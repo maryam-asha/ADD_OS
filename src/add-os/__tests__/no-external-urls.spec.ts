@@ -74,6 +74,10 @@ const ALLOWED: readonly AllowedHost[] = [
 		host: "pinx.vercel.app",
 		why: "Pinx template <meta> tags in index.html (canonical, og:image, twitter:image). Inert markup — no fetch — but wrong branding.",
 		removedBy: "Phase 4 (brand assets: title, meta, favicon)"
+	},
+	{
+		host: "api.test",
+		why: "Mocked API base URL in Vitest service-layer tests where fetch itself is stubbed — no network request possible."
 	}
 	// `api.org` was here — the Pinx placeholder VITE_API_URL. Removed from the
 	// allowlist because it is no longer in the build: the variable was emptied and
