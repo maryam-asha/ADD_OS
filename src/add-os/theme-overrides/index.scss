@@ -1,0 +1,18 @@
+// ── ADD OS — theme override layer ───────────────────────────────────────────
+//
+// Aggregator for every style override we own. Imported as the LAST line of
+// `src/assets/scss/index.scss` so that, at equal specificity, our rules win
+// over the template's without needing `!important`.
+//
+// Add every new partial here — a file that is not listed below is dead code.
+//
+// See ./README.md for the conventions.
+
+// RTL gap fixes — see ./RTL-REPORT.md
+@import "./rtl-gaps";
+
+// Sidebar navigation rendered by Navbar/items.tsx
+@import "./nav";
+
+// Numerals and data — the tabular-figure face for money/quantity cells
+@import "./numeric";

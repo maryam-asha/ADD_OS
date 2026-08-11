@@ -1,0 +1,21 @@
+allowBuilds:
+  "@parcel/watcher": true
+  "@scarf/scarf": true
+  "@tailwindcss/oxide": true
+  cypress: true
+  esbuild: true
+  unrs-resolver: true
+
+minimumReleaseAge: 0
+
+shellEmulator: true
+
+trustPolicy: off
+
+packages:
+  - .
+
+overrides:
+  # https://github.com/rolldown/rolldown/issues/9515
+  rolldown: 1.0.1
+  vue-maplibre-gl>maplibre-gl: ^5.24.0

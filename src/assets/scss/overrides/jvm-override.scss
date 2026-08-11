@@ -1,0 +1,11 @@
+.jvm-container {
+	#jvm-markers-labels-group {
+		.jvm-marker {
+			transform: translateX(-18px) translateY(-18px);
+		}
+	}
+
+	@media (hover: none) {
+		pointer-events: none;
+	}
+}

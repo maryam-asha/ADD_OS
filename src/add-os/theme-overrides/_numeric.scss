@@ -1,0 +1,48 @@
+// ── ADD OS — numerals and data ──────────────────────────────────────────────
+//
+// The presentation half of the formatter contract. `add-os/utils/format/` decides
+// WHICH digits are shown; this decides the face that draws them.
+//
+// ── Why a dedicated face at all ─────────────────────────────────────────────
+// Poppins — the brand's mandated Latin face — has NO tabular figures. Measured
+// from the shipped woff2 with fontTools on 2026-08-03: no `tnum` feature (zero
+// GSUB/GPOS features at all in the Fontsource latin subset) and digit advance
+// widths spanning 320–635 units on a 1000 unit em. "1" is 320, "6" is 635.
+//
+// So a money column set in Poppins is ragged, and how ragged depends on which
+// digits each amount happens to contain. `font-variant-numeric: tabular-nums`
+// cannot fix it — with no `tnum` feature to activate, the declaration is a
+// silent no-op.
+//
+// Noto Sans Arabic's Latin digits are all exactly 572 units: tabular by default.
+//
+// ── Scope ───────────────────────────────────────────────────────────────────
+// Numerals ONLY — money, quantities, counts. Poppins keeps its mandated Latin
+// display role everywhere else. Apply this class to the CELL, never to a table.
+//
+// `tabular-nums` is kept as a declaration even though the face needs no feature:
+// it costs nothing, and it keeps the intent legible if the face is ever swapped
+// for one that DOES gate tabular figures behind `tnum`.
+
+.add-numeric {
+	// From `fontFamily.numeric` in add-os/theme/tokens.ts — the single source.
+	font-family: var(--add-font-family-numeric);
+	font-variant-numeric: tabular-nums;
+
+	// Digit strings should not be broken across lines mid-amount.
+	white-space: nowrap;
+
+	// NOTE: `direction` is deliberately NOT set.
+	//
+	// `formatCurrency` relies on the bidi algorithm to place "1,234 ل.س." — the
+	// Latin-digit run lands first (visually rightmost) in an RTL context, which
+	// is correct. Forcing `direction: ltr` here would move the currency symbol to
+	// the wrong side in Arabic. The format module flags this as not yet visually
+	// verified; it is a Phase 5 QA item, not something to pre-empt with CSS.
+}
+
+// A total or subtotal reads as the same column, one weight heavier. Both weights
+// of the numerals face are imported for exactly this.
+.add-numeric--total {
+	font-weight: var(--add-font-weight-strong);
+}

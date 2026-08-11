@@ -1,0 +1,127 @@
+// ── ADD OS — brand typefaces ────────────────────────────────────────────────
+//
+// Two faces, per ADD Brand Guideline 2026 p.19:
+//   Latin   → Poppins             (mandated)
+//   Arabic  → Noto Sans Arabic    (approved substitute — see below)
+//
+// ⚠️ APPROVED DEVIATION FROM THE GUIDELINE
+// The Guideline mandates "Noto IKEA Arabic". That is IKEA's proprietary corporate
+// typeface: not on Google Fonts, not on npm, and not offered for third-party web
+// embedding. Shipping it would mean redistributing an unlicensed font inside a
+// product carrying another organisation's brand.
+//
+// Noto Sans Arabic is the MINIMUM-DISTANCE substitute. Noto IKEA is itself a Noto
+// derivative — a commission on top of the Noto Arabic skeleton — so Noto Sans
+// Arabic is the closest legitimately licensable face to what the Guideline
+// actually names. Where a substitution is forced, the one that stays nearest the
+// mandated family is the one that survives brand review. SIL OFL 1.1, so
+// embedding is unambiguous.
+//
+// Trade-off accepted knowingly: the icon set is Carbon (IBM's design language),
+// so IBM Plex Sans Arabic would have paired type and iconography inside one
+// design system. Fidelity to the mandated family was judged to outweigh that
+// internal coherence. Icons are not type; the Guideline governs type.
+//
+// This is a brand-level defect that affects print and marketing too, not only
+// ADD OS. Logged for the Guideline-feedback list; see docs/brand/PHASE-0-AUDIT.md §9.
+//
+// ── Every file is local. Zero network requests. ──────────────────────────────
+// @fontsource ships woff2 + woff with RELATIVE urls and `font-display: swap`
+// already set, so the VPN-isolation constraint holds by construction. Only the
+// subsets actually rendered are imported — Poppins `latin`, Noto `arabic` — not
+// the devanagari/cyrillic/greek subsets both packages also carry, and NOT Noto
+// Sans Arabic's own `latin` subset, which would be dead weight since Poppins
+// owns every Latin glyph (see the ordering note below).
+//
+// Weights: the Guideline specifies Regular and Bold (p.19). 500 and 600 are
+// intermediate weights of the SAME mandated families, not new typefaces; the UI
+// needs them for `fontWeightStrong` and card titles.
+
+// Latin — Poppins
+@import "@fontsource/poppins/latin-400.css";
+@import "@fontsource/poppins/latin-500.css";
+@import "@fontsource/poppins/latin-600.css";
+@import "@fontsource/poppins/latin-700.css";
+
+// Arabic — Noto Sans Arabic
+@import "@fontsource/noto-sans-arabic/arabic-400.css";
+@import "@fontsource/noto-sans-arabic/arabic-500.css";
+@import "@fontsource/noto-sans-arabic/arabic-600.css";
+@import "@fontsource/noto-sans-arabic/arabic-700.css";
+
+// ── NUMERALS — Noto Sans Arabic's LATIN subset ──────────────────────────────
+//
+// Poppins has NO tabular figures. Measured from the shipped woff2 with fontTools
+// on 2026-08-03: no `tnum` feature — zero GSUB/GPOS features at all in the
+// Fontsource latin subset — and digit advance widths spanning 320–635 units on a
+// 1000 unit em (a 31.5%-of-em spread; "1" is 320, "6" is 635). So
+// `font-variant-numeric: tabular-nums` is a SILENT NO-OP on Poppins, and money
+// columns render visibly ragged depending on which digits an amount contains.
+//
+// Noto Sans Arabic's Latin digits are all exactly 572 units — one width, tabular
+// by default, no feature needed. Already installed, so no new package.
+//
+// This is why Noto's `latin` subset IS imported after all — but ONLY at the two
+// weights tables use, and ONLY reachable through `--font-family-numeric`. It
+// never enters the body stack, because Poppins leads there and owns every Latin
+// glyph. Poppins keeps its mandated display role untouched.
+@import "@fontsource/noto-sans-arabic/latin-400.css";
+@import "@fontsource/noto-sans-arabic/latin-600.css";
+
+// Monospace — non-brand utility face. The Guideline specifies no monospace.
+// Also the fallback for numeric table columns if Poppins lacks `tnum`.
+@import "@fontsource/jetbrains-mono/latin.css";
+
+// ── The two swap points ─────────────────────────────────────────────────────
+//
+// `--font-family-arabic` remains the ONLY place the Arabic face is named, and
+// `--font-family-latin` is its Latin counterpart. The font stacks in
+// `src/design-tokens.json` reference both via `var()`, and the theme store
+// publishes the result as `--font-family` / `--font-family-display` on <html>.
+//
+// To change either face: install the @fontsource package, swap the @import
+// above, and change the family name below. Nothing else — the stacks, the
+// tokens, and naive-ui all follow.
+//
+// ── Why ONE stack serves both languages ─────────────────────────────────────
+// Poppins carries no Arabic glyphs, so an Arabic character falls through to
+// Noto Sans Arabic automatically, PER GLYPH. Latin therefore always renders in
+// Poppins and Arabic always in Noto Sans Arabic — including inside mixed strings
+// like "قاعة Business Café" — with no `:lang()` rule and no runtime switch.
+//
+// ⚠️ ORDER IS LOAD-BEARING. Noto Sans Arabic ships its own Latin glyphs, so if it
+// came first, English would silently stop being Poppins and the mandated Latin
+// face would be lost. Poppins must lead. (This is also why only Noto's `arabic`
+// subset is imported above — its `latin` subset would never be reached.)
+//
+// SIZE is the part that is per-language: Arabic needs more size and looser
+// leading than Latin at the same nominal step. That lives in
+// `src/add-os/theme/tokens.ts` (`typeScale`) and is emitted as `:lang()` rules
+// in `src/add-os/theme/tokens.generated.css`.
+//
+// Note: these are plain `:root` declarations, while the theme store writes
+// `--font-family*` as INLINE styles on <html>. There is no conflict — the two
+// sets are different variables, and inline `var()` references resolve against
+// these at use time.
+:root {
+	--font-family-latin: "Poppins";
+	--font-family-arabic: "Noto Sans Arabic", "Segoe UI", Tahoma, "Noto Naskh Arabic", sans-serif;
+}
+
+// The NUMERALS stack is deliberately NOT declared here. This file names the two
+// brand FACES — the documented swap points. Which faces digits use, and in what
+// order, is a token decision, so it lives in `add-os/theme/tokens.ts`
+// (`fontFamily.numeric`) and is emitted as `--add-font-family-numeric`.
+// Declaring it in both places is the two-parallel-palettes failure mode.
+
+// Alternatives, if either face is ever revisited. All SIL OFL, all self-hostable.
+//
+// Arabic:
+// @import "@fontsource/ibm-plex-sans-arabic/arabic.css";      // IBM Plex Sans Arabic (pairs with Carbon icons)
+// @import "@fontsource-variable/cairo/index.css";             // Cairo (the pre-brand default)
+// @import "@fontsource-variable/tajawal/index.css";           // Tajawal
+// @import "@fontsource-variable/almarai/index.css";           // Almarai
+//
+// Latin:
+// @import "@fontsource/lexend/latin.css";                     // Lexend (Pinx default)
+// @import "@fontsource/public-sans/latin.css";                // Public Sans (Pinx default)

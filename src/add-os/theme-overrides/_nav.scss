@@ -1,0 +1,127 @@
+// ── ADD OS — sidebar navigation ─────────────────────────────────────────────
+//
+// Styles the markup rendered by `app-layouts/common/Navbar/items.tsx`.
+// Those nodes come from a render function, so they carry no `data-v-*` scope
+// attribute and are styled globally from here — no vendor file is touched.
+
+// ── Sections that are routed but not built yet ──────────────────────────────
+//
+// These rows are ENABLED: clickable, and they route to the ComingSoon page.
+// WCAG's contrast exemption covers *disabled* components, so an enabled row's
+// label is bound by 4.5:1 and its non-text indicator by 3:1.
+//
+// This used to be `opacity: 0.55` → `0.8` on hover, which was wrong twice over:
+//   1. it applied disabled treatment to something that is not disabled, landing
+//      the label near 3.0:1;
+//   2. opacity multiplies against whatever is behind it, so one value drifts per
+//      surface and NO ratio can be asserted.
+//
+// So every value here is a COLOUR, and the "Soon" badge carries the deferral.
+// The badge was always the explanation for the dimming; now it is the whole
+// signal, and the label stays fully legible. Ratios are pinned by
+// theme/__tests__/tokens.spec.ts.
+.add-os-nav-soon {
+	// Full `textMuted` — 6.32 on surface, 4.69 on body, 5.28 on sunken.
+	color: var(--add-deferred-label);
+}
+
+// The icon is the ONE element allowed to recede, and it does so by colour:
+// 4.37 / 3.25 / 3.65 — clears the 1.4.11 non-text minimum on every surface.
+// Wrapped in items.tsx because the icon is a SIBLING of the label, so the class
+// above cannot reach it.
+.add-os-nav-soon-icon {
+	display: inline-flex;
+	color: var(--add-deferred-icon);
+}
+
+.add-os-nav-section {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--add-space-4);
+	// The label sits inside a grid cell that can be narrower than the text.
+	min-width: 0;
+
+	&__text {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	// The badge is the deferral signal, so it is fully legible — no opacity.
+	// 1px border per the binding status-surface rule; `borderStrong`, not
+	// `border`, because Aleppo Stone is only 1.46:1 against the badge fill.
+	&__badge {
+		// Never let the badge win space from the label it annotates.
+		flex: 0 0 auto;
+		font-size: var(--add-font-size-caption);
+		background-color: var(--add-deferred-badge-surface);
+		color: var(--add-deferred-badge-text);
+		border: var(--add-border-width-hairline) solid var(--add-deferred-badge-border);
+	}
+}
+
+.n-menu {
+	.n-menu-item-content-header {
+		a {
+			text-decoration: none;
+			color: inherit;
+		}
+	}
+}
+
+// ── Menu indentation — the RTL fix from RTL-REPORT.md §5.3 ──────────────────
+//
+// naive-ui applies nesting indentation as an INLINE `padding-left`, computed per
+// depth. Inline and physical, it cannot be moved to the other side by any rule,
+// so in RTL the indentation stayed on the left while the text read right-to-left.
+//
+// So we pass `:indent="0"` and `:root-indent="0"` on every `n-menu` and restate
+// the indent here with `padding-inline-start`, which mirrors on its own.
+//
+// ⚠️ `indent=0` does NOT remove the inline style — it only makes it zero.
+// `MenuOptionContent` builds it as `paddingLeft && `${paddingLeft}px``, so a
+// computed indent of 0 yields the NUMBER 0: falsy, but not nullish, and Vue
+// only skips null/undefined style values. Every item therefore still ships
+// `style="padding-left: 0px"`, an inline declaration that beats an ordinary
+// stylesheet rule on whichever side is physically left:
+//
+//   RTL → padding-inline-start = padding-right → no clash → indent applied
+//   LTR → padding-inline-start = padding-left  → clash    → indent swallowed
+//
+// which is precisely how it shipped: correct in Arabic, flat in English.
+// Hence `!important` — the one job it is actually for, overriding a third-party
+// inline style we are not allowed to edit. `padding-inline-end` needs it too:
+// that is the side that lands on physical-left in RTL.
+// Pinned by `__tests__/nav-indent.spec.ts`; if naive-ui ever stops emitting the
+// inline style that test fails, and these `!important`s can go.
+//
+// Collapsed menus are excluded: there naive-ui returns a centring offset instead
+// of an indent, which is still wanted — and being inline, it is left alone.
+
+$nav-indent-step: 18px;
+
+.n-menu:not(.n-menu--collapsed) {
+	.n-menu-item-content {
+		// Both sides are stated logically, so naive-ui's hard-coded
+		// `padding-right: 18px` — which lands on the LEADING edge in RTL — is
+		// overridden in both directions without naming a physical side.
+		padding-inline-start: $nav-indent-step !important;
+		padding-inline-end: $nav-indent-step !important;
+	}
+
+	.n-submenu-children {
+		.n-menu-item-content {
+			padding-inline-start: $nav-indent-step * 2 !important;
+		}
+
+		.n-submenu-children {
+			.n-menu-item-content {
+				padding-inline-start: $nav-indent-step * 3 !important;
+			}
+
+			.n-submenu-children .n-menu-item-content {
+				padding-inline-start: $nav-indent-step * 4 !important;
+			}
+		}
+	}
+}

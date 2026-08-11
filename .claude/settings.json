@@ -1,0 +1,45 @@
+{
+  "permissions": {
+    "deny": [
+      "Edit(_pinx-vendor/**)",
+      "Write(_pinx-vendor/**)",
+      "Edit(src/design-tokens.json)",
+      "Write(src/design-tokens.json)",
+      "Read(.env)",
+      "Read(.env.production)",
+      "Read(.env.local)",
+      "Write(.env.sample)"
+    ],
+    "ask": [
+      "Edit(src/theme/**)",
+      "Edit(src/utils/theme.ts)",
+      "Edit(src/assets/scss/**)",
+      "Edit(.env*)",
+      "Edit(.gitignore)",
+      "Bash(pnpm add*)",
+      "Bash(npm install*)"
+    ],
+    "allow": [
+      "Read(**)",
+      "Edit(src/add-os/**)",
+      "Edit(docs/**)",
+      "Bash(pnpm test*)",
+      "Bash(pnpm lint*)",
+      "Bash(pnpm typecheck*)",
+      "Bash(pnpm vitest*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/guards.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

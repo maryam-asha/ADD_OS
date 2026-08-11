@@ -1,0 +1,40 @@
+// ── ADD OS — RTL gap fixes ──────────────────────────────────────────────────
+//
+// Only gaps that are genuinely uncovered. Before adding anything here, check:
+//   1. `rtlStyles` in src/app-layouts/common/rtlProvider.ts  (+ our rtl-styles.ts)
+//   2. the `.direction-rtl` block in src/assets/scss/overrides/naive-override.scss
+//
+// Every rule below targets a Pinx component's SCOPED styles. Scoped selectors
+// carry a `[data-v-*]` attribute, so specificity here is matched deliberately
+// and we rely on source order — this file is imported last. Where a selector is
+// repeated to raise specificity, it is commented.
+//
+// ⚠️ Not visually verified. See RTL-REPORT.md.
+
+.direction-rtl {
+	// ── components/common/Percentage.vue ──────────────────────────────────────
+	// The template pads/spaces the trend icon with physical `margin-right` /
+	// `padding-right`. In RTL both land on the leading edge instead of the
+	// trailing one. Zero out the physical side and restate it logically.
+	.percentage {
+		.percentage-icon {
+			margin-right: 0;
+			margin-inline-end: 3px;
+		}
+
+		&.with-background {
+			padding-right: 4px; // back to the symmetric base value
+			padding-inline-end: 6px;
+		}
+	}
+
+	// ── app-layouts/common/Toolbar/Breadcrumb.vue ─────────────────────────────
+	// Breadcrumb items slide in from `translateX(-5px)`, i.e. from the left.
+	// In RTL the trail grows leftward, so items should enter from the right.
+	// The class is repeated to match the scoped rule's specificity.
+	.breadcrumb {
+		.anim-enter-from.anim-enter-from {
+			transform: translateX(5px);
+		}
+	}
+}

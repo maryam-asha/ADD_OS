@@ -1,0 +1,132 @@
+@import "@vueup/vue-quill/dist/vue-quill.snow.css";
+
+.ql-snow.ql-toolbar {
+	border: 1px solid var(--border-color) !important;
+	border-radius: var(--border-radius);
+
+	.ql-picker {
+		border-radius: var(--border-radius-small);
+
+		.ql-picker-label {
+			&.ql-active {
+				background-color: rgba(var(--primary-color-rgb) / 0.05);
+				color: var(--primary-color);
+
+				.ql-fill {
+					fill: var(--primary-color);
+				}
+				.ql-stroke {
+					stroke: var(--primary-color);
+				}
+			}
+
+			&:hover {
+				background-color: transparent;
+			}
+		}
+		&.ql-expanded {
+			.ql-picker-label {
+				border-color: transparent;
+
+				&.ql-active {
+					background-color: rgba(var(--primary-color-rgb) / 0.05);
+					color: var(--primary-color);
+				}
+			}
+			.ql-picker-options {
+				border-radius: var(--border-radius);
+
+				.ql-picker-item {
+					border-radius: var(--border-radius-small);
+					color: var(--fg-default-color);
+					display: flex;
+					.ql-fill {
+						fill: var(--fg-default-color);
+					}
+					.ql-stroke {
+						stroke: var(--fg-default-color);
+					}
+
+					&.ql-selected {
+						background-color: rgba(var(--primary-color-rgb) / 0.05);
+						color: var(--primary-color);
+						.ql-fill {
+							fill: var(--primary-color);
+						}
+						.ql-stroke {
+							stroke: var(--primary-color);
+						}
+					}
+
+					&:hover {
+						background-color: var(--hover-color);
+					}
+				}
+			}
+		}
+
+		&:hover {
+			background-color: var(--hover-color);
+		}
+	}
+
+	button {
+		border-radius: var(--border-radius-small);
+
+		&.ql-active {
+			background-color: rgba(var(--primary-color-rgb) / 0.05);
+			color: var(--primary-color);
+
+			.ql-fill {
+				fill: var(--primary-color);
+			}
+			.ql-stroke {
+				stroke: var(--primary-color);
+			}
+		}
+
+		&:hover {
+			background-color: var(--hover-color);
+		}
+	}
+
+	.ql-stroke {
+		stroke: var(--fg-secondary-color);
+	}
+
+	.ql-fill {
+		fill: var(--fg-secondary-color);
+	}
+
+	.ql-picker-options {
+		background-color: var(--bg-default-color);
+		border: 1px solid var(--border-color) !important;
+
+		.ql-stroke {
+			stroke: #000;
+		}
+
+		.ql-fill {
+			fill: #000;
+		}
+	}
+}
+
+.ql-snow.ql-container {
+	flex-grow: 1;
+	height: inherit;
+	border-radius: var(--border-radius);
+	font-family: var(--font-family);
+	border: 1px solid var(--border-color) !important;
+	margin-top: 10px;
+	font-size: 16px;
+}
+.ql-toolbar.ql-snow + .ql-container.ql-snow {
+	border-top: 1px solid var(--border-color);
+}
+
+.direction-rtl {
+	.ql-editor {
+		text-align: right;
+	}
+}

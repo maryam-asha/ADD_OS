@@ -1,0 +1,67 @@
+{
+	"common": {
+		"comingSoon": "Coming soon",
+		"search": "Search",
+		"close": "Close",
+		"save": "Save",
+		"delete": "Delete",
+		"clear": "Clear",
+		"viewAll": "View all",
+		"logout": "Log out"
+	},
+	"notifications": {
+		"title": "Notifications",
+		"setAsRead": "Set as read",
+		"markAllAsRead": "Mark all as read"
+	},
+	"shortcuts": {
+		"title": "Shortcuts"
+	},
+	"nav": {
+		"sections": {
+			"dashboard": "Dashboard",
+			"spatial": "Spatial structure",
+			"system": "System & permissions",
+			"members": "Members",
+			"bookings": "Bookings",
+			"plans": "Plans & subscriptions",
+			"access": "Access control",
+			"payments": "Payments",
+			"community": "Community & events",
+			"incubation": "Incubation & acceleration",
+			"address": "Business address",
+			"cms": "Website management",
+			"settings": "Settings"
+		},
+		"pages": {
+			"overview": "Overview",
+			"branches": "Branches",
+			"buildings": "Buildings",
+			"spaces": "Spaces",
+			"users": "Users",
+			"roles": "Roles & permissions",
+			"individuals": "Individuals",
+			"companies": "Companies",
+			"memberships": "Memberships",
+			"allBookings": "All bookings",
+			"calendar": "Calendar",
+			"packages": "Packages",
+			"wallet": "Wallet",
+			"locks": "Locks",
+			"accessLogs": "Access logs",
+			"transactions": "Transactions",
+			"paymentMethods": "Payment methods",
+			"exchangeRates": "Exchange rates",
+			"events": "Events",
+			"community": "Community",
+			"cafe": "Café",
+			"incubate": "Incubate",
+			"accelerate": "Accelerate",
+			"mentors": "Mentors",
+			"formationRequests": "Formation requests",
+			"content": "Content",
+			"partners": "Partners",
+			"systemSettings": "System settings"
+		}
+	}
+}
