@@ -1,5 +1,6 @@
 import type { RouteRecordRaw } from "vue-router"
 import RolesPage from "@/add-os/modules/system/views/RolesPage.vue"
+import UsersPage from "@/add-os/modules/system/views/UsersPage.vue"
 import ComingSoon from "@/add-os/views/ComingSoon.vue"
 import { NAV_SECTIONS, navPageTitleKey, navRouteName, navRoutePath, navSectionTitleKey } from "./sections"
 
@@ -22,7 +23,8 @@ import { NAV_SECTIONS, navPageTitleKey, navRouteName, navRoutePath, navSectionTi
 
 /** Pages with a real screen. Everything else still falls back to ComingSoon. */
 const PAGE_COMPONENTS: Record<string, unknown> = {
-	"system.roles": RolesPage
+	"system.roles": RolesPage,
+	"system.users": UsersPage
 }
 
 export function createAddOsRoutes(): RouteRecordRaw[] {

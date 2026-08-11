@@ -24,6 +24,25 @@
 			"admin": "Admin"
 		}
 	},
+	"users": {
+		"description": "Operations and admin accounts on the dashboard. Members register from the app and never appear here.",
+		"searchPlaceholder": "Search by name, phone or email",
+		"roleFilterPlaceholder": "Filter by role",
+		"columns": {
+			"name": "Name",
+			"phone": "Phone",
+			"email": "Email",
+			"role": "Role",
+			"status": "Status"
+		},
+		"status": {
+			"active": "Active",
+			"deactivated": "Deactivated",
+			"blocked": "Blocked"
+		},
+		"loadError": "Couldn't load users. You may not have permission to view this page.",
+		"empty": "No users found."
+	},
 	"shortcuts": {
 		"title": "Shortcuts"
 	},
