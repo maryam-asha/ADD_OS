@@ -14,6 +14,16 @@
 		"setAsRead": "Set as read",
 		"markAllAsRead": "Mark all as read"
 	},
+	"roles": {
+		"description": "Assignable roles across the dashboard. There are no per-role permissions yet — just the names.",
+		"loadError": "Couldn't load roles. You may not have permission to view this page.",
+		"empty": "No roles found.",
+		"names": {
+			"member": "Member",
+			"operations": "Operations",
+			"admin": "Admin"
+		}
+	},
 	"shortcuts": {
 		"title": "Shortcuts"
 	},
