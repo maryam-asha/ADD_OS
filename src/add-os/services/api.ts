@@ -108,6 +108,10 @@ export async function put<T>(path: string, body?: unknown, query?: Record<string
 	return request<T>("PUT", path, { body, query, headers, credentials })
 }
 
+export async function patch<T>(path: string, body?: unknown, query?: Record<string, unknown>, headers?: Record<string, string>, credentials?: RequestCredentials): Promise<T> {
+	return request<T>("PATCH", path, { body, query, headers, credentials })
+}
+
 export async function del<T>(path: string, query?: Record<string, unknown>, headers?: Record<string, string>, credentials?: RequestCredentials): Promise<T> {
 	return request<T>("DELETE", path, { query, headers, credentials })
 }
