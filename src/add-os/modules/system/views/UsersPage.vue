@@ -30,6 +30,7 @@ import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { ApiError } from "@/add-os/services/api"
 import { listUsers } from "@/add-os/services/users"
+import { STATUS_ICONS } from "@/add-os/theme/tokens"
 import Icon from "@/components/common/Icon.vue"
 
 defineProps<{ titleKey?: string }>()
@@ -46,9 +47,9 @@ const { t } = useI18n()
 const ROLES: UserRole[] = ["member", "operations", "admin"]
 
 const STATUS_ICON: Record<UserStatus, string> = {
-	active: "carbon:checkmark-filled",
-	deactivated: "carbon:warning-alt-filled",
-	blocked: "carbon:error-filled"
+	active: STATUS_ICONS.success,
+	deactivated: STATUS_ICONS.warning,
+	blocked: STATUS_ICONS.danger
 }
 
 const STATUS_TYPE: Record<UserStatus, "success" | "warning" | "error"> = {
