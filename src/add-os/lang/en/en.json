@@ -59,6 +59,11 @@
 			"reasonPlaceholder": "Why is the status changing?",
 			"success": "Status updated."
 		},
+		"changeRole": {
+			"button": "Change role",
+			"title": "Change role",
+			"success": "Role updated."
+		},
 		"form": {
 			"name": "Full name",
 			"phone": "Phone",

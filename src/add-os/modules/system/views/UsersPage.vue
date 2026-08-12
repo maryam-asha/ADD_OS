@@ -79,6 +79,20 @@
 				</div>
 			</template>
 		</n-modal>
+
+		<n-modal v-model:show="roleModalVisible" preset="card" :title="t('users.changeRole.title')" class="max-w-md">
+			<n-form>
+				<n-form-item :label="t('users.columns.role')">
+					<n-select v-model:value="roleForm" :options="roleFilterOptions" />
+				</n-form-item>
+			</n-form>
+			<template #footer>
+				<div class="flex justify-end gap-2">
+					<n-button @click="roleModalVisible = false">{{ t("users.form.cancel") }}</n-button>
+					<n-button type="primary" :loading="submittingRole" @click="submitRoleChange">{{ t("users.form.submit") }}</n-button>
+				</div>
+			</template>
+		</n-modal>
 	</div>
 </template>
 
@@ -97,7 +111,7 @@ import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { isValidPassword, isValidSyrianPhone } from "@/add-os/modules/system/utils/validation"
 import { ApiError } from "@/add-os/services/api"
-import { createUser, listUsers, updateUserProfile, updateUserStatus } from "@/add-os/services/users"
+import { assignRole, createUser, listUsers, updateUserProfile, updateUserStatus } from "@/add-os/services/users"
 import { STATUS_ICONS } from "@/add-os/theme/tokens"
 import Icon from "@/components/common/Icon.vue"
 
@@ -176,7 +190,8 @@ function renderStatusTag(row: User) {
 function renderActions(row: User) {
 	return h("div", { class: "flex gap-2" }, [
 		h(NButton, { text: true, type: "primary", onClick: () => openEdit(row) }, { default: () => t("users.edit.button") }),
-		h(NButton, { text: true, type: "warning", onClick: () => openStatusModal(row) }, { default: () => t("users.changeStatus.button") })
+		h(NButton, { text: true, type: "warning", onClick: () => openStatusModal(row) }, { default: () => t("users.changeStatus.button") }),
+		h(NButton, { text: true, onClick: () => openRoleModal(row) }, { default: () => t("users.changeRole.button") })
 	])
 }
 
@@ -354,6 +369,34 @@ async function submitStatusChange() {
 		message.error(error.data?.message ?? t("users.loadError"))
 	} finally {
 		submittingStatus.value = false
+	}
+}
+
+const roleModalVisible = ref(false)
+const submittingRole = ref(false)
+const roleTargetId = ref<number | null>(null)
+const roleForm = ref<UserRole>("member")
+
+function openRoleModal(user: User) {
+	roleTargetId.value = user.id
+	roleForm.value = user.roles[0] ?? "member"
+	roleModalVisible.value = true
+}
+
+async function submitRoleChange() {
+	if (roleTargetId.value === null) return
+
+	submittingRole.value = true
+	try {
+		await assignRole(roleTargetId.value, roleForm.value)
+		message.success(t("users.changeRole.success"))
+		roleModalVisible.value = false
+		await loadUsers()
+	} catch (error) {
+		if (!(error instanceof ApiError)) throw error
+		message.error(error.data?.message ?? t("users.loadError"))
+	} finally {
+		submittingRole.value = false
 	}
 }
 </script>
