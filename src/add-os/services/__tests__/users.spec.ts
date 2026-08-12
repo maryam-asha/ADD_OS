@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
+import { assignRole, createUser, getUser, listUsers, updateUserProfile, updateUserStatus } from "../users"
+
 vi.mock("@/add-os/config/env", () => ({
 	apiUrl: () => "http://api.test"
 }))
-
-import { assignRole, createUser, getUser, listUsers, updateUserProfile, updateUserStatus } from "../users"
 
 const sampleUser = {
 	id: 1,

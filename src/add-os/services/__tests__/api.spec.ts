@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
+import { patch } from "../api"
+
 vi.mock("@/add-os/config/env", () => ({
 	apiUrl: () => "http://api.test"
 }))
-
-import { patch } from "../api"
 
 describe("patch", () => {
 	beforeEach(() => {

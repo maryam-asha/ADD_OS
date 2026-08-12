@@ -26,7 +26,7 @@
 
 		<n-drawer v-model:show="drawerVisible" :width="420">
 			<n-drawer-content :title="mode === 'create' ? t('users.create.title') : t('users.edit.title')" closable>
-				<n-form ref="formRef" :model="form" :rules="rules" label-placement="top">
+				<n-form ref="formRef" :model="form" :rules label-placement="top">
 					<n-form-item path="name" :label="t('users.form.name')">
 						<n-input v-model:value="form.name" />
 					</n-form-item>
@@ -252,7 +252,7 @@ const rules = computed<FormRules>(() => ({
 	email: [
 		{ required: true, message: t("users.validation.emailRequired"), trigger: ["blur", "input"] },
 		{
-			validator: (_rule, value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+			validator: (_rule, value: string) => /^[^\s@]+@[^\s@][^\s.@]*\.[^\s@]+$/.test(value),
 			message: t("users.validation.emailInvalid"),
 			trigger: ["blur", "input"]
 		}
