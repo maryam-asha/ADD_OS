@@ -51,6 +51,14 @@
 			"button": "Edit",
 			"success": "Profile updated."
 		},
+		"changeStatus": {
+			"button": "Change status",
+			"title": "Change status",
+			"warning": "Deactivating or blocking signs this user out of every device immediately.",
+			"reasonLabel": "Reason (optional)",
+			"reasonPlaceholder": "Why is the status changing?",
+			"success": "Status updated."
+		},
 		"form": {
 			"name": "Full name",
 			"phone": "Phone",

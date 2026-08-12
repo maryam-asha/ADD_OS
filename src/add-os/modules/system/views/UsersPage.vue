@@ -56,18 +56,48 @@
 				</template>
 			</n-drawer-content>
 		</n-drawer>
+
+		<n-modal v-model:show="statusModalVisible" preset="card" :title="t('users.changeStatus.title')" class="max-w-md">
+			<n-alert type="warning" :title="t('users.changeStatus.warning')" class="mb-4" />
+			<n-form>
+				<n-form-item :label="t('users.columns.status')">
+					<n-select v-model:value="statusForm.status" :options="statusOptions" />
+				</n-form-item>
+				<n-form-item :label="t('users.changeStatus.reasonLabel')">
+					<n-input
+						v-model:value="statusForm.reason"
+						type="textarea"
+						:placeholder="t('users.changeStatus.reasonPlaceholder')"
+						maxlength="500"
+					/>
+				</n-form-item>
+			</n-form>
+			<template #footer>
+				<div class="flex justify-end gap-2">
+					<n-button @click="statusModalVisible = false">{{ t("users.form.cancel") }}</n-button>
+					<n-button type="primary" :loading="submittingStatus" @click="submitStatusChange">{{ t("users.form.submit") }}</n-button>
+				</div>
+			</template>
+		</n-modal>
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns, FormInst, FormRules, SelectOption } from "naive-ui"
-import type { CreateUserPayload, UpdateUserProfilePayload, User, UserRole, UserStatus } from "@/add-os/modules/system/types/user"
-import { NAlert, NButton, NDataTable, NDrawer, NDrawerContent, NForm, NFormItem, NInput, NSelect, NTag, useMessage } from "naive-ui"
+import type {
+	CreateUserPayload,
+	UpdateUserProfilePayload,
+	UpdateUserStatusPayload,
+	User,
+	UserRole,
+	UserStatus
+} from "@/add-os/modules/system/types/user"
+import { NAlert, NButton, NDataTable, NDrawer, NDrawerContent, NForm, NFormItem, NInput, NModal, NSelect, NTag, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { isValidPassword, isValidSyrianPhone } from "@/add-os/modules/system/utils/validation"
 import { ApiError } from "@/add-os/services/api"
-import { createUser, listUsers, updateUserProfile } from "@/add-os/services/users"
+import { createUser, listUsers, updateUserProfile, updateUserStatus } from "@/add-os/services/users"
 import { STATUS_ICONS } from "@/add-os/theme/tokens"
 import Icon from "@/components/common/Icon.vue"
 
@@ -144,7 +174,10 @@ function renderStatusTag(row: User) {
 }
 
 function renderActions(row: User) {
-	return h(NButton, { text: true, type: "primary", onClick: () => openEdit(row) }, { default: () => t("users.edit.button") })
+	return h("div", { class: "flex gap-2" }, [
+		h(NButton, { text: true, type: "primary", onClick: () => openEdit(row) }, { default: () => t("users.edit.button") }),
+		h(NButton, { text: true, type: "warning", onClick: () => openStatusModal(row) }, { default: () => t("users.changeStatus.button") })
+	])
 }
 
 const columns = computed<DataTableColumns<User>>(() => [
@@ -289,6 +322,38 @@ async function submitEdit() {
 		message.error(error.data?.message ?? t("users.loadError"))
 	} finally {
 		submitting.value = false
+	}
+}
+
+const statusModalVisible = ref(false)
+const submittingStatus = ref(false)
+const statusTargetId = ref<number | null>(null)
+const statusForm = ref<UpdateUserStatusPayload>({ status: "active", reason: "" })
+
+const statusOptions = computed<SelectOption[]>(() =>
+	(["active", "deactivated", "blocked"] as const).map(status => ({ label: t(`users.status.${status}`), value: status }))
+)
+
+function openStatusModal(user: User) {
+	statusTargetId.value = user.id
+	statusForm.value = { status: user.status, reason: "" }
+	statusModalVisible.value = true
+}
+
+async function submitStatusChange() {
+	if (statusTargetId.value === null) return
+
+	submittingStatus.value = true
+	try {
+		await updateUserStatus(statusTargetId.value, statusForm.value)
+		message.success(t("users.changeStatus.success"))
+		statusModalVisible.value = false
+		await loadUsers()
+	} catch (error) {
+		if (!(error instanceof ApiError)) throw error
+		message.error(error.data?.message ?? t("users.loadError"))
+	} finally {
+		submittingStatus.value = false
 	}
 }
 </script>
