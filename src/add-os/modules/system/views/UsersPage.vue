@@ -16,20 +16,56 @@
 				clearable
 				class="max-w-xs"
 			/>
+			<n-button type="primary" @click="openCreate">
+				<template #icon><Icon name="carbon:add" :size="16" /></template>
+				{{ t("users.create.button") }}
+			</n-button>
 		</div>
 
 		<n-data-table :columns :data="filteredUsers" :loading :bordered="false" :row-key />
+
+		<n-drawer v-model:show="drawerVisible" :width="420">
+			<n-drawer-content :title="t('users.create.title')" closable>
+				<n-form ref="formRef" :model="form" :rules="rules" label-placement="top">
+					<n-form-item path="name" :label="t('users.form.name')">
+						<n-input v-model:value="form.name" />
+					</n-form-item>
+					<n-form-item path="phone" :label="t('users.form.phone')">
+						<n-input v-model:value="form.phone" :placeholder="t('users.form.phonePlaceholder')" />
+					</n-form-item>
+					<n-form-item path="email" :label="t('users.form.email')">
+						<n-input v-model:value="form.email" />
+					</n-form-item>
+					<n-form-item path="password" :label="t('users.form.password')">
+						<n-input v-model:value="form.password" type="password" show-password-on="click" />
+					</n-form-item>
+					<n-form-item path="password_confirmation" :label="t('users.form.passwordConfirmation')">
+						<n-input v-model:value="form.password_confirmation" type="password" show-password-on="click" />
+					</n-form-item>
+					<n-form-item path="role" :label="t('users.form.role')">
+						<n-select v-model:value="form.role" :placeholder="t('users.form.rolePlaceholder')" :options="createRoleOptions" />
+					</n-form-item>
+				</n-form>
+				<template #footer>
+					<div class="flex justify-end gap-2">
+						<n-button @click="drawerVisible = false">{{ t("users.form.cancel") }}</n-button>
+						<n-button type="primary" :loading="submitting" @click="submitCreate">{{ t("users.form.submit") }}</n-button>
+					</div>
+				</template>
+			</n-drawer-content>
+		</n-drawer>
 	</div>
 </template>
 
 <script setup lang="ts">
-import type { DataTableColumns, SelectOption } from "naive-ui"
-import type { User, UserRole, UserStatus } from "@/add-os/modules/system/types/user"
-import { NAlert, NDataTable, NInput, NSelect, NTag } from "naive-ui"
+import type { DataTableColumns, FormInst, FormRules, SelectOption } from "naive-ui"
+import type { CreateUserPayload, User, UserRole, UserStatus } from "@/add-os/modules/system/types/user"
+import { NAlert, NButton, NDataTable, NDrawer, NDrawerContent, NForm, NFormItem, NInput, NSelect, NTag, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import { isValidPassword, isValidSyrianPhone } from "@/add-os/modules/system/utils/validation"
 import { ApiError } from "@/add-os/services/api"
-import { listUsers } from "@/add-os/services/users"
+import { createUser, listUsers } from "@/add-os/services/users"
 import { STATUS_ICONS } from "@/add-os/theme/tokens"
 import Icon from "@/components/common/Icon.vue"
 
@@ -127,4 +163,85 @@ async function loadUsers() {
 }
 
 onMounted(loadUsers)
+
+const message = useMessage()
+
+const drawerVisible = ref(false)
+const submitting = ref(false)
+const formRef = ref<FormInst | null>(null)
+
+function emptyForm(): CreateUserPayload {
+	return { name: "", phone: "", email: "", password: "", password_confirmation: "", role: "operations" }
+}
+
+const form = ref<CreateUserPayload>(emptyForm())
+
+/** StoreUserRequest allows only these two — member accounts self-register from the app. */
+const createRoleOptions = computed<SelectOption[]>(() => [
+	{ label: t("roles.names.operations"), value: "operations" },
+	{ label: t("roles.names.admin"), value: "admin" }
+])
+
+const rules = computed<FormRules>(() => ({
+	name: [{ required: true, message: t("users.validation.nameRequired"), trigger: ["blur", "input"] }],
+	phone: [
+		{ required: true, message: t("users.validation.phoneRequired"), trigger: ["blur", "input"] },
+		{
+			validator: (_rule, value: string) => isValidSyrianPhone(value),
+			message: t("users.validation.phoneInvalid"),
+			trigger: ["blur", "input"]
+		}
+	],
+	email: [
+		{ required: true, message: t("users.validation.emailRequired"), trigger: ["blur", "input"] },
+		{
+			validator: (_rule, value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+			message: t("users.validation.emailInvalid"),
+			trigger: ["blur", "input"]
+		}
+	],
+	password: [
+		{ required: true, message: t("users.validation.passwordRequired"), trigger: ["blur", "input"] },
+		{
+			validator: (_rule, value: string) => isValidPassword(value),
+			message: t("users.validation.passwordTooShort"),
+			trigger: ["blur", "input"]
+		}
+	],
+	password_confirmation: [
+		{ required: true, message: t("users.validation.passwordRequired"), trigger: ["blur", "input"] },
+		{
+			validator: (_rule, value: string) => value === form.value.password,
+			message: t("users.validation.passwordConfirmationMismatch"),
+			trigger: ["blur", "input"]
+		}
+	],
+	role: [{ required: true, message: t("users.validation.roleRequired"), trigger: ["change", "blur"] }]
+}))
+
+function openCreate() {
+	form.value = emptyForm()
+	drawerVisible.value = true
+}
+
+async function submitCreate() {
+	try {
+		await formRef.value?.validate()
+	} catch {
+		return
+	}
+
+	submitting.value = true
+	try {
+		await createUser(form.value)
+		message.success(t("users.create.success"))
+		drawerVisible.value = false
+		await loadUsers()
+	} catch (error) {
+		if (!(error instanceof ApiError)) throw error
+		message.error(error.data?.message ?? t("users.loadError"))
+	} finally {
+		submitting.value = false
+	}
+}
 </script>

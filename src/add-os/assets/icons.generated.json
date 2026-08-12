@@ -12,6 +12,9 @@
 			"activity": {
 				"body": "<path fill=\"currentColor\" d=\"M12 29a1 1 0 0 1-.92-.62L6.33 17H2v-2h5a1 1 0 0 1 .92.62L12 25.28l8.06-21.63A1 1 0 0 1 21 3a1 1 0 0 1 .93.68L25.72 15H30v2h-5a1 1 0 0 1-.95-.68L21 7l-8.06 21.35A1 1 0 0 1 12 29\"/>"
 			},
+			"add": {
+				"body": "<path fill=\"currentColor\" d=\"M17 15V8h-2v7H8v2h7v7h2v-7h7v-2z\"/>"
+			},
 			"add-alt": {
 				"body": "<path fill=\"currentColor\" d=\"M16 4c6.6 0 12 5.4 12 12s-5.4 12-12 12S4 22.6 4 16S9.4 4 16 4m0-2C8.3 2 2 8.3 2 16s6.3 14 14 14s14-6.3 14-14S23.7 2 16 2\"/><path fill=\"currentColor\" d=\"M24 15h-7V8h-2v7H8v2h7v7h2v-7h7z\"/>"
 			},

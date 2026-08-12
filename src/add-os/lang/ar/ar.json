@@ -44,6 +44,34 @@
 			"deactivated": "معطّل",
 			"blocked": "محظور"
 		},
+		"create": {
+			"button": "مستخدم جديد",
+			"title": "مستخدم جديد",
+			"success": "تم إنشاء المستخدم."
+		},
+		"form": {
+			"name": "الاسم الكامل",
+			"phone": "رقم الهاتف",
+			"phonePlaceholder": "مثال: 09XXXXXXXX",
+			"email": "البريد الإلكتروني",
+			"password": "كلمة المرور",
+			"passwordConfirmation": "تأكيد كلمة المرور",
+			"role": "الدور",
+			"rolePlaceholder": "اختر دوراً",
+			"submit": "حفظ",
+			"cancel": "إلغاء"
+		},
+		"validation": {
+			"nameRequired": "الاسم مطلوب.",
+			"phoneRequired": "رقم الهاتف مطلوب.",
+			"phoneInvalid": "أدخل رقم هاتف سوري صحيح (09XXXXXXXX).",
+			"emailRequired": "البريد الإلكتروني مطلوب.",
+			"emailInvalid": "أدخل بريداً إلكترونياً صحيحاً.",
+			"passwordRequired": "كلمة المرور مطلوبة.",
+			"passwordTooShort": "يجب أن تتكوّن كلمة المرور من 8 أحرف على الأقل.",
+			"passwordConfirmationMismatch": "كلمتا المرور غير متطابقتين.",
+			"roleRequired": "الدور مطلوب."
+		},
 		"loadError": "تعذّر تحميل المستخدمين. قد لا تملك صلاحية الوصول لهذه الصفحة.",
 		"empty": "لا يوجد مستخدمون."
 	},

@@ -40,6 +40,34 @@
 			"deactivated": "Deactivated",
 			"blocked": "Blocked"
 		},
+		"create": {
+			"button": "New user",
+			"title": "New user",
+			"success": "User created."
+		},
+		"form": {
+			"name": "Full name",
+			"phone": "Phone",
+			"phonePlaceholder": "09XXXXXXXX",
+			"email": "Email",
+			"password": "Password",
+			"passwordConfirmation": "Confirm password",
+			"role": "Role",
+			"rolePlaceholder": "Select a role",
+			"submit": "Save",
+			"cancel": "Cancel"
+		},
+		"validation": {
+			"nameRequired": "Name is required.",
+			"phoneRequired": "Phone is required.",
+			"phoneInvalid": "Enter a valid Syrian mobile number (09XXXXXXXX).",
+			"emailRequired": "Email is required.",
+			"emailInvalid": "Enter a valid email address.",
+			"passwordRequired": "Password is required.",
+			"passwordTooShort": "Password must be at least 8 characters.",
+			"passwordConfirmationMismatch": "Passwords do not match.",
+			"roleRequired": "Role is required."
+		},
 		"loadError": "Couldn't load users. You may not have permission to view this page.",
 		"empty": "No users found."
 	},
