@@ -33,7 +33,8 @@
 			"phone": "Phone",
 			"email": "Email",
 			"role": "Role",
-			"status": "Status"
+			"status": "Status",
+			"actions": "Actions"
 		},
 		"status": {
 			"active": "Active",
@@ -44,6 +45,11 @@
 			"button": "New user",
 			"title": "New user",
 			"success": "User created."
+		},
+		"edit": {
+			"title": "Edit user",
+			"button": "Edit",
+			"success": "Profile updated."
 		},
 		"form": {
 			"name": "Full name",
