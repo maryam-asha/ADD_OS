@@ -1,3 +1,6 @@
+import router from "@/router"
+import { useAuthStore } from "@/stores/auth"
+
 import { apiUrl } from "../config/env"
 
 class ApiError extends Error {
@@ -79,6 +82,10 @@ async function request<T>(
 	const res = await fetch(url, init)
 	const text = await res.text()
 	if (!res.ok) {
+		if (res.status === 401) {
+			useAuthStore().setLogout()
+			router.push("/login")
+		}
 		throw new ApiError(res.status, text || res.statusText)
 	}
 
