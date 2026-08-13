@@ -196,19 +196,31 @@ exactly (`updateUserProfile` vs. `updateUserStatus` are separate calls, separate
 
 ---
 
-## 6. `api.ts` — centralized error handling (new)
+## 6. Centralized error handling — split between `api.ts` and the composables
 
-`request<T>()` gains one behavior, layered onto what exists today (CSRF header,
-`credentials: "include"` are unchanged):
+`api.ts` is a plain module, not a component — it has no Naive UI provider context, so
+it cannot call `useMessage()` directly (and standing up `createDiscreteApi` just for
+this would mean wiring a second theme-aware provider, which is more machinery than one
+redirect needs). The handling in §1 of the original ask splits along that real
+boundary instead of pretending it doesn't exist:
 
-- **401** → call the existing `useAuthStore().setLogout()` action and redirect to
-  `/login`. One toast ("session expired"), not one per failed call.
-- **403** → one standard "not authorized" toast; the calling page's state is untouched.
-- **422** → no generic toast. `ApiError.data.errors` (Laravel's `{field: [msgs]}` shape)
-  is already parsed; `useResourceMutations` (§7) is the layer that maps it onto the
-  form's field-level feedback, not `api.ts` itself.
-- Anything else (5xx, network failure) → generic toast from `error.data?.message`,
-  falling back to a translated generic-failure string.
+- **401**, in `request<T>()` itself → call the existing `useAuthStore().setLogout()`
+  action and `router.push("/login")` (`router` is `src/router`'s default-exported
+  singleton — a plain object, importable outside component context, same as any other
+  module). No toast: landing on the login screen already is the signal, matching
+  `initSession()`'s existing silent `setLogout()` on a failed `getMe()` — no toast
+  there either.
+- **403 / 422 / anything else**, in `useResourceMutations` (§7) — one place, reused by
+  all 7 resource pages, which is what "unified handling" actually means here (a toast
+  needs a component's Naive UI context, which the composable has and `api.ts` doesn't):
+  - **422** → `ApiError.data.errors` (Laravel's `{field: [msgs]}` shape, already parsed)
+    is mapped onto `ResourceFormDrawer`'s field-level feedback — no toast.
+  - **403** and anything else (5xx, network) → `useMessage().error(error.data?.message
+    ?? <generic fallback>)`.
+- List-load failures (`useResourceList`, §7) don't toast either — they set an `error`
+  ref the page renders as an inline `n-alert`, mirroring `UsersPage.vue`'s existing
+  `loadError` pattern exactly (a toast on every page mount that happens to 403 would be
+  noisier than a page that just says so).
 
 `ApiError` itself is unchanged — this is additive behavior around existing calls, not a
 reshaping of the class.
