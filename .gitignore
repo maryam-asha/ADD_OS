@@ -18,6 +18,10 @@ unplugin.components.d.ts
 /cypress/videos/
 /cypress/screenshots/
 
+# Superpowers subagent-driven-development scratch workspace (ledgers, briefs,
+# review packages) — per-plan, regenerated, never meant to be committed.
+.superpowers/
+
 # Editor directories and files
 .vscode/*
 !.vscode/settings.json
