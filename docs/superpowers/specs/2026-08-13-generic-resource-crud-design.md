@@ -180,8 +180,8 @@ resources with a status sub-endpoint (§5).
 | Building | `branch_id` | `name` {ar,en}, `floor_count` | no |
 | Floor | `building_id` | `label`, `sort_order` | no — deliberately no status, ever (backend design doc + `SpatialHierarchyGuardTest`) |
 | Zone | `floor_id` | `label`, `sort_order` | no — same guard as Floor |
-| Space | `building_id`, `zone_id` (nullable) | `space_type` (enum: `co_space`\|`room`\|`business`\|`event_hall`), `allocation_model` (nullable), `is_lockable`, `capacity`, `hourly_rate` (nullable), `pricing_currency` (nullable, Currency enum) | yes — `PATCH .../status` with `status`, `status_reason` (nullable), `status_from` (nullable), `status_until` (nullable). Confirmed value: `maintenance`; the full status enum should be confirmed against the backend's `SpaceStatus` cases when the Space page is built, not guessed here. |
-| Resource | `space_id` | `name`, `category`, `quantity` (defaults 1) | yes — `PATCH .../status` with `status`, `status_reason` (nullable) only — no `status_from`/`status_until` for this one |
+| Space | `building_id`, `zone_id` (nullable) | `space_type` (enum: `co_space`\|`room`\|`business`\|`event_hall`), `allocation_model` (nullable), `is_lockable`, `capacity`, `hourly_rate` (nullable), `pricing_currency` (nullable, Currency enum) | yes — `PATCH .../status` with `status`, `status_reason` (nullable), `status_from` (nullable), `status_until` (nullable). Status enum: `active`\|`maintenance`\|`retired` (`App\Domain\Foundation\Enums\OperationalStatus`, read directly from `ADDCore` source — shared with Resource, below). |
+| Resource | `space_id` | `name`, `category`, `quantity` (defaults 1) | yes — `PATCH .../status` with `status`, `status_reason` (nullable) only — no `status_from`/`status_until` for this one. Same `OperationalStatus` enum as Space. |
 | SeatDesk | `space_id` (must be a `co_space`-type Space, enforced server-side) | `label`, `qr_point_id` (nullable) | no |
 
 `name`/`city` are `{ar, en}` objects on the wire (confirmed in the Postman create
@@ -374,7 +374,7 @@ exist.
 
 | Item | Owner | Why it is not blocking |
 |---|---|---|
-| Full `status` enum values for Space/Resource (`active`, `maintenance` are confirmed; the rest are not) | Backend | Confirm against the actual `SpaceStatus`/enum class when the Space/Resource "change status" drawers are built — not guessed here to avoid recording a wrong value as fact. |
+| ~~Full `status` enum values for Space/Resource~~ — **resolved during plan-writing**: `App\Domain\Foundation\Enums\OperationalStatus` (`ADDCore/app/Domain/Foundation/Enums/OperationalStatus.php`) is `active`\|`maintenance`\|`retired`, shared by both Space and Resource. §5 updated in place. | — | Closed — read directly from the Laravel source rather than left as a guess. |
 | `Device`/`DeviceCapability` admin CRUD | Product/Maryam | Explicitly deferred, §2 — the generic layer is designed so adding them later is config-only. |
 | `VITE_API_URL` still unset | Infra | Pre-existing, tracked in root `CLAUDE.md`'s open-items table; unrelated to this design beyond being a precondition for any of it to run against a real backend. |
 | Section-level role gating for `spatial` | Product | Same deferral as the Users/Roles design (§11 there) — not reopened here. |
