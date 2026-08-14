@@ -152,6 +152,15 @@
 			"deleteConfirmTitle": "Delete this record?",
 			"deleteConfirmOk": "Delete",
 			"deleteConfirmCancel": "Cancel"
+		},
+		"form": {
+			"submit": "Save",
+			"cancel": "Cancel",
+			"arabicPlaceholder": "Arabic",
+			"englishPlaceholder": "English"
+		},
+		"validation": {
+			"required": "{field} is required."
 		}
 	}
 }
