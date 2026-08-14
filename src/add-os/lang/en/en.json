@@ -139,5 +139,10 @@
 			"partners": "Partners",
 			"systemSettings": "System settings"
 		}
+	},
+	"resourceCrud": {
+		"mutations": {
+			"genericError": "Something went wrong. Please try again."
+		}
 	}
 }
