@@ -1,6 +1,14 @@
 import { del, get, post, put } from "./api"
 
-interface MessageResponse {
+/**
+ * Exported (not just module-local): `vue-tsc --build --force` emits
+ * declaration files (`composite: true`), and any consumer that re-exports
+ * `api.update`/`api.remove` at module scope — e.g. `export const updateX =
+ * api.update` — has this type in its own public signature. An unexported name
+ * referenced from another module's declaration output is TS4023 ("cannot be
+ * named"), so this must stay exported for every resource service to type-check.
+ */
+export interface MessageResponse {
 	message?: string
 }
 

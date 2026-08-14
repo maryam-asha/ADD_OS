@@ -1,4 +1,5 @@
 import type { RouteRecordRaw } from "vue-router"
+import BranchesPage from "@/add-os/modules/spatial/views/BranchesPage.vue"
 import RolesPage from "@/add-os/modules/system/views/RolesPage.vue"
 import UsersPage from "@/add-os/modules/system/views/UsersPage.vue"
 import ComingSoon from "@/add-os/views/ComingSoon.vue"
@@ -24,7 +25,8 @@ import { NAV_SECTIONS, navPageTitleKey, navRouteName, navRoutePath, navSectionTi
 /** Pages with a real screen. Everything else still falls back to ComingSoon. */
 const PAGE_COMPONENTS: Record<string, unknown> = {
 	"system.roles": RolesPage,
-	"system.users": UsersPage
+	"system.users": UsersPage,
+	"spatial.branches": BranchesPage
 }
 
 export function createAddOsRoutes(): RouteRecordRaw[] {

@@ -90,6 +90,16 @@
 		"loadError": "Couldn't load users. You may not have permission to view this page.",
 		"empty": "No users found."
 	},
+	"branches": {
+		"columns": { "name": "Name", "city": "City", "timezone": "Timezone", "isActive": "Active" },
+		"isActiveYes": "Active",
+		"isActiveNo": "Inactive",
+		"create": { "button": "New branch", "title": "New branch", "success": "Branch created." },
+		"edit": { "title": "Edit branch", "success": "Branch updated." },
+		"delete": { "success": "Branch deleted." },
+		"form": { "name": "Name", "city": "City", "timezone": "Timezone", "isActive": "Active" },
+		"loadError": "Couldn't load branches. You may not have permission to view this page."
+	},
 	"shortcuts": {
 		"title": "Shortcuts"
 	},
