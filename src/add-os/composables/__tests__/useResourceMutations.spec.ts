@@ -71,9 +71,10 @@ describe("useResourceMutations", () => {
 		const refetch = vi.fn()
 		const { create } = useResourceMutations(api, refetch, MESSAGES)
 
-		// create() re-throws after toasting (so the caller knows the mutation
-		// failed) — swallow the expected rejection to assert on the toast/refetch.
-		await create({ label: "A" }).catch(() => {})
+		// create() re-throws after toasting (so the caller knows the mutation failed) —
+		// assert the rejection explicitly so a future regression that dropped the
+		// rethrow (leaving only the toast) would fail this test, not slip through.
+		await expect(create({ label: "A" })).rejects.toBe(failure)
 
 		expect(errorMock).toHaveBeenCalledWith("This action is unauthorized.")
 		expect(refetch).not.toHaveBeenCalled()
@@ -84,7 +85,7 @@ describe("useResourceMutations", () => {
 		const api = { create: vi.fn().mockRejectedValue(failure), update: vi.fn(), remove: vi.fn() }
 		const { create } = useResourceMutations(api, vi.fn(), MESSAGES)
 
-		await create({ label: "A" }).catch(() => {})
+		await expect(create({ label: "A" })).rejects.toBe(failure)
 
 		expect(errorMock).toHaveBeenCalledWith("Something went wrong. Please try again.")
 	})
@@ -106,7 +107,7 @@ describe("useResourceMutations", () => {
 		const api = { create: vi.fn().mockRejectedValue(failure), update: vi.fn(), remove: vi.fn() }
 		const { create, isSubmitting } = useResourceMutations(api, vi.fn(), MESSAGES)
 
-		await create({ label: "A" }).catch(() => {})
+		await expect(create({ label: "A" })).rejects.toBe(failure)
 
 		expect(isSubmitting.value).toBe(false)
 	})
