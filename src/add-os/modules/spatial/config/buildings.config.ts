@@ -34,5 +34,5 @@ export function buildBuildingFields(branches: Branch[], locale: SupportedLocale)
 }
 
 export function emptyBuildingPayload(): BuildingPayload {
-	return { branch_id: 0, name: { ar: "", en: "" }, floor_count: 1 }
+	return { branch_id: null, name: { ar: "", en: "" }, floor_count: 1 }
 }
