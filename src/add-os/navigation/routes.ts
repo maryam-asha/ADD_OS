@@ -1,5 +1,6 @@
 import type { RouteRecordRaw } from "vue-router"
 import BranchesPage from "@/add-os/modules/spatial/views/BranchesPage.vue"
+import BuildingsPage from "@/add-os/modules/spatial/views/BuildingsPage.vue"
 import RolesPage from "@/add-os/modules/system/views/RolesPage.vue"
 import UsersPage from "@/add-os/modules/system/views/UsersPage.vue"
 import ComingSoon from "@/add-os/views/ComingSoon.vue"
@@ -26,7 +27,8 @@ import { NAV_SECTIONS, navPageTitleKey, navRouteName, navRoutePath, navSectionTi
 const PAGE_COMPONENTS: Record<string, unknown> = {
 	"system.roles": RolesPage,
 	"system.users": UsersPage,
-	"spatial.branches": BranchesPage
+	"spatial.branches": BranchesPage,
+	"spatial.buildings": BuildingsPage
 }
 
 export function createAddOsRoutes(): RouteRecordRaw[] {

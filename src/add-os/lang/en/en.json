@@ -100,6 +100,14 @@
 		"form": { "name": "Name", "city": "City", "timezone": "Timezone", "isActive": "Active" },
 		"loadError": "Couldn't load branches. You may not have permission to view this page."
 	},
+	"buildings": {
+		"columns": { "branch": "Branch", "name": "Name", "floorCount": "Floors" },
+		"create": { "button": "New building", "title": "New building", "success": "Building created." },
+		"edit": { "title": "Edit building", "success": "Building updated." },
+		"delete": { "success": "Building deleted." },
+		"form": { "branch": "Branch", "name": "Name", "floorCount": "Number of floors" },
+		"loadError": "Couldn't load buildings. You may not have permission to view this page."
+	},
 	"shortcuts": {
 		"title": "Shortcuts"
 	},
