@@ -143,6 +143,15 @@
 	"resourceCrud": {
 		"mutations": {
 			"genericError": "Something went wrong. Please try again."
+		},
+		"table": {
+			"actionsColumn": "Actions",
+			"empty": "No records found.",
+			"editAction": "Edit",
+			"deleteAction": "Delete",
+			"deleteConfirmTitle": "Delete this record?",
+			"deleteConfirmOk": "Delete",
+			"deleteConfirmCancel": "Cancel"
 		}
 	}
 }
