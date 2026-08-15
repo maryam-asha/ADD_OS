@@ -108,6 +108,14 @@
 		"form": { "branch": "Branch", "name": "Name", "floorCount": "Number of floors" },
 		"loadError": "Couldn't load buildings. You may not have permission to view this page."
 	},
+	"floors": {
+		"columns": { "building": "Building", "label": "Label", "sortOrder": "Order" },
+		"create": { "button": "New floor", "title": "New floor", "success": "Floor created." },
+		"edit": { "title": "Edit floor", "success": "Floor updated." },
+		"delete": { "success": "Floor deleted." },
+		"form": { "branch": "Branch", "building": "Building", "label": "Label", "sortOrder": "Sort order" },
+		"loadError": "Couldn't load floors. You may not have permission to view this page."
+	},
 	"shortcuts": {
 		"title": "Shortcuts"
 	},
@@ -131,6 +139,7 @@
 			"overview": "Overview",
 			"branches": "Branches",
 			"buildings": "Buildings",
+			"floors": "Floors",
 			"spaces": "Spaces",
 			"users": "Users",
 			"roles": "Roles & permissions",
