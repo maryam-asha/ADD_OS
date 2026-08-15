@@ -3,7 +3,12 @@ import type { FieldDescriptor } from "../field-types"
 import { describe, expect, it } from "vitest"
 import { buildPayload, pickLocalized } from "../field-types"
 
-interface Widget {
+// Extends Record<string, unknown> explicitly, exactly as every real resource
+// payload type (BranchPayload, BuildingPayload, ...) and ResourceFormDrawer's
+// own test Model do: an interface with no index signature of its own isn't
+// structurally compatible with `TModel extends Record<string, unknown>`, so
+// without this buildPayload(fields, model) fails to compile.
+interface Widget extends Record<string, unknown> {
 	branch_id: number
 	building_id: number
 	label: string
