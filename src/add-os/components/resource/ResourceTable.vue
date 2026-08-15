@@ -18,6 +18,7 @@ const props = defineProps<{
 	loading: boolean
 	onEdit: (row: T) => void
 	onDelete: (row: T) => void | Promise<void>
+	extraActions?: (row: T) => ReturnType<typeof h>[]
 }>()
 
 const { t } = useI18n()
@@ -31,6 +32,7 @@ function rowKey(row: T) {
 function renderActions(row: T) {
 	return h("div", { class: "flex gap-2" }, [
 		h(NButton, { text: true, type: "primary", onClick: () => props.onEdit(row) }, { default: () => t("resourceCrud.table.editAction") }),
+		...(props.extraActions?.(row) ?? []),
 		h(
 			NPopconfirm,
 			{

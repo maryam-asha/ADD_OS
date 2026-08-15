@@ -1,6 +1,7 @@
 import type { DataTableColumns } from "naive-ui"
 import { mount } from "@vue/test-utils"
 import { describe, expect, it, vi } from "vitest"
+import { h } from "vue"
 import { createI18n } from "vue-i18n"
 
 import ResourceTable from "../ResourceTable.vue"
@@ -92,6 +93,20 @@ describe("resourceTable", () => {
 		await deleteButton?.trigger("click")
 
 		expect(onDelete).not.toHaveBeenCalled()
+		wrapper.unmount()
+	})
+
+	it("renders extraActions buttons alongside edit/delete when provided", async () => {
+		const onExtra = vi.fn()
+		const wrapper = mountTable({
+			extraActions: (row: Row) => [h("button", { onClick: () => onExtra(row) }, "Extra")]
+		})
+
+		const extraButton = wrapper.findAll("button").find(button => button.text() === "Extra")
+		expect(extraButton?.exists()).toBe(true)
+		await extraButton?.trigger("click")
+
+		expect(onExtra).toHaveBeenCalledWith({ id: 1, label: "Row A" })
 		wrapper.unmount()
 	})
 })
