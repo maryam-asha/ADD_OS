@@ -108,8 +108,12 @@ function openCreate() {
 function openEdit(row: Space) {
 	mode.value = "edit"
 	editingId.value = row.id
+	// `branch_id` is virtual (it only narrows the building dropdown), but it still
+	// has to be seeded or the drawer opens with an empty branch above a populated
+	// building. buildingsById is already loaded here for the table's building
+	// column, so derive it the same way FloorsPage.openEdit does.
 	form.value = {
-		branch_id: null, // same known limitation as Zone/Task 11 — branch isn't looked up from a space's building here
+		branch_id: buildingsById.value[row.building_id]?.branch_id ?? null,
 		building_id: row.building_id,
 		zone_id: row.zone_id,
 		space_type: row.space_type,
