@@ -51,7 +51,7 @@ const { data: branches } = useResourceList<Branch>(listBranches)
 
 const { data, isLoading, error, refetch } = useResourceList<SeatDesk>(() => listSeatsDesks())
 const columns = computed(() => buildSeatDeskColumns(t))
-const fields = computed(() => buildSeatDeskFields(branches.value, currentLocale.value))
+const fields = computed(() => buildSeatDeskFields(t, branches.value, currentLocale.value))
 
 const mutations = useResourceMutations({ create: createSeatDesk, update: updateSeatDesk, remove: removeSeatDesk }, refetch, {
 	createSuccess: t("seatsDesks.create.success"),

@@ -45,7 +45,7 @@ interface SeatDeskFormModel extends SeatDeskPayload {
 	zone_id: number | null
 }
 
-export function buildSeatDeskFields(branches: Branch[], locale: SupportedLocale): FieldDescriptor<SeatDeskFormModel>[] {
+export function buildSeatDeskFields(t: ComposerTranslation, branches: Branch[], locale: SupportedLocale): FieldDescriptor<SeatDeskFormModel>[] {
 	const branchOptions: SelectOption[] = branches.map(branch => ({ label: pickLocalized(branch.name, locale), value: branch.id }))
 
 	return [
@@ -96,7 +96,9 @@ export function buildSeatDeskFields(branches: Branch[], locale: SupportedLocale)
 			optionsFrom: async ({ building_id, zone_id }) => {
 				if (!building_id) return []
 				const spaces = await listSpaces({ building_id: building_id as number, zone_id: (zone_id as number) || undefined })
-				return spaces.filter(space => space.space_type === "co_space").map(space => ({ label: `Co-working space #${space.id}`, value: space.id }))
+				return spaces
+					.filter(space => space.space_type === "co_space")
+					.map(space => ({ label: `${t(`spaces.spaceType.${space.space_type}`)} #${space.id}`, value: space.id }))
 			}
 		},
 		{ key: "label", labelKey: "seatsDesks.form.label", type: "text", required: true },
