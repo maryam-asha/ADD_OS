@@ -271,3 +271,14 @@ message catalogues, and seed data at once.
 
 **Needed:** a ruling on `Event` vs `Events`. Nav labels and seed data will be
 taken from Philosophy; nothing will be seeded from Company Profile.
+
+**New instance found (2026-08-15), deliberately not resolved by inference:** the
+admin dashboard's Spaces/Seats & Desks CRUD screens (generic-resource-crud plan)
+render `space_type: "co_space"` as the plain descriptive "Co-working space" /
+"مساحة عمل مشتركة" rather than the brand term `Co-Space` — because this table's
+Arabic rendering of `Co-Space` is itself unresolved (no Arabic form is registered
+above), and picking one here would silently prejudge that open question for a
+user-facing string. This is a staff-facing admin field, not the customer-facing
+service catalog, but the same term is at stake. Flagging so the eventual ruling
+on `Co-Space`/`Business Café` updates this screen's copy too, not just the
+public-site copy.

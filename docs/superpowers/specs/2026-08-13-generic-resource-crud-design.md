@@ -195,6 +195,17 @@ only on the two `FieldDescriptor` sets used by a separate, smaller "change statu
 per resource, not the create/edit drawer. This mirrors the existing Users precedent
 exactly (`updateUserProfile` vs. `updateUserStatus` are separate calls, separate forms).
 
+**Deviation, decided during implementation (Task 12/13, 2026-08-15):** the shipped
+"change status" drawers for Space and Resource send only `status` + `status_reason`,
+omitting `status_from`/`status_until` from the payload entirely — not just from the
+create/edit drawer, but from the status drawer's own `FieldDescriptor` set too. Both
+fields are optional per the backend design doc, and neither this spec nor the plan
+specifies a datetime-picker UX for them; adding one wasn't otherwise motivated by
+anything in this PoC, so the two fields were left out rather than guessed at. If a
+future pass adds scheduled status transitions, `SpaceStatusPayload`/
+`SpaceResourceStatusPayload` and `buildSpaceStatusFields`/`buildResourceStatusFields`
+are the two places to extend.
+
 ---
 
 ## 6. Centralized error handling — split between `api.ts` and the composables
