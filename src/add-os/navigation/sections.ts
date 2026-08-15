@@ -65,7 +65,8 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "buildings", path: "buildings" },
 			{ key: "floors", path: "floors" },
 			{ key: "zones", path: "zones" },
-			{ key: "spaces", path: "spaces" }
+			{ key: "spaces", path: "spaces" },
+			{ key: "resources", path: "resources" }
 		]
 	},
 	{

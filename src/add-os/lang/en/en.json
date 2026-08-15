@@ -156,6 +156,29 @@
 		},
 		"loadError": "Couldn't load spaces. You may not have permission to view this page."
 	},
+	"resources": {
+		"columns": { "space": "Space", "name": "Name", "category": "Category", "quantity": "Quantity", "status": "Status" },
+		"create": { "button": "New resource", "title": "New resource", "success": "Resource created." },
+		"edit": { "title": "Edit resource", "success": "Resource updated." },
+		"delete": { "success": "Resource deleted." },
+		"changeStatus": {
+			"button": "Change status",
+			"title": "Change status",
+			"statusLabel": "Status",
+			"reasonLabel": "Reason (optional)",
+			"success": "Status updated."
+		},
+		"form": {
+			"branch": "Branch",
+			"building": "Building",
+			"zone": "Zone (optional)",
+			"space": "Space",
+			"name": "Name",
+			"category": "Category",
+			"quantity": "Quantity"
+		},
+		"loadError": "Couldn't load resources. You may not have permission to view this page."
+	},
 	"shortcuts": {
 		"title": "Shortcuts"
 	},
@@ -182,6 +205,7 @@
 			"floors": "Floors",
 			"zones": "Zones",
 			"spaces": "Spaces",
+			"resources": "Resources",
 			"users": "Users",
 			"roles": "Roles & permissions",
 			"individuals": "Individuals",
