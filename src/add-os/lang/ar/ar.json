@@ -128,6 +128,38 @@
 		"form": { "branch": "الفرع", "building": "المبنى", "floor": "الطابق", "label": "التسمية", "sortOrder": "ترتيب الفرز" },
 		"loadError": "تعذّر تحميل المناطق. قد لا تملك صلاحية عرض هذه الصفحة."
 	},
+	"operationalStatus": { "active": "نشط", "maintenance": "قيد الصيانة", "retired": "خارج الخدمة" },
+	"spaces": {
+		"columns": { "building": "المبنى", "zone": "المنطقة", "spaceType": "النوع", "capacity": "السعة", "status": "الحالة" },
+		"spaceType": {
+			"co_space": "مساحة عمل مشتركة",
+			"room": "غرفة",
+			"business": "مساحة أعمال",
+			"event_hall": "قاعة فعاليات"
+		},
+		"create": { "button": "مساحة جديدة", "title": "مساحة جديدة", "success": "تم إنشاء المساحة." },
+		"edit": { "title": "تعديل المساحة", "success": "تم تحديث المساحة." },
+		"delete": { "success": "تم حذف المساحة." },
+		"changeStatus": {
+			"button": "تغيير الحالة",
+			"title": "تغيير الحالة",
+			"statusLabel": "الحالة",
+			"reasonLabel": "السبب (اختياري)",
+			"success": "تم تحديث الحالة."
+		},
+		"form": {
+			"branch": "الفرع",
+			"building": "المبنى",
+			"zone": "المنطقة (اختياري)",
+			"spaceType": "النوع",
+			"allocationModel": "نموذج التخصيص (اختياري)",
+			"isLockable": "قابلة للإغلاق",
+			"capacity": "السعة",
+			"hourlyRate": "السعر بالساعة (اختياري)",
+			"pricingCurrency": "العملة (اختياري)"
+		},
+		"loadError": "تعذّر تحميل المساحات. قد لا تملك صلاحية عرض هذه الصفحة."
+	},
 	"shortcuts": {
 		"title": "الاختصارات"
 	},

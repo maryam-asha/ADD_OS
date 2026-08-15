@@ -124,6 +124,38 @@
 		"form": { "branch": "Branch", "building": "Building", "floor": "Floor", "label": "Label", "sortOrder": "Sort order" },
 		"loadError": "Couldn't load zones. You may not have permission to view this page."
 	},
+	"operationalStatus": { "active": "Active", "maintenance": "Under maintenance", "retired": "Retired" },
+	"spaces": {
+		"columns": { "building": "Building", "zone": "Zone", "spaceType": "Type", "capacity": "Capacity", "status": "Status" },
+		"spaceType": {
+			"co_space": "Co-working space",
+			"room": "Room",
+			"business": "Business space",
+			"event_hall": "Event hall"
+		},
+		"create": { "button": "New space", "title": "New space", "success": "Space created." },
+		"edit": { "title": "Edit space", "success": "Space updated." },
+		"delete": { "success": "Space deleted." },
+		"changeStatus": {
+			"button": "Change status",
+			"title": "Change status",
+			"statusLabel": "Status",
+			"reasonLabel": "Reason (optional)",
+			"success": "Status updated."
+		},
+		"form": {
+			"branch": "Branch",
+			"building": "Building",
+			"zone": "Zone (optional)",
+			"spaceType": "Type",
+			"allocationModel": "Allocation model (optional)",
+			"isLockable": "Lockable",
+			"capacity": "Capacity",
+			"hourlyRate": "Hourly rate (optional)",
+			"pricingCurrency": "Currency (optional)"
+		},
+		"loadError": "Couldn't load spaces. You may not have permission to view this page."
+	},
 	"shortcuts": {
 		"title": "Shortcuts"
 	},

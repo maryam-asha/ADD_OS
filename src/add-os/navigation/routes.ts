@@ -2,6 +2,7 @@ import type { RouteRecordRaw } from "vue-router"
 import BranchesPage from "@/add-os/modules/spatial/views/BranchesPage.vue"
 import BuildingsPage from "@/add-os/modules/spatial/views/BuildingsPage.vue"
 import FloorsPage from "@/add-os/modules/spatial/views/FloorsPage.vue"
+import SpacesPage from "@/add-os/modules/spatial/views/SpacesPage.vue"
 import ZonesPage from "@/add-os/modules/spatial/views/ZonesPage.vue"
 import RolesPage from "@/add-os/modules/system/views/RolesPage.vue"
 import UsersPage from "@/add-os/modules/system/views/UsersPage.vue"
@@ -32,7 +33,8 @@ const PAGE_COMPONENTS: Record<string, unknown> = {
 	"spatial.branches": BranchesPage,
 	"spatial.buildings": BuildingsPage,
 	"spatial.floors": FloorsPage,
-	"spatial.zones": ZonesPage
+	"spatial.zones": ZonesPage,
+	"spatial.spaces": SpacesPage
 }
 
 export function createAddOsRoutes(): RouteRecordRaw[] {
