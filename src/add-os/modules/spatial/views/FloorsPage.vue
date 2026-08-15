@@ -14,7 +14,7 @@
 			</n-button>
 		</div>
 
-		<ResourceTable :columns :data :loading="isLoading" :on-edit="openEdit" :on-delete="async row => { await mutations.remove(row.id) }" />
+		<ResourceTable :columns :data :loading="isTableLoading" :on-edit="openEdit" :on-delete="async row => { await mutations.remove(row.id) }" />
 
 		<ResourceFormDrawer
 			v-model:show="drawerVisible"
@@ -49,11 +49,12 @@ defineProps<{ titleKey?: string }>()
 
 const { t } = useI18n()
 
-const { data: branches } = useResourceList<Branch>(listBranches)
-const { data: buildings } = useResourceList<Building>(() => listBuildings())
+const { data: branches, isLoading: isLoadingBranches } = useResourceList<Branch>(listBranches)
+const { data: buildings, isLoading: isLoadingBuildings } = useResourceList<Building>(() => listBuildings())
 const buildingsById = computed(() => Object.fromEntries(buildings.value.map(building => [building.id, building])))
 
 const { data, isLoading, error, refetch } = useResourceList<Floor>(() => listFloors())
+const isTableLoading = computed(() => isLoading.value || isLoadingBranches.value || isLoadingBuildings.value)
 const columns = computed(() => buildFloorColumns(t, currentLocale.value, buildingsById.value))
 const fields = computed(() => buildFloorFields(branches.value, currentLocale.value))
 
