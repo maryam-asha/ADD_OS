@@ -116,6 +116,14 @@
 		"form": { "branch": "Branch", "building": "Building", "label": "Label", "sortOrder": "Sort order" },
 		"loadError": "Couldn't load floors. You may not have permission to view this page."
 	},
+	"zones": {
+		"columns": { "floor": "Floor", "label": "Label", "sortOrder": "Order" },
+		"create": { "button": "New zone", "title": "New zone", "success": "Zone created." },
+		"edit": { "title": "Edit zone", "success": "Zone updated." },
+		"delete": { "success": "Zone deleted." },
+		"form": { "branch": "Branch", "building": "Building", "floor": "Floor", "label": "Label", "sortOrder": "Sort order" },
+		"loadError": "Couldn't load zones. You may not have permission to view this page."
+	},
 	"shortcuts": {
 		"title": "Shortcuts"
 	},
@@ -140,6 +148,7 @@
 			"branches": "Branches",
 			"buildings": "Buildings",
 			"floors": "Floors",
+			"zones": "Zones",
 			"spaces": "Spaces",
 			"users": "Users",
 			"roles": "Roles & permissions",
