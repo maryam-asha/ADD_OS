@@ -1,13 +1,4 @@
 import type { RouteRecordRaw } from "vue-router"
-import BranchesPage from "@/add-os/modules/spatial/views/BranchesPage.vue"
-import BuildingsPage from "@/add-os/modules/spatial/views/BuildingsPage.vue"
-import FloorsPage from "@/add-os/modules/spatial/views/FloorsPage.vue"
-import ResourcesPage from "@/add-os/modules/spatial/views/ResourcesPage.vue"
-import SeatsDesksPage from "@/add-os/modules/spatial/views/SeatsDesksPage.vue"
-import SpacesPage from "@/add-os/modules/spatial/views/SpacesPage.vue"
-import ZonesPage from "@/add-os/modules/spatial/views/ZonesPage.vue"
-import RolesPage from "@/add-os/modules/system/views/RolesPage.vue"
-import UsersPage from "@/add-os/modules/system/views/UsersPage.vue"
 import ComingSoon from "@/add-os/views/ComingSoon.vue"
 import { NAV_SECTIONS, navPageTitleKey, navRouteName, navRoutePath, navSectionTitleKey } from "./sections"
 
@@ -26,19 +17,27 @@ import { NAV_SECTIONS, navPageTitleKey, navRouteName, navRoutePath, navSectionTi
  *
  * ComingSoon is imported statically on purpose: the remaining placeholder pages
  * share it, and lazy loading would emit the same chunk once per page.
+ *
+ * Real pages, by contrast, are lazy on purpose and must stay that way. A static
+ * import here pulls each page's whole module graph — view → service →
+ * `services/api.ts` → `@/router` → back into this file — into this module's own
+ * evaluation, and that cycle leaves `NAV_SECTIONS` uninitialised at the moment
+ * `createAddOsRoutes()` runs ("Cannot access '__vite_ssr_import_N__' before
+ * initialization"). Deferring to a factory means the page graph is only touched
+ * once the router actually navigates, long after every module has settled.
  */
 
 /** Pages with a real screen. Everything else still falls back to ComingSoon. */
-const PAGE_COMPONENTS: Record<string, unknown> = {
-	"system.roles": RolesPage,
-	"system.users": UsersPage,
-	"spatial.branches": BranchesPage,
-	"spatial.buildings": BuildingsPage,
-	"spatial.floors": FloorsPage,
-	"spatial.zones": ZonesPage,
-	"spatial.spaces": SpacesPage,
-	"spatial.resources": ResourcesPage,
-	"spatial.seatsDesks": SeatsDesksPage
+const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
+	"system.roles": () => import("@/add-os/modules/system/views/RolesPage.vue"),
+	"system.users": () => import("@/add-os/modules/system/views/UsersPage.vue"),
+	"spatial.branches": () => import("@/add-os/modules/spatial/views/BranchesPage.vue"),
+	"spatial.buildings": () => import("@/add-os/modules/spatial/views/BuildingsPage.vue"),
+	"spatial.floors": () => import("@/add-os/modules/spatial/views/FloorsPage.vue"),
+	"spatial.zones": () => import("@/add-os/modules/spatial/views/ZonesPage.vue"),
+	"spatial.spaces": () => import("@/add-os/modules/spatial/views/SpacesPage.vue"),
+	"spatial.resources": () => import("@/add-os/modules/spatial/views/ResourcesPage.vue"),
+	"spatial.seatsDesks": () => import("@/add-os/modules/spatial/views/SeatsDesksPage.vue")
 }
 
 export function createAddOsRoutes(): RouteRecordRaw[] {
