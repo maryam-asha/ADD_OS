@@ -151,6 +151,11 @@ async function submitStatusChange(payload: Record<string, unknown>) {
 		await refetch()
 	} catch (caught) {
 		if (!(caught instanceof ApiError)) throw caught
+		// A 422 carries field-level `errors` that ResourceFormDrawer's own
+		// handleSubmit catch maps onto the status drawer's fieldErrors (inline
+		// per-field feedback) — rethrow without toasting, same as
+		// useResourceMutations.ts, so it isn't shown twice.
+		if (caught.status === 422) throw caught
 		message.error(caught.data?.message ?? t("resourceCrud.mutations.genericError"))
 		throw caught
 	} finally {
