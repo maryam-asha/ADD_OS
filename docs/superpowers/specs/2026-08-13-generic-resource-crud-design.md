@@ -163,8 +163,9 @@ export const listBuildings = (branchId?: number) => api.list(branchId ? { branch
 export const { getById: getBuilding, create: createBuilding, update: updateBuilding, remove: removeBuilding } = api
 
 // services/spaces.ts — extra endpoint, not from the factory
-export const updateSpaceStatus = (id: number, payload: UpdateSpaceStatusPayload) =>
-  patch<{ message?: string }>(`/api/v1/admin/spaces/${id}/status`, payload)
+export function updateSpaceStatus(id: number, payload: UpdateSpaceStatusPayload) {
+  return patch<{ message?: string }>(`/api/v1/admin/spaces/${id}/status`, payload)
+}
 ```
 
 `spaces.ts` and `resources.ts` each add an `updateStatus()` this way — the only two
@@ -271,14 +272,14 @@ Thin wrapper over `n-data-table`. Props: `columns`, `data`, `loading`, `onEdit`,
 ```ts
 interface FieldDescriptor<TModel = any> {
   key: keyof TModel & string
-  labelKey: string                                  // i18n key; the component calls t()
+  labelKey: string // i18n key; the component calls t()
   type: "text" | "bilingual-text" | "number" | "select" | "switch"
   required?: boolean
-  rule?: FormItemRule | FormItemRule[]               // native Naive UI rule, per-field override
-  options?: SelectOption[] | (() => SelectOption[])  // select-only, static
-  dependsOn?: string                                 // another field's key
+  rule?: FormItemRule | FormItemRule[] // native Naive UI rule, per-field override
+  options?: SelectOption[] | (() => SelectOption[]) // select-only, static
+  dependsOn?: string // another field's key
   optionsFrom?: (parentValue: unknown) => Promise<SelectOption[]> | SelectOption[]
-  virtual?: boolean                                  // participates in the form/dependency graph
+  virtual?: boolean // participates in the form/dependency graph
                                                       // but is excluded from the submitted payload
   disabledWhen?: (model: TModel) => boolean
 }
@@ -335,10 +336,10 @@ missing ones so all 7 resources have a route:
 pages: [
   { key: "branches", path: "branches" },
   { key: "buildings", path: "buildings" },
-  { key: "floors", path: "floors" },        // new
-  { key: "zones", path: "zones" },          // new
+  { key: "floors", path: "floors" }, // new
+  { key: "zones", path: "zones" }, // new
   { key: "spaces", path: "spaces" },
-  { key: "resources", path: "resources" },  // new
+  { key: "resources", path: "resources" }, // new
   { key: "seatsDesks", path: "seats-desks" } // new
 ]
 ```

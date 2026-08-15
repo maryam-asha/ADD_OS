@@ -1,7 +1,7 @@
-import { describe, expect, it } from "vitest"
-
-import { buildPayload, pickLocalized } from "../field-types"
 import type { FieldDescriptor } from "../field-types"
+
+import { describe, expect, it } from "vitest"
+import { buildPayload, pickLocalized } from "../field-types"
 
 interface Widget {
 	branch_id: number
