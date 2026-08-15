@@ -20,7 +20,6 @@
 			v-model:show="drawerVisible"
 			v-model:model="form"
 			:fields
-			:mode
 			:title="mode === 'create' ? t('floors.create.title') : t('floors.edit.title')"
 			:submitting="mutations.isSubmitting.value"
 			:on-submit="submit"

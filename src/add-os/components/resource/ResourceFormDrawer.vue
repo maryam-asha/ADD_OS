@@ -58,7 +58,6 @@ import { buildPayload } from "./field-types"
 
 const props = defineProps<{
 	fields: FieldDescriptor<TModel>[]
-	mode: "create" | "edit"
 	title: string
 	submitting: boolean
 	onSubmit: (payload: Record<string, unknown>) => Promise<void>

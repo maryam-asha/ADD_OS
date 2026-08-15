@@ -37,7 +37,6 @@ function mountDrawer(fields: FieldDescriptor<Model>[], model: Model, onSubmit = 
 	return mount(ResourceFormDrawer<Model>, {
 		props: {
 			fields,
-			mode: "create",
 			title: "New thing",
 			submitting: false,
 			onSubmit,
@@ -119,7 +118,6 @@ describe("resourceFormDrawer", () => {
 		const wrapper = mount(ResourceFormDrawer<Model>, {
 			props: {
 				fields,
-				mode: "create",
 				title: "New thing",
 				submitting: false,
 				onSubmit,

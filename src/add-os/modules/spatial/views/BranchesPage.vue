@@ -20,7 +20,6 @@
 			v-model:show="drawerVisible"
 			v-model:model="form"
 			:fields="branchFields"
-			:mode
 			:title="mode === 'create' ? t('branches.create.title') : t('branches.edit.title')"
 			:submitting="mutations.isSubmitting.value"
 			:on-submit="submit"

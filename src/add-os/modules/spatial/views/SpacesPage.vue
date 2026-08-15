@@ -27,7 +27,6 @@
 			v-model:show="drawerVisible"
 			v-model:model="form"
 			:fields
-			:mode
 			:title="mode === 'create' ? t('spaces.create.title') : t('spaces.edit.title')"
 			:submitting="mutations.isSubmitting.value"
 			:on-submit="submit"
@@ -37,7 +36,6 @@
 			v-model:show="statusDrawerVisible"
 			v-model:model="statusForm"
 			:fields="statusFields"
-			mode="edit"
 			:title="t('spaces.changeStatus.title')"
 			:submitting="statusSubmitting"
 			:on-submit="submitStatusChange"
