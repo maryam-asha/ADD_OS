@@ -3,6 +3,7 @@ import BranchesPage from "@/add-os/modules/spatial/views/BranchesPage.vue"
 import BuildingsPage from "@/add-os/modules/spatial/views/BuildingsPage.vue"
 import FloorsPage from "@/add-os/modules/spatial/views/FloorsPage.vue"
 import ResourcesPage from "@/add-os/modules/spatial/views/ResourcesPage.vue"
+import SeatsDesksPage from "@/add-os/modules/spatial/views/SeatsDesksPage.vue"
 import SpacesPage from "@/add-os/modules/spatial/views/SpacesPage.vue"
 import ZonesPage from "@/add-os/modules/spatial/views/ZonesPage.vue"
 import RolesPage from "@/add-os/modules/system/views/RolesPage.vue"
@@ -36,7 +37,8 @@ const PAGE_COMPONENTS: Record<string, unknown> = {
 	"spatial.floors": FloorsPage,
 	"spatial.zones": ZonesPage,
 	"spatial.spaces": SpacesPage,
-	"spatial.resources": ResourcesPage
+	"spatial.resources": ResourcesPage,
+	"spatial.seatsDesks": SeatsDesksPage
 }
 
 export function createAddOsRoutes(): RouteRecordRaw[] {

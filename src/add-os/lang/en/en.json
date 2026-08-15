@@ -179,6 +179,21 @@
 		},
 		"loadError": "Couldn't load resources. You may not have permission to view this page."
 	},
+	"seatsDesks": {
+		"columns": { "space": "Space", "label": "Label", "qrPointId": "QR point" },
+		"create": { "button": "New seat/desk", "title": "New seat/desk", "success": "Seat/desk created." },
+		"edit": { "title": "Edit seat/desk", "success": "Seat/desk updated." },
+		"delete": { "success": "Seat/desk deleted." },
+		"form": {
+			"branch": "Branch",
+			"building": "Building",
+			"zone": "Zone (optional)",
+			"space": "Space",
+			"label": "Label",
+			"qrPointId": "QR point ID (optional)"
+		},
+		"loadError": "Couldn't load seats & desks. You may not have permission to view this page."
+	},
 	"shortcuts": {
 		"title": "Shortcuts"
 	},
@@ -206,6 +221,7 @@
 			"zones": "Zones",
 			"spaces": "Spaces",
 			"resources": "Resources",
+			"seatsDesks": "Seats & Desks",
 			"users": "Users",
 			"roles": "Roles & permissions",
 			"individuals": "Individuals",
