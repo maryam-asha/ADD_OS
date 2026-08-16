@@ -104,7 +104,8 @@
 		"edit": { "title": "Edit branch", "success": "Branch updated." },
 		"delete": { "success": "Branch deleted." },
 		"form": { "name": "Name", "city": "City", "timezone": "Timezone", "isActive": "Active" },
-		"loadError": "Couldn't load branches. You may not have permission to view this page."
+		"loadError": "Couldn't load branches. You may not have permission to view this page.",
+		"stats": { "total": "Total branches", "active": "Active", "inactive": "Inactive" }
 	},
 	"buildings": {
 		"columns": { "branch": "Branch", "name": "Name", "floorCount": "Floors" },

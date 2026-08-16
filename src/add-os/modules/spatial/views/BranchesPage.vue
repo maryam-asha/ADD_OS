@@ -5,6 +5,8 @@
 			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.branches") }}</h1>
 		</div>
 
+		<ResourceStatCards :cards="statCards" />
+
 		<n-alert v-if="error" type="error" :title="t('branches.loadError')" />
 
 		<div class="flex justify-end">
@@ -32,6 +34,7 @@ import type { Branch, BranchPayload } from "@/add-os/modules/spatial/types/branc
 import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.vue"
+import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
@@ -46,6 +49,16 @@ const { t } = useI18n()
 
 const { data, isLoading, error, refetch } = useResourceList<Branch>(listBranches)
 const columns = computed(() => buildBranchColumns(t, currentLocale.value))
+
+const statCards = computed(() => {
+	const total = data.value.length
+	const active = data.value.filter(branch => branch.is_active).length
+	return [
+		{ label: t("branches.stats.total"), value: total },
+		{ label: t("branches.stats.active"), value: active },
+		{ label: t("branches.stats.inactive"), value: total - active }
+	]
+})
 
 const mutations = useResourceMutations({ create: createBranch, update: updateBranch, remove: removeBranch }, refetch, {
 	createSuccess: t("branches.create.success"),
