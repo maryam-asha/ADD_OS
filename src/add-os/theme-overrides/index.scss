@@ -17,5 +17,6 @@
 // Numerals and data — the tabular-figure face for money/quantity cells
 @import "./numeric";
 
-// Resource ledger tables — uppercase header treatment for ResourceTable.vue
+// Resource ledger tables — uppercase header treatment for ResourceTable.vue and
+// UsersPage.vue's own inline n-data-table
 @import "./resource-table";

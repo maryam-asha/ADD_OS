@@ -58,6 +58,14 @@ describe("resourceTable", () => {
 		wrapper.unmount()
 	})
 
+	it("carries the add-ledger-table class so the ledger header styling applies", () => {
+		const wrapper = mountTable()
+
+		expect(wrapper.classes()).toContain("add-ledger-table")
+
+		wrapper.unmount()
+	})
+
 	it("shows the localized empty state when there are no rows and it isn't loading", () => {
 		const wrapper = mountTable({ data: [] })
 
