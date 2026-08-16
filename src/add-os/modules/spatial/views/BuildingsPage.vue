@@ -5,6 +5,8 @@
 			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.buildings") }}</h1>
 		</div>
 
+		<ResourceStatCards :cards="statCards" />
+
 		<n-alert v-if="error" type="error" :title="t('buildings.loadError')" />
 
 		<div class="flex justify-end">
@@ -33,6 +35,7 @@ import type { Building, BuildingPayload } from "@/add-os/modules/spatial/types/b
 import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.vue"
+import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
@@ -52,6 +55,11 @@ const branchesById = computed(() => Object.fromEntries(branches.value.map(branch
 const { data, isLoading, error, refetch } = useResourceList<Building>(() => listBuildings())
 const columns = computed(() => buildBuildingColumns(t, currentLocale.value, branchesById.value))
 const fields = computed(() => buildBuildingFields(branches.value, currentLocale.value))
+
+const statCards = computed(() => [
+	{ label: t("buildings.stats.total"), value: data.value.length },
+	{ label: t("buildings.stats.totalFloors"), value: data.value.reduce((sum, building) => sum + building.floor_count, 0) }
+])
 
 const mutations = useResourceMutations({ create: createBuilding, update: updateBuilding, remove: removeBuilding }, refetch, {
 	createSuccess: t("buildings.create.success"),
