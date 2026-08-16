@@ -1,6 +1,6 @@
 <template>
-	<div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-		<n-card v-for="card in cards" :key="card.label" size="small">
+	<div class="flex flex-wrap gap-4">
+		<n-card v-for="card in cards" :key="card.label" size="small" class="min-w-[10rem] flex-1">
 			<n-statistic :label="card.label" :value="formattedValue(card.value)" />
 		</n-card>
 	</div>

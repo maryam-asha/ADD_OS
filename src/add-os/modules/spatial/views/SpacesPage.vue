@@ -5,7 +5,7 @@
 			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.spaces") }}</h1>
 		</div>
 
-		<ResourceStatCards :cards="statCards" />
+		<ResourceStatCards v-if="!error && !isLoading" :cards="statCards" />
 
 		<n-alert v-if="error" type="error" :title="t('spaces.loadError')" />
 
@@ -46,6 +46,7 @@
 </template>
 
 <script setup lang="ts">
+import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vue"
 import type { Branch } from "@/add-os/modules/spatial/types/branch"
 import type { Building } from "@/add-os/modules/spatial/types/building"
 import type { OperationalStatus } from "@/add-os/modules/spatial/types/operational-status"
@@ -88,16 +89,16 @@ const { data, isLoading, error, refetch } = useResourceList<Space>(() => listSpa
 const columns = computed(() => buildSpaceColumns(t, currentLocale.value, buildingsById.value, zonesById.value))
 const fields = computed(() => buildSpaceFields(t, branches.value, currentLocale.value))
 
-const statCards = computed(() => {
+const statCards = computed<StatCard[]>(() => {
 	const total = data.value.length
 	const active = data.value.filter(space => space.status === "active").length
 	const maintenance = data.value.filter(space => space.status === "maintenance").length
 	const retired = data.value.filter(space => space.status === "retired").length
 	return [
 		{ label: t("spaces.stats.total"), value: total },
-		{ label: t("spaces.stats.active"), value: active },
-		{ label: t("spaces.stats.maintenance"), value: maintenance },
-		{ label: t("spaces.stats.retired"), value: retired }
+		{ label: t("operationalStatus.active"), value: active },
+		{ label: t("operationalStatus.maintenance"), value: maintenance },
+		{ label: t("operationalStatus.retired"), value: retired }
 	]
 })
 

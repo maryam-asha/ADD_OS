@@ -90,10 +90,7 @@
 		"loadError": "Couldn't load users. You may not have permission to view this page.",
 		"empty": "No users found.",
 		"stats": {
-			"total": "Total users",
-			"active": "Active",
-			"deactivated": "Deactivated",
-			"blocked": "Blocked"
+			"total": "Total users"
 		}
 	},
 	"branches": {
@@ -163,7 +160,7 @@
 			"pricingCurrency": "Currency (optional)"
 		},
 		"loadError": "Couldn't load spaces. You may not have permission to view this page.",
-		"stats": { "total": "Total spaces", "active": "Active", "maintenance": "Under maintenance", "retired": "Retired" }
+		"stats": { "total": "Total spaces" }
 	},
 	"resources": {
 		"columns": { "space": "Space", "name": "Name", "category": "Category", "quantity": "Quantity", "status": "Status" },
@@ -187,7 +184,7 @@
 			"quantity": "Quantity"
 		},
 		"loadError": "Couldn't load resources. You may not have permission to view this page.",
-		"stats": { "total": "Total resources", "active": "Active", "maintenance": "Under maintenance", "retired": "Retired" }
+		"stats": { "total": "Total resources" }
 	},
 	"seatsDesks": {
 		"columns": { "space": "Space", "label": "Label", "qrPointId": "QR point" },

@@ -5,7 +5,7 @@
 			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.branches") }}</h1>
 		</div>
 
-		<ResourceStatCards :cards="statCards" />
+		<ResourceStatCards v-if="!error && !isLoading" :cards="statCards" />
 
 		<n-alert v-if="error" type="error" :title="t('branches.loadError')" />
 
@@ -30,6 +30,7 @@
 </template>
 
 <script setup lang="ts">
+import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vue"
 import type { Branch, BranchPayload } from "@/add-os/modules/spatial/types/branch"
 import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
@@ -50,7 +51,7 @@ const { t } = useI18n()
 const { data, isLoading, error, refetch } = useResourceList<Branch>(listBranches)
 const columns = computed(() => buildBranchColumns(t, currentLocale.value))
 
-const statCards = computed(() => {
+const statCards = computed<StatCard[]>(() => {
 	const total = data.value.length
 	const active = data.value.filter(branch => branch.is_active).length
 	return [

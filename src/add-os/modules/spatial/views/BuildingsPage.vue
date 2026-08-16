@@ -5,7 +5,7 @@
 			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.buildings") }}</h1>
 		</div>
 
-		<ResourceStatCards :cards="statCards" />
+		<ResourceStatCards v-if="!error && !isLoading" :cards="statCards" />
 
 		<n-alert v-if="error" type="error" :title="t('buildings.loadError')" />
 
@@ -30,6 +30,7 @@
 </template>
 
 <script setup lang="ts">
+import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vue"
 import type { Branch } from "@/add-os/modules/spatial/types/branch"
 import type { Building, BuildingPayload } from "@/add-os/modules/spatial/types/building"
 import { computed, ref } from "vue"
@@ -56,7 +57,7 @@ const { data, isLoading, error, refetch } = useResourceList<Building>(() => list
 const columns = computed(() => buildBuildingColumns(t, currentLocale.value, branchesById.value))
 const fields = computed(() => buildBuildingFields(branches.value, currentLocale.value))
 
-const statCards = computed(() => [
+const statCards = computed<StatCard[]>(() => [
 	{ label: t("buildings.stats.total"), value: data.value.length },
 	{ label: t("buildings.stats.totalFloors"), value: data.value.reduce((sum, building) => sum + building.floor_count, 0) }
 ])

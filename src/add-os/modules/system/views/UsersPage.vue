@@ -5,7 +5,7 @@
 			<p>{{ t("users.description") }}</p>
 		</div>
 
-		<ResourceStatCards :cards="statCards" />
+		<ResourceStatCards v-if="!loadError && !loading" :cards="statCards" />
 
 		<n-alert v-if="loadError" type="error" :title="t('users.loadError')" />
 
@@ -100,6 +100,7 @@
 
 <script setup lang="ts">
 import type { DataTableColumns, FormInst, FormRules, SelectOption } from "naive-ui"
+import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vue"
 import type {
 	CreateUserPayload,
 	UpdateUserProfilePayload,
@@ -165,11 +166,11 @@ const filteredUsers = computed(() => {
 	})
 })
 
-const statCards = computed(() => [
+const statCards = computed<StatCard[]>(() => [
 	{ label: t("users.stats.total"), value: users.value.length },
-	{ label: t("users.stats.active"), value: users.value.filter(u => u.status === "active").length },
-	{ label: t("users.stats.deactivated"), value: users.value.filter(u => u.status === "deactivated").length },
-	{ label: t("users.stats.blocked"), value: users.value.filter(u => u.status === "blocked").length }
+	{ label: t("users.status.active"), value: users.value.filter(u => u.status === "active").length },
+	{ label: t("users.status.deactivated"), value: users.value.filter(u => u.status === "deactivated").length },
+	{ label: t("users.status.blocked"), value: users.value.filter(u => u.status === "blocked").length }
 ])
 
 function rowKey(row: User): number {
