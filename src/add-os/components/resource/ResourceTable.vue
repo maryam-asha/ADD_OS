@@ -1,6 +1,6 @@
 <!-- src/add-os/components/resource/ResourceTable.vue -->
 <template>
-	<div class="flex flex-col gap-3">
+	<div class="flex flex-col gap-3 add-ledger-table">
 		<n-data-table v-if="data.length > 0 || loading" :columns="tableColumns" :data :loading :pagination :bordered="false" :row-key />
 		<div v-else class="py-10 text-center">{{ t("resourceCrud.table.empty") }}</div>
 	</div>

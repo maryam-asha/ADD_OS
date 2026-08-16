@@ -134,6 +134,14 @@ export function getThemeOverrides(state: ThemeState): GlobalThemeOverrides {
 		Tag: {
 			colorBordered: "rgba(0, 0, 0, 0.1)"
 		},
+		DataTable: {
+			// Header background/text de-emphasized relative to the card body — the
+			// ledger-table look from the admin-dashboard Figma reference. Both
+			// colors already flow through this function; see Task 2's note in the
+			// plan for why no token/pipeline change was needed.
+			thColor: backgroundSecondary,
+			thTextColor: textTertiary
+		},
 		Typography: {
 			headerFontSize1: getTypeValue(state, state.typography.h1.fontSize),
 			headerFontSize2: getTypeValue(state, state.typography.h2.fontSize),

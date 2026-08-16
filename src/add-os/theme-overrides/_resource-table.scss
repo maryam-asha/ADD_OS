@@ -1,0 +1,16 @@
+// src/add-os/theme-overrides/_resource-table.scss
+//
+// ── ADD OS — resource ledger table ──────────────────────────────────────────
+// Uppercase, de-emphasized table header, matching the ledger-table visual
+// language from the admin-dashboard Figma reference (see
+// docs/superpowers/specs/2026-08-16-resource-list-visual-refresh-design.md).
+// Colour/weight come from src/theme/index.ts's `DataTable` themeOverrides —
+// this partial only adds what Naive UI's theme vars cannot express
+// (text-transform), reusing existing generated CSS vars for size/weight so
+// nothing here is a new hardcoded design value.
+
+.add-ledger-table .n-data-table-th__title {
+	text-transform: uppercase;
+	font-size: var(--add-font-size-caption);
+	font-weight: var(--add-font-weight-medium);
+}
