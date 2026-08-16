@@ -186,7 +186,8 @@
 			"category": "Category",
 			"quantity": "Quantity"
 		},
-		"loadError": "Couldn't load resources. You may not have permission to view this page."
+		"loadError": "Couldn't load resources. You may not have permission to view this page.",
+		"stats": { "total": "Total resources", "active": "Active", "maintenance": "Under maintenance", "retired": "Retired" }
 	},
 	"seatsDesks": {
 		"columns": { "space": "Space", "label": "Label", "qrPointId": "QR point" },
