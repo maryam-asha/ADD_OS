@@ -162,7 +162,8 @@
 			"hourlyRate": "Hourly rate (optional)",
 			"pricingCurrency": "Currency (optional)"
 		},
-		"loadError": "Couldn't load spaces. You may not have permission to view this page."
+		"loadError": "Couldn't load spaces. You may not have permission to view this page.",
+		"stats": { "total": "Total spaces", "active": "Active", "maintenance": "Under maintenance", "retired": "Retired" }
 	},
 	"resources": {
 		"columns": { "space": "Space", "name": "Name", "category": "Category", "quantity": "Quantity", "status": "Status" },

@@ -5,6 +5,8 @@
 			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.spaces") }}</h1>
 		</div>
 
+		<ResourceStatCards :cards="statCards" />
+
 		<n-alert v-if="error" type="error" :title="t('spaces.loadError')" />
 
 		<div class="flex justify-end">
@@ -53,6 +55,7 @@ import { NButton, useMessage } from "naive-ui"
 import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.vue"
+import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
@@ -84,6 +87,19 @@ const zonesById = computed(() => Object.fromEntries(zones.value.map(zone => [zon
 const { data, isLoading, error, refetch } = useResourceList<Space>(() => listSpaces())
 const columns = computed(() => buildSpaceColumns(t, currentLocale.value, buildingsById.value, zonesById.value))
 const fields = computed(() => buildSpaceFields(t, branches.value, currentLocale.value))
+
+const statCards = computed(() => {
+	const total = data.value.length
+	const active = data.value.filter(space => space.status === "active").length
+	const maintenance = data.value.filter(space => space.status === "maintenance").length
+	const retired = data.value.filter(space => space.status === "retired").length
+	return [
+		{ label: t("spaces.stats.total"), value: total },
+		{ label: t("spaces.stats.active"), value: active },
+		{ label: t("spaces.stats.maintenance"), value: maintenance },
+		{ label: t("spaces.stats.retired"), value: retired }
+	]
+})
 
 const mutations = useResourceMutations({ create: createSpace, update: updateSpace, remove: removeSpace }, refetch, {
 	createSuccess: t("spaces.create.success"),
