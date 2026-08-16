@@ -22,7 +22,7 @@
 			</n-button>
 		</div>
 
-		<n-data-table :columns :data="filteredUsers" :loading :bordered="false" :row-key />
+		<n-data-table :columns :data="filteredUsers" :loading :bordered="false" :row-key class="add-ledger-table" />
 
 		<n-drawer v-model:show="drawerVisible" :width="420">
 			<n-drawer-content :title="mode === 'create' ? t('users.create.title') : t('users.edit.title')" closable>
