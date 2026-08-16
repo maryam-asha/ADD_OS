@@ -5,6 +5,8 @@
 			<p>{{ t("users.description") }}</p>
 		</div>
 
+		<ResourceStatCards :cards="statCards" />
+
 		<n-alert v-if="loadError" type="error" :title="t('users.loadError')" />
 
 		<div class="flex flex-wrap items-center gap-3">
@@ -109,6 +111,7 @@ import type {
 import { NAlert, NButton, NDataTable, NDrawer, NDrawerContent, NForm, NFormItem, NInput, NModal, NSelect, NTag, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import { isValidPassword, isValidSyrianPhone } from "@/add-os/modules/system/utils/validation"
 import { ApiError } from "@/add-os/services/api"
 import { assignRole, createUser, listUsers, updateUserProfile, updateUserStatus } from "@/add-os/services/users"
@@ -161,6 +164,13 @@ const filteredUsers = computed(() => {
 		)
 	})
 })
+
+const statCards = computed(() => [
+	{ label: t("users.stats.total"), value: users.value.length },
+	{ label: t("users.stats.active"), value: users.value.filter(u => u.status === "active").length },
+	{ label: t("users.stats.deactivated"), value: users.value.filter(u => u.status === "deactivated").length },
+	{ label: t("users.stats.blocked"), value: users.value.filter(u => u.status === "blocked").length }
+])
 
 function rowKey(row: User): number {
 	return row.id

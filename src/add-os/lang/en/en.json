@@ -88,7 +88,13 @@
 			"roleRequired": "Role is required."
 		},
 		"loadError": "Couldn't load users. You may not have permission to view this page.",
-		"empty": "No users found."
+		"empty": "No users found.",
+		"stats": {
+			"total": "Total users",
+			"active": "Active",
+			"deactivated": "Deactivated",
+			"blocked": "Blocked"
+		}
 	},
 	"branches": {
 		"columns": { "name": "Name", "city": "City", "timezone": "Timezone", "isActive": "Active" },
