@@ -56,4 +56,59 @@ describe("useResourceList", () => {
 		expect(error.value).toBe(failure)
 		expect(isLoading.value).toBe(false)
 	})
+
+	describe("pagination (optional)", () => {
+		it("exposes meta when list() resolves a Paginated<T>", async () => {
+			const list = vi.fn().mockResolvedValue({
+				data: [{ id: 1 }],
+				meta: { current_page: 1, last_page: 4, per_page: 10, total: 40 }
+			})
+
+			const { data, meta } = useResourceList(list)
+			await nextTick()
+			await nextTick()
+
+			expect(data.value).toEqual([{ id: 1 }])
+			expect(meta.value).toEqual({ current_page: 1, last_page: 4, per_page: 10, total: 40 })
+		})
+
+		it("leaves meta undefined when list() resolves a plain array", async () => {
+			const list = vi.fn().mockResolvedValue([{ id: 1 }])
+
+			const { meta } = useResourceList(list)
+			await nextTick()
+			await nextTick()
+
+			expect(meta.value).toBeUndefined()
+		})
+
+		it("merges a page ref into the query and refetches when it changes", async () => {
+			const list = vi.fn().mockResolvedValue({ data: [], meta: { current_page: 1, last_page: 1, per_page: 10, total: 0 } })
+			const page = ref(1)
+
+			useResourceList(list, undefined, page)
+			await nextTick()
+			await nextTick()
+
+			expect(list).toHaveBeenLastCalledWith({ page: 1 })
+
+			page.value = 2
+			await nextTick()
+			await nextTick()
+
+			expect(list).toHaveBeenLastCalledWith({ page: 2 })
+		})
+
+		it("combines an existing query with the page ref", async () => {
+			const list = vi.fn().mockResolvedValue({ data: [], meta: { current_page: 1, last_page: 1, per_page: 10, total: 0 } })
+			const query = ref<Record<string, unknown> | undefined>({ branch_id: 1 })
+			const page = ref(1)
+
+			useResourceList(list, query, page)
+			await nextTick()
+			await nextTick()
+
+			expect(list).toHaveBeenLastCalledWith({ branch_id: 1, page: 1 })
+		})
+	})
 })

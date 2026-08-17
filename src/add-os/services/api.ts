@@ -1,3 +1,5 @@
+import { currentLocale } from "@/add-os/lang/currentLocale"
+import { DEFAULT_CURRENCY } from "@/add-os/utils/format/currency"
 import router from "@/router"
 import { useAuthStore } from "@/stores/auth"
 
@@ -39,6 +41,28 @@ function readXsrfToken(): string | null {
 	return null
 }
 
+/**
+ * Headers every ADD OS request carries, on every verb, with no exceptions.
+ * The backend expects `lang`/`currency` (lower-case, exactly — see
+ * ADD-OS.postman_collection.json) on every endpoint, admin dashboard included.
+ *
+ * Read at request time, not import time: `currentLocale` is a ref so a
+ * language switch takes effect on the very next request, without a reload.
+ *
+ * Currency has no per-user store yet (out of scope here) — every request
+ * currently uses the single app-wide DEFAULT_CURRENCY. A caller can still
+ * override it per-request via `options.headers`, which layers on top of
+ * this and wins (see `request()` below).
+ */
+function buildDefaultHeaders(): Record<string, string> {
+	return {
+		"Accept": "application/json",
+		"Content-Type": "application/json",
+		"lang": currentLocale.value,
+		"currency": DEFAULT_CURRENCY
+	}
+}
+
 function buildUrl(path: string, query?: Record<string, unknown>): string {
 	const base = apiUrl()
 	const cleanPath = path.replace(/^\/+/, "")
@@ -59,8 +83,7 @@ async function request<T>(
 ): Promise<T> {
 	const url = buildUrl(path, options?.query)
 	const headers: Record<string, string> = {
-		"Accept": "application/json",
-		"Content-Type": "application/json",
+		...buildDefaultHeaders(),
 		...(options?.headers || {})
 	}
 

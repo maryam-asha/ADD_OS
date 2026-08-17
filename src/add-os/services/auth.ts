@@ -10,6 +10,15 @@ class AuthError extends Error {
 /**
  * Request the CSRF cookie from the API. Must be called first.
  * Sends credentials so the cookie is set across the API origin.
+ *
+ * Deliberately bypasses api.ts's request() and so does NOT carry the
+ * `lang`/`currency` headers every other endpoint gets: this hits Laravel
+ * Sanctum's framework-level `/sanctum/csrf-cookie` route directly, which
+ * returns no body and has no localized content to negotiate. Routing it
+ * through request() would also risk firing request()'s 401 → logout +
+ * redirect-to-/login side effect during the pre-login cookie-priming step,
+ * before there is a session to log out of. Exempted on purpose, not an
+ * oversight.
  */
 export async function getCsrfCookie(): Promise<void> {
 	const url = `${apiUrl().replace(/\/+$/, "")}/sanctum/csrf-cookie`

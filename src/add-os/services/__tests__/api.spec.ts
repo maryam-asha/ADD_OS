@@ -1,6 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { get, patch } from "../api"
+import { setCurrentLocale } from "@/add-os/lang/currentLocale"
+import { DEFAULT_LOCALE } from "@/add-os/lang/locales"
+import { DEFAULT_CURRENCY } from "@/add-os/utils/format/currency"
+import { del, get, patch, post, put } from "../api"
 
 vi.mock("@/add-os/config/env", () => ({
 	apiUrl: () => "http://api.test"
@@ -99,5 +102,62 @@ describe("401 handling", () => {
 
 		expect(setLogoutMock).not.toHaveBeenCalled()
 		expect(pushMock).not.toHaveBeenCalled()
+	})
+})
+
+describe("default headers (lang/currency)", () => {
+	beforeEach(() => {
+		vi.stubGlobal("fetch", vi.fn())
+		vi.mocked(fetch).mockImplementation(
+			async () =>
+				new Response(JSON.stringify({ data: [] }), { status: 200, headers: { "content-type": "application/json" } })
+		)
+	})
+
+	afterEach(() => {
+		setCurrentLocale(DEFAULT_LOCALE)
+	})
+
+	it.each([
+		["GET", () => get("/api/v1/admin/widgets")],
+		["POST", () => post("/api/v1/admin/widgets", {})],
+		["PUT", () => put("/api/v1/admin/widgets/1", {})],
+		["PATCH", () => patch("/api/v1/admin/widgets/1", {})],
+		["DELETE", () => del("/api/v1/admin/widgets/1")]
+	] as const)("sends lang and currency on %s", async (_method: string, run: () => Promise<unknown>) => {
+		await run()
+
+		expect(fetch).toHaveBeenCalledWith(
+			expect.any(String),
+			expect.objectContaining({
+				headers: expect.objectContaining({ lang: DEFAULT_LOCALE, currency: DEFAULT_CURRENCY })
+			})
+		)
+	})
+
+	it("reads currentLocale at request time, so a language switch applies to the next request", async () => {
+		await get("/api/v1/admin/widgets")
+		expect(fetch).toHaveBeenLastCalledWith(
+			expect.any(String),
+			expect.objectContaining({ headers: expect.objectContaining({ lang: "ar" }) })
+		)
+
+		setCurrentLocale("en")
+		await get("/api/v1/admin/widgets")
+		expect(fetch).toHaveBeenLastCalledWith(
+			expect.any(String),
+			expect.objectContaining({ headers: expect.objectContaining({ lang: "en" }) })
+		)
+	})
+
+	it("lets caller-supplied headers override the lang/currency default", async () => {
+		await get("/api/v1/admin/widgets", undefined, { currency: "USD" })
+
+		expect(fetch).toHaveBeenCalledWith(
+			expect.any(String),
+			expect.objectContaining({
+				headers: expect.objectContaining({ currency: "USD", lang: DEFAULT_LOCALE })
+			})
+		)
 	})
 })
