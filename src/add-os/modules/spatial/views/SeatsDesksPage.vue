@@ -14,7 +14,13 @@
 			</n-button>
 		</div>
 
-		<ResourceTable :columns :data :loading="isLoading" :on-edit="openEdit" :on-delete="async row => { await mutations.remove(row.id) }" />
+		<ResourceTable
+			:columns
+			:data
+			:loading="isLoading"
+			:on-edit="openEdit"
+			:on-delete="canDelete ? (async row => { await mutations.remove(row.id) }) : undefined"
+		/>
 
 		<ResourceFormDrawer
 			v-model:show="drawerVisible"
@@ -36,6 +42,7 @@ import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
+import { canDeleteSpatialResource } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import { buildSeatDeskColumns, buildSeatDeskFields, emptySeatDeskPayload } from "@/add-os/modules/spatial/config/seats-desks.config"
 import { listBranches } from "@/add-os/services/branches"
@@ -51,6 +58,7 @@ const { data: branches } = useResourceList<Branch>(listBranches)
 const { data, isLoading, error, refetch } = useResourceList<SeatDesk>(() => listSeatsDesks())
 const columns = computed(() => buildSeatDeskColumns(t))
 const fields = computed(() => buildSeatDeskFields(t, branches.value, currentLocale.value))
+const canDelete = computed(() => canDeleteSpatialResource("seatsDesks"))
 
 const mutations = useResourceMutations({ create: createSeatDesk, update: updateSeatDesk, remove: removeSeatDesk }, refetch, {
 	createSuccess: t("seatsDesks.create.success"),

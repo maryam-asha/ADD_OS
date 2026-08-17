@@ -16,7 +16,14 @@
 			</n-button>
 		</div>
 
-		<ResourceTable :columns :data :loading="isLoading" :on-edit="openEdit" :on-delete="async row => { await mutations.remove(row.id) }" />
+		<ResourceTable
+			:columns
+			:data
+			:loading="isLoading"
+			:on-edit="openEdit"
+			:on-delete="canDelete ? (async row => { await mutations.remove(row.id) }) : undefined"
+			:delete-warning="t('buildings.delete.cascadeWarning')"
+		/>
 
 		<ResourceFormDrawer
 			v-model:show="drawerVisible"
@@ -40,6 +47,7 @@ import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vu
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
+import { canDeleteSpatialResource } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import { buildBuildingColumns, buildBuildingFields, emptyBuildingPayload } from "@/add-os/modules/spatial/config/buildings.config"
 import { listBranches } from "@/add-os/services/branches"
@@ -56,6 +64,7 @@ const branchesById = computed(() => Object.fromEntries(branches.value.map(branch
 const { data, isLoading, error, refetch } = useResourceList<Building>(() => listBuildings())
 const columns = computed(() => buildBuildingColumns(t, currentLocale.value, branchesById.value))
 const fields = computed(() => buildBuildingFields(branches.value, currentLocale.value))
+const canDelete = computed(() => canDeleteSpatialResource("buildings"))
 
 const statCards = computed<StatCard[]>(() => [
 	{ label: t("buildings.stats.total"), value: data.value.length },

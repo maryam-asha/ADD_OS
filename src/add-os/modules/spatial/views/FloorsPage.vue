@@ -14,7 +14,14 @@
 			</n-button>
 		</div>
 
-		<ResourceTable :columns :data :loading="isTableLoading" :on-edit="openEdit" :on-delete="async row => { await mutations.remove(row.id) }" />
+		<ResourceTable
+			:columns
+			:data
+			:loading="isTableLoading"
+			:on-edit="openEdit"
+			:on-delete="canDelete ? (async row => { await mutations.remove(row.id) }) : undefined"
+			:delete-warning="t('floors.delete.cascadeWarning')"
+		/>
 
 		<ResourceFormDrawer
 			v-model:show="drawerVisible"
@@ -37,6 +44,7 @@ import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
+import { canDeleteSpatialResource } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import { buildFloorColumns, buildFloorFields, emptyFloorPayload } from "@/add-os/modules/spatial/config/floors.config"
 import { listBranches } from "@/add-os/services/branches"
@@ -56,6 +64,7 @@ const { data, isLoading, error, refetch } = useResourceList<Floor>(() => listFlo
 const isTableLoading = computed(() => isLoading.value || isLoadingBranches.value || isLoadingBuildings.value)
 const columns = computed(() => buildFloorColumns(t, currentLocale.value, buildingsById.value))
 const fields = computed(() => buildFloorFields(branches.value, currentLocale.value))
+const canDelete = computed(() => canDeleteSpatialResource("floors"))
 
 const mutations = useResourceMutations({ create: createFloor, update: updateFloor, remove: removeFloor }, refetch, {
 	createSuccess: t("floors.create.success"),

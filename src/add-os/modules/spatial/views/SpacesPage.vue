@@ -21,7 +21,8 @@
 			:data
 			:loading="isLoading"
 			:on-edit="openEdit"
-			:on-delete="async row => { await mutations.remove(row.id) }"
+			:on-delete="canDelete ? (async row => { await mutations.remove(row.id) }) : undefined"
+			:delete-warning="t('spaces.delete.cascadeWarning')"
 			:extra-actions="renderStatusAction"
 		/>
 
@@ -60,6 +61,7 @@ import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vu
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
+import { canDeleteSpatialResource } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import {
 	buildSpaceColumns,
@@ -88,6 +90,7 @@ const zonesById = computed(() => Object.fromEntries(zones.value.map(zone => [zon
 const { data, isLoading, error, refetch } = useResourceList<Space>(() => listSpaces())
 const columns = computed(() => buildSpaceColumns(t, currentLocale.value, buildingsById.value, zonesById.value))
 const fields = computed(() => buildSpaceFields(t, branches.value, currentLocale.value))
+const canDelete = computed(() => canDeleteSpatialResource("spaces"))
 
 const statCards = computed<StatCard[]>(() => {
 	const total = data.value.length

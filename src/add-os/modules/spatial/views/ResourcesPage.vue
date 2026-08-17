@@ -21,7 +21,7 @@
 			:data
 			:loading="isLoading"
 			:on-edit="openEdit"
-			:on-delete="async row => { await mutations.remove(row.id) }"
+			:on-delete="canDelete ? (async row => { await mutations.remove(row.id) }) : undefined"
 			:extra-actions="renderStatusAction"
 		/>
 
@@ -58,6 +58,7 @@ import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vu
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
+import { canDeleteSpatialResource } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import {
 	buildResourceColumns,
@@ -80,6 +81,7 @@ const { data: branches } = useResourceList<Branch>(listBranches)
 const { data, isLoading, error, refetch } = useResourceList<SpaceResource>(() => listResources())
 const columns = computed(() => buildResourceColumns(t))
 const fields = computed(() => buildResourceFields(t, branches.value, currentLocale.value))
+const canDelete = computed(() => canDeleteSpatialResource("resources"))
 
 const statCards = computed<StatCard[]>(() => {
 	const total = data.value.length

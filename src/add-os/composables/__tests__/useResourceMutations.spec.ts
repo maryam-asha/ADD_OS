@@ -13,7 +13,13 @@ vi.mock("naive-ui", () => ({
 }))
 
 vi.mock("vue-i18n", () => ({
-	useI18n: () => ({ t: (key: string) => (key === "resourceCrud.mutations.genericError" ? "Something went wrong. Please try again." : key) })
+	useI18n: () => ({
+		t: (key: string) => {
+			if (key === "resourceCrud.mutations.genericError") return "Something went wrong. Please try again."
+			if (key === "resourceCrud.mutations.permissionError") return "You don't have permission for this action."
+			return key
+		}
+	})
 }))
 
 const MESSAGES = { createSuccess: "Created.", updateSuccess: "Updated.", deleteSuccess: "Deleted." }
@@ -65,8 +71,8 @@ describe("useResourceMutations", () => {
 		expect(successMock).toHaveBeenCalledWith("Deleted.")
 	})
 
-	it("on a non-422 ApiError, toasts the server message and does not refetch", async () => {
-		const failure = new ApiError(403, JSON.stringify({ message: "This action is unauthorized." }))
+	it("on a non-403/422 ApiError, toasts the server message and does not refetch", async () => {
+		const failure = new ApiError(409, JSON.stringify({ message: "This branch already has an active lease." }))
 		const api = { create: vi.fn().mockRejectedValue(failure), update: vi.fn(), remove: vi.fn() }
 		const refetch = vi.fn()
 		const { create } = useResourceMutations(api, refetch, MESSAGES)
@@ -76,7 +82,7 @@ describe("useResourceMutations", () => {
 		// rethrow (leaving only the toast) would fail this test, not slip through.
 		await expect(create({ label: "A" })).rejects.toBe(failure)
 
-		expect(errorMock).toHaveBeenCalledWith("This action is unauthorized.")
+		expect(errorMock).toHaveBeenCalledWith("This branch already has an active lease.")
 		expect(refetch).not.toHaveBeenCalled()
 	})
 
@@ -88,6 +94,19 @@ describe("useResourceMutations", () => {
 		await expect(create({ label: "A" })).rejects.toBe(failure)
 
 		expect(errorMock).toHaveBeenCalledWith("Something went wrong. Please try again.")
+	})
+
+	it("on a 403 ApiError, toasts the fixed permission message — not the raw backend text — and does not refetch", async () => {
+		const failure = new ApiError(403, JSON.stringify({ message: "This action is unauthorized." }))
+		const api = { create: vi.fn(), update: vi.fn(), remove: vi.fn().mockRejectedValue(failure) }
+		const refetch = vi.fn()
+		const { remove } = useResourceMutations(api, refetch, MESSAGES)
+
+		await expect(remove(1)).rejects.toBe(failure)
+
+		expect(errorMock).toHaveBeenCalledWith("You don't have permission for this action.")
+		expect(errorMock).not.toHaveBeenCalledWith("This action is unauthorized.")
+		expect(refetch).not.toHaveBeenCalled()
 	})
 
 	it("on a 422 ApiError, re-throws it (for the drawer to map onto form fields) without toasting", async () => {

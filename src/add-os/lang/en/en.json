@@ -99,7 +99,10 @@
 		"isActiveNo": "Inactive",
 		"create": { "button": "New branch", "title": "New branch", "success": "Branch created." },
 		"edit": { "title": "Edit branch", "success": "Branch updated." },
-		"delete": { "success": "Branch deleted." },
+		"delete": {
+			"success": "Branch deleted.",
+			"cascadeWarning": "Deleting this branch also deletes every building, floor, zone, space, resource, and seat/desk under it."
+		},
 		"form": { "name": "Name", "city": "City", "timezone": "Timezone", "isActive": "Active" },
 		"loadError": "Couldn't load branches. You may not have permission to view this page.",
 		"stats": { "total": "Total branches", "active": "Active", "inactive": "Inactive" }
@@ -108,7 +111,10 @@
 		"columns": { "branch": "Branch", "name": "Name", "floorCount": "Floors" },
 		"create": { "button": "New building", "title": "New building", "success": "Building created." },
 		"edit": { "title": "Edit building", "success": "Building updated." },
-		"delete": { "success": "Building deleted." },
+		"delete": {
+			"success": "Building deleted.",
+			"cascadeWarning": "Deleting this building also deletes every floor, zone, space, resource, and seat/desk under it."
+		},
 		"form": { "branch": "Branch", "name": "Name", "floorCount": "Number of floors" },
 		"loadError": "Couldn't load buildings. You may not have permission to view this page.",
 		"stats": { "total": "Total buildings", "totalFloors": "Total floors" }
@@ -117,7 +123,10 @@
 		"columns": { "building": "Building", "label": "Label", "sortOrder": "Order" },
 		"create": { "button": "New floor", "title": "New floor", "success": "Floor created." },
 		"edit": { "title": "Edit floor", "success": "Floor updated." },
-		"delete": { "success": "Floor deleted." },
+		"delete": {
+			"success": "Floor deleted.",
+			"cascadeWarning": "Deleting this floor also deletes every zone and space under it."
+		},
 		"form": { "branch": "Branch", "building": "Building", "label": "Label", "sortOrder": "Sort order" },
 		"loadError": "Couldn't load floors. You may not have permission to view this page."
 	},
@@ -125,7 +134,10 @@
 		"columns": { "floor": "Floor", "label": "Label", "sortOrder": "Order" },
 		"create": { "button": "New zone", "title": "New zone", "success": "Zone created." },
 		"edit": { "title": "Edit zone", "success": "Zone updated." },
-		"delete": { "success": "Zone deleted." },
+		"delete": {
+			"success": "Zone deleted.",
+			"cascadeWarning": "Deleting this zone also deletes every space under it."
+		},
 		"form": { "branch": "Branch", "building": "Building", "floor": "Floor", "label": "Label", "sortOrder": "Sort order" },
 		"loadError": "Couldn't load zones. You may not have permission to view this page."
 	},
@@ -140,7 +152,10 @@
 		},
 		"create": { "button": "New space", "title": "New space", "success": "Space created." },
 		"edit": { "title": "Edit space", "success": "Space updated." },
-		"delete": { "success": "Space deleted." },
+		"delete": {
+			"success": "Space deleted.",
+			"cascadeWarning": "Deleting this space also deletes every resource and seat/desk under it."
+		},
 		"changeStatus": {
 			"button": "Change status",
 			"title": "Change status",
@@ -257,7 +272,8 @@
 	},
 	"resourceCrud": {
 		"mutations": {
-			"genericError": "Something went wrong. Please try again."
+			"genericError": "Something went wrong. Please try again.",
+			"permissionError": "You don't have permission for this action."
 		},
 		"table": {
 			"actionsColumn": "Actions",

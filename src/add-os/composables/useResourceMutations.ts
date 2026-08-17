@@ -25,9 +25,13 @@ export function useResourceMutations<T, CreatePayload, UpdatePayload>(
 	/**
 	 * A 422 carries field-level `errors` the caller (ResourceFormDrawer) maps
 	 * onto its own form — re-thrown, not toasted, so it isn't shown twice.
-	 * Everything else (403, 5xx, network) is this composable's job to surface,
-	 * since it's the layer that actually runs inside a component's Naive UI
-	 * context (api.ts, one layer down, cannot call useMessage() at all).
+	 * A 403 always shows the fixed, translated permission message — never the
+	 * raw backend text, which is Laravel's generic Gate-denial string, not
+	 * something a user should have to parse. Everything else (5xx, network)
+	 * falls back to the backend's own message or a generic one. This is the
+	 * one place that surfaces any of it, since it's the layer that actually
+	 * runs inside a component's Naive UI context (api.ts, one layer down,
+	 * cannot call useMessage() at all).
 	 */
 	async function run<R>(action: () => Promise<R>, successMessage: string): Promise<R> {
 		isSubmitting.value = true
@@ -39,7 +43,11 @@ export function useResourceMutations<T, CreatePayload, UpdatePayload>(
 		} catch (caught) {
 			if (!(caught instanceof ApiError)) throw caught
 			if (caught.status === 422) throw caught
-			message.error(caught.data?.message ?? t("resourceCrud.mutations.genericError"))
+			if (caught.status === 403) {
+				message.error(t("resourceCrud.mutations.permissionError"))
+			} else {
+				message.error(caught.data?.message ?? t("resourceCrud.mutations.genericError"))
+			}
 			throw caught
 		} finally {
 			isSubmitting.value = false

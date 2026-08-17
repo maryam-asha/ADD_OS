@@ -1,7 +1,8 @@
 import type { DataTableColumns } from "naive-ui"
 import { mount } from "@vue/test-utils"
+import { NDialogProvider } from "naive-ui"
 import { describe, expect, it, vi } from "vitest"
-import { h } from "vue"
+import { h, nextTick } from "vue"
 import { createI18n } from "vue-i18n"
 
 import ResourceTable from "../ResourceTable.vue"
@@ -33,19 +34,25 @@ interface Row {
 
 const columns: DataTableColumns<Row> = [{ title: "Label", key: "label" }]
 
+// ResourceTable's delete action opens a centered `useDialog()` confirm, which
+// throws without an ancestor `<n-dialog-provider>` — wrapping in one here
+// mirrors the real `Provider.vue` root every page actually mounts under.
 function mountTable(overrides: Record<string, unknown> = {}) {
-	return mount(ResourceTable<Row>, {
-		props: {
-			columns,
-			data: [{ id: 1, label: "Row A" }],
-			loading: false,
-			onEdit: vi.fn(),
-			onDelete: vi.fn(),
-			...overrides
-		},
-		global: { plugins: [i18n] },
-		attachTo: document.body
-	})
+	const props = {
+		columns,
+		data: [{ id: 1, label: "Row A" }],
+		loading: false,
+		onEdit: vi.fn(),
+		onDelete: vi.fn(),
+		...overrides
+	}
+	return mount(
+		{ render: () => h(NDialogProvider, null, { default: () => h(ResourceTable<Row>, props) }) },
+		{
+			global: { plugins: [i18n] },
+			attachTo: document.body
+		}
+	)
 }
 
 describe("resourceTable", () => {
@@ -61,7 +68,10 @@ describe("resourceTable", () => {
 	it("carries the add-ledger-table class so the ledger header styling applies", () => {
 		const wrapper = mountTable()
 
-		expect(wrapper.classes()).toContain("add-ledger-table")
+		// wrapper.classes() reads the outer NDialogProvider wrapper's own root
+		// (a Fragment), not ResourceTable's div — find() searches the whole
+		// subtree instead, regardless of that wrapping.
+		expect(wrapper.find(".add-ledger-table").exists()).toBe(true)
 
 		wrapper.unmount()
 	})
@@ -86,7 +96,8 @@ describe("resourceTable", () => {
 		const onEdit = vi.fn()
 		const wrapper = mountTable({ onEdit })
 
-		const editButton = wrapper.findAll("button").find(button => button.text().includes("Edit"))
+		// The trigger is icon-only now — found by its aria-label, not visible text.
+		const editButton = wrapper.findAll("button").find(button => button.attributes("aria-label") === "Edit")
 		await editButton?.trigger("click")
 
 		expect(onEdit).toHaveBeenCalledWith({ id: 1, label: "Row A" })
@@ -97,10 +108,33 @@ describe("resourceTable", () => {
 		const onDelete = vi.fn()
 		const wrapper = mountTable({ onDelete })
 
-		const deleteButton = wrapper.findAll("button").find(button => button.text().includes("Delete"))
+		// The trigger is icon-only now — found by its aria-label, not visible text.
+		const deleteButton = wrapper.findAll("button").find(button => button.attributes("aria-label") === "Delete")
 		await deleteButton?.trigger("click")
 
 		expect(onDelete).not.toHaveBeenCalled()
+		wrapper.unmount()
+	})
+
+	it("calls onDelete once the confirm dialog's own positive button is clicked", async () => {
+		const onDelete = vi.fn()
+		const wrapper = mountTable({ onDelete })
+
+		const deleteButton = wrapper.findAll("button").find(button => button.attributes("aria-label") === "Delete")
+		await deleteButton?.trigger("click")
+		await nextTick()
+
+		// The dialog is teleported to document.body — outside the wrapper's own
+		// root node — same as n-modal in ResourceFormDrawer.spec.ts, so it's
+		// queried on the document rather than via wrapper.find().
+		const positiveButton = Array.from(document.querySelectorAll(".n-dialog__action button")).find(
+			button => button.textContent?.trim() === "Delete"
+		)
+		expect(positiveButton).toBeTruthy()
+		positiveButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+		await nextTick()
+
+		expect(onDelete).toHaveBeenCalledWith({ id: 1, label: "Row A" })
 		wrapper.unmount()
 	})
 
@@ -115,6 +149,35 @@ describe("resourceTable", () => {
 		await extraButton?.trigger("click")
 
 		expect(onExtra).toHaveBeenCalledWith({ id: 1, label: "Row A" })
+		wrapper.unmount()
+	})
+
+	it("renders no delete button when onDelete is absent — hidden, not disabled", () => {
+		const wrapper = mountTable({ onDelete: undefined })
+
+		const deleteButton = wrapper.findAll("button").find(button => button.attributes("aria-label") === "Delete")
+		expect(deleteButton).toBeUndefined()
+
+		wrapper.unmount()
+	})
+
+	it("still renders the edit button when onDelete is absent", () => {
+		const wrapper = mountTable({ onDelete: undefined })
+
+		const editButton = wrapper.findAll("button").find(button => button.attributes("aria-label") === "Edit")
+		expect(editButton).toBeTruthy()
+
+		wrapper.unmount()
+	})
+
+	it("includes deleteWarning text in the confirm dialog when provided", async () => {
+		const wrapper = mountTable({ deleteWarning: "This also deletes everything under it." })
+
+		const deleteButton = wrapper.findAll("button").find(button => button.attributes("aria-label") === "Delete")
+		await deleteButton?.trigger("click")
+		await nextTick()
+
+		expect(document.body.textContent).toContain("This also deletes everything under it.")
 		wrapper.unmount()
 	})
 })
