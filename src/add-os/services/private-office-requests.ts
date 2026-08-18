@@ -1,9 +1,9 @@
+import type { MessageResponse } from "./resource-factory"
 import type {
 	MarkAsQuotedPayload,
 	PrivateOfficeRequest,
 	PrivateOfficeRequestPayload
 } from "@/add-os/modules/members/types/private-office-request"
-import type { MessageResponse } from "./resource-factory"
 import { del, get, post, put } from "./api"
 
 const BASE = "/api/v1/admin/private-office-requests"

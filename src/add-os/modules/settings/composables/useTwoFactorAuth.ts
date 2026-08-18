@@ -1,3 +1,4 @@
+import type { TwoFactorPhase } from "../types/account"
 import { ref } from "vue"
 import {
 	confirmTwoFactorAuthentication,
@@ -8,7 +9,6 @@ import {
 	regenerateTwoFactorRecoveryCodes
 } from "@/add-os/services/account"
 import { ApiError } from "@/add-os/services/api"
-import type { TwoFactorPhase } from "../types/account"
 
 /**
  * Drives the 2FA section of the Account & Security page. Every call that can

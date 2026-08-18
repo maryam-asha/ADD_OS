@@ -1,7 +1,7 @@
+import type { Company, CompanyPayload, CompanyStatusPayload } from "@/add-os/modules/members/types/company"
 import { useMessage } from "naive-ui"
 import { ref } from "vue"
 import { useI18n } from "vue-i18n"
-import type { Company, CompanyPayload, CompanyStatusPayload } from "@/add-os/modules/members/types/company"
 import { ApiError } from "@/add-os/services/api"
 import { createCompany, updateCompanyStatus } from "@/add-os/services/companies"
 

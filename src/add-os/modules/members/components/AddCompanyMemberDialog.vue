@@ -31,9 +31,8 @@ import { useCompanyDetail } from "@/add-os/modules/members/composables/useCompan
 import { ApiError } from "@/add-os/services/api"
 
 const props = defineProps<{ companyId: number }>()
-const show = defineModel<boolean>("show", { required: true })
 const emit = defineEmits<{ added: [] }>()
-
+const show = defineModel<boolean>("show", { required: true })
 const { t } = useI18n()
 const message = useMessage()
 const { users, isLoadingUsers, addMember } = useCompanyDetail(props.companyId)

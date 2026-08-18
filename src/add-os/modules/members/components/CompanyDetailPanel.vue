@@ -24,7 +24,7 @@
 		</n-drawer-content>
 	</n-drawer>
 
-	<AddCompanyMemberDialog v-model:show="addDialogShow" :company-id="companyId" @added="refetchMembers" />
+	<AddCompanyMemberDialog v-model:show="addDialogShow" :company-id @added="refetchMembers" />
 </template>
 
 <script setup lang="ts">
@@ -33,10 +33,10 @@ import type { CompanyMember } from "@/add-os/modules/members/types/company-membe
 import { NAlert, NButton, NDataTable, NDrawer, NDrawerContent, NSpin, NSwitch, useDialog, useMessage } from "naive-ui"
 import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
-import AddCompanyMemberDialog from "./AddCompanyMemberDialog.vue"
 import { useCompanyDetail } from "@/add-os/modules/members/composables/useCompanyDetail"
 import { ApiError } from "@/add-os/services/api"
 import Icon from "@/components/common/Icon.vue"
+import AddCompanyMemberDialog from "./AddCompanyMemberDialog.vue"
 
 const props = defineProps<{ companyId: number }>()
 const show = defineModel<boolean>("show", { required: true })

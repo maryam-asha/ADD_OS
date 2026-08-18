@@ -13,13 +13,15 @@ const ALLOWED_RELATIVE_FILES = new Set([
 	"services/company-members.ts"
 ])
 
-/** Leading-slash path fragments, not bare words — this avoids matching i18n keys
+/**
+ * Leading-slash path fragments, not bare words — this avoids matching i18n keys
  * like "companies.columns.legalName" or nav path segments like `path: "companies"`.
  * Narrowed further to include `/admin` because a bare `/companies` also matches
  * inside the perfectly normal import specifier `@/add-os/services/companies`
  * (the substring lives in "services/companies"), which isn't an HTTP call at all.
  * `/admin/companies` and `/admin/private-office-requests` are the actual API path
- * segments the three service files construct, and never appear in an import path. */
+ * segments the three service files construct, and never appear in an import path.
+ */
 const PATH_MARKERS = ["/admin/companies", "/admin/private-office-requests"]
 
 function walk(dir: string, out: string[] = []): string[] {

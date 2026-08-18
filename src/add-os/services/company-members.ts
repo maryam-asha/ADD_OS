@@ -1,10 +1,10 @@
+import type { MessageResponse } from "./resource-factory"
 import type {
 	AddCompanyMemberPayload,
 	CompanyMember,
 	UpdateAdminFlagPayload,
 	UpdateDoorAccessPayload
 } from "@/add-os/modules/members/types/company-member"
-import type { MessageResponse } from "./resource-factory"
 import { del, get, patch, post } from "./api"
 
 /**

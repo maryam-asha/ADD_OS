@@ -33,12 +33,12 @@ defineProps<{
 	error: string | null
 }>()
 
-const password = defineModel<string>("password", { required: true })
-
 const emit = defineEmits<{
 	submit: []
 	cancel: []
 }>()
+
+const password = defineModel<string>("password", { required: true })
 
 const { t } = useI18n()
 

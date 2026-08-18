@@ -1,5 +1,5 @@
-import type { Company, CompanyPayload, CompanyStatusPayload } from "@/add-os/modules/members/types/company"
 import type { MessageResponse } from "./resource-factory"
+import type { Company, CompanyPayload, CompanyStatusPayload } from "@/add-os/modules/members/types/company"
 import { get, patch, post } from "./api"
 
 const BASE = "/api/v1/admin/companies"

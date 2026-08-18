@@ -27,8 +27,8 @@ import { onBeforeMount, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
 import { isValidPassword } from "@/add-os/modules/system/utils/validation"
-import { getCsrfCookie, resetPassword } from "@/add-os/services/auth"
 import { ApiError } from "@/add-os/services/api"
+import { getCsrfCookie, resetPassword } from "@/add-os/services/auth"
 
 interface ModelType {
 	password: string

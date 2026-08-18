@@ -88,9 +88,9 @@
 		</n-card>
 
 		<ConfirmPasswordModal
-			:visible="modalVisible"
 			v-model:password="confirmationPassword"
-			:confirming="confirming"
+			:visible="modalVisible"
+			:confirming
 			:error="confirmError"
 			@submit="submit"
 			@cancel="cancel"
