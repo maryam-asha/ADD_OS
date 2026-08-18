@@ -6,9 +6,9 @@
 			<n-alert v-else-if="companyError" type="error" :title="t('companies.detail.loadError')" />
 			<div v-else-if="company" class="flex flex-col gap-4">
 				<dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-					<dt class="text-gray-500">{{ t("companies.columns.contractRef") }}</dt>
+					<dt class="text-secondary">{{ t("companies.columns.contractRef") }}</dt>
 					<dd>{{ company.contract_ref }}</dd>
-					<dt class="text-gray-500">{{ t("companies.columns.status") }}</dt>
+					<dt class="text-secondary">{{ t("companies.columns.status") }}</dt>
 					<dd>{{ t(`companies.status.${company.status}`) }}</dd>
 				</dl>
 
