@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Ship the Private Office Request → Company → Company Member pipeline in the
+**Goal:** Ship the Private Office Request â†’ Company â†’ Company Member pipeline in the
 ADD OS dashboard: three admin screens, three explicit services, one shared detail
 composable, a quick-add-member action available from both the Companies table and the
 company detail panel, and a fifth architecture guard preventing any screen from bypassing
@@ -11,15 +11,15 @@ the service layer.
 **Architecture:** New domain module `src/add-os/modules/members/` (types, config, views,
 components, composables) sits on top of three new explicit services
 (`services/private-office-requests.ts`, `services/companies.ts`,
-`services/company-members.ts` — the last a factory returning a service bound to one
+`services/company-members.ts` â€” the last a factory returning a service bound to one
 `companyId`, never a hand-concatenated path). `PrivateOfficeRequestsPage.vue` reuses
-`useResourceMutations` (its three verbs — create, mark-as-quoted, delete — match that
+`useResourceMutations` (its three verbs â€” create, mark-as-quoted, delete â€” match that
 composable's create/update/remove shape exactly). `CompaniesPage.vue` cannot reuse it
 (no PUT, no DELETE on Companies), so two small dedicated composables
 (`useCompanyMutations.ts`) cover create and status-change independently, mirroring
 `useResourceMutations`'s own toast/rethrow shape without touching the shared file. One
 new composable, `useCompanyDetail(companyId)`, is the single fetch/mutate surface for a
-company's own data and its members list — consumed by the detail panel, by the shared
+company's own data and its members list â€” consumed by the detail panel, by the shared
 `AddCompanyMemberDialog.vue` (used from both the detail panel and a Companies-table row
 action), and by nothing else.
 
@@ -27,7 +27,7 @@ action), and by nothing else.
 vue-i18n (ar/en), Vitest + `@vue/test-utils`, the existing `fetch`-based
 `services/api.ts` client.
 
-**Spec:** The task brief given directly in this conversation ("ADD OS — Company
+**Spec:** The task brief given directly in this conversation ("ADD OS â€” Company
 Pipeline: Postman-verified services, guard test, quick-add member"), cross-checked
 line-by-line against `C:\Users\User\Desktop\Aleppo Digital District\ADDCore\postman\ADD-OS.postman_collection.json`
 (the "Private Office Requests", "Companies", and "Company Members" folders).
@@ -37,32 +37,32 @@ line-by-line against `C:\Users\User\Desktop\Aleppo Digital District\ADDCore\post
 - **Scope:** `src/add-os/**` only, except the one explicitly-permitted route
   registration in `src/add-os/navigation/routes.ts`. No template file (Category C), no
   `_pinx-vendor/**`.
-- **No `createResourceApi`** for Companies or Private Office Requests — Companies has no
+- **No `createResourceApi`** for Companies or Private Office Requests â€” Companies has no
   PUT/DELETE, Company Members is a nested resource. Three explicit service files, per
   the brief.
 - **Every list goes through the existing `services/pagination.ts` shape**, but per the
-  brief's own explicit out-of-scope note ("عناصر ترقيم بصرية" / visual pagination is out
+  brief's own explicit out-of-scope note ("ط¹ظ†ط§طµط± طھط±ظ‚ظٹظ… ط¨طµط±ظٹط©" / visual pagination is out
   of scope) and the fact the Postman collection ships **zero example responses for any
   endpoint** (confirmed: 0 occurrences of a `"response"` key across the whole 714KB
   file, so `meta`'s real shape for these three lists is unconfirmed), every new list call
   uses the existing `.list()`-style flat-array convention (matching every current
-  service — none of them call `listPage()` today). No pagination UI is built.
+  service â€” none of them call `listPage()` today). No pagination UI is built.
 - **Icons:** every new Carbon icon name used below already exists in
   `icons.generated.json` (all are already used elsewhere in this codebase: `carbon:add`,
   `carbon:edit` [not reused here, no edit concept applies], `carbon:trash-can`,
   `carbon:view`, `carbon:user-follow`, `carbon:status-change`, `carbon:currency`,
   `carbon:locked`). If `npm run icons`'s generated file is regenerated for any reason
   during this work, the regenerated `icons.generated.json` must be committed alongside
-  it (this is exactly how `main` broke in commit `032e3c7` — do not repeat it).
+  it (this is exactly how `main` broke in commit `032e3c7` â€” do not repeat it).
 - **i18n:** every user-visible string ships in **both** `ar.json` and `en.json`, Arabic
   first as the source of meaning. `lang/__tests__/messages.spec.ts` must stay green (key
   parity, no blanks, no Arabic leaking into English, Arabic must contain Arabic script).
 - **No inline role checks:** nothing under `modules/members/**` may call
-  `isRoleGranted` or compare a role literal directly — `no-inline-role-checks.spec.ts`
-  enforces this. (This plan adds no role-gating at all for the Company Pipeline — the
-  brief specifies none, unlike the seven spatial tables' delete-gate — so this constraint
+  `isRoleGranted` or compare a role literal directly â€” `no-inline-role-checks.spec.ts`
+  enforces this. (This plan adds no role-gating at all for the Company Pipeline â€” the
+  brief specifies none, unlike the seven spatial tables' delete-gate â€” so this constraint
   is satisfied by omission, not by a new permissions entry.)
-- **No direct HTTP outside the service layer** — enforced by the new 5th guard,
+- **No direct HTTP outside the service layer** â€” enforced by the new 5th guard,
   `src/add-os/__tests__/no-direct-company-http.spec.ts` (Task 7).
 - **`vitest run`, `vue-tsc --build --force`, `eslint --fix`** must all be clean before
   this is done. Never modify an existing test to make it pass.
@@ -72,42 +72,42 @@ line-by-line against `C:\Users\User\Desktop\Aleppo Digital District\ADDCore\post
 All three resources live under `/api/v1/admin/...`, every request carries `lang` and
 `currency` headers (already handled unconditionally by `services/api.ts`, added in
 `3314ba6`). Extracted directly from
-`ADD-OS.postman_collection.json` lines 2044–2624:
+`ADD-OS.postman_collection.json` lines 2044â€“2624:
 
-- **Private Office Requests** (`/private-office-requests`): `GET` (list) · `POST
-  {prospect_name, contact}` (starts at `"requested"`) · `GET /{id}` · `PUT /{id}
+- **Private Office Requests** (`/private-office-requests`): `GET` (list) آ· `POST
+  {prospect_name, contact}` (starts at `"requested"`) آ· `GET /{id}` آ· `PUT /{id}
   {status, quote_ref}` (status only accepts `"requested"|"quoted"`; `"contracted"` 422s;
-  returns `{message}`, never the entity) · **`DELETE /{id}` exists** — named "Delete
+  returns `{message}`, never the entity) آ· **`DELETE /{id}` exists** â€” named "Delete
   Private Office Request" in the collection. Not silent.
-- **Companies** (`/companies`): `GET` (list) · `POST {private_office_request_id,
+- **Companies** (`/companies`): `GET` (list) آ· `POST {private_office_request_id,
   legal_name, contract_ref, branch_id}` (422 if the request isn't `"quoted"`; `branch_id`
-  must reference an existing branch; auto-provisions a wallet, out of scope) · `GET
-  /{id}` · `PATCH /{id}/status {status}` (`"active"|"inactive"` only, 422 otherwise,
-  returns `{message}`) · **no PUT, no DELETE** — confirmed by the collection's own
-  description text ("لا PUT ولا DELETE" holds).
-- **Company Members** (`/companies/{id}/members`): `GET` · `POST {user_id,
+  must reference an existing branch; auto-provisions a wallet, out of scope) آ· `GET
+  /{id}` آ· `PATCH /{id}/status {status}` (`"active"|"inactive"` only, 422 otherwise,
+  returns `{message}`) آ· **no PUT, no DELETE** â€” confirmed by the collection's own
+  description text ("ظ„ط§ PUT ظˆظ„ط§ DELETE" holds).
+- **Company Members** (`/companies/{id}/members`): `GET` آ· `POST {user_id,
   door_access_enabled, is_admin}` (422 if already a member; `is_admin` here is the only
-  way to bootstrap a company's first admin) · `PATCH /{user_id} {door_access_enabled}` ·
-  `PATCH /{user_id}/admin {is_admin}` · **`DELETE /{user_id}` exists** — named "Remove
+  way to bootstrap a company's first admin) آ· `PATCH /{user_id} {door_access_enabled}` آ·
+  `PATCH /{user_id}/admin {is_admin}` آ· **`DELETE /{user_id}` exists** â€” named "Remove
   Company Member". Not silent.
 
 **Silence left un-guessed:** the collection has no example response for any of these
 nine endpoints, so the exact JSON shape of a returned entity (e.g. whether "List Company
 Members" nests a `user` object with `name`/`phone`, or just returns
 `{user_id, door_access_enabled, is_admin}`) is not confirmed. The types below use
-**only** field names that appear literally in a request body — nothing is invented for
+**only** field names that appear literally in a request body â€” nothing is invented for
 display convenience. This is called out again at the relevant task.
 
 ## Nav placement decision (asked and answered, not inferred)
 
 "Private Office Requests" doesn't exist anywhere in the codebase (no nav entry, no i18n
 key). Asked directly: the `address` section's sole existing coming-soon page
-(`formationRequests`, icon `carbon:enterprise`) is repurposed for it — renamed to
-`privateOfficeRequests` — rather than adding a third page to the `members` section.
+(`formationRequests`, icon `carbon:enterprise`) is repurposed for it â€” renamed to
+`privateOfficeRequests` â€” rather than adding a third page to the `members` section.
 "Companies" maps unambiguously to the existing `members.companies` coming-soon page.
 Company Members has no page/route of its own: it is a drawer (`CompanyDetailPanel.vue`)
-opened from a Companies-table row action, per the brief's own "صفحة/لوح" (page-**or**-
-panel) wording — this avoids inventing a new nested-route pattern with zero existing
+opened from a Companies-table row action, per the brief's own "طµظپط­ط©/ظ„ظˆط­" (page-**or**-
+panel) wording â€” this avoids inventing a new nested-route pattern with zero existing
 precedent in this codebase.
 
 ---
@@ -119,7 +119,7 @@ precedent in this codebase.
 
 **Interfaces:**
 - Produces: `PrivateOfficeRequestStatus`, `PrivateOfficeRequest`,
-  `PrivateOfficeRequestPayload`, `MarkAsQuotedPayload` — consumed by Tasks 4, 11, 12.
+  `PrivateOfficeRequestPayload`, `MarkAsQuotedPayload` â€” consumed by Tasks 4, 11, 12.
 
 - [ ] **Step 1: Write the file**
 
@@ -152,7 +152,7 @@ export interface PrivateOfficeRequestPayload extends Record<string, unknown> {
 /**
  * The collection's PUT accepts `status: "requested" | "quoted"` generically, but
  * "requested" is never a useful transition from this UI (nothing reverts a quote)
- * and "contracted" always 422s here — only reachable via Companies/createCompany.
+ * and "contracted" always 422s here â€” only reachable via Companies/createCompany.
  * This payload only carries what the UI's one real action needs; the service
  * function (Task 4) supplies the fixed `status: "quoted"` itself.
  */
@@ -182,7 +182,7 @@ git commit -m "feat(add-os): add Private Office Request types"
 - Create: `src/add-os/modules/members/types/company.ts`
 
 **Interfaces:**
-- Produces: `CompanyStatus`, `Company`, `CompanyPayload`, `CompanyStatusPayload` —
+- Produces: `CompanyStatus`, `Company`, `CompanyPayload`, `CompanyStatusPayload` â€”
   consumed by Tasks 5, 9, 10, 13, 16.
 
 - [ ] **Step 1: Write the file**
@@ -194,7 +194,7 @@ export type CompanyStatus = "active" | "inactive"
 
 /**
  * Field names are literal from the Postman collection's Create Company body plus
- * Update Company Status's body — no example response exists for this resource
+ * Update Company Status's body â€” no example response exists for this resource
  * either (see private-office-request.ts's identical caveat).
  */
 export interface Company {
@@ -207,13 +207,13 @@ export interface Company {
 }
 
 /**
- * `private_office_request_id`/`branch_id`: `number | null`, not `number` — `null`
+ * `private_office_request_id`/`branch_id`: `number | null`, not `number` â€” `null`
  * is the "nothing selected yet" sentinel for these two required selects.
  * async-validator's `isEmptyValue` treats `null` as empty unconditionally but
  * never treats a numeric `0` as empty, so `0` would silently pass a
  * `required: true` rule with nothing actually selected. By the time
  * ResourceFormDrawer's validation passes and onSubmit fires, both are
- * guaranteed real ids — the widening only affects transient form-editing state.
+ * guaranteed real ids â€” the widening only affects transient form-editing state.
  * (Same precedent as `modules/spatial/types/zone.ts`'s `ZonePayload.floor_id` and
  * `modules/spatial/types/space.ts`'s `SpacePayload.building_id`.)
  */
@@ -250,7 +250,7 @@ git commit -m "feat(add-os): add Company types"
 
 **Interfaces:**
 - Produces: `CompanyMember`, `AddCompanyMemberPayload`, `UpdateDoorAccessPayload`,
-  `UpdateAdminFlagPayload` — consumed by Tasks 6, 9, 14, 15.
+  `UpdateAdminFlagPayload` â€” consumed by Tasks 6, 9, 14, 15.
 
 - [ ] **Step 1: Write the file**
 
@@ -258,11 +258,11 @@ git commit -m "feat(add-os): add Company types"
 // src/add-os/modules/members/types/company-member.ts
 
 /**
- * Only `user_id`, `door_access_enabled`, `is_admin` are confirmed — they are the
+ * Only `user_id`, `door_access_enabled`, `is_admin` are confirmed â€” they are the
  * exact fields in Add Company Member's POST body, and the collection has no
  * GET/List response example to confirm anything else (e.g. a nested user name
  * or phone). Do NOT add a `name`/`user` field here without verifying a real
- * response first — the members table (Task 15) renders `user_id` directly for
+ * response first â€” the members table (Task 15) renders `user_id` directly for
  * this reason, and that limitation is called out again there.
  */
 export interface CompanyMember {
@@ -314,7 +314,7 @@ git commit -m "feat(add-os): add Company Member types"
   `createPrivateOfficeRequest(payload: PrivateOfficeRequestPayload):
   Promise<PrivateOfficeRequest>`, `markPrivateOfficeRequestAsQuoted(id: number, payload:
   MarkAsQuotedPayload): Promise<MessageResponse>`,
-  `removePrivateOfficeRequest(id: number): Promise<MessageResponse>` — consumed by
+  `removePrivateOfficeRequest(id: number): Promise<MessageResponse>` â€” consumed by
   Task 12.
 
 - [ ] **Step 1: Write the failing test**
@@ -418,7 +418,7 @@ describe("private office requests service", () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/add-os/services/__tests__/private-office-requests.spec.ts`
-Expected: FAIL — `Cannot find module '../private-office-requests'`.
+Expected: FAIL â€” `Cannot find module '../private-office-requests'`.
 
 - [ ] **Step 3: Write the implementation**
 
@@ -450,7 +450,7 @@ export async function createPrivateOfficeRequest(payload: PrivateOfficeRequestPa
 }
 
 /**
- * Bakes in the one real status transition this UI performs — see the
+ * Bakes in the one real status transition this UI performs â€” see the
  * MarkAsQuotedPayload doc comment in types/private-office-request.ts.
  */
 export async function markPrivateOfficeRequestAsQuoted(id: number, payload: MarkAsQuotedPayload): Promise<MessageResponse> {
@@ -488,7 +488,7 @@ git commit -m "feat(add-os): add Private Office Requests service"
 - Produces: `listCompanies(): Promise<Company[]>`, `getCompany(id: number):
   Promise<Company>`, `createCompany(payload: CompanyPayload): Promise<Company>`,
   `updateCompanyStatus(id: number, payload: CompanyStatusPayload):
-  Promise<MessageResponse>` — consumed by Tasks 9, 10, 16. **No update, no remove** —
+  Promise<MessageResponse>` â€” consumed by Tasks 9, 10, 16. **No update, no remove** â€”
   the collection confirms Companies has neither PUT nor DELETE.
 
 - [ ] **Step 1: Write the failing test**
@@ -574,7 +574,7 @@ describe("companies service", () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/add-os/services/__tests__/companies.spec.ts`
-Expected: FAIL — `Cannot find module '../companies'`.
+Expected: FAIL â€” `Cannot find module '../companies'`.
 
 - [ ] **Step 3: Write the implementation**
 
@@ -630,7 +630,7 @@ git commit -m "feat(add-os): add Companies service"
 - Consumes: `get/post/patch/del` from `./api`; `MessageResponse` from
   `./resource-factory`; types from Task 3.
 - Produces: `createCompanyMembersApi(companyId: number): { list, add, updateDoorAccess,
-  updateAdminFlag, remove }` — a factory, not standalone functions, per the brief's
+  updateAdminFlag, remove }` â€” a factory, not standalone functions, per the brief's
   explicit "no string-concatenated path in every caller" requirement. Consumed by
   Task 9.
 
@@ -718,7 +718,7 @@ describe("company members nested service", () => {
 		expect(result).toEqual({ message: "Deleted." })
 	})
 
-	it("binds a different companyId per call — no shared base path", async () => {
+	it("binds a different companyId per call â€” no shared base path", async () => {
 		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: [] }))
 
 		await createCompanyMembersApi(7).list()
@@ -734,7 +734,7 @@ describe("company members nested service", () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/add-os/services/__tests__/company-members.spec.ts`
-Expected: FAIL — `Cannot find module '../company-members'`.
+Expected: FAIL â€” `Cannot find module '../company-members'`.
 
 - [ ] **Step 3: Write the implementation**
 
@@ -750,7 +750,7 @@ import type { MessageResponse } from "./resource-factory"
 import { del, get, patch, post } from "./api"
 
 /**
- * Built as a factory bound to one companyId — no caller string-concatenates
+ * Built as a factory bound to one companyId â€” no caller string-concatenates
  * `/companies/${id}/members` by hand; every path is assembled once, here.
  */
 export function createCompanyMembersApi(companyId: number) {
@@ -788,13 +788,13 @@ git commit -m "feat(add-os): add Company Members nested service"
 
 ---
 
-### Task 7: 5th architecture guard — no-direct-company-http.spec.ts
+### Task 7: 5th architecture guard â€” no-direct-company-http.spec.ts
 
 **Files:**
 - Create: `src/add-os/__tests__/no-direct-company-http.spec.ts`
 
 **Interfaces:**
-- Consumes: nothing from application code — pure filesystem scan, following
+- Consumes: nothing from application code â€” pure filesystem scan, following
   `no-external-urls.spec.ts`'s two-pass (source, then `dist/` if present) structure and
   `no-inline-role-checks.spec.ts`'s "only these files may reference X" allowlist idea.
 
@@ -810,14 +810,14 @@ const ROOT = path.resolve(__dirname, "..", "..", "..")
 const ADD_OS_DIR = path.join(ROOT, "src", "add-os")
 const TEXT_EXT = /\.(?:ts|tsx|vue)$/i
 
-/** Only these files may reference a Company Pipeline HTTP path — everything else must go through them. */
+/** Only these files may reference a Company Pipeline HTTP path â€” everything else must go through them. */
 const ALLOWED_RELATIVE_FILES = new Set([
 	"services/companies.ts",
 	"services/private-office-requests.ts",
 	"services/company-members.ts"
 ])
 
-/** Leading-slash path fragments, not bare words — this avoids matching i18n keys
+/** Leading-slash path fragments, not bare words â€” this avoids matching i18n keys
  * like "companies.columns.legalName" or nav path segments like `path: "companies"`. */
 const PATH_MARKERS = ["/companies", "/private-office-requests"]
 
@@ -856,7 +856,7 @@ function findOffenders(files: string[]): string[] {
 		.map(f => path.relative(ROOT, f).replace(/\\/g, "/"))
 }
 
-describe("company pipeline — no direct HTTP calls outside the service layer", () => {
+describe("company pipeline â€” no direct HTTP calls outside the service layer", () => {
 	const sourceFiles = walk(ADD_OS_DIR)
 
 	it("scans a non-empty surface", () => {
@@ -877,7 +877,7 @@ describe("company pipeline — no direct HTTP calls outside the service layer", 
 	it("has a build to check", () => {
 		if (!built) {
 			console.warn(
-				"\n  [no-direct-company-http] dist/ absent — emitted-artifact pass SKIPPED." +
+				"\n  [no-direct-company-http] dist/ absent â€” emitted-artifact pass SKIPPED." +
 					"\n  Run `npm run build` before `npm run test:unit` for full coverage.\n"
 			)
 		}
@@ -885,7 +885,7 @@ describe("company pipeline — no direct HTTP calls outside the service layer", 
 	})
 
 	// Once bundled, an offending call site can no longer be attributed to a
-	// source file — minification and chunking erase that. This pass is
+	// source file â€” minification and chunking erase that. This pass is
 	// intentionally a weaker smoke check (the endpoints still exist in the
 	// build at all, proving the service layer wasn't tree-shaken away), not a
 	// location check like the source pass above.
@@ -902,7 +902,7 @@ describe("company pipeline — no direct HTTP calls outside the service layer", 
 - [ ] **Step 2: Verify the guard passes on a clean tree**
 
 Run: `npx vitest run src/add-os/__tests__/no-direct-company-http.spec.ts`
-Expected: PASS — no Company Pipeline files exist yet outside this guard itself, so
+Expected: PASS â€” no Company Pipeline files exist yet outside this guard itself, so
 there is nothing to find.
 
 - [ ] **Step 3: Prove the guard actually catches an offender (temporary, reverted before finishing)**
@@ -911,7 +911,7 @@ Temporarily add one line to `src/add-os/views/ComingSoon.vue` (or any file outsi
 allowlist):
 
 ```ts
-// TEMPORARY — proves the guard fires, will be removed in the next step
+// TEMPORARY â€” proves the guard fires, will be removed in the next step
 const offendingPath = "/api/v1/admin/companies"
 ```
 
@@ -930,22 +930,22 @@ Expected: PASS again.
 
 ```bash
 git add src/add-os/__tests__/no-direct-company-http.spec.ts
-git commit -m "test(add-os): add 5th architecture guard — no direct Company Pipeline HTTP calls"
+git commit -m "test(add-os): add 5th architecture guard â€” no direct Company Pipeline HTTP calls"
 ```
 
 ---
 
-### Task 8: i18n — nav rename + new resource namespaces
+### Task 8: i18n â€” nav rename + new resource namespaces
 
 **Files:**
-- Modify: `src/add-os/lang/en/en.json:339` (rename `formationRequests` →
+- Modify: `src/add-os/lang/en/en.json:339` (rename `formationRequests` â†’
   `privateOfficeRequests`), and append three new top-level namespaces after
   `resourceCrud` (currently ends at line 369).
 - Modify: `src/add-os/lang/ar/ar.json:343` (same rename), same three new namespaces.
 
 **Interfaces:**
 - Produces: `nav.pages.privateOfficeRequests`, `privateOfficeRequests.*`,
-  `companies.*`, `companyMembers.*` — consumed by Tasks 12, 14, 15, 16, 17.
+  `companies.*`, `companyMembers.*` â€” consumed by Tasks 12, 14, 15, 16, 17.
 
 - [ ] **Step 1: Rename the nav page key in English**
 
@@ -964,16 +964,16 @@ to
 In `src/add-os/lang/ar/ar.json`, change line 343:
 
 ```json
-			"formationRequests": "طلبات التأسيس",
+			"formationRequests": "ط·ظ„ط¨ط§طھ ط§ظ„طھط£ط³ظٹط³",
 ```
 to
 ```json
-			"privateOfficeRequests": "طلبات المكاتب الخاصة",
+			"privateOfficeRequests": "ط·ظ„ط¨ط§طھ ط§ظ„ظ…ظƒط§طھط¨ ط§ظ„ط®ط§طµط©",
 ```
 
 - [ ] **Step 3: Append the three new namespaces to en.json**
 
-Change the file's ending (currently lines 366–370):
+Change the file's ending (currently lines 366â€“370):
 
 ```json
 		"validation": {
@@ -1013,7 +1013,7 @@ to
 		"stats": { "total": "Total requests", "requested": "Requested", "quoted": "Quoted", "contracted": "Contracted" }
 	},
 	"companies": {
-		"description": "Companies created from a quoted private office request. Created here only — never self-service.",
+		"description": "Companies created from a quoted private office request. Created here only â€” never self-service.",
 		"columns": { "legalName": "Legal name", "contractRef": "Contract ref", "branch": "Branch", "status": "Status", "actions": "Actions" },
 		"status": { "active": "Active", "inactive": "Inactive" },
 		"create": {
@@ -1047,7 +1047,7 @@ to
 			"userRequired": "Select a user.",
 			"doorAccessLabel": "Door access enabled",
 			"adminLabel": "Company admin",
-			"adminHint": "The first admin for a company can only be set here — an existing company admin can only promote another member, not appoint the first one.",
+			"adminHint": "The first admin for a company can only be set here â€” an existing company admin can only promote another member, not appoint the first one.",
 			"success": "Member added.",
 			"alreadyMemberError": "This user is already a member of this company."
 		},
@@ -1067,90 +1067,90 @@ Change ar.json's identical ending block (same line numbers, same nesting) to:
 
 ```json
 		"validation": {
-			"required": "{field} مطلوب."
+			"required": "{field} ظ…ط·ظ„ظˆط¨."
 		}
 	},
 	"privateOfficeRequests": {
-		"description": "طلبات العملاء المحتملين لمكتب خاص، من مُقدَّم إلى مُسعَّر إلى متعاقَد.",
-		"columns": { "prospectName": "العميل المحتمل", "contact": "التواصل", "status": "الحالة", "quoteRef": "مرجع العرض", "actions": "إجراءات" },
-		"status": { "requested": "مُقدَّم", "quoted": "مُسعَّر", "contracted": "متعاقَد" },
-		"create": { "button": "طلب جديد", "title": "طلب مكتب خاص جديد", "success": "تم إنشاء الطلب." },
+		"description": "ط·ظ„ط¨ط§طھ ط§ظ„ط¹ظ…ظ„ط§ط، ط§ظ„ظ…ط­طھظ…ظ„ظٹظ† ظ„ظ…ظƒطھط¨ ط®ط§طµطŒ ظ…ظ† ظ…ظڈظ‚ط¯ظژظ‘ظ… ط¥ظ„ظ‰ ظ…ظڈط³ط¹ظژظ‘ط± ط¥ظ„ظ‰ ظ…طھط¹ط§ظ‚ظژط¯.",
+		"columns": { "prospectName": "ط§ظ„ط¹ظ…ظٹظ„ ط§ظ„ظ…ط­طھظ…ظ„", "contact": "ط§ظ„طھظˆط§طµظ„", "status": "ط§ظ„ط­ط§ظ„ط©", "quoteRef": "ظ…ط±ط¬ط¹ ط§ظ„ط¹ط±ط¶", "actions": "ط¥ط¬ط±ط§ط،ط§طھ" },
+		"status": { "requested": "ظ…ظڈظ‚ط¯ظژظ‘ظ…", "quoted": "ظ…ظڈط³ط¹ظژظ‘ط±", "contracted": "ظ…طھط¹ط§ظ‚ظژط¯" },
+		"create": { "button": "ط·ظ„ط¨ ط¬ط¯ظٹط¯", "title": "ط·ظ„ط¨ ظ…ظƒطھط¨ ط®ط§طµ ط¬ط¯ظٹط¯", "success": "طھظ… ط¥ظ†ط´ط§ط، ط§ظ„ط·ظ„ط¨." },
 		"markAsQuoted": {
-			"button": "تحويل إلى عرض سعر",
-			"title": "تحويل إلى عرض سعر",
-			"quoteRefLabel": "مرجع عرض السعر",
+			"button": "طھط­ظˆظٹظ„ ط¥ظ„ظ‰ ط¹ط±ط¶ ط³ط¹ط±",
+			"title": "طھط­ظˆظٹظ„ ط¥ظ„ظ‰ ط¹ط±ط¶ ط³ط¹ط±",
+			"quoteRefLabel": "ظ…ط±ط¬ط¹ ط¹ط±ط¶ ط§ظ„ط³ط¹ط±",
 			"quoteRefPlaceholder": "Q-2026-0001",
-			"success": "تم تحويل الطلب إلى مُسعَّر."
+			"success": "طھظ… طھط­ظˆظٹظ„ ط§ظ„ط·ظ„ط¨ ط¥ظ„ظ‰ ظ…ظڈط³ط¹ظژظ‘ط±."
 		},
-		"contractedLocked": "أصبح هذا الطلب شركة ولا يمكن تغيير حالته من هنا بعد الآن.",
-		"delete": { "success": "تم حذف الطلب." },
-		"form": { "prospectName": "اسم العميل المحتمل", "contact": "التواصل" },
+		"contractedLocked": "ط£طµط¨ط­ ظ‡ط°ط§ ط§ظ„ط·ظ„ط¨ ط´ط±ظƒط© ظˆظ„ط§ ظٹظ…ظƒظ† طھط؛ظٹظٹط± ط­ط§ظ„طھظ‡ ظ…ظ† ظ‡ظ†ط§ ط¨ط¹ط¯ ط§ظ„ط¢ظ†.",
+		"delete": { "success": "طھظ… ط­ط°ظپ ط§ظ„ط·ظ„ط¨." },
+		"form": { "prospectName": "ط§ط³ظ… ط§ظ„ط¹ظ…ظٹظ„ ط§ظ„ظ…ط­طھظ…ظ„", "contact": "ط§ظ„طھظˆط§طµظ„" },
 		"validation": {
-			"prospectNameRequired": "اسم العميل المحتمل مطلوب.",
-			"contactRequired": "معلومات التواصل مطلوبة.",
-			"quoteRefRequired": "مرجع عرض السعر مطلوب."
+			"prospectNameRequired": "ط§ط³ظ… ط§ظ„ط¹ظ…ظٹظ„ ط§ظ„ظ…ط­طھظ…ظ„ ظ…ط·ظ„ظˆط¨.",
+			"contactRequired": "ظ…ط¹ظ„ظˆظ…ط§طھ ط§ظ„طھظˆط§طµظ„ ظ…ط·ظ„ظˆط¨ط©.",
+			"quoteRefRequired": "ظ…ط±ط¬ط¹ ط¹ط±ط¶ ط§ظ„ط³ط¹ط± ظ…ط·ظ„ظˆط¨."
 		},
-		"loadError": "تعذّر تحميل طلبات المكاتب الخاصة. قد لا تملك صلاحية عرض هذه الصفحة.",
-		"empty": "لا توجد طلبات مكاتب خاصة.",
-		"stats": { "total": "إجمالي الطلبات", "requested": "مُقدَّمة", "quoted": "مُسعَّرة", "contracted": "متعاقَدة" }
+		"loadError": "طھط¹ط°ظ‘ط± طھط­ظ…ظٹظ„ ط·ظ„ط¨ط§طھ ط§ظ„ظ…ظƒط§طھط¨ ط§ظ„ط®ط§طµط©. ظ‚ط¯ ظ„ط§ طھظ…ظ„ظƒ طµظ„ط§ط­ظٹط© ط¹ط±ط¶ ظ‡ط°ظ‡ ط§ظ„طµظپط­ط©.",
+		"empty": "ظ„ط§ طھظˆط¬ط¯ ط·ظ„ط¨ط§طھ ظ…ظƒط§طھط¨ ط®ط§طµط©.",
+		"stats": { "total": "ط¥ط¬ظ…ط§ظ„ظٹ ط§ظ„ط·ظ„ط¨ط§طھ", "requested": "ظ…ظڈظ‚ط¯ظژظ‘ظ…ط©", "quoted": "ظ…ظڈط³ط¹ظژظ‘ط±ط©", "contracted": "ظ…طھط¹ط§ظ‚ظژط¯ط©" }
 	},
 	"companies": {
-		"description": "الشركات المُنشأة من طلب مكتب خاص مُسعَّر. تُنشأ من هنا فقط — لا خدمة ذاتية أبداً.",
-		"columns": { "legalName": "الاسم القانوني", "contractRef": "مرجع العقد", "branch": "الفرع", "status": "الحالة", "actions": "إجراءات" },
-		"status": { "active": "نشطة", "inactive": "غير نشطة" },
+		"description": "ط§ظ„ط´ط±ظƒط§طھ ط§ظ„ظ…ظڈظ†ط´ط£ط© ظ…ظ† ط·ظ„ط¨ ظ…ظƒطھط¨ ط®ط§طµ ظ…ظڈط³ط¹ظژظ‘ط±. طھظڈظ†ط´ط£ ظ…ظ† ظ‡ظ†ط§ ظپظ‚ط· â€” ظ„ط§ ط®ط¯ظ…ط© ط°ط§طھظٹط© ط£ط¨ط¯ط§ظ‹.",
+		"columns": { "legalName": "ط§ظ„ط§ط³ظ… ط§ظ„ظ‚ط§ظ†ظˆظ†ظٹ", "contractRef": "ظ…ط±ط¬ط¹ ط§ظ„ط¹ظ‚ط¯", "branch": "ط§ظ„ظپط±ط¹", "status": "ط§ظ„ط­ط§ظ„ط©", "actions": "ط¥ط¬ط±ط§ط،ط§طھ" },
+		"status": { "active": "ظ†ط´ط·ط©", "inactive": "ط؛ظٹط± ظ†ط´ط·ط©" },
 		"create": {
-			"button": "شركة جديدة",
-			"title": "شركة جديدة",
-			"success": "تم إنشاء الشركة.",
-			"noQuotedRequestsTitle": "لا توجد طلبات مُسعَّرة بعد",
-			"noQuotedRequestsBody": "لا يمكن إنشاء شركة إلا من طلب مكتب خاص مُسعَّر. توجّه إلى طلبات المكاتب الخاصة وحوّل طلباً إلى عرض سعر أولاً.",
-			"goToRequests": "الذهاب إلى طلبات المكاتب الخاصة"
+			"button": "ط´ط±ظƒط© ط¬ط¯ظٹط¯ط©",
+			"title": "ط´ط±ظƒط© ط¬ط¯ظٹط¯ط©",
+			"success": "طھظ… ط¥ظ†ط´ط§ط، ط§ظ„ط´ط±ظƒط©.",
+			"noQuotedRequestsTitle": "ظ„ط§ طھظˆط¬ط¯ ط·ظ„ط¨ط§طھ ظ…ظڈط³ط¹ظژظ‘ط±ط© ط¨ط¹ط¯",
+			"noQuotedRequestsBody": "ظ„ط§ ظٹظ…ظƒظ† ط¥ظ†ط´ط§ط، ط´ط±ظƒط© ط¥ظ„ط§ ظ…ظ† ط·ظ„ط¨ ظ…ظƒطھط¨ ط®ط§طµ ظ…ظڈط³ط¹ظژظ‘ط±. طھظˆط¬ظ‘ظ‡ ط¥ظ„ظ‰ ط·ظ„ط¨ط§طھ ط§ظ„ظ…ظƒط§طھط¨ ط§ظ„ط®ط§طµط© ظˆط­ظˆظ‘ظ„ ط·ظ„ط¨ط§ظ‹ ط¥ظ„ظ‰ ط¹ط±ط¶ ط³ط¹ط± ط£ظˆظ„ط§ظ‹.",
+			"goToRequests": "ط§ظ„ط°ظ‡ط§ط¨ ط¥ظ„ظ‰ ط·ظ„ط¨ط§طھ ط§ظ„ظ…ظƒط§طھط¨ ط§ظ„ط®ط§طµط©"
 		},
-		"changeStatus": { "button": "تغيير الحالة", "title": "تغيير الحالة", "success": "تم تحديث الحالة." },
-		"viewMembers": { "button": "عرض الأعضاء" },
-		"form": { "privateOfficeRequest": "طلب المكتب الخاص", "branch": "الفرع", "legalName": "الاسم القانوني", "contractRef": "مرجع العقد" },
+		"changeStatus": { "button": "طھط؛ظٹظٹط± ط§ظ„ط­ط§ظ„ط©", "title": "طھط؛ظٹظٹط± ط§ظ„ط­ط§ظ„ط©", "success": "طھظ… طھط­ط¯ظٹط« ط§ظ„ط­ط§ظ„ط©." },
+		"viewMembers": { "button": "ط¹ط±ط¶ ط§ظ„ط£ط¹ط¶ط§ط،" },
+		"form": { "privateOfficeRequest": "ط·ظ„ط¨ ط§ظ„ظ…ظƒطھط¨ ط§ظ„ط®ط§طµ", "branch": "ط§ظ„ظپط±ط¹", "legalName": "ط§ظ„ط§ط³ظ… ط§ظ„ظ‚ط§ظ†ظˆظ†ظٹ", "contractRef": "ظ…ط±ط¬ط¹ ط§ظ„ط¹ظ‚ط¯" },
 		"validation": {
-			"privateOfficeRequestRequired": "طلب مُسعَّر مطلوب.",
-			"branchRequired": "الفرع مطلوب.",
-			"legalNameRequired": "الاسم القانوني مطلوب.",
-			"contractRefRequired": "مرجع العقد مطلوب."
+			"privateOfficeRequestRequired": "ط·ظ„ط¨ ظ…ظڈط³ط¹ظژظ‘ط± ظ…ط·ظ„ظˆط¨.",
+			"branchRequired": "ط§ظ„ظپط±ط¹ ظ…ط·ظ„ظˆط¨.",
+			"legalNameRequired": "ط§ظ„ط§ط³ظ… ط§ظ„ظ‚ط§ظ†ظˆظ†ظٹ ظ…ط·ظ„ظˆط¨.",
+			"contractRefRequired": "ظ…ط±ط¬ط¹ ط§ظ„ط¹ظ‚ط¯ ظ…ط·ظ„ظˆط¨."
 		},
-		"loadError": "تعذّر تحميل الشركات. قد لا تملك صلاحية عرض هذه الصفحة.",
-		"empty": "لا توجد شركات.",
-		"stats": { "total": "إجمالي الشركات", "active": "نشطة", "inactive": "غير نشطة" },
-		"detail": { "title": "الشركة", "loadError": "تعذّر تحميل بيانات هذه الشركة." }
+		"loadError": "طھط¹ط°ظ‘ط± طھط­ظ…ظٹظ„ ط§ظ„ط´ط±ظƒط§طھ. ظ‚ط¯ ظ„ط§ طھظ…ظ„ظƒ طµظ„ط§ط­ظٹط© ط¹ط±ط¶ ظ‡ط°ظ‡ ط§ظ„طµظپط­ط©.",
+		"empty": "ظ„ط§ طھظˆط¬ط¯ ط´ط±ظƒط§طھ.",
+		"stats": { "total": "ط¥ط¬ظ…ط§ظ„ظٹ ط§ظ„ط´ط±ظƒط§طھ", "active": "ظ†ط´ط·ط©", "inactive": "ط؛ظٹط± ظ†ط´ط·ط©" },
+		"detail": { "title": "ط§ظ„ط´ط±ظƒط©", "loadError": "طھط¹ط°ظ‘ط± طھط­ظ…ظٹظ„ ط¨ظٹط§ظ†ط§طھ ظ‡ط°ظ‡ ط§ظ„ط´ط±ظƒط©." }
 	},
 	"companyMembers": {
-		"columns": { "userId": "معرّف المستخدم", "doorAccess": "الوصول للأبواب", "isAdmin": "أدمن", "actions": "إجراءات" },
+		"columns": { "userId": "ظ…ط¹ط±ظ‘ظپ ط§ظ„ظ…ط³طھط®ط¯ظ…", "doorAccess": "ط§ظ„ظˆطµظˆظ„ ظ„ظ„ط£ط¨ظˆط§ط¨", "isAdmin": "ط£ط¯ظ…ظ†", "actions": "ط¥ط¬ط±ط§ط،ط§طھ" },
 		"add": {
-			"button": "إضافة عضو",
-			"title": "إضافة عضو للشركة",
-			"userLabel": "المستخدم",
-			"userRequired": "اختر مستخدماً.",
-			"doorAccessLabel": "تفعيل الوصول للأبواب",
-			"adminLabel": "أدمن الشركة",
-			"adminHint": "أول أدمن للشركة لا يُعيَّن إلا من هنا — أدمن الشركة القائم لا يستطيع إلا ترقية عضو موجود، لا تعيين الأول.",
-			"success": "تمت إضافة العضو.",
-			"alreadyMemberError": "هذا المستخدم عضو بالفعل في هذه الشركة."
+			"button": "ط¥ط¶ط§ظپط© ط¹ط¶ظˆ",
+			"title": "ط¥ط¶ط§ظپط© ط¹ط¶ظˆ ظ„ظ„ط´ط±ظƒط©",
+			"userLabel": "ط§ظ„ظ…ط³طھط®ط¯ظ…",
+			"userRequired": "ط§ط®طھط± ظ…ط³طھط®ط¯ظ…ط§ظ‹.",
+			"doorAccessLabel": "طھظپط¹ظٹظ„ ط§ظ„ظˆطµظˆظ„ ظ„ظ„ط£ط¨ظˆط§ط¨",
+			"adminLabel": "ط£ط¯ظ…ظ† ط§ظ„ط´ط±ظƒط©",
+			"adminHint": "ط£ظˆظ„ ط£ط¯ظ…ظ† ظ„ظ„ط´ط±ظƒط© ظ„ط§ ظٹظڈط¹ظٹظژظ‘ظ† ط¥ظ„ط§ ظ…ظ† ظ‡ظ†ط§ â€” ط£ط¯ظ…ظ† ط§ظ„ط´ط±ظƒط© ط§ظ„ظ‚ط§ط¦ظ… ظ„ط§ ظٹط³طھط·ظٹط¹ ط¥ظ„ط§ طھط±ظ‚ظٹط© ط¹ط¶ظˆ ظ…ظˆط¬ظˆط¯طŒ ظ„ط§ طھط¹ظٹظٹظ† ط§ظ„ط£ظˆظ„.",
+			"success": "طھظ…طھ ط¥ط¶ط§ظپط© ط§ظ„ط¹ط¶ظˆ.",
+			"alreadyMemberError": "ظ‡ط°ط§ ط§ظ„ظ…ط³طھط®ط¯ظ… ط¹ط¶ظˆ ط¨ط§ظ„ظپط¹ظ„ ظپظٹ ظ‡ط°ظ‡ ط§ظ„ط´ط±ظƒط©."
 		},
 		"remove": {
-			"confirmTitle": "إزالة هذا العضو؟",
-			"confirmOk": "إزالة",
-			"confirmCancel": "إلغاء",
-			"success": "تمت إزالة العضو."
+			"confirmTitle": "ط¥ط²ط§ظ„ط© ظ‡ط°ط§ ط§ظ„ط¹ط¶ظˆطں",
+			"confirmOk": "ط¥ط²ط§ظ„ط©",
+			"confirmCancel": "ط¥ظ„ط؛ط§ط،",
+			"success": "طھظ…طھ ط¥ط²ط§ظ„ط© ط§ظ„ط¹ط¶ظˆ."
 		}
 	}
 }
 ```
 
-(Do not change ar.json's existing `"required": "{field} مطلوب."` line if it already
-reads that way — copy the file's actual current text for that one line verbatim; only
+(Do not change ar.json's existing `"required": "{field} ظ…ط·ظ„ظˆط¨."` line if it already
+reads that way â€” copy the file's actual current text for that one line verbatim; only
 the content **after** it, from `},` onward, is new.)
 
 - [ ] **Step 2: Run the bilingual invariant test**
 
 Run: `npx vitest run src/add-os/lang/__tests__/messages.spec.ts`
-Expected: PASS — key parity, no blanks, no Arabic-in-English, Arabic bundle actually
+Expected: PASS â€” key parity, no blanks, no Arabic-in-English, Arabic bundle actually
 translated.
 
 - [ ] **Step 3: Commit**
@@ -1179,10 +1179,10 @@ git commit -m "feat(add-os): add Company Pipeline i18n strings; rename formation
   AddCompanyMemberPayload) => Promise<CompanyMember>, setDoorAccess: (userId: number,
   payload: UpdateDoorAccessPayload) => Promise<void>, setAdminFlag: (userId: number,
   payload: UpdateAdminFlagPayload) => Promise<void>, removeMember: (userId: number) =>
-  Promise<void> }` — consumed by Tasks 14, 15.
+  Promise<void> }` â€” consumed by Tasks 14, 15.
 
 This is the first single-entity detail composable in this codebase (confirmed: no
-`use*Detail` precedent exists). It does not toast or navigate — it is pure data/actions,
+`use*Detail` precedent exists). It does not toast or navigate â€” it is pure data/actions,
 matching how `useResourceList` stays presentation-free; toasting for these actions is
 each caller's own responsibility (Tasks 14, 15), exactly as `useResourceList` leaves
 toasting to its callers today.
@@ -1325,7 +1325,7 @@ describe("useCompanyDetail", () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/add-os/modules/members/composables/__tests__/useCompanyDetail.spec.ts`
-Expected: FAIL — `Cannot find module '../useCompanyDetail'`.
+Expected: FAIL â€” `Cannot find module '../useCompanyDetail'`.
 
 - [ ] **Step 3: Write the implementation**
 
@@ -1348,7 +1348,7 @@ import { listUsers } from "@/add-os/services/users"
 /**
  * The one shared fetch/mutate surface for a single company: its own record,
  * its members, and the user list needed to add one. Every consumer of company
- * data — the detail panel, the shared AddCompanyMemberDialog, anything future —
+ * data â€” the detail panel, the shared AddCompanyMemberDialog, anything future â€”
  * calls this instead of writing its own fetch logic.
  */
 export function useCompanyDetail(companyId: number) {
@@ -1448,12 +1448,12 @@ git commit -m "feat(add-os): add useCompanyDetail composable"
   () => Promise<void>): { submit: (payload: CompanyPayload) => Promise<Company>,
   isSubmitting: Ref<boolean> }`, `useCompanyStatusChange(refetchCompanies: () =>
   Promise<void>): { submit: (id: number, payload: CompanyStatusPayload) =>
-  Promise<void>, isSubmitting: Ref<boolean> }` — consumed by Task 16.
+  Promise<void>, isSubmitting: Ref<boolean> }` â€” consumed by Task 16.
 
 Companies has no PUT/DELETE, so it cannot use `useResourceMutations`'s
 create+update+remove triplet without fabricating a `remove` that nothing calls. These
 two small composables mirror `useResourceMutations`'s own `run()` toast/rethrow shape
-(403 → fixed message, 422/other → server message or generic, always rethrow) for exactly
+(403 â†’ fixed message, 422/other â†’ server message or generic, always rethrow) for exactly
 the two mutations Companies has, without touching the shared file.
 
 - [ ] **Step 1: Write the failing test**
@@ -1578,7 +1578,7 @@ describe("useCompanyStatusChange", () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/add-os/modules/members/composables/__tests__/useCompanyMutations.spec.ts`
-Expected: FAIL — `Cannot find module '../useCompanyMutations'`.
+Expected: FAIL â€” `Cannot find module '../useCompanyMutations'`.
 
 - [ ] **Step 3: Write the implementation**
 
@@ -1673,7 +1673,7 @@ git commit -m "feat(add-os): add useCompanyCreation and useCompanyStatusChange c
   from Task 1.
 - Produces: `buildRequestColumns(t, onQuote, onDelete): DataTableColumns<PrivateOfficeRequest>`,
   `requestFields: FieldDescriptor<PrivateOfficeRequestPayload>[]`,
-  `emptyRequestPayload(): PrivateOfficeRequestPayload` — consumed by Task 12.
+  `emptyRequestPayload(): PrivateOfficeRequestPayload` â€” consumed by Task 12.
 
 - [ ] **Step 1: Write the file**
 
@@ -1707,7 +1707,7 @@ export function buildRequestColumns(
 			render: row =>
 				h(NTag, { type: STATUS_TAG_TYPE[row.status], round: true, bordered: true }, { default: () => t(`privateOfficeRequests.status.${row.status}`) })
 		},
-		{ title: t("privateOfficeRequests.columns.quoteRef"), key: "quote_ref", render: row => row.quote_ref ?? "—" },
+		{ title: t("privateOfficeRequests.columns.quoteRef"), key: "quote_ref", render: row => row.quote_ref ?? "â€”" },
 		{
 			title: t("privateOfficeRequests.columns.actions"),
 			key: "actions",
@@ -1784,7 +1784,7 @@ git commit -m "feat(add-os): add Private Office Requests table/form config"
 - Create: `src/add-os/modules/members/views/PrivateOfficeRequestsPage.vue`
 - Test: `src/add-os/modules/members/views/__tests__/PrivateOfficeRequestsPage.spec.ts`
   (source-scan guard, following `UsersPage.spec.ts`'s precedent that a full page mount
-  isn't worth a new harness — the real behavior is already covered by Tasks 4 and 11's
+  isn't worth a new harness â€” the real behavior is already covered by Tasks 4 and 11's
   unit tests).
 
 **Interfaces:**
@@ -1817,7 +1817,8 @@ git commit -m "feat(add-os): add Private Office Requests table/form config"
 		</div>
 
 		<n-card class="add-ledger-table">
-			<n-data-table :columns :data :loading="isLoading" :bordered="false" :row-key />
+			<n-data-table v-if="data.length > 0 || isLoading" :columns :data :loading="isLoading" :bordered="false" :row-key />
+			<div v-else class="py-10 text-center">{{ t("privateOfficeRequests.empty") }}</div>
 		</n-card>
 
 		<ResourceFormDrawer
@@ -1947,7 +1948,7 @@ import { describe, expect, it } from "vitest"
 
 /**
  * Following UsersPage.spec.ts's precedent: a full mount pulls in services,
- * i18n and the message/dialog providers for no extra assertion value here —
+ * i18n and the message/dialog providers for no extra assertion value here â€”
  * the real behavior (service calls, mutation toasts, quoted-only filtering)
  * is already covered by Task 4's and Task 11's unit tests. This is a
  * lightweight source guard for wiring invariants a unit test can't see.
@@ -2003,7 +2004,7 @@ git commit -m "feat(add-os): add Private Office Requests page"
 - Produces: `quotedRequestOptions(requests): SelectOption[]`, `buildCompanyColumns(t,
   branches, locale): DataTableColumns<Company>`, `buildCompanyFields(t, quotedRequests,
   branches, locale): FieldDescriptor<CompanyPayload>[]`, `emptyCompanyPayload():
-  CompanyPayload` — consumed by Task 16. `quotedRequestOptions` is the one piece of real
+  CompanyPayload` â€” consumed by Task 16. `quotedRequestOptions` is the one piece of real
   filtering logic here, so it gets a real unit test (test requirement #3 from the
   brief), unlike Task 11's config, which is pure declarative data.
 
@@ -2040,7 +2041,7 @@ describe("quotedRequestOptions", () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/add-os/modules/members/config/__tests__/companies.config.spec.ts`
-Expected: FAIL — `Cannot find module '../companies.config'`.
+Expected: FAIL â€” `Cannot find module '../companies.config'`.
 
 - [ ] **Step 3: Write the implementation**
 
@@ -2120,9 +2121,9 @@ git commit -m "feat(add-os): add Companies table/form config with quoted-only re
 
 **Files:**
 - Modify: `src/add-os/modules/members/config/__tests__/private-office-requests.config.spec.ts`
-  (new file — Task 11 shipped no test of its own; this closes that gap before moving on,
-  since the brief's own test requirement #6 — "contracted ⇒ no status-edit action
-  shown" — needs a real assertion, not just the page-level source scan from Task 12).
+  (new file â€” Task 11 shipped no test of its own; this closes that gap before moving on,
+  since the brief's own test requirement #6 â€” "contracted â‡’ no status-edit action
+  shown" â€” needs a real assertion, not just the page-level source scan from Task 12).
 
 **Interfaces:**
 - Consumes: `buildRequestColumns` (Task 11).
@@ -2154,11 +2155,11 @@ describe("buildRequestColumns actions", () => {
 		expect(actionChildren("requested")).toHaveLength(2)
 	})
 
-	it("shows only delete for a quoted row — quoting again isn't a modeled action (1 control)", () => {
+	it("shows only delete for a quoted row â€” quoting again isn't a modeled action (1 control)", () => {
 		expect(actionChildren("quoted")).toHaveLength(1)
 	})
 
-	it("shows a disabled locked tooltip plus delete for a contracted row — not silence, an explained block (2 controls)", () => {
+	it("shows a disabled locked tooltip plus delete for a contracted row â€” not silence, an explained block (2 controls)", () => {
 		const children = actionChildren("contracted")
 		expect(children).toHaveLength(2)
 	})
@@ -2180,7 +2181,7 @@ describe("buildRequestColumns actions", () => {
 
 Run: `npx vitest run src/add-os/modules/members/config/__tests__/private-office-requests.config.spec.ts`
 Expected: FAIL if `buildRequestColumns`'s action-count-per-status doesn't yet match (it
-already should from Task 11's implementation — this step exists to catch a mismatch
+already should from Task 11's implementation â€” this step exists to catch a mismatch
 before committing test coverage that quietly passes for the wrong reason).
 
 - [ ] **Step 3: Fix Task 11's implementation if the test reveals a mismatch, otherwise confirm it already passes**
@@ -2215,7 +2216,7 @@ git commit -m "test(add-os): cover contracted-status action blocking in request 
 
 Following `ResourceFormDrawer.spec.ts`'s own established pattern (Task 14's sibling
 component): drive the test by mutating the component's exposed `form` ref directly and
-calling its exposed `submit()`, rather than simulating raw naive-ui DOM events — that
+calling its exposed `submit()`, rather than simulating raw naive-ui DOM events â€” that
 file's own comments explain why (`n-select`/`n-form` internals aren't worth a second,
 more fragile harness when the component can expose its real logic instead).
 
@@ -2239,7 +2240,7 @@ vi.mock("@/add-os/modules/members/composables/useCompanyDetail", () => ({
 
 // The component calls useMessage() directly. Mounting it for real without a
 // message provider is exactly the pitfall UsersPage.spec.ts's own comment
-// avoids by not mounting at all — mock only useMessage, keep every other
+// avoids by not mounting at all â€” mock only useMessage, keep every other
 // naive-ui export (NModal, NForm, NSelect, ...) real via importActual.
 vi.mock("naive-ui", async () => {
 	const actual = await vi.importActual<typeof import("naive-ui")>("naive-ui")
@@ -2351,7 +2352,7 @@ describe("addCompanyMemberDialog", () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/add-os/modules/members/components/__tests__/AddCompanyMemberDialog.spec.ts`
-Expected: FAIL — `Cannot find module '../AddCompanyMemberDialog.vue'`.
+Expected: FAIL â€” `Cannot find module '../AddCompanyMemberDialog.vue'`.
 
 - [ ] **Step 3: Write the implementation**
 
@@ -2412,7 +2413,7 @@ watch(show, visible => {
 	}
 })
 
-const userOptions = computed<SelectOption[]>(() => users.value.map(user => ({ label: `${user.name} — ${user.phone}`, value: user.id })))
+const userOptions = computed<SelectOption[]>(() => users.value.map(user => ({ label: `${user.name} â€” ${user.phone}`, value: user.id })))
 
 const rules: FormRules = {
 	user_id: { required: true, type: "number", message: t("companyMembers.add.userRequired"), trigger: ["change"] }
@@ -2479,7 +2480,7 @@ git commit -m "feat(add-os): add shared AddCompanyMemberDialog component"
   same company).
 
 **Known, explicitly-flagged limitation:** the members table renders the numeric
-`user_id` directly — `CompanyMember` (Task 3) carries no name/phone field because the
+`user_id` directly â€” `CompanyMember` (Task 3) carries no name/phone field because the
 collection's "List Company Members" response is unconfirmed (no example exists). This
 is not silently worked around; it is exactly what the brief asked to be surfaced rather
 than guessed.
@@ -2488,7 +2489,7 @@ than guessed.
 
 Same exposed-handler pattern as Task 14: the optimistic-toggle-then-revert-on-failure
 logic (refetch matrix row 5) lives in this component's own script, not in
-`useCompanyDetail`, so it needs its own real coverage — not just a rendered-text check.
+`useCompanyDetail`, so it needs its own real coverage â€” not just a rendered-text check.
 `defineExpose` makes `onToggleDoorAccess`/`onToggleAdmin`/`performRemove`/`members`
 callable directly, avoiding a second, more fragile harness for driving naive-ui
 `NSwitch`/`NDataTable` DOM internals (the same reasoning `ResourceFormDrawer.spec.ts`
@@ -2516,7 +2517,7 @@ const removeMemberMock = vi.fn()
 const refetchMembersMock = vi.fn()
 // A real ref, not a plain {value: ...} stand-in: this component `defineExpose`s
 // `members` directly (Step 3 below), and Vue's expose/auto-unwrap machinery only
-// behaves correctly against a genuine ref — matching what the real
+// behaves correctly against a genuine ref â€” matching what the real
 // useCompanyDetail (Task 9) actually returns.
 let membersFixture: ReturnType<typeof ref<{ user_id: number; door_access_enabled: boolean; is_admin: boolean }[]>>
 
@@ -2539,7 +2540,7 @@ vi.mock("@/add-os/modules/members/composables/useCompanyDetail", () => ({
 	})
 }))
 
-// naive-ui's real useDialog opens a teleported modal and waits for a click —
+// naive-ui's real useDialog opens a teleported modal and waits for a click â€”
 // this test drives the confirmation directly by invoking onPositiveClick,
 // the same way a user clicking "Remove" in the real dialog would.
 const dialogWarningMock = vi.fn((options: { onPositiveClick: () => void }) => options.onPositiveClick())
@@ -2656,7 +2657,7 @@ describe("companyDetailPanel", () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/add-os/modules/members/components/__tests__/CompanyDetailPanel.spec.ts`
-Expected: FAIL — `Cannot find module '../CompanyDetailPanel.vue'`.
+Expected: FAIL â€” `Cannot find module '../CompanyDetailPanel.vue'`.
 
 - [ ] **Step 3: Write the implementation**
 
@@ -2816,7 +2817,7 @@ git commit -m "feat(add-os): add CompanyDetailPanel with member management"
 **Files:**
 - Create: `src/add-os/modules/members/views/CompaniesPage.vue`
 - Test: `src/add-os/modules/members/views/__tests__/CompaniesPage.spec.ts` (source-scan
-  guard, same rationale as Task 12 — real behavior already covered by Tasks 5, 10, 13's
+  guard, same rationale as Task 12 â€” real behavior already covered by Tasks 5, 10, 13's
   unit tests, plus this task's own guard for the wiring a unit test can't see: the
   shared-dialog-import requirement).
 
@@ -2833,7 +2834,7 @@ git commit -m "feat(add-os): add CompanyDetailPanel with member management"
 |---|---|
 | Create company | requests list + companies list (`useCompanyCreation`) |
 | Change company status | companies list (`useCompanyStatusChange`); the open detail panel too, if it's showing this same company (via the panel's exposed `refetchCompany`) |
-| Add member from the table quick-action | that dialog instance's own members fetch only — no detail page is open, so nothing else needs refreshing. Company list shows no member count column (the collection has no such field on Company — not invented), so there is nothing on the row to update either. |
+| Add member from the table quick-action | that dialog instance's own members fetch only â€” no detail page is open, so nothing else needs refreshing. Company list shows no member count column (the collection has no such field on Company â€” not invented), so there is nothing on the row to update either. |
 | Add member from the detail panel | the panel's members table, via `@added="refetchMembers"` (Task 15) |
 | Toggle door access / admin | optimistic row mutation + refetch-on-failure (Task 15) |
 | Remove member | that company's members table (Task 15) |
@@ -2860,7 +2861,8 @@ git commit -m "feat(add-os): add CompanyDetailPanel with member management"
 		</div>
 
 		<n-card class="add-ledger-table">
-			<n-data-table :columns :data :loading="isLoading" :bordered="false" :row-key />
+			<n-data-table v-if="data.length > 0 || isLoading" :columns :data :loading="isLoading" :bordered="false" :row-key />
+			<div v-else class="py-10 text-center">{{ t("companies.empty") }}</div>
 		</n-card>
 
 		<ResourceFormDrawer
@@ -3052,7 +3054,7 @@ const FILE = path.resolve(__dirname, "..", "CompaniesPage.vue")
 const DETAIL_PANEL_FILE = path.resolve(__dirname, "..", "..", "components", "CompanyDetailPanel.vue")
 
 describe("companiesPage wiring", () => {
-	it("imports AddCompanyMemberDialog from the shared component path — the same one CompanyDetailPanel uses", () => {
+	it("imports AddCompanyMemberDialog from the shared component path â€” the same one CompanyDetailPanel uses", () => {
 		const pageSource = readFileSync(FILE, "utf8")
 		const panelSource = readFileSync(DETAIL_PANEL_FILE, "utf8")
 
@@ -3077,7 +3079,7 @@ describe("companiesPage wiring", () => {
 		expect(source).not.toMatch(/createDrawerVisible\.value = true\s*$/m) // never unconditionally opens the drawer
 	})
 
-	it("never sends a raw HTTP call — only the composables/services layer", () => {
+	it("never sends a raw HTTP call â€” only the composables/services layer", () => {
 		const source = readFileSync(FILE, "utf8")
 		expect(source).not.toMatch(/\bfetch\(/)
 	})
@@ -3096,7 +3098,7 @@ Expected: no errors. If `creation.submit`'s parameter-type indirection
 (`Parameters<typeof creation.submit>[0]`) doesn't satisfy strict mode cleanly, replace it
 with the plain `CompanyPayload` cast used elsewhere (`payload as unknown as
 CompanyPayload`), importing `CompanyPayload` from `@/add-os/modules/members/types/company`
-— functionally identical, just written out.
+â€” functionally identical, just written out.
 
 - [ ] **Step 5: Commit**
 
@@ -3107,7 +3109,7 @@ git commit -m "feat(add-os): add Companies page with quick-add-member row action
 
 ---
 
-### Task 17: Navigation — register both real routes
+### Task 17: Navigation â€” register both real routes
 
 **Files:**
 - Modify: `src/add-os/navigation/sections.ts` (the `address` section's page and status;
@@ -3119,7 +3121,7 @@ git commit -m "feat(add-os): add Companies page with quick-add-member row action
 
 - [ ] **Step 1: Update the `address` section in sections.ts**
 
-Change (currently lines 157–163):
+Change (currently lines 157â€“163):
 
 ```ts
 	{
@@ -3142,12 +3144,12 @@ to
 ```
 
 (`status` flips to `"active"` because, after this task, 100% of this section's pages
-have a real screen — matching the precedent set by the `spatial` and `system`
+have a real screen â€” matching the precedent set by the `spatial` and `system`
 sections, both `"active"` only once every one of their pages shipped.)
 
 - [ ] **Step 2: Update the `members` section's status in sections.ts**
 
-Change (currently lines 83–93):
+Change (currently lines 83â€“93):
 
 ```ts
 	{
@@ -3178,13 +3180,13 @@ to
 ```
 
 (`individuals` and `memberships` keep falling back to `ComingSoon` via `routes.ts`'s own
-`?? ComingSoon` — exactly the documented, already-established behavior for an `"active"`
+`?? ComingSoon` â€” exactly the documented, already-established behavior for an `"active"`
 section with some pages still unshipped, per this file's own header comment: "Pages of
 `active` sections point there too for now; they switch over one at a time.")
 
 - [ ] **Step 3: Register both real components in routes.ts**
 
-Change `PAGE_COMPONENTS` (currently lines 31–42) to add two entries:
+Change `PAGE_COMPONENTS` (currently lines 31â€“42) to add two entries:
 
 ```ts
 const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
@@ -3224,13 +3226,13 @@ git commit -m "feat(add-os): register Private Office Requests and Companies rout
 
 ### Task 18: Full verification pass
 
-**Files:** none created — verification only.
+**Files:** none created â€” verification only.
 
 - [ ] **Step 1: Full test suite**
 
 Run: `npx vitest run`
 Expected: every test green, including all 5 architecture guards, the bilingual
-invariant, and every new file from Tasks 4–16.
+invariant, and every new file from Tasks 4â€“16.
 
 - [ ] **Step 2: Typecheck**
 
@@ -3248,31 +3250,31 @@ it.
 Run: `git diff --stat main` (or the base branch)
 Expected: every changed path is under `src/add-os/**`, except
 `src/add-os/navigation/routes.ts` and `sections.ts` (both inside `src/add-os/**`
-anyway) — confirm nothing under vendor `src/**` or `_pinx-vendor/**` was touched.
+anyway) â€” confirm nothing under vendor `src/**` or `_pinx-vendor/**` was touched.
 
 - [ ] **Step 5: Manual walkthrough (documented in the final report, with screenshots if the dev server is run)**
 
-1. Open Private Office Requests → create one (`prospect_name`, `contact`) → appears
+1. Open Private Office Requests â†’ create one (`prospect_name`, `contact`) â†’ appears
    `requested`.
-2. Convert it to quoted (`quote_ref`) → status badge updates to `quoted`.
-3. Open Companies → New company → the private-office-request dropdown shows only the
-   one just quoted → pick a branch → fill legal name/contract ref → submit.
+2. Convert it to quoted (`quote_ref`) â†’ status badge updates to `quoted`.
+3. Open Companies â†’ New company â†’ the private-office-request dropdown shows only the
+   one just quoted â†’ pick a branch â†’ fill legal name/contract ref â†’ submit.
 4. Back on Private Office Requests, confirm the same request now shows `contracted`
    and its row action is a disabled, tooltipped lock icon, not silently absent.
-5. On the new Companies row, click "Add member" (the quick-add action) → dialog opens
-   scoped to that row's company id → pick a user → submit → success toast, no detail
+5. On the new Companies row, click "Add member" (the quick-add action) â†’ dialog opens
+   scoped to that row's company id â†’ pick a user â†’ submit â†’ success toast, no detail
    page ever opened.
-6. Click "View members" on the same row → detail panel opens showing the member just
-   added → toggle door access, toggle admin, remove the member with confirmation →
+6. Click "View members" on the same row â†’ detail panel opens showing the member just
+   added â†’ toggle door access, toggle admin, remove the member with confirmation â†’
    table updates each time.
-7. Re-open "Add member" from inside the detail panel this time → add a second member →
+7. Re-open "Add member" from inside the detail panel this time â†’ add a second member â†’
    confirm the panel's own members table updates without closing.
 
 - [ ] **Step 6: Write the final report**
 
 Cover explicitly, per the brief's own request:
 - What was extracted literally from the Postman collection, and any difference from
-  a prior description (none found — the brief's own contract table matched the
+  a prior description (none found â€” the brief's own contract table matched the
   collection exactly, including both "silent" deletes turning out to exist).
 - What the collection was silent on and was *not* guessed: the exact JSON shape of
   every response (zero examples anywhere in the collection), specifically flagged for
@@ -3282,4 +3284,4 @@ Cover explicitly, per the brief's own request:
   out of scope per the brief and is not built; no role-gating was added (none was
   specified for this pipeline, unlike the seven spatial tables).
 
-No further commit — this task is verification and reporting only.
+No further commit â€” this task is verification and reporting only.
