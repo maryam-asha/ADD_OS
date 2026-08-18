@@ -9,9 +9,8 @@ function actionChildren(status: "requested" | "quoted" | "contracted") {
 	const onQuote = vi.fn()
 	const onDelete = vi.fn()
 	const columns = buildRequestColumns(t, onQuote, onDelete)
-	const actionsColumn = columns.find(c => c.key === "actions")!
+	const actionsColumn = columns.find(c => (c as { key?: string }).key === "actions")!
 	const row = { id: 1, prospect_name: "A", contact: "a", status, quote_ref: status === "requested" ? null : "Q-1" }
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- NaiveUI's own DataTableColumn.render type
 	const vnode = (actionsColumn as any).render(row, 0)
 	return vnode.children as unknown[]
 }
@@ -34,9 +33,8 @@ describe("buildRequestColumns actions", () => {
 		const onQuote = vi.fn()
 		const onDelete = vi.fn()
 		const columns = buildRequestColumns(t, onQuote, onDelete)
-		const actionsColumn = columns.find(c => c.key === "actions")!
+		const actionsColumn = columns.find(c => (c as { key?: string }).key === "actions")!
 		const row = { id: 1, prospect_name: "A", contact: "a", status: "contracted" as const, quote_ref: "Q-1" }
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		;(actionsColumn as any).render(row, 0)
 		expect(onQuote).not.toHaveBeenCalled()
 	})
