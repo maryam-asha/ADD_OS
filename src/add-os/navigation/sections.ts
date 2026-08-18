@@ -159,7 +159,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		path: "/address",
 		icon: "carbon:enterprise",
 		status: "coming-soon",
-		pages: [{ key: "formationRequests", path: "formation-requests" }]
+		pages: [{ key: "privateOfficeRequests", path: "private-office-requests" }]
 	},
 	{
 		key: "cms",
