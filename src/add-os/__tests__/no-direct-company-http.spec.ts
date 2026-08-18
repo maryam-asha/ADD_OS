@@ -66,7 +66,7 @@ describe("company pipeline — no direct HTTP calls outside the service layer", 
 		expect(sourceFiles.length).toBeGreaterThan(10)
 	})
 
-	it("references /companies or /private-office-requests only from the dedicated service files", () => {
+	it("references /admin/companies or /admin/private-office-requests only from the dedicated service files", () => {
 		const offenders = findOffenders(sourceFiles)
 		expect(
 			offenders,

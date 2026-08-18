@@ -30,8 +30,8 @@
 		/>
 
 		<n-modal v-model:show="quoteModalVisible" preset="card" :title="t('privateOfficeRequests.markAsQuoted.title')" class="max-w-md">
-			<n-form>
-				<n-form-item :label="t('privateOfficeRequests.markAsQuoted.quoteRefLabel')">
+			<n-form ref="quoteFormRef" :model="quoteForm" :rules="quoteRules">
+				<n-form-item path="quote_ref" :label="t('privateOfficeRequests.markAsQuoted.quoteRefLabel')">
 					<n-input v-model:value="quoteForm.quote_ref" :placeholder="t('privateOfficeRequests.markAsQuoted.quoteRefPlaceholder')" />
 				</n-form-item>
 			</n-form>
@@ -46,10 +46,10 @@
 </template>
 
 <script setup lang="ts">
-import type { DataTableColumns } from "naive-ui"
+import type { DataTableColumns, FormInst, FormRules } from "naive-ui"
 import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vue"
 import type { MarkAsQuotedPayload, PrivateOfficeRequest, PrivateOfficeRequestPayload } from "@/add-os/modules/members/types/private-office-request"
-import { NAlert, NButton, NCard, NDataTable, NForm, NFormItem, NInput, NModal, useDialog } from "naive-ui"
+import { NAlert, NButton, NCard, NDataTable, NForm, NFormItem, NInput, NModal, useDialog, useMessage } from "naive-ui"
 import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.vue"
@@ -57,6 +57,7 @@ import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vu
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
 import { buildRequestColumns, emptyRequestPayload, requestFields } from "@/add-os/modules/members/config/private-office-requests.config"
+import { ApiError } from "@/add-os/services/api"
 import {
 	createPrivateOfficeRequest,
 	listPrivateOfficeRequests,
@@ -68,6 +69,7 @@ import Icon from "@/components/common/Icon.vue"
 defineProps<{ titleKey?: string }>()
 const { t } = useI18n()
 const dialog = useDialog()
+const message = useMessage()
 
 const { data, isLoading, error, refetch } = useResourceList<PrivateOfficeRequest>(listPrivateOfficeRequests)
 
@@ -118,6 +120,10 @@ async function submitCreate(payload: Record<string, unknown>) {
 const quoteModalVisible = ref(false)
 const quoteTargetId = ref<number | null>(null)
 const quoteForm = ref<MarkAsQuotedPayload>({ quote_ref: "" })
+const quoteFormRef = ref<FormInst | null>(null)
+const quoteRules: FormRules = {
+	quote_ref: { required: true, message: t("privateOfficeRequests.markAsQuoted.quoteRefRequired"), trigger: ["blur", "input"] }
+}
 
 function openQuote(row: PrivateOfficeRequest) {
 	quoteTargetId.value = row.id
@@ -128,8 +134,16 @@ function openQuote(row: PrivateOfficeRequest) {
 async function submitQuote() {
 	if (quoteTargetId.value === null) return
 	try {
-		await mutations.update(quoteTargetId.value, quoteForm.value)
+		await quoteFormRef.value?.validate()
 	} catch {
+		return
+	}
+	try {
+		await mutations.update(quoteTargetId.value, quoteForm.value)
+	} catch (caught) {
+		if (caught instanceof ApiError && caught.status === 422) {
+			message.error(caught.data?.message ?? t("resourceCrud.mutations.genericError"))
+		}
 		return
 	}
 	quoteModalVisible.value = false

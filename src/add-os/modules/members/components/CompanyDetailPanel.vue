@@ -56,7 +56,7 @@ function memberRowKey(row: CompanyMember) {
 
 function toastFailure(caught: unknown) {
 	if (!(caught instanceof ApiError)) throw caught
-	message.error(caught.status === 403 ? t("resourceCrud.mutations.permissionError") : t("resourceCrud.mutations.genericError"))
+	message.error(caught.status === 403 ? t("resourceCrud.mutations.permissionError") : (caught.data?.message ?? t("resourceCrud.mutations.genericError")))
 }
 
 async function onToggleDoorAccess(row: CompanyMember, value: boolean) {
