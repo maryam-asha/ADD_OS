@@ -84,7 +84,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		key: "members",
 		path: "/members",
 		icon: "carbon:user-multiple",
-		status: "coming-soon",
+		status: "active",
 		pages: [
 			{ key: "individuals", path: "individuals" },
 			{ key: "companies", path: "companies" },
@@ -158,7 +158,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		key: "address",
 		path: "/address",
 		icon: "carbon:enterprise",
-		status: "coming-soon",
+		status: "active",
 		pages: [{ key: "privateOfficeRequests", path: "private-office-requests" }]
 	},
 	{
