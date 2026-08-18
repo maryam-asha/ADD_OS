@@ -19,21 +19,7 @@
 				<template #extra-actions>
 					<n-button text type="primary" @click="gotoForgotPassword()">Forgot Password?</n-button>
 				</template>
-				<template #bottom-area>
-					<div class="text-center">
-						Don't you have an account?
-						<n-button text type="primary" size="large" @click="gotoSignUp()">Sign up</n-button>
-					</div>
-				</template>
 			</SignIn>
-			<SignUp v-else-if="type === 'signup'" key="signup">
-				<template #bottom-area>
-					<div class="text-center">
-						Do you have an account?
-						<n-button text type="primary" size="large" @click="gotoSignIn()">Sign in</n-button>
-					</div>
-				</template>
-			</SignUp>
 			<ForgotPassword v-else-if="type === 'forgotpassword'" key="forgotpassword" />
 			<TwoFactorChallenge v-else-if="type === 'twofactor'" key="twofactor" />
 		</transition>
@@ -49,7 +35,6 @@ import Logo from "@/app-layouts/common/Logo.vue"
 import Icon from "@/components/common/Icon.vue"
 import ForgotPassword from "./ForgotPassword.vue"
 import SignIn from "./SignIn.vue"
-import SignUp from "./SignUp.vue"
 import TwoFactorChallenge from "./TwoFactorChallenge.vue"
 
 const props = defineProps<{
@@ -61,7 +46,6 @@ const type = ref<FormType>("signin")
 const router = useRouter()
 const titles: Record<FormType, string> = {
 	signin: "Welcome Back",
-	signup: "Hello",
 	forgotpassword: "Forgot Password",
 	twofactor: "Two-Factor Authentication"
 }
@@ -72,14 +56,6 @@ function gotoSignIn() {
 		type.value = "signin"
 	} else {
 		router.replace({ name: "Login" })
-	}
-}
-
-function gotoSignUp() {
-	if (!props.useOnlyRouter) {
-		type.value = "signup"
-	} else {
-		router.replace({ name: "Register" })
 	}
 }
 

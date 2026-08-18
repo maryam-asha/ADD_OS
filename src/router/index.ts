@@ -43,24 +43,23 @@ const router = createRouter({
 			}
 		},
 		{
-			path: "/register",
-			name: "Register",
-			component: () => import("@/views/Auth/Login.vue"),
-			props: { formType: "signup" as FormType },
-			meta: {
-				title: "Register",
-				theme: { layout: Layout.Blank, boxed: { enabled: false }, padded: { enabled: false } },
-				checkAuth: true,
-				skipPin: true
-			}
-		},
-		{
 			path: "/forgot-password",
 			name: "ForgotPassword",
 			component: () => import("@/views/Auth/Login.vue"),
 			props: { formType: "forgotpassword" as FormType },
 			meta: {
 				title: "Forgot Password",
+				theme: { layout: Layout.Blank, boxed: { enabled: false }, padded: { enabled: false } },
+				checkAuth: true,
+				skipPin: true
+			}
+		},
+		{
+			path: "/reset-password",
+			name: "ResetPassword",
+			component: () => import("@/add-os/modules/auth/views/ResetPasswordPage.vue"),
+			meta: {
+				title: "Reset Password",
 				theme: { layout: Layout.Blank, boxed: { enabled: false }, padded: { enabled: false } },
 				checkAuth: true,
 				skipPin: true

@@ -7,7 +7,8 @@
 		"delete": "Delete",
 		"clear": "Clear",
 		"viewAll": "View all",
-		"logout": "Log out"
+		"logout": "Log out",
+		"logged_out": "Logged out"
 	},
 	"notifications": {
 		"title": "Notifications",
@@ -22,6 +23,77 @@
 			"member": "Member",
 			"operations": "Operations",
 			"admin": "Admin"
+		}
+	},
+	"auth": {
+		"forgotPassword": {
+			"emailLabel": "Email",
+			"emailPlaceholder": "Insert your email",
+			"emailRequired": "Email is required.",
+			"emailInvalid": "Enter a valid email address.",
+			"submit": "Send reset link",
+			"success": "If that email has an account, a reset link is on its way.",
+			"alreadySignedIn": "You're already signed in.",
+			"genericError": "Couldn't send the reset link. Please try again."
+		},
+		"resetPassword": {
+			"title": "Reset password",
+			"passwordLabel": "New password",
+			"passwordConfirmationLabel": "Confirm new password",
+			"passwordRequired": "Password is required.",
+			"passwordTooShort": "Password must be at least 8 characters.",
+			"passwordConfirmationRequired": "Please confirm the password.",
+			"passwordConfirmationMismatch": "Passwords do not match.",
+			"submit": "Reset password",
+			"success": "Password reset. Please sign in.",
+			"genericError": "Couldn't reset the password. Please try again."
+		}
+	},
+	"account": {
+		"description": "Manage your own profile, password, and two-factor authentication.",
+		"genericError": "Something went wrong. Please try again.",
+		"profile": {
+			"title": "Profile",
+			"nameLabel": "Full name",
+			"emailLabel": "Email",
+			"nameRequired": "Name is required.",
+			"emailRequired": "Email is required.",
+			"emailInvalid": "Enter a valid email address.",
+			"submit": "Save",
+			"success": "Profile updated."
+		},
+		"password": {
+			"title": "Password",
+			"currentLabel": "Current password",
+			"newLabel": "New password",
+			"confirmLabel": "Confirm new password",
+			"currentRequired": "Current password is required.",
+			"newRequired": "New password is required.",
+			"newTooShort": "Password must be at least 8 characters.",
+			"confirmRequired": "Please confirm the new password.",
+			"confirmMismatch": "Passwords do not match.",
+			"submit": "Change password",
+			"success": "Password changed."
+		},
+		"twoFactor": {
+			"title": "Two-factor authentication",
+			"description": "Require an authenticator-app code in addition to your password when signing in.",
+			"enableButton": "Enable two-factor authentication",
+			"activeBadge": "Two-factor authentication is set up",
+			"codeLabel": "Authentication code",
+			"codePlaceholder": "123456",
+			"confirmButton": "Confirm",
+			"confirmSuccess": "Two-factor authentication confirmed.",
+			"recoveryCodesTitle": "Recovery codes",
+			"regenerateButton": "Regenerate recovery codes",
+			"disableButton": "Disable two-factor authentication"
+		},
+		"confirmPassword": {
+			"title": "Confirm your password",
+			"description": "For your security, please confirm your password to continue.",
+			"passwordLabel": "Password",
+			"cancel": "Cancel",
+			"submit": "Confirm"
 		}
 	},
 	"users": {
@@ -267,6 +339,7 @@
 			"formationRequests": "Formation requests",
 			"content": "Content",
 			"partners": "Partners",
+			"accountSecurity": "Account & security",
 			"systemSettings": "System settings"
 		}
 	},

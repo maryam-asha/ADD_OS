@@ -31,6 +31,7 @@ import { NAV_SECTIONS, navPageTitleKey, navRouteName, navRoutePath, navSectionTi
 const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"system.roles": () => import("@/add-os/modules/system/views/RolesPage.vue"),
 	"system.users": () => import("@/add-os/modules/system/views/UsersPage.vue"),
+	"settings.accountSecurity": () => import("@/add-os/modules/settings/views/AccountSecurityPage.vue"),
 	"spatial.branches": () => import("@/add-os/modules/spatial/views/BranchesPage.vue"),
 	"spatial.buildings": () => import("@/add-os/modules/spatial/views/BuildingsPage.vue"),
 	"spatial.floors": () => import("@/add-os/modules/spatial/views/FloorsPage.vue"),

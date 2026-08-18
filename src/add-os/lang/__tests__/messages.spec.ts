@@ -75,3 +75,13 @@ describe("translation content", () => {
 		expect(untranslated).toEqual([])
 	})
 })
+
+describe("common.logged_out", () => {
+	// Avatar.vue's logout handler calls t("common.logged_out") for its success
+	// toast. The ar/en parity check above can't catch a key missing from BOTH
+	// bundles — it was, and the toast rendered the raw key. Locking it down here.
+	it("is defined in both bundles", () => {
+		expect((en as Messages).common as Messages).toHaveProperty("logged_out")
+		expect((ar as Messages).common as Messages).toHaveProperty("logged_out")
+	})
+})

@@ -1,1 +1,1 @@
-export type FormType = "signin" | "signup" | "forgotpassword" | "twofactor"
+export type FormType = "signin" | "forgotpassword" | "twofactor"

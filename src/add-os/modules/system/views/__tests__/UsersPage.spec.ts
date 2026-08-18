@@ -28,3 +28,18 @@ describe("usersPage inline table", () => {
 		expect(source).toContain("add-ledger-table")
 	})
 })
+
+/**
+ * Guards the fix for the drift risk a prior version of this file accepted on
+ * purpose: a hardcoded `["member", "operations", "admin"]` role list (plus a
+ * second hardcoded subset for the create-user drawer) instead of the same
+ * `listRoles()` call `RolesPage.vue` already makes. Source-scan, for the same
+ * reason as the guard above — no mount harness for one assertion.
+ */
+describe("usersPage role options", () => {
+	it("sources role dropdowns from listRoles(), not a hardcoded literal array", () => {
+		const source = readFileSync(FILE, "utf8")
+		expect(source).toContain('import { listRoles } from "@/add-os/services/roles"')
+		expect(source).not.toMatch(/\[\s*"member",\s*"operations",\s*"admin"\s*\]/)
+	})
+})

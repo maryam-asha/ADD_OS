@@ -9,55 +9,65 @@
 
 		<n-alert v-if="loadError" type="error" :title="t('users.loadError')" />
 
-		<div class="flex flex-wrap items-center gap-3">
-			<n-input v-model:value="search" :placeholder="t('users.searchPlaceholder')" clearable class="max-w-xs" />
-			<n-select
-				v-model:value="roleFilter"
-				:placeholder="t('users.roleFilterPlaceholder')"
-				:options="roleFilterOptions"
-				clearable
-				class="max-w-xs"
-			/>
+		<div class="flex justify-end">
 			<n-button type="primary" @click="openCreate">
 				<template #icon><Icon name="carbon:add" :size="16" /></template>
 				{{ t("users.create.button") }}
 			</n-button>
 		</div>
 
-		<n-data-table :columns :data="filteredUsers" :loading :bordered="false" :row-key class="add-ledger-table" />
+		<div class="flex items-center gap-3">
+			<n-input v-model:value="search" :placeholder="t('users.searchPlaceholder')" clearable class="flex-1" />
+			<n-select
+				v-model:value="roleFilter"
+				:placeholder="t('users.roleFilterPlaceholder')"
+				:options="roleFilterOptions"
+				clearable
+				class="flex-1"
+			/>
+		</div>
 
-		<n-drawer v-model:show="drawerVisible" :width="420">
-			<n-drawer-content :title="mode === 'create' ? t('users.create.title') : t('users.edit.title')" closable>
-				<n-form ref="formRef" :model="form" :rules label-placement="top">
-					<n-form-item path="name" :label="t('users.form.name')">
-						<n-input v-model:value="form.name" />
+		<n-card class="add-ledger-table">
+			<n-data-table :columns :data="filteredUsers" :loading :bordered="false" :row-key />
+		</n-card>
+
+		<n-modal
+			v-model:show="drawerVisible"
+			preset="card"
+			:title="mode === 'create' ? t('users.create.title') : t('users.edit.title')"
+			closable
+			style="max-width: 28rem"
+			content-style="max-height: 60vh; overflow-y: auto"
+		>
+			<n-form ref="formRef" :model="form" :rules label-placement="top">
+				<n-form-item path="name" :label="t('users.form.name')">
+					<n-input v-model:value="form.name" />
+				</n-form-item>
+				<n-form-item path="phone" :label="t('users.form.phone')">
+					<n-input v-model:value="form.phone" :placeholder="t('users.form.phonePlaceholder')" />
+				</n-form-item>
+				<n-form-item path="email" :label="t('users.form.email')">
+					<n-input v-model:value="form.email" />
+				</n-form-item>
+				<template v-if="mode === 'create'">
+					<n-form-item path="password" :label="t('users.form.password')">
+						<n-input v-model:value="form.password" type="password" show-password-on="click" />
 					</n-form-item>
-					<n-form-item path="phone" :label="t('users.form.phone')">
-						<n-input v-model:value="form.phone" :placeholder="t('users.form.phonePlaceholder')" />
+					<n-form-item path="password_confirmation" :label="t('users.form.passwordConfirmation')">
+						<n-input v-model:value="form.password_confirmation" type="password" show-password-on="click" />
 					</n-form-item>
-					<n-form-item path="email" :label="t('users.form.email')">
-						<n-input v-model:value="form.email" />
-					</n-form-item>
-					<template v-if="mode === 'create'">
-						<n-form-item path="password" :label="t('users.form.password')">
-							<n-input v-model:value="form.password" type="password" show-password-on="click" />
-						</n-form-item>
-						<n-form-item path="password_confirmation" :label="t('users.form.passwordConfirmation')">
-							<n-input v-model:value="form.password_confirmation" type="password" show-password-on="click" />
-						</n-form-item>
-					</template>
-					<n-form-item v-if="mode === 'create'" path="role" :label="t('users.form.role')">
-						<n-select v-model:value="form.role" :placeholder="t('users.form.rolePlaceholder')" :options="createRoleOptions" />
-					</n-form-item>
-				</n-form>
-				<template #footer>
-					<div class="flex justify-end gap-2">
-						<n-button @click="drawerVisible = false">{{ t("users.form.cancel") }}</n-button>
-						<n-button type="primary" :loading="submitting" @click="mode === 'create' ? submitCreate() : submitEdit()">{{ t("users.form.submit") }}</n-button>
-					</div>
 				</template>
-			</n-drawer-content>
-		</n-drawer>
+				<n-form-item v-if="mode === 'create'" path="role" :label="t('users.form.role')">
+					<n-select v-model:value="form.role" :placeholder="t('users.form.rolePlaceholder')" :options="createRoleOptions" />
+				</n-form-item>
+			</n-form>
+			<template #footer>
+				<div class="flex justify-end gap-2">
+					<n-button @click="drawerVisible = false">{{ t("users.form.cancel") }}</n-button>
+					<n-button type="primary" :loading="submitting" @click="mode === 'create' ? submitCreate() : submitEdit()">{{ t("users.form.submit") }}</n-button>
+				</div>
+			</template>
+		</n-modal>
 
 		<n-modal v-model:show="statusModalVisible" preset="card" :title="t('users.changeStatus.title')" class="max-w-md">
 			<n-alert type="warning" :title="t('users.changeStatus.warning')" class="mb-4" />
@@ -109,12 +119,13 @@ import type {
 	UserRole,
 	UserStatus
 } from "@/add-os/modules/system/types/user"
-import { NAlert, NButton, NDataTable, NDrawer, NDrawerContent, NForm, NFormItem, NInput, NModal, NSelect, NTag, useMessage } from "naive-ui"
+import { NAlert, NButton, NCard, NDataTable, NForm, NFormItem, NInput, NModal, NSelect, NTag, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import { isValidPassword, isValidSyrianPhone } from "@/add-os/modules/system/utils/validation"
 import { ApiError } from "@/add-os/services/api"
+import { listRoles } from "@/add-os/services/roles"
 import { assignRole, createUser, listUsers, updateUserProfile, updateUserStatus } from "@/add-os/services/users"
 import { STATUS_ICONS } from "@/add-os/theme/tokens"
 import Icon from "@/components/common/Icon.vue"
@@ -124,13 +135,19 @@ defineProps<{ titleKey?: string }>()
 const { t } = useI18n()
 
 /**
- * Fixed by the backend's own validation (`AssignRoleRequest`/`StoreUserRequest`
- * both hardcode this exact list), not fetched from `listRoles()` — a role the
- * assign-role endpoint would reject is not a useful filter/select option here,
- * even if the roles table ever grew a fourth row. `RolesPage.vue` is the one
- * screen that legitimately reflects whatever the roles table contains.
+ * Sourced from `GET /api/v1/admin/roles` — the same call `RolesPage.vue`
+ * makes — rather than a hardcoded literal list. A prior version of this file
+ * hardcoded the three role names on the reasoning that
+ * `AssignRoleRequest`/`StoreUserRequest` validate against a fixed list
+ * anyway, so a role `listRoles()` didn't return wasn't a useful option here.
+ * That's true but doesn't outweigh the drift risk of two independent lists
+ * of "the roles that exist" in the same app: if the roles table ever gains a
+ * row, this screen and `RolesPage.vue` would silently disagree until someone
+ * remembered to update this literal by hand. Fetching once here costs
+ * nothing extra a user would notice, and a role the assign-role endpoint
+ * would still reject fails exactly as before (a 422, generically toasted).
  */
-const ROLES: UserRole[] = ["member", "operations", "admin"]
+const roles = ref<UserRole[]>([])
 
 const STATUS_ICON: Record<UserStatus, string> = {
 	active: STATUS_ICONS.success,
@@ -150,7 +167,7 @@ const loadError = ref(false)
 const search = ref("")
 const roleFilter = ref<UserRole | null>(null)
 
-const roleFilterOptions = computed<SelectOption[]>(() => ROLES.map(role => ({ label: t(`roles.names.${role}`), value: role })))
+const roleFilterOptions = computed<SelectOption[]>(() => roles.value.map(role => ({ label: t(`roles.names.${role}`), value: role })))
 
 const filteredUsers = computed(() => {
 	const term = search.value.trim().toLowerCase()
@@ -199,10 +216,26 @@ function renderStatusTag(row: User) {
 }
 
 function renderActions(row: User) {
+	const editLabel = t("users.edit.button")
+	const statusLabel = t("users.changeStatus.button")
+	const roleLabel = t("users.changeRole.button")
+
 	return h("div", { class: "flex gap-2" }, [
-		h(NButton, { text: true, type: "primary", onClick: () => openEdit(row) }, { default: () => t("users.edit.button") }),
-		h(NButton, { text: true, type: "warning", onClick: () => openStatusModal(row) }, { default: () => t("users.changeStatus.button") }),
-		h(NButton, { text: true, onClick: () => openRoleModal(row) }, { default: () => t("users.changeRole.button") })
+		h(
+			NButton,
+			{ text: true, type: "primary", "aria-label": editLabel, title: editLabel, onClick: () => openEdit(row) },
+			{ icon: () => h(Icon, { name: "carbon:edit", size: 18 }) }
+		),
+		h(
+			NButton,
+			{ text: true, type: "warning", "aria-label": statusLabel, title: statusLabel, onClick: () => openStatusModal(row) },
+			{ icon: () => h(Icon, { name: "carbon:status-change", size: 18 }) }
+		),
+		h(
+			NButton,
+			{ text: true, "aria-label": roleLabel, title: roleLabel, onClick: () => openRoleModal(row) },
+			{ icon: () => h(Icon, { name: "carbon:user-role", size: 18 }) }
+		)
 	])
 }
 
@@ -228,7 +261,20 @@ async function loadUsers() {
 	}
 }
 
-onMounted(loadUsers)
+async function loadRoles() {
+	try {
+		roles.value = await listRoles()
+	} catch (error) {
+		if (!(error instanceof ApiError)) throw error
+		// Left empty on failure: the filter/select options are just empty, not a page-level error —
+		// the user list itself (loadUsers' own loadError) is the primary content of this page.
+	}
+}
+
+onMounted(() => {
+	loadUsers()
+	loadRoles()
+})
 
 const message = useMessage()
 
@@ -244,11 +290,10 @@ function emptyForm(): CreateUserPayload {
 
 const form = ref<CreateUserPayload>(emptyForm())
 
-/** StoreUserRequest allows only these two — member accounts self-register from the app. */
-const createRoleOptions = computed<SelectOption[]>(() => [
-	{ label: t("roles.names.operations"), value: "operations" },
-	{ label: t("roles.names.admin"), value: "admin" }
-])
+/** `StoreUserRequest` never accepts `member` — member accounts self-register from the app. */
+const createRoleOptions = computed<SelectOption[]>(() =>
+	roles.value.filter(role => role !== "member").map(role => ({ label: t(`roles.names.${role}`), value: role }))
+)
 
 const rules = computed<FormRules>(() => ({
 	name: [{ required: true, message: t("users.validation.nameRequired"), trigger: ["blur", "input"] }],

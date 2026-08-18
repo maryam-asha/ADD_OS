@@ -176,7 +176,10 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		path: "/settings",
 		icon: "carbon:settings",
 		status: "coming-soon",
-		pages: [{ key: "systemSettings", path: "system" }]
+		pages: [
+			{ key: "accountSecurity", path: "account" },
+			{ key: "systemSettings", path: "system" }
+		]
 	}
 ]
 

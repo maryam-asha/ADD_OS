@@ -60,4 +60,31 @@ export async function logout(): Promise<void> {
 	return post<void>("/logout")
 }
 
+/**
+ * Requests a password-reset email for the given address. Always resolves on a
+ * 2xx — Fortify's own neutral-response behavior for unknown emails is untested
+ * here (this endpoint currently 500s for a valid email too; see
+ * docs/add-os/auth-verification-report.md). A 409 means the caller already has
+ * an active session — live-confirmed, not documented in the collection —
+ * callers should show a distinct "you're already signed in" message for it.
+ */
+export async function requestPasswordReset(email: string): Promise<void> {
+	return post<void>("/forgot-password", { email })
+}
+
+/**
+ * Completes a password reset using the token/email from the emailed link.
+ * A bad/expired token comes back as a 422 keyed on `email`, not `token` —
+ * live-confirmed against the real backend — so callers should surface that
+ * error as a page-level message, not a per-field one under a token input.
+ */
+export async function resetPassword(payload: {
+	token: string
+	email: string
+	password: string
+	password_confirmation: string
+}): Promise<void> {
+	return post<void>("/reset-password", payload)
+}
+
 export { AuthError }

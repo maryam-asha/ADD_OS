@@ -8,10 +8,12 @@ import { useAuthStore } from "@/stores/auth"
  * spatial resources reads literally "Admin-only (not operations)." there
  * (Delete Branch/Building/Floor/Zone/Space/Resource/Seat-Desk).
  *
- * `users` and `roles` carry NO such annotation anywhere in that collection —
- * deliberately left out of this map rather than guessed at. See the task
- * report for that silence: an open question for the backend/brand owner,
- * not resolved here.
+ * `users` and `roles` have no entries here, and that's settled, not an open
+ * question: the collection has no DELETE endpoint for either resource at
+ * all. Users are deactivated via `PATCH /api/v1/admin/users/{id}/status`
+ * (see `UsersPage.vue`'s change-status modal), never hard-deleted. Roles
+ * have no CRUD whatsoever — `GET /api/v1/admin/roles` is read-only; roles
+ * are backend-seeded. There is nothing to gate here for either resource.
  */
 export const SPATIAL_RESOURCE_DELETE_ROLE = {
 	branches: "admin",

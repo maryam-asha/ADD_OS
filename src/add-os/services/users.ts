@@ -25,19 +25,26 @@ export async function getUser(id: number): Promise<User> {
 	return res.data
 }
 
-/** Profile fields only — status and role are separate actions, matching `UpdateUserRequest`. */
-export async function updateUserProfile(id: number, payload: UpdateUserProfilePayload): Promise<User> {
-	const res = await put<{ data: User }>(`${BASE}/${id}`, payload)
-	return res.data
+/**
+ * Profile fields only — status and role are separate actions, matching
+ * `UpdateUserRequest`. Live-confirmed (and documented in the collection):
+ * this returns `{"message": "..."}` on success, not the updated resource —
+ * callers must re-fetch (e.g. `listUsers()`) to see the new values.
+ */
+export async function updateUserProfile(id: number, payload: UpdateUserProfilePayload): Promise<void> {
+	return put<void>(`${BASE}/${id}`, payload)
 }
 
-/** Setting `deactivated`/`blocked` revokes every session this user holds, immediately. */
-export async function updateUserStatus(id: number, payload: UpdateUserStatusPayload): Promise<User> {
-	const res = await patch<{ data: User }>(`${BASE}/${id}/status`, payload)
-	return res.data
+/**
+ * Setting `deactivated`/`blocked` revokes every session this user holds,
+ * immediately. Live-confirmed: returns `{"message": "..."}`, not the updated
+ * resource — same as `updateUserProfile`.
+ */
+export async function updateUserStatus(id: number, payload: UpdateUserStatusPayload): Promise<void> {
+	return patch<void>(`${BASE}/${id}/status`, payload)
 }
 
-export async function assignRole(id: number, role: UserRole): Promise<User> {
-	const res = await patch<{ data: User }>(`${BASE}/${id}/role`, { role })
-	return res.data
+/** Live-confirmed: returns `{"message": "..."}`, not the updated resource — same as the two above. */
+export async function assignRole(id: number, role: UserRole): Promise<void> {
+	return patch<void>(`${BASE}/${id}/role`, { role })
 }

@@ -75,8 +75,20 @@ describe("users service", () => {
 		expect(user).toEqual(sampleUser)
 	})
 
+	// updateUserProfile/updateUserStatus/assignRole are typed Promise<void>: live-testing
+	// against the real backend (see docs/add-os/auth-verification-report.md) showed every
+	// one of these three PATCH/PUT endpoints returns `{"message": "..."}`, never the
+	// updated user — matching the Postman collection's own documented behavior. A prior
+	// version of this file (and of these three functions) assumed a `{data: User}`
+	// envelope instead, which would have resolved `res.data` to `undefined` against the
+	// real API despite the `Promise<User>` return type. `api.ts`'s `request()` still
+	// JSON-parses and returns whatever body comes back regardless of the caller's declared
+	// generic — `void` is a type-level "don't rely on this," not a runtime guarantee the
+	// value is actually `undefined` — so these tests only assert the call resolves and
+	// hits the right endpoint, not what it resolves to.
+
 	it("updateUserProfile PUTs the profile fields", async () => {
-		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: sampleUser }))
+		vi.mocked(fetch).mockResolvedValue(jsonResponse({ message: "تم تحديث بيانات المستخدم." }))
 
 		const payload = { name: "Rana Khoury-Haddad", phone: "0988877766", email: "rana.khoury@add.local" }
 		await updateUserProfile(1, payload)
@@ -88,28 +100,26 @@ describe("users service", () => {
 	})
 
 	it("updateUserStatus PATCHes the status endpoint", async () => {
-		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: { ...sampleUser, status: "deactivated" } }))
+		vi.mocked(fetch).mockResolvedValue(jsonResponse({ message: "تم تحديث حالة المستخدم." }))
 
 		const payload = { status: "deactivated" as const, reason: "left the company" }
-		const user = await updateUserStatus(1, payload)
+		await updateUserStatus(1, payload)
 
 		expect(fetch).toHaveBeenCalledWith(
 			"http://api.test/api/v1/admin/users/1/status",
 			expect.objectContaining({ method: "PATCH", body: JSON.stringify(payload) })
 		)
-		expect(user.status).toBe("deactivated")
 	})
 
 	it("assignRole PATCHes the role endpoint with { role }", async () => {
-		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: { ...sampleUser, roles: ["admin"] } }))
+		vi.mocked(fetch).mockResolvedValue(jsonResponse({ message: "تم تحديث دور المستخدم." }))
 
-		const user = await assignRole(1, "admin")
+		await assignRole(1, "admin")
 
 		expect(fetch).toHaveBeenCalledWith(
 			"http://api.test/api/v1/admin/users/1/role",
 			expect.objectContaining({ method: "PATCH", body: JSON.stringify({ role: "admin" }) })
 		)
-		expect(user.roles).toEqual(["admin"])
 	})
 
 	it("propagates ApiError with validation errors on a 422", async () => {
