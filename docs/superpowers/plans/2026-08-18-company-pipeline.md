@@ -3119,9 +3119,18 @@ git commit -m "feat(add-os): add Companies page with quick-add-member row action
 **Interfaces:**
 - Consumes: `PrivateOfficeRequestsPage.vue` (Task 12), `CompaniesPage.vue` (Task 16).
 
-- [ ] **Step 1: Update the `address` section in sections.ts**
+- [ ] **Step 1: Flip the `address` section's status to `active` in sections.ts**
 
-Change (currently lines 157–163):
+**Note (controller ruling, made during Task 9's review cycle):** the page-key rename
+this step originally specified (`formationRequests`/`formation-requests` ->
+`privateOfficeRequests`/`private-office-requests`) was already applied early, as an
+out-of-sequence fix, immediately after Task 8 landed — Task 8's i18n rename
+(`nav.pages.formationRequests` -> `nav.pages.privateOfficeRequests`) left `sections.ts`
+and the i18n catalogs briefly inconsistent, which the existing
+`navigation/__tests__/navigation.spec.ts`'s "translates every page title" test
+correctly caught. Fixing the key in `sections.ts` immediately (rather than waiting for
+this task) kept the suite green for every task in between. `sections.ts`'s `address`
+section, as of that fix, already reads:
 
 ```ts
 	{
@@ -3129,10 +3138,13 @@ Change (currently lines 157–163):
 		path: "/address",
 		icon: "carbon:enterprise",
 		status: "coming-soon",
-		pages: [{ key: "formationRequests", path: "formation-requests" }]
+		pages: [{ key: "privateOfficeRequests", path: "private-office-requests" }]
 	},
 ```
-to
+
+Only `status` still needs to change here, to `"active"` — the key/path rename is
+already done. Change it to:
+
 ```ts
 	{
 		key: "address",
@@ -3146,6 +3158,15 @@ to
 (`status` flips to `"active"` because, after this task, 100% of this section's pages
 have a real screen — matching the precedent set by the `spatial` and `system`
 sections, both `"active"` only once every one of their pages shipped.)
+
+**Also as part of this task:** update `navigation/__tests__/navigation.spec.ts`'s
+"marks exactly the two built sections as active" test — it currently hardcodes `2`;
+after this task's status flips (this section plus `members`, Step 2 below), the true
+count becomes `4`. This is a legitimate update to an existing test's asserted count as
+the codebase's own invariant changes (not a weakening of the test — the test still
+asserts an exact count, just the correct one), not a case of "editing a test to make it
+pass" in the sense the plan prohibits (that prohibition is about not gaming assertions
+to dodge a real defect, which this is not).
 
 - [ ] **Step 2: Update the `members` section's status in sections.ts**
 
