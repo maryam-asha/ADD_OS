@@ -336,7 +336,7 @@
 			"incubate": "Incubate",
 			"accelerate": "Accelerate",
 			"mentors": "Mentors",
-			"formationRequests": "Formation requests",
+			"privateOfficeRequests": "Private office requests",
 			"content": "Content",
 			"partners": "Partners",
 			"accountSecurity": "Account & security",
@@ -365,6 +365,76 @@
 		},
 		"validation": {
 			"required": "{field} is required."
+		}
+	},
+	"privateOfficeRequests": {
+		"description": "Prospects requesting a private office, moving from requested to quoted to contracted.",
+		"columns": { "prospectName": "Prospect", "contact": "Contact", "status": "Status", "quoteRef": "Quote ref", "actions": "Actions" },
+		"status": { "requested": "Requested", "quoted": "Quoted", "contracted": "Contracted" },
+		"create": { "button": "New request", "title": "New private office request", "success": "Request created." },
+		"markAsQuoted": {
+			"button": "Convert to quote",
+			"title": "Convert to quote",
+			"quoteRefLabel": "Quote reference",
+			"quoteRefPlaceholder": "Q-2026-0001",
+			"success": "Request marked as quoted."
+		},
+		"contractedLocked": "This request became a company and can no longer change status here.",
+		"delete": { "success": "Request deleted." },
+		"form": { "prospectName": "Prospect name", "contact": "Contact" },
+		"validation": {
+			"prospectNameRequired": "Prospect name is required.",
+			"contactRequired": "Contact is required.",
+			"quoteRefRequired": "Quote reference is required."
+		},
+		"loadError": "Couldn't load private office requests. You may not have permission to view this page.",
+		"empty": "No private office requests found.",
+		"stats": { "total": "Total requests", "requested": "Requested", "quoted": "Quoted", "contracted": "Contracted" }
+	},
+	"companies": {
+		"description": "Companies created from a quoted private office request. Created here only — never self-service.",
+		"columns": { "legalName": "Legal name", "contractRef": "Contract ref", "branch": "Branch", "status": "Status", "actions": "Actions" },
+		"status": { "active": "Active", "inactive": "Inactive" },
+		"create": {
+			"button": "New company",
+			"title": "New company",
+			"success": "Company created.",
+			"noQuotedRequestsTitle": "No quoted requests yet",
+			"noQuotedRequestsBody": "A company can only be created from a quoted private office request. Go to Private Office Requests and convert one to a quote first.",
+			"goToRequests": "Go to Private Office Requests"
+		},
+		"changeStatus": { "button": "Change status", "title": "Change status", "success": "Status updated." },
+		"viewMembers": { "button": "View members" },
+		"form": { "privateOfficeRequest": "Private office request", "branch": "Branch", "legalName": "Legal name", "contractRef": "Contract ref" },
+		"validation": {
+			"privateOfficeRequestRequired": "A quoted request is required.",
+			"branchRequired": "Branch is required.",
+			"legalNameRequired": "Legal name is required.",
+			"contractRefRequired": "Contract ref is required."
+		},
+		"loadError": "Couldn't load companies. You may not have permission to view this page.",
+		"empty": "No companies found.",
+		"stats": { "total": "Total companies", "active": "Active", "inactive": "Inactive" },
+		"detail": { "title": "Company", "loadError": "Couldn't load this company." }
+	},
+	"companyMembers": {
+		"columns": { "userId": "User ID", "doorAccess": "Door access", "isAdmin": "Admin", "actions": "Actions" },
+		"add": {
+			"button": "Add member",
+			"title": "Add company member",
+			"userLabel": "User",
+			"userRequired": "Select a user.",
+			"doorAccessLabel": "Door access enabled",
+			"adminLabel": "Company admin",
+			"adminHint": "The first admin for a company can only be set here — an existing company admin can only promote another member, not appoint the first one.",
+			"success": "Member added.",
+			"alreadyMemberError": "This user is already a member of this company."
+		},
+		"remove": {
+			"confirmTitle": "Remove this member?",
+			"confirmOk": "Remove",
+			"confirmCancel": "Cancel",
+			"success": "Member removed."
 		}
 	}
 }

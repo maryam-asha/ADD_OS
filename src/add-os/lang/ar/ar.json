@@ -340,7 +340,7 @@
 			"incubate": "برنامج Incubate",
 			"accelerate": "برنامج Accelerate",
 			"mentors": "المرشدون",
-			"formationRequests": "طلبات التأسيس",
+			"privateOfficeRequests": "طلبات المكاتب الخاصة",
 			"content": "المحتوى",
 			"partners": "الشركاء",
 			"accountSecurity": "الحساب والأمان",
@@ -369,6 +369,76 @@
 		},
 		"validation": {
 			"required": "{field} مطلوب."
+		}
+	},
+	"privateOfficeRequests": {
+		"description": "طلبات العملاء المحتملين لمكتب خاص، من مُقدَّم إلى مُسعَّر إلى متعاقَد.",
+		"columns": { "prospectName": "العميل المحتمل", "contact": "التواصل", "status": "الحالة", "quoteRef": "مرجع العرض", "actions": "إجراءات" },
+		"status": { "requested": "مُقدَّم", "quoted": "مُسعَّر", "contracted": "متعاقَد" },
+		"create": { "button": "طلب جديد", "title": "طلب مكتب خاص جديد", "success": "تم إنشاء الطلب." },
+		"markAsQuoted": {
+			"button": "تحويل إلى عرض سعر",
+			"title": "تحويل إلى عرض سعر",
+			"quoteRefLabel": "مرجع عرض السعر",
+			"quoteRefPlaceholder": "مثال: Q-2026-0001",
+			"success": "تم تحويل الطلب إلى مُسعَّر."
+		},
+		"contractedLocked": "أصبح هذا الطلب شركة ولا يمكن تغيير حالته من هنا بعد الآن.",
+		"delete": { "success": "تم حذف الطلب." },
+		"form": { "prospectName": "اسم العميل المحتمل", "contact": "التواصل" },
+		"validation": {
+			"prospectNameRequired": "اسم العميل المحتمل مطلوب.",
+			"contactRequired": "معلومات التواصل مطلوبة.",
+			"quoteRefRequired": "مرجع عرض السعر مطلوب."
+		},
+		"loadError": "تعذّر تحميل طلبات المكاتب الخاصة. قد لا تملك صلاحية عرض هذه الصفحة.",
+		"empty": "لا توجد طلبات مكاتب خاصة.",
+		"stats": { "total": "إجمالي الطلبات", "requested": "مُقدَّمة", "quoted": "مُسعَّرة", "contracted": "متعاقَدة" }
+	},
+	"companies": {
+		"description": "الشركات المُنشأة من طلب مكتب خاص مُسعَّر. تُنشأ من هنا فقط — لا خدمة ذاتية أبداً.",
+		"columns": { "legalName": "الاسم القانوني", "contractRef": "مرجع العقد", "branch": "الفرع", "status": "الحالة", "actions": "إجراءات" },
+		"status": { "active": "نشطة", "inactive": "غير نشطة" },
+		"create": {
+			"button": "شركة جديدة",
+			"title": "شركة جديدة",
+			"success": "تم إنشاء الشركة.",
+			"noQuotedRequestsTitle": "لا توجد طلبات مُسعَّرة بعد",
+			"noQuotedRequestsBody": "لا يمكن إنشاء شركة إلا من طلب مكتب خاص مُسعَّر. توجّه إلى طلبات المكاتب الخاصة وحوّل طلباً إلى عرض سعر أولاً.",
+			"goToRequests": "الذهاب إلى طلبات المكاتب الخاصة"
+		},
+		"changeStatus": { "button": "تغيير الحالة", "title": "تغيير الحالة", "success": "تم تحديث الحالة." },
+		"viewMembers": { "button": "عرض الأعضاء" },
+		"form": { "privateOfficeRequest": "طلب المكتب الخاص", "branch": "الفرع", "legalName": "الاسم القانوني", "contractRef": "مرجع العقد" },
+		"validation": {
+			"privateOfficeRequestRequired": "طلب مُسعَّر مطلوب.",
+			"branchRequired": "الفرع مطلوب.",
+			"legalNameRequired": "الاسم القانوني مطلوب.",
+			"contractRefRequired": "مرجع العقد مطلوب."
+		},
+		"loadError": "تعذّر تحميل الشركات. قد لا تملك صلاحية عرض هذه الصفحة.",
+		"empty": "لا توجد شركات.",
+		"stats": { "total": "إجمالي الشركات", "active": "نشطة", "inactive": "غير نشطة" },
+		"detail": { "title": "الشركة", "loadError": "تعذّر تحميل بيانات هذه الشركة." }
+	},
+	"companyMembers": {
+		"columns": { "userId": "معرّف المستخدم", "doorAccess": "الوصول للأبواب", "isAdmin": "أدمن", "actions": "إجراءات" },
+		"add": {
+			"button": "إضافة عضو",
+			"title": "إضافة عضو للشركة",
+			"userLabel": "المستخدم",
+			"userRequired": "اختر مستخدماً.",
+			"doorAccessLabel": "تفعيل الوصول للأبواب",
+			"adminLabel": "أدمن الشركة",
+			"adminHint": "أول أدمن للشركة لا يُعيَّن إلا من هنا — أدمن الشركة القائم لا يستطيع إلا ترقية عضو موجود، لا تعيين الأول.",
+			"success": "تمت إضافة العضو.",
+			"alreadyMemberError": "هذا المستخدم عضو بالفعل في هذه الشركة."
+		},
+		"remove": {
+			"confirmTitle": "إزالة هذا العضو؟",
+			"confirmOk": "إزالة",
+			"confirmCancel": "إلغاء",
+			"success": "تمت إزالة العضو."
 		}
 	},
 	"sun_description": "الشمس نجم متوسط الحجم يقع في مركز نظامنا الشمسي. وهي مصدر الضوء والحرارة اللذين يحفظان الحياة على الأرض. تتكوّن أساساً من الهيدروجين والهيليوم، وتولّد طاقتها عبر الاندماج النووي. وتُبقي كتلتها وجاذبيتها الكواكب والأجرام السماوية الأخرى في مدارات حولها."
