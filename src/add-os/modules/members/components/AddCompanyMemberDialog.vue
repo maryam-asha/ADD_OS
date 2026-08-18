@@ -10,7 +10,7 @@
 			</n-form-item>
 			<n-form-item path="is_admin" :label="t('companyMembers.add.adminLabel')">
 				<n-switch v-model:value="form.is_admin" />
-				<p class="mt-1 text-xs text-gray-500">{{ t("companyMembers.add.adminHint") }}</p>
+				<p class="mt-1 text-secondary">{{ t("companyMembers.add.adminHint") }}</p>
 			</n-form-item>
 		</n-form>
 		<template #footer>
