@@ -128,6 +128,7 @@ const quoteRules: FormRules = {
 function openQuote(row: PrivateOfficeRequest) {
 	quoteTargetId.value = row.id
 	quoteForm.value = { quote_ref: "" }
+	quoteFormRef.value?.restoreValidation()
 	quoteModalVisible.value = true
 }
 
