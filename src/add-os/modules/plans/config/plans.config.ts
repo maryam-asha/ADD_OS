@@ -45,7 +45,7 @@ export function buildPlanColumns(t: ComposerTranslation, locale: SupportedLocale
 					{
 						default: () => [
 							h(Icon, { name: row.is_active ? STATUS_ICONS.success : STATUS_ICONS.danger, size: 14 }),
-							` ${t(row.is_active ? "branches.isActiveYes" : "branches.isActiveNo")}`
+							` ${t(row.is_active ? "packages.isActiveYes" : "packages.isActiveNo")}`
 						]
 					}
 				)

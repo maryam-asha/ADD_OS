@@ -290,6 +290,8 @@
 	},
 	"packages": {
 		"columns": { "name": "Name", "type": "Type", "price": "Price", "duration": "Duration (days)", "isActive": "Active" },
+		"isActiveYes": "Active",
+		"isActiveNo": "Inactive",
 		"type": { "subscription": "Subscription", "oneTime": "One-time" },
 		"create": { "button": "New plan", "title": "New plan", "success": "Plan created." },
 		"edit": { "title": "Edit plan", "success": "Plan updated." },
