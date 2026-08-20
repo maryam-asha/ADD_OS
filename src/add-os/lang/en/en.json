@@ -288,6 +288,26 @@
 		},
 		"loadError": "Couldn't load seats & desks. You may not have permission to view this page."
 	},
+	"packages": {
+		"columns": { "name": "Name", "type": "Type", "price": "Price", "duration": "Duration (days)", "isActive": "Active" },
+		"type": { "subscription": "Subscription", "oneTime": "One-time" },
+		"create": { "button": "New plan", "title": "New plan", "success": "Plan created." },
+		"edit": { "title": "Edit plan", "success": "Plan updated." },
+		"delete": { "success": "Plan deleted." },
+		"form": {
+			"name": "Name",
+			"isSubscription": "Subscription plan",
+			"price": "Price",
+			"pricingCurrency": "Currency",
+			"durationDays": "Duration (days)",
+			"includedHours": "Included hours",
+			"overageRate": "Overage rate (per hour)",
+			"isActive": "Active",
+			"order": "Display order"
+		},
+		"loadError": "Couldn't load plans. You may not have permission to view this page.",
+		"stats": { "total": "Total plans", "active": "Active", "subscriptions": "Subscriptions" }
+	},
 	"shortcuts": {
 		"title": "Shortcuts"
 	},

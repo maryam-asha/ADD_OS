@@ -292,6 +292,26 @@
 		},
 		"loadError": "تعذّر تحميل المقاعد والطاولات. قد لا تملك صلاحية عرض هذه الصفحة."
 	},
+	"packages": {
+		"columns": { "name": "الاسم", "type": "النوع", "price": "السعر", "duration": "المدة (أيام)", "isActive": "نشط" },
+		"type": { "subscription": "اشتراك", "oneTime": "دفعة واحدة" },
+		"create": { "button": "باقة جديدة", "title": "باقة جديدة", "success": "تم إنشاء الباقة." },
+		"edit": { "title": "تعديل الباقة", "success": "تم تحديث الباقة." },
+		"delete": { "success": "تم حذف الباقة." },
+		"form": {
+			"name": "الاسم",
+			"isSubscription": "باقة اشتراك",
+			"price": "السعر",
+			"pricingCurrency": "العملة",
+			"durationDays": "المدة (أيام)",
+			"includedHours": "الساعات المتضمنة",
+			"overageRate": "سعر الساعة الإضافية",
+			"isActive": "نشط",
+			"order": "ترتيب العرض"
+		},
+		"loadError": "تعذّر تحميل الباقات. قد لا تملك صلاحية عرض هذه الصفحة.",
+		"stats": { "total": "إجمالي الباقات", "active": "نشطة", "subscriptions": "اشتراكات" }
+	},
 	"shortcuts": {
 		"title": "الاختصارات"
 	},
