@@ -17,7 +17,7 @@ const props = defineProps<{
 	columns: DataTableColumns<T>
 	data: T[]
 	loading: boolean
-	onEdit: (row: T) => void
+	onEdit?: (row: T) => void
 	onDelete?: (row: T) => void | Promise<void>
 	/**
 	 * Extra confirm-dialog copy shown above the generic prompt — e.g. a
@@ -62,11 +62,15 @@ function renderEditActions(row: T) {
 	const editLabel = t("resourceCrud.table.editAction")
 
 	return h("div", { class: "flex gap-2" }, [
-		h(
-			NButton,
-			{ text: true, type: "primary", "aria-label": editLabel, title: editLabel, onClick: () => props.onEdit(row) },
-			{ icon: () => h(Icon, { name: "carbon:edit", size: 18 }) }
-		),
+		...(props.onEdit
+			? [
+					h(
+						NButton,
+						{ text: true, type: "primary", "aria-label": editLabel, title: editLabel, onClick: () => props.onEdit!(row) },
+						{ icon: () => h(Icon, { name: "carbon:edit", size: 18 }) }
+					)
+				]
+			: []),
 		...(props.extraActions?.(row) ?? [])
 	])
 }
@@ -88,10 +92,10 @@ function renderDeleteAction(row: T) {
  * actual rule; this only avoids showing a control expected to 403.
  */
 const tableColumns = computed<DataTableColumns<T>>(() => {
-	const columns: DataTableColumns<T> = [
-		...props.columns,
-		{ title: t("resourceCrud.table.actionsColumn"), key: "actions", render: renderEditActions }
-	]
+	const columns: DataTableColumns<T> = [...props.columns]
+	if (props.onEdit || props.extraActions) {
+		columns.push({ title: t("resourceCrud.table.actionsColumn"), key: "actions", render: renderEditActions })
+	}
 	if (props.onDelete) {
 		columns.push({ title: "", key: "delete", render: renderDeleteAction })
 	}

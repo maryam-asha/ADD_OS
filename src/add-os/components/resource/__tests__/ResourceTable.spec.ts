@@ -180,4 +180,27 @@ describe("resourceTable", () => {
 		expect(document.body.textContent).toContain("This also deletes everything under it.")
 		wrapper.unmount()
 	})
+
+	it("renders no actions column at all when onEdit is absent", () => {
+		const wrapper = mountTable({ onEdit: undefined, onDelete: undefined })
+
+		expect(wrapper.text()).not.toContain("Actions")
+		const editButton = wrapper.findAll("button").find(button => button.attributes("aria-label") === "Edit")
+		expect(editButton).toBeUndefined()
+
+		wrapper.unmount()
+	})
+
+	it("still renders extraActions when onEdit is absent but extraActions is provided", () => {
+		const onExtra = vi.fn()
+		const wrapper = mountTable({
+			onEdit: undefined,
+			extraActions: (row: Row) => [h("button", { onClick: () => onExtra(row) }, "Extra")]
+		})
+
+		const extraButton = wrapper.findAll("button").find(button => button.text() === "Extra")
+		expect(extraButton?.exists()).toBe(true)
+
+		wrapper.unmount()
+	})
 })
