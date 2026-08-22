@@ -7,7 +7,7 @@ import type { BusinessHourException, BusinessHourExceptionPayload } from "@/add-
 /** Confirmed live: lowercase full English names only — "Sunday" (capitalized) is rejected. */
 const DAYS_OF_WEEK: DayOfWeek[] = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
 
-const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/
+const TIME_PATTERN = /^(?:[01]\d|2[0-3]):[0-5]\d$/
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
 
 function dayOfWeekOptions(t: ComposerTranslation): SelectOption[] {

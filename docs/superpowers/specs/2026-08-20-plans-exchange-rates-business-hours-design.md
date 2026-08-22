@@ -231,3 +231,31 @@ isolated change to a shared component, confirmed clean of the unrelated stray
 `ResourceFormDrawer.vue` diff already flagged elsewhere in this doc. See the implementation
 plan's Task 1. Nothing above is superseded - this is an addition the original design didn't
 need to consider until the task breakdown reached Exchange Rates' actual row-action shape.
+
+## Addendum (post-implementation verification, 2026-08-22)
+
+Task 11's final verification pass reviewed all 10 implementation tasks' commits against this
+design and found two implementation-time deviations from the plan's literal sample code,
+both already logged in `.superpowers/sdd/2026-08-20-plans-exchange-rates-business-hours/progress.md`
+and reproduced here so the design record carries them too. Nothing above is superseded —
+both are corrections to sample code, not to a design decision.
+
+1. **Task 8 — `timeRule` early-return guard.** The plan's Step-3 sample `timeRule` validator,
+   transcribed literally, had no early return for the `required=false` + empty/null case and
+   would have failed the plan's own listed test for that case. The implementer added an
+   early-return guard (`if (!required && (value === "" || value === null)) return true`)
+   before the pattern check — see `src/add-os/modules/spatial/config/business-hours.config.ts`.
+   Ruling recorded in `progress.md`: the fix is correct and necessary; the plan's sample code
+   had a latent bug; no further action needed.
+
+2. **Task 10 — import reordering via `eslint --fix`.** `BusinessHoursPage.vue`'s brief code
+   block, transcribed verbatim, failed this repo's pre-existing `perfectionist/sort-imports`/
+   `sort-named-imports` rules (confirmed clean on `SeatsDesksPage.vue`/`BranchesPage.vue`, so
+   not a rule introduced by this task). The implementer ran `eslint --fix` on the affected
+   files, which reordered import statements and one named-import group only — no logic or
+   string literals changed. Full detail in
+   `.superpowers/sdd/2026-08-20-plans-exchange-rates-business-hours/task-10-report.md`
+   ("Deviation from brief: import ordering").
+
+No other deviations from this design surfaced during the Task 11 review of the full commit
+range (`8f88f97..a0dca3f`) against the sections above.

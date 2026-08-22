@@ -1,8 +1,9 @@
+import type { ComposerTranslation } from "vue-i18n"
 import { describe, expect, it } from "vitest"
 
 import { businessHourExceptionFields, businessHourFields } from "../business-hours.config"
 
-const t = ((key: string) => key) as (key: string, named?: Record<string, unknown>) => string
+const t = ((key: string) => key) as ComposerTranslation
 
 describe("businessHourFields", () => {
 	it("open_time and close_time rules accept HH:mm", () => {
