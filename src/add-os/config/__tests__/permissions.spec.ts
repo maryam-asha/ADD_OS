@@ -16,7 +16,7 @@ vi.mock("@/stores/auth", () => ({
 	})
 }))
 
-const { canDeleteSpatialResource, CASCADING_SPATIAL_RESOURCES, SPATIAL_RESOURCE_DELETE_ROLE } = await import("../permissions")
+const { canDeleteSpatialResource, canDeleteBusinessHours, CASCADING_SPATIAL_RESOURCES, SPATIAL_RESOURCE_DELETE_ROLE, BUSINESS_HOURS_DELETE_ROLE } = await import("../permissions")
 
 describe("permissions", () => {
 	it("maps every spatial resource to admin, per the collection's Admin-only annotation", () => {
@@ -77,5 +77,26 @@ describe("cascade-delete warning copy", () => {
 		const enBundle = en as Record<string, { delete?: { cascadeWarning?: string } }>
 		expect(enBundle.resources?.delete?.cascadeWarning).toBeUndefined()
 		expect(enBundle.seatsDesks?.delete?.cascadeWarning).toBeUndefined()
+	})
+})
+
+describe("business hours permissions", () => {
+	it("is admin-only, per the collection's Admin-only annotation on both delete endpoints", () => {
+		expect(BUSINESS_HOURS_DELETE_ROLE).toBe("admin")
+	})
+
+	it("grants delete to admin", () => {
+		state.role = "admin"
+		expect(canDeleteBusinessHours()).toBe(true)
+	})
+
+	it("denies delete to operations", () => {
+		state.role = "operations"
+		expect(canDeleteBusinessHours()).toBe(false)
+	})
+
+	it("denies delete when there is no role", () => {
+		state.role = null
+		expect(canDeleteBusinessHours()).toBe(false)
 	})
 })

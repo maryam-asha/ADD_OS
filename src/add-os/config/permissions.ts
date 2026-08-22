@@ -65,3 +65,17 @@ export const CASCADING_SPATIAL_RESOURCES: ReadonlySet<SpatialResourceKey> = new 
 export function canDeleteSpatialResource(resource: SpatialResourceKey): boolean {
 	return useAuthStore().isRoleGranted(SPATIAL_RESOURCE_DELETE_ROLE[resource])
 }
+
+/**
+ * Business Hours delete + Business Hour Exception delete are both "Admin-only
+ * (not operations)." per the collection — same rule, so one shared constant and
+ * one function cover both endpoints rather than duplicating
+ * `SPATIAL_RESOURCE_DELETE_ROLE`'s per-resource map for a single value. Kept
+ * separate from that map: Business Hours isn't a spatial resource, it just
+ * lives in that nav section.
+ */
+export const BUSINESS_HOURS_DELETE_ROLE: Role = "admin"
+
+export function canDeleteBusinessHours(): boolean {
+	return useAuthStore().isRoleGranted(BUSINESS_HOURS_DELETE_ROLE)
+}
