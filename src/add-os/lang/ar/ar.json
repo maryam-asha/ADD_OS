@@ -314,6 +314,16 @@
 		"loadError": "تعذّر تحميل الباقات. قد لا تملك صلاحية عرض هذه الصفحة.",
 		"stats": { "total": "إجمالي الباقات", "active": "نشطة", "subscriptions": "اشتراكات" }
 	},
+	"exchangeRates": {
+		"columns": { "currencyCode": "العملة", "rateToBase": "السعر (ليرة سورية لكل دولار)", "effectiveFrom": "ساري من" },
+		"latestBadge": "الأحدث",
+		"create": { "button": "سعر صرف جديد", "title": "سعر صرف جديد", "success": "تم إنشاء سعر الصرف." },
+		"form": { "currencyCode": "العملة", "rateToBase": "السعر (ليرة سورية لكل دولار)", "effectiveFrom": "ساري من (YYYY-MM-DD)" },
+		"validation": { "effectiveFromFormat": "أدخل تاريخاً بصيغة YYYY-MM-DD." },
+		"loadError": "تعذّر تحميل أسعار الصرف. قد لا تملك صلاحية عرض هذه الصفحة.",
+		"empty": "لا توجد أسعار صرف.",
+		"stats": { "latestUsd": "أحدث سعر صرف دولار → ليرة" }
+	},
 	"shortcuts": {
 		"title": "الاختصارات"
 	},

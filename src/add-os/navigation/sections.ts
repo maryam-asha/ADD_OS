@@ -125,7 +125,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		key: "payments",
 		path: "/payments",
 		icon: "carbon:currency",
-		status: "coming-soon",
+		status: "active",
 		pages: [
 			{ key: "transactions", path: "transactions" },
 			{ key: "paymentMethods", path: "methods" },

@@ -310,6 +310,16 @@
 		"loadError": "Couldn't load plans. You may not have permission to view this page.",
 		"stats": { "total": "Total plans", "active": "Active", "subscriptions": "Subscriptions" }
 	},
+	"exchangeRates": {
+		"columns": { "currencyCode": "Currency", "rateToBase": "Rate (SYP per 1 USD)", "effectiveFrom": "Effective from" },
+		"latestBadge": "Latest",
+		"create": { "button": "New rate", "title": "New exchange rate", "success": "Exchange rate created." },
+		"form": { "currencyCode": "Currency", "rateToBase": "Rate (SYP per 1 USD)", "effectiveFrom": "Effective from (YYYY-MM-DD)" },
+		"validation": { "effectiveFromFormat": "Enter a date as YYYY-MM-DD." },
+		"loadError": "Couldn't load exchange rates. You may not have permission to view this page.",
+		"empty": "No exchange rates found.",
+		"stats": { "latestUsd": "Latest USD → SYP rate" }
+	},
 	"shortcuts": {
 		"title": "Shortcuts"
 	},

@@ -41,7 +41,8 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"spatial.seatsDesks": () => import("@/add-os/modules/spatial/views/SeatsDesksPage.vue"),
 	"address.privateOfficeRequests": () => import("@/add-os/modules/members/views/PrivateOfficeRequestsPage.vue"),
 	"members.companies": () => import("@/add-os/modules/members/views/CompaniesPage.vue"),
-	"plans.packages": () => import("@/add-os/modules/plans/views/PlansPage.vue")
+	"plans.packages": () => import("@/add-os/modules/plans/views/PlansPage.vue"),
+	"payments.exchangeRates": () => import("@/add-os/modules/payments/views/ExchangeRatesPage.vue")
 }
 
 export function createAddOsRoutes(): RouteRecordRaw[] {
