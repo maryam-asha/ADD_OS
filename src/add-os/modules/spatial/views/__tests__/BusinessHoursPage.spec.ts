@@ -18,11 +18,16 @@ describe("businessHoursPage wiring", () => {
 	})
 
 	it("scopes both lists to the selected branch via branch_id, not an unfiltered list", () => {
-		expect(source).toContain("useResourceList<BusinessHour>(listBusinessHours, branchQuery)")
-		expect(source).toContain("useResourceList<BusinessHourException>(listBusinessHourExceptions, branchQuery)")
+		expect(source).toContain("useResourceList<BusinessHour>(listBusinessHoursForBranch, branchQuery)")
+		expect(source).toContain("useResourceList<BusinessHourException>(listBusinessHourExceptionsForBranch, branchQuery)")
 	})
 
 	it("never sends a raw HTTP call — only the composables/services layer", () => {
 		expect(source).not.toMatch(/\bfetch\(/)
+	})
+
+	it("does not call the real list service while no branch is selected, so useResourceList's immediate refetch can't issue an unfiltered request", () => {
+		expect(source).toMatch(/function listBusinessHoursForBranch\(query\?: Record<string, unknown>\) \{\s*return selectedBranchId\.value === null \? Promise\.resolve\(\[\]\) : listBusinessHours\(query\)/)
+		expect(source).toMatch(/function listBusinessHourExceptionsForBranch\(query\?: Record<string, unknown>\) \{\s*return selectedBranchId\.value === null \? Promise\.resolve\(\[\]\) : listBusinessHourExceptions\(query\)/)
 	})
 })

@@ -126,13 +126,27 @@ listBranches().then(result => {
 
 const branchQuery = computed(() => (selectedBranchId.value === null ? undefined : { branch_id: selectedBranchId.value }))
 
+// useResourceList's own watch(query, refetch, { immediate: true }) fires synchronously
+// during setup, before listBranches() above has resolved and picked a default
+// selectedBranchId — at that instant branchQuery.value is undefined. These wrappers stop
+// that first, branch-less refetch from ever reaching the network: they only call through
+// to the real service once a branch is actually selected, so GET /business-hours and
+// GET /business-hour-exceptions are never issued unfiltered.
+function listBusinessHoursForBranch(query?: Record<string, unknown>) {
+	return selectedBranchId.value === null ? Promise.resolve([]) : listBusinessHours(query)
+}
+
+function listBusinessHourExceptionsForBranch(query?: Record<string, unknown>) {
+	return selectedBranchId.value === null ? Promise.resolve([]) : listBusinessHourExceptions(query)
+}
+
 // ── Weekly schedule ──────────────────────────────────────────────────────
 const {
 	data: hours,
 	isLoading: hoursLoading,
 	error: hoursError,
 	refetch: refetchHours
-} = useResourceList<BusinessHour>(listBusinessHours, branchQuery)
+} = useResourceList<BusinessHour>(listBusinessHoursForBranch, branchQuery)
 const hourColumns = computed(() => buildBusinessHourColumns(t))
 
 const hourMutations = useResourceMutations(
@@ -175,7 +189,7 @@ const {
 	isLoading: exceptionsLoading,
 	error: exceptionsError,
 	refetch: refetchExceptions
-} = useResourceList<BusinessHourException>(listBusinessHourExceptions, branchQuery)
+} = useResourceList<BusinessHourException>(listBusinessHourExceptionsForBranch, branchQuery)
 const exceptionColumns = computed(() => buildBusinessHourExceptionColumns(t))
 
 const exceptionMutations = useResourceMutations(
@@ -230,9 +244,10 @@ async function submitException(payload: Record<string, unknown>) {
 	}
 }
 
-// Both tabs' branch-scoped lists refetch when the branch changes — refetch() (not the
-// composable's own query watcher) is called explicitly because both hourForm/exceptionForm
-// also need their branch_id reset for the next "New" click.
+// Resets both create-form drafts (hourForm/exceptionForm) to the newly selected branch, so
+// the next "New" click starts from the right branch_id. This watch does not itself trigger
+// a refetch — that's driven entirely by useResourceList's own
+// watch(query, refetch, { immediate: true }) reacting to branchQuery changing.
 watch(selectedBranchId, () => {
 	hourForm.value = emptyBusinessHourPayload(selectedBranchId.value ?? 0)
 	exceptionForm.value = emptyBusinessHourExceptionPayload(selectedBranchId.value ?? 0)
