@@ -288,6 +288,45 @@
 		},
 		"loadError": "Couldn't load seats & desks. You may not have permission to view this page."
 	},
+	"businessHours": {
+		"branchLabel": "Branch",
+		"branchPlaceholder": "Select a branch",
+		"tabs": { "weeklySchedule": "Weekly schedule", "exceptions": "Exceptions" },
+		"days": {
+			"sunday": "Sunday",
+			"monday": "Monday",
+			"tuesday": "Tuesday",
+			"wednesday": "Wednesday",
+			"thursday": "Thursday",
+			"friday": "Friday",
+			"saturday": "Saturday"
+		},
+		"columns": { "dayOfWeek": "Day", "openTime": "Opens", "closeTime": "Closes" },
+		"create": { "button": "New hours", "title": "New business hours", "success": "Business hours created." },
+		"edit": { "title": "Edit business hours", "success": "Business hours updated." },
+		"delete": { "success": "Business hours deleted." },
+		"form": { "dayOfWeek": "Day of week", "openTime": "Opens at", "closeTime": "Closes at" },
+		"validation": { "timeFormat": "Enter a time as HH:mm, e.g. 08:00." },
+		"loadError": "Couldn't load business hours. You may not have permission to view this page.",
+		"empty": "No business hours found for this branch.",
+		"exceptions": {
+			"columns": { "date": "Date", "isClosed": "Closed", "hours": "Hours", "reason": "Reason" },
+			"isClosedYes": "Closed",
+			"isClosedNo": "Open",
+			"create": { "button": "New exception", "title": "New exception", "success": "Exception created." },
+			"edit": { "title": "Edit exception", "success": "Exception updated." },
+			"delete": { "success": "Exception deleted." },
+			"form": {
+				"date": "Date (YYYY-MM-DD)",
+				"isClosed": "Closed all day",
+				"openTime": "Opens at",
+				"closeTime": "Closes at",
+				"reason": "Reason (optional)"
+			},
+			"validation": { "dateFormat": "Enter a date as YYYY-MM-DD." },
+			"empty": "No exceptions found for this branch."
+		}
+	},
 	"packages": {
 		"columns": { "name": "Name", "type": "Type", "price": "Price", "duration": "Duration (days)", "isActive": "Active" },
 		"isActiveYes": "Active",
@@ -348,6 +387,7 @@
 			"spaces": "Spaces",
 			"resources": "Resources",
 			"seatsDesks": "Seats & Desks",
+			"businessHours": "Business Hours",
 			"users": "Users",
 			"roles": "Roles & permissions",
 			"individuals": "Individuals",

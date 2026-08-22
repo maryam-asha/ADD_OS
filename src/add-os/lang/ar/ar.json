@@ -292,6 +292,45 @@
 		},
 		"loadError": "تعذّر تحميل المقاعد والطاولات. قد لا تملك صلاحية عرض هذه الصفحة."
 	},
+	"businessHours": {
+		"branchLabel": "الفرع",
+		"branchPlaceholder": "اختر فرعاً",
+		"tabs": { "weeklySchedule": "الجدول الأسبوعي", "exceptions": "الاستثناءات" },
+		"days": {
+			"sunday": "الأحد",
+			"monday": "الاثنين",
+			"tuesday": "الثلاثاء",
+			"wednesday": "الأربعاء",
+			"thursday": "الخميس",
+			"friday": "الجمعة",
+			"saturday": "السبت"
+		},
+		"columns": { "dayOfWeek": "اليوم", "openTime": "يفتح", "closeTime": "يغلق" },
+		"create": { "button": "ساعات جديدة", "title": "ساعات عمل جديدة", "success": "تم إنشاء ساعات العمل." },
+		"edit": { "title": "تعديل ساعات العمل", "success": "تم تحديث ساعات العمل." },
+		"delete": { "success": "تم حذف ساعات العمل." },
+		"form": { "dayOfWeek": "يوم الأسبوع", "openTime": "يفتح الساعة", "closeTime": "يغلق الساعة" },
+		"validation": { "timeFormat": "أدخل وقتاً بصيغة HH:mm، مثل 08:00." },
+		"loadError": "تعذّر تحميل ساعات العمل. قد لا تملك صلاحية عرض هذه الصفحة.",
+		"empty": "لا توجد ساعات عمل لهذا الفرع.",
+		"exceptions": {
+			"columns": { "date": "التاريخ", "isClosed": "مغلق", "hours": "الساعات", "reason": "السبب" },
+			"isClosedYes": "مغلق",
+			"isClosedNo": "مفتوح",
+			"create": { "button": "استثناء جديد", "title": "استثناء جديد", "success": "تم إنشاء الاستثناء." },
+			"edit": { "title": "تعديل الاستثناء", "success": "تم تحديث الاستثناء." },
+			"delete": { "success": "تم حذف الاستثناء." },
+			"form": {
+				"date": "التاريخ (YYYY-MM-DD)",
+				"isClosed": "مغلق طوال اليوم",
+				"openTime": "يفتح الساعة",
+				"closeTime": "يغلق الساعة",
+				"reason": "السبب (اختياري)"
+			},
+			"validation": { "dateFormat": "أدخل تاريخاً بصيغة YYYY-MM-DD." },
+			"empty": "لا توجد استثناءات لهذا الفرع."
+		}
+	},
 	"packages": {
 		"columns": { "name": "الاسم", "type": "النوع", "price": "السعر", "duration": "المدة (أيام)", "isActive": "نشط" },
 		"isActiveYes": "نشط",
@@ -352,6 +391,7 @@
 			"spaces": "المساحات",
 			"resources": "الموارد",
 			"seatsDesks": "المقاعد والطاولات",
+			"businessHours": "ساعات العمل",
 			"users": "المستخدمون",
 			"roles": "الأدوار والصلاحيات",
 			"individuals": "الأفراد",
