@@ -1,7 +1,7 @@
 import type { FormItemRule, SelectOption } from "naive-ui"
 import type { SupportedLocale } from "@/add-os/lang/locales"
 
-export type FieldType = "text" | "bilingual-text" | "number" | "select" | "switch"
+export type FieldType = "text" | "bilingual-text" | "number" | "select" | "switch" | "time" | "date"
 
 export interface Bilingual {
 	ar: string

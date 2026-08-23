@@ -40,8 +40,8 @@ export function buildBusinessHourColumns(t: ComposerTranslation): DataTableColum
 export function businessHourFields(t: ComposerTranslation): FieldDescriptor<BusinessHourPayload>[] {
 	return [
 		{ key: "day_of_week", labelKey: "businessHours.form.dayOfWeek", type: "select", required: true, options: dayOfWeekOptions(t) },
-		{ key: "open_time", labelKey: "businessHours.form.openTime", type: "text", rule: timeRule(t) },
-		{ key: "close_time", labelKey: "businessHours.form.closeTime", type: "text", rule: timeRule(t) }
+		{ key: "open_time", labelKey: "businessHours.form.openTime", type: "time", rule: timeRule(t) },
+		{ key: "close_time", labelKey: "businessHours.form.closeTime", type: "time", rule: timeRule(t) }
 	]
 }
 
@@ -85,7 +85,7 @@ export function businessHourExceptionFields(t: ComposerTranslation, isClosed: bo
 	}
 
 	const fields: FieldDescriptor<BusinessHourExceptionPayload>[] = [
-		{ key: "date", labelKey: "businessHours.exceptions.form.date", type: "text", rule: dateRule },
+		{ key: "date", labelKey: "businessHours.exceptions.form.date", type: "date", rule: dateRule },
 		{ key: "is_closed", labelKey: "businessHours.exceptions.form.isClosed", type: "switch" }
 	]
 
@@ -94,8 +94,8 @@ export function businessHourExceptionFields(t: ComposerTranslation, isClosed: bo
 		// required here — the "not required when closed" case is handled by omitting the
 		// fields entirely above, not by a conditional required flag.
 		fields.push(
-			{ key: "open_time", labelKey: "businessHours.exceptions.form.openTime", type: "text", rule: timeRule(t) },
-			{ key: "close_time", labelKey: "businessHours.exceptions.form.closeTime", type: "text", rule: timeRule(t) }
+			{ key: "open_time", labelKey: "businessHours.exceptions.form.openTime", type: "time", rule: timeRule(t) },
+			{ key: "close_time", labelKey: "businessHours.exceptions.form.closeTime", type: "time", rule: timeRule(t) }
 		)
 	}
 

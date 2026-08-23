@@ -19,14 +19,26 @@
 			>
 				<n-input v-if="field.type === 'text'" v-model:value="(model as Record<string, unknown>)[field.key] as string" />
 				<div v-else-if="field.type === 'bilingual-text'" class="flex w-full gap-2">
-					<n-input
-						v-model:value="((model as Record<string, unknown>)[field.key] as Bilingual).ar"
-						:placeholder="t('resourceCrud.form.arabicPlaceholder')"
-					/>
-					<n-input
-						v-model:value="((model as Record<string, unknown>)[field.key] as Bilingual).en"
-						:placeholder="t('resourceCrud.form.englishPlaceholder')"
-					/>
+					<div class="flex-1">
+						<n-input
+							v-model:value="((model as Record<string, unknown>)[field.key] as Bilingual).ar"
+							:placeholder="t('resourceCrud.form.arabicPlaceholder')"
+							:status="fieldErrors[`${field.key}.ar`] ? 'error' : undefined"
+						/>
+						<n-text v-if="fieldErrors[`${field.key}.ar`]" type="error" class="text-xs">
+							{{ fieldErrors[`${field.key}.ar`]?.[0] }}
+						</n-text>
+					</div>
+					<div class="flex-1">
+						<n-input
+							v-model:value="((model as Record<string, unknown>)[field.key] as Bilingual).en"
+							:placeholder="t('resourceCrud.form.englishPlaceholder')"
+							:status="fieldErrors[`${field.key}.en`] ? 'error' : undefined"
+						/>
+						<n-text v-if="fieldErrors[`${field.key}.en`]" type="error" class="text-xs">
+							{{ fieldErrors[`${field.key}.en`]?.[0] }}
+						</n-text>
+					</div>
 				</div>
 				<n-input-number
 					v-else-if="field.type === 'number'"
@@ -41,6 +53,22 @@
 					clearable
 				/>
 				<n-switch v-else-if="field.type === 'switch'" v-model:value="(model as Record<string, unknown>)[field.key] as boolean" />
+				<n-time-picker
+					v-else-if="field.type === 'time'"
+					:formatted-value="toPickerTimeValue((model as Record<string, unknown>)[field.key])"
+					format="HH:mm"
+					value-format="HH:mm"
+					class="w-full"
+					@update:formatted-value="(value: string | null) => setPickerValue(field.key, value)"
+				/>
+				<n-date-picker
+					v-else-if="field.type === 'date'"
+					:formatted-value="toPickerDateValue((model as Record<string, unknown>)[field.key])"
+					format="yyyy-MM-dd"
+					value-format="yyyy-MM-dd"
+					class="w-full"
+					@update:formatted-value="(value: string | null) => setPickerValue(field.key, value)"
+				/>
 			</n-form-item>
 		</n-form>
 		<template #footer>
@@ -55,7 +83,7 @@
 <script setup lang="ts" generic="TModel extends Record<string, unknown>">
 import type { FormInst, FormRules, SelectOption } from "naive-ui"
 import type { Bilingual, FieldDescriptor } from "./field-types"
-import { NButton, NForm, NFormItem, NInput, NInputNumber, NModal, NSelect, NSwitch } from "naive-ui"
+import { NButton, NDatePicker, NForm, NFormItem, NInput, NInputNumber, NModal, NSelect, NSwitch, NText, NTimePicker } from "naive-ui"
 import { computed, reactive, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { ApiError } from "@/add-os/services/api"
@@ -148,6 +176,63 @@ for (const field of props.fields) {
 	)
 }
 
+const TIME_DISPLAY_PATTERN = /^(?:[01]\d|2[0-3]):[0-5]\d$/
+const DATE_DISPLAY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/
+
+/**
+ * NTimePicker/NDatePicker strictly parse `formatted-value` (via date-fns)
+ * into an internal timestamp, and only ever special-case `null` as "no
+ * value" — every other string, including a plain empty one, gets run
+ * through that parse and then `format()`. An unparseable string produces an
+ * Invalid Date, and formatting one throws synchronously during setup —
+ * confirmed by mounting both pickers directly: `open_time: ""` and
+ * `date: ""`, which are exactly today's `emptyBusinessHourPayload` /
+ * `emptyBusinessHourExceptionPayload` defaults, crash immediately, and so
+ * does a genuinely malformed legacy value like `"25:00"`.
+ *
+ * These two functions are the pickers' own crash-avoidance shape check, not
+ * the field's business rule — they only decide what is safe to hand the
+ * picker without it throwing, so they stay this minimal. A value that fails
+ * here still passes through to the picker as `null` (displays as empty)
+ * while the model itself is left untouched: `field.rule` (TIME_PATTERN /
+ * DATE_PATTERN in business-hours.config.ts) is the real validator and still
+ * catches it at submit, exactly as it did when these fields were plain text.
+ *
+ * Time needs only the regex: hour/minute have fixed, context-independent
+ * ranges. Date needs a further round-trip through `Date`'s local-component
+ * constructor, because the shape regex alone accepts calendar-invalid dates
+ * like `"2026-02-30"` that date-fns still fails to parse.
+ */
+function toPickerTimeValue(value: unknown): string | null {
+	return typeof value === "string" && TIME_DISPLAY_PATTERN.test(value) ? value : null
+}
+
+function toPickerDateValue(value: unknown): string | null {
+	if (typeof value !== "string") return null
+	const match = DATE_DISPLAY_PATTERN.exec(value)
+	if (!match) return null
+
+	const [, yearStr, monthStr, dayStr] = match
+	const year = Number(yearStr)
+	const month = Number(monthStr)
+	const day = Number(dayStr)
+	const parsed = new Date(year, month - 1, day)
+	const isRealCalendarDate = parsed.getFullYear() === year && parsed.getMonth() === month - 1 && parsed.getDate() === day
+
+	return isRealCalendarDate ? value : null
+}
+
+/**
+ * Writes the picker's own emitted value back to the model, never a
+ * timestamp. A cleared picker emits `null`; mapped to `""` so a field the
+ * user never touched, or clears, keeps today's empty-string representation
+ * instead of introducing `null` as a second "empty" the payload never had.
+ */
+function setPickerValue(key: string, value: string | null) {
+	const target = model.value as Record<string, unknown>
+	target[key] = value ?? ""
+}
+
 /**
  * Both halves are required, not either: the dashboard renders whichever half
  * matches the active locale, so a branch named only in English is a blank row
@@ -157,6 +242,31 @@ for (const field of props.fields) {
 function isBilingualComplete(value: unknown): boolean {
 	const bilingual = value as Partial<Bilingual> | null | undefined
 	return Boolean(bilingual?.ar?.trim()) && Boolean(bilingual?.en?.trim())
+}
+
+/**
+ * A bilingual value is an object, and async-validator cannot check one with its
+ * built-in keywords: `required` alone never fires, because `isEmptyValue` counts
+ * only undefined/null/""/[] as empty — and a rule carrying neither `type` nor
+ * `validator` defaults to `type: "string"`, whose type check then rejects the
+ * object even when both halves are filled. That was diagnosed for
+ * `bilingual-text` first, because the failure there is loud: the object always
+ * fails the forced string check, so the field became unsubmittable outright.
+ *
+ * Generalized afterward: the same forced `type: "string"` also rejects a
+ * `number` field holding `0`, a `switch` holding `false`, and a `select` holding
+ * a numeric id — all values async-validator's type check treats as the wrong
+ * type, none of them actually empty. Those failures are quieter (the field still
+ * submits once the user retypes something string-shaped into it) but wrong for
+ * the same root-cause reason, so this replaces the bilingual-only check with one
+ * emptiness rule for every field type rather than leaving two parallel paths.
+ * Only null, undefined, and a whitespace-only string count as empty for
+ * non-bilingual fields — `0` and `false` are real values.
+ */
+function isFieldValueEmpty(field: FieldDescriptor<TModel>, value: unknown): boolean {
+	if (field.type === "bilingual-text") return !isBilingualComplete(value)
+	if (value === null || value === undefined) return true
+	return typeof value === "string" && value.trim().length === 0
 }
 
 const rules = computed<FormRules>(() => {
@@ -170,33 +280,16 @@ const rules = computed<FormRules>(() => {
 
 		const message = t("resourceCrud.validation.required", { field: t(field.labelKey) })
 
-		if (field.type === "bilingual-text") {
-			/**
-			 * A bilingual value is an object, and async-validator cannot check one
-			 * with its built-in keywords: `required` alone never fires, because
-			 * `isEmptyValue` counts only undefined/null/""/[] as empty — and a rule
-			 * carrying neither `type` nor `validator` defaults to `type: "string"`,
-			 * whose type check then rejects the object even when both halves are
-			 * filled. So the bare-keyword rule made these fields unsubmittable
-			 * rather than under-validated.
-			 *
-			 * A custom `validator` replaces the built-in check outright
-			 * (`getValidationMethod` prefers it, and `getType` stops forcing
-			 * "string" once it is present). `required` is kept purely so naive-ui
-			 * still marks the label with its asterisk.
-			 */
-			result[field.key] = {
-				required: true,
-				trigger: ["blur", "change", "input"],
-				validator: (_rule, value) => isBilingualComplete(value) || new Error(message)
-			}
-			continue
-		}
-
+		/**
+		 * A custom `validator` replaces the built-in keyword check outright
+		 * (`getValidationMethod` prefers it, and `getType` stops forcing "string"
+		 * once it is present). `required` is kept purely so naive-ui still marks
+		 * the label with its asterisk.
+		 */
 		result[field.key] = {
 			required: true,
-			message,
-			trigger: ["blur", "change", "input"]
+			trigger: ["blur", "change", "input"],
+			validator: (_rule, value) => (isFieldValueEmpty(field, value) ? new Error(message) : true)
 		}
 	}
 	return result
@@ -206,17 +299,36 @@ const rules = computed<FormRules>(() => {
  * Laravel reports a bilingual field's errors under dotted sub-keys (`name.ar`,
  * `name.en`) and never the bare `name` the template looks up, so a 422 on those
  * fields used to show the user nothing at all — and 422s are deliberately not
- * toasted either, leaving no feedback anywhere. Fold every key onto its root
- * segment, concatenating when more than one sub-key of the same field failed.
+ * toasted either, leaving no feedback anywhere. This used to fold every key onto
+ * its root segment so at least something rendered, concatenating when more than
+ * one sub-key of the same field failed.
+ *
+ * That folding was removed for bilingual-text: it collapsed two
+ * independently-failing inputs into one message with no indication of which
+ * half was wrong, and neither n-input ever got its own error styling. Those
+ * dotted keys are kept as-is — `name.ar` and `name.en` stay distinct entries in
+ * `fieldErrors` — and the bilingual-text template branch looks each one up
+ * directly for its own `status` and feedback line.
+ *
+ * But the fold was doing a second job that has no replacement yet: a dotted key
+ * whose root belongs to a field that is NOT bilingual-text (no other type
+ * renders a per-segment breakdown) still needs to land *somewhere*, or the
+ * message renders nowhere — the exact silent-422 failure this function exists
+ * to prevent. So the fold is restored, but only for that case: a dotted key
+ * folds onto its root iff a field with that key exists and its type isn't
+ * `bilingual-text`. Everything else (an undotted key, or a dotted key whose
+ * root is bilingual-text or matches no known field) passes through unchanged.
  */
-function foldFieldErrors(errors: Record<string, string[]>): Record<string, string[]> {
-	const folded: Record<string, string[]> = {}
+function foldNonBilingualDottedErrors(errors: Record<string, string[]>): Record<string, string[]> {
+	const result: Record<string, string[]> = {}
 	for (const [key, messages] of Object.entries(errors)) {
-		const root = key.split(".")[0]
-		const list = Array.isArray(messages) ? messages : [String(messages)]
-		folded[root] = [...(folded[root] ?? []), ...list]
+		const dot = key.indexOf(".")
+		const root = dot === -1 ? key : key.slice(0, dot)
+		const rootField = dot === -1 ? undefined : props.fields.find(field => field.key === root)
+		const target = rootField && rootField.type !== "bilingual-text" ? root : key
+		result[target] = [...(result[target] ?? []), ...messages]
 	}
-	return folded
+	return result
 }
 
 async function handleSubmit() {
@@ -232,7 +344,7 @@ async function handleSubmit() {
 		show.value = false
 	} catch (caught) {
 		if (caught instanceof ApiError && caught.status === 422 && caught.data?.errors) {
-			fieldErrors.value = foldFieldErrors(caught.data.errors)
+			fieldErrors.value = foldNonBilingualDottedErrors(caught.data.errors)
 		}
 	}
 }

@@ -1,3 +1,4 @@
+import type { FormItemRule } from "naive-ui"
 import type { Bilingual, FieldDescriptor } from "../field-types"
 // src/add-os/components/resource/__tests__/ResourceFormDrawer.spec.ts
 import { flushPromises, mount } from "@vue/test-utils"
@@ -17,7 +18,7 @@ const i18n = createI18n({
 				form: { submit: "Save", cancel: "Cancel", arabicPlaceholder: "Arabic", englishPlaceholder: "English" },
 				validation: { required: "{field} is required." }
 			},
-			x: { region: "Region", city: "City", label: "Label", name: "Name" }
+			x: { region: "Region", city: "City", label: "Label", name: "Name", price: "Price", branchId: "Branch", active: "Active" }
 		}
 	}
 })
@@ -35,6 +36,26 @@ interface Model extends Record<string, unknown> {
 
 interface BilingualModel extends Record<string, unknown> {
 	name: Bilingual
+}
+
+interface NumberModel extends Record<string, unknown> {
+	price: number | null
+}
+
+interface SelectIdModel extends Record<string, unknown> {
+	branch_id: number | null
+}
+
+interface SwitchModel extends Record<string, unknown> {
+	active: boolean
+}
+
+interface TimeModel extends Record<string, unknown> {
+	open_time: string | null
+}
+
+interface DateModel extends Record<string, unknown> {
+	date: string | null
 }
 
 function mountBilingual(model: BilingualModel, onSubmit = vi.fn().mockResolvedValue(undefined)) {
@@ -57,8 +78,8 @@ function mountBilingual(model: BilingualModel, onSubmit = vi.fn().mockResolvedVa
 	})
 }
 
-function mountDrawer(fields: FieldDescriptor<Model>[], model: Model, onSubmit = vi.fn().mockResolvedValue(undefined)) {
-	return mount(ResourceFormDrawer<Model>, {
+function mountDrawer<T extends Record<string, unknown>>(fields: FieldDescriptor<T>[], model: T, onSubmit = vi.fn().mockResolvedValue(undefined)) {
+	return mount(ResourceFormDrawer<T>, {
 		props: {
 			fields,
 			title: "New thing",
@@ -294,10 +315,62 @@ describe("resourceFormDrawer", () => {
 		wrapper.unmount()
 	})
 
-	it("folds a 422's dotted bilingual keys onto the root field key", async () => {
+	// async-validator's bare `required` keyword defaults an untyped rule to
+	// `type: "string"`, so a rule with no `type`/`validator` rejects any value
+	// that isn't a string — including "real" values like a numeric 0, a numeric
+	// select id, or `false` — even though none of them are actually empty.
+	it("submits a required number field holding 0", async () => {
+		const onSubmit = vi.fn().mockResolvedValue(undefined)
+		const fields: FieldDescriptor<NumberModel>[] = [{ key: "price", labelKey: "x.price", type: "number", required: true }]
+		const wrapper = mountDrawer(fields, { price: 0 }, onSubmit)
+
+		await wrapper.vm.handleSubmit()
+
+		expect(onSubmit).toHaveBeenCalledWith({ price: 0 })
+		wrapper.unmount()
+	})
+
+	it("submits a required select field holding a numeric id", async () => {
+		const onSubmit = vi.fn().mockResolvedValue(undefined)
+		const fields: FieldDescriptor<SelectIdModel>[] = [
+			{ key: "branch_id", labelKey: "x.branchId", type: "select", required: true, options: [{ label: "Main", value: 1 }] }
+		]
+		const wrapper = mountDrawer(fields, { branch_id: 1 }, onSubmit)
+
+		await wrapper.vm.handleSubmit()
+
+		expect(onSubmit).toHaveBeenCalledWith({ branch_id: 1 })
+		wrapper.unmount()
+	})
+
+	it("submits a required switch field holding false", async () => {
+		const onSubmit = vi.fn().mockResolvedValue(undefined)
+		const fields: FieldDescriptor<SwitchModel>[] = [{ key: "active", labelKey: "x.active", type: "switch", required: true }]
+		const wrapper = mountDrawer(fields, { active: false }, onSubmit)
+
+		await wrapper.vm.handleSubmit()
+
+		expect(onSubmit).toHaveBeenCalledWith({ active: false })
+		wrapper.unmount()
+	})
+
+	it("blocks a required text field holding only whitespace", async () => {
+		const onSubmit = vi.fn().mockResolvedValue(undefined)
+		const fields: FieldDescriptor<Model>[] = [{ key: "label", labelKey: "x.label", type: "text", required: true }]
+		const wrapper = mountDrawer(fields, { region: null, city: null, label: "   " }, onSubmit)
+
+		await wrapper.vm.handleSubmit()
+
+		expect(onSubmit).not.toHaveBeenCalled()
+		wrapper.unmount()
+	})
+
+	it("keeps a 422's dotted bilingual keys separate so each half reports its own error", async () => {
 		// Laravel nests a bilingual field's errors under `name.ar` / `name.en` and
-		// never the bare `name` the template looks up, so an unfolded 422 showed the
-		// user nothing at all — and 422s are deliberately not toasted either.
+		// never the bare `name` the template looks up. These used to get folded
+		// onto `name`, which rendered one merged message with no indication of
+		// which half failed and left both n-inputs unstyled. Each half must now
+		// carry — and report — its own error independently.
 		const failure = new ApiError(
 			422,
 			JSON.stringify({ message: "Invalid.", errors: { "name.ar": ["Arabic is required."], "name.en": ["English is required."] } })
@@ -307,7 +380,104 @@ describe("resourceFormDrawer", () => {
 
 		await wrapper.vm.handleSubmit()
 
-		expect(wrapper.vm.fieldErrors).toEqual({ name: ["Arabic is required.", "English is required."] })
+		expect(wrapper.vm.fieldErrors).toEqual({ "name.ar": ["Arabic is required."], "name.en": ["English is required."] })
+
+		await nextTick()
+		const erroredInputs = document.body.querySelectorAll(".n-input--error-status")
+		expect(erroredInputs).toHaveLength(2)
+		expect(document.body.textContent).toContain("Arabic is required.")
+		expect(document.body.textContent).toContain("English is required.")
+
 		wrapper.unmount()
+	})
+
+	// The old fold did two jobs: render a bilingual half's dotted error (now
+	// handled per-half above), and give a dotted key on any OTHER field type
+	// somewhere to land, since the template only ever looks up `fieldErrors[field.key]`
+	// for non-bilingual fields. Dropping the fold outright silently lost that
+	// second job — no payload in the codebase produces a dotted key on a
+	// non-bilingual field today, but a 422 is never toasted, so if one ever did,
+	// the message would render nowhere at all.
+	it("folds a 422's dotted key onto a non-bilingual field's own error slot", async () => {
+		const failure = new ApiError(422, JSON.stringify({ message: "Invalid.", errors: { "label.0": ["Already taken."] } }))
+		const onSubmit = vi.fn().mockRejectedValue(failure)
+		const fields: FieldDescriptor<Model>[] = [{ key: "label", labelKey: "x.label", type: "text", required: true }]
+		const wrapper = mountDrawer(fields, { region: null, city: null, label: "A" }, onSubmit)
+
+		await wrapper.vm.handleSubmit()
+
+		expect(wrapper.vm.fieldErrors).toEqual({ label: ["Already taken."] })
+		wrapper.unmount()
+	})
+
+	// open_time/close_time and an exception's date used to be plain text inputs
+	// with a regex backstop — an Arabic-speaking operator had to type "09:00" by
+	// hand. They're real pickers now; the model must still hold the same plain
+	// "HH:mm" / "yyyy-MM-dd" string, never a timestamp, so the payload a service
+	// receives is byte-identical to before.
+	it("renders a time picker and submits its HH:mm value unchanged", async () => {
+		const onSubmit = vi.fn().mockResolvedValue(undefined)
+		const fields: FieldDescriptor<TimeModel>[] = [{ key: "open_time", labelKey: "x.label", type: "time" }]
+		const wrapper = mountDrawer(fields, { open_time: "09:00" }, onSubmit)
+
+		expect(document.body.querySelector(".n-time-picker")).not.toBeNull()
+
+		await wrapper.vm.handleSubmit()
+
+		expect(onSubmit).toHaveBeenCalledWith({ open_time: "09:00" })
+		wrapper.unmount()
+	})
+
+	it("renders a date picker and submits its yyyy-MM-dd value unchanged", async () => {
+		const onSubmit = vi.fn().mockResolvedValue(undefined)
+		const fields: FieldDescriptor<DateModel>[] = [{ key: "date", labelKey: "x.label", type: "date" }]
+		const wrapper = mountDrawer(fields, { date: "2026-08-23" }, onSubmit)
+
+		expect(document.body.querySelector(".n-date-picker")).not.toBeNull()
+
+		await wrapper.vm.handleSubmit()
+
+		expect(onSubmit).toHaveBeenCalledWith({ date: "2026-08-23" })
+		wrapper.unmount()
+	})
+
+	it("still blocks a bad seeded time value via the field's own rule despite the picker UI", async () => {
+		// A picker can't itself produce "25:00", but the model can still be seeded
+		// with one — e.g. from an API response written before this validation
+		// existed. `field.rule` must keep taking precedence over the picker's
+		// presence exactly as it did when open_time was a plain text field.
+		const onSubmit = vi.fn().mockResolvedValue(undefined)
+		const timeRule: FormItemRule = {
+			required: true,
+			trigger: ["blur", "input"],
+			validator: (_rule, value) =>
+				(typeof value === "string" && /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value)) || new Error("Invalid time format.")
+		}
+		const fields: FieldDescriptor<TimeModel>[] = [{ key: "open_time", labelKey: "x.label", type: "time", rule: timeRule }]
+		const wrapper = mountDrawer(fields, { open_time: "25:00" }, onSubmit)
+
+		await wrapper.vm.handleSubmit()
+
+		expect(onSubmit).not.toHaveBeenCalled()
+		wrapper.unmount()
+	})
+
+	// naive-ui's pickers strictly parse `formatted-value` via date-fns and only
+	// special-case `null` as "no value" — every other string, including a plain
+	// empty one, is run through that parser and then `format()`. An empty string
+	// fails to parse and formatting the result throws, and "" is exactly what
+	// emptyBusinessHourPayload/emptyBusinessHourExceptionPayload seed today, so
+	// a naive `v-model:formatted-value` binding crashed on the literal "New
+	// Business Hour" default state, before the user did anything at all.
+	it("mounts a time/date picker seeded with today's empty-string default without crashing", () => {
+		const timeFields: FieldDescriptor<TimeModel>[] = [{ key: "open_time", labelKey: "x.label", type: "time" }]
+		const timeWrapper = mountDrawer(timeFields, { open_time: "" })
+		expect(document.body.querySelector(".n-time-picker")).not.toBeNull()
+		timeWrapper.unmount()
+
+		const dateFields: FieldDescriptor<DateModel>[] = [{ key: "date", labelKey: "x.label", type: "date" }]
+		const dateWrapper = mountDrawer(dateFields, { date: "" })
+		expect(document.body.querySelector(".n-date-picker")).not.toBeNull()
+		dateWrapper.unmount()
 	})
 })
