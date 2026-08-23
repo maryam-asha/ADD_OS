@@ -5,6 +5,8 @@
 			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.businessHours") }}</h1>
 		</div>
 
+		<n-alert v-if="branchesError" type="error" :title="t('businessHours.loadError')" />
+
 		<n-select
 			v-model:value="selectedBranchId"
 			class="max-w-sm"
@@ -113,21 +115,28 @@ defineProps<{ titleKey?: string }>()
 const { t } = useI18n()
 const canDeleteHours = computed(() => canDeleteBusinessHours())
 
-const branches = ref<Branch[]>([])
+const { data: branches, error: branchesError } = useResourceList<Branch>(listBranches)
 const selectedBranchId = ref<number | null>(null)
 const branchOptions = computed<SelectOption[]>(() =>
 	branches.value.map(branch => ({ label: pickLocalized(branch.name, currentLocale.value), value: branch.id }))
 )
 
-listBranches().then(result => {
-	branches.value = result
-	selectedBranchId.value = result[0]?.id ?? null
-})
+// Auto-selects the first branch once the list resolves, same as the previous
+// listBranches().then(...) wiring — just sourced from useResourceList's reactive
+// `data` so a rejected request surfaces via `branchesError` instead of leaving the
+// branch picker (and both tabs, gated on selectedBranchId !== null) silently blank.
+watch(
+	branches,
+	result => {
+		selectedBranchId.value = result[0]?.id ?? null
+	},
+	{ immediate: true }
+)
 
 const branchQuery = computed(() => (selectedBranchId.value === null ? undefined : { branch_id: selectedBranchId.value }))
 
 // useResourceList's own watch(query, refetch, { immediate: true }) fires synchronously
-// during setup, before listBranches() above has resolved and picked a default
+// during setup, before the branches list above has resolved and picked a default
 // selectedBranchId — at that instant branchQuery.value is undefined. These wrappers stop
 // that first, branch-less refetch from ever reaching the network: they only call through
 // to the real service once a branch is actually selected, so GET /business-hours and

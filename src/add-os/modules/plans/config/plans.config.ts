@@ -30,7 +30,7 @@ export function buildPlanColumns(t: ComposerTranslation, locale: SupportedLocale
 				h("div", [
 					h("div", formatCurrency(row.price, { currency: row.pricing_currency })),
 					row.converted_amount && row.converted_currency
-						? h("div", { class: "text-gray-400 text-xs" }, `≈ ${formatCurrency(row.converted_amount, { currency: row.converted_currency })}`)
+						? h("div", { class: "text-secondary text-xs" }, `≈ ${formatCurrency(row.converted_amount, { currency: row.converted_currency })}`)
 						: null
 				])
 		},

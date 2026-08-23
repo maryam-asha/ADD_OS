@@ -67,12 +67,15 @@ export function buildBusinessHourExceptionColumns(t: ComposerTranslation): DataT
 }
 
 /**
- * `isClosed` drives both whether open_time/close_time are required at all (an
- * exception marked closed omits them entirely — confirmed live) and their
- * disabled state. Callers rebuild this array from a `computed` keyed on the
- * current form model's `is_closed`, so toggling the switch produces fresh rule
- * objects with the correct required-ness — `ResourceFormDrawer`'s `rules`
- * computed already reacts to `props.fields` changing.
+ * `isClosed` drives whether open_time/close_time are required at all (an
+ * exception marked closed omits them entirely — confirmed live). Callers
+ * rebuild this array from a `computed` keyed on the current form model's
+ * `is_closed`, so toggling the switch produces a fresh fields array —
+ * `ResourceFormDrawer` renders whatever fields array it's given, so when
+ * `isClosed` is true the open_time/close_time descriptors are omitted
+ * entirely rather than included-but-disabled: `ResourceFormDrawer`'s
+ * `:disabled` binding only exists on its `n-select` render branch, so a
+ * `disabledWhen` on a `text`-type field has no visual effect there.
  */
 export function businessHourExceptionFields(t: ComposerTranslation, isClosed: boolean): FieldDescriptor<BusinessHourExceptionPayload>[] {
 	const dateRule: FormItemRule = {
@@ -81,25 +84,24 @@ export function businessHourExceptionFields(t: ComposerTranslation, isClosed: bo
 		validator: (_rule, value) => (typeof value === "string" && DATE_PATTERN.test(value)) || new Error(t("businessHours.exceptions.validation.dateFormat"))
 	}
 
-	return [
+	const fields: FieldDescriptor<BusinessHourExceptionPayload>[] = [
 		{ key: "date", labelKey: "businessHours.exceptions.form.date", type: "text", rule: dateRule },
-		{ key: "is_closed", labelKey: "businessHours.exceptions.form.isClosed", type: "switch" },
-		{
-			key: "open_time",
-			labelKey: "businessHours.exceptions.form.openTime",
-			type: "text",
-			rule: timeRule(t, !isClosed),
-			disabledWhen: model => Boolean(model.is_closed)
-		},
-		{
-			key: "close_time",
-			labelKey: "businessHours.exceptions.form.closeTime",
-			type: "text",
-			rule: timeRule(t, !isClosed),
-			disabledWhen: model => Boolean(model.is_closed)
-		},
-		{ key: "reason", labelKey: "businessHours.exceptions.form.reason", type: "text" }
+		{ key: "is_closed", labelKey: "businessHours.exceptions.form.isClosed", type: "switch" }
 	]
+
+	if (!isClosed) {
+		// This branch only runs when isClosed is false, so open_time/close_time are always
+		// required here — the "not required when closed" case is handled by omitting the
+		// fields entirely above, not by a conditional required flag.
+		fields.push(
+			{ key: "open_time", labelKey: "businessHours.exceptions.form.openTime", type: "text", rule: timeRule(t) },
+			{ key: "close_time", labelKey: "businessHours.exceptions.form.closeTime", type: "text", rule: timeRule(t) }
+		)
+	}
+
+	fields.push({ key: "reason", labelKey: "businessHours.exceptions.form.reason", type: "text" })
+
+	return fields
 }
 
 export function emptyBusinessHourExceptionPayload(branchId: number): BusinessHourExceptionPayload {

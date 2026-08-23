@@ -32,20 +32,16 @@ describe("businessHourExceptionFields", () => {
 		expect(openTimeRule.validator(null, "")).toBeInstanceOf(Error)
 	})
 
-	it("skips the HH:mm requirement for open_time/close_time when closed", () => {
-		const fields = businessHourExceptionFields(t, true)
-		const openTimeRule = fields.find(field => field.key === "open_time")!.rule as { validator: (rule: unknown, value: unknown) => unknown }
+	it("omits open_time/close_time when isClosed is true", () => {
+		const closedFields = businessHourExceptionFields(t, true)
 
-		expect(openTimeRule.validator(null, "")).toBe(true)
-		expect(openTimeRule.validator(null, null)).toBe(true)
-	})
+		expect(closedFields.some(field => field.key === "open_time")).toBe(false)
+		expect(closedFields.some(field => field.key === "close_time")).toBe(false)
 
-	it("disables open_time/close_time when the model's is_closed is true", () => {
-		const fields = businessHourExceptionFields(t, true)
-		const openTimeField = fields.find(field => field.key === "open_time")!
+		const openFields = businessHourExceptionFields(t, false)
 
-		expect(openTimeField.disabledWhen?.({ is_closed: true } as never)).toBe(true)
-		expect(openTimeField.disabledWhen?.({ is_closed: false } as never)).toBe(false)
+		expect(openFields.some(field => field.key === "open_time")).toBe(true)
+		expect(openFields.some(field => field.key === "close_time")).toBe(true)
 	})
 
 	it("date field requires YYYY-MM-DD", () => {
