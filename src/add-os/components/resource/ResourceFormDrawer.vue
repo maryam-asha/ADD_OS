@@ -1,56 +1,61 @@
 <!-- src/add-os/components/resource/ResourceFormDrawer.vue -->
 <template>
-	<n-drawer v-model:show="show" :width="420">
-		<n-drawer-content :title closable>
-			<n-form ref="formRef" :model :rules label-placement="top">
-				<n-form-item
-					v-for="field in fields"
-					:key="field.key"
-					:path="field.key"
-					:label="t(field.labelKey)"
-					:feedback="fieldErrors[field.key]?.[0]"
-					:validation-status="fieldErrors[field.key] ? 'error' : undefined"
-				>
-					<n-input v-if="field.type === 'text'" v-model:value="(model as Record<string, unknown>)[field.key] as string" />
-					<div v-else-if="field.type === 'bilingual-text'" class="flex w-full gap-2">
-						<n-input
-							v-model:value="((model as Record<string, unknown>)[field.key] as Bilingual).ar"
-							:placeholder="t('resourceCrud.form.arabicPlaceholder')"
-						/>
-						<n-input
-							v-model:value="((model as Record<string, unknown>)[field.key] as Bilingual).en"
-							:placeholder="t('resourceCrud.form.englishPlaceholder')"
-						/>
-					</div>
-					<n-input-number
-						v-else-if="field.type === 'number'"
-						v-model:value="(model as Record<string, unknown>)[field.key] as number | null"
-						class="w-full"
+	<n-modal
+		v-model:show="show"
+		preset="card"
+		:title
+		closable
+		style="max-width: 28rem"
+		content-style="max-height: 60vh; overflow-y: auto"
+	>
+		<n-form ref="formRef" :model :rules label-placement="top">
+			<n-form-item
+				v-for="field in fields"
+				:key="field.key"
+				:path="field.key"
+				:label="t(field.labelKey)"
+				:feedback="fieldErrors[field.key]?.[0]"
+				:validation-status="fieldErrors[field.key] ? 'error' : undefined"
+			>
+				<n-input v-if="field.type === 'text'" v-model:value="(model as Record<string, unknown>)[field.key] as string" />
+				<div v-else-if="field.type === 'bilingual-text'" class="flex w-full gap-2">
+					<n-input
+						v-model:value="((model as Record<string, unknown>)[field.key] as Bilingual).ar"
+						:placeholder="t('resourceCrud.form.arabicPlaceholder')"
 					/>
-					<n-select
-						v-else-if="field.type === 'select'"
-						v-model:value="(model as Record<string, unknown>)[field.key] as string | number | null"
-						:options="field.options ?? dynamicOptions[field.key] ?? []"
-						:disabled="field.disabledWhen?.(model) ?? false"
-						clearable
+					<n-input
+						v-model:value="((model as Record<string, unknown>)[field.key] as Bilingual).en"
+						:placeholder="t('resourceCrud.form.englishPlaceholder')"
 					/>
-					<n-switch v-else-if="field.type === 'switch'" v-model:value="(model as Record<string, unknown>)[field.key] as boolean" />
-				</n-form-item>
-			</n-form>
-			<template #footer>
-				<div class="flex justify-end gap-2">
-					<n-button @click="show = false">{{ t("resourceCrud.form.cancel") }}</n-button>
-					<n-button type="primary" :loading="submitting" @click="handleSubmit">{{ t("resourceCrud.form.submit") }}</n-button>
 				</div>
-			</template>
-		</n-drawer-content>
-	</n-drawer>
+				<n-input-number
+					v-else-if="field.type === 'number'"
+					v-model:value="(model as Record<string, unknown>)[field.key] as number | null"
+					class="w-full"
+				/>
+				<n-select
+					v-else-if="field.type === 'select'"
+					v-model:value="(model as Record<string, unknown>)[field.key] as string | number | null"
+					:options="field.options ?? dynamicOptions[field.key] ?? []"
+					:disabled="field.disabledWhen?.(model) ?? false"
+					clearable
+				/>
+				<n-switch v-else-if="field.type === 'switch'" v-model:value="(model as Record<string, unknown>)[field.key] as boolean" />
+			</n-form-item>
+		</n-form>
+		<template #footer>
+			<div class="flex justify-end gap-2">
+				<n-button @click="show = false">{{ t("resourceCrud.form.cancel") }}</n-button>
+				<n-button type="primary" :loading="submitting" @click="handleSubmit">{{ t("resourceCrud.form.submit") }}</n-button>
+			</div>
+		</template>
+	</n-modal>
 </template>
 
 <script setup lang="ts" generic="TModel extends Record<string, unknown>">
 import type { FormInst, FormRules, SelectOption } from "naive-ui"
 import type { Bilingual, FieldDescriptor } from "./field-types"
-import { NButton, NDrawer, NDrawerContent, NForm, NFormItem, NInput, NInputNumber, NSelect, NSwitch } from "naive-ui"
+import { NButton, NForm, NFormItem, NInput, NInputNumber, NModal, NSelect, NSwitch } from "naive-ui"
 import { computed, reactive, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { ApiError } from "@/add-os/services/api"
@@ -78,7 +83,7 @@ function dependsOnKeys(field: FieldDescriptor<TModel>): string[] {
 }
 
 /**
- * A "drawer session" is one open/close cycle. `n-drawer` does not unmount its
+ * A "drawer session" is one open/close cycle. `n-modal` does not unmount its
  * content, so this component outlives every session and has to clear what the
  * last one left behind — otherwise "New X" opens showing the previous record's
  * 422 feedback, its invalid-field highlighting, and its dropdown options.

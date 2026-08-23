@@ -82,7 +82,7 @@ describe("resourceFormDrawer", () => {
 		]
 		const wrapper = mountDrawer(fields, { region: null, city: null, label: "" })
 
-		// n-drawer teleports its content to document.body (outside the wrapper's
+		// n-modal teleports its content to document.body (outside the wrapper's
 		// own root node), so it must be asserted on the document rather than via
 		// wrapper.text(), which only inspects the wrapper's own root node tree.
 		expect(document.body.textContent).toContain("Region")
@@ -165,7 +165,7 @@ describe("resourceFormDrawer", () => {
 		wrapper.unmount()
 	})
 
-	// n-drawer keeps its content mounted between opens, so everything the drawer
+	// n-modal keeps its content mounted between opens, so everything the drawer
 	// derives survives a close. Every view starts a session by assigning a
 	// brand-new object to its `form` ref, which is the only signal available that
 	// the previous session's leftovers must not be applied to it.
