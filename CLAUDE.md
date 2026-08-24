@@ -38,14 +38,18 @@ missing a hook. **Say so instead of reaching into vendor code.**
 
 ## Commands
 
-> ⚠️ **Verify against `package.json` and delete this note.** Written before the repo's
-> `package.json` was in hand.
-
-- `pnpm dev` — dev server
-- `pnpm build` — production build
-- `pnpm test` — Vitest, **includes the architecture guards. Never skip.**
-- `pnpm lint` · `pnpm typecheck` (`vue-tsc --noEmit`)
-- `npm run design-tokens` — regenerate `src/design-tokens.json` from `figma-tokens.json`
+- `pnpm dev` — dev server (`pnpm dev:host` binds `--host`)
+- `pnpm build` — production build; runs `type-check` and `build:only` (`vite build`) together
+- `pnpm test:unit` — Vitest, **includes the architecture guards. Never skip.**
+- `pnpm lint` — ESLint, and **it applies fixes** (`eslint . --fix`), not just a check
+- `pnpm type-check` — `vue-tsc --build --force`
+- `pnpm tokens` — regenerate every token artifact (DTCG `tokens.json`, `tokens.generated.css`,
+  `tokens.dart`, `figma-tokens.json`, `src/design-tokens.json`) from the one hand-authored
+  source, `src/add-os/theme/tokens.ts`
+- `pnpm design-tokens` — interactive Figma Tokens export/import tool (`tokens-tool.js`).
+  Export re-derives `figma-tokens.json` from `src/design-tokens.json` (redundant with
+  `tokens`, harmless). **Import is disabled** — it hard-stops rather than silently
+  discarding hand-authored `tokens.ts` values on the next `pnpm tokens` run.
 
 **Run the full suite after any change to theme, tokens, env, or a user-facing control.**
 Or run `/guards`.
@@ -136,4 +140,5 @@ Detailed rules load automatically from `.claude/rules/` when you open matching f
 | Adopt or deliberately replace `warning` `#E7B155` as a canonical brand state colour. | Brand |
 | `borderStrong` light-mode value (Aleppo Stone fails 3:1). | Design |
 | **Set the real internal `VITE_API_URL`.** Empty today; production refuses to start. | Infra |
+| List-endpoint pagination shape. `pagination.ts`/`listPage()` assume Laravel's default paginator (`data` + `meta: {current_page, last_page, per_page, total}` + `links`), but it's never been observed: zero example responses anywhere in `ADD-OS.postman_collection.json`, and the one admin list endpoint live-tested so far (`GET /api/v1/admin/plans`) returned a flat array with no `meta` at all. Need one real response body from a documented-paginated endpoint (e.g. `GET /api/v1/admin/error-logs?page=2`, the one endpoint the collection describes in prose as "Paginated (25 per page)") before any pagination UI work starts. | Backend |
 | Courtesy: tell the Pinx vendor their MapTiler keys shipped in a publicly sold template. Not ADD's to revoke. | Infra |

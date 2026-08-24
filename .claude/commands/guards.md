@@ -17,6 +17,14 @@ Then report, per spec file, pass/fail and what it protects:
 - `no-secrets.spec.ts` — committed env files declare secret-shaped keys empty; `.gitignore`
   asserts `.env`, `.env.*`, `!.env.example` as patterns; `.env.sample` absent; allowlist
   entries justified.
+- `no-inline-role-checks.spec.ts` — only `config/permissions.ts` may call `isRoleGranted`
+  or compare a role against a literal for a destroy decision; scans `src/add-os/modules/**`
+  so a reimplemented inline check fails loudly instead of quietly drifting from the
+  collection-sourced role map.
+- `no-direct-company-http.spec.ts` — only `services/companies.ts`,
+  `services/private-office-requests.ts`, and `services/company-members.ts` may reference
+  the `/admin/companies` or `/admin/private-office-requests` HTTP paths; every other file
+  under `src/add-os` must go through them.
 - `theme/__tests__/tokens.spec.ts` — WCAG ratios, ΔE separations, and "guideline p.15 strict
   rule stays disengaged" (Antique Copper in no semantic and no component token).
 
