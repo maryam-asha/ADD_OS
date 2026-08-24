@@ -363,6 +363,26 @@
 		"empty": "لا توجد أسعار صرف.",
 		"stats": { "latestUsd": "أحدث سعر صرف دولار → ليرة" }
 	},
+	"walletTopUps": {
+		"description": "سجّل شحن محفظة يدوياً من الاستقبال، لمحفظة عضو أو محفظة شركة.",
+		"recipientType": { "user": "محفظة عضو", "company": "محفظة شركة" },
+		"paymentMethod": { "cash": "نقداً", "sham": "شام كاش", "mtn": "إم تي إن كاش", "syriatel": "سيرياتيل كاش" },
+		"form": {
+			"recipientType": "شحن لـ",
+			"user": "العضو",
+			"company": "الشركة",
+			"amount": "المبلغ",
+			"paymentMethod": "طريقة الدفع",
+			"description": "الوصف (اختياري)"
+		},
+		"validation": {
+			"amountFormat": "أدخل مبلغاً لا يقل عن 0.01، بخانتين عشريتين على الأكثر.",
+			"userRequired": "اختر عضواً.",
+			"companyRequired": "اختر شركة."
+		},
+		"submit": { "button": "تسجيل الشحن", "success": "تم شحن المحفظة." },
+		"loadError": "تعذّر تحميل الأعضاء والشركات. قد لا تملك صلاحية عرض هذه الصفحة."
+	},
 	"shortcuts": {
 		"title": "الاختصارات"
 	},
@@ -406,6 +426,7 @@
 			"transactions": "المعاملات",
 			"paymentMethods": "طرق الدفع",
 			"exchangeRates": "أسعار الصرف",
+			"walletTopUps": "شحن المحافظ",
 			"events": "الفعاليات",
 			"community": "المجتمع",
 			"cafe": "الكافيه",

@@ -130,7 +130,8 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		pages: [
 			{ key: "transactions", path: "transactions" },
 			{ key: "paymentMethods", path: "methods" },
-			{ key: "exchangeRates", path: "exchange-rates" }
+			{ key: "exchangeRates", path: "exchange-rates" },
+			{ key: "walletTopUps", path: "wallet-top-ups" }
 		]
 	},
 	{

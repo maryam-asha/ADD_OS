@@ -43,7 +43,8 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"address.privateOfficeRequests": () => import("@/add-os/modules/members/views/PrivateOfficeRequestsPage.vue"),
 	"members.companies": () => import("@/add-os/modules/members/views/CompaniesPage.vue"),
 	"plans.packages": () => import("@/add-os/modules/plans/views/PlansPage.vue"),
-	"payments.exchangeRates": () => import("@/add-os/modules/payments/views/ExchangeRatesPage.vue")
+	"payments.exchangeRates": () => import("@/add-os/modules/payments/views/ExchangeRatesPage.vue"),
+	"payments.walletTopUps": () => import("@/add-os/modules/payments/views/WalletTopUpsPage.vue")
 }
 
 export function createAddOsRoutes(): RouteRecordRaw[] {
