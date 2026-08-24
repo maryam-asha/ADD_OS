@@ -53,6 +53,8 @@ missing a hook. **Say so instead of reaching into vendor code.**
   Export re-derives `figma-tokens.json` from `src/design-tokens.json` (redundant with
   `tokens`, harmless). **Import is disabled** — it hard-stops rather than silently
   discarding hand-authored `tokens.ts` values on the next `pnpm tokens` run.
+- `pnpm api:collection:check` — compares the pinned API snapshot (`docs/api/`) against
+  the live canonical collection; see **API contract** below.
 
 **Run the full suite after any change to theme, tokens, env, or a user-facing control.**
 Or run `/guards`.
@@ -132,6 +134,24 @@ rules only reload when Claude next touches a matching file.
   brand owner. **Read before touching colour, type, or service naming.**
 
 Detailed rules load automatically from `.claude/rules/` when you open matching files.
+
+---
+
+## API contract
+
+The canonical Postman collection — the source for every "confirmed from the
+collection" / "per the collection" claim — lives **outside this repo**, in the backend
+project, and is kept current there:
+
+    C:\Users\User\Desktop\Aleppo Digital District\ADDCore\postman\ADD-OS.postman_collection.json
+
+A moving file can't anchor a claim, so this repo pins a dated, byte-identical copy at
+`docs/api/ADD-OS.postman_collection.json` (see `docs/api/README.md` for the pin date,
+endpoint count, and the credential/encoding checks run at pin time). Every "per the
+collection" claim in code or docs cites that snapshot **by date**, never the live file.
+**If `pnpm api:collection:check` reports a mismatch, every claim sourced from the
+snapshot is unverified until someone re-reads the canonical file and re-pins it** —
+treat a stale pin the same as a failing guard, not as background noise.
 
 ---
 

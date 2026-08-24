@@ -26,6 +26,7 @@
 		"tokens": "node scripts/build-tokens.js",
 		"design-tokens": "node scripts/tokens-tool.js",
 		"icons": "node scripts/build-icons.js",
+		"api:collection:check": "node scripts/check-api-collection.js",
 		"libs:check": "taze",
 		"libs:reload": "rm -rf node_modules package-lock.json pnpm-lock.yaml && pnpm install"
 	},

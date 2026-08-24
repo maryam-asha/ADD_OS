@@ -41,7 +41,12 @@ export default antfu(
 		// readers, not for ESLint — parsing them as plain JS produces parsing
 		// errors and stray style hits that are noise, not findings, and noise is
 		// what trains everyone to ignore a red lint.
-		ignores: ["docs/**/*.md"]
+		//
+		// docs/api/ pins a byte-for-byte, dated snapshot of the backend's Postman
+		// collection (see docs/api/README.md) — its formatting is the source's,
+		// not ours, and reformatting it to satisfy jsonc/* would break the hash
+		// match `pnpm api:collection:check` depends on. Never "fix" this file.
+		ignores: ["docs/**/*.md", "docs/api/**"]
 	},
 	{
 		files: ["**/*.vue"],

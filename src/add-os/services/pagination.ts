@@ -9,6 +9,22 @@
  * field Laravel doesn't send; a response with no `meta` is treated as a
  * single complete page — synthesized, not observed (see the function doc
  * below for exactly what that means).
+ *
+ * Re-checked against the snapshot pinned 2026-08-24 (docs/api/, 205 endpoints,
+ * up from the 65-endpoint copy this file was originally written against).
+ * Still true on the larger snapshot, checked directly rather than assumed:
+ * zero occurrences of `meta`, `per_page`, or `last_page` as JSON keys anywhere
+ * in the file, and zero saved example responses of any kind for any endpoint.
+ * Exactly three endpoints are described as paginated in prose — one more than
+ * previously known: `GET /api/v1/admin/error-logs` ("25 per page"),
+ * `GET /api/v1/member-directory` ("20 per page" — public, member-facing), and
+ * `GET /api/v1/admin/reception/arrival-requests` ("Paginated, status = pending
+ * only..." — an admin-dashboard endpoint, but one with no screen built yet).
+ * None of the three states a response shape. No endpoint this codebase
+ * currently implements is among them, so the "meta absent → synthesize one
+ * page" path stays the only one ever exercised in practice — still a guess,
+ * not a fact, until one real response body settles it (see CLAUDE.md's Open
+ * table, Backend row).
  */
 
 export interface PaginationMeta {
