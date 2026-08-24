@@ -37,6 +37,13 @@ export default antfu(
 		}
 	},
 	{
+		// Plan/spec docs embed TypeScript snippets in fenced code blocks for human
+		// readers, not for ESLint — parsing them as plain JS produces parsing
+		// errors and stray style hits that are noise, not findings, and noise is
+		// what trains everyone to ignore a red lint.
+		ignores: ["docs/**/*.md"]
+	},
+	{
 		files: ["**/*.vue"],
 		rules: {
 			"vue/block-order": [

@@ -41,7 +41,10 @@ missing a hook. **Say so instead of reaching into vendor code.**
 - `pnpm dev` — dev server (`pnpm dev:host` binds `--host`)
 - `pnpm build` — production build; runs `type-check` and `build:only` (`vite build`) together
 - `pnpm test:unit` — Vitest, **includes the architecture guards. Never skip.**
-- `pnpm lint` — ESLint, and **it applies fixes** (`eslint . --fix`), not just a check
+- `pnpm lint` — ESLint, and **it writes** (`eslint . --fix`); never use it as a verification
+  step
+- `pnpm lint:check` — the same ESLint config with **no writes** (`eslint .`); this is the
+  one verification runs
 - `pnpm type-check` — `vue-tsc --build --force`
 - `pnpm tokens` — regenerate every token artifact (DTCG `tokens.json`, `tokens.generated.css`,
   `tokens.dart`, `figma-tokens.json`, `src/design-tokens.json`) from the one hand-authored
@@ -74,7 +77,7 @@ rules only reload when Claude next touches a matching file.
 4. **No shipped control may be a no-op.** Removing a dead control means removing the
    capability behind it, plus its i18n keys and its orphaned SCSS.
 5. **A Guideline ambiguity is settled by the brand owner, never by a developer's
-   inference.** Log it in `docs/GUIDELINE-FEEDBACK.md` and keep the affected rule
+   inference.** Log it in `docs/brand/GUIDELINE-FEEDBACK.md` and keep the affected rule
    structurally disengaged until it's ruled on.
 6. **Never commit a `.env` file, and never quote a credential fragment anywhere** —
    including in documentation. Half a key is the same mistake one step smaller.
@@ -113,6 +116,9 @@ rules only reload when Claude next touches a matching file.
   simply wrong.
 - **Surface gaps unprompted.** One focused question at a time; wait for the decision.
 - Update the relevant `docs/` record in the same change that alters behaviour.
+- **A new architecture guard is registered in `.claude/commands/guards.md` in the same
+  change that adds it.** `no-inline-role-checks.spec.ts` and `no-direct-company-http.spec.ts`
+  both shipped without that entry, so `/guards` under-reported for as long as they existed.
 
 ---
 
@@ -122,7 +128,7 @@ rules only reload when Claude next touches a matching file.
   tiers, locked decisions, migration inventory of hardcoded values.
 - `@docs/PHASE-3-DEAD-CONTROLS.md` — what was removed from the shell and why.
 - `@docs/SECRETS-RESOLUTION.md` — env/secrets posture; what each guard enforces.
-- `@docs/GUIDELINE-FEEDBACK.md` — the deviation register and the open questions for the
+- `@docs/brand/GUIDELINE-FEEDBACK.md` — the deviation register and the open questions for the
   brand owner. **Read before touching colour, type, or service naming.**
 
 Detailed rules load automatically from `.claude/rules/` when you open matching files.
