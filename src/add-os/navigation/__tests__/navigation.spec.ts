@@ -1,5 +1,6 @@
 import type { RouteRecordRaw } from "vue-router"
 import { describe, expect, it } from "vitest"
+import ComingSoon from "@/add-os/views/ComingSoon.vue"
 import ar from "../../lang/ar"
 import en from "../../lang/en"
 import { createAddOsRoutes } from "../routes"
@@ -28,10 +29,10 @@ describe("section list", () => {
 		expect(NAV_SECTIONS).toHaveLength(13)
 	})
 
-	it("marks exactly the six built sections as active", () => {
+	it("marks exactly the seven built sections as active", () => {
 		const active = NAV_SECTIONS.filter(section => section.status === "active").map(section => section.key)
 
-		expect(active).toEqual(["spatial", "system", "members", "plans", "payments", "address"])
+		expect(active).toEqual(["spatial", "system", "members", "bookings", "plans", "payments", "address"])
 	})
 
 	it("gives every section at least one page", () => {
@@ -83,6 +84,22 @@ describe("routes", () => {
 		for (const route of routes) {
 			expect(route.meta?.auth).toBe(true)
 		}
+	})
+
+	/**
+	 * `active` is a promise to the operator that the section leads somewhere.
+	 * A section can legitimately mix real pages with placeholders — `payments`
+	 * does — but one marked active with nothing behind it at all is a lie the
+	 * status field is supposed to prevent. This also catches the quieter
+	 * version: a `PAGE_COMPONENTS` key misspelled against `navRouteName`, which
+	 * fails open to ComingSoon and looks exactly like work not started.
+	 */
+	it("gives every active section at least one page that is not the placeholder", () => {
+		const placeholderOnly = NAV_SECTIONS.filter(
+			(section, index) => section.status === "active" && childrenOf(routes[index]).every(child => child.component === ComingSoon)
+		).map(section => section.key)
+
+		expect(placeholderOnly).toEqual([])
 	})
 
 	it("points the home redirect at a page that exists", () => {

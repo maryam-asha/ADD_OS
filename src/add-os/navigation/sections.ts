@@ -96,8 +96,25 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		key: "bookings",
 		path: "/bookings",
 		icon: "carbon:calendar",
-		status: "coming-soon",
+		status: "active",
+		/**
+		 * Reception-desk pages lead, and that ordering is deliberate rather than
+		 * alphabetical or historical: a section redirects to its FIRST page, so
+		 * putting the two built screens ahead of the two placeholders is what
+		 * makes `/bookings` land somewhere useful. `payments` shows the other
+		 * outcome — it is active, but its first page is still ComingSoon.
+		 *
+		 * These two live here rather than under a new "Reception" section even
+		 * though their endpoints sit under `reception/`. The precedent is
+		 * `payments.walletTopUps`, which posts to `reception/wallet-top-ups` and
+		 * is nonetheless filed under Payments: the URL prefix names the backend
+		 * team that owns the endpoint, not the operator's mental model. A 14th
+		 * top-level section also has a cost the other three do not — see the
+		 * horizontal-nav note in `.claude/rules/shell-and-controls.md`.
+		 */
 		pages: [
+			{ key: "approvalQueue", path: "approval-queue" },
+			{ key: "activeSessions", path: "active-sessions" },
 			{ key: "allBookings", path: "all" },
 			{ key: "calendar", path: "calendar" }
 		]

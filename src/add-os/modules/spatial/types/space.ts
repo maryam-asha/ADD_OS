@@ -4,6 +4,18 @@ import type { CurrencyCode } from "@/add-os/utils/format/currency"
 
 export type SpaceType = "co_space" | "room" | "business" | "event_hall"
 
+/**
+ * The same four values at runtime, next to the type they belong to — the
+ * arrangement `PAYMENT_METHODS`/`PaymentMethod` already uses in
+ * `modules/payments/types/wallet-top-up.ts`.
+ *
+ * Lives here rather than in `spaces.config.ts`, where it started, because a
+ * second consumer arrived: the reception columns need to tell a known
+ * `space_type` from an unrecognised one so an unexpected value renders as
+ * itself instead of a missing-translation key.
+ */
+export const SPACE_TYPES: readonly SpaceType[] = ["co_space", "room", "business", "event_hall"]
+
 export interface Space {
 	id: number
 	building_id: number
