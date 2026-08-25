@@ -41,6 +41,8 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"spatial.seatsDesks": () => import("@/add-os/modules/spatial/views/SeatsDesksPage.vue"),
 	"spatial.businessHours": () => import("@/add-os/modules/spatial/views/BusinessHoursPage.vue"),
 	"address.privateOfficeRequests": () => import("@/add-os/modules/members/views/PrivateOfficeRequestsPage.vue"),
+	"bookings.approvalQueue": () => import("@/add-os/modules/booking/views/ApprovalQueuePage.vue"),
+	"bookings.activeSessions": () => import("@/add-os/modules/booking/views/ActiveSessionsPage.vue"),
 	"members.companies": () => import("@/add-os/modules/members/views/CompaniesPage.vue"),
 	"plans.packages": () => import("@/add-os/modules/plans/views/PlansPage.vue"),
 	"payments.exchangeRates": () => import("@/add-os/modules/payments/views/ExchangeRatesPage.vue"),

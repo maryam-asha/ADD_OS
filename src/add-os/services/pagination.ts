@@ -10,21 +10,32 @@
  * single complete page — synthesized, not observed (see the function doc
  * below for exactly what that means).
  *
- * Re-checked against the snapshot pinned 2026-08-24 (docs/api/, 205 endpoints,
- * up from the 65-endpoint copy this file was originally written against).
- * Still true on the larger snapshot, checked directly rather than assumed:
- * zero occurrences of `meta`, `per_page`, or `last_page` as JSON keys anywhere
- * in the file, and zero saved example responses of any kind for any endpoint.
- * Exactly three endpoints are described as paginated in prose — one more than
- * previously known: `GET /api/v1/admin/error-logs` ("25 per page"),
- * `GET /api/v1/member-directory` ("20 per page" — public, member-facing), and
- * `GET /api/v1/admin/reception/arrival-requests` ("Paginated, status = pending
- * only..." — an admin-dashboard endpoint, but one with no screen built yet).
- * None of the three states a response shape. No endpoint this codebase
- * currently implements is among them, so the "meta absent → synthesize one
- * page" path stays the only one ever exercised in practice — still a guess,
- * not a fact, until one real response body settles it (see CLAUDE.md's Open
- * table, Backend row).
+ * Re-checked against the snapshot pinned 2026-08-25 (docs/api/), and the count
+ * below is a correction: this comment previously said "exactly three endpoints
+ * are described as paginated in prose". That was true of the 2026-08-24 pin.
+ * The 2026-08-25 re-pin brought the Reception Operations folder with it, and
+ * there are now FOUR:
+ *
+ *   `GET /api/v1/admin/error-logs`                          "25 per page"
+ *   `GET /api/v1/member-directory`                          "20 per page" (public)
+ *   `GET /api/v1/admin/reception/arrival-requests`          no screen built yet
+ *   `GET /api/v1/admin/reception/bookings/pending-approval` "25/page"
+ *
+ * The fourth is the change that matters here: it is the first prose-paginated
+ * endpoint this codebase actually implements (`services/reception.ts` →
+ * `ApprovalQueuePage.vue`), so the `meta`-present branch of `toPaginated` is no
+ * longer dead code reached only by its own unit test.
+ *
+ * What has NOT changed: still zero occurrences of `meta`, `per_page`,
+ * `last_page` or `current_page` as JSON keys anywhere in the file, and still
+ * zero saved example responses of any kind for any endpoint — both re-checked
+ * directly against the 2026-08-25 pin rather than assumed. So the `meta` shape
+ * remains specified-but-unobserved. The backend task that shipped
+ * `pending-approval` documents `{current_page, last_page, total}` — note the
+ * absent `per_page`, which is exactly the sub-field `toPaginated` falls back
+ * to `data.length` for. CLAUDE.md's Open table (Backend row) stays open until
+ * one real response body is captured; what it no longer blocks is pagination
+ * UI, which now exists against a documented shape.
  */
 
 export interface PaginationMeta {
