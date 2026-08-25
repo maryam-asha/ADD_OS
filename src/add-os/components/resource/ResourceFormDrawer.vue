@@ -71,6 +71,13 @@
 						class="w-full"
 						@update:formatted-value="(value: string | null) => setPickerValue(field.key, value)"
 					/>
+					<n-date-picker
+						v-else-if="field.type === 'datetime'"
+						v-model:value="(model as Record<string, unknown>)[field.key] as number | null"
+						type="datetime"
+						class="w-full"
+						clearable
+					/>
 				</n-form-item>
 			</template>
 		</n-form>
@@ -178,6 +185,27 @@ for (const field of props.fields) {
 		{ immediate: true }
 	)
 }
+
+/**
+ * Why `datetime` is bound differently from `date` and `time` in the template.
+ *
+ * Those two round-trip through `formatted-value` + `value-format`, because their
+ * model values ARE display strings. `datetime` instead binds the picker's own
+ * native value — epoch millis — and holds a `number | null` in the model.
+ *
+ * The reason is that `value-format` cannot express a UTC offset. ADDCore runs on
+ * `'timezone' => 'UTC'`, so a bare wall-clock string like `2026-08-26 09:00:00`
+ * is READ as 09:00 UTC — noon in Damascus. Keeping the model numeric means the
+ * drawer never holds an ambiguous instant at all, and the one service that owns
+ * the wire format does the offset-aware conversion (see
+ * `services/announcements.ts` and the spec at
+ * docs/superpowers/specs/2026-08-25-kiosk-module-design.md §5).
+ *
+ * This is also why the two shape guards below deliberately do NOT serve
+ * `datetime`: a number cannot produce the Invalid Date crash they exist to
+ * prevent, so routing it through them would only reintroduce the string
+ * ambiguity it is avoiding.
+ */
 
 const TIME_DISPLAY_PATTERN = /^(?:[01]\d|2[0-3]):[0-5]\d$/
 const DATE_DISPLAY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/
