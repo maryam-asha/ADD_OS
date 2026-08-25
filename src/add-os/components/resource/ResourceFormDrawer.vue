@@ -9,67 +9,70 @@
 		content-style="max-height: 60vh; overflow-y: auto"
 	>
 		<n-form ref="formRef" :model :rules label-placement="top">
-			<n-form-item
-				v-for="field in fields"
-				:key="field.key"
-				:path="field.key"
-				:label="t(field.labelKey)"
-				:feedback="fieldErrors[field.key]?.[0]"
-				:validation-status="fieldErrors[field.key] ? 'error' : undefined"
-			>
-				<n-input v-if="field.type === 'text'" v-model:value="(model as Record<string, unknown>)[field.key] as string" />
-				<div v-else-if="field.type === 'bilingual-text'" class="flex w-full gap-2">
-					<div class="flex-1">
+			<template v-for="field in fields" :key="field.key">
+				<template v-if="field.type === 'bilingual-text'">
+					<n-form-item
+						:path="`${field.key}.ar`"
+						:label="bilingualLabel(field, 'ar')"
+						:feedback="fieldErrors[`${field.key}.ar`]?.[0]"
+						:validation-status="fieldErrors[`${field.key}.ar`] ? 'error' : undefined"
+					>
 						<n-input
 							v-model:value="((model as Record<string, unknown>)[field.key] as Bilingual).ar"
 							:placeholder="t('resourceCrud.form.arabicPlaceholder')"
-							:status="fieldErrors[`${field.key}.ar`] ? 'error' : undefined"
 						/>
-						<n-text v-if="fieldErrors[`${field.key}.ar`]" type="error" class="text-xs">
-							{{ fieldErrors[`${field.key}.ar`]?.[0] }}
-						</n-text>
-					</div>
-					<div class="flex-1">
+					</n-form-item>
+					<n-form-item
+						:path="`${field.key}.en`"
+						:label="bilingualLabel(field, 'en')"
+						:feedback="fieldErrors[`${field.key}.en`]?.[0]"
+						:validation-status="fieldErrors[`${field.key}.en`] ? 'error' : undefined"
+					>
 						<n-input
 							v-model:value="((model as Record<string, unknown>)[field.key] as Bilingual).en"
 							:placeholder="t('resourceCrud.form.englishPlaceholder')"
-							:status="fieldErrors[`${field.key}.en`] ? 'error' : undefined"
 						/>
-						<n-text v-if="fieldErrors[`${field.key}.en`]" type="error" class="text-xs">
-							{{ fieldErrors[`${field.key}.en`]?.[0] }}
-						</n-text>
-					</div>
-				</div>
-				<n-input-number
-					v-else-if="field.type === 'number'"
-					v-model:value="(model as Record<string, unknown>)[field.key] as number | null"
-					class="w-full"
-				/>
-				<n-select
-					v-else-if="field.type === 'select'"
-					v-model:value="(model as Record<string, unknown>)[field.key] as string | number | null"
-					:options="field.options ?? dynamicOptions[field.key] ?? []"
-					:disabled="field.disabledWhen?.(model) ?? false"
-					clearable
-				/>
-				<n-switch v-else-if="field.type === 'switch'" v-model:value="(model as Record<string, unknown>)[field.key] as boolean" />
-				<n-time-picker
-					v-else-if="field.type === 'time'"
-					:formatted-value="toPickerTimeValue((model as Record<string, unknown>)[field.key])"
-					format="HH:mm"
-					value-format="HH:mm"
-					class="w-full"
-					@update:formatted-value="(value: string | null) => setPickerValue(field.key, value)"
-				/>
-				<n-date-picker
-					v-else-if="field.type === 'date'"
-					:formatted-value="toPickerDateValue((model as Record<string, unknown>)[field.key])"
-					format="yyyy-MM-dd"
-					value-format="yyyy-MM-dd"
-					class="w-full"
-					@update:formatted-value="(value: string | null) => setPickerValue(field.key, value)"
-				/>
-			</n-form-item>
+					</n-form-item>
+				</template>
+				<n-form-item
+					v-else
+					:path="field.key"
+					:label="t(field.labelKey)"
+					:feedback="fieldErrors[field.key]?.[0]"
+					:validation-status="fieldErrors[field.key] ? 'error' : undefined"
+				>
+					<n-input v-if="field.type === 'text'" v-model:value="(model as Record<string, unknown>)[field.key] as string" />
+					<n-input-number
+						v-else-if="field.type === 'number'"
+						v-model:value="(model as Record<string, unknown>)[field.key] as number | null"
+						class="w-full"
+					/>
+					<n-select
+						v-else-if="field.type === 'select'"
+						v-model:value="(model as Record<string, unknown>)[field.key] as string | number | null"
+						:options="field.options ?? dynamicOptions[field.key] ?? []"
+						:disabled="field.disabledWhen?.(model) ?? false"
+						clearable
+					/>
+					<n-switch v-else-if="field.type === 'switch'" v-model:value="(model as Record<string, unknown>)[field.key] as boolean" />
+					<n-time-picker
+						v-else-if="field.type === 'time'"
+						:formatted-value="toPickerTimeValue((model as Record<string, unknown>)[field.key])"
+						format="HH:mm"
+						value-format="HH:mm"
+						class="w-full"
+						@update:formatted-value="(value: string | null) => setPickerValue(field.key, value)"
+					/>
+					<n-date-picker
+						v-else-if="field.type === 'date'"
+						:formatted-value="toPickerDateValue((model as Record<string, unknown>)[field.key])"
+						format="yyyy-MM-dd"
+						value-format="yyyy-MM-dd"
+						class="w-full"
+						@update:formatted-value="(value: string | null) => setPickerValue(field.key, value)"
+					/>
+				</n-form-item>
+			</template>
 		</n-form>
 		<template #footer>
 			<div class="flex justify-end gap-2">
@@ -81,9 +84,9 @@
 </template>
 
 <script setup lang="ts" generic="TModel extends Record<string, unknown>">
-import type { FormInst, FormRules, SelectOption } from "naive-ui"
+import type { FormInst, FormItemRule, FormRules, SelectOption } from "naive-ui"
 import type { Bilingual, FieldDescriptor } from "./field-types"
-import { NButton, NDatePicker, NForm, NFormItem, NInput, NInputNumber, NModal, NSelect, NSwitch, NText, NTimePicker } from "naive-ui"
+import { NButton, NDatePicker, NForm, NFormItem, NInput, NInputNumber, NModal, NSelect, NSwitch, NTimePicker } from "naive-ui"
 import { computed, reactive, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { ApiError } from "@/add-os/services/api"
@@ -237,34 +240,47 @@ function setPickerValue(key: string, value: string | null) {
  * Both halves are required, not either: the dashboard renders whichever half
  * matches the active locale, so a branch named only in English is a blank row
  * in Arabic. Laravel validates `name.ar` and `name.en` separately for the same
- * reason.
+ * reason — which is also why each half is now its own independent field
+ * (`${field.key}.ar` / `${field.key}.en`) with its own label, asterisk, and
+ * validation lifecycle, rather than one item covering both.
+ *
+ * The composed label goes through one i18n key
+ * (`resourceCrud.form.bilingualLabel`) per locale, not template
+ * concatenation: the Arabic half's language name must itself be written in
+ * Arabic (`locales.ar` = "العربية") under the `ar` locale, or a Latin run like
+ * "Arabic" embedded in an RTL sentence lets the bidi algorithm reorder the
+ * surrounding parenthesis and words. Composing through `t()` in one language
+ * per locale sidesteps that outright — there is never a mixed-script string
+ * to reorder. English reads "{field} ({language})"; Arabic reads
+ * "{field} (ب{language})" — "بـ" ("in") is the idiomatic Arabic parenthetical
+ * preposition, not a literal mirror of the English punctuation, and it
+ * doubles as what keeps this key's Arabic string genuinely Arabic rather than
+ * a punctuation-only value the ar/en translation-content guard would flag as
+ * an untranslated copy.
  */
-function isBilingualComplete(value: unknown): boolean {
-	const bilingual = value as Partial<Bilingual> | null | undefined
-	return Boolean(bilingual?.ar?.trim()) && Boolean(bilingual?.en?.trim())
+function bilingualLabel(field: FieldDescriptor<TModel>, language: "ar" | "en"): string {
+	return t("resourceCrud.form.bilingualLabel", { field: t(field.labelKey), language: t(`locales.${language}`) })
 }
 
 /**
- * A bilingual value is an object, and async-validator cannot check one with its
- * built-in keywords: `required` alone never fires, because `isEmptyValue` counts
- * only undefined/null/""/[] as empty — and a rule carrying neither `type` nor
- * `validator` defaults to `type: "string"`, whose type check then rejects the
- * object even when both halves are filled. That was diagnosed for
- * `bilingual-text` first, because the failure there is loud: the object always
- * fails the forced string check, so the field became unsubmittable outright.
+ * async-validator's bare `required` keyword only ever checks emptiness against
+ * undefined/null/""/[] (`isEmptyValue`), and a rule carrying neither `type` nor
+ * `validator` defaults to `type: "string"` (`getType`), whose type check then
+ * runs *after* that emptiness check and rejects anything that isn't a string —
+ * a `number` field holding `0`, a `switch` holding `false`, a `select` holding
+ * a numeric id, all genuinely filled. So every required field gets a custom
+ * validator instead, built on this one emptiness check: only null, undefined,
+ * and a whitespace-only string count as empty; `0` and `false` are real values.
  *
- * Generalized afterward: the same forced `type: "string"` also rejects a
- * `number` field holding `0`, a `switch` holding `false`, and a `select` holding
- * a numeric id — all values async-validator's type check treats as the wrong
- * type, none of them actually empty. Those failures are quieter (the field still
- * submits once the user retypes something string-shaped into it) but wrong for
- * the same root-cause reason, so this replaces the bilingual-only check with one
- * emptiness rule for every field type rather than leaving two parallel paths.
- * Only null, undefined, and a whitespace-only string count as empty for
- * non-bilingual fields — `0` and `false` are real values.
+ * This used to also branch on `field.type === "bilingual-text"`, checking both
+ * halves of a `{ar, en}` object at once — back when one rule covered both
+ * inputs. Now that each half is its own plain-string field (see
+ * `bilingualLabel` above), a half needs nothing beyond this same check any
+ * other required string field gets, so the branch and the object-shaped
+ * `isBilingualComplete` helper it called are both gone rather than left
+ * unreachable.
  */
-function isFieldValueEmpty(field: FieldDescriptor<TModel>, value: unknown): boolean {
-	if (field.type === "bilingual-text") return !isBilingualComplete(value)
+function isFieldValueEmpty(value: unknown): boolean {
 	if (value === null || value === undefined) return true
 	return typeof value === "string" && value.trim().length === 0
 }
@@ -278,18 +294,30 @@ const rules = computed<FormRules>(() => {
 		}
 		if (!field.required) continue
 
-		const message = t("resourceCrud.validation.required", { field: t(field.labelKey) })
-
 		/**
 		 * A custom `validator` replaces the built-in keyword check outright
 		 * (`getValidationMethod` prefers it, and `getType` stops forcing "string"
 		 * once it is present). `required` is kept purely so naive-ui still marks
 		 * the label with its asterisk.
 		 */
+		if (field.type === "bilingual-text") {
+			const buildRule = (language: "ar" | "en"): FormItemRule => {
+				const message = t("resourceCrud.validation.required", { field: bilingualLabel(field, language) })
+				return {
+					required: true,
+					trigger: ["blur", "change", "input"],
+					validator: (_rule, value) => (isFieldValueEmpty(value) ? new Error(message) : true)
+				}
+			}
+			result[field.key] = { ar: buildRule("ar"), en: buildRule("en") }
+			continue
+		}
+
+		const message = t("resourceCrud.validation.required", { field: t(field.labelKey) })
 		result[field.key] = {
 			required: true,
 			trigger: ["blur", "change", "input"],
-			validator: (_rule, value) => (isFieldValueEmpty(field, value) ? new Error(message) : true)
+			validator: (_rule, value) => (isFieldValueEmpty(value) ? new Error(message) : true)
 		}
 	}
 	return result
@@ -307,8 +335,9 @@ const rules = computed<FormRules>(() => {
  * independently-failing inputs into one message with no indication of which
  * half was wrong, and neither n-input ever got its own error styling. Those
  * dotted keys are kept as-is — `name.ar` and `name.en` stay distinct entries in
- * `fieldErrors` — and the bilingual-text template branch looks each one up
- * directly for its own `status` and feedback line.
+ * `fieldErrors` — because each half is now its own `n-form-item` bound to that
+ * exact path, reading its `:feedback`/`:validation-status` from `fieldErrors`
+ * the same way every other field already does.
  *
  * But the fold was doing a second job that has no replacement yet: a dotted key
  * whose root belongs to a field that is NOT bilingual-text (no other type

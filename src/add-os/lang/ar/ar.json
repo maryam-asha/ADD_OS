@@ -458,7 +458,8 @@
 			"submit": "حفظ",
 			"cancel": "إلغاء",
 			"arabicPlaceholder": "العربية",
-			"englishPlaceholder": "الإنجليزية"
+			"englishPlaceholder": "الإنجليزية",
+			"bilingualLabel": "{field} (ب{language})"
 		},
 		"validation": {
 			"required": "{field} مطلوب."

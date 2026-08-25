@@ -20,3 +20,7 @@
 // Resource ledger tables — uppercase header treatment for ResourceTable.vue and
 // UsersPage.vue's own inline n-data-table
 @import "./resource-table";
+
+// Form validation feedback — undoes the vendor's attached "flap" that
+// overlaps a required field's own input at ADD OS's font metrics
+@import "./form-feedback";

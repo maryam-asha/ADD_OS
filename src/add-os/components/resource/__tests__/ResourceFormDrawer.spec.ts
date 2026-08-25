@@ -15,10 +15,28 @@ const i18n = createI18n({
 	messages: {
 		en: {
 			resourceCrud: {
-				form: { submit: "Save", cancel: "Cancel", arabicPlaceholder: "Arabic", englishPlaceholder: "English" },
+				form: {
+					submit: "Save",
+					cancel: "Cancel",
+					arabicPlaceholder: "Arabic",
+					englishPlaceholder: "English",
+					bilingualLabel: "{field} ({language})"
+				},
 				validation: { required: "{field} is required." }
 			},
+			locales: { ar: "Arabic", en: "English" },
 			x: { region: "Region", city: "City", label: "Label", name: "Name", price: "Price", branchId: "Branch", active: "Active" }
+		},
+		// Mirrors ar.json's actual bilingualLabel construction: "بـ" ("in") is the
+		// idiomatic Arabic parenthetical preposition, not a literal mirror of the
+		// English punctuation — see ResourceFormDrawer.vue's bilingualLabel() comment.
+		ar: {
+			resourceCrud: {
+				form: { submit: "حفظ", cancel: "إلغاء", arabicPlaceholder: "العربية", englishPlaceholder: "الإنجليزية", bilingualLabel: "{field} (ب{language})" },
+				validation: { required: "{field} مطلوب." }
+			},
+			locales: { ar: "العربية", en: "الإنجليزية" },
+			x: { name: "الاسم" }
 		}
 	}
 })
@@ -295,13 +313,20 @@ describe("resourceFormDrawer", () => {
 		wrapper.unmount()
 	})
 
-	it("fails a required bilingual field when only one half is filled", async () => {
+	// Each half is now its own n-form-item with its own path/rule/validation
+	// lifecycle — not one item covering both — so a blank half must fail on
+	// its own without dragging the filled half's item into an error state.
+	it("validates each bilingual half independently: one blank half errors, the filled half does not", async () => {
 		const onSubmit = vi.fn().mockResolvedValue(undefined)
 		const wrapper = mountBilingual({ name: { ar: "حلب", en: "   " } }, onSubmit)
 
 		await wrapper.vm.handleSubmit()
+		await nextTick()
 
 		expect(onSubmit).not.toHaveBeenCalled()
+		expect(document.body.textContent).toContain("Name (English) is required.")
+		expect(document.body.textContent).not.toContain("Name (Arabic) is required.")
+		expect(document.body.querySelectorAll(".n-input--error-status")).toHaveLength(1)
 		wrapper.unmount()
 	})
 
@@ -313,6 +338,23 @@ describe("resourceFormDrawer", () => {
 
 		expect(onSubmit).toHaveBeenCalledWith({ name: { ar: "حلب", en: "Aleppo" } })
 		wrapper.unmount()
+	})
+
+	it("composes each half's label as \"field (language)\" in both locales, with the space intact", async () => {
+		const wrapper = mountBilingual({ name: { ar: "", en: "" } })
+		expect(document.body.textContent).toContain("Name (Arabic)")
+		expect(document.body.textContent).toContain("Name (English)")
+		wrapper.unmount()
+
+		i18n.global.locale.value = "ar"
+		const arWrapper = mountBilingual({ name: { ar: "", en: "" } })
+		// "بـ" ("in") is the idiomatic Arabic parenthetical preposition — see
+		// ResourceFormDrawer.vue's bilingualLabel() comment — not a mirror of the
+		// English punctuation, but it composes with the same required space.
+		expect(document.body.textContent).toContain("الاسم (بالعربية)")
+		expect(document.body.textContent).toContain("الاسم (بالإنجليزية)")
+		arWrapper.unmount()
+		i18n.global.locale.value = "en"
 	})
 
 	// async-validator's bare `required` keyword defaults an untyped rule to

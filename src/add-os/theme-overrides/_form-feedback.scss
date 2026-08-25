@@ -1,0 +1,41 @@
+// ── ADD OS — form-item feedback: undo the vendor's attached "flap" ─────────
+//
+// naive-override.scss's `.n-form-item .n-form-item-feedback-wrapper` block
+// (src/assets/scss/overrides/naive-override.scss:155-192) deliberately
+// renders a required field's validation message as a box fused to the
+// bottom of its input: pulled up via `transform: translateY(-7px)` (-6px at
+// "small" size), its own top/side padding forced to zero with `!important`,
+// and given a border/background/rounded-bottom-corners meant to look like
+// one continuous shape with the input above it.
+//
+// At ADD OS's actual rendered font size/line-height that fixed pixel offset
+// overshoots: confirmed by measuring both elements' bounding boxes in a real
+// browser, the message's own top edge sits ~4px above the input's bottom
+// edge — the text visibly renders over the input rather than merely flush
+// against its border as the vendor intended. This is a deliberate vendor
+// effect, not a stuck transition or a missing stylesheet, and it reproduces
+// identically for any required field's client-side validation message, in
+// every n-form-item in the app — not scoped to one component.
+//
+// Reset to naive-ui's own default rendering: plain feedback text below the
+// input at its natural spacing, no attached box. `!important` matches the
+// vendor rule's own use of it on the properties that need it to win.
+.n-form-item {
+	.n-form-item-feedback-wrapper:not(:empty) {
+		transform: none;
+		padding: var(--n-feedback-padding) !important;
+
+		.n-form-item-feedback {
+			font-size: inherit;
+			line-height: inherit;
+			padding: 0;
+			border: none;
+			border-radius: 0;
+			background: none;
+		}
+	}
+
+	&.n-form-item--small-size .n-form-item-feedback-wrapper:not(:empty) {
+		transform: none;
+	}
+}

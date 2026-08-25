@@ -1,4 +1,8 @@
 {
+	"locales": {
+		"ar": "Arabic",
+		"en": "English"
+	},
 	"common": {
 		"comingSoon": "Coming soon",
 		"search": "Search",
@@ -454,7 +458,8 @@
 			"submit": "Save",
 			"cancel": "Cancel",
 			"arabicPlaceholder": "Arabic",
-			"englishPlaceholder": "English"
+			"englishPlaceholder": "English",
+			"bilingualLabel": "{field} ({language})"
 		},
 		"validation": {
 			"required": "{field} is required."
