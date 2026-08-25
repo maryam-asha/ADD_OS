@@ -8,8 +8,7 @@ import {
 	listActiveSessions,
 	listPendingApprovals,
 	rejectBooking,
-	settleSessionPayment,
-	toOffsetIso
+	settleSessionPayment
 } from "../reception"
 
 vi.mock("@/add-os/config/env", () => ({
@@ -187,29 +186,4 @@ describe("reception service", () => {
 		})
 	})
 
-	/**
-	 * The collection's own example is `"2026-08-17T11:00:00+03:00"` — local wall
-	 * clock with an explicit offset, not a UTC `Z` string. Asserted structurally
-	 * rather than against a literal offset, because the suite runs in whatever
-	 * zone the machine is set to; a hardcoded `+03:00` would pass in Damascus and
-	 * fail elsewhere without either result meaning anything.
-	 */
-	describe("toOffsetIso", () => {
-		it("emits local wall-clock time with an explicit UTC offset", () => {
-			const at = new Date(2026, 7, 17, 11, 0, 0)
-
-			expect(toOffsetIso(at)).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/)
-			expect(toOffsetIso(at).startsWith("2026-08-17T11:00:00")).toBe(true)
-		})
-
-		it("round-trips to the same instant it was given", () => {
-			const at = new Date(2026, 0, 3, 7, 5, 9)
-
-			expect(new Date(toOffsetIso(at)).getTime()).toBe(at.getTime())
-		})
-
-		it("zero-pads every component", () => {
-			expect(toOffsetIso(new Date(2026, 0, 3, 7, 5, 9)).slice(0, 19)).toBe("2026-01-03T07:05:09")
-		})
-	})
 })

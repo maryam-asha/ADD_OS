@@ -2,7 +2,7 @@ import { dateArDZ } from "naive-ui"
 import { describe, expect, it } from "vitest"
 import { MONTHS } from "../calendar"
 import { formatCurrency } from "../currency"
-import { formatDate, formatDateTime, formatRelativeTime, formatTime } from "../dates"
+import { formatDate, formatDateTime, formatRelativeTime, formatTime, toOffsetIso } from "../dates"
 import { dateArLevantine } from "../naiveDateLocale"
 import { formatNumber, hasFraction } from "../numbers"
 
@@ -267,5 +267,34 @@ describe("formatRelativeTime", () => {
 
 	it("accepts an ISO string as readily as a Date", () => {
 		expect(formatRelativeTime(ago(300).toISOString(), { ...EN, now: NOW })).toBe("5 minutes ago")
+	})
+})
+
+/**
+ * The collection's own example is `"2026-08-17T11:00:00+03:00"` — local wall
+ * clock with an explicit offset, not a UTC `Z` string. Asserted structurally
+ * rather than against a literal offset, because the suite runs in whatever
+ * zone the machine is set to; a hardcoded `+03:00` would pass in Damascus and
+ * fail elsewhere without either result meaning anything.
+ *
+ * These cases moved here from `services/__tests__/reception.spec.ts` when
+ * `toOffsetIso` did, unchanged.
+ */
+describe("toOffsetIso", () => {
+	it("emits local wall-clock time with an explicit UTC offset", () => {
+		const at = new Date(2026, 7, 17, 11, 0, 0)
+
+		expect(toOffsetIso(at)).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/)
+		expect(toOffsetIso(at).startsWith("2026-08-17T11:00:00")).toBe(true)
+	})
+
+	it("round-trips to the same instant it was given", () => {
+		const at = new Date(2026, 0, 3, 7, 5, 9)
+
+		expect(new Date(toOffsetIso(at)).getTime()).toBe(at.getTime())
+	})
+
+	it("zero-pads every component", () => {
+		expect(toOffsetIso(new Date(2026, 0, 3, 7, 5, 9)).slice(0, 19)).toBe("2026-01-03T07:05:09")
 	})
 })

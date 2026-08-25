@@ -10,6 +10,7 @@ import type {
 	SettlePaymentPayload
 } from "@/add-os/modules/booking/types/reception"
 import type { PaymentMethod } from "@/add-os/modules/payments/types/wallet-top-up"
+import { toOffsetIso } from "@/add-os/utils/format"
 import { get, post } from "./api"
 import { toPaginated } from "./pagination"
 
@@ -26,6 +27,11 @@ import { toPaginated } from "./pagination"
  * buttons. `sessionPrefix()` below is the ONE place that mapping lives; the
  * views pass `row.type` through and never build a path.
  *
+ * `toOffsetIso` used to live here and is now `utils/format/dates.ts`'s, because
+ * `services/announcements.ts` became a second consumer and the wire format for
+ * a timestamp is one decision, not one per service. No re-export shim was left
+ * behind: a name with two homes is a name that drifts.
+ *
  * Endpoints verified against the API snapshot pinned 2026-08-25
  * (`docs/api/ADD-OS.postman_collection.json` → Admin (Dashboard) → Reception
  * Operations). Note what is deliberately absent: there is no walk-in `cancel`
@@ -35,36 +41,6 @@ import { toPaginated } from "./pagination"
  */
 
 const BASE = "/api/v1/admin/reception"
-
-function pad(value: number): string {
-	return value < 10 ? `0${value}` : String(value)
-}
-
-/**
- * Serializes a `Date` the way the collection's own examples write it:
- * `2026-08-17T11:00:00+03:00` — local wall clock with an explicit UTC offset,
- * NOT `toISOString()`'s UTC `Z` form.
- *
- * Both parse to the same instant, so this is not a correctness fix. It is a
- * legibility one: `checked_out_at` is read back by humans in Damascus, and a
- * value that says 08:00Z for an 11:00 check-out invites someone to "correct"
- * it. Matching the documented shape keeps the wire log readable as the wall
- * clock the operator actually saw.
- *
- * Exported for its own test — the offset branch is the part that goes wrong,
- * and asserting it through a fetch body would be testing it by accident.
- */
-export function toOffsetIso(at: Date): string {
-	const offsetMinutes = -at.getTimezoneOffset()
-	const sign = offsetMinutes < 0 ? "-" : "+"
-	const absolute = Math.abs(offsetMinutes)
-
-	const date = `${at.getFullYear()}-${pad(at.getMonth() + 1)}-${pad(at.getDate())}`
-	const time = `${pad(at.getHours())}:${pad(at.getMinutes())}:${pad(at.getSeconds())}`
-	const offset = `${sign}${pad(Math.floor(absolute / 60))}:${pad(absolute % 60)}`
-
-	return `${date}T${time}${offset}`
-}
 
 /** The one place `type` becomes a URL. Every shared action routes through it. */
 function sessionPrefix(type: SessionType): string {

@@ -96,6 +96,36 @@ export function formatTime(value: DateInput, options: Omit<DateFormatOptions, "s
 }
 
 /**
+ * Serializes a `Date` the way the API collection's own examples write it:
+ * `2026-08-17T11:00:00+03:00` — local wall clock with an explicit UTC offset,
+ * NOT `toISOString()`'s UTC `Z` form.
+ *
+ * This started life in `services/reception.ts`, for `checked_out_at`. It moved
+ * here when `services/announcements.ts` became a second consumer — and there it
+ * is not a legibility preference but a correctness requirement: ADDCore runs on
+ * `'timezone' => 'UTC'`, so a bare wall-clock string carrying no offset is READ
+ * as UTC. An operator in Damascus scheduling a banner for 09:00 would get 12:00.
+ *
+ * For `checked_out_at` the original reason still holds too: both forms parse to
+ * the same instant, so that was never a correctness fix. It is a legibility one
+ * — `checked_out_at` is read back by humans in Damascus, and a value that says
+ * 08:00Z for an 11:00 check-out invites someone to "correct" it. Matching the
+ * documented shape keeps the wire log readable as the wall clock the operator
+ * actually saw.
+ */
+export function toOffsetIso(at: Date): string {
+	const offsetMinutes = -at.getTimezoneOffset()
+	const sign = offsetMinutes < 0 ? "-" : "+"
+	const absolute = Math.abs(offsetMinutes)
+
+	const date = `${at.getFullYear()}-${pad(at.getMonth() + 1)}-${pad(at.getDate())}`
+	const time = `${pad(at.getHours())}:${pad(at.getMinutes())}:${pad(at.getSeconds())}`
+	const offset = `${sign}${pad(Math.floor(absolute / 60))}:${pad(absolute % 60)}`
+
+	return `${date}T${time}${offset}`
+}
+
+/**
  * How long ago something happened, in words.
  *
  * Hand-rolled for the same reason the month table in `./calendar.ts` is:
