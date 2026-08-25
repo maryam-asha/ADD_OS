@@ -121,6 +121,12 @@ rules only reload when Claude next touches a matching file.
 - **A new architecture guard is registered in `.claude/commands/guards.md` in the same
   change that adds it.** `no-inline-role-checks.spec.ts` and `no-direct-company-http.spec.ts`
   both shipped without that entry, so `/guards` under-reported for as long as they existed.
+- **Each batch is committed before the next begins, and two agents must not share one
+  working tree.** The concrete cost of skipping this: a test count that moved 467 → 473
+  between two verification runs with no source diff to explain it, because a second,
+  concurrently-running task was editing the same spec file between them — discovered only
+  by an outside audit, not by either agent. Three unrelated batches then sat mixed in one
+  uncommitted tree with no way to tell which file belonged to which.
 
 ---
 
