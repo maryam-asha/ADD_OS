@@ -4,17 +4,17 @@ import type { FieldDescriptor } from "@/add-os/components/resource/field-types"
 import type { SupportedLocale } from "@/add-os/lang/locales"
 import type { Branch } from "@/add-os/modules/spatial/types/branch"
 import type { Building } from "@/add-os/modules/spatial/types/building"
-import type { Space, SpacePayload, SpaceType } from "@/add-os/modules/spatial/types/space"
+import type { Space, SpacePayload } from "@/add-os/modules/spatial/types/space"
 import type { Zone } from "@/add-os/modules/spatial/types/zone"
 import type { CurrencyCode } from "@/add-os/utils/format/currency"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import { buildOperationalStatusOptions, renderOperationalStatusTag } from "@/add-os/modules/spatial/types/operational-status"
+import { SPACE_TYPES } from "@/add-os/modules/spatial/types/space"
 import { listBuildings } from "@/add-os/services/buildings"
 import { listFloors } from "@/add-os/services/floors"
 import { listZones } from "@/add-os/services/zones"
 import { formatNumber } from "@/add-os/utils/format"
 
-const SPACE_TYPES: SpaceType[] = ["co_space", "room", "business", "event_hall"]
 const CURRENCIES: CurrencyCode[] = ["SYP", "USD", "EUR"]
 
 export function buildSpaceColumns(

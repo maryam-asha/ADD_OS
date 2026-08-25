@@ -379,6 +379,69 @@
 		"submit": { "button": "Record top-up", "success": "Wallet topped up." },
 		"loadError": "Couldn't load members and companies. You may not have permission to view this page."
 	},
+	"approvalQueue": {
+		"description": "Bookings waiting on a reception decision. Only spaces that require approval appear here.",
+		"loadError": "Couldn't load the approval queue. You may not have permission to view this page.",
+		"empty": "Nothing is waiting for approval.",
+		"columns": {
+			"requester": "Requester",
+			"space": "Space",
+			"when": "Booked for",
+			"requested": "Requested",
+			"actions": "Actions"
+		},
+		"approve": { "button": "Approve", "success": "Booking approved." },
+		"reject": {
+			"button": "Reject",
+			"title": "Reject booking",
+			"reasonLabel": "Reason for rejection",
+			"reasonPlaceholder": "The requester sees this, so say what would make it work.",
+			"reasonRequired": "Give a reason for the rejection.",
+			"success": "Booking rejected."
+		}
+	},
+	"activeSessions": {
+		"description": "Everyone currently checked in, bookings and walk-ins together.",
+		"loadError": "Couldn't load active sessions. You may not have permission to view this page.",
+		"empty": "Nobody is checked in right now.",
+		"refresh": "Refresh",
+		"overdue": "Overdue",
+		"onTime": "On time",
+		"columns": {
+			"occupant": "Occupant",
+			"space": "Space",
+			"type": "Type",
+			"checkedInAt": "Checked in",
+			"status": "Status",
+			"actions": "Actions"
+		},
+		"type": { "booking": "Booking", "walkin": "Walk-in" },
+		"checkOut": {
+			"button": "Check out",
+			"title": "Check out session",
+			"atLabel": "Checked out at",
+			"futureNotAllowed": "The check-out time cannot be in the future.",
+			"settleLabel": "Settle payment now",
+			"settleNone": "Don't settle now",
+			"success": "Session checked out.",
+			"settleSuccess": "Payment settled."
+		},
+		"extend": {
+			"button": "Extend",
+			"title": "Extend booking",
+			"minutesLabel": "Additional minutes",
+			"minutesInvalid": "Enter a whole number of minutes, 1 or more.",
+			"success": "Booking extended."
+		},
+		"cancel": {
+			"button": "Cancel booking",
+			"confirmTitle": "Cancel this booking?",
+			"confirmText": "The member's booking ends now and the space is freed.",
+			"confirmOk": "Cancel booking",
+			"confirmCancel": "Keep it",
+			"success": "Booking cancelled."
+		}
+	},
 	"shortcuts": {
 		"title": "Shortcuts"
 	},
@@ -413,6 +476,8 @@
 			"individuals": "Individuals",
 			"companies": "Companies",
 			"memberships": "Memberships",
+			"approvalQueue": "Approval queue",
+			"activeSessions": "Active sessions",
 			"allBookings": "All bookings",
 			"calendar": "Calendar",
 			"packages": "Packages",
