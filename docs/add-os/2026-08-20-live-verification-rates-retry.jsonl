@@ -1,0 +1,9 @@
+{"step":"request","method":"GET","path":"/sanctum/csrf-cookie","status":204,"body":null,"timestamp":"2026-08-20T15:17:25.564Z"}
+{"step":"request","method":"POST","path":"/login","status":200,"body":{"two_factor":false},"timestamp":"2026-08-20T15:17:27.311Z"}
+{"step":"request","method":"POST","path":"/api/v1/admin/exchange-rates","status":422,"body":{"message":"البيانات المُرسلة غير صالحة.","errors":{"currency_code":["قيمة currency code المختارة غير صحيحة."]}},"timestamp":"2026-08-20T15:17:28.033Z"}
+{"step":"request","method":"POST","path":"/api/v1/admin/exchange-rates","status":422,"body":{"message":"البيانات المُرسلة غير صالحة.","errors":{"currency_code":["قيمة currency code المختارة غير صحيحة."]}},"timestamp":"2026-08-20T15:17:28.728Z"}
+{"step":"request","method":"GET","path":"/api/v1/admin/exchange-rates","status":200,"body":{"data":[]},"timestamp":"2026-08-20T15:17:29.438Z"}
+{"step":"request","method":"GET","path":"/api/v1/admin/exchange-rates/latest","status":404,"body":{"message":"المورد المطلوب غير موجود."},"timestamp":"2026-08-20T15:17:29.830Z"}
+{"step":"request","method":"GET","path":"/api/v1/admin/exchange-rates?currency_code=SYP","status":200,"body":{"data":[]},"timestamp":"2026-08-20T15:17:30.184Z"}
+{"step":"request","method":"POST","path":"/api/v1/admin/exchange-rates","status":422,"body":{"message":"البيانات المُرسلة غير صالحة.","errors":{"currency_code":["قيمة currency code المختارة غير صحيحة."]}},"timestamp":"2026-08-20T15:17:30.527Z"}
+{"step":"request","method":"GET","path":"/api/v1/admin/exchange-rates","status":200,"body":{"data":[]},"timestamp":"2026-08-20T15:17:30.859Z"}
