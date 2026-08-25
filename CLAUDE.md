@@ -154,7 +154,8 @@ project, and is kept current there:
 A moving file can't anchor a claim, so this repo pins a dated, byte-identical copy at
 `docs/api/ADD-OS.postman_collection.json` (see `docs/api/README.md` for the pin date,
 endpoint count, and the credential/encoding checks run at pin time). Every "per the
-collection" claim in code or docs cites that snapshot **by date**, never the live file.
+collection" claim in code or docs cites that snapshot **by date**, never the live file;
+where two pins happen to share a date, that README's `sha256` prefix disambiguates them.
 **If `pnpm api:collection:check` reports a mismatch, every claim sourced from the
 snapshot is unverified until someone re-reads the canonical file and re-pins it** —
 treat a stale pin the same as a failing guard, not as background noise.
