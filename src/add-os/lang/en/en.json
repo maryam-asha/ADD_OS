@@ -359,6 +359,26 @@
 		"empty": "No exchange rates found.",
 		"stats": { "latestUsd": "Latest USD → SYP rate" }
 	},
+	"walletTopUps": {
+		"description": "Record a manual wallet top-up taken at reception, for a member or a company wallet.",
+		"recipientType": { "user": "Member wallet", "company": "Company wallet" },
+		"paymentMethod": { "cash": "Cash", "sham": "Sham Cash", "mtn": "MTN Cash", "syriatel": "Syriatel Cash" },
+		"form": {
+			"recipientType": "Top up",
+			"user": "Member",
+			"company": "Company",
+			"amount": "Amount",
+			"paymentMethod": "Payment method",
+			"description": "Description (optional)"
+		},
+		"validation": {
+			"amountFormat": "Enter an amount of at least 0.01, using at most two decimals.",
+			"userRequired": "Select a member.",
+			"companyRequired": "Select a company."
+		},
+		"submit": { "button": "Record top-up", "success": "Wallet topped up." },
+		"loadError": "Couldn't load members and companies. You may not have permission to view this page."
+	},
 	"shortcuts": {
 		"title": "Shortcuts"
 	},
@@ -402,6 +422,7 @@
 			"transactions": "Transactions",
 			"paymentMethods": "Payment methods",
 			"exchangeRates": "Exchange rates",
+			"walletTopUps": "Wallet top-ups",
 			"events": "Events",
 			"community": "Community",
 			"cafe": "Café",
