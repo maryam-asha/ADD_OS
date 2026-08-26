@@ -1,0 +1,15 @@
+# ADD OS — line-ending handling.
+#
+# Deliberately scoped to one path. This repo has no repo-wide `text=auto` rule and
+# this file does not add one: changing normalisation for every tracked file is a
+# separate decision with a much larger blast radius, and nothing here needs it.
+#
+# The pinned API contract is the exception, because byte-identity IS its contract.
+# `pnpm api:collection:check` (scripts/check-api-collection.js) hashes the
+# WORKING-TREE bytes of this snapshot and of the canonical file in ADDCore, and
+# docs/api/README.md records a sha256 for the pin. With `core.autocrlf=true` — which
+# is the setting on the machine this was pinned from — a fresh checkout rewrites LF
+# to CRLF, changing those bytes and making the guard report a mismatch that has
+# nothing to do with the API contract having moved. `-text` disables all conversion
+# for this path, so what is committed is what lands on disk, on every platform.
+docs/api/ADD-OS.postman_collection.json -text

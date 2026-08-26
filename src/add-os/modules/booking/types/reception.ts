@@ -11,18 +11,23 @@ import type { SpaceType } from "@/add-os/modules/spatial/types/space"
  *
  * The collection carries no saved example response for either endpoint — that
  * is true of every endpoint in the file — so the field lists below are the
- * contract as specified, not one observed on the wire. Two consequences worth
+ * contract as specified, not one observed on the wire. One consequence worth
  * knowing before trusting a field:
  *
- *  - `meta` on the paginated list is documented ("Paginated (25/page)") but its
- *    shape has never been captured. `toPaginated` tolerates a missing
- *    `per_page`, which is exactly what the specified shape omits.
  *  - `space_type` is typed against the enum the collection states for Spaces
  *    (`co_space | room | business | event_hall`). The backend task's sample row
  *    shows `"meeting_room"`, which is not in that enum and is read here as
  *    prose shorthand for `room` rather than a fifth value. The columns render
  *    an unrecognised value verbatim instead of a missing-translation key, so a
  *    surprise on the wire shows up as a visibly odd cell, not a crash.
+ *
+ * Pagination is NOT among those consequences any more. This comment used to
+ * warn that the paginated list's `meta` shape "has never been captured" and
+ * that `toPaginated` tolerates a missing `per_page` "which is exactly what the
+ * specified shape omits". Both halves are now wrong: a real body was captured
+ * on 2026-08-25 and it carries `per_page`. Laravel's standard paginator shape
+ * is the locked project-wide convention — `services/pagination.ts` owns that
+ * decision and records what closing it gave up. Nothing to check here.
  *
  * There is deliberately no translatable Space *name* here: this codebase has
  * no such field, and `space_type` is the established stand-in — the same one

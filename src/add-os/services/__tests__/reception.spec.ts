@@ -4,12 +4,14 @@ import {
 	approveBooking,
 	cancelBooking,
 	checkOutSession,
+	confirmArrivalRequest,
 	extendBooking,
 	listActiveSessions,
+	listArrivalRequests,
 	listPendingApprovals,
+	rejectArrivalRequest,
 	rejectBooking,
-	settleSessionPayment,
-	toOffsetIso
+	settleSessionPayment
 } from "../reception"
 
 vi.mock("@/add-os/config/env", () => ({
@@ -39,6 +41,15 @@ const pendingRow = {
 	start_at: "2026-08-26T09:00:00+03:00",
 	end_at: "2026-08-26T11:00:00+03:00",
 	created_at: "2026-08-25T08:00:00+03:00"
+}
+
+const arrivalRow = {
+	id: 4,
+	status: "pending" as const,
+	requested_at: "2026-08-26T09:15:00+03:00",
+	matched_booking_id: null,
+	user: { id: 12, name: "Sara", phone: "0900000000" },
+	matched_booking: null
 }
 
 const sessionRow = {
@@ -187,29 +198,53 @@ describe("reception service", () => {
 		})
 	})
 
-	/**
-	 * The collection's own example is `"2026-08-17T11:00:00+03:00"` — local wall
-	 * clock with an explicit offset, not a UTC `Z` string. Asserted structurally
-	 * rather than against a literal offset, because the suite runs in whatever
-	 * zone the machine is set to; a hardcoded `+03:00` would pass in Damascus and
-	 * fail elsewhere without either result meaning anything.
-	 */
-	describe("toOffsetIso", () => {
-		it("emits local wall-clock time with an explicit UTC offset", () => {
-			const at = new Date(2026, 7, 17, 11, 0, 0)
+	describe("arrival requests", () => {
+		it("lists from the arrival-requests path and keeps the backend's meta", async () => {
+			vi.spyOn(globalThis, "fetch").mockResolvedValue(
+				jsonResponse({ data: [arrivalRow], meta: { current_page: 2, last_page: 5, per_page: 25, total: 112 } })
+			)
 
-			expect(toOffsetIso(at)).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/)
-			expect(toOffsetIso(at).startsWith("2026-08-17T11:00:00")).toBe(true)
+			const page = await listArrivalRequests({ page: 2 })
+
+			expect(calledUrl()).toBe(`${BASE}/arrival-requests?page=2`)
+			expect(page.data).toEqual([arrivalRow])
+			expect(page.meta.last_page).toBe(5)
+			expect(page.meta.total).toBe(112)
 		})
 
-		it("round-trips to the same instant it was given", () => {
-			const at = new Date(2026, 0, 3, 7, 5, 9)
+		/**
+		 * The distinction this whole screen turns on. A matched request is checked
+		 * into its own booking by the backend, so a body would be meaningless — and
+		 * an unmatched one 422s without `space_id`. Asserting the ABSENCE of a body
+		 * is what would fail if someone "helpfully" started always sending one.
+		 */
+		it("confirms a matched request with no body at all", async () => {
+			vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({ message: "Arrival confirmed." }))
 
-			expect(new Date(toOffsetIso(at)).getTime()).toBe(at.getTime())
+			await confirmArrivalRequest(4)
+
+			expect(calledUrl()).toBe(`${BASE}/arrival-requests/4/confirm`)
+			expect(calledInit().method).toBe("POST")
+			expect(calledInit().body).toBeUndefined()
 		})
 
-		it("zero-pads every component", () => {
-			expect(toOffsetIso(new Date(2026, 0, 3, 7, 5, 9)).slice(0, 19)).toBe("2026-01-03T07:05:09")
+		it("confirms an unmatched request with space_id and nothing else", async () => {
+			vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({ message: "Walk-in started." }))
+
+			await confirmArrivalRequest(4, 9)
+
+			expect(calledUrl()).toBe(`${BASE}/arrival-requests/4/confirm`)
+			expect(JSON.parse(calledInit().body as string)).toEqual({ space_id: 9 })
+		})
+
+		it("rejects with no body", async () => {
+			vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({ message: "Arrival rejected." }))
+
+			await rejectArrivalRequest(4)
+
+			expect(calledUrl()).toBe(`${BASE}/arrival-requests/4/reject`)
+			expect(calledInit().method).toBe("POST")
+			expect(calledInit().body).toBeUndefined()
 		})
 	})
 })

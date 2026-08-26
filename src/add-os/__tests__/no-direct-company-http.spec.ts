@@ -4,7 +4,27 @@ import { describe, expect, it } from "vitest"
 
 const ROOT = path.resolve(__dirname, "..", "..", "..")
 const ADD_OS_DIR = path.join(ROOT, "src", "add-os")
+/** Hand-written sources. Never `g`-flagged — `walk` calls `.test()` in a loop, and a global regex is stateful. */
 const TEXT_EXT = /\.(?:ts|tsx|vue)$/i
+
+/**
+ * Emitted bundles.
+ *
+ * This constant exists because the two passes below scan sets that share no
+ * extension, and `walk` used to hardcode `TEXT_EXT` for both: the dist pass
+ * called `walk(dist)` and then filtered the result for `.js`/`.mjs`, which is an
+ * intersection of two disjoint sets. `distFiles` was therefore ALWAYS `[]` and
+ * the joined text always `""` — so the pass did not vacuously succeed, it
+ * FAILED every single time a build existed, on `"".includes(marker)`. The
+ * markers were in the build the whole time (`dist/assets/companies-*.js` carries
+ * `/admin/companies`); nothing ever opened a `.js` file to look.
+ *
+ * A guard that cries wolf on every build is worse than no guard: the next person
+ * to run `pnpm build && pnpm test:unit` learns to skip it. Hence `walk` now takes
+ * the pattern as a parameter, and the pass asserts it actually read something
+ * before asserting on the contents.
+ */
+const BUNDLE_EXT = /\.(?:js|mjs)$/i
 
 /** Only these files may reference a Company Pipeline HTTP path — everything else must go through them. */
 const ALLOWED_RELATIVE_FILES = new Set([
@@ -24,14 +44,15 @@ const ALLOWED_RELATIVE_FILES = new Set([
  */
 const PATH_MARKERS = ["/admin/companies", "/admin/private-office-requests"]
 
-function walk(dir: string, out: string[] = []): string[] {
+/** `pattern` is a parameter, not a module constant — the two callers scan disjoint extension sets. */
+function walk(dir: string, pattern: RegExp, out: string[] = []): string[] {
 	if (!existsSync(dir)) return out
 	for (const entry of readdirSync(dir, { withFileTypes: true })) {
 		const full = path.join(dir, entry.name)
 		if (entry.isDirectory()) {
 			if (entry.name === "node_modules") continue
-			walk(full, out)
-		} else if (TEXT_EXT.test(entry.name)) {
+			walk(full, pattern, out)
+		} else if (pattern.test(entry.name)) {
 			out.push(full)
 		}
 	}
@@ -60,7 +81,7 @@ function findOffenders(files: string[]): string[] {
 }
 
 describe("company pipeline — no direct HTTP calls outside the service layer", () => {
-	const sourceFiles = walk(ADD_OS_DIR)
+	const sourceFiles = walk(ADD_OS_DIR, TEXT_EXT)
 
 	it("scans a non-empty surface", () => {
 		expect(sourceFiles.length).toBeGreaterThan(10)
@@ -93,7 +114,18 @@ describe("company pipeline — no direct HTTP calls outside the service layer", 
 	// build at all, proving the service layer wasn't tree-shaken away), not a
 	// location check like the source pass above.
 	it.runIf(built)("ships the Company Pipeline endpoints in the build", () => {
-		const distFiles = walk(dist).filter(f => /\.(?:js|mjs)$/i.test(f))
+		const distFiles = walk(dist, BUNDLE_EXT)
+
+		/**
+		 * Asserted BEFORE the contents are, and this line is the point of the fix:
+		 * without it, "found nothing to read" and "read everything and the markers
+		 * are gone" are the same red test — and the first masqueraded as the second
+		 * for as long as this guard existed. Any future change that stops this pass
+		 * from reaching the bundles now says so in as many words, instead of
+		 * blaming the companies module.
+		 */
+		expect(distFiles.length, "dist/ yielded no .js or .mjs files — the scan below would read an empty string").toBeGreaterThan(0)
+
 		const text = distFiles.map(f => readFileSync(f, "utf8")).join("\n")
 		for (const marker of PATH_MARKERS) {
 			expect(text.includes(marker), `${marker} missing from the build`).toBe(true)

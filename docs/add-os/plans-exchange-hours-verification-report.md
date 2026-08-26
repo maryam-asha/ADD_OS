@@ -3,7 +3,17 @@
 Live-backend verification pass for the task brief covering **Plans**, **Exchange Rates**,
 and **Business Hours**, run against a locally-started `php artisan serve` (ADDCore) on
 `127.0.0.1:8000`, before any frontend code was written. Raw request/response logs:
-`tmp-verify-results.jsonl`, `tmp-verify-rates2.jsonl` (repo root, gitignored as `tmp-*`).
+[`2026-08-20-live-verification-results.jsonl`](2026-08-20-live-verification-results.jsonl),
+[`2026-08-20-live-verification-rates-retry.jsonl`](2026-08-20-live-verification-rates-retry.jsonl)
+— moved here 2026-08-24 from `tmp-verify-results.jsonl` / `tmp-verify-rates2.jsonl` at the
+repo root, where they had sat untracked since this pass. **Correction:** this line
+previously said they were "gitignored as `tmp-*`" — checked now, `.gitignore` has no such
+pattern; they were simply never `git add`ed, which is a materially different (and much
+more fragile) kind of not-committed. `tmp-verify-results.jsonl` in particular is the only
+record of the live `GET /api/v1/admin/plans` response shape that the pagination
+deprioritization decision (see `pagination.ts` and the Open table in `CLAUDE.md`) rests
+on — it is why that decision is preserved here rather than left to expire with the next
+`tmp-*` cleanup.
 
 ## Fixing the verification harness itself
 

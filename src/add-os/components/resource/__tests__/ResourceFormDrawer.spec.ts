@@ -15,10 +15,28 @@ const i18n = createI18n({
 	messages: {
 		en: {
 			resourceCrud: {
-				form: { submit: "Save", cancel: "Cancel", arabicPlaceholder: "Arabic", englishPlaceholder: "English" },
+				form: {
+					submit: "Save",
+					cancel: "Cancel",
+					arabicPlaceholder: "Arabic",
+					englishPlaceholder: "English",
+					bilingualLabel: "{field} ({language})"
+				},
 				validation: { required: "{field} is required." }
 			},
-			x: { region: "Region", city: "City", label: "Label", name: "Name", price: "Price", branchId: "Branch", active: "Active" }
+			locales: { ar: "Arabic", en: "English" },
+			x: { region: "Region", city: "City", label: "Label", name: "Name", price: "Price", branchId: "Branch", active: "Active", startsAt: "Starts at", day: "Day" }
+		},
+		// Mirrors ar.json's actual bilingualLabel construction: "بـ" ("in") is the
+		// idiomatic Arabic parenthetical preposition, not a literal mirror of the
+		// English punctuation — see ResourceFormDrawer.vue's bilingualLabel() comment.
+		ar: {
+			resourceCrud: {
+				form: { submit: "حفظ", cancel: "إلغاء", arabicPlaceholder: "العربية", englishPlaceholder: "الإنجليزية", bilingualLabel: "{field} (ب{language})" },
+				validation: { required: "{field} مطلوب." }
+			},
+			locales: { ar: "العربية", en: "الإنجليزية" },
+			x: { name: "الاسم" }
 		}
 	}
 })
@@ -55,6 +73,15 @@ interface TimeModel extends Record<string, unknown> {
 }
 
 interface DateModel extends Record<string, unknown> {
+	date: string | null
+}
+
+interface DateTimeModel extends Record<string, unknown> {
+	starts_at: number | null
+}
+
+interface MixedDateModel extends Record<string, unknown> {
+	starts_at: number | null
 	date: string | null
 }
 
@@ -295,13 +322,20 @@ describe("resourceFormDrawer", () => {
 		wrapper.unmount()
 	})
 
-	it("fails a required bilingual field when only one half is filled", async () => {
+	// Each half is now its own n-form-item with its own path/rule/validation
+	// lifecycle — not one item covering both — so a blank half must fail on
+	// its own without dragging the filled half's item into an error state.
+	it("validates each bilingual half independently: one blank half errors, the filled half does not", async () => {
 		const onSubmit = vi.fn().mockResolvedValue(undefined)
 		const wrapper = mountBilingual({ name: { ar: "حلب", en: "   " } }, onSubmit)
 
 		await wrapper.vm.handleSubmit()
+		await nextTick()
 
 		expect(onSubmit).not.toHaveBeenCalled()
+		expect(document.body.textContent).toContain("Name (English) is required.")
+		expect(document.body.textContent).not.toContain("Name (Arabic) is required.")
+		expect(document.body.querySelectorAll(".n-input--error-status")).toHaveLength(1)
 		wrapper.unmount()
 	})
 
@@ -313,6 +347,23 @@ describe("resourceFormDrawer", () => {
 
 		expect(onSubmit).toHaveBeenCalledWith({ name: { ar: "حلب", en: "Aleppo" } })
 		wrapper.unmount()
+	})
+
+	it("composes each half's label as \"field (language)\" in both locales, with the space intact", async () => {
+		const wrapper = mountBilingual({ name: { ar: "", en: "" } })
+		expect(document.body.textContent).toContain("Name (Arabic)")
+		expect(document.body.textContent).toContain("Name (English)")
+		wrapper.unmount()
+
+		i18n.global.locale.value = "ar"
+		const arWrapper = mountBilingual({ name: { ar: "", en: "" } })
+		// "بـ" ("in") is the idiomatic Arabic parenthetical preposition — see
+		// ResourceFormDrawer.vue's bilingualLabel() comment — not a mirror of the
+		// English punctuation, but it composes with the same required space.
+		expect(document.body.textContent).toContain("الاسم (بالعربية)")
+		expect(document.body.textContent).toContain("الاسم (بالإنجليزية)")
+		arWrapper.unmount()
+		i18n.global.locale.value = "en"
 	})
 
 	// async-validator's bare `required` keyword defaults an untyped rule to
@@ -479,5 +530,59 @@ describe("resourceFormDrawer", () => {
 		const dateWrapper = mountDrawer(dateFields, { date: "" })
 		expect(document.body.querySelector(".n-date-picker")).not.toBeNull()
 		dateWrapper.unmount()
+	})
+})
+
+describe("datetime field", () => {
+	/**
+	 * `datetime` binds the picker's NATIVE value — an epoch-millis number —
+	 * rather than the `formatted-value` string round-trip `date` and `time` use.
+	 * A `value-format` string cannot carry a UTC offset, and ADDCore runs on UTC,
+	 * so a wall-clock string would be stored three hours off in Damascus. Keeping
+	 * the model numeric leaves offset handling to the one service that owns the
+	 * wire format. See docs/superpowers/specs/2026-08-25-kiosk-module-design.md §5.
+	 */
+	it("renders a datetime picker and round-trips a timestamp unchanged", async () => {
+		const at = new Date(2026, 7, 25, 9, 30, 0).getTime()
+		const model: DateTimeModel = { starts_at: at }
+		const fields: FieldDescriptor<DateTimeModel>[] = [{ key: "starts_at", labelKey: "x.startsAt", type: "datetime" }]
+		const wrapper = mountDrawer(fields, model)
+		await flushPromises()
+
+		expect(document.body.querySelector(".n-date-picker")).not.toBeNull()
+		expect(model.starts_at).toBe(at)
+		wrapper.unmount()
+	})
+
+	it("accepts null as the empty value without crashing the picker", async () => {
+		const model: DateTimeModel = { starts_at: null }
+		const fields: FieldDescriptor<DateTimeModel>[] = [{ key: "starts_at", labelKey: "x.startsAt", type: "datetime" }]
+		const wrapper = mountDrawer(fields, model)
+		await flushPromises()
+
+		expect(document.body.querySelector(".n-date-picker")).not.toBeNull()
+		expect(model.starts_at).toBeNull()
+		wrapper.unmount()
+	})
+
+	/**
+	 * The `date` type's shape guards (`toPickerDateValue`) exist because
+	 * NDatePicker parses `formatted-value` through date-fns and throws
+	 * synchronously on an unparseable string. A number never reaches that code
+	 * path, so `datetime` must not be routed through them — this asserts the two
+	 * types stay independent and neither breaks the other.
+	 */
+	it("leaves the string-based date field working alongside it", async () => {
+		const model: MixedDateModel = { starts_at: null, date: "2026-08-25" }
+		const fields: FieldDescriptor<MixedDateModel>[] = [
+			{ key: "starts_at", labelKey: "x.startsAt", type: "datetime" },
+			{ key: "date", labelKey: "x.day", type: "date" }
+		]
+		const wrapper = mountDrawer(fields, model)
+		await flushPromises()
+
+		expect(document.body.querySelectorAll(".n-date-picker").length).toBe(2)
+		expect(model.date).toBe("2026-08-25")
+		wrapper.unmount()
 	})
 })

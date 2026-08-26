@@ -2,7 +2,7 @@ import { dateArDZ } from "naive-ui"
 import { describe, expect, it } from "vitest"
 import { MONTHS } from "../calendar"
 import { formatCurrency } from "../currency"
-import { formatDate, formatDateTime, formatTime } from "../dates"
+import { formatDate, formatDateTime, formatRelativeTime, formatTime, toOffsetIso } from "../dates"
 import { dateArLevantine } from "../naiveDateLocale"
 import { formatNumber, hasFraction } from "../numbers"
 
@@ -202,5 +202,111 @@ describe("naive-ui date panel locale", () => {
 		expect(localize.day).toBe(upstream.day)
 		expect(dateArLevantine.locale.formatLong).toBe(dateArDZ.locale.formatLong)
 		expect(dateArLevantine.locale.match).toBe(dateArDZ.locale.match)
+	})
+})
+
+describe("formatRelativeTime", () => {
+	const NOW = new Date(2026, 7, 25, 12, 0, 0)
+	const ago = (seconds: number) => new Date(NOW.getTime() - seconds * 1000)
+
+	it("floors anything under a minute to a 'just now' phrase", () => {
+		expect(formatRelativeTime(ago(0), { ...EN, now: NOW })).toBe("just now")
+		expect(formatRelativeTime(ago(59), { ...EN, now: NOW })).toBe("just now")
+		expect(formatRelativeTime(ago(59), { ...AR, now: NOW })).toBe("الآن")
+	})
+
+	it("treats a future timestamp as 'just now' rather than emitting a negative count", () => {
+		expect(formatRelativeTime(new Date(NOW.getTime() + 5000), { ...EN, now: NOW })).toBe("just now")
+	})
+
+	it("counts minutes, hours and days in English with plain plurals", () => {
+		expect(formatRelativeTime(ago(60), { ...EN, now: NOW })).toBe("1 minute ago")
+		expect(formatRelativeTime(ago(300), { ...EN, now: NOW })).toBe("5 minutes ago")
+		expect(formatRelativeTime(ago(3600), { ...EN, now: NOW })).toBe("1 hour ago")
+		expect(formatRelativeTime(ago(7200), { ...EN, now: NOW })).toBe("2 hours ago")
+		expect(formatRelativeTime(ago(86400), { ...EN, now: NOW })).toBe("1 day ago")
+		expect(formatRelativeTime(ago(86400 * 3), { ...EN, now: NOW })).toBe("3 days ago")
+	})
+
+	/**
+	 * The whole reason this formatter is hand-rolled. Arabic counted nouns take
+	 * four distinct forms, and collapsing them to singular/plural is what every
+	 * naive implementation does:
+	 *   1    → the bare noun, no numeral
+	 *   2    → the dual form, no numeral
+	 *   3-10 → numeral + plural of paucity
+	 *   11+  → numeral + singular
+	 */
+	it("uses all four Arabic plural categories for minutes", () => {
+		expect(formatRelativeTime(ago(60), { ...AR, now: NOW })).toBe("منذ دقيقة")
+		expect(formatRelativeTime(ago(120), { ...AR, now: NOW })).toBe("منذ دقيقتين")
+		expect(formatRelativeTime(ago(300), { ...AR, now: NOW })).toBe("منذ 5 دقائق")
+		expect(formatRelativeTime(ago(600), { ...AR, now: NOW })).toBe("منذ 10 دقائق")
+		expect(formatRelativeTime(ago(660), { ...AR, now: NOW })).toBe("منذ 11 دقيقة")
+		expect(formatRelativeTime(ago(1500), { ...AR, now: NOW })).toBe("منذ 25 دقيقة")
+	})
+
+	it("uses all four Arabic plural categories for hours", () => {
+		expect(formatRelativeTime(ago(3600), { ...AR, now: NOW })).toBe("منذ ساعة")
+		expect(formatRelativeTime(ago(7200), { ...AR, now: NOW })).toBe("منذ ساعتين")
+		expect(formatRelativeTime(ago(3600 * 4), { ...AR, now: NOW })).toBe("منذ 4 ساعات")
+		expect(formatRelativeTime(ago(3600 * 13), { ...AR, now: NOW })).toBe("منذ 13 ساعة")
+	})
+
+	it("uses all four Arabic plural categories for days", () => {
+		expect(formatRelativeTime(ago(86400), { ...AR, now: NOW })).toBe("منذ يوم")
+		expect(formatRelativeTime(ago(86400 * 2), { ...AR, now: NOW })).toBe("منذ يومين")
+		expect(formatRelativeTime(ago(86400 * 6), { ...AR, now: NOW })).toBe("منذ 6 أيام")
+		expect(formatRelativeTime(ago(86400 * 12), { ...AR, now: NOW })).toBe("منذ 12 يوم")
+	})
+
+	/**
+	 * Collects every digit and asserts each is ASCII, rather than testing against
+	 * an Arabic-Indic range — the same approach `formatDate`'s own "keeps digits
+	 * Latin" case above takes, and for the same two reasons: `\p{Nd}` catches any
+	 * non-Latin digit set rather than only the one range someone thought to
+	 * exclude, and a literal `[٠-٩]` in source is a character range a reader
+	 * cannot verify at a glance (the regexp lint rule rejects it on that ground).
+	 */
+	it("emits Latin digits, never Arabic-Indic ones", () => {
+		const rendered = formatRelativeTime(ago(300), { ...AR, now: NOW })
+		const digits = rendered.match(/\p{Nd}/gu) ?? []
+
+		expect(rendered).toContain("5")
+		expect(digits.length).toBeGreaterThan(0)
+		expect(digits.every(digit => digit >= "0" && digit <= "9")).toBe(true)
+	})
+
+	it("accepts an ISO string as readily as a Date", () => {
+		expect(formatRelativeTime(ago(300).toISOString(), { ...EN, now: NOW })).toBe("5 minutes ago")
+	})
+})
+
+/**
+ * The collection's own example is `"2026-08-17T11:00:00+03:00"` — local wall
+ * clock with an explicit offset, not a UTC `Z` string. Asserted structurally
+ * rather than against a literal offset, because the suite runs in whatever
+ * zone the machine is set to; a hardcoded `+03:00` would pass in Damascus and
+ * fail elsewhere without either result meaning anything.
+ *
+ * These cases moved here from `services/__tests__/reception.spec.ts` when
+ * `toOffsetIso` did, unchanged.
+ */
+describe("toOffsetIso", () => {
+	it("emits local wall-clock time with an explicit UTC offset", () => {
+		const at = new Date(2026, 7, 17, 11, 0, 0)
+
+		expect(toOffsetIso(at)).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/)
+		expect(toOffsetIso(at).startsWith("2026-08-17T11:00:00")).toBe(true)
+	})
+
+	it("round-trips to the same instant it was given", () => {
+		const at = new Date(2026, 0, 3, 7, 5, 9)
+
+		expect(new Date(toOffsetIso(at)).getTime()).toBe(at.getTime())
+	})
+
+	it("zero-pads every component", () => {
+		expect(toOffsetIso(new Date(2026, 0, 3, 7, 5, 9)).slice(0, 19)).toBe("2026-01-03T07:05:09")
 	})
 })

@@ -94,3 +94,110 @@ export function formatDateTime(value: DateInput, options: Omit<DateFormatOptions
 export function formatTime(value: DateInput, options: Omit<DateFormatOptions, "style"> = {}): string {
 	return formatDate(value, { ...options, style: "time" })
 }
+
+/**
+ * Serializes a `Date` the way the API collection's own examples write it:
+ * `2026-08-17T11:00:00+03:00` — local wall clock with an explicit UTC offset,
+ * NOT `toISOString()`'s UTC `Z` form.
+ *
+ * This started life in `services/reception.ts`, for `checked_out_at`. It moved
+ * here when `services/announcements.ts` became a second consumer — and there it
+ * is not a legibility preference but a correctness requirement: ADDCore runs on
+ * `'timezone' => 'UTC'`, so a bare wall-clock string carrying no offset is READ
+ * as UTC. An operator in Damascus scheduling a banner for 09:00 would get 12:00.
+ *
+ * For `checked_out_at` the original reason still holds too: both forms parse to
+ * the same instant, so that was never a correctness fix. It is a legibility one
+ * — `checked_out_at` is read back by humans in Damascus, and a value that says
+ * 08:00Z for an 11:00 check-out invites someone to "correct" it. Matching the
+ * documented shape keeps the wire log readable as the wall clock the operator
+ * actually saw.
+ */
+export function toOffsetIso(at: Date): string {
+	const offsetMinutes = -at.getTimezoneOffset()
+	const sign = offsetMinutes < 0 ? "-" : "+"
+	const absolute = Math.abs(offsetMinutes)
+
+	const date = `${at.getFullYear()}-${pad(at.getMonth() + 1)}-${pad(at.getDate())}`
+	const time = `${pad(at.getHours())}:${pad(at.getMinutes())}:${pad(at.getSeconds())}`
+	const offset = `${sign}${pad(Math.floor(absolute / 60))}:${pad(absolute % 60)}`
+
+	return `${date}T${time}${offset}`
+}
+
+/**
+ * How long ago something happened, in words.
+ *
+ * Hand-rolled for the same reason the month table in `./calendar.ts` is:
+ * `Intl.RelativeTimeFormat`, date-fns and dayjs each ship their own Arabic data
+ * and they do not agree. Here the disagreement would be grammatical rather than
+ * lexical — Arabic counted nouns take FOUR forms, and a library configured for
+ * two produces "منذ 2 دقائق" where a speaker says "منذ دقيقتين".
+ *
+ * `now` is injectable so a caller can drive it from a ticking ref (see
+ * `composables/useNow.ts`) and so tests are not clock-dependent.
+ *
+ * Anything under a minute — including a future timestamp arriving from clock
+ * skew — floors to "just now". A negative count is never emitted.
+ */
+export interface RelativeTimeOptions {
+	locale?: SupportedLocale
+	now?: DateInput
+}
+
+/** Ordered largest-first: the first unit the elapsed time reaches is the one used. */
+const RELATIVE_UNITS = [
+	{ unit: "day", seconds: 86400 },
+	{ unit: "hour", seconds: 3600 },
+	{ unit: "minute", seconds: 60 }
+] as const
+
+type RelativeUnit = (typeof RELATIVE_UNITS)[number]["unit"]
+
+/**
+ * `one` and `two` are used WITHOUT a numeral — "منذ دقيقة", not "منذ 1 دقيقة".
+ * `few` covers 3-10 (plural of paucity); `many` covers 11 and up, which takes
+ * the singular back again. This is the table a two-form library cannot express.
+ */
+const AR_UNIT_FORMS: Record<RelativeUnit, { one: string; two: string; few: string; many: string }> = {
+	minute: { one: "دقيقة", two: "دقيقتين", few: "دقائق", many: "دقيقة" },
+	hour: { one: "ساعة", two: "ساعتين", few: "ساعات", many: "ساعة" },
+	day: { one: "يوم", two: "يومين", few: "أيام", many: "يوم" }
+}
+
+const EN_UNIT_FORMS: Record<RelativeUnit, { one: string; other: string }> = {
+	minute: { one: "minute", other: "minutes" },
+	hour: { one: "hour", other: "hours" },
+	day: { one: "day", other: "days" }
+}
+
+const JUST_NOW: Record<SupportedLocale, string> = { ar: "الآن", en: "just now" }
+
+function relativeArabic(count: number, unit: RelativeUnit): string {
+	const forms = AR_UNIT_FORMS[unit]
+	if (count === 1) return `منذ ${forms.one}`
+	if (count === 2) return `منذ ${forms.two}`
+	if (count <= 10) return `منذ ${count} ${forms.few}`
+	return `منذ ${count} ${forms.many}`
+}
+
+function relativeEnglish(count: number, unit: RelativeUnit): string {
+	const forms = EN_UNIT_FORMS[unit]
+	return `${count} ${count === 1 ? forms.one : forms.other} ago`
+}
+
+export function formatRelativeTime(value: DateInput, options: RelativeTimeOptions = {}): string {
+	const { locale = currentLocale.value, now = Date.now() } = options
+	const elapsedSeconds = Math.floor((toDate(now).getTime() - toDate(value).getTime()) / 1000)
+
+	if (elapsedSeconds < 60) return JUST_NOW[locale]
+
+	for (const { unit, seconds } of RELATIVE_UNITS) {
+		if (elapsedSeconds >= seconds) {
+			const count = Math.floor(elapsedSeconds / seconds)
+			return locale === "ar" ? relativeArabic(count, unit) : relativeEnglish(count, unit)
+		}
+	}
+
+	return JUST_NOW[locale]
+}

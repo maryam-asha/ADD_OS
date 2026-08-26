@@ -76,9 +76,30 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		path: "/system",
 		icon: "carbon:user-admin",
 		status: "active",
+		/**
+		 * Global settings sits here, with Users and Roles, rather than in the
+		 * `settings` section below — where a `systemSettings` placeholder pointing at
+		 * `/settings/system` stood until 2026-08-26.
+		 *
+		 * The two sections divide on WHOSE settings they are, not on the word:
+		 * `settings` is the signed-in operator's own account (Account & security),
+		 * while these keys are platform-wide plumbing an admin changes for everybody
+		 * — the same class of thing as promoting an account or editing a role. The
+		 * backend agrees on where the boundary is: `PATCH /admin/settings/{key}` sits
+		 * inside the very same `role:admin` group as every Users and Roles route.
+		 *
+		 * WHAT THIS GAVE UP: the `/settings/system` URL, and the reading that a
+		 * section named "Settings" owns everything called a setting. Nothing links to
+		 * that path yet, so there is nothing to redirect; if that changes, add a
+		 * redirect rather than moving the page back and re-splitting the two ideas.
+		 *
+		 * Last in the list on purpose — a section redirects to its FIRST page, and
+		 * `/system` should keep landing on Users.
+		 */
 		pages: [
 			{ key: "users", path: "users" },
-			{ key: "roles", path: "roles" }
+			{ key: "roles", path: "roles" },
+			{ key: "globalSettings", path: "settings" }
 		]
 	},
 	{
@@ -115,6 +136,19 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		pages: [
 			{ key: "approvalQueue", path: "approval-queue" },
 			{ key: "activeSessions", path: "active-sessions" },
+			/**
+			 * The kiosk's arrival queue lands here rather than in a "Kiosk" section
+			 * of its own, applying the rule above rather than making a new one: an
+			 * arriving member is handled at the reception desk by the operator
+			 * already working the two queues above it, and `arrival-requests` sits
+			 * under the same `reception/` prefix `approvalQueue` and
+			 * `activeSessions` do. A Kiosk section would have been the 14th.
+			 *
+			 * Its sibling page, Announcements, went to `cms` instead — the two are
+			 * one feature to the backend but two different jobs to two different
+			 * operators, and this list is ordered by the operator's day.
+			 */
+			{ key: "arrivalRequests", path: "arrival-requests" },
 			{ key: "allBookings", path: "all" },
 			{ key: "calendar", path: "calendar" }
 		]
@@ -148,6 +182,10 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "transactions", path: "transactions" },
 			{ key: "paymentMethods", path: "methods" },
 			{ key: "exchangeRates", path: "exchange-rates" },
+			// Sits after exchange-rates on purpose: the rates form's currency
+			// options are rows of this resource, so the pair reads in the order
+			// they depend on each other.
+			{ key: "currencies", path: "currencies" },
 			{ key: "walletTopUps", path: "wallet-top-ups" }
 		]
 	},
@@ -184,8 +222,19 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		key: "cms",
 		path: "/cms",
 		icon: "carbon:document",
-		status: "coming-soon",
+		status: "active",
+		/**
+		 * Kiosk banner content is content management, so it lives here rather than
+		 * beside the arrival queue it ships with — the operator who schedules a
+		 * banner is not the operator working the reception desk.
+		 *
+		 * Announcements leads the list deliberately: a section redirects to its
+		 * FIRST page, and `content`/`partners` are still ComingSoon, so any other
+		 * order would make `/cms` land on a placeholder the moment the section went
+		 * active. Same consideration the `bookings` ordering note records.
+		 */
 		pages: [
+			{ key: "announcements", path: "announcements" },
 			{ key: "content", path: "content" },
 			{ key: "partners", path: "partners" }
 		]
@@ -195,10 +244,20 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		path: "/settings",
 		icon: "carbon:settings",
 		status: "coming-soon",
-		pages: [
-			{ key: "accountSecurity", path: "account" },
-			{ key: "systemSettings", path: "system" }
-		]
+		/**
+		 * REVERSAL, 2026-08-26: `{ key: "systemSettings", path: "system" }` was
+		 * removed from this list. It was a ComingSoon placeholder for exactly the
+		 * screen that shipped that day as `system.globalSettings`, so leaving it
+		 * would have put a second "System settings" entry in the sidebar promising a
+		 * page that already existed one section up — a nav entry that can only
+		 * mislead, which is what invariant 4 is about. Its `nav.pages.systemSettings`
+		 * key came out of both catalogues in the same change.
+		 *
+		 * What that gave up is recorded on the `system` section above. This section
+		 * now holds one page, which is fine: it is the operator's own account, and
+		 * `/settings` redirects to it.
+		 */
+		pages: [{ key: "accountSecurity", path: "account" }]
 	}
 ]
 

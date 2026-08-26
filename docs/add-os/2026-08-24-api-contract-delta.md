@@ -120,3 +120,103 @@ endpoints are described as paginated in prose, not two — `GET /admin/error-log
 member/public one — but it has no screen yet either (see the Reception Operations row
 above), so "the dashboard uses neither" still holds in practice today. Recorded in
 `pagination.ts`'s module doc (appended, not overwritten) with the 2026-08-24 citation.
+
+---
+
+## Wider sweep (2026-08-24, later same day) — corrections to (a) and (b)
+
+The original section (a) sweep — `grep -rlniE "confirmed live|Live-confirmed|per the
+collection|confirmed from the collection|collection says|collection describes"
+src/add-os` — was too narrow twice over: it never ran against `docs/`, and even inside
+`src/add-os/` it missed `pagination.ts`/`resource-factory.ts`'s "is not confirmed"
+phrasing because that exact string isn't one of the six grepped. Re-run wider:
+
+```
+grep -rlniE "confirmed live|live-confirmed|per the collection|collection says|
+collection describes|not confirmed|unconfirmed|\bassumed\b|verified against|
+TODO\(backend\)|confirmed from the collection" src/add-os docs
+```
+
+34 files matched (up from 17, and now including `docs/`). Four are false positives —
+`docs/brand/PHASE-0-AUDIT.md` ("verified against DataTable," about a font's `tnum`
+feature) and `src/add-os/theme/tokens.ts` ("not assumed," about colour provenance) match
+on generic language, not backend claims; `docs/superpowers/specs/2026-08-04-add-loader-integration-design.md`
+and `.../2026-08-16-resource-list-visual-refresh-design.md` match on "assumed"/"unconfirmed"
+about a UI stack brief and a token tier, respectively. Excluded from what follows.
+
+**This is not a zero.** Two genuine findings, both surfaced only by widening into `docs/`:
+
+### Finding 1 — a live bug: Zone delete doesn't cascade, contradicting its own documented contract
+
+`docs/add-os/auth-verification-report.md` (already in the repo, pre-dating this session)
+recorded, under "Backend gaps found": `DELETE /api/v1/admin/zones/{id}` does **not**
+cascade to child Spaces — live-reproduced (Branch→Building→Floor→Zone→Space created,
+Zone deleted `204`, the Space still fetches `200` with `zone_id` set to `null` instead of
+being deleted). This **contradicts the Postman collection's own prose** ("cascades
+through every Space under this zone" — still exactly what the 2026-08-24 pinned snapshot
+says, unchanged) **and** the frontend's cascade-delete warning copy, which tells the user
+deleting a zone "also deletes every space under it." It doesn't. Branch→Building→Floor
+cascades were separately confirmed working.
+
+This sits alongside, not on top of, section (a)'s "Holds" verdict for `permissions.ts`'s
+`CASCADING_SPATIAL_RESOURCES` claim — that verdict was about whether the **code's claim
+matches the collection's prose** (it does, still). This finding is about whether the
+**collection's prose matches what the backend actually does** (it doesn't, for this one
+relationship). Both can be true at once, and the second one is a live, user-facing bug:
+right now, a staff member deleting a Zone with Spaces under it sees an accurate-looking
+warning and gets an inaccurate result. Flagging per this batch's instruction, not fixing.
+
+### Finding 2 — section (b) understated the Users/Roles gap; the real scope is the whole resource, not two actions
+
+`docs/superpowers/specs/2026-08-11-users-roles-management-design.md` §1 records, from
+reading ADDCore's actual route file: "the entire Users resource and the Roles listing
+sit behind `role:admin`, not `admin|operations` — including plain 'List Users'." That was
+written 2026-08-11. Re-checked directly against the live route file today
+(`ADDCore/routes/api/v1/admin.php`, 2026-08-24) rather than trusting either the design
+doc's age or the Postman collection's silence:
+
+```php
+// Narrower than the group above: managing accounts and roles is admin-only,
+// operations can't create or promote other accounts.
+Route::middleware('role:admin')->group(function () {
+    Route::apiResource('users', UserController::class)->except('destroy');
+    Route::patch('users/{user}/status', [UserController::class, 'updateStatus']);
+    Route::patch('users/{user}/role', [UserController::class, 'assignRole']);
+    Route::get('roles', [RoleController::class, 'index']);
+    ...
+    Route::patch('settings/{key}', [SettingController::class, 'update']);
+});
+```
+
+Still true, today. This is **more** than the Postman collection's prose ever says: the
+collection only calls "admin-only" out explicitly for Create User and Assign Role (which
+is what section (b) reported); it says nothing about List Users, Get User, Update User
+Profile, or **Update User Status** being restricted at all. But the actual route file
+gates the *entire* `users` resource (index/show/store/update, all four, plus
+`updateStatus` and `assignRole`) and separately `GET /roles` behind `role:admin` —
+`admin|operations` is not enough for any of it. `PATCH /admin/settings/{key}` is in the
+same group, for whatever that's worth once Settings has a screen.
+
+**This corrects section (b)'s claim that `PATCH /admin/users/{id}/status` "is not
+described as admin-only and needs no such gate."** It is admin-only; the collection just
+doesn't say so. And `RolesPage.vue` has exactly the same shape of gap as `UsersPage.vue`
+— checked just now, it calls `listRoles()` unconditionally with no `isRoleGranted` check
+anywhere, so it fails the same way. Corrected finding written up on its own in
+`docs/add-os/2026-08-24-usersrolespage-permission-gap.md`, per this batch's Task 4.
+
+**A related, smaller finding surfaced by the same route file:** `/api/v1/admin/currencies`
+(GET/POST/GET/PATCH/PATCH-status — a real, implemented resource, per
+`routes/api/v1/admin.php` lines 112–116) **does not appear anywhere in the Postman
+collection** — zero matches for `"currencies"` as a path in the 2026-08-24 pinned
+snapshot (299 hits for the unrelated `currency` header key, zero for the resource). Not
+investigated further — noted because it means the collection is missing at least one
+whole resource, not just under-annotating permissions on ones it does list.
+
+**Everything else the wider sweep surfaced** either re-confirms a claim already in the
+table above (e.g. `services/__tests__/users.spec.ts`'s comment about a prior version
+assuming a `{data: User}` envelope — same message-only claim as `users.ts`, already
+"Holds"), or restates a still-open, honestly-labeled unconfirmed assumption rather than a
+false one (`docs/superpowers/plans/2026-08-18-company-pipeline.md`: Company Member's
+response shape "is not confirmed... no example exists" — still true today, zero example
+responses anywhere in the pinned snapshot, so this is accurately labeled uncertainty, not
+a contradiction).

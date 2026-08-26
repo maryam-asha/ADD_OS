@@ -121,6 +121,12 @@ rules only reload when Claude next touches a matching file.
 - **A new architecture guard is registered in `.claude/commands/guards.md` in the same
   change that adds it.** `no-inline-role-checks.spec.ts` and `no-direct-company-http.spec.ts`
   both shipped without that entry, so `/guards` under-reported for as long as they existed.
+- **Each batch is committed before the next begins, and two agents must not share one
+  working tree.** The concrete cost of skipping this: a test count that moved 467 → 473
+  between two verification runs with no source diff to explain it, because a second,
+  concurrently-running task was editing the same spec file between them — discovered only
+  by an outside audit, not by either agent. Three unrelated batches then sat mixed in one
+  uncommitted tree with no way to tell which file belonged to which.
 
 ---
 
@@ -148,7 +154,8 @@ project, and is kept current there:
 A moving file can't anchor a claim, so this repo pins a dated, byte-identical copy at
 `docs/api/ADD-OS.postman_collection.json` (see `docs/api/README.md` for the pin date,
 endpoint count, and the credential/encoding checks run at pin time). Every "per the
-collection" claim in code or docs cites that snapshot **by date**, never the live file.
+collection" claim in code or docs cites that snapshot **by date**, never the live file;
+where two pins happen to share a date, that README's `sha256` prefix disambiguates them.
 **If `pnpm api:collection:check` reports a mismatch, every claim sourced from the
 snapshot is unverified until someone re-reads the canonical file and re-pins it** —
 treat a stale pin the same as a failing guard, not as background noise.
@@ -166,5 +173,4 @@ treat a stale pin the same as a failing guard, not as background noise.
 | Adopt or deliberately replace `warning` `#E7B155` as a canonical brand state colour. | Brand |
 | `borderStrong` light-mode value (Aleppo Stone fails 3:1). | Design |
 | **Set the real internal `VITE_API_URL`.** Empty today; production refuses to start. | Infra |
-| List-endpoint pagination shape. `pagination.ts`/`listPage()` assume Laravel's default paginator (`data` + `meta: {current_page, last_page, per_page, total}` + `links`), and it is **still never been observed**: zero example responses anywhere in `ADD-OS.postman_collection.json`, and the one admin list endpoint live-tested so far (`GET /api/v1/admin/plans`) returned a flat array with no `meta` at all. Need one real response body to close this — `GET /api/v1/admin/reception/bookings/pending-approval?page=2` is now the cheapest place to capture one, since it is the first documented-paginated endpoint with a screen built on it. **Narrowed 2026-08-25:** this no longer blocks pagination UI. The backend task that shipped `pending-approval` specifies `meta: {current_page, last_page, total}` — note the absent `per_page`, which `toPaginated` already falls back to `data.length` for — and `ApprovalQueuePage.vue` renders a pager against it. What stays open is confirmation from a real response; if the shape differs, that page is where it surfaces first. | Backend |
 | Courtesy: tell the Pinx vendor their MapTiler keys shipped in a publicly sold template. Not ADD's to revoke. | Infra |
