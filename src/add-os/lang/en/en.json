@@ -581,6 +581,7 @@
 			"businessHours": "Business Hours",
 			"users": "Users",
 			"roles": "Roles & permissions",
+			"globalSettings": "Global settings",
 			"individuals": "Individuals",
 			"companies": "Companies",
 			"memberships": "Memberships",
@@ -608,8 +609,7 @@
 			"announcements": "Announcements",
 			"content": "Content",
 			"partners": "Partners",
-			"accountSecurity": "Account & security",
-			"systemSettings": "System settings"
+			"accountSecurity": "Account & security"
 		}
 	},
 	"resourceCrud": {
@@ -705,6 +705,48 @@
 			"confirmOk": "Remove",
 			"confirmCancel": "Cancel",
 			"success": "Member removed."
+		}
+	},
+	"settings": {
+		"description": "Every global configuration key the system reads at runtime. The keys themselves are created by the backend — only their values are editable here.",
+		"loadError": "Couldn't load the settings. You may not have permission to view this page.",
+		"empty": "No settings found.",
+		"readOnlyNotice": "Only an admin account can change a setting. You can read every value here.",
+		"finishEditingFirst": "Save or cancel the row you're editing first.",
+		"updateSuccess": "Setting updated.",
+		"columns": { "key": "Setting", "type": "Type", "value": "Value", "updatedAt": "Last changed" },
+		"types": { "int": "Number", "bool": "On / off", "string": "Text", "time": "Time", "json": "JSON" },
+		"value": { "enabled": "On", "disabled": "Off" },
+		"validation": {
+			"integerRequired": "Enter a whole number.",
+			"nonNegative": "Enter 0 or more — a duration cannot be negative.",
+			"booleanRequired": "This setting is either on or off.",
+			"stringRequired": "This setting cannot be left empty.",
+			"timeFormat": "Use HH:mm, for example 08:30. Seconds are not accepted.",
+			"jsonInvalid": "That isn't valid JSON. Check the quotes, commas and brackets.",
+			"jsonNotObject": "Enter a JSON object or array, not a single value."
+		},
+		"confirm": {
+			"ok": "Save anyway",
+			"cancel": "Cancel",
+			"generic": "This change takes effect everywhere immediately. Save it?",
+			"appTimezone": "Every stored booking time is read in this time zone, so changing it moves every date and time shown across the whole system. Save it?",
+			"kioskArrivalQrValue": "This is the value encoded in every arrival QR, printed and displayed. Changing it stops all of them working until they are replaced. Save it?"
+		},
+		"keys": {
+			"bookingCancellationWindow": { "label": "Cancellation window", "description": "How many minutes before a booking starts it can still be cancelled." },
+			"bookingSlotGranularity": { "label": "Slot size", "description": "The length of one bookable time slot, in minutes." },
+			"bookingMinDuration": { "label": "Shortest booking", "description": "The shortest booking that may be made, in minutes." },
+			"bookingOverrunGrace": { "label": "Overrun grace", "description": "How many minutes a session may run past its end time before it counts as an overrun." },
+			"bookingBuffer": { "label": "Buffer between bookings", "description": "Minutes left free between two bookings of the same resource." },
+			"profileCompletionThreshold": { "label": "Profile completion threshold", "description": "The profile completion percentage a member has to reach." },
+			"guestHostApprovalTimeout": { "label": "Host approval timeout", "description": "How many seconds a host has to approve their guest's arrival." },
+			"kioskArrivalRequestExpiry": { "label": "Arrival request expiry", "description": "How many minutes an arrival request stays valid at the kiosk." },
+			"kioskAppStoreUrl": { "label": "App Store link", "description": "The iOS download link the kiosk shows." },
+			"kioskGooglePlayUrl": { "label": "Google Play link", "description": "The Android download link the kiosk shows." },
+			"kioskArrivalQrValue": { "label": "Arrival QR value", "description": "The value encoded in the arrival QR members scan." },
+			"moduleCafeIsEnabled": { "label": "Café module", "description": "Turns the café module on or off across the whole system." },
+			"appTimezone": { "label": "Time zone", "description": "The time zone every stored date and time is read in." }
 		}
 	}
 }
