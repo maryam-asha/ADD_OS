@@ -354,14 +354,53 @@
 		"stats": { "total": "إجمالي الباقات", "active": "نشطة", "subscriptions": "اشتراكات" }
 	},
 	"exchangeRates": {
-		"columns": { "currencyCode": "العملة", "rateToBase": "السعر (ليرة سورية لكل دولار)", "effectiveFrom": "ساري من" },
+		"columns": { "currencyCode": "العملة", "rateToBase": "السعر (دولار لكل وحدة)", "effectiveFrom": "ساري من" },
 		"latestBadge": "الأحدث",
 		"create": { "button": "سعر صرف جديد", "title": "سعر صرف جديد", "success": "تم إنشاء سعر الصرف." },
-		"form": { "currencyCode": "العملة", "rateToBase": "السعر (ليرة سورية لكل دولار)", "effectiveFrom": "ساري من (YYYY-MM-DD)" },
-		"validation": { "effectiveFromFormat": "أدخل تاريخاً بصيغة YYYY-MM-DD." },
+		"form": { "currencyCode": "العملة", "rateToBase": "السعر (دولار لكل وحدة)", "effectiveFrom": "ساري من (YYYY-MM-DD)" },
+		"validation": {
+			"effectiveFromFormat": "أدخل تاريخاً بصيغة YYYY-MM-DD.",
+			"rateMustBePositive": "يجب أن يكون السعر أكبر من صفر."
+		},
+		"suggestion": {
+			"title": "سعر مقترح بانتظار المراجعة",
+			"reviewTitle": "مراجعة السعر المقترح",
+			"headline": "سعر السوق: 1 دولار = {rate} ليرة سورية",
+			"submits": "يُرسل بقيمة {rate} دولار لكل ليرة سورية، وقد قلبها الخادم مسبقاً.",
+			"deviation": "{percent}% مقارنةً بالسعر الحالي",
+			"fetched": "من {source}، جُلب {when}",
+			"unknownSource": "مصدر خارجي",
+			"unknownTime": "في وقت غير معروف",
+			"accept": "مراجعة وقبول",
+			"dismiss": "تجاهل",
+			"dismissed": "تم تجاهل الاقتراح.",
+			"staleTitle": "لا توجد بيانات أسعار حديثة",
+			"staleBody": "لم يُجلب أي سعر من المصدر الخارجي منذ أكثر من 48 ساعة، لذا فإن هذا الرقم ليس حالياً. أدخل السعر يدوياً بدلاً من ذلك.",
+			"lastFetch": "آخر جلب ناجح: {when}",
+			"neverFetched": "لم يُسجّل أي جلب ناجح."
+		},
 		"loadError": "تعذّر تحميل أسعار الصرف. قد لا تملك صلاحية عرض هذه الصفحة.",
 		"empty": "لا توجد أسعار صرف.",
-		"stats": { "latestUsd": "أحدث سعر صرف دولار → ليرة" }
+		"stats": { "latestFor": "أحدث سعر لـ {code}" }
+	},
+	"currencies": {
+		"description": "كل العملات التي يعرفها النظام. تُعطّل العملة ولا تُحذف أبداً، لأن الأسعار والحجوزات والمحافظ جميعها ترتبط بها.",
+		"columns": { "code": "الرمز", "name": "الاسم", "symbol": "الرمز الكتابي", "decimalPlaces": "الخانات العشرية", "order": "الترتيب", "isActive": "الحالة" },
+		"baseBadge": "أساسية",
+		"baseLocked": "العملة الأساسية نشطة دائماً ولا يمكن تعطيلها.",
+		"create": { "button": "عملة جديدة", "title": "عملة جديدة", "success": "تم إنشاء العملة." },
+		"edit": { "title": "تعديل العملة", "success": "تم تحديث العملة." },
+		"status": { "activated": "تم تفعيل العملة.", "deactivated": "تم تعطيل العملة." },
+		"form": { "code": "الرمز", "name": "الاسم", "symbol": "الرمز الكتابي", "decimalPlaces": "الخانات العشرية", "order": "ترتيب العرض" },
+		"validation": {
+			"codeFormat": "استخدم ثلاثة أحرف لاتينية كبيرة تماماً، مثل USD.",
+			"symbolTooLong": "يجب ألا يتجاوز الرمز الكتابي {max} محارف.",
+			"decimalPlacesRange": "أدخل عدداً صحيحاً بين {min} و {max}.",
+			"orderInvalid": "أدخل عدداً صحيحاً لا يقل عن {min}."
+		},
+		"loadError": "تعذّر تحميل العملات. قد لا تملك صلاحية عرض هذه الصفحة.",
+		"empty": "لا توجد عملات.",
+		"stats": { "total": "إجمالي العملات", "active": "نشطة", "base": "العملة الأساسية" }
 	},
 	"walletTopUps": {
 		"description": "سجّل شحن محفظة يدوياً من الاستقبال، لمحفظة عضو أو محفظة شركة.",
@@ -557,6 +596,7 @@
 			"transactions": "المعاملات",
 			"paymentMethods": "طرق الدفع",
 			"exchangeRates": "أسعار الصرف",
+			"currencies": "العملات",
 			"walletTopUps": "شحن المحافظ",
 			"events": "الفعاليات",
 			"community": "المجتمع",

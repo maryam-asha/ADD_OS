@@ -354,14 +354,53 @@
 		"stats": { "total": "Total plans", "active": "Active", "subscriptions": "Subscriptions" }
 	},
 	"exchangeRates": {
-		"columns": { "currencyCode": "Currency", "rateToBase": "Rate (SYP per 1 USD)", "effectiveFrom": "Effective from" },
+		"columns": { "currencyCode": "Currency", "rateToBase": "Rate (USD per 1 unit)", "effectiveFrom": "Effective from" },
 		"latestBadge": "Latest",
 		"create": { "button": "New rate", "title": "New exchange rate", "success": "Exchange rate created." },
-		"form": { "currencyCode": "Currency", "rateToBase": "Rate (SYP per 1 USD)", "effectiveFrom": "Effective from (YYYY-MM-DD)" },
-		"validation": { "effectiveFromFormat": "Enter a date as YYYY-MM-DD." },
+		"form": { "currencyCode": "Currency", "rateToBase": "Rate (USD per 1 unit)", "effectiveFrom": "Effective from (YYYY-MM-DD)" },
+		"validation": {
+			"effectiveFromFormat": "Enter a date as YYYY-MM-DD.",
+			"rateMustBePositive": "The rate must be greater than 0."
+		},
+		"suggestion": {
+			"title": "Suggested rate awaiting review",
+			"reviewTitle": "Review suggested rate",
+			"headline": "Market rate: 1 USD = {rate} SYP",
+			"submits": "Submitted as {rate} USD per 1 SYP, already inverted by the backend.",
+			"deviation": "{percent}% vs. the current rate",
+			"fetched": "From {source}, fetched {when}",
+			"unknownSource": "an external source",
+			"unknownTime": "at an unknown time",
+			"accept": "Review and accept",
+			"dismiss": "Dismiss",
+			"dismissed": "Suggestion dismissed.",
+			"staleTitle": "No fresh rate data",
+			"staleBody": "Nothing has been fetched from the external source in over 48 hours, so this figure is not current. Enter a rate manually instead.",
+			"lastFetch": "Last successful fetch: {when}",
+			"neverFetched": "No successful fetch has been recorded."
+		},
 		"loadError": "Couldn't load exchange rates. You may not have permission to view this page.",
 		"empty": "No exchange rates found.",
-		"stats": { "latestUsd": "Latest USD → SYP rate" }
+		"stats": { "latestFor": "Latest {code} rate" }
+	},
+	"currencies": {
+		"description": "Every currency the system knows about. A currency is deactivated, never deleted, because prices, bookings and wallets all reference it.",
+		"columns": { "code": "Code", "name": "Name", "symbol": "Symbol", "decimalPlaces": "Decimals", "order": "Order", "isActive": "Status" },
+		"baseBadge": "Base",
+		"baseLocked": "The base currency is always active and cannot be deactivated.",
+		"create": { "button": "New currency", "title": "New currency", "success": "Currency created." },
+		"edit": { "title": "Edit currency", "success": "Currency updated." },
+		"status": { "activated": "Currency activated.", "deactivated": "Currency deactivated." },
+		"form": { "code": "Code", "name": "Name", "symbol": "Symbol", "decimalPlaces": "Decimal places", "order": "Display order" },
+		"validation": {
+			"codeFormat": "Use exactly three uppercase letters, for example USD.",
+			"symbolTooLong": "The symbol must be {max} characters or fewer.",
+			"decimalPlacesRange": "Enter a whole number between {min} and {max}.",
+			"orderInvalid": "Enter a whole number of {min} or more."
+		},
+		"loadError": "Couldn't load currencies. You may not have permission to view this page.",
+		"empty": "No currencies found.",
+		"stats": { "total": "Total currencies", "active": "Active", "base": "Base currency" }
 	},
 	"walletTopUps": {
 		"description": "Record a manual wallet top-up taken at reception, for a member or a company wallet.",
@@ -557,6 +596,7 @@
 			"transactions": "Transactions",
 			"paymentMethods": "Payment methods",
 			"exchangeRates": "Exchange rates",
+			"currencies": "Currencies",
 			"walletTopUps": "Wallet top-ups",
 			"events": "Events",
 			"community": "Community",

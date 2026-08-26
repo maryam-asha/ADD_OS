@@ -51,6 +51,7 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"members.companies": () => import("@/add-os/modules/members/views/CompaniesPage.vue"),
 	"plans.packages": () => import("@/add-os/modules/plans/views/PlansPage.vue"),
 	"payments.exchangeRates": () => import("@/add-os/modules/payments/views/ExchangeRatesPage.vue"),
+	"payments.currencies": () => import("@/add-os/modules/payments/views/CurrenciesPage.vue"),
 	"payments.walletTopUps": () => import("@/add-os/modules/payments/views/WalletTopUpsPage.vue")
 }
 

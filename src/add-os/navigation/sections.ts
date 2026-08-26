@@ -161,6 +161,10 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "transactions", path: "transactions" },
 			{ key: "paymentMethods", path: "methods" },
 			{ key: "exchangeRates", path: "exchange-rates" },
+			// Sits after exchange-rates on purpose: the rates form's currency
+			// options are rows of this resource, so the pair reads in the order
+			// they depend on each other.
+			{ key: "currencies", path: "currencies" },
 			{ key: "walletTopUps", path: "wallet-top-ups" }
 		]
 	},
