@@ -8,11 +8,19 @@ import type { SpaceType } from "@/add-os/modules/spatial/types/space"
  * `Admin (Dashboard) → Reception Operations → Arrival Requests` in the API
  * snapshot pinned 2026-08-25 (`sha256 86d330d9…`).
  *
- * `SpaceType` is reused from `modules/spatial` rather than redeclared, so the
- * existing `spaces.spaceType.*` translations cover it and an unrecognised value
- * is a type error here rather than a missing-translation key on screen — the
- * same reason `SPACE_TYPES` was moved next to its type for the reception
- * columns.
+ * `SpaceType` is reused from `modules/spatial` rather than redeclared, and that
+ * carries the same known caveat `modules/booking/types/reception.ts` already
+ * records: the backend task's sample row for this very resource shows
+ * `"meeting_room"`, which is not in the enum the collection states for Spaces
+ * (`co_space | room | business | event_hall`). It is read here as prose
+ * shorthand for `room`, not as a fifth value — the same reading the booking
+ * types took, so the two do not disagree about one wire field.
+ *
+ * The safety net is at the RENDER layer, not the type layer:
+ * `buildArrivalRequestColumns` goes through `spaceTypeLabel`, which prints an
+ * unrecognised value verbatim instead of a missing-translation key. A surprise
+ * on the wire therefore shows up as a visibly odd cell rather than the literal
+ * string `spaces.spaceType.meeting_room`.
  */
 
 /** Only the three fields the resource actually exposes — not the full user record. */
