@@ -29,10 +29,20 @@ describe("section list", () => {
 		expect(NAV_SECTIONS).toHaveLength(13)
 	})
 
-	it("marks exactly the seven built sections as active", () => {
+	/**
+	 * A pinned inventory, not a count — an entry may only join it when a real
+	 * screen lands in that section, and the diff is meant to be visible in review.
+	 *
+	 * `cms` joined on 2026-08-25 with the kiosk Announcements page. The section
+	 * COUNT above deliberately did not move: the kiosk feature was split across
+	 * two existing sections rather than given a fourteenth of its own — see the
+	 * reasoning in `sections.ts` and the design record at
+	 * docs/superpowers/specs/2026-08-25-kiosk-module-design.md §2.
+	 */
+	it("marks exactly the eight built sections as active", () => {
 		const active = NAV_SECTIONS.filter(section => section.status === "active").map(section => section.key)
 
-		expect(active).toEqual(["spatial", "system", "members", "bookings", "plans", "payments", "address"])
+		expect(active).toEqual(["spatial", "system", "members", "bookings", "plans", "payments", "address", "cms"])
 	})
 
 	it("gives every section at least one page", () => {

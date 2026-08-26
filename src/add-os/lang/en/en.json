@@ -404,6 +404,71 @@
 			"success": "Booking rejected."
 		}
 	},
+	"arrivalRequests": {
+		"description": "Members who have signalled they've arrived and are waiting at the desk.",
+		"loadError": "Couldn't load arrival requests. You may not have permission to view this page.",
+		"empty": "Nobody is waiting right now.",
+		"noBooking": "Walk-in",
+		"columns": {
+			"member": "Member",
+			"phone": "Phone",
+			"waiting": "Waiting",
+			"booking": "Booking",
+			"actions": "Actions"
+		},
+		"confirm": {
+			"button": "Confirm",
+			"success": "Arrival confirmed.",
+			"spaceTitle": "Start a walk-in session",
+			"spaceLabel": "Space",
+			"spaceOption": "{space} · seats {capacity}"
+		},
+		"reject": {
+			"button": "Reject",
+			"success": "Arrival rejected."
+		}
+	},
+	"announcements": {
+		"description": "Banner content shown on the reception kiosk screen.",
+		"loadError": "Couldn't load announcements. You may not have permission to view this page.",
+		"windowAlways": "Always",
+		"windowOpenStart": "Any time",
+		"windowOpenEnd": "No end",
+		"isActiveYes": "Active",
+		"isActiveNo": "Hidden",
+		"columns": {
+			"sortOrder": "Order",
+			"type": "Type",
+			"imageUrl": "Image",
+			"window": "Shown",
+			"isActive": "Status"
+		},
+		"form": {
+			"type": "Type",
+			"imageUrl": "Image URL",
+			"linkUrl": "Link URL",
+			"sortOrder": "Order",
+			"startsAt": "Starts at",
+			"endsAt": "Ends at",
+			"isActive": "Active"
+		},
+		"validation": {
+			"typeTooLong": "Type must be {max} characters or fewer.",
+			"urlTooLong": "The URL must be {max} characters or fewer.",
+			"urlInvalid": "Enter a complete URL, including the scheme.",
+			"endsBeforeStarts": "The end must not come before the start."
+		},
+		"create": {
+			"button": "New announcement",
+			"title": "New announcement",
+			"success": "Announcement created."
+		},
+		"edit": {
+			"title": "Edit announcement",
+			"success": "Announcement updated."
+		},
+		"delete": { "success": "Announcement deleted." }
+	},
 	"activeSessions": {
 		"description": "Everyone currently checked in, bookings and walk-ins together.",
 		"loadError": "Couldn't load active sessions. You may not have permission to view this page.",
@@ -482,6 +547,7 @@
 			"memberships": "Memberships",
 			"approvalQueue": "Approval queue",
 			"activeSessions": "Active sessions",
+			"arrivalRequests": "Arrival requests",
 			"allBookings": "All bookings",
 			"calendar": "Calendar",
 			"packages": "Packages",
@@ -499,6 +565,7 @@
 			"accelerate": "Accelerate",
 			"mentors": "Mentors",
 			"privateOfficeRequests": "Private office requests",
+			"announcements": "Announcements",
 			"content": "Content",
 			"partners": "Partners",
 			"accountSecurity": "Account & security",

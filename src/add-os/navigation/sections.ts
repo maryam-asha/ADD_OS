@@ -115,6 +115,19 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		pages: [
 			{ key: "approvalQueue", path: "approval-queue" },
 			{ key: "activeSessions", path: "active-sessions" },
+			/**
+			 * The kiosk's arrival queue lands here rather than in a "Kiosk" section
+			 * of its own, applying the rule above rather than making a new one: an
+			 * arriving member is handled at the reception desk by the operator
+			 * already working the two queues above it, and `arrival-requests` sits
+			 * under the same `reception/` prefix `approvalQueue` and
+			 * `activeSessions` do. A Kiosk section would have been the 14th.
+			 *
+			 * Its sibling page, Announcements, went to `cms` instead — the two are
+			 * one feature to the backend but two different jobs to two different
+			 * operators, and this list is ordered by the operator's day.
+			 */
+			{ key: "arrivalRequests", path: "arrival-requests" },
 			{ key: "allBookings", path: "all" },
 			{ key: "calendar", path: "calendar" }
 		]
@@ -184,8 +197,19 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		key: "cms",
 		path: "/cms",
 		icon: "carbon:document",
-		status: "coming-soon",
+		status: "active",
+		/**
+		 * Kiosk banner content is content management, so it lives here rather than
+		 * beside the arrival queue it ships with — the operator who schedules a
+		 * banner is not the operator working the reception desk.
+		 *
+		 * Announcements leads the list deliberately: a section redirects to its
+		 * FIRST page, and `content`/`partners` are still ComingSoon, so any other
+		 * order would make `/cms` land on a placeholder the moment the section went
+		 * active. Same consideration the `bookings` ordering note records.
+		 */
 		pages: [
+			{ key: "announcements", path: "announcements" },
 			{ key: "content", path: "content" },
 			{ key: "partners", path: "partners" }
 		]

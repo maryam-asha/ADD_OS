@@ -77,7 +77,7 @@ const ALLOWED: readonly AllowedHost[] = [
 	},
 	{
 		host: "api.test",
-		why: "Mocked API base URL in Vitest service-layer tests where fetch itself is stubbed — no network request possible."
+		why: "Mocked host in Vitest tests where fetch itself is stubbed — the API base URL in service-layer specs, and mock resource URLs (announcement image/link fields) in view specs. No network request is possible in either case."
 	}
 	// `api.org` was here — the Pinx placeholder VITE_API_URL. Removed from the
 	// allowlist because it is no longer in the build: the variable was emptied and

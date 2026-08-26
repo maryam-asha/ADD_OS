@@ -404,6 +404,71 @@
 			"success": "تم رفض الحجز."
 		}
 	},
+	"arrivalRequests": {
+		"description": "الأعضاء الذين أعلنوا وصولهم وينتظرون عند الاستقبال.",
+		"loadError": "تعذّر تحميل طلبات الوصول. قد لا تملك صلاحية عرض هذه الصفحة.",
+		"empty": "لا أحد بالانتظار الآن.",
+		"noBooking": "زيارة مباشرة",
+		"columns": {
+			"member": "العضو",
+			"phone": "الهاتف",
+			"waiting": "مدة الانتظار",
+			"booking": "الحجز",
+			"actions": "الإجراءات"
+		},
+		"confirm": {
+			"button": "تأكيد",
+			"success": "تم تأكيد الوصول.",
+			"spaceTitle": "بدء جلسة زيارة مباشرة",
+			"spaceLabel": "المساحة",
+			"spaceOption": "{space} · تتّسع لـ {capacity}"
+		},
+		"reject": {
+			"button": "رفض",
+			"success": "تم رفض الوصول."
+		}
+	},
+	"announcements": {
+		"description": "محتوى اللافتات المعروض على شاشة الاستقبال.",
+		"loadError": "تعذّر تحميل الإعلانات. قد لا تملك صلاحية عرض هذه الصفحة.",
+		"windowAlways": "دائماً",
+		"windowOpenStart": "من أي وقت",
+		"windowOpenEnd": "بلا نهاية",
+		"isActiveYes": "ظاهر",
+		"isActiveNo": "مخفي",
+		"columns": {
+			"sortOrder": "الترتيب",
+			"type": "النوع",
+			"imageUrl": "الصورة",
+			"window": "فترة العرض",
+			"isActive": "الحالة"
+		},
+		"form": {
+			"type": "النوع",
+			"imageUrl": "رابط الصورة",
+			"linkUrl": "الرابط",
+			"sortOrder": "الترتيب",
+			"startsAt": "يبدأ في",
+			"endsAt": "ينتهي في",
+			"isActive": "ظاهر"
+		},
+		"validation": {
+			"typeTooLong": "يجب ألّا يتجاوز النوع {max} حرفاً.",
+			"urlTooLong": "يجب ألّا يتجاوز الرابط {max} حرفاً.",
+			"urlInvalid": "أدخل رابطاً كاملاً مع البروتوكول.",
+			"endsBeforeStarts": "يجب ألّا تسبق النهاية البداية."
+		},
+		"create": {
+			"button": "إعلان جديد",
+			"title": "إعلان جديد",
+			"success": "تم إنشاء الإعلان."
+		},
+		"edit": {
+			"title": "تعديل الإعلان",
+			"success": "تم تحديث الإعلان."
+		},
+		"delete": { "success": "تم حذف الإعلان." }
+	},
 	"activeSessions": {
 		"description": "كل من هم داخل المكان الآن، الحجوزات والزيارات المباشرة معاً.",
 		"loadError": "تعذّر تحميل الجلسات النشطة. قد لا تملك صلاحية عرض هذه الصفحة.",
@@ -482,6 +547,7 @@
 			"memberships": "العضويات",
 			"approvalQueue": "طلبات الموافقة",
 			"activeSessions": "الجلسات النشطة",
+			"arrivalRequests": "طلبات الوصول",
 			"allBookings": "كل الحجوزات",
 			"calendar": "التقويم",
 			"packages": "الباقات",
@@ -499,6 +565,7 @@
 			"accelerate": "برنامج Accelerate",
 			"mentors": "المرشدون",
 			"privateOfficeRequests": "طلبات المكاتب الخاصة",
+			"announcements": "الإعلانات",
 			"content": "المحتوى",
 			"partners": "الشركاء",
 			"accountSecurity": "الحساب والأمان",

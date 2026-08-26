@@ -1,5 +1,5 @@
-import type { Announcement, AnnouncementPayload, AnnouncementWirePayload } from "@/add-os/modules/kiosk/types/announcement"
 import type { MessageResponse } from "./resource-factory"
+import type { Announcement, AnnouncementPayload, AnnouncementWirePayload } from "@/add-os/modules/kiosk/types/announcement"
 import { toOffsetIso } from "@/add-os/utils/format"
 import { createResourceApi } from "./resource-factory"
 
@@ -54,12 +54,17 @@ export function toWirePayload(payload: AnnouncementPayload): AnnouncementWirePay
 	}
 }
 
-export const listAnnouncements = (): Promise<Announcement[]> => api.list()
+export function listAnnouncements(): Promise<Announcement[]> {
+	return api.list()
+}
 
-export const createAnnouncement = (payload: AnnouncementPayload): Promise<Announcement> => api.create(toWirePayload(payload))
+export function createAnnouncement(payload: AnnouncementPayload): Promise<Announcement> {
+	return api.create(toWirePayload(payload))
+}
 
 /** Returns `{message}`, never the updated resource — refetch for the new state. */
-export const updateAnnouncement = (id: number, payload: AnnouncementPayload): Promise<MessageResponse> =>
-	api.update(id, toWirePayload(payload))
+export function updateAnnouncement(id: number, payload: AnnouncementPayload): Promise<MessageResponse> {
+	return api.update(id, toWirePayload(payload))
+}
 
 export const removeAnnouncement = api.remove

@@ -43,6 +43,11 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"address.privateOfficeRequests": () => import("@/add-os/modules/members/views/PrivateOfficeRequestsPage.vue"),
 	"bookings.approvalQueue": () => import("@/add-os/modules/booking/views/ApprovalQueuePage.vue"),
 	"bookings.activeSessions": () => import("@/add-os/modules/booking/views/ActiveSessionsPage.vue"),
+	// Both kiosk pages live in one module even though they surface in two
+	// sections — `modules/members` already does the same for
+	// `address.privateOfficeRequests`.
+	"bookings.arrivalRequests": () => import("@/add-os/modules/kiosk/views/ArrivalRequestsPage.vue"),
+	"cms.announcements": () => import("@/add-os/modules/kiosk/views/AnnouncementsPage.vue"),
 	"members.companies": () => import("@/add-os/modules/members/views/CompaniesPage.vue"),
 	"plans.packages": () => import("@/add-os/modules/plans/views/PlansPage.vue"),
 	"payments.exchangeRates": () => import("@/add-os/modules/payments/views/ExchangeRatesPage.vue"),

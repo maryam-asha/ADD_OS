@@ -260,9 +260,21 @@ describe("formatRelativeTime", () => {
 		expect(formatRelativeTime(ago(86400 * 12), { ...AR, now: NOW })).toBe("منذ 12 يوم")
 	})
 
+	/**
+	 * Collects every digit and asserts each is ASCII, rather than testing against
+	 * an Arabic-Indic range — the same approach `formatDate`'s own "keeps digits
+	 * Latin" case above takes, and for the same two reasons: `\p{Nd}` catches any
+	 * non-Latin digit set rather than only the one range someone thought to
+	 * exclude, and a literal `[٠-٩]` in source is a character range a reader
+	 * cannot verify at a glance (the regexp lint rule rejects it on that ground).
+	 */
 	it("emits Latin digits, never Arabic-Indic ones", () => {
-		expect(formatRelativeTime(ago(300), { ...AR, now: NOW })).toMatch(/5/)
-		expect(formatRelativeTime(ago(300), { ...AR, now: NOW })).not.toMatch(/[٠-٩]/)
+		const rendered = formatRelativeTime(ago(300), { ...AR, now: NOW })
+		const digits = rendered.match(/\p{Nd}/gu) ?? []
+
+		expect(rendered).toContain("5")
+		expect(digits.length).toBeGreaterThan(0)
+		expect(digits.every(digit => digit >= "0" && digit <= "9")).toBe(true)
 	})
 
 	it("accepts an ISO string as readily as a Date", () => {
