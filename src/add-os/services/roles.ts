@@ -1,7 +1,7 @@
-import type { RoleName, RolePayload, RoleRecord } from "@/add-os/modules/system/types/role"
+import type { CreateRolePayload, RoleName, RoleRecord, UpdateRolePayload } from "@/add-os/modules/system/types/role"
 import { createResourceApi } from "./resource-factory"
 
-const api = createResourceApi<RoleRecord, RolePayload, RolePayload>("/api/v1/admin/roles")
+const api = createResourceApi<RoleRecord, CreateRolePayload, UpdateRolePayload>("/api/v1/admin/roles")
 
 export const listRoleRecords = api.list
 export const getRole = api.getById

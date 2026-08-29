@@ -102,10 +102,23 @@ describe("updateRole", () => {
 		vi.stubGlobal("fetch", vi.fn())
 	})
 
-	it("PUTs the payload and returns the message body only", async () => {
+	it("PUTs a payload with both name and permissions and returns the message body only", async () => {
 		vi.mocked(fetch).mockResolvedValue(jsonResponse({ message: "Updated." }))
 
 		const payload = { name: "front-desk", permissions: ["branches.view"] }
+		const result = await updateRole(4, payload)
+
+		expect(fetch).toHaveBeenCalledWith(
+			"http://api.test/api/v1/admin/roles/4",
+			expect.objectContaining({ method: "PUT", body: JSON.stringify(payload) })
+		)
+		expect(result).toEqual({ message: "Updated." })
+	})
+
+	it("PUTs a permissions-only payload (no name key) and returns the message body only", async () => {
+		vi.mocked(fetch).mockResolvedValue(jsonResponse({ message: "Updated." }))
+
+		const payload = { permissions: ["branches.view", "branches.update"] }
 		const result = await updateRole(4, payload)
 
 		expect(fetch).toHaveBeenCalledWith(

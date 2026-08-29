@@ -9,8 +9,21 @@ export interface RoleRecord {
 	permissions: string[]
 }
 
-export interface RolePayload {
+/** `StoreRoleRequest` — `name` is required on create. */
+export interface CreateRolePayload {
 	name: string
+	permissions?: string[]
+}
+
+/**
+ * `UpdateRoleRequest` — `name` is `sometimes` server-side, so a
+ * permissions-only edit doesn't need to resend it. Deliberately NOT shared
+ * with `CreateRolePayload` (unlike e.g. `BranchPayload`, which documents
+ * create/update as "confirmed identical in the Postman collection") — here
+ * the two shapes genuinely differ.
+ */
+export interface UpdateRolePayload {
+	name?: string
 	permissions?: string[]
 }
 
