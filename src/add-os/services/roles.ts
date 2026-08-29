@@ -1,8 +1,15 @@
-import type { UserRole } from "@/add-os/modules/system/types/user"
-import { get } from "./api"
+import type { RoleName, RolePayload, RoleRecord } from "@/add-os/modules/system/types/role"
+import { createResourceApi } from "./resource-factory"
 
-/** The assignable role names, per `RoleController::index()` — no per-role permissions to fetch yet. */
-export async function listRoles(): Promise<UserRole[]> {
-	const res = await get<{ data: UserRole[] }>("/api/v1/admin/roles")
-	return res.data
+const api = createResourceApi<RoleRecord, RolePayload, RolePayload>("/api/v1/admin/roles")
+
+export const listRoleRecords = api.list
+export const getRole = api.getById
+export const createRole = api.create
+export const updateRole = api.update
+export const removeRole = api.remove
+
+/** Bare role names only — kept for callers (e.g. dropdowns) that don't need the full record. */
+export async function listRoles(): Promise<RoleName[]> {
+	return (await listRoleRecords()).map(r => r.name)
 }

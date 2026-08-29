@@ -1,9 +1,17 @@
+import type { RoleName } from "@/add-os/modules/system/types/role"
+
 /**
  * Backend user-role domain (`Admin\StoreUserRequest` / `AssignRoleRequest`),
  * distinct from `types/auth.d.ts`'s route-guard `Role` — that one gates which
- * pages a session can reach; this one is a column on the `users` table.
+ * pages a session can reach; this one is a column on the `users` table. Custom
+ * roles are now arbitrary operator-chosen strings (see `types/role.ts`), so
+ * this is just an alias rather than a fixed 3-value union. (A `export type {
+ * RoleName as UserRole } from ...` re-export only creates an export binding,
+ * not a local one — `UserRole` still needs to resolve within this file, e.g.
+ * in `User`/`CreateUserPayload` below — so it's imported and aliased here
+ * instead.)
  */
-export type UserRole = "member" | "operations" | "admin"
+export type UserRole = RoleName
 
 export type UserStatus = "active" | "deactivated" | "blocked"
 
@@ -19,14 +27,20 @@ export interface User {
 	roles: UserRole[]
 }
 
-/** `StoreUserRequest` — member is never offered: only ops/admin accounts are created here. */
+/**
+ * `StoreUserRequest` — member is never offered: only ops/admin accounts are
+ * created here. `role` is typed as the general `UserRole` (now that custom
+ * roles exist) rather than a narrower `"operations" | "admin"` literal union;
+ * `UsersPage.vue`'s `createRoleOptions` is what actually restricts the
+ * dropdown to those two values at runtime — this type doesn't need to.
+ */
 export interface CreateUserPayload {
 	name: string
 	phone: string
 	email: string
 	password: string
 	password_confirmation: string
-	role: "operations" | "admin"
+	role: UserRole
 }
 
 /** `UpdateUserRequest` — profile fields only, no password/role/status. */

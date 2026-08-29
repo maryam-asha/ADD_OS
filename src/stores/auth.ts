@@ -15,18 +15,21 @@ export const useAuthStore = defineStore("auth", {
 	state: () => ({
 		logged: false,
 		role: null as Role | null,
+		permissions: [] as string[],
 		user: {} as Partial<AdminUser>
 	}),
 	actions: {
 		setLogged(user: AdminUser) {
 			this.logged = true
 			this.role = primaryRole(user.roles)
+			this.permissions = user.permissions ?? []
 			this.user = user
 		},
 		/** Clears local state only — callers that need the server session revoked call logout() first. */
 		setLogout() {
 			this.logged = false
 			this.role = null
+			this.permissions = []
 			this.user = {}
 		},
 		/**
@@ -67,6 +70,9 @@ export const useAuthStore = defineStore("auth", {
 
 				return arrRoles.includes(state.role)
 			}
+		},
+		hasPermission(state) {
+			return (permission: string) => state.permissions.includes(permission)
 		}
 	},
 	persist: {
