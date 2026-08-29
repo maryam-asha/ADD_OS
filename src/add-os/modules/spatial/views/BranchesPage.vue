@@ -10,7 +10,7 @@
 		<n-alert v-if="error" type="error" :title="t('branches.loadError')" />
 
 		<div class="flex justify-end">
-			<n-button type="primary" @click="openCreate">
+			<n-button v-if="canCreate" type="primary" @click="openCreate">
 				<template #icon><Icon name="carbon:add" :size="16" /></template>
 				{{ t("branches.create.button") }}
 			</n-button>
@@ -20,7 +20,7 @@
 			:columns
 			:data
 			:loading="isLoading"
-			:on-edit="openEdit"
+			:on-edit="canUpdate ? openEdit : undefined"
 			:on-delete="canDelete ? (async row => { await mutations.remove(row.id) }) : undefined"
 			:delete-warning="t('branches.delete.cascadeWarning')"
 		/>
@@ -46,7 +46,7 @@ import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vu
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
-import { canDeleteSpatialResource } from "@/add-os/config/permissions"
+import { can } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import { branchFields, buildBranchColumns, emptyBranchPayload } from "@/add-os/modules/spatial/config/branches.config"
 import { createBranch, listBranches, removeBranch, updateBranch } from "@/add-os/services/branches"
@@ -58,7 +58,9 @@ const { t } = useI18n()
 
 const { data, isLoading, error, refetch } = useResourceList<Branch>(listBranches)
 const columns = computed(() => buildBranchColumns(t, currentLocale.value))
-const canDelete = computed(() => canDeleteSpatialResource("branches"))
+const canCreate = computed(() => can("branches.create"))
+const canUpdate = computed(() => can("branches.update"))
+const canDelete = computed(() => can("branches.delete"))
 
 const statCards = computed<StatCard[]>(() => {
 	const total = data.value.length

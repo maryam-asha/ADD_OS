@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest"
 import ar from "@/add-os/lang/ar"
 import en from "@/add-os/lang/en"
 
-const state = { role: null as string | null }
+const state = { role: null as string | null, permissions: [] as string[] }
 
 vi.mock("@/stores/auth", () => ({
 	useAuthStore: () => ({
@@ -12,17 +12,17 @@ vi.mock("@/stores/auth", () => ({
 			const arr = Array.isArray(roles) ? roles : [roles]
 			if (arr.includes("all")) return true
 			return state.role !== null && arr.includes(state.role)
-		}
+		},
+		hasPermission: (permission: string) => state.permissions.includes(permission)
 	})
 }))
 
-const { canDeleteSpatialResource, canDeleteBusinessHours, CASCADING_SPATIAL_RESOURCES, SPATIAL_RESOURCE_DELETE_ROLE, BUSINESS_HOURS_DELETE_ROLE } = await import("../permissions")
+const { canDeleteSpatialResource, canDeleteBusinessHours, can, canManageRoles, CASCADING_SPATIAL_RESOURCES, SPATIAL_RESOURCE_DELETE_ROLE, BUSINESS_HOURS_DELETE_ROLE } = await import("../permissions")
 
 describe("permissions", () => {
 	it("maps every spatial resource to admin, per the collection's Admin-only annotation", () => {
 		expect(Object.values(SPATIAL_RESOURCE_DELETE_ROLE).every(role => role === "admin")).toBe(true)
 		expect(Object.keys(SPATIAL_RESOURCE_DELETE_ROLE).sort()).toEqual([
-			"branches",
 			"buildings",
 			"floors",
 			"resources",
@@ -54,7 +54,44 @@ describe("permissions", () => {
 
 	it("denies delete when there is no role", () => {
 		state.role = null
-		expect(canDeleteSpatialResource("branches")).toBe(false)
+		expect(canDeleteSpatialResource("buildings")).toBe(false)
+	})
+})
+
+describe("permission-based gate", () => {
+	it("reflects the current user's granted permissions", () => {
+		state.permissions = ["branches.view", "branches.create", "branches.update"]
+		expect(can("branches.view")).toBe(true)
+		expect(can("branches.create")).toBe(true)
+		expect(can("branches.update")).toBe(true)
+		expect(can("branches.delete")).toBe(false)
+	})
+
+	it("grants when the permission is present", () => {
+		state.permissions = ["branches.delete"]
+		expect(can("branches.delete")).toBe(true)
+	})
+
+	it("denies when there are no permissions", () => {
+		state.permissions = []
+		expect(can("branches.delete")).toBe(false)
+	})
+})
+
+describe("role management permissions", () => {
+	it("grants role management to admin", () => {
+		state.role = "admin"
+		expect(canManageRoles()).toBe(true)
+	})
+
+	it("denies role management to operations", () => {
+		state.role = "operations"
+		expect(canManageRoles()).toBe(false)
+	})
+
+	it("denies role management when there is no role", () => {
+		state.role = null
+		expect(canManageRoles()).toBe(false)
 	})
 })
 
