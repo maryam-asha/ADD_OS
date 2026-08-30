@@ -51,6 +51,9 @@
 			"selectAll": "Select all",
 			"submit": "Save",
 			"cancel": "Cancel"
+		},
+		"validation": {
+			"nameRequired": "Name is required."
 		}
 	},
 	"auth": {

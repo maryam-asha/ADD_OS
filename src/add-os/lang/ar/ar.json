@@ -55,6 +55,9 @@
 			"selectAll": "تحديد الكل",
 			"submit": "حفظ",
 			"cancel": "إلغاء"
+		},
+		"validation": {
+			"nameRequired": "الاسم مطلوب."
 		}
 	},
 	"auth": {

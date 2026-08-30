@@ -26,8 +26,8 @@
 			style="max-width: 40rem"
 			content-style="max-height: 60vh; overflow-y: auto"
 		>
-			<n-form label-placement="top">
-				<n-form-item :label="t('roles.form.name')">
+			<n-form ref="formRef" :model="form" :rules label-placement="top">
+				<n-form-item path="name" :label="t('roles.form.name')">
 					<n-input v-model:value="form.name" :disabled="mode === 'edit' && editingRole?.protected" />
 				</n-form-item>
 				<n-form-item :label="t('roles.form.permissions')">
@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import type { DataTableColumns } from "naive-ui"
+import type { DataTableColumns, FormInst, FormRules } from "naive-ui"
 import type { PermissionModule, RoleRecord } from "@/add-os/modules/system/types/role"
 import {
 	NAlert,
@@ -200,6 +200,11 @@ function emptyForm(): { name: string; permissions: string[] } {
 }
 
 const form = ref(emptyForm())
+const formRef = ref<FormInst | null>(null)
+
+const rules = computed<FormRules>(() => ({
+	name: [{ required: true, message: t("roles.validation.nameRequired"), trigger: ["blur", "input"] }]
+}))
 
 /**
  * The module's own "select all" checkbox sits outside `n-checkbox-group`'s
@@ -237,6 +242,12 @@ function openEdit(role: RoleRecord) {
  * conditionally omit it.
  */
 async function submitCreate() {
+	try {
+		await formRef.value?.validate()
+	} catch {
+		return
+	}
+
 	submitting.value = true
 	try {
 		await createRole({ name: form.value.name, permissions: form.value.permissions })
@@ -253,6 +264,12 @@ async function submitCreate() {
 
 async function submitEdit() {
 	if (editingRole.value === null) return
+
+	try {
+		await formRef.value?.validate()
+	} catch {
+		return
+	}
 
 	submitting.value = true
 	try {

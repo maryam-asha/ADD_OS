@@ -82,7 +82,8 @@ const i18n = createI18n({
 				create: { button: "New role", title: "New role", success: "Role created." },
 				edit: { title: "Edit role", button: "Edit", success: "Role updated." },
 				delete: { button: "Delete", success: "Role deleted." },
-				form: { name: "Name", permissions: "Permissions", selectAll: "Select all", submit: "Save", cancel: "Cancel" }
+				form: { name: "Name", permissions: "Permissions", selectAll: "Select all", submit: "Save", cancel: "Cancel" },
+				validation: { nameRequired: "Name is required." }
 			},
 			resourceCrud: {
 				table: {
@@ -246,6 +247,23 @@ describe("rolesPage", () => {
 			expect(page.vm.modalVisible).toBe(true)
 			wrapper.unmount()
 		})
+
+		it("does not call createRole when the name is blank (required-field validation blocks submit)", async () => {
+			const wrapper = mountPage()
+			await flushPromises()
+			const page = findPage(wrapper)
+
+			page.vm.openCreate()
+			await nextTick()
+			// emptyForm() already seeds name as "" — submitting straight away is
+			// exactly what an operator clicking "New role" then "Save" would do.
+			await page.vm.submitCreate()
+			await flushPromises()
+
+			expect(createRoleMock).not.toHaveBeenCalled()
+			expect(page.vm.modalVisible).toBe(true)
+			wrapper.unmount()
+		})
 	})
 
 	describe("select all / module checkbox state", () => {
@@ -357,6 +375,22 @@ describe("rolesPage", () => {
 			expect(updateRoleMock).toHaveBeenCalledWith(customRole.id, { name: "front-desk", permissions: ["branches.view", "branches.update"] })
 			expect(messageMock.success).toHaveBeenCalledWith("Role updated.")
 			expect(page.vm.modalVisible).toBe(false)
+			wrapper.unmount()
+		})
+
+		it("does not call updateRole when the name is cleared to blank (required-field validation blocks submit)", async () => {
+			const wrapper = mountPage()
+			await flushPromises()
+			const page = findPage(wrapper)
+
+			page.vm.openEdit(customRole)
+			await nextTick()
+			page.vm.form.name = ""
+			await page.vm.submitEdit()
+			await flushPromises()
+
+			expect(updateRoleMock).not.toHaveBeenCalled()
+			expect(page.vm.modalVisible).toBe(true)
 			wrapper.unmount()
 		})
 	})
