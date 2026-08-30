@@ -25,17 +25,19 @@
 				/>
 			</n-form-item>
 
-			<n-button type="primary" class="w-full!" size="large" :loading="submitting" @click="submitSignIn">
-				{{ t("auth.signIn.submit") }}
-			</n-button>
-
-			<div class="mt-6 flex justify-center">
+			<!-- Where the reference puts "Remember me" beside it. That checkbox is not
+			     here on purpose: no `remember` field exists in the API collection. -->
+			<div class="mb-6 flex justify-end">
 				<router-link v-slot="{ navigate }" :to="{ name: 'ForgotPassword' }" custom>
 					<n-button text type="primary" @click="navigate">
 						{{ t("auth.signIn.forgotLink") }}
 					</n-button>
 				</router-link>
 			</div>
+
+			<n-button type="primary" class="w-full!" size="large" :loading="submitting" @click="submitSignIn">
+				{{ t("auth.signIn.submit") }}
+			</n-button>
 		</n-form>
 
 		<n-form v-else ref="twoFactorFormRef" :model="twoFactor" :rules="twoFactorRules" label-placement="top">

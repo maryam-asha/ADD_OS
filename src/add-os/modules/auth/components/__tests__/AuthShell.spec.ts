@@ -18,12 +18,11 @@ const messages = {
 }
 
 /**
- * Logo reaches for an SVG through `new URL(..., import.meta.url)` and Icon does a
- * local Iconify lookup — neither is what these tests are about, and both would
- * make a failure here ambiguous. Stubbed so the assertions are about the shell.
+ * Icon does a local Iconify lookup, which is not what these tests are about and
+ * would make a failure here ambiguous. Stubbed so the assertions are about the
+ * shell. The logo is a plain <img> with an imported asset URL — nothing to stub.
  */
 const stubs = {
-	Logo: { template: `<div class="logo-stub" />` },
 	Icon: { props: ["name", "size"], template: `<i class="icon-stub" :data-name="name" />` }
 }
 

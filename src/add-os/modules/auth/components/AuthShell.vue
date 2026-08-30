@@ -8,44 +8,46 @@
 		docs/superpowers/specs/2026-08-30-auth-visual-alignment-design.md §3.5.
 	-->
 	<n-config-provider :theme-overrides="authThemeOverrides">
-		<div class="auth-shell flex min-h-screen bg-[var(--add-body)]">
+		<div
+			class="auth-shell relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--add-auth-panel-background)] p-6"
+		>
 			<!--
-				The dark panel carries the brand the way the member app's hero card does.
-				Hidden below the project's `mobile` breakpoint, where the member app
-				itself is a single column.
-				`aria-hidden` because it is decoration: the accessible name of this page
-				comes from the heading in the sheet, and the logo is repeated there.
+				Decoration only, hence aria-hidden: two offset rounded panels behind the
+				card, the way the member app stacks surfaces. Tinted from `surface` with
+				an opacity modifier rather than a literal rgba(), so they stay a token
+				reference and the no-hardcoded-values rule holds.
 			-->
-			<aside
-				aria-hidden="true"
-				class="mobile:flex hidden basis-1/2 flex-col justify-between bg-[var(--add-auth-panel-background)] p-12 text-[var(--add-auth-panel-text)]"
-			>
-				<Logo type="small" dark />
+			<div aria-hidden="true" class="pointer-events-none absolute inset-0 hidden items-center justify-center sm:flex">
+				<div class="rounded-add-large bg-surface/5 absolute size-96 -translate-x-32 -translate-y-24" />
+				<div class="rounded-add-large border-surface/10 absolute size-96 translate-x-32 translate-y-24 border" />
+			</div>
 
-				<p class="text-2xl leading-relaxed font-semibold text-[var(--add-auth-panel-text)]">
-					{{ t("auth.shell.tagline") }}
-				</p>
-
-				<span />
-			</aside>
-
-			<main class="flex grow items-center justify-center p-6">
-				<div class="bg-surface rounded-add-large shadow-add-raised w-full max-w-md p-8">
-					<n-button v-if="showBack" text class="mb-6" @click="emit('back')">
+			<main class="relative flex w-full max-w-md flex-col items-center">
+				<div class="bg-surface rounded-add-large shadow-add-overlay w-full p-8">
+					<n-button v-if="showBack" text class="mb-4" @click="emit('back')">
 						<Icon :name="backIcon" :size="20" />
 						<span class="ms-2">{{ t("auth.common.back") }}</span>
 					</n-button>
 
-					<!-- The panel is hidden on small screens, so the mark is repeated here. -->
-					<div class="mobile:hidden mb-6 flex">
-						<Logo type="small" />
+					<!--
+						The supplied PNG, not Logo.vue: this page wants the full lockup —
+						charcoal mark plus the green wordmark — and Logo.vue's `small`
+						variant is the compact mark. `logo-dark.png` is the transparent,
+						dark-ink file, which is the one that belongs on a white card.
+					-->
+					<div class="mb-6 flex justify-center">
+						<img :src="logoLockup" :alt="t('common.logoAlt')" class="h-12 w-auto" />
 					</div>
 
-					<h1 class="text-text-primary mb-2 text-3xl font-bold">{{ title }}</h1>
-					<p v-if="subtitle" class="text-text-secondary mb-8">{{ subtitle }}</p>
+					<h1 class="text-text-primary mb-2 text-center text-2xl font-bold">{{ title }}</h1>
+					<p v-if="subtitle" class="text-text-secondary mb-8 text-center">{{ subtitle }}</p>
 
 					<slot />
 				</div>
+
+				<p class="mt-6 text-center text-sm text-[var(--add-auth-panel-text)]">
+					{{ t("auth.shell.tagline") }}
+				</p>
 			</main>
 		</div>
 	</n-config-provider>
@@ -57,7 +59,7 @@ import { NButton, NConfigProvider } from "naive-ui"
 import { computed } from "vue"
 import { useI18n } from "vue-i18n"
 import { component, DEFAULT_MODE } from "@/add-os/theme/tokens"
-import Logo from "@/app-layouts/common/Logo.vue"
+import logoLockup from "@/assets/images/logo-dark.png"
 import Icon from "@/components/common/Icon.vue"
 import { useThemeStore } from "@/stores/theme"
 
