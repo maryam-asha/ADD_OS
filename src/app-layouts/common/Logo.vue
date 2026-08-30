@@ -1,19 +1,21 @@
 <template>
 	<div class="logo">
 		<Transition name="logo-fade" mode="out-in">
-			<img
-				:key="logoSrc"
-				:src="logoSrc"
-				alt="SOCFortress logo"
-				aria-label="SOCFortress logo"
-				class="logo-image"
-			/>
+			<!--
+				ADD OS: the alt text read "SOCFortress logo" — a wrong brand inherited
+				from an earlier template lineage, listed as residue to strip in
+				.claude/rules/vendor-boundary.md. `aria-label` is dropped rather than
+				translated: on an <img> it duplicates `alt`, and two accessible names
+				for one element is how they drift apart.
+			-->
+			<img :key="logoSrc" :src="logoSrc" :alt="t('common.logoAlt')" class="logo-image" />
 		</Transition>
 	</div>
 </template>
 
 <script lang="ts" setup>
 import { computed } from "vue"
+import { useI18n } from "vue-i18n"
 import { useThemeStore } from "@/stores/theme"
 
 interface Props {
@@ -28,6 +30,7 @@ const props = withDefaults(defineProps<Props>(), {
 	maxHeight: "32px"
 })
 
+const { t } = useI18n()
 const themeStore = useThemeStore()
 
 const isDark = computed<boolean>(() => props.dark ?? themeStore.isThemeDark)

@@ -12,7 +12,8 @@
 		"clear": "مسح",
 		"viewAll": "عرض الكل",
 		"logout": "تسجيل الخروج",
-		"logged_out": "تم تسجيل الخروج"
+		"logged_out": "تم تسجيل الخروج",
+		"logoAlt": "شعار ADD OS"
 	},
 	"notifications": {
 		"title": "الإشعارات",
@@ -30,6 +31,40 @@
 		}
 	},
 	"auth": {
+		"common": {
+			"back": "رجوع"
+		},
+		"shell": {
+			"tagline": "لوحة تشغيل حي حلب الرقمي."
+		},
+		"signIn": {
+			"title": "أهلاً بعودتك",
+			"subtitle": "سجّل الدخول لإدارة العضويات والحجوزات والوصول.",
+			"emailLabel": "البريد الإلكتروني",
+			"emailPlaceholder": "أدخل بريدك الإلكتروني",
+			"emailRequired": "البريد الإلكتروني مطلوب.",
+			"emailInvalid": "أدخل بريداً إلكترونياً صحيحاً.",
+			"passwordLabel": "كلمة المرور",
+			"passwordPlaceholder": "أدخل كلمة المرور",
+			"passwordRequired": "كلمة المرور مطلوبة.",
+			"forgotLink": "نسيت كلمة المرور؟",
+			"submit": "تسجيل الدخول",
+			"genericError": "تعذّر تسجيل الدخول. تحقّق من بياناتك وأعد المحاولة."
+		},
+		"twoFactor": {
+			"title": "التحقّق بخطوتين",
+			"subtitle": "أدخل الرمز من تطبيق المصادقة لإتمام تسجيل الدخول.",
+			"codeLabel": "رمز المصادقة",
+			"codePlaceholder": "أدخل الرمز المكوّن من ست خانات",
+			"codeRequired": "أدخل الرمز من تطبيق المصادقة.",
+			"recoveryLabel": "رمز الاسترداد",
+			"recoveryPlaceholder": "أدخل رمز استرداد",
+			"recoveryRequired": "أدخل رمز استرداد.",
+			"useRecoveryCode": "استخدم رمز استرداد بدلاً من ذلك",
+			"useAuthCode": "استخدم رمز المصادقة بدلاً من ذلك",
+			"submit": "تحقّق",
+			"genericError": "تعذّر التحقّق من الرمز. أعد المحاولة."
+		},
 		"forgotPassword": {
 			"emailLabel": "البريد الإلكتروني",
 			"emailPlaceholder": "أدخل بريدك الإلكتروني",

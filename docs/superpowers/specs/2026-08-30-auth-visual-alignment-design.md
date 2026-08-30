@@ -367,6 +367,24 @@ same work that changes behaviour, and requires keeping the survey a removal eras
 
 ---
 
+## 7a · As built — where batch 2 departed from §4–§5
+
+Recorded rather than edited into the sections above, so the original intent stays
+readable next to what shipping it actually required.
+
+| Designed | Built | Why |
+|---|---|---|
+| Panel drops below 800px, matching `main.scss` | Drops below the project's `mobile` breakpoint | 800 was the vendor's magic number. `tailwind.css` already declares `--breakpoint-mobile`, so the project's own token is used instead of reintroducing a literal. |
+| `auth.shell.logoAlt` | `common.logoAlt` | `Logo.vue` renders in the sidebar and toolbar too, not only on auth. A key under `auth.*` would have made every other screen's logo depend on the auth namespace. |
+| `auth.twoFactor.*` as listed | Plus `recoveryPlaceholder` | The recovery-code field needs its own placeholder; the authenticator-code one describes a six-digit code and would be wrong on it. |
+| `AuthShell` takes slots for title, subtitle and form | Props for `title`/`subtitle`, one default slot for the form | Title and subtitle are always plain strings. Props keep them in the parent's `computed`, which is what lets the two-factor step swap both by changing one ref. |
+| `aria-label` on the logo translated | `aria-label` removed, `alt` translated | On an `<img>` the two are competing accessible names. Keeping both is how they drift apart; `alt` is the one that belongs there. |
+
+Verified at build time, not assumed: naive-ui 2.44.1's `ConfigProvider` **merges**
+`themeOverrides` with its ancestor's unless the prop is exactly `null`
+(`config-provider/src/ConfigProvider.mjs`, "use inherited themeOverrides"). So the auth
+screens remap `primary` only, and keep every other value the app-level provider sets.
+
 ## 8 · Open — brand owner
 
 Logged to `docs/brand/GUIDELINE-FEEDBACK.md` in batch 4. None blocks batches 1–3.

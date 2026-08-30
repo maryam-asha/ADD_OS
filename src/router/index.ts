@@ -34,7 +34,11 @@ const router = createRouter({
 		{
 			path: "/login",
 			name: "Login",
-			component: () => import("@/views/Auth/Login.vue"),
+			// ADD OS: ours, not the vendor page. The Pinx `views/Auth/Login.vue`
+			// shipped a floating runtime control that repainted the panel from the
+			// chart ramp, and its form strings were untranslated English literals.
+			// `/forgot-password` below still resolves to it until batch 3 replaces it.
+			component: () => import("@/add-os/modules/auth/views/LoginPage.vue"),
 			meta: {
 				title: "Login",
 				theme: { layout: Layout.Blank, boxed: { enabled: false }, padded: { enabled: false } },

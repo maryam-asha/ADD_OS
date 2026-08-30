@@ -8,7 +8,8 @@
 		"clear": "Clear",
 		"viewAll": "View all",
 		"logout": "Log out",
-		"logged_out": "Logged out"
+		"logged_out": "Logged out",
+		"logoAlt": "ADD OS logo"
 	},
 	"notifications": {
 		"title": "Notifications",
@@ -26,6 +27,40 @@
 		}
 	},
 	"auth": {
+		"common": {
+			"back": "Back"
+		},
+		"shell": {
+			"tagline": "The operations dashboard for Aleppo Digital District."
+		},
+		"signIn": {
+			"title": "Welcome back",
+			"subtitle": "Sign in to manage memberships, bookings and access.",
+			"emailLabel": "Email",
+			"emailPlaceholder": "Enter your email",
+			"emailRequired": "Email is required.",
+			"emailInvalid": "Enter a valid email address.",
+			"passwordLabel": "Password",
+			"passwordPlaceholder": "Enter your password",
+			"passwordRequired": "Password is required.",
+			"forgotLink": "Forgot your password?",
+			"submit": "Sign in",
+			"genericError": "Couldn't sign in. Check your details and try again."
+		},
+		"twoFactor": {
+			"title": "Two-step verification",
+			"subtitle": "Enter the code from your authenticator app to finish signing in.",
+			"codeLabel": "Authentication code",
+			"codePlaceholder": "Enter the six-digit code",
+			"codeRequired": "Enter the code from your authenticator app.",
+			"recoveryLabel": "Recovery code",
+			"recoveryPlaceholder": "Enter a recovery code",
+			"recoveryRequired": "Enter a recovery code.",
+			"useRecoveryCode": "Use a recovery code instead",
+			"useAuthCode": "Use an authentication code instead",
+			"submit": "Verify",
+			"genericError": "Couldn't verify that code. Please try again."
+		},
 		"forgotPassword": {
 			"emailLabel": "Email",
 			"emailPlaceholder": "Insert your email",
