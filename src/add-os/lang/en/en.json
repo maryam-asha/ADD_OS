@@ -16,13 +16,41 @@
 		"markAllAsRead": "Mark all as read"
 	},
 	"roles": {
-		"description": "Assignable roles across the dashboard. There are no per-role permissions yet — just the names.",
+		"description": "Manage roles and the admin-dashboard permissions each one grants.",
 		"loadError": "Couldn't load roles. You may not have permission to view this page.",
 		"empty": "No roles found.",
 		"names": {
 			"member": "Member",
 			"operations": "Operations",
 			"admin": "Admin"
+		},
+		"builtIn": "Built-in",
+		"columns": {
+			"name": "Name",
+			"permissions": "Permissions",
+			"permissionCount": "{count} permissions",
+			"actions": "Actions"
+		},
+		"create": {
+			"button": "New role",
+			"title": "New role",
+			"success": "Role created."
+		},
+		"edit": {
+			"title": "Edit role",
+			"button": "Edit",
+			"success": "Role updated."
+		},
+		"delete": {
+			"button": "Delete",
+			"success": "Role deleted."
+		},
+		"form": {
+			"name": "Name",
+			"permissions": "Permissions",
+			"selectAll": "Select all",
+			"submit": "Save",
+			"cancel": "Cancel"
 		}
 	},
 	"auth": {
