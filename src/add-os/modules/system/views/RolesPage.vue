@@ -30,6 +30,14 @@
 				<n-form-item path="name" :label="t('roles.form.name')">
 					<n-input v-model:value="form.name" :disabled="mode === 'edit' && editingRole?.protected" />
 				</n-form-item>
+				<!--
+					Module names (group.module) and action labels (action.action) are shown
+					as their raw backend identifiers, not translated — a deliberate v1
+					simplification. Permission names are open-ended and backend-derived
+					(PermissionSyncService reflects them off route definitions), so
+					individually localizing each one isn't practical yet, unlike the fixed
+					roles.names.* set used for the three built-in role names.
+				-->
 				<n-form-item :label="t('roles.form.permissions')">
 					<n-checkbox-group v-model:value="form.permissions" class="w-full">
 						<div v-for="group in permissionModules" :key="group.module" class="rounded-lg border p-4 mb-3">
@@ -123,9 +131,14 @@ function renderNameCell(row: RoleRecord) {
  * backend rejects any `permissions` key sent for it with a 422 regardless of
  * protected status (`api.role.member_out_of_scope`). Delete stays gated on
  * `protected` alone, since that's the flag the backend actually keys its
- * rename/delete rejection on.
+ * rename/delete rejection on. Both are also gated on `canManageRoles()`,
+ * same defense-in-depth the Create button already has — the backend is the
+ * real authority, but a user who can't manage roles shouldn't even see the
+ * buttons.
  */
 function renderActions(row: RoleRecord) {
+	if (!canManageRoles()) return h("div", { class: "flex gap-2" })
+
 	const editLabel = t("roles.edit.button")
 	const deleteLabel = t("roles.delete.button")
 

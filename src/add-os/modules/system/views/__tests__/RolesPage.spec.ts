@@ -191,6 +191,29 @@ describe("rolesPage", () => {
 			expect(customRow?.find('[aria-label="Delete"]').exists()).toBe(true)
 			wrapper.unmount()
 		})
+
+		/**
+		 * Final-review fix: renderActions() previously only checked
+		 * row.protected/row.name, with no canManageRoles() check of its own —
+		 * only the top-of-page Create button was gated on it. Same
+		 * defense-in-depth as the Create button now applies to every row's
+		 * Edit/Delete, even a custom role that would otherwise qualify for both.
+		 */
+		it("renders no Edit and no Delete button for any row when the user cannot manage roles", async () => {
+			canManageRolesMock.mockReturnValue(false)
+			const wrapper = mountPage()
+			await flushPromises()
+
+			const rows = wrapper.findAll("tbody tr")
+			const adminRow = rows.find(row => row.text().includes("Admin"))
+			const customRow = rows.find(row => row.text().includes("front-desk"))
+
+			expect(adminRow?.find('[aria-label="Edit"]').exists()).toBe(false)
+			expect(adminRow?.find('[aria-label="Delete"]').exists()).toBe(false)
+			expect(customRow?.find('[aria-label="Edit"]').exists()).toBe(false)
+			expect(customRow?.find('[aria-label="Delete"]').exists()).toBe(false)
+			wrapper.unmount()
+		})
 	})
 
 	describe("create button gating", () => {

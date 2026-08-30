@@ -18,7 +18,6 @@
 	"roles": {
 		"description": "Manage roles and the admin-dashboard permissions each one grants.",
 		"loadError": "Couldn't load roles. You may not have permission to view this page.",
-		"empty": "No roles found.",
 		"names": {
 			"member": "Member",
 			"operations": "Operations",

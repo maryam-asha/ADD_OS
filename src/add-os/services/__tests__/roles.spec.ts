@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-import { createRole, getRole, listRoleRecords, listRoles, removeRole, updateRole } from "../roles"
+import { createRole, listRoleRecords, listRoles, removeRole, updateRole } from "../roles"
 
 vi.mock("@/add-os/config/env", () => ({
 	apiUrl: () => "http://api.test"
@@ -63,27 +63,12 @@ describe("listRoles", () => {
 	})
 })
 
-describe("getRole", () => {
-	beforeEach(() => {
-		vi.stubGlobal("fetch", vi.fn())
-	})
-
-	it("GETs a single role by id and unwraps it", async () => {
-		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: customRole }))
-
-		const role = await getRole(4)
-
-		expect(fetch).toHaveBeenCalledWith("http://api.test/api/v1/admin/roles/4", expect.objectContaining({ method: "GET" }))
-		expect(role).toEqual(customRole)
-	})
-})
-
 describe("createRole", () => {
 	beforeEach(() => {
 		vi.stubGlobal("fetch", vi.fn())
 	})
 
-	it("POSTs the payload and unwraps the created role", async () => {
+	it("createRole POSTs the payload and unwraps the created role", async () => {
 		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: customRole }, 201))
 
 		const payload = { name: "front-desk", permissions: ["branches.view", "branches.update"] }
@@ -102,7 +87,7 @@ describe("updateRole", () => {
 		vi.stubGlobal("fetch", vi.fn())
 	})
 
-	it("PUTs a payload with both name and permissions and returns the message body only", async () => {
+	it("updateRole PUTs a payload with both name and permissions and returns the message body only", async () => {
 		vi.mocked(fetch).mockResolvedValue(jsonResponse({ message: "Updated." }))
 
 		const payload = { name: "front-desk", permissions: ["branches.view"] }
@@ -115,7 +100,7 @@ describe("updateRole", () => {
 		expect(result).toEqual({ message: "Updated." })
 	})
 
-	it("PUTs a permissions-only payload (no name key) and returns the message body only", async () => {
+	it("updateRole PUTs a permissions-only payload (no name key) and returns the message body only", async () => {
 		vi.mocked(fetch).mockResolvedValue(jsonResponse({ message: "Updated." }))
 
 		const payload = { permissions: ["branches.view", "branches.update"] }
@@ -145,7 +130,7 @@ describe("removeRole", () => {
 		vi.stubGlobal("fetch", vi.fn())
 	})
 
-	it("DELETEs the role and resolves to undefined on a 204/empty response", async () => {
+	it("removeRole DELETEs the role and resolves to undefined on a 204/empty response", async () => {
 		vi.mocked(fetch).mockResolvedValue(emptyResponse())
 
 		const result = await removeRole(4)

@@ -4,7 +4,6 @@ import { createResourceApi } from "./resource-factory"
 const api = createResourceApi<RoleRecord, CreateRolePayload, UpdateRolePayload>("/api/v1/admin/roles")
 
 export const listRoleRecords = api.list
-export const getRole = api.getById
 export const createRole = api.create
 export const updateRole = api.update
 export const removeRole = api.remove

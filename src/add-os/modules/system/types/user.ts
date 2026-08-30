@@ -28,11 +28,14 @@ export interface User {
 }
 
 /**
- * `StoreUserRequest` — member is never offered: only ops/admin accounts are
- * created here. `role` is typed as the general `UserRole` (now that custom
- * roles exist) rather than a narrower `"operations" | "admin"` literal union;
- * `UsersPage.vue`'s `createRoleOptions` is what actually restricts the
- * dropdown to those two values at runtime — this type doesn't need to.
+ * `StoreUserRequest` — member is never offered: only ops/admin (and any
+ * custom role) accounts are created here. `role` is typed as the general
+ * `UserRole` (now that custom roles exist) rather than a narrower
+ * `"operations" | "admin"` literal union; `UsersPage.vue`'s
+ * `createRoleOptions` is what actually restricts the dropdown at runtime —
+ * it excludes `member` only, not any fixed set of the remaining roles, since
+ * an admin can create an arbitrary number of custom roles via `RolesPage.vue`
+ * and all of them are valid choices here.
  */
 export interface CreateUserPayload {
 	name: string
