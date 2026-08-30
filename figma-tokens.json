@@ -53,7 +53,7 @@
 			"type": "fontFamilies"
 		},
 		"color-light-sidebar-background": {
-			"value": "#FFFFFF",
+			"value": "#F7F5F2",
 			"type": "color"
 		},
 		"color-light-body-background": {
@@ -61,7 +61,7 @@
 			"type": "color"
 		},
 		"color-light-background": {
-			"value": "#FFFFFF",
+			"value": "#F7F5F2",
 			"type": "color"
 		},
 		"color-light-background-secondary": {
@@ -125,7 +125,7 @@
 			"type": "color"
 		},
 		"color-dark-sidebar-background": {
-			"value": "#FFFFFF",
+			"value": "#F7F5F2",
 			"type": "color"
 		},
 		"color-dark-body-background": {
@@ -133,7 +133,7 @@
 			"type": "color"
 		},
 		"color-dark-background": {
-			"value": "#FFFFFF",
+			"value": "#F7F5F2",
 			"type": "color"
 		},
 		"color-dark-background-secondary": {

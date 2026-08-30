@@ -1,12 +1,20 @@
 import { mount } from "@vue/test-utils"
+import { colord, extend } from "colord"
+import a11yPlugin from "colord/plugins/a11y"
 import { NConfigProvider } from "naive-ui"
 import { createPinia } from "pinia"
 import { createPersistedState } from "pinia-plugin-persistedstate"
 import { beforeEach, describe, expect, it } from "vitest"
 import { createI18n } from "vue-i18n"
-import { component, DEFAULT_MODE, semantic } from "@/add-os/theme/tokens"
+import { brand, component, DEFAULT_MODE, semantic } from "@/add-os/theme/tokens"
 import { useThemeStore } from "@/stores/theme"
 import AuthShell from "../AuthShell.vue"
+
+extend([a11yPlugin])
+
+const ratio = (fg: string, bg: string) => colord(fg).contrast(bg)
+/** WCAG 1.4.11 — non-text UI: control boundaries and focus indicators. */
+const AA_NON_TEXT = 3
 
 const messages = {
 	en: {
@@ -88,31 +96,126 @@ describe("authShell", () => {
 
 	describe("the green call to action", () => {
 		const auth = component[DEFAULT_MODE].auth
-		const overridesOf = () => mountShell().findComponent(NConfigProvider).props("themeOverrides") as {
-			common: Record<string, string>
-		}
+		const overridesOf = () =>
+			mountShell().findComponent(NConfigProvider).props("themeOverrides") as {
+				common?: Record<string, string>
+				Button: Record<string, string>
+			}
 
-		it("remaps naive's primary to the auth ramp for these screens only", () => {
-			const { common } = overridesOf()
+		it("paints the filled primary button with the auth ramp", () => {
+			const { Button } = overridesOf()
 
-			expect(common.primaryColor).toBe(auth.actionBase)
-			expect(common.primaryColorHover).toBe(auth.actionHover)
-			expect(common.primaryColorPressed).toBe(auth.actionPressed)
+			expect(Button.colorPrimary).toBe(auth.actionBase)
+			expect(Button.colorHoverPrimary).toBe(auth.actionHover)
+			expect(Button.colorPressedPrimary).toBe(auth.actionPressed)
+			expect(Button.textColorPrimary).toBe(auth.actionOn)
 		})
 
-		it("does not leave the dashboard's teal primary in place", () => {
-			// Without this the screens would silently render teal and still pass
+		it("does not leave the dashboard's teal on the button", () => {
+			// Without this the button would silently render teal and still pass
 			// every other assertion here.
-			expect(overridesOf().common.primaryColor).not.toBe(semantic[DEFAULT_MODE].primary.base)
+			expect(overridesOf().Button.colorPrimary).not.toBe(semantic[DEFAULT_MODE].primary.base)
+		})
+
+		// The design puts a green button and a Deep Teal "forgot password?" link on
+		// the SAME screen. A text button reads `primary`, so remapping
+		// `common.primaryColor` — which an earlier revision of this file did — turns
+		// the link green too. Scoping to `Button` is what keeps them apart, and this
+		// is the assertion that fails if anyone widens it back.
+		it("leaves `primary` alone, so text links stay Deep Teal", () => {
+			const overrides = overridesOf()
+
+			expect(overrides.common?.primaryColor).toBeUndefined()
 		})
 
 		it("supplies hover and pressed explicitly, never by naive's derivation", () => {
 			// getThemeColors() derives hover by LIGHTENING, which drops light-mode
-			// hover below AA. All three must be present.
-			const { common } = overridesOf()
-			for (const key of ["primaryColor", "primaryColorHover", "primaryColorPressed", "primaryColorSuppl"]) {
-				expect(common[key], `${key} must be set explicitly`).toBeTruthy()
+			// hover below AA. Every state must be set.
+			const { Button } = overridesOf()
+			for (const key of ["colorPrimary", "colorHoverPrimary", "colorPressedPrimary", "colorFocusPrimary"]) {
+				expect(Button[key], `${key} must be set explicitly`).toBeTruthy()
 			}
 		})
+	})
+
+	// The design annotates the control border as #CDC2AF. That is already the
+	// shipping value — `semantic.border` is Aleppo Stone, and theme/index.ts feeds
+	// it to naive as `common.borderColor` — so the shell adds no override for it.
+	// Asserted here so a future palette change cannot silently drift the auth
+	// screens away from the design without a test saying so.
+	describe("input focus is Smart Olive, by the design owner's decision", () => {
+		const overridesOf = () =>
+			mountShell().findComponent(NConfigProvider).props("themeOverrides") as {
+				Input: Record<string, string>
+			}
+
+		it("focuses and hovers on Smart Olive", () => {
+			const { Input } = overridesOf()
+
+			expect(Input.borderFocus).toContain(brand.smartOlive)
+			expect(Input.borderHover).toContain(brand.smartOlive)
+			expect(Input.caretColor).toBe(brand.smartOlive)
+		})
+
+		it("references the brand primitive rather than restating its hex", () => {
+			// A literal would put a second copy of the value outside tokens.ts.
+			expect(brand.smartOlive).toBe("#809C66")
+			expect(overridesOf().Input.caretColor).toBe(brand.smartOlive)
+		})
+
+		// Smart Olive is a PILLAR colour. Using it here is a scoped component
+		// override, not a token — and that distinction is the whole reason the
+		// pillar guard still holds. If anyone promotes it into the token tree,
+		// tokens.spec.ts fails; this asserts the other half.
+		it("does not smuggle a pillar colour into the token tree", () => {
+			const collect = (o: unknown, out: string[] = []): string[] => {
+				if (typeof o === "string") {
+					out.push(o.toUpperCase())
+				} else if (o && typeof o === "object") {
+					for (const v of Object.values(o)) {
+						collect(v, out)
+					}
+				}
+				return out
+			}
+			expect(collect(component[DEFAULT_MODE])).not.toContain(brand.smartOlive.toUpperCase())
+			expect(collect(semantic[DEFAULT_MODE])).not.toContain(brand.smartOlive.toUpperCase())
+		})
+
+		/**
+		 * Records a KNOWN DEVIATION, and is written to fail the day it stops being
+		 * one — not to bless it.
+		 *
+		 * A focus indicator is bound by WCAG 1.4.11's 3:1 against adjacent colours.
+		 * Smart Olive cleared that on the card at 3.06:1 while `surface` was
+		 * #FFFFFF. On 2026-08-30 `surface` became #F7F5F2 to match the member app,
+		 * and the ring dropped to 2.81:1 — so it now clears 3:1 against NEITHER
+		 * adjacent surface:
+		 *   · card surface (#F7F5F2) — 2.81:1
+		 *   · input fill   (#EFECEB) — 2.60:1
+		 *
+		 * Both numbers are pinned. If a future palette change lifts either above
+		 * 3:1, this test fails and the deviation should be closed rather than
+		 * re-pinned. Owner: Design — see docs/brand/GUIDELINE-FEEDBACK.md.
+		 */
+		it("is a recorded 1.4.11 deviation — below 3:1 on both adjacent surfaces", () => {
+			const s = semantic[DEFAULT_MODE]
+			const onCard = ratio(brand.smartOlive, s.surface)
+			const onFill = ratio(brand.smartOlive, s.inputFill)
+
+			expect(onCard, "card contrast moved — reassess the deviation").toBeCloseTo(2.81, 1)
+			expect(onFill, "input-fill contrast moved — reassess the deviation").toBeCloseTo(2.6, 1)
+			expect(onCard).toBeLessThan(AA_NON_TEXT)
+			expect(onFill).toBeLessThan(AA_NON_TEXT)
+		})
+	})
+
+	it("takes its control border from the shipping token, not a local override", () => {
+		expect(semantic[DEFAULT_MODE].border).toBe("#CDC2AF")
+
+		const overrides = mountShell().findComponent(NConfigProvider).props("themeOverrides") as {
+			common?: Record<string, string>
+		}
+		expect(overrides.common?.borderColor).toBeUndefined()
 	})
 })

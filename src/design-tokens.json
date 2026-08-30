@@ -60,9 +60,9 @@
 	},
 	"colors": {
 		"light": {
-			"sidebarBackground": "#FFFFFF",
+			"sidebarBackground": "#F7F5F2",
 			"bodyBackground": "#E2DDDB",
-			"background": "#FFFFFF",
+			"background": "#F7F5F2",
 			"backgroundSecondary": "#EDEAE8",
 			"text": "#43474F",
 			"textSecondary": "#565B65",
@@ -80,9 +80,9 @@
 			"extra4": "#B8D098"
 		},
 		"dark": {
-			"sidebarBackground": "#FFFFFF",
+			"sidebarBackground": "#F7F5F2",
 			"bodyBackground": "#E2DDDB",
-			"background": "#FFFFFF",
+			"background": "#F7F5F2",
 			"backgroundSecondary": "#EDEAE8",
 			"text": "#43474F",
 			"textSecondary": "#565B65",

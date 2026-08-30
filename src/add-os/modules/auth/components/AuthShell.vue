@@ -8,6 +8,12 @@
 		docs/superpowers/specs/2026-08-30-auth-visual-alignment-design.md §3.5.
 	-->
 	<n-config-provider :theme-overrides="authThemeOverrides">
+		<!--
+			The DASHBOARD's own composition, deliberately not the member app's.
+			The phone screens are one flat warm surface because a phone has no room
+			for anything else; a desktop login does. What the two share is the
+			palette and the type — one identity, different medium.
+		-->
 		<div
 			class="auth-shell relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--add-auth-panel-background)] p-6"
 		>
@@ -30,7 +36,7 @@
 					</n-button>
 
 					<!--
-						The supplied PNG, not Logo.vue: this page wants the full lockup —
+						The supplied PNG, not Logo.vue: the design shows the full lockup —
 						charcoal mark plus the green wordmark — and Logo.vue's `small`
 						variant is the compact mark. `logo-dark.png` is the transparent,
 						dark-ink file, which is the one that belongs on a white card.
@@ -58,7 +64,7 @@ import type { GlobalThemeOverrides } from "naive-ui"
 import { NButton, NConfigProvider } from "naive-ui"
 import { computed } from "vue"
 import { useI18n } from "vue-i18n"
-import { component, DEFAULT_MODE } from "@/add-os/theme/tokens"
+import { brand, component, DEFAULT_MODE } from "@/add-os/theme/tokens"
 import logoLockup from "@/assets/images/logo-dark.png"
 import Icon from "@/components/common/Icon.vue"
 import { useThemeStore } from "@/stores/theme"
@@ -91,17 +97,59 @@ const backIcon = computed<string>(() => (themeStore.isRTL ? BackIconRtl : BackIc
 const authAction = component[DEFAULT_MODE].auth
 
 /**
- * `suppl` mirrors `hover`, exactly as the success ramp it references does
- * (`semantic.light.success.suppl === success.hover`). Supplied explicitly
- * because the vendor's `getThemeColors()` derives hover by LIGHTENING, which
- * drops every light-mode hover below AA — see .claude/rules/tokens-and-color.md.
+ * Scoped to `Button`, NOT to `common.primaryColor`.
+ *
+ * The design puts a GREEN submit button and a DEEP TEAL "forgot password?" link
+ * on the same screen. Remapping `common.primaryColor` would turn both green —
+ * the link is `n-button text type="primary"`, which reads the same colour. So
+ * only the filled primary button is remapped, and `primary` itself is left at
+ * the dashboard's Deep Teal so text links match the design.
+ *
+ * Hover and pressed are supplied explicitly because the vendor's
+ * `getThemeColors()` derives hover by LIGHTENING, which drops every light-mode
+ * hover below AA — see .claude/rules/tokens-and-color.md.
  */
 const authThemeOverrides: GlobalThemeOverrides = {
-	common: {
-		primaryColor: authAction.actionBase,
-		primaryColorHover: authAction.actionHover,
-		primaryColorPressed: authAction.actionPressed,
-		primaryColorSuppl: authAction.actionHover
+	Button: {
+		colorPrimary: authAction.actionBase,
+		colorHoverPrimary: authAction.actionHover,
+		colorPressedPrimary: authAction.actionPressed,
+		colorFocusPrimary: authAction.actionHover,
+		textColorPrimary: authAction.actionOn,
+		textColorHoverPrimary: authAction.actionOn,
+		textColorPressedPrimary: authAction.actionOn,
+		textColorFocusPrimary: authAction.actionOn,
+		borderPrimary: `1px solid ${authAction.actionBase}`,
+		borderHoverPrimary: `1px solid ${authAction.actionHover}`,
+		borderPressedPrimary: `1px solid ${authAction.actionPressed}`,
+		borderFocusPrimary: `1px solid ${authAction.actionHover}`
+	},
+	/**
+	 * Focus and hover on the inputs are Smart Olive, by the design owner's
+	 * decision (2026-08-30).
+	 *
+	 * Referenced from `brand`, never written as a literal, so the one source in
+	 * tokens.ts still owns the value. This does NOT make it a token: the pillar
+	 * guard forbids Smart Olive as a semantic or component token value, and that
+	 * stays true — nothing here is added to `semantic` or `component`.
+	 *
+	 * Measured, because a focus indicator is bound by WCAG 1.4.11's 3:1 against
+	 * ADJACENT colours and this one sits between two:
+	 *   · against the card surface (#FFFFFF) — 3.06:1, clears 3:1, barely
+	 *   · against the input fill  (#EFECEB) — 2.60:1, does NOT clear 3:1
+	 * The outer edge passes and the inner edge does not. Recorded rather than
+	 * silently "corrected": darkening it would no longer be Smart Olive, and the
+	 * choice is the design owner's to confirm. See GUIDELINE-FEEDBACK.md.
+	 *
+	 * `color-mix` keeps the focus glow derived from the same colour without
+	 * introducing an rgba() literal, which Invariant 2 forbids in add-os.
+	 */
+	Input: {
+		borderHover: `1px solid ${brand.smartOlive}`,
+		borderFocus: `1px solid ${brand.smartOlive}`,
+		boxShadowFocus: `0 0 0 2px color-mix(in srgb, ${brand.smartOlive} 20%, transparent)`,
+		caretColor: brand.smartOlive,
+		loadingColor: brand.smartOlive
 	}
 }
 </script>

@@ -151,6 +151,17 @@ export const DERIVATIONS: Record<string, Derivation> = {
 		provenance: "derived",
 		note: 'Not in the palette, but the Guideline presumes it — Aleppo Stone is described as an "alternative background to white" (p.15). Cards sit on the Warm Mist body.'
 	},
+	surfaceCard: {
+		value: "#F7F5F2",
+		from: "warmMist",
+		provenance: "derived",
+		note:
+			"Card and panel surface, set 2026-08-30 by the design owner to match the ADD member app. " +
+			"Warm Mist lightened — the same warm hue family, not a neutral white. " +
+			"DISTINCT from `surfaceWhite`, which stays #FFFFFF: that value is also the `on` colour " +
+			"carried by primary/success/danger/info fills, so repointing it would have tinted every " +
+			"white button label instead of only the surfaces."
+	},
 	textSecondary: {
 		value: "#565B65",
 		from: "charcoalBackbone",
@@ -336,8 +347,8 @@ const light: SemanticTokens = {
 	},
 
 	body: brand.warmMist,
-	surface: DERIVATIONS.surfaceWhite.value,
-	surfaceRaised: DERIVATIONS.surfaceWhite.value,
+	surface: DERIVATIONS.surfaceCard.value,
+	surfaceRaised: DERIVATIONS.surfaceCard.value,
 	surfaceSunken: DERIVATIONS.surfaceSunken.value,
 	inputFill: DERIVATIONS.inputFill.value,
 
@@ -713,8 +724,14 @@ const componentLight: ComponentTokens = {
 		numericFontFamily: fontFamily.numeric
 	},
 	auth: {
-		panelBackground: brand.levantDeepTeal, //  #314550 · brand verbatim
-		panelText: light.textOnDark, //            Warm Mist · 7.43 on the panel
+		// Charcoal Backbone, NOT Levant Deep Teal. The auth ground is the largest
+		// single surface in the product, and BRAND_RATIOS puts Levant Deep Teal in
+		// the 10% "intelligence & interaction" band while Charcoal Backbone sits in
+		// the 45% "structure & clarity" band with Warm Mist. Painting a full page in
+		// the 10% colour spends that whole allowance on one screen.
+		// Design owner's call, 2026-08-30.
+		panelBackground: brand.charcoalBackbone, // #43474F · brand verbatim
+		panelText: light.textOnDark, //            Warm Mist · 6.92 on the panel
 		actionBase: light.success.base, //         = DERIVATIONS.successFill · white text 4.61
 		actionHover: light.success.hover, //       5.75
 		actionPressed: light.success.pressed, //   7.14

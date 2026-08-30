@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest"
 import runtimeTokens from "@/design-tokens.json"
 import {
 	brand,
+	BRAND_RATIOS,
 	component,
 	DARK_MODE_SUPPORTED,
 	DERIVATIONS,
@@ -422,12 +423,12 @@ describe("auth — the signed-out screens follow the member app", () => {
 			}
 		})
 
-		it(`${mode}: panel text clears AA on the panel, at the measured 7.43:1`, () => {
+		it(`${mode}: panel text clears AA on the panel, at the measured 6.92:1`, () => {
 			const r = ratio(a.panelText, a.panelBackground)
 			expect(r, `${a.panelText} on ${a.panelBackground} → ${r.toFixed(2)}:1`).toBeGreaterThanOrEqual(AA_TEXT)
-			// Asserted, not merely commented: the panel is Levant Deep Teal carrying
-			// Warm Mist, and that pairing is the one tokens.ts documents as 7.43.
-			expect(r).toBeCloseTo(7.43, 1)
+			// Asserted, not merely commented: the panel is Charcoal Backbone carrying
+			// Warm Mist — the 45% "structure & clarity" pairing — measured at 6.92.
+			expect(r).toBeCloseTo(6.92, 1)
 		})
 
 		it(`${mode}: the CTA references the success ramp rather than restating it`, () => {
@@ -441,9 +442,18 @@ describe("auth — the signed-out screens follow the member app", () => {
 			expect(DERIVATIONS.successFill.provenance).toBe("adjusted")
 		})
 
-		it(`${mode}: the panel is Levant Deep Teal verbatim`, () => {
-			expect(a.panelBackground).toBe(brand.levantDeepTeal)
+		// The auth ground is the largest single surface in the product, so it must
+		// come from the 45% "structure & clarity" band, not the 10% one. This is
+		// the assertion that fails if anyone repaints it in Levant Deep Teal,
+		// Signal Cyan or Deep Teal — all of which sit in the 10% band.
+		it(`${mode}: the panel is Charcoal Backbone — the 45% structure colour`, () => {
+			expect(a.panelBackground).toBe(brand.charcoalBackbone)
 			expect(a.panelText).toBe(s.textOnDark)
+			expect(BRAND_RATIOS["structure (warmMist + charcoalBackbone)"]).toBe(0.45)
+
+			for (const tenPercent of [brand.levantDeepTeal, brand.signalCyan, brand.deepTeal, brand.antiqueCopper]) {
+				expect(a.panelBackground, "the auth ground must not come from the 10% band").not.toBe(tenPercent)
+			}
 		})
 
 		it(`${mode}: raw Smart Olive never reaches the CTA — it is 3.05:1, below AA`, () => {

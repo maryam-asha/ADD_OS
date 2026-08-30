@@ -43,8 +43,8 @@
 
 	/* ── surfaces ── */
 	--add-body: #E2DDDB;
-	--add-surface: #FFFFFF;
-	--add-surface-raised: #FFFFFF;
+	--add-surface: #F7F5F2;
+	--add-surface-raised: #F7F5F2;
 	--add-surface-sunken: #EDEAE8;
 	--add-input-fill: #EFECEB;
 
@@ -72,7 +72,7 @@
 	--add-font-weight-bold: 700;
 
 	/* ── component (Tier 3) ── */
-	--add-sidebar-background: #FFFFFF;
+	--add-sidebar-background: #F7F5F2;
 	--add-sidebar-item-active-background: rgba(0, 127, 145, 0.10);
 	--add-sidebar-item-active-text: #006B7A;
 	--add-sidebar-item-hover-background: rgba(67, 71, 79, 0.05);
@@ -87,7 +87,7 @@
 	--add-table-row-stripe-background: #EDEAE8;
 	--add-table-border-color: #CDC2AF;
 	--add-table-numeric-font-family: 'Noto Sans Arabic', 'JetBrains Mono', SFMono-Regular, Consolas, monospace;
-	--add-auth-panel-background: #314550;
+	--add-auth-panel-background: #43474F;
 	--add-auth-panel-text: #E2DDDB;
 	--add-auth-action-base: #657C50;
 	--add-auth-action-hover: #586C46;
