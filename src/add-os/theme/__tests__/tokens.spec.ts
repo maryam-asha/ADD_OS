@@ -399,6 +399,60 @@ describe("deferred — a colour token, because those rows are ENABLED", () => {
 	})
 })
 
+describe("auth — the signed-out screens follow the member app", () => {
+	// The CTA on these screens is GREEN, not the teal `primary` the rest of the
+	// dashboard uses. Smart Olive itself cannot serve: it is the Ecosystem pillar
+	// colour (the sweep below catches that) AND it carries white text at only
+	// 3.05:1. So the CTA is the contrast-adjusted Smart Olive — of which this file
+	// holds exactly one, `DERIVATIONS.successFill`, reached via `success.base`.
+	//
+	// These tests lock the REFERENCE, not just the ratio. A future edit that
+	// replaces the reference with an equal literal would keep every ratio green
+	// while quietly creating a second source for one colour.
+	for (const mode of THEME_MODES) {
+		const a = component[mode].auth
+		const s = semantic[mode]
+
+		it(`${mode}: the CTA carries its own label at ≥${AA_TEXT}:1`, () => {
+			for (const stateName of ["actionBase", "actionHover", "actionPressed"] as const) {
+				const r = ratio(a.actionOn, a[stateName])
+				expect(r, `${stateName} (${a[stateName]}) with ${a.actionOn} → ${r.toFixed(2)}:1`).toBeGreaterThanOrEqual(
+					AA_TEXT
+				)
+			}
+		})
+
+		it(`${mode}: panel text clears AA on the panel, at the measured 7.43:1`, () => {
+			const r = ratio(a.panelText, a.panelBackground)
+			expect(r, `${a.panelText} on ${a.panelBackground} → ${r.toFixed(2)}:1`).toBeGreaterThanOrEqual(AA_TEXT)
+			// Asserted, not merely commented: the panel is Levant Deep Teal carrying
+			// Warm Mist, and that pairing is the one tokens.ts documents as 7.43.
+			expect(r).toBeCloseTo(7.43, 1)
+		})
+
+		it(`${mode}: the CTA references the success ramp rather than restating it`, () => {
+			expect(a.actionBase).toBe(s.success.base)
+			expect(a.actionHover).toBe(s.success.hover)
+			expect(a.actionPressed).toBe(s.success.pressed)
+			expect(a.actionOn).toBe(s.success.on)
+			// And that ramp is the adjusted Smart Olive, not a fresh green.
+			expect(a.actionBase).toBe(DERIVATIONS.successFill.value)
+			expect(DERIVATIONS.successFill.from).toBe("smartOlive")
+			expect(DERIVATIONS.successFill.provenance).toBe("adjusted")
+		})
+
+		it(`${mode}: the panel is Levant Deep Teal verbatim`, () => {
+			expect(a.panelBackground).toBe(brand.levantDeepTeal)
+			expect(a.panelText).toBe(s.textOnDark)
+		})
+
+		it(`${mode}: raw Smart Olive never reaches the CTA — it is 3.05:1, below AA`, () => {
+			expect(a.actionBase).not.toBe(brand.smartOlive)
+			expect(ratio(a.actionOn, brand.smartOlive)).toBeLessThan(AA_TEXT)
+		})
+	}
+})
+
 describe("service pillars are assets, never tokens", () => {
 	// Core is Aleppo Economic Orange. In this dashboard orange means `danger` and
 	// nothing else — that is what makes destructive actions unmistakable. If
@@ -444,6 +498,20 @@ describe("service pillars are assets, never tokens", () => {
 			const used = collect(component[mode])
 			for (const c of PILLAR_COLORS) {
 				expect(used, `${c} must not be a component token`).not.toContain(c.toUpperCase())
+			}
+		})
+
+		// `collect` recurses, so a newly added component group is swept the moment
+		// it exists — which is easy to believe and easy to be wrong about. The
+		// `auth` group is the case that matters: its CTA is a darkened Smart Olive,
+		// one step away from the Ecosystem pillar hex. Prove the sweep reaches it,
+		// so "auth is covered" is a tested claim rather than an assumption about
+		// how `collect` behaves.
+		it(`${mode}: the component sweep actually descends into the auth group`, () => {
+			const used = collect(component[mode])
+			const a = component[mode].auth
+			for (const value of [a.panelBackground, a.panelText, a.actionBase, a.actionHover, a.actionPressed]) {
+				expect(used, `${value} was not reached by the sweep`).toContain(value.toUpperCase())
 			}
 		})
 	}

@@ -652,6 +652,40 @@ export interface ComponentTokens {
 		/** Money and quantity columns. Poppins has no tabular figures — see `fontFamily.numeric`. */
 		numericFontFamily: string
 	}
+	/**
+	 * The signed-out screens, aligned with the member app's visual language.
+	 * See `docs/superpowers/specs/2026-08-30-auth-visual-alignment-design.md`.
+	 *
+	 * ── Why the CTA is not `primary` ────────────────────────────────────────
+	 * The member app's auth screens use a GREEN call to action, not the teal
+	 * `primary` this dashboard uses everywhere else. Both products are ADD, so
+	 * the auth screens follow the app rather than the dashboard here.
+	 *
+	 * ── Why it REFERENCES `success` instead of minting a green ──────────────
+	 * Smart Olive #809C66 cannot be used directly, on two independent grounds:
+	 * it is the Ecosystem PILLAR colour (asserted against below), and it carries
+	 * white text at only 3.05:1 where AA needs 4.5. So the CTA must be the
+	 * contrast-adjusted Smart Olive — and there is exactly ONE of those in this
+	 * file already: `DERIVATIONS.successFill`, reached through `success.base`.
+	 *
+	 * Minting a second derivation with the same recipe would be a second source
+	 * for one colour. So this group POINTS at the success ramp. The visible
+	 * consequence is deliberate and recorded rather than hidden: the sign-in
+	 * button is the same green as a success message. Whether auth's green should
+	 * be visually distinct needs a brand-sanctioned second green — an open
+	 * question in docs/brand/GUIDELINE-FEEDBACK.md, not a developer's call.
+	 */
+	auth: {
+		/** The brand panel. Levant Deep Teal, verbatim — the member app's hero surface. */
+		panelBackground: string
+		/** Text on the panel. Warm Mist, 7.43:1 — the ratio tier 2 already asserts. */
+		panelText: string
+		/** The CTA ramp — references the success ramp, does not restate it. */
+		actionBase: string
+		actionHover: string
+		actionPressed: string
+		actionOn: string
+	}
 }
 
 const componentLight: ComponentTokens = {
@@ -677,6 +711,14 @@ const componentLight: ComponentTokens = {
 		rowStripeBackground: light.surfaceSunken,
 		borderColor: light.border,
 		numericFontFamily: fontFamily.numeric
+	},
+	auth: {
+		panelBackground: brand.levantDeepTeal, //  #314550 · brand verbatim
+		panelText: light.textOnDark, //            Warm Mist · 7.43 on the panel
+		actionBase: light.success.base, //         = DERIVATIONS.successFill · white text 4.61
+		actionHover: light.success.hover, //       5.75
+		actionPressed: light.success.pressed, //   7.14
+		actionOn: light.success.on //              white
 	}
 }
 

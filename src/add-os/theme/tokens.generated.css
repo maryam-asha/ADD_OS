@@ -87,6 +87,12 @@
 	--add-table-row-stripe-background: #EDEAE8;
 	--add-table-border-color: #CDC2AF;
 	--add-table-numeric-font-family: 'Noto Sans Arabic', 'JetBrains Mono', SFMono-Regular, Consolas, monospace;
+	--add-auth-panel-background: #314550;
+	--add-auth-panel-text: #E2DDDB;
+	--add-auth-action-base: #657C50;
+	--add-auth-action-hover: #586C46;
+	--add-auth-action-pressed: #4C5D3C;
+	--add-auth-action-on: #FFFFFF;
 
 	/* ── space · radius · elevation ── */
 	--add-space-0: 0px;
