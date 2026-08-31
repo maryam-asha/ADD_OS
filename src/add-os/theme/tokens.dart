@@ -55,7 +55,7 @@ class AddColors {
   static const Color infoText = Color(0xFF006B7A);
   static const Color body = Color(0xFFE2DDDB);
   static const Color surface = Color(0xFFF7F5F2);
-  static const Color surfaceRaised = Color(0xFFF7F5F2);
+  static const Color surfaceRaised = Color(0xFFFFFFFF);
   static const Color surfaceSunken = Color(0xFFEDEAE8);
   static const Color inputFill = Color(0xFFEFECEB);
   static const Color border = Color(0xFFCDC2AF);

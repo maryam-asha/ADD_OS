@@ -106,12 +106,29 @@ describe("tier 2 — text on surfaces", () => {
 		// Cards sit on the Warm Mist body, so BOTH backgrounds must pass. This is
 		// the trap the warm light palette sets: a grey that passes on white can
 		// still fail on Mist.
+		// `surfaceRaised` joined this sweep on 2026-08-31. While it was the same
+		// colour as `surface` it was covered by accident; now it is white and it is
+		// where most dialog text lives, so it is covered on purpose.
 		for (const key of ["textPrimary", "textSecondary", "textMuted"] as const) {
-			it(`${mode}/${key} clears AA on surface AND body`, () => {
+			it(`${mode}/${key} clears AA on surface, raised AND body`, () => {
 				expect(ratio(s[key], s.surface), `${key} on surface`).toBeGreaterThanOrEqual(AA_TEXT)
+				expect(ratio(s[key], s.surfaceRaised), `${key} on surfaceRaised`).toBeGreaterThanOrEqual(AA_TEXT)
 				expect(ratio(s[key], s.body), `${key} on body`).toBeGreaterThanOrEqual(AA_TEXT)
 			})
 		}
+
+		/**
+		 * The dialog surface is deliberately NOT the card surface any more.
+		 *
+		 * Pinned because the change is invisible to every other assertion here: if
+		 * someone repoints `surfaceRaised` back at `surfaceCard`, every ratio above
+		 * still passes and dialogs quietly go back to reading as one plane with the
+		 * card behind them.
+		 */
+		it(`${mode}: the raised surface is white and distinct from the card`, () => {
+			expect(s.surfaceRaised).toBe(DERIVATIONS.surfaceWhite.value)
+			expect(s.surfaceRaised).not.toBe(s.surface)
+		})
 
 		it(`${mode}/textPrimary also clears AA on the input fill`, () => {
 			expect(ratio(s.textPrimary, s.inputFill)).toBeGreaterThanOrEqual(AA_TEXT)

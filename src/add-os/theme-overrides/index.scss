@@ -26,3 +26,7 @@
 // Form validation feedback — undoes the vendor's attached "flap" that
 // overlaps a required field's own input at ADD OS's font metrics
 @import "./form-feedback";
+
+// Dialogs, drawers and popovers on white — connects `surfaceRaised`, which the
+// theme bridge never consumed, to the naive surfaces that need it
+@import "./dialog-surface";

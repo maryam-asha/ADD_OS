@@ -271,7 +271,13 @@ export interface SemanticTokens {
 	body: string
 	/** Cards, panels, table bodies — sits on `body`. */
 	surface: string
-	/** Popovers, modals, dropdowns — sits on `surface`. Same colour; elevation does the work. */
+	/**
+	 * Popovers, modals, drawers, dropdowns — sits on `surface`.
+	 *
+	 * Was the same colour as `surface`, with elevation alone separating them.
+	 * White since 2026-08-31 by the design owner: a dialog on a card, both at
+	 * #F7F5F2, read as one plane no matter what the shadow did.
+	 */
 	surfaceRaised: string
 	/** Table headers, zebra striping — a step DOWN from `surface`. */
 	surfaceSunken: string
@@ -387,7 +393,8 @@ const light: SemanticTokens = {
 
 	body: brand.warmMist,
 	surface: DERIVATIONS.surfaceCard.value,
-	surfaceRaised: DERIVATIONS.surfaceCard.value,
+	surfaceRaised: DERIVATIONS.surfaceWhite.value, // #FFFFFF — dialogs lift off the card
+
 	surfaceSunken: DERIVATIONS.surfaceSunken.value,
 	inputFill: DERIVATIONS.inputFill.value,
 
@@ -631,9 +638,12 @@ export const borderWidth = {
 } as const
 
 /**
- * `surfaceRaised` is the same colour as `surface`, so elevation — not tint —
- * separates a popover from the card beneath it. Warm-tinted shadow: a neutral
- * black shadow reads grey and cold against Warm Mist.
+ * `surfaceRaised` was the same colour as `surface`, leaving elevation to do all
+ * the separating; since 2026-08-31 it is white, so tint and elevation work
+ * together. The shadow still matters — a dialog can open over a white card.
+ *
+ * Warm-tinted shadow: a neutral black shadow reads grey and cold against Warm
+ * Mist.
  */
 export const elevation = {
 	none: "none",

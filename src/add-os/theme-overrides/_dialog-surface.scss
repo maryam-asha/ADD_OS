@@ -1,0 +1,38 @@
+// src/add-os/theme-overrides/_dialog-surface.scss
+//
+// ── ADD OS — dialogs, drawers and popovers sit on white ─────────────────────
+//
+// Design owner, 2026-08-31: a dialog opening over a card was #F7F5F2 on #F7F5F2
+// and read as one plane, whatever the shadow did. `surfaceRaised` — the token
+// that has always MEANT "popovers, modals, dropdowns" — is now #FFFFFF, and this
+// partial is what finally connects it to naive-ui.
+//
+// ── Why here and not in the theme bridge ────────────────────────────────────
+//
+// `src/theme/index.ts` feeds naive `cardColor` / `modalColor` / `popoverColor`,
+// all three from ONE value (`background`). Even if that file were ours to edit —
+// it is Category C, override never edit — a single value cannot say "cards stay
+// #F7F5F2, dialogs go white". `surfaceRaised` was emitted all along and simply
+// never consumed; this reads it.
+//
+// ── The selectors ───────────────────────────────────────────────────────────
+//
+// Read from naive's own style sources rather than guessed:
+//   · `.n-card`   paints `background-color: var(--n-color)` — ONE class.
+//   · `.n-drawer` paints the same — ONE class.
+//   · `.n-dialog` paints NOTHING; it inherits whatever is behind it.
+//
+// So every rule below needs two classes to outrank naive, and the doubled
+// `.n-drawer.n-drawer` is that and nothing more — the drawer root carries no
+// second class to pair with.
+//
+// `.n-modal.n-card` is deliberately NOT plain `.n-card`: a modal with
+// `preset="card"` puts both classes on the same element, so this catches dialog
+// cards while leaving the page's own cards on `surface`. That distinction is the
+// whole point of the change.
+
+.n-modal.n-card,
+.n-drawer.n-drawer,
+.n-dialog.n-dialog {
+	background-color: var(--add-surface-raised);
+}
