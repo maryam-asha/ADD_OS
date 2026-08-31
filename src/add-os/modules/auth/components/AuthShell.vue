@@ -33,10 +33,19 @@
 				lands that same dense corner at its top-left. One anchor, one rotation —
 				rather than two positions that would drift apart when either is touched.
 
-				The offset is the SAME on both axes (`44`, i.e. 11rem), so the two panels
-				sit on a true 45° diagonal and every gap around the card measures the
-				same. They were 11rem across and 8rem down, which read as four unequal
-				gaps rather than one composition.
+				The two axes carry DIFFERENT offsets, and that is deliberate — an equal
+				offset was tried first and reverted.
+
+				Equal offsets put the panels on a true 45° diagonal, which is the better
+				composition in the abstract and the wrong one here: the viewport is wide
+				and short. A panel is 24rem tall, so at 11rem down its outer edge sits
+				~20rem from centre — past the bottom of a laptop window, and the shell
+				clipped both panels flat against the top and bottom edges. Sacrificing
+				the exact diagonal buys back the breathing room above and below the card,
+				which is what actually reads.
+
+				Horizontal has the room the vertical does not, so it takes the extra
+				(13rem) and gives the pattern more exposed panel to show in.
 
 				`-inset-6` is load-bearing, not padding: the artwork carries ~4% of
 				transparent margin inside its own viewBox, so at `inset-0` it stopped
@@ -48,11 +57,11 @@
 				`pattern-dark.svg` is #42474F against it — a pattern nobody could see.
 			-->
 			<div aria-hidden="true" class="pointer-events-none absolute inset-0 hidden items-center justify-center sm:flex">
-				<div class="rounded-add-large bg-surface/5 absolute size-96 -translate-x-44 -translate-y-44 overflow-hidden">
+				<div class="rounded-add-large bg-surface/5 absolute size-96 -translate-x-52 -translate-y-28 overflow-hidden">
 					<div class="bg-bottom-right absolute -inset-6 rotate-180 bg-cover bg-no-repeat opacity-25" :style="patternLayer" />
 				</div>
 				<div
-					class="rounded-add-large border-surface/10 absolute size-96 translate-x-44 translate-y-44 overflow-hidden border"
+					class="rounded-add-large border-surface/10 absolute size-96 translate-x-52 translate-y-28 overflow-hidden border"
 				>
 					<div class="bg-bottom-right absolute -inset-6 bg-cover bg-no-repeat opacity-25" :style="patternLayer" />
 				</div>
