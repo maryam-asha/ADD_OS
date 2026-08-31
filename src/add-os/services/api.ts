@@ -76,6 +76,38 @@ function buildUrl(path: string, query?: Record<string, unknown>): string {
 	return url.toString()
 }
 
+/**
+ * Bounce to sign-in on a 401 — but ONLY from a route that required a session.
+ *
+ * This used to be an unconditional `router.push("/login")`, and it broke the two
+ * pages a signed-out caller is most likely to be on.
+ *
+ * `main.ts` awaits `initSession()` before mounting, so `getMe()` runs while the
+ * router's FIRST navigation is still in flight. On a 401 the old push started a
+ * second navigation; the two cancelled each other, neither completed, and
+ * vue-router stayed at START_LOCATION — where `<RouterView>` renders nothing.
+ * The result was a blank page with the address bar unchanged and no Vue error,
+ * on `/forgot-password` and `/reset-password` specifically: they are the only
+ * routes reachable WITHOUT a session that are not `/login` itself, and a push to
+ * `/login` from `/login` is a same-location navigation that cancels nothing.
+ *
+ * Two conditions, both needed:
+ *   · `name` is undefined only at START_LOCATION — i.e. before the first
+ *     navigation finishes, which is exactly the boot probe.
+ *   · `meta.auth` marks the routes that require a session (asserted for every
+ *     add-os route by navigation.spec.ts). A 401 on a public auth page is
+ *     information for that page to render, not a reason to navigate away.
+ *
+ * `setLogout()` still runs in every case — clearing stale state is never wrong.
+ * Only the navigation is conditional.
+ */
+function redirectToLoginIfProtected(): void {
+	const current = router.currentRoute.value
+	if (current.name === undefined) return
+	if (!current.meta?.auth) return
+	router.push("/login")
+}
+
 async function request<T>(
 	method: string,
 	path: string,
@@ -107,7 +139,7 @@ async function request<T>(
 	if (!res.ok) {
 		if (res.status === 401) {
 			useAuthStore().setLogout()
-			router.push("/login")
+			redirectToLoginIfProtected()
 		}
 		throw new ApiError(res.status, text || res.statusText)
 	}

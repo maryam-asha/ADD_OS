@@ -9,9 +9,12 @@ vi.mock("@/add-os/config/env", () => ({
 	apiUrl: () => "http://api.test"
 }))
 
-const { setLogoutMock, pushMock } = vi.hoisted(() => ({
+const { setLogoutMock, pushMock, currentRoute } = vi.hoisted(() => ({
 	setLogoutMock: vi.fn(),
-	pushMock: vi.fn()
+	pushMock: vi.fn(),
+	// Mirrors vue-router's `router.currentRoute`. Writable so a test can put the
+	// router where the bug actually happened — see "401 handling" below.
+	currentRoute: { value: { name: "Branches" as string | undefined, meta: {} as { auth?: boolean } } }
 }))
 
 vi.mock("@/stores/auth", () => ({
@@ -22,9 +25,15 @@ vi.mock("@/stores/auth", () => ({
 
 vi.mock("@/router", () => ({
 	default: {
-		push: pushMock
+		push: pushMock,
+		currentRoute
 	}
 }))
+
+/** The router as it is on a protected page: navigation finished, session required. */
+function onProtectedRoute() {
+	currentRoute.value = { name: "Branches", meta: { auth: true } }
+}
 
 describe("patch", () => {
 	beforeEach(() => {
@@ -74,9 +83,10 @@ describe("401 handling", () => {
 		vi.stubGlobal("fetch", vi.fn())
 		setLogoutMock.mockClear()
 		pushMock.mockClear()
+		onProtectedRoute()
 	})
 
-	it("logs out and redirects to /login on a 401, before throwing", async () => {
+	const unauthenticated = () =>
 		vi.mocked(fetch).mockResolvedValue(
 			new Response(JSON.stringify({ message: "Unauthenticated." }), {
 				status: 401,
@@ -84,10 +94,45 @@ describe("401 handling", () => {
 			})
 		)
 
+	it("logs out and redirects to /login on a 401, before throwing", async () => {
+		unauthenticated()
+
 		await expect(get("/api/v1/admin/branches")).rejects.toMatchObject({ status: 401 })
 
 		expect(setLogoutMock).toHaveBeenCalledOnce()
 		expect(pushMock).toHaveBeenCalledWith("/login")
+	})
+
+	/**
+	 * `main.ts` awaits `initSession()` BEFORE mounting, so `getMe()` can 401 while
+	 * the router's first navigation is still in flight — `currentRoute` is
+	 * START_LOCATION, whose `name` is undefined.
+	 *
+	 * Redirecting from there started a second navigation that cancelled the first.
+	 * Neither completed, the router stayed at START_LOCATION, and `<RouterView>`
+	 * rendered nothing: a blank page, address bar unchanged, no Vue error. It hit
+	 * `/forgot-password` and `/reset-password` and nothing else, because they are
+	 * the only session-free routes that are not `/login` — pushing `/login` while
+	 * on `/login` cancels nothing.
+	 */
+	it("does not navigate when the router has not finished its first navigation", async () => {
+		currentRoute.value = { name: undefined, meta: {} }
+		unauthenticated()
+
+		await expect(get("/api/v1/admin/me")).rejects.toMatchObject({ status: 401 })
+
+		expect(setLogoutMock, "stale session state must still be cleared").toHaveBeenCalledOnce()
+		expect(pushMock, "a boot-time 401 must not race the first navigation").not.toHaveBeenCalled()
+	})
+
+	it("does not navigate away from a page that never required a session", async () => {
+		currentRoute.value = { name: "ForgotPassword", meta: {} }
+		unauthenticated()
+
+		await expect(get("/api/v1/admin/me")).rejects.toMatchObject({ status: 401 })
+
+		expect(setLogoutMock).toHaveBeenCalledOnce()
+		expect(pushMock, "a 401 is content for a public auth page, not a redirect").not.toHaveBeenCalled()
 	})
 
 	it("does not log out on a non-401 error", async () => {

@@ -25,8 +25,16 @@ Then report, per spec file, pass/fail and what it protects:
   `/forgot-password` and `/reset-password` carry **no** `checkAuth` — it redirects to "/"
   whenever the store says signed in, which made both unreachable and stranded emailed reset
   tokens — while `/login` keeps it.
+- `boot-401-navigation.spec.ts` — boots the app the way `main.ts` does (router installed,
+  THEN `initSession()` awaited, THEN mount) at `/forgot-password` with every request 401ing,
+  and asserts the caller is still there with the page rendered. `api.ts` answered a 401 with
+  an unconditional `router.push("/login")`, which raced the first navigation: neither
+  completed, the router stayed at START_LOCATION and `<RouterView>` rendered nothing — a
+  blank page, address bar unchanged, no Vue error. Uses `createApp`, not test-utils `mount()`,
+  because mount installs plugins in a different order and the bug does not reproduce.
 - `no-external-urls.spec.ts` — no host reachable from an isolated network; allowlist entries
-  carry `removedBy` notes.
+  carry `removedBy` notes. `sourceOnly` entries are exempt from the dist-staleness check —
+  they could never be in a build — and a second assertion fails if one ever appears there.
 - `no-secrets.spec.ts` — committed env files declare secret-shaped keys empty; `.gitignore`
   asserts `.env`, `.env.*`, `!.env.example` as patterns; `.env.sample` absent; allowlist
   entries justified.
