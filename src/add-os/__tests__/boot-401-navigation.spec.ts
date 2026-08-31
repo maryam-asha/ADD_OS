@@ -77,9 +77,26 @@ async function bootUnauthenticatedAt(path: string) {
 	document.body.appendChild(host)
 	app.mount(host)
 
+	// `isReady()` is the deterministic signal: it resolves when the FIRST
+	// navigation settles, which is the exact thing this test is about. An earlier
+	// version slept 800ms instead and passed alone while failing inside the full
+	// suite, where the lazy route chunk loads under load — a flaky guard, which is
+	// worse than none because it teaches people to ignore red.
+	//
+	// Raced against a deadline rather than awaited outright: in the BUGGY state the
+	// first navigation is cancelled and never completes, so `isReady()` would hang
+	// and the test would die of a 120s timeout instead of failing on the assertion
+	// that explains what broke. Losing the race is itself the symptom.
+	await Promise.race([router.isReady(), new Promise(resolve => setTimeout(resolve, 10_000))])
 	await flushPromises()
-	await new Promise(resolve => setTimeout(resolve, 800))
-	await flushPromises()
+
+	// The view is an async component, so isReady() can resolve one tick before the
+	// DOM has it. Poll instead of guessing a duration: bounded, and it exits the
+	// moment content appears rather than always paying the worst case.
+	for (let i = 0; i < 100 && (host.textContent ?? "").length <= 50; i++) {
+		await new Promise(resolve => setTimeout(resolve, 20))
+		await flushPromises()
+	}
 
 	// Unmounted by the caller: left mounted, ResizeObserver's scheduler keeps
 	// running past the jsdom teardown and prints a TypeError after the summary.
