@@ -23,12 +23,12 @@ class AddBrand {
 /// Dark mode is out of scope for v1; add an `AddColorsDark` class when it lands.
 class AddColors {
   AddColors._();
-  static const Color primaryBase = Color(0xFF007F91);
-  static const Color primaryHover = Color(0xFF006977);
-  static const Color primaryPressed = Color(0xFF00525E);
-  static const Color primarySuppl = Color(0xFF006977);
+  static const Color primaryBase = Color(0xFF657C50);
+  static const Color primaryHover = Color(0xFF586C46);
+  static const Color primaryPressed = Color(0xFF4C5D3C);
+  static const Color primarySuppl = Color(0xFF586C46);
   static const Color primaryOn = Color(0xFFFFFFFF);
-  static const Color primaryText = Color(0xFF006B7A);
+  static const Color primaryText = Color(0xFF556843);
   static const Color successBase = Color(0xFF657C50);
   static const Color successHover = Color(0xFF586C46);
   static const Color successPressed = Color(0xFF4C5D3C);

@@ -89,7 +89,7 @@
 			"type": "color"
 		},
 		"color-light-primary": {
-			"value": "#007F91",
+			"value": "#657C50",
 			"type": "color"
 		},
 		"color-light-info": {
@@ -161,7 +161,7 @@
 			"type": "color"
 		},
 		"color-dark-primary": {
-			"value": "#007F91",
+			"value": "#657C50",
 			"type": "color"
 		},
 		"color-dark-info": {

@@ -230,11 +230,31 @@ describe("colour is never the sole channel for state", () => {
 		expect(new Set(Object.values(STATUS_ICONS)).size).toBe(roles.length)
 	})
 
-	// This is the measured reason the icon rule is binding rather than advisory:
-	// Signal Cyan darkened to meet AA lands ΔE 2.7 from primary, so `info` and
-	// `primary` are the same colour to everyone. Decision Q3 accepted that.
-	it("info shares primary's hue — documenting why the icon is mandatory", () => {
-		expect(semantic.light.info.base).toBe(semantic.light.primary.base)
+	/**
+	 * This is the measured reason the icon rule is binding rather than advisory.
+	 *
+	 * It USED to be `info`: Signal Cyan darkened to meet AA lands ΔE 2.7 from Deep
+	 * Teal, so `info` and `primary` were one colour (decision Q3). Since
+	 * 2026-08-31 `primary` is the adjusted olive and Deep Teal moved to `info`, so
+	 * that particular collision is gone — `info` and `primary` are finally
+	 * distinct.
+	 *
+	 * The collision moved rather than closed. `primary` and `success` are now the
+	 * same value, which is a harder case than the old one: an action a user can
+	 * TAKE and a state the system has REACHED no longer differ by hue. The design
+	 * owner accepted that knowingly when aligning with the member app.
+	 *
+	 * So this test is inverted rather than deleted. It pins the collision that
+	 * exists today, and it fails the moment someone "fixes" it by minting a second
+	 * green — which is a brand-owner decision, not a developer's.
+	 */
+	it("primary and success are one colour — documenting why the icon is mandatory", () => {
+		expect(semantic.light.primary.base).toBe(semantic.light.success.base)
+		expect(semantic.light.primary.text).toBe(semantic.light.success.text)
+	})
+
+	it("info is no longer primary's twin", () => {
+		expect(semantic.light.info.base).not.toBe(semantic.light.primary.base)
 	})
 })
 
@@ -343,6 +363,42 @@ describe("numerals — the face that draws digits is a declared decision", () =>
 	})
 })
 
+/**
+ * The header stopped being a tinted band on 2026-08-31 and became type: no fill,
+ * Levant Deep Teal, larger and bold.
+ *
+ * Losing the fill is what makes these assertions necessary. While the header sat
+ * on `surfaceSunken` its label was measured against that band; the label now sits
+ * directly on the card, and nothing else in the file would notice if the colour
+ * drifted somewhere unreadable.
+ */
+describe("table headers carry the accent as type, not as a fill", () => {
+	for (const mode of THEME_MODES) {
+		const t = component[mode].table
+		const s = semantic[mode]
+
+		it(`${mode}: the header has no fill of its own`, () => {
+			expect(t.headerBackground).toBe("transparent")
+		})
+
+		it(`${mode}: the header label clears AA on the surface it now sits on`, () => {
+			const r = ratio(t.headerText, s.surface)
+			expect(r, `${t.headerText} on ${s.surface} → ${r.toFixed(2)}:1`).toBeGreaterThanOrEqual(AA_TEXT)
+		})
+
+		// Row striping is what separates rows now that the header band is gone, so
+		// the label has to hold up there too — a striped row can sit directly under
+		// a header cell at the top of a scrolled table.
+		it(`${mode}: and on the striped rows beneath it`, () => {
+			expect(ratio(t.headerText, t.rowStripeBackground)).toBeGreaterThanOrEqual(AA_TEXT)
+		})
+
+		it(`${mode}: the header colour is Levant Deep Teal, referenced not restated`, () => {
+			expect(t.headerText).toBe(brand.levantDeepTeal)
+		})
+	}
+})
+
 describe("deferred — a colour token, because those rows are ENABLED", () => {
 	// The "Soon" rows are clickable and route to ComingSoon. WCAG's contrast
 	// exemption covers DISABLED components only, so the label is bound by 4.5:1
@@ -401,11 +457,14 @@ describe("deferred — a colour token, because those rows are ENABLED", () => {
 })
 
 describe("auth — the signed-out screens follow the member app", () => {
-	// The CTA on these screens is GREEN, not the teal `primary` the rest of the
-	// dashboard uses. Smart Olive itself cannot serve: it is the Ecosystem pillar
-	// colour (the sweep below catches that) AND it carries white text at only
-	// 3.05:1. So the CTA is the contrast-adjusted Smart Olive — of which this file
-	// holds exactly one, `DERIVATIONS.successFill`, reached via `success.base`.
+	// The CTA on these screens is GREEN. It used to be green in DEFIANCE of a teal
+	// `primary`, which is why the auth group once carried its own CTA ramp; since
+	// 2026-08-31 `primary` is that same green and the ramp is gone.
+	//
+	// What has not changed is which green. Smart Olive itself cannot serve: it is
+	// the Ecosystem pillar colour (the sweep below catches that) AND it carries
+	// white text at only 3.05:1. So the CTA is the contrast-adjusted Smart Olive —
+	// of which this file holds exactly one, `DERIVATIONS.successFill`.
 	//
 	// These tests lock the REFERENCE, not just the ratio. A future edit that
 	// replaces the reference with an equal literal would keep every ratio green
@@ -413,15 +472,6 @@ describe("auth — the signed-out screens follow the member app", () => {
 	for (const mode of THEME_MODES) {
 		const a = component[mode].auth
 		const s = semantic[mode]
-
-		it(`${mode}: the CTA carries its own label at ≥${AA_TEXT}:1`, () => {
-			for (const stateName of ["actionBase", "actionHover", "actionPressed"] as const) {
-				const r = ratio(a.actionOn, a[stateName])
-				expect(r, `${stateName} (${a[stateName]}) with ${a.actionOn} → ${r.toFixed(2)}:1`).toBeGreaterThanOrEqual(
-					AA_TEXT
-				)
-			}
-		})
 
 		it(`${mode}: panel text clears AA on the panel, at the measured 6.92:1`, () => {
 			const r = ratio(a.panelText, a.panelBackground)
@@ -431,15 +481,24 @@ describe("auth — the signed-out screens follow the member app", () => {
 			expect(r).toBeCloseTo(6.92, 1)
 		})
 
-		it(`${mode}: the CTA references the success ramp rather than restating it`, () => {
-			expect(a.actionBase).toBe(s.success.base)
-			expect(a.actionHover).toBe(s.success.hover)
-			expect(a.actionPressed).toBe(s.success.pressed)
-			expect(a.actionOn).toBe(s.success.on)
-			// And that ramp is the adjusted Smart Olive, not a fresh green.
-			expect(a.actionBase).toBe(DERIVATIONS.successFill.value)
+		/**
+		 * The auth group no longer carries a CTA ramp — `primary` is the green the
+		 * sign-in button needs, so the four `action*` tokens and the AuthShell
+		 * `Button` remap that read them were deleted on 2026-08-31.
+		 *
+		 * What the deleted tests protected still needs protecting, so it is asserted
+		 * one level up instead: the green must stay the ADJUSTED Smart Olive, never
+		 * the raw pillar hex and never a freshly minted second green.
+		 */
+		it(`${mode}: the CTA green is the adjusted Smart Olive, reached through primary`, () => {
+			expect(s.primary.base).toBe(DERIVATIONS.successFill.value)
 			expect(DERIVATIONS.successFill.from).toBe("smartOlive")
 			expect(DERIVATIONS.successFill.provenance).toBe("adjusted")
+			expect(ratio(s.primary.on, s.primary.base)).toBeGreaterThanOrEqual(AA_TEXT)
+		})
+
+		it(`${mode}: the auth group holds the panel only — no CTA tokens came back`, () => {
+			expect(Object.keys(a).sort()).toEqual(["panelBackground", "panelText"])
 		})
 
 		// The auth ground is the largest single surface in the product, so it must
@@ -457,8 +516,8 @@ describe("auth — the signed-out screens follow the member app", () => {
 		})
 
 		it(`${mode}: raw Smart Olive never reaches the CTA — it is 3.05:1, below AA`, () => {
-			expect(a.actionBase).not.toBe(brand.smartOlive)
-			expect(ratio(a.actionOn, brand.smartOlive)).toBeLessThan(AA_TEXT)
+			expect(s.primary.base).not.toBe(brand.smartOlive)
+			expect(ratio(s.primary.on, brand.smartOlive)).toBeLessThan(AA_TEXT)
 		})
 	}
 })
@@ -520,7 +579,7 @@ describe("service pillars are assets, never tokens", () => {
 		it(`${mode}: the component sweep actually descends into the auth group`, () => {
 			const used = collect(component[mode])
 			const a = component[mode].auth
-			for (const value of [a.panelBackground, a.panelText, a.actionBase, a.actionHover, a.actionPressed]) {
+			for (const value of [a.panelBackground, a.panelText]) {
 				expect(used, `${value} was not reached by the sweep`).toContain(value.toUpperCase())
 			}
 		})

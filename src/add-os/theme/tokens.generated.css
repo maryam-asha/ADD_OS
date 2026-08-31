@@ -15,11 +15,11 @@
 	--add-brand-deep-teal: #007F91;
 
 	/* ── semantic fills + their guaranteed text colour (Tier 2) ── */
-	--add-primary: #007F91;
-	--add-primary-hover: #006977;
-	--add-primary-pressed: #00525E;
+	--add-primary: #657C50;
+	--add-primary-hover: #586C46;
+	--add-primary-pressed: #4C5D3C;
 	--add-primary-on: #FFFFFF;
-	--add-primary-text: #006B7A;
+	--add-primary-text: #556843;
 	--add-success: #657C50;
 	--add-success-hover: #586C46;
 	--add-success-pressed: #4C5D3C;
@@ -83,16 +83,13 @@
 	--add-deferred-badge-text: #565B65;
 	--add-deferred-badge-border: #7F7B76;
 	--add-status-border-width: 1px;
-	--add-table-header-background: #EDEAE8;
+	--add-table-header-background: transparent;
+	--add-table-header-text: #314550;
 	--add-table-row-stripe-background: #EDEAE8;
 	--add-table-border-color: #CDC2AF;
 	--add-table-numeric-font-family: 'Noto Sans Arabic', 'JetBrains Mono', SFMono-Regular, Consolas, monospace;
 	--add-auth-panel-background: #43474F;
 	--add-auth-panel-text: #E2DDDB;
-	--add-auth-action-base: #657C50;
-	--add-auth-action-hover: #586C46;
-	--add-auth-action-pressed: #4C5D3C;
-	--add-auth-action-on: #FFFFFF;
 
 	/* ── space · radius · elevation ── */
 	--add-space-0: 0px;

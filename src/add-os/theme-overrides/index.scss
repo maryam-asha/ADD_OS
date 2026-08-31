@@ -17,8 +17,10 @@
 // Numerals and data — the tabular-figure face for money/quantity cells
 @import "./numeric";
 
-// Resource ledger tables — uppercase header treatment for ResourceTable.vue and
-// UsersPage.vue's own inline n-data-table
+// DataTable headers — no fill, Levant Deep Teal label, larger and bold. Applies
+// wherever `.add-ledger-table` sits, which is ResourceTable.vue and the five
+// hand-built tables. The class is the specificity anchor, not decoration: naive
+// injects its own header CSS at runtime, after this sheet.
 @import "./resource-table";
 
 // Form validation feedback — undoes the vendor's attached "flap" that

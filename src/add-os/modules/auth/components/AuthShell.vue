@@ -1,11 +1,15 @@
 <template>
 	<!--
-		The auth screens are the ONE place in the dashboard where the call to action
-		is green rather than the teal `primary`, because the member app's auth
-		screens are green and both products are ADD. The remap is a build-time
-		constant read from `tokens.ts` — there is no write path and no user control,
-		and every ratio it introduces is asserted in `tokens.spec.ts`. See
+		These screens were once the ONE place in the dashboard with a green call to
+		action, because the member app's auth screens are green and the dashboard's
+		`primary` was Deep Teal. As of 2026-08-31 the whole dashboard follows the
+		member app and `primary` IS that green, so nothing here is special any more
+		— the CTA is simply `primary`, and this shell overrides no button colour.
+		See the REVERSAL note in tokens.ts and
 		docs/superpowers/specs/2026-08-30-auth-visual-alignment-design.md §3.5.
+
+		What remains below is the Input focus colour, which is genuinely local: it
+		is raw Smart Olive, a PILLAR colour that may not enter the token tree.
 	-->
 	<n-config-provider :theme-overrides="authThemeOverrides">
 		<!--
@@ -60,7 +64,9 @@ import type { GlobalThemeOverrides } from "naive-ui"
 import { NButton, NConfigProvider } from "naive-ui"
 import { computed } from "vue"
 import { useI18n } from "vue-i18n"
-import { brand, component, DEFAULT_MODE } from "@/add-os/theme/tokens"
+// Only `brand` now: the auth CTA tokens went with the Button remap below, and
+// the panel colours reach the template as CSS vars, not as imports.
+import { brand } from "@/add-os/theme/tokens"
 import logoLockup from "@/assets/images/logo-dark.png"
 import Icon from "@/components/common/Icon.vue"
 import { useThemeStore } from "@/stores/theme"
@@ -90,36 +96,23 @@ const BackIconRtl = "carbon:arrow-right"
  */
 const backIcon = computed<string>(() => (themeStore.isRTL ? BackIconRtl : BackIconLtr))
 
-const authAction = component[DEFAULT_MODE].auth
-
 /**
- * Scoped to `Button`, NOT to `common.primaryColor`.
+ * ── The Button remap that used to live here is GONE, 2026-08-31 ──────────────
  *
- * The design puts a GREEN submit button and a DEEP TEAL "forgot password?" link
- * on the same screen. Remapping `common.primaryColor` would turn both green —
- * the link is `n-button text type="primary"`, which reads the same colour. So
- * only the filled primary button is remapped, and `primary` itself is left at
- * the dashboard's Deep Teal so text links match the design.
+ * It existed for one reason: the design puts a GREEN submit button on these
+ * screens, and the dashboard's `primary` was Deep Teal. It was scoped to
+ * `Button` rather than `common.primaryColor` so the teal "forgot password?"
+ * link would not turn green with it — the link is `n-button text type="primary"`
+ * and reads the same colour.
  *
- * Hover and pressed are supplied explicitly because the vendor's
- * `getThemeColors()` derives hover by LIGHTENING, which drops every light-mode
- * hover below AA — see .claude/rules/tokens-and-color.md.
+ * `primary` is that green now (see the REVERSAL note in tokens.ts), so every
+ * value in that block equalled what naive-ui already resolves. It repainted the
+ * button its existing colour, and the link is green by design rather than by
+ * accident. Deleted rather than left standing: an override that changes nothing
+ * reads as protection and provides none, and the next person to move `primary`
+ * would find the auth button mysteriously exempt.
  */
 const authThemeOverrides: GlobalThemeOverrides = {
-	Button: {
-		colorPrimary: authAction.actionBase,
-		colorHoverPrimary: authAction.actionHover,
-		colorPressedPrimary: authAction.actionPressed,
-		colorFocusPrimary: authAction.actionHover,
-		textColorPrimary: authAction.actionOn,
-		textColorHoverPrimary: authAction.actionOn,
-		textColorPressedPrimary: authAction.actionOn,
-		textColorFocusPrimary: authAction.actionOn,
-		borderPrimary: `1px solid ${authAction.actionBase}`,
-		borderHoverPrimary: `1px solid ${authAction.actionHover}`,
-		borderPressedPrimary: `1px solid ${authAction.actionPressed}`,
-		borderFocusPrimary: `1px solid ${authAction.actionHover}`
-	},
 	/**
 	 * Focus and hover on the inputs are Smart Olive, by the design owner's
 	 * decision (2026-08-30).

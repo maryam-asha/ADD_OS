@@ -19,7 +19,21 @@
 					</n-button>
 				</div>
 
-				<n-data-table :columns="memberColumns" :data="members" :loading="isLoadingMembers" :bordered="false" :row-key="memberRowKey" />
+				<!--
+					`add-ledger-table` is the specificity anchor for the shared DataTable
+					header treatment — see theme-overrides/_resource-table.scss. It was
+					the one table in add-os missing it, so this drawer alone rendered
+					naive's default grey header band.
+				-->
+				<div class="add-ledger-table">
+					<n-data-table
+						:columns="memberColumns"
+						:data="members"
+						:loading="isLoadingMembers"
+						:bordered="false"
+						:row-key="memberRowKey"
+					/>
+				</div>
 			</div>
 		</n-drawer-content>
 	</n-drawer>

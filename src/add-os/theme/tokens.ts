@@ -303,23 +303,69 @@ export interface SemanticTokens {
 	focusRingOuter: string
 }
 
+// ════════════════════════════════════════════════════════════════════════════
+// REVERSAL 2026-08-31 — the accent moves from Deep Teal to the adjusted olive
+//
+// `primary` was Deep Teal #007F91 and `info` was the same value "by decision Q3",
+// because Signal Cyan darkened to meet AA lands ΔE 2.7 from Deep Teal and the
+// two could not be told apart. That reasoning is kept below and in
+// GUIDELINE-FEEDBACK.md §3; it was correct for the palette it was reasoning about.
+//
+// The design owner has aligned the dashboard with the ADD member app, whose
+// accent is green throughout — tabs, filter chips, bottom nav, every primary
+// button. So `primary` now takes the adjusted Smart Olive and Deep Teal moves
+// down to `info`, which is a real gain there: `info` and `primary` are finally
+// DIFFERENT colours, which they never were before.
+//
+// It also moves the product toward the approved usage ratios rather than away:
+// BRAND_RATIOS puts growth (Smart Olive) at 25% and intelligence & interaction
+// (Deep Teal, Levant Deep Teal, Signal Cyan) at 10%, and the dashboard had been
+// carrying the 10% colour as its main accent on every screen.
+//
+// WHAT WAS GIVEN UP, and it is not small: `primary` and `success` are now the
+// SAME colour. An action a user can take and a state the system has reached no
+// longer differ by hue. The member app has this collision too and accepts it,
+// and the design owner accepted it here knowingly — but it means the binding
+// status rule (icon + text label + 1px border, never colour alone) is now
+// load-bearing for `primary` as well, not only for `info`. See
+// .claude/rules/tokens-and-color.md.
+//
+// Smart Olive itself #809C66 is NOT used: it is the Ecosystem pillar colour,
+// which tokens.spec.ts forbids as a token value, and it carries white text at
+// only 3.05:1. The adjusted #657C50 was already in the file.
+// ════════════════════════════════════════════════════════════════════════════
+
+/**
+ * The adjusted-Smart-Olive ramp, defined ONCE and referenced by both `primary`
+ * and `success` — they are the same colour after 2026-08-31. Writing the six
+ * values twice would put two sources under one colour, which is the exact
+ * failure this file exists to prevent.
+ *
+ * Ratios are unchanged from when this ramp served `success` alone; the role it
+ * fills is what changed, not the measurements.
+ */
+const adjustedOliveRamp: InteractiveColor = {
+	base: DERIVATIONS.successFill.value, // #657C50 · white text 4.61
+	hover: "#586C46", //                   5.75
+	pressed: "#4C5D3C", //                 7.14
+	suppl: "#586C46",
+	on: DERIVATIONS.surfaceWhite.value,
+	text: "#556843" //                     6.09 on white · 4.52 on Warm Mist
+}
+
+/** Deep Teal, which served `primary` until 2026-08-31 and now serves `info`. */
+const deepTealRamp: InteractiveColor = {
+	base: brand.deepTeal, //           #007F91 · white text 4.72
+	hover: "#006977", //               darken 0.05 · 6.38
+	pressed: "#00525E", //             darken 0.10 · 8.86
+	suppl: "#006977",
+	on: DERIVATIONS.surfaceWhite.value,
+	text: "#006B7A" //                 6.20 on white · 4.60 on Warm Mist
+}
+
 const light: SemanticTokens = {
-	primary: {
-		base: brand.deepTeal, //           #007F91 · white text 4.72
-		hover: "#006977", //               darken 0.05 · 6.38
-		pressed: "#00525E", //             darken 0.10 · 8.86
-		suppl: "#006977",
-		on: DERIVATIONS.surfaceWhite.value,
-		text: "#006B7A" //                 6.20 on white · 4.60 on Warm Mist
-	},
-	success: {
-		base: DERIVATIONS.successFill.value, // #657C50 · white text 4.61
-		hover: "#586C46", //               5.75
-		pressed: "#4C5D3C", //             7.14
-		suppl: "#586C46",
-		on: DERIVATIONS.surfaceWhite.value,
-		text: "#556843" //                 6.09 on white · 4.52 on Warm Mist
-	},
+	primary: adjustedOliveRamp,
+	success: adjustedOliveRamp,
 	warning: {
 		// The ONLY fill that carries dark text, so hover/pressed LIGHTEN.
 		base: DERIVATIONS.warningAmber.value, // #E7B155 · charcoal text 4.80
@@ -337,14 +383,7 @@ const light: SemanticTokens = {
 		on: DERIVATIONS.surfaceWhite.value,
 		text: "#B4321D" //                 6.14 on white · 4.56 on Warm Mist
 	},
-	info: {
-		base: brand.deepTeal, //           = primary, by decision Q3
-		hover: "#006977",
-		pressed: "#00525E",
-		suppl: "#006977",
-		on: DERIVATIONS.surfaceWhite.value,
-		text: "#006B7A"
-	},
+	info: deepTealRamp,
 
 	body: brand.warmMist,
 	surface: DERIVATIONS.surfaceCard.value,
@@ -671,7 +710,16 @@ export interface ComponentTokens {
 		borderWidth: string
 	}
 	table: {
+		/**
+		 * `transparent` since 2026-08-31, by the design owner: the header sits on the
+		 * card with no fill of its own. It was `surfaceSunken`, a tinted band.
+		 */
 		headerBackground: string
+		/**
+		 * Header LABEL colour. Levant Deep Teal — the header now carries the accent
+		 * as type rather than as a background. 9.5:1 on the card surface, asserted.
+		 */
+		headerText: string
 		rowStripeBackground: string
 		borderColor: string
 		/** Money and quantity columns. Poppins has no tabular figures — see `fontFamily.numeric`. */
@@ -681,35 +729,28 @@ export interface ComponentTokens {
 	 * The signed-out screens, aligned with the member app's visual language.
 	 * See `docs/superpowers/specs/2026-08-30-auth-visual-alignment-design.md`.
 	 *
-	 * ── Why the CTA is not `primary` ────────────────────────────────────────
-	 * The member app's auth screens use a GREEN call to action, not the teal
-	 * `primary` this dashboard uses everywhere else. Both products are ADD, so
-	 * the auth screens follow the app rather than the dashboard here.
+	 * ── SUPERSEDED 2026-08-31, kept because the reasoning still explains the
+	 *    shape of the file ──────────────────────────────────────────────────
+	 * This group also carried `actionBase/Hover/Pressed/On`. The member app's
+	 * auth screens use a GREEN call to action, and the dashboard's `primary` was
+	 * teal, so the auth CTA had to diverge from `primary` and pointed at the
+	 * success ramp instead — never minting a second green, because Smart Olive
+	 * #809C66 is the Ecosystem pillar colour AND carries white text at only
+	 * 3.05:1, so `DERIVATIONS.successFill` was the one legal adjusted olive.
 	 *
-	 * ── Why it REFERENCES `success` instead of minting a green ──────────────
-	 * Smart Olive #809C66 cannot be used directly, on two independent grounds:
-	 * it is the Ecosystem PILLAR colour (asserted against below), and it carries
-	 * white text at only 3.05:1 where AA needs 4.5. So the CTA must be the
-	 * contrast-adjusted Smart Olive — and there is exactly ONE of those in this
-	 * file already: `DERIVATIONS.successFill`, reached through `success.base`.
-	 *
-	 * Minting a second derivation with the same recipe would be a second source
-	 * for one colour. So this group POINTS at the success ramp. The visible
-	 * consequence is deliberate and recorded rather than hidden: the sign-in
-	 * button is the same green as a success message. Whether auth's green should
-	 * be visually distinct needs a brand-sanctioned second green — an open
-	 * question in docs/brand/GUIDELINE-FEEDBACK.md, not a developer's call.
+	 * `primary` IS that green now. The four action tokens became four values
+	 * identical to the ones naive-ui already resolves, driving a `themeOverrides`
+	 * block in AuthShell.vue that repainted the button its existing colour. Both
+	 * are gone: a control that changes nothing is the thing this codebase treats
+	 * as a defect, and a token nothing reads is how the next reader is misled
+	 * into thinking auth's CTA is still independent. It is not — if `primary`
+	 * moves, the sign-in button moves with it, and that is now the intent.
 	 */
 	auth: {
-		/** The brand panel. Levant Deep Teal, verbatim — the member app's hero surface. */
+		/** The brand panel. Charcoal Backbone — the 45% structure colour. */
 		panelBackground: string
-		/** Text on the panel. Warm Mist, 7.43:1 — the ratio tier 2 already asserts. */
+		/** Text on the panel. Warm Mist, 6.92:1 on the panel. */
 		panelText: string
-		/** The CTA ramp — references the success ramp, does not restate it. */
-		actionBase: string
-		actionHover: string
-		actionPressed: string
-		actionOn: string
 	}
 }
 
@@ -742,7 +783,12 @@ const componentLight: ComponentTokens = {
 		borderWidth: borderWidth.hairline
 	},
 	table: {
-		headerBackground: light.surfaceSunken,
+		// The tinted header band is gone (2026-08-31, design owner). The emphasis
+		// moved from the FILL to the TYPE: no background, Levant Deep Teal label,
+		// larger and bold. Row striping keeps `surfaceSunken`, so the table still
+		// has horizontal rhythm without a heavy header.
+		headerBackground: "transparent",
+		headerText: brand.levantDeepTeal, // #314550 · 9.5:1 on the card surface
 		rowStripeBackground: light.surfaceSunken,
 		borderColor: light.border,
 		numericFontFamily: fontFamily.numeric
@@ -755,11 +801,7 @@ const componentLight: ComponentTokens = {
 		// the 10% colour spends that whole allowance on one screen.
 		// Design owner's call, 2026-08-30.
 		panelBackground: brand.charcoalBackbone, // #43474F · brand verbatim
-		panelText: light.textOnDark, //            Warm Mist · 6.92 on the panel
-		actionBase: light.success.base, //         = DERIVATIONS.successFill · white text 4.61
-		actionHover: light.success.hover, //       5.75
-		actionPressed: light.success.pressed, //   7.14
-		actionOn: light.success.on //              white
+		panelText: light.textOnDark //             Warm Mist · 6.92 on the panel
 	}
 }
 

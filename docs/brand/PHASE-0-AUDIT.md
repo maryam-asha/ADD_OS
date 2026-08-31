@@ -680,11 +680,29 @@ reinforced by mandatory icon + label.
 derived value. Signal Cyan additionally retains its Guideline role (p. 16) as
 activity indicator and hairline accent where it needs no white text.
 
+#### Q3 superseded 2026-08-31 — the teal became `info`'s alone
+
+The design owner aligned the dashboard with the **ADD member app**, whose accent
+is green on every surface. `primary` moved to the adjusted Smart Olive `#657C50`
+and Deep Teal moved down to `info`.
+
+The premise of Q3 was that `info` could not be *distinguished* from `primary` —
+Signal Cyan darkened to AA lands ΔE 2.7 from Deep Teal, so the two candidate
+colours were one colour. That is now moot from the other direction: `info` kept
+the teal and `primary` left, so **the Q3 collision is resolved**.
+
+It resolved by moving, not by closing. `primary` and `success` are now the same
+value, so the redundant-encoding rule below is *more* binding, not less — it now
+governs primary actions as well as status. Given up: hue no longer separates "an
+action you may take" from "a state that has been reached". Accepted knowingly by
+the design owner; see `GUIDELINE-FEEDBACK.md` §3 for what a second green would
+cost.
+
 ### Non-negotiable consequence of Q2/Q3 — the redundant-encoding rule
 
-Because `info` shares primary's hue and `warn/dang` is at ΔE threshold under
-deuteranopia, **colour is never the sole channel for state.** Binding for
-Phases 2–3:
+Because a semantic role shares `primary`'s hue — `info` until 2026-08-31,
+`success` after it — and `warn/dang` is at ΔE threshold under deuteranopia,
+**colour is never the sole channel for state.** Binding for Phases 2–3:
 
 1. **Icon required** on every status — `carbon:checkmark-filled`,
    `carbon:warning-alt-filled`, `carbon:error-filled`,
@@ -700,9 +718,14 @@ Phases 2–3:
 **B** = brand verbatim · **B\*** = brand, contrast-adjusted (hue preserved) ·
 **D** = derived · **?** = still open.
 
+> **Amended 2026-08-31.** `primary` and `info` swapped values when the dashboard
+> was aligned with the ADD member app — see *Q3 superseded* above. The rows below
+> carry both, so this table is not read as current while stating the old value.
+> Everything else in it is unchanged.
+
 | Tier 2 token | Light | src | Dark | src |
 |---|---|---|---|---|
-| `primary` | `#007F91` Deep Teal | **B** | `#00BFDF` Signal Cyan | **B** |
+| `primary` | ~~`#007F91` Deep Teal~~ → `#657C50` adjusted Smart Olive | **B\*** | ~~`#00BFDF`~~ → mirrors light | **B\*** |
 | `primaryHover` | darker than base | **B\*** | lighter | **B\*** |
 | `surface` | `#FFFFFF` | **D** | `#314550` Levant Deep Teal | **B** |
 | `surfaceRaised` | `#FFFFFF` + elevation | **D** | `#39505D` | **D** |
@@ -715,7 +738,7 @@ Phases 2–3:
 | `success` | `#657C50` | **B\*** | `#A0B58D` | **B\*** |
 | `warning` | `#E7B155` | **D** | `#E7B155` | **D** |
 | `danger` | `#D93D23` | **B\*** | `#EC9A8D` | **B\*** |
-| `info` | `#007F91` (= primary) | **B** | `#00BFDF` | **B** |
+| `info` | ~~`#007F91` (= primary)~~ → `#007F91` Deep Teal, now its own colour | **B** | `#00BFDF` | **B** |
 | `focusRing` | `#007F91` Deep Teal | **B** | `#00BFDF` | **B** |
 
 Derived-value count: 1 semantic colour (`warning`), 2 light neutrals, `#FFFFFF`,

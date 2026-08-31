@@ -93,47 +93,39 @@ describe("authShell", () => {
 		})
 	})
 
-	describe("the green call to action", () => {
-		const auth = component[DEFAULT_MODE].auth
+	/**
+	 * The CTA is still green — it just is not this component's doing any more.
+	 *
+	 * Until 2026-08-31 the shell carried a `Button` remap, because the design
+	 * wanted a green submit button while the dashboard's `primary` was Deep Teal.
+	 * `primary` is that same green now, so the remap set every value to what naive
+	 * already resolved. It was deleted, and these tests changed from "the shell
+	 * repaints the button" to "the shell adds NOTHING, and does not need to".
+	 *
+	 * The old suite's most valuable assertion survives inverted: it checked that
+	 * the button was NOT `primary`. This checks that it IS, which is the property
+	 * that would break if someone reintroduced a partial override.
+	 */
+	describe("the green call to action comes from primary, not from this shell", () => {
 		const overridesOf = () =>
 			mountShell().findComponent(NConfigProvider).props("themeOverrides") as {
 				common?: Record<string, string>
-				Button: Record<string, string>
+				Button?: Record<string, string>
 			}
 
-		it("paints the filled primary button with the auth ramp", () => {
-			const { Button } = overridesOf()
-
-			expect(Button.colorPrimary).toBe(auth.actionBase)
-			expect(Button.colorHoverPrimary).toBe(auth.actionHover)
-			expect(Button.colorPressedPrimary).toBe(auth.actionPressed)
-			expect(Button.textColorPrimary).toBe(auth.actionOn)
+		it("adds no Button override at all", () => {
+			expect(overridesOf().Button).toBeUndefined()
 		})
 
-		it("does not leave the dashboard's teal on the button", () => {
-			// Without this the button would silently render teal and still pass
-			// every other assertion here.
-			expect(overridesOf().Button.colorPrimary).not.toBe(semantic[DEFAULT_MODE].primary.base)
+		it("leaves `primary` alone, so the shell cannot fork the palette", () => {
+			expect(overridesOf().common?.primaryColor).toBeUndefined()
 		})
 
-		// The design puts a green button and a Deep Teal "forgot password?" link on
-		// the SAME screen. A text button reads `primary`, so remapping
-		// `common.primaryColor` — which an earlier revision of this file did — turns
-		// the link green too. Scoping to `Button` is what keeps them apart, and this
-		// is the assertion that fails if anyone widens it back.
-		it("leaves `primary` alone, so text links stay Deep Teal", () => {
-			const overrides = overridesOf()
-
-			expect(overrides.common?.primaryColor).toBeUndefined()
-		})
-
-		it("supplies hover and pressed explicitly, never by naive's derivation", () => {
-			// getThemeColors() derives hover by LIGHTENING, which drops light-mode
-			// hover below AA. Every state must be set.
-			const { Button } = overridesOf()
-			for (const key of ["colorPrimary", "colorHoverPrimary", "colorPressedPrimary", "colorFocusPrimary"]) {
-				expect(Button[key], `${key} must be set explicitly`).toBeTruthy()
-			}
+		it("and `primary` is in fact the green the design asks for", () => {
+			// If this fails, the button is no longer green and deleting the override
+			// stopped being safe — which is the whole reason it is asserted here and
+			// not left to tokens.spec.ts alone.
+			expect(semantic[DEFAULT_MODE].primary.base).toBe(semantic[DEFAULT_MODE].success.base)
 		})
 	})
 

@@ -60,7 +60,13 @@ theme is `@theme inline` in `src/tailwind.css`, reading the CSS vars the theme s
 
 ## State colour is never the sole channel
 
-`info` shares primary's hue, and `warning`/`danger` sit at ΔE 21 under deuteranopia.
+**`primary` and `success` are the SAME colour** since 2026-08-31 — the accent moved from
+Deep Teal to the adjusted Smart Olive `#657C50` to match the ADD member app, and that is
+the value `success` already held. An action a user can take and a state the system has
+reached no longer differ by hue, so the rules below are load-bearing for primary buttons
+too, not just for status. (`info` took Deep Teal and is finally distinct from `primary`;
+before the swap the two were one colour.) `warning`/`danger` sit at ΔE 21 under
+deuteranopia.
 Therefore, mandatory on **every** status:
 
 1. a distinct Carbon icon (`checkmark-filled`, `warning-alt-filled`, `error-filled`,

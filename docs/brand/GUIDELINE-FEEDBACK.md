@@ -147,6 +147,41 @@ text label.
 is a candidate worth adopting or replacing deliberately. Right now it is ADD OS's
 value, not ADD's.
 
+### Updated 2026-08-31 — the accent moved, and the collision moved with it
+
+The design owner aligned the dashboard with the **ADD member app**, whose accent
+is green throughout: tabs, filter chips, bottom navigation, and every primary
+button. So `primary` is now the adjusted Smart Olive `#657C50` and Deep Teal
+moved down to `info`.
+
+Two consequences, in opposite directions.
+
+**Resolved:** the third bullet above no longer describes the product. `info` and
+`primary` were the same colour because both were Deep Teal; they are now
+genuinely different, and the icon rule is no longer the only thing separating an
+informational message from a primary action.
+
+**Created, knowingly:** `primary` and `success` are now the same value. An action
+a user can *take* and a state the system has *reached* no longer differ by hue —
+a sign-in button is the same green as an "Approved" badge. The member app has
+this collision and accepts it; the design owner accepted it here after it was put
+to them explicitly. It makes the binding status rule (icon + text label + 1px
+border, never colour alone) load-bearing for `primary` too.
+
+This also moves the product **toward** the approved usage ratios rather than away:
+`BRAND_RATIOS` puts growth (Smart Olive) at 25% and intelligence & interaction
+(Deep Teal, Levant Deep Teal, Signal Cyan) at 10%, and the dashboard had been
+spending the 10% colour as its accent on every screen.
+
+Raw Smart Olive `#809C66` is still not used anywhere: it is the Ecosystem pillar
+colour, and it carries white text at 3.05:1. Only the contrast-adjusted `#657C50`
+ships, and it is defined once and referenced by both roles.
+
+**Needed:** if `primary` and `success` should be visually distinct, that requires a
+**second brand-sanctioned green** — a brand-owner decision. `tokens.spec.ts` pins
+the collision as it stands, so minting one fails a test first rather than
+happening quietly.
+
 ---
 
 ## 4. 🟡 White is used but never specified
