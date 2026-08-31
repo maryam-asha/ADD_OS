@@ -23,24 +23,38 @@
 				an opacity modifier rather than a literal rgba(), so they stay a token
 				reference and the no-hardcoded-values rule holds.
 
-				Each panel carries the ADD pattern, anchored to its OUTER corner —
-				top-left on the upper panel, bottom-right on the lower one. The artwork
-				is a staircase of the wordmark with a diagonal void through it, NOT a
-				seamless tile, so it is placed rather than repeated: anchored this way
-				its dense corner sits at the edge of the composition and the void falls
-				behind the card, where a repeat would have fought the form.
+				Each panel carries the ADD pattern with its DENSE corner pointing away
+				from the card, so the two panels read as one diagonal running out of
+				frame and the card sits in the calm middle of it. The artwork is a
+				staircase of the wordmark with a diagonal void through it, NOT a
+				seamless tile, so it is placed rather than repeated.
+
+				Both panels anchor `bg-bottom-right`; the upper one is turned 180°, which
+				lands that same dense corner at its top-left. One anchor, one rotation —
+				rather than two positions that would drift apart when either is touched.
+
+				The offset is the SAME on both axes (`44`, i.e. 11rem), so the two panels
+				sit on a true 45° diagonal and every gap around the card measures the
+				same. They were 11rem across and 8rem down, which read as four unequal
+				gaps rather than one composition.
+
+				`-inset-6` is load-bearing, not padding: the artwork carries ~4% of
+				transparent margin inside its own viewBox, so at `inset-0` it stopped
+				short of the panel edge and left a visible gap. The layer is oversized
+				and the panel's `overflow-hidden` crops it, so the letters bleed off the
+				edge instead of floating inside it.
 
 				Green, not the charcoal variant: the ground IS Charcoal Backbone, and
 				`pattern-dark.svg` is #42474F against it — a pattern nobody could see.
 			-->
 			<div aria-hidden="true" class="pointer-events-none absolute inset-0 hidden items-center justify-center sm:flex">
-				<div class="rounded-add-large bg-surface/5 absolute size-96 -translate-x-32 -translate-y-24 overflow-hidden">
-					<div class="bg-top-left size-full bg-cover bg-no-repeat opacity-20" :style="patternLayer" />
+				<div class="rounded-add-large bg-surface/5 absolute size-96 -translate-x-44 -translate-y-44 overflow-hidden">
+					<div class="bg-bottom-right absolute -inset-6 rotate-180 bg-cover bg-no-repeat opacity-25" :style="patternLayer" />
 				</div>
 				<div
-					class="rounded-add-large border-surface/10 absolute size-96 translate-x-32 translate-y-24 overflow-hidden border"
+					class="rounded-add-large border-surface/10 absolute size-96 translate-x-44 translate-y-44 overflow-hidden border"
 				>
-					<div class="bg-bottom-right size-full bg-cover bg-no-repeat opacity-20" :style="patternLayer" />
+					<div class="bg-bottom-right absolute -inset-6 bg-cover bg-no-repeat opacity-25" :style="patternLayer" />
 				</div>
 			</div>
 
