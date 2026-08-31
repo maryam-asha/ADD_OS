@@ -30,9 +30,6 @@
 		"common": {
 			"back": "Back"
 		},
-		"shell": {
-			"tagline": "The operations dashboard for Aleppo Digital District."
-		},
 		"signIn": {
 			"title": "Welcome back",
 			"subtitle": "Sign in to manage memberships, bookings and access.",
@@ -62,6 +59,9 @@
 			"genericError": "Couldn't verify that code. Please try again."
 		},
 		"forgotPassword": {
+			"title": "Reset your password",
+			"subtitle": "Enter your email and we'll send you a link to set a new password.",
+			"backToSignIn": "Back to sign in",
 			"emailLabel": "Email",
 			"emailPlaceholder": "Insert your email",
 			"emailRequired": "Email is required.",
@@ -72,7 +72,11 @@
 			"genericError": "Couldn't send the reset link. Please try again."
 		},
 		"resetPassword": {
-			"title": "Reset password",
+			"title": "Set a new password",
+			"subtitle": "Choose a password you haven't used before.",
+			"backToSignIn": "Back to sign in",
+			"passwordPlaceholder": "At least 8 characters",
+			"passwordConfirmationPlaceholder": "Re-enter the new password",
 			"passwordLabel": "New password",
 			"passwordConfirmationLabel": "Confirm new password",
 			"passwordRequired": "Password is required.",

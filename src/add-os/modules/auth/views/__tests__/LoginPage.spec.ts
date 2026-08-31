@@ -37,7 +37,6 @@ const messages = {
 		common: { logoAlt: "ADD OS logo" },
 		auth: {
 			common: { back: "Back" },
-			shell: { tagline: "The operations dashboard." },
 			signIn: {
 				title: "Welcome back",
 				subtitle: "Sign in to continue.",

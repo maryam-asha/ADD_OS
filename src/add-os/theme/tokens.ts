@@ -702,8 +702,18 @@ export interface ComponentTokens {
 const componentLight: ComponentTokens = {
 	sidebar: {
 		background: light.surface,
-		itemActiveBackground: "rgba(0, 127, 145, 0.10)",
-		itemActiveText: light.primary.text,
+		/**
+		 * Olive, not teal — the nav's active state now matches the auth screens, so
+		 * the product reads as one identity. Design owner's call, 2026-08-30.
+		 *
+		 * NOT raw Smart Olive #809C66, for two independent reasons that both still
+		 * hold: it is the Ecosystem PILLAR colour, which `tokens.spec.ts` forbids as
+		 * a component token value, and as a LABEL on this surface it measures
+		 * 2.81:1 where AA needs 4.5. `success.text` is the text-safe member of the
+		 * same adjusted-olive ramp and measures 5.60:1 on the sidebar.
+		 */
+		itemActiveBackground: "rgba(101, 124, 80, 0.12)",
+		itemActiveText: light.success.text,
 		itemHoverBackground: "rgba(67, 71, 79, 0.05)"
 	},
 	deferred: {

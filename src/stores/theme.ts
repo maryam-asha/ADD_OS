@@ -1,6 +1,8 @@
 import type { GlobalThemeOverrides, ThemeCommonVars } from "naive-ui"
 import type { BuiltInGlobalTheme } from "naive-ui/es/themes/interface"
-import type { Layout, RouterTransition } from "@/types/theme.d"
+// ADD OS: `Layout` and `RouterTransition` were only needed by `setLayout()` and
+// `setRouterTransition()`, removed with the LayoutSettings panel on 2026-08-30.
+// The state still carries both values — they are read, never written.
 import { useWindowSize } from "@vueuse/core"
 import _get from "lodash/get"
 import _set from "lodash/set"
@@ -15,24 +17,24 @@ import { ThemeNameEnum } from "@/types/theme.d"
 export const useThemeStore = defineStore("theme", {
 	state: () => getDefaultState(),
 	actions: {
-		setLayout(layout: Layout): void {
-			this.layout = layout
-		},
 		setRTL(rtl: boolean): void {
 			this.rtl = rtl
-		},
-		setBoxed(boxed: boolean): void {
-			this.boxed.enabled = boxed
 		},
 		setFooterShow(show: boolean): void {
 			this.footer.show = show
 		},
-		setToolbarBoxed(boxed: boolean): void {
-			this.boxed.toolbar = boxed
-		},
-		setRouterTransition(routerTransition: RouterTransition): void {
-			this.routerTransition = routerTransition
-		},
+		// ADD OS: `setLayout()` · `setBoxed()` · `setToolbarBoxed()` ·
+		// `setRouterTransition()` ALL REMOVED with the LayoutSettings panel on
+		// 2026-08-30, which was their only caller.
+		//
+		// Same rule the theme writers above were deleted under: removing a control
+		// does not remove the capability, and a write path with no UI is how a
+		// half-reviewed state comes back. `setFooterShow` survives because
+		// `composables/useHideLayoutFooter.ts` still calls it — a real caller, not
+		// a control.
+		//
+		// The layout components keep READING `isBoxed` / `isToolbarBoxed` /
+		// `isFooterShown`; reads were never the problem.
 		// ADD OS: `setTheme()` · `setThemeLight()` · `setThemeDark()` · `toggleTheme()`
 		// ALL REMOVED — every runtime write path to `themeName`.
 		//
@@ -229,7 +231,11 @@ export const useThemeStore = defineStore("theme", {
 		// survive with no UI left to correct it, leaving a user stuck in a layout the
 		// ADD nav has never been reviewed in. `routerTransition` follows for the same
 		// reason — persisting state nothing can set is how stale state hides.
-		pick: ["rtl", "boxed", "sidebar.collapsed"]
+		// ADD OS: "boxed" REMOVED on 2026-08-30 with the LayoutSettings panel. It was
+		// the only thing that could set it, so a persisted value would have stuck
+		// with no UI left to correct it — the same stale-state trap that took
+		// `layout` and `routerTransition` out of this list.
+		pick: ["rtl", "sidebar.collapsed"]
 	}
 })
 

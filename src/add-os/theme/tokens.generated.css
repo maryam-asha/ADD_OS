@@ -73,8 +73,8 @@
 
 	/* ── component (Tier 3) ── */
 	--add-sidebar-background: #F7F5F2;
-	--add-sidebar-item-active-background: rgba(0, 127, 145, 0.10);
-	--add-sidebar-item-active-text: #006B7A;
+	--add-sidebar-item-active-background: rgba(101, 124, 80, 0.12);
+	--add-sidebar-item-active-text: #556843;
 	--add-sidebar-item-hover-background: rgba(67, 71, 79, 0.05);
 	--add-deferred-label: #5A606B;
 	--add-deferred-icon: #727986;

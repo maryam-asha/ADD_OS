@@ -25,7 +25,6 @@
 
 		<SplashScreen :show="loading" />
 		<SearchDialog v-if="isLogged" />
-		<LayoutSettings />
 	</Provider>
 </template>
 
@@ -40,7 +39,6 @@ import Provider from "@/app-layouts/common/Provider.vue"
 import SplashScreen from "@/app-layouts/common/SplashScreen.vue"
 import HorizontalNav from "@/app-layouts/HorizontalNav"
 import VerticalNav from "@/app-layouts/VerticalNav"
-import LayoutSettings from "@/components/common/LayoutSettings.vue"
 import SearchDialog from "@/components/common/SearchDialog.vue"
 import { useAuthStore } from "@/stores/auth"
 import { useMainStore } from "@/stores/main"

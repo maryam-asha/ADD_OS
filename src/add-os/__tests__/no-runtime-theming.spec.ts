@@ -45,7 +45,11 @@ const FORBIDDEN_ACTIONS = [
 /** Deleted files whose return would reintroduce a removed capability. */
 const DELETED_FILES = [
 	{ file: "src/app-layouts/common/Toolbar/ThemeSwitch.vue", why: "toolbar dark-mode toggle" },
-	{ file: "src/composables/useThemeSwitch.ts", why: "toggle wrapper used by the command palette" }
+	{ file: "src/composables/useThemeSwitch.ts", why: "toggle wrapper used by the command palette" },
+	{
+		file: "src/components/common/LayoutSettings.vue",
+		why: "the floating layout-settings panel, removed whole on 2026-08-30 — it was the last surface that wrote themed state, and its language switch is served by the toolbar's LocaleSwitch"
+	}
 ] as const
 
 const TEXT_EXT = /\.(?:ts|tsx|vue)$/i
@@ -107,11 +111,14 @@ describe("no runtime theming — the store exposes no write path", () => {
 		const pick = storeCode.match(/pick:\s*\[([^\]]*)\]/)
 		expect(pick, "persist.pick not found").not.toBeNull()
 		const persisted = pick![1]
-		for (const key of ["themeName", "layout", "routerTransition"]) {
+		// "boxed" joined this list on 2026-08-30: the LayoutSettings panel was its
+		// only writer, so once the panel went, a persisted value could stick with
+		// no UI left to correct it.
+		for (const key of ["themeName", "layout", "routerTransition", "boxed"]) {
 			expect(persisted, `${key} must not persist — nothing can set it, so a stale value would stick`).not.toContain(key)
 		}
-		// The ones a user CAN still change must keep persisting.
-		for (const key of ["rtl", "boxed", "sidebar.collapsed"]) {
+		// The ones something CAN still change must keep persisting.
+		for (const key of ["rtl", "sidebar.collapsed"]) {
 			expect(persisted, `${key} should still persist`).toContain(key)
 		}
 	})
@@ -189,10 +196,46 @@ describe("no runtime theming — removed controls stay removed", () => {
 		expect(offenders, `dangling import of a deleted control:\n  ${offenders.join("\n  ")}`).toEqual([])
 	})
 
-	// The colour picker was the control; these were its ingredients.
-	it("no colour picker remains in the settings panel", () => {
-		const code = stripComments(read("src/components/common/LayoutSettings.vue"))
-		expect(code, "n-color-picker is back").not.toMatch(/n-color-picker|NColorPicker/i)
-		expect(code, "the demo swatch palette is back").not.toMatch(/#00B27B|#00E19B/i)
+	/**
+	 * The colour picker was the control; these were its ingredients.
+	 *
+	 * This used to read `LayoutSettings.vue` alone. That panel was removed whole on
+	 * 2026-08-30, so pointing the check at one deleted file would have left a guard
+	 * that silently guards nothing. It now sweeps the surfaces that can actually
+	 * REACH a user.
+	 *
+	 * `src/views/` is excluded on purpose, and the exclusion is the interesting
+	 * part: the unrouted Pinx demo views still on disk include
+	 * `views/Components/ColorPicker.vue`, whose whole subject IS an
+	 * `n-color-picker`. They are unreachable by design — the router is built from
+	 * `add-os/navigation/sections.ts` and nothing imports them, so they drop out of
+	 * the bundle (see .claude/rules/vendor-boundary.md, "Unrouted demo surfaces").
+	 * Flagging them would make this guard cry wolf until someone deleted it.
+	 *
+	 * What that costs: a picker added to a demo view AND then routed would pass
+	 * here. Linking a demo view into `sections.ts` is already forbidden, and the
+	 * dist-scanning guards would see it once it shipped.
+	 */
+	const SHELL_ROOTS = ["src/add-os", "src/app-layouts", "src/components", "src/composables", "src/stores"]
+
+	it("no colour picker remains on any surface that can reach a user", () => {
+		const offenders: string[] = []
+		for (const root of SHELL_ROOTS) {
+			for (const rel of walk(root).filter(r => !GUARD_SPECS.has(r))) {
+				const code = stripComments(read(rel))
+				if (/n-color-picker|NColorPicker/i.test(code)) {
+					offenders.push(`${rel} → colour picker`)
+				}
+				if (/#00B27B|#00E19B/i.test(code)) {
+					offenders.push(`${rel} → demo swatch palette`)
+				}
+			}
+		}
+		expect(offenders, `the removed colour picker is back:\n  ${offenders.join("\n  ")}`).toEqual([])
+	})
+
+	it("scans a meaningful surface, so the sweep above cannot pass vacuously", () => {
+		const scanned = SHELL_ROOTS.flatMap(root => walk(root))
+		expect(scanned.length).toBeGreaterThan(100)
 	})
 })

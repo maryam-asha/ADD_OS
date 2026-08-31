@@ -1,23 +1,47 @@
 <template>
-	<div class="flex min-h-screen items-center justify-center p-6">
-		<div class="w-full max-w-96">
-			<div class="font-display mb-8 text-3xl font-bold">{{ t("auth.resetPassword.title") }}</div>
+	<AuthShell :title="t('auth.resetPassword.title')" :subtitle="t('auth.resetPassword.subtitle')">
+		<!--
+			Page-level, not per-field: a bad or expired token comes back as a 422 keyed
+			on `email` — live-confirmed against the real backend — and neither field on
+			this form is the one the backend is actually complaining about.
+		-->
+		<n-alert v-if="pageError" type="error" :title="pageError" class="mb-6" />
 
-			<n-alert v-if="pageError" type="error" :title="pageError" class="mb-6" />
+		<n-form ref="formRef" :model :rules label-placement="top">
+			<n-form-item path="password" :label="t('auth.resetPassword.passwordLabel')">
+				<n-input
+					v-model:value="model.password"
+					type="password"
+					show-password-on="click"
+					:placeholder="t('auth.resetPassword.passwordPlaceholder')"
+					size="large"
+					autocomplete="new-password"
+				/>
+			</n-form-item>
+			<n-form-item path="password_confirmation" :label="t('auth.resetPassword.passwordConfirmationLabel')">
+				<n-input
+					v-model:value="model.password_confirmation"
+					type="password"
+					show-password-on="click"
+					:placeholder="t('auth.resetPassword.passwordConfirmationPlaceholder')"
+					size="large"
+					autocomplete="new-password"
+				/>
+			</n-form-item>
 
-			<n-form ref="formRef" :model :rules label-placement="top">
-				<n-form-item path="password" :label="t('auth.resetPassword.passwordLabel')">
-					<n-input v-model:value="model.password" type="password" show-password-on="click" size="large" />
-				</n-form-item>
-				<n-form-item path="password_confirmation" :label="t('auth.resetPassword.passwordConfirmationLabel')">
-					<n-input v-model:value="model.password_confirmation" type="password" show-password-on="click" size="large" />
-				</n-form-item>
-				<n-button type="primary" class="w-full!" size="large" :loading="submitting" @click="submit">
-					{{ t("auth.resetPassword.submit") }}
-				</n-button>
-			</n-form>
-		</div>
-	</div>
+			<n-button type="primary" class="w-full!" size="large" :loading="submitting" @click="submit">
+				{{ t("auth.resetPassword.submit") }}
+			</n-button>
+
+			<div class="mt-6 flex justify-center">
+				<router-link v-slot="{ navigate }" :to="{ name: 'Login' }" custom>
+					<n-button text type="primary" @click="navigate">
+						{{ t("auth.resetPassword.backToSignIn") }}
+					</n-button>
+				</router-link>
+			</div>
+		</n-form>
+	</AuthShell>
 </template>
 
 <script lang="ts" setup>
@@ -26,6 +50,7 @@ import { NAlert, NButton, NForm, NFormItem, NInput, useMessage } from "naive-ui"
 import { onBeforeMount, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
+import AuthShell from "@/add-os/modules/auth/components/AuthShell.vue"
 import { isValidPassword } from "@/add-os/modules/system/utils/validation"
 import { ApiError } from "@/add-os/services/api"
 import { getCsrfCookie, resetPassword } from "@/add-os/services/auth"

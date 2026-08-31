@@ -1,4 +1,3 @@
-import type { FormType } from "@/components/auth/types.d"
 import { createRouter, createWebHistory } from "vue-router"
 import { createAddOsRoutes } from "@/add-os/navigation/routes"
 import { HOME_REDIRECT } from "@/add-os/navigation/sections"
@@ -37,11 +36,13 @@ const router = createRouter({
 			// ADD OS: ours, not the vendor page. The Pinx `views/Auth/Login.vue`
 			// shipped a floating runtime control that repainted the panel from the
 			// chart ramp, and its form strings were untranslated English literals.
-			// `/forgot-password` below still resolves to it until batch 3 replaces it.
 			component: () => import("@/add-os/modules/auth/views/LoginPage.vue"),
 			meta: {
 				title: "Login",
 				theme: { layout: Layout.Blank, boxed: { enabled: false }, padded: { enabled: false } },
+				// Sign-in is the one auth route that SHOULD bounce a signed-in caller:
+				// there is nothing for them to do here. The two password routes below
+				// deliberately do not — see the note on `/forgot-password`.
 				checkAuth: true,
 				skipPin: true
 			}
@@ -49,12 +50,26 @@ const router = createRouter({
 		{
 			path: "/forgot-password",
 			name: "ForgotPassword",
-			component: () => import("@/views/Auth/Login.vue"),
-			props: { formType: "forgotpassword" as FormType },
+			// ADD OS: its own view now, rather than `views/Auth/Login.vue` driven by a
+			// `formType` prop. Nothing under `views/Auth` or `components/auth` is
+			// imported any more; those files stay on disk, unrouted, like the removed
+			// Pinx demo views.
+			component: () => import("@/add-os/modules/auth/views/ForgotPasswordPage.vue"),
 			meta: {
 				title: "Forgot Password",
 				theme: { layout: Layout.Blank, boxed: { enabled: false }, padded: { enabled: false } },
-				checkAuth: true,
+				// REVERSAL (2026-08-30). This carried `checkAuth: true`, copied from
+				// `/login`. Measured: with a session in the store `authCheck()` returns
+				// "/", so the page was unreachable — which is how it was reported.
+				//
+				// Given up by dropping it: a signed-in admin can now open a page they
+				// arguably do not need. Bought: the page works when the store says
+				// "signed in" and the server disagrees — a stale persisted `logged`,
+				// which `initSession()` cannot clear while VITE_API_URL is empty
+				// (see CLAUDE.md, Open · Infra). The server is the authority here, and
+				// it answers: Fortify replies 409 to an authenticated caller, which
+				// `ForgotPasswordPage.vue` already turns into its own message. That
+				// branch was unreachable while the guard ran first.
 				skipPin: true
 			}
 		},
@@ -65,7 +80,10 @@ const router = createRouter({
 			meta: {
 				title: "Reset Password",
 				theme: { layout: Layout.Blank, boxed: { enabled: false }, padded: { enabled: false } },
-				checkAuth: true,
+				// Same reversal, and here it was the worse bug: this route is reached
+				// from the emailed link, `?token=…&email=…`. Bouncing a caller whose
+				// store still says "signed in" left them with a valid token they could
+				// never spend — the one case where the page MUST render.
 				skipPin: true
 			}
 		},

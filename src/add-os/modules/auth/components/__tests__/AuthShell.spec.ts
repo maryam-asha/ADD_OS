@@ -19,8 +19,7 @@ const AA_NON_TEXT = 3
 const messages = {
 	en: {
 		auth: {
-			common: { back: "Back" },
-			shell: { tagline: "The operations dashboard." }
+			common: { back: "Back" }
 		}
 	}
 }

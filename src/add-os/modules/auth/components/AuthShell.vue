@@ -50,10 +50,6 @@
 
 					<slot />
 				</div>
-
-				<p class="mt-6 text-center text-sm text-[var(--add-auth-panel-text)]">
-					{{ t("auth.shell.tagline") }}
-				</p>
 			</main>
 		</div>
 	</n-config-provider>

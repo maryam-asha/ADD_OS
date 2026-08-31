@@ -10,8 +10,21 @@ pnpm vitest run src/add-os/__tests__ src/add-os/theme/__tests__
 
 Then report, per spec file, pass/fail and what it protects:
 
-- `no-runtime-theming.spec.ts` — 18 assertions. `themeName` pinned to `Light`, absent from
+- `no-runtime-theming.spec.ts` — 21 assertions. `themeName` pinned to `Light`, absent from
   `persist.pick`, no write path into theme or palette, `colors.dark` mirroring `colors.light`.
+  Since 2026-08-30 also asserts `boxed` left `persist.pick` (the LayoutSettings panel was its
+  only writer), that `LayoutSettings.vue` stays deleted, and that no colour picker returns to
+  any surface that can reach a user — `src/views/**` is excluded there because the unrouted
+  Pinx demo `views/Components/ColorPicker.vue` is a picker by subject and can never ship.
+- `no-vendor-auth-imports.spec.ts` — nothing outside `src/views/Auth` and `src/components/auth`
+  may import from them, and the router points `Login`, `ForgotPassword` and `ResetPassword` at
+  `add-os/modules/auth`. Re-linking the vendor login would restore, in one line, a runtime
+  panel repaint the theming guard cannot see, untranslated English form strings, and a
+  "Remember me" control with no `remember` field in the API collection. Carries a negative
+  control so the detector cannot pass by failing to match. Also asserts that
+  `/forgot-password` and `/reset-password` carry **no** `checkAuth` — it redirects to "/"
+  whenever the store says signed in, which made both unreachable and stranded emailed reset
+  tokens — while `/login` keeps it.
 - `no-external-urls.spec.ts` — no host reachable from an isolated network; allowlist entries
   carry `removedBy` notes.
 - `no-secrets.spec.ts` — committed env files declare secret-shaped keys empty; `.gitignore`

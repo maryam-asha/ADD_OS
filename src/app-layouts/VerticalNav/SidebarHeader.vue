@@ -1,17 +1,27 @@
 <template>
 	<div class="sidebar-header flex items-center justify-between gap-4">
-		<div class="flex grow" :class="{ 'justify-center': logoSmall }">
+		<!-- ADD OS: centred in its box in both states, not only when collapsed. -->
+		<div class="flex grow justify-center">
 			<Logo
 				v-if="logoSmall"
 				type="small"
 				max-height="32px"
 				class="animate-[fade_calc(var(--sidebar-anim-duration)*2)_forwards_calc(var(--sidebar-anim-duration)/2)] opacity-0"
 			/>
-			<Logo
+			<!--
+				ADD OS: the expanded sidebar shows the full ADD lockup — the same
+				`logo-dark.png` the login screen uses, so the menu and the sign-in
+				page read as one product.
+
+				It replaces `<Logo type="large">`, which resolved to
+				`brand-logo_large_light.svg`. That file is not in the repo, so the
+				expanded sidebar was rendering a broken image on every page.
+			-->
+			<img
 				v-if="!logoSmall"
-				type="large"
-				max-height="28px"
-				class="animate-[fade_calc(var(--sidebar-anim-duration)*2)_forwards_calc(var(--sidebar-anim-duration)/2)] opacity-0"
+				:src="logoLockup"
+				:alt="t('common.logoAlt')"
+				class="h-11 w-auto max-w-full animate-[fade_calc(var(--sidebar-anim-duration)*2)_forwards_calc(var(--sidebar-anim-duration)/2)] object-contain opacity-0"
 			/>
 		</div>
 		<Transition name="fade" mode="out-in">
@@ -33,7 +43,9 @@
 <script lang="ts" setup>
 import { Icon as Iconify } from "@iconify/vue"
 import { computed } from "vue"
+import { useI18n } from "vue-i18n"
 import Logo from "@/app-layouts/common/Logo.vue"
+import logoLockup from "@/assets/images/logo-dark.png"
 import Icon from "@/components/common/Icon.vue"
 import { useThemeStore } from "@/stores/theme"
 
@@ -41,6 +53,7 @@ const { logoSmall } = defineProps<{
 	logoSmall?: boolean
 }>()
 
+const { t } = useI18n()
 const CircleRegular = "fa6-regular:circle"
 const DotCircleRegular = "fa6-regular:circle-dot"
 const CloseOutline = "carbon:chevron-left"
