@@ -39,8 +39,26 @@
 // on the five hand-built tables. A new table without it renders naive's default
 // header — asserted for ResourceTable in its own spec.
 
+// ── Killing the fill: one variable, not four elements ───────────────────────
+//
+// A first attempt set `background-color` on `.n-data-table-th` alone and left a
+// grey band behind, because naive paints the header from FOUR places, all fed by
+// the same variable: `.n-data-table-thead`, `.n-data-table-th`, and the `--hover`
+// and `--sorting` modifiers on a sortable header.
+//
+// Naive defines `--n-merged-th-color` in its own STYLESHEET rule on
+// `.n-data-table` (one class) — not inline, which is the part that makes this
+// work. Inline custom properties would beat any rule we could write; a
+// stylesheet one only needs to be outranked. Two classes does that, and
+// redefining the variable reaches every consumer at once, including states that
+// only appear on hover and would not have shown up in review.
+.add-ledger-table .n-data-table {
+	--n-merged-th-color: var(--add-table-header-background);
+	--n-merged-th-color-hover: var(--add-table-header-background);
+	--n-merged-th-color-sorting: var(--add-table-header-background);
+}
+
 .add-ledger-table .n-data-table .n-data-table-th {
-	background-color: var(--add-table-header-background);
 	color: var(--add-table-header-text);
 }
 
