@@ -162,7 +162,7 @@ treat a stale pin the same as a failing guard, not as background noise.
 | `Event` vs `Events`. Philosophy says *Event*; Guideline, site and brand artwork say *Events*. Blocks nav labels + ar/en catalogues + seed data at once. | Brand |
 | "Aleppo Spice" — named in the p.15 strict rule, defined nowhere. Probably Aleppo Economic Orange; **deliberately not assumed**. | Brand |
 | White-on-Warm-Mist as the intended surface hierarchy, or a named neutral for cards. | Brand |
-| Noto IKEA Arabic licence + `woff2`, or a Guideline revision naming an embeddable face. | Brand |
+| Noto IKEA Arabic licence + `woff2`, or a Guideline revision naming an embeddable face. **Changed 2026-08-30:** the design owner supplied the files and the face now ships, so the Guideline and the product agree — but the licence question is untouched and the deviation existed precisely because of it. The files are a third-party redistribution, not an IKEA grant. See `docs/brand/GUIDELINE-FEEDBACK.md` §1. | Brand |
 | Adopt or deliberately replace `warning` `#E7B155` as a canonical brand state colour. | Brand |
 | `borderStrong` light-mode value (Aleppo Stone fails 3:1). | Design |
 | **Set the real internal `VITE_API_URL`.** Empty today; production refuses to start. | Infra |

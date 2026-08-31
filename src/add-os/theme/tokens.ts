@@ -371,27 +371,41 @@ export const semantic: Record<ThemeMode, SemanticTokens> = { light }
 // ════════════════════════════════════════════════════════════════════════════
 // TYPOGRAPHY
 //
-// Two mandated faces (Guideline p.19): Poppins for Latin, and — by approved
-// deviation — Noto Sans Arabic for Arabic. The Guideline names "Noto IKEA
-// Arabic", IKEA's proprietary corporate typeface, which is not licensable for
-// third-party embedding.
+// Two mandated faces (Guideline p.19): Poppins for Latin, Noto IKEA Arabic for
+// Arabic.
 //
-// Noto Sans Arabic is the MINIMUM-DISTANCE substitute: Noto IKEA is itself a Noto
-// derivative, so this is the closest legitimately licensable face to what the
-// Guideline actually names. IBM Plex Sans Arabic was implemented first and then
-// reversed — it would have paired type with the Carbon icon set inside a single
-// design system, but fidelity to the mandated family outweighed that coherence.
-// See docs/brand/PHASE-0-AUDIT.md §9 and docs/brand/GUIDELINE-FEEDBACK.md §1.
+// ── SUPERSEDED, kept for the reasoning ──────────────────────────────────────
+// Until 2026-08-30 the Arabic face was Noto Sans Arabic, by approved deviation:
+// "Noto IKEA Arabic" is IKEA's proprietary corporate typeface and was not
+// obtainable for third-party embedding, so the MINIMUM-DISTANCE substitute was
+// used — Noto IKEA is itself a Noto derivative, making Noto Sans Arabic the
+// closest legitimately licensable face to what the Guideline names. IBM Plex
+// Sans Arabic was implemented first and then reversed: it would have paired type
+// with the Carbon icon set inside a single design system, but fidelity to the
+// mandated family outweighed that coherence.
+//
+// ── REVERSAL 2026-08-30 ─────────────────────────────────────────────────────
+// The design owner supplied Noto IKEA Arabic and instructed that it be used, so
+// the availability premise no longer holds and the substitute is gone. What was
+// given up is the licence certainty that made the substitute defensible: the
+// supplied files are a third-party redistribution, not an IKEA grant. That is
+// the brand owner's call, it is still open, and it is logged in
+// docs/brand/GUIDELINE-FEEDBACK.md §1. Latin is unchanged — Poppins either way,
+// now self-hosted from the repo rather than node_modules.
+// See docs/brand/PHASE-0-AUDIT.md §9 and src/assets/scss/fonts.scss.
 //
 // ── Why ONE stack serves both languages ─────────────────────────────────────
 // Poppins carries no Arabic glyphs, so an Arabic character falls through to
-// Noto Sans Arabic automatically, per glyph. Latin therefore always renders in
-// Poppins and Arabic always in Noto Sans Arabic — including mixed strings
+// Noto IKEA Arabic automatically, per glyph. Latin therefore always renders in
+// Poppins and Arabic always in Noto IKEA Arabic — including mixed strings
 // ("قاعة Business Café") — with no `:lang()` rule and no runtime switch.
 //
-// ⚠️ Poppins must LEAD the stack. Unlike Poppins, Noto Sans Arabic ships its own
-// Latin glyphs, so reversing the order would silently cost us the mandated Latin
-// face. Only Noto's `arabic` subset is imported, for the same reason.
+// ⚠️ Poppins must LEAD the stack. Noto IKEA Arabic is a Noto derivative and
+// ships its own Latin glyphs, so reversing the order would silently cost us the
+// mandated Latin face.
+//
+// Noto Sans Arabic is still INSTALLED, but only its Latin subset and only to
+// draw digits — see `fontFamily.numeric` below. It no longer sets a letter.
 //
 // SIZE is the part that must be per-language: Arabic needs slightly more size
 // and noticeably looser leading than Latin at the same nominal step.

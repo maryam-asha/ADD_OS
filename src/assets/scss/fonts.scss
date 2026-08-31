@@ -2,9 +2,12 @@
 //
 // Two faces, per ADD Brand Guideline 2026 p.19:
 //   Latin   → Poppins             (mandated)
-//   Arabic  → Noto Sans Arabic    (approved substitute — see below)
+//   Arabic  → Noto IKEA Arabic    (mandated — supplied by the design owner
+//                                  2026-08-30, licence still open; see below)
 //
-// ⚠️ APPROVED DEVIATION FROM THE GUIDELINE
+// ⚠️ APPROVED DEVIATION FROM THE GUIDELINE — SUPERSEDED 2026-08-30, kept for the
+// reasoning. See the reversal directly below it.
+//
 // The Guideline mandates "Noto IKEA Arabic". That is IKEA's proprietary corporate
 // typeface: not on Google Fonts, not on npm, and not offered for third-party web
 // embedding. Shipping it would mean redistributing an unlicensed font inside a
@@ -25,29 +28,98 @@
 // This is a brand-level defect that affects print and marketing too, not only
 // ADD OS. Logged for the Guideline-feedback list; see docs/brand/PHASE-0-AUDIT.md §9.
 //
+// ── REVERSAL, 2026-08-30 — the design owner supplied both faces ──────────────
+//
+// Arabic is now Noto IKEA Arabic, self-hosted from `add-os/assets/fonts/ar/`,
+// and Latin is Poppins self-hosted from `add-os/assets/fonts/en/`. The design
+// owner placed both in the tree and instructed that they be used: ONE Arabic
+// face, ONE Latin face, both from the repo.
+//
+// What that gains: the Arabic face the Guideline actually names, instead of a
+// substitute. The whole argument above was about availability, not preference —
+// so once the files exist, the reason for the substitute is gone.
+//
+// What was GIVEN UP, and it is not nothing:
+//
+//  1. LICENCE. The availability problem above was never solved, only bypassed.
+//     These files are a third-party redistribution ("ArbFONTS-…"), not an IKEA
+//     grant, and nothing in them establishes a right to embed. Whether ADD may
+//     ship this face is the brand owner's call and it is still open in
+//     CLAUDE.md. Recorded in docs/brand/GUIDELINE-FEEDBACK.md; a ruling that
+//     goes the other way is a two-line revert of this block.
+//  2. BYTES. TTF, not woff2, and unsubsetted: ~1.26 MB of fonts where the
+//     @fontsource woff2 subsets were ~230 KB. Poppins alone went 8 KB → 142 KB
+//     PER WEIGHT for a typeface that renders identically, since @fontsource
+//     ships the same Poppins — it was never a network dependency, only a
+//     node_modules one. Isolated office LAN, first load only, so this was
+//     judged affordable rather than free.
+//  3. WEIGHTS. The Arabic face arrived as Regular and Bold only. 500 and 600
+//     are mapped onto them by descriptor ranges below rather than synthesised.
+//
 // ── Every file is local. Zero network requests. ──────────────────────────────
-// @fontsource ships woff2 + woff with RELATIVE urls and `font-display: swap`
-// already set, so the VPN-isolation constraint holds by construction. Only the
-// subsets actually rendered are imported — Poppins `latin`, Noto `arabic` — not
-// the devanagari/cyrillic/greek subsets both packages also carry, and NOT Noto
-// Sans Arabic's own `latin` subset, which would be dead weight since Poppins
-// owns every Latin glyph (see the ordering note below).
+// Both faces are files in this repo, addressed by relative url() and rebased by
+// Vite at build time, so the VPN-isolation constraint holds by construction —
+// there is no font host to be unreachable.
 //
 // Weights: the Guideline specifies Regular and Bold (p.19). 500 and 600 are
 // intermediate weights of the SAME mandated families, not new typefaces; the UI
 // needs them for `fontWeightStrong` and card titles.
 
-// Latin — Poppins
-@import "@fontsource/poppins/latin-400.css";
-@import "@fontsource/poppins/latin-500.css";
-@import "@fontsource/poppins/latin-600.css";
-@import "@fontsource/poppins/latin-700.css";
+// ── Latin — Poppins, from add-os/assets/fonts/en/ ───────────────────────────
+@font-face {
+	font-family: "Poppins";
+	src: url("../../add-os/assets/fonts/en/Poppins-Regular.ttf") format("truetype");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
 
-// Arabic — Noto Sans Arabic
-@import "@fontsource/noto-sans-arabic/arabic-400.css";
-@import "@fontsource/noto-sans-arabic/arabic-500.css";
-@import "@fontsource/noto-sans-arabic/arabic-600.css";
-@import "@fontsource/noto-sans-arabic/arabic-700.css";
+@font-face {
+	font-family: "Poppins";
+	src: url("../../add-os/assets/fonts/en/Poppins-Medium.ttf") format("truetype");
+	font-weight: 500;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Poppins";
+	src: url("../../add-os/assets/fonts/en/Poppins-SemiBold.ttf") format("truetype");
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Poppins";
+	src: url("../../add-os/assets/fonts/en/Poppins-Bold.ttf") format("truetype");
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
+
+// ── Arabic — Noto IKEA Arabic, from add-os/assets/fonts/ar/ ─────────────────
+//
+// Two files, four weights. The `font-weight: 400 500` RANGE descriptor tells the
+// browser this file answers for both, so a 500 request resolves to the real
+// Regular outline instead of a synthetic in-between; likewise 600 resolves to
+// the real Bold. Without the ranges, 500/600 would be faux-bolded by the
+// rasteriser, which distorts Arabic joins far more visibly than Latin stems.
+@font-face {
+	font-family: "Noto IKEA Arabic";
+	src: url("../../add-os/assets/fonts/ar/ArbFONTS-NotoIKEAArabic-Regular.ttf") format("truetype");
+	font-weight: 400 500;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Noto IKEA Arabic";
+	src: url("../../add-os/assets/fonts/ar/ArbFONTS-NotoIKEAArabic-Bold.ttf") format("truetype");
+	font-weight: 600 700;
+	font-style: normal;
+	font-display: swap;
+}
 
 // ── NUMERALS — Noto Sans Arabic's LATIN subset ──────────────────────────────
 //
@@ -59,12 +131,15 @@
 // columns render visibly ragged depending on which digits an amount contains.
 //
 // Noto Sans Arabic's Latin digits are all exactly 572 units — one width, tabular
-// by default, no feature needed. Already installed, so no new package.
+// by default, no feature needed.
 //
-// This is why Noto's `latin` subset IS imported after all — but ONLY at the two
-// weights tables use, and ONLY reachable through `--font-family-numeric`. It
-// never enters the body stack, because Poppins leads there and owns every Latin
-// glyph. Poppins keeps its mandated display role untouched.
+// This is why the `@fontsource/noto-sans-arabic` package SURVIVES the 2026-08-30
+// switch to self-hosted faces: it no longer draws a single letter, only digits.
+// Its `latin` subset is imported at the two weights tables use and is reachable
+// ONLY through `--font-family-numeric`. It never enters the body stack, because
+// Poppins leads there and owns every Latin glyph. Removing it would silently
+// un-align every money column — `fontFamily.numeric` in tokens.ts must lead with
+// a face whose digit width is MEASURED, and this is the one that is.
 @import "@fontsource/noto-sans-arabic/latin-400.css";
 @import "@fontsource/noto-sans-arabic/latin-600.css";
 
@@ -79,20 +154,19 @@
 // `src/design-tokens.json` reference both via `var()`, and the theme store
 // publishes the result as `--font-family` / `--font-family-display` on <html>.
 //
-// To change either face: install the @fontsource package, swap the @import
-// above, and change the family name below. Nothing else — the stacks, the
-// tokens, and naive-ui all follow.
+// To change either face: drop the files under `add-os/assets/fonts/`, swap the
+// @font-face src above, and change the family name below. Nothing else — the
+// stacks, the tokens, and naive-ui all follow.
 //
 // ── Why ONE stack serves both languages ─────────────────────────────────────
-// Poppins carries no Arabic glyphs, so an Arabic character falls through to
-// Noto Sans Arabic automatically, PER GLYPH. Latin therefore always renders in
-// Poppins and Arabic always in Noto Sans Arabic — including inside mixed strings
+// Poppins carries no Arabic glyphs, so an Arabic character falls through to the
+// Arabic face automatically, PER GLYPH. Latin therefore always renders in
+// Poppins and Arabic always in Noto IKEA Arabic — including inside mixed strings
 // like "قاعة Business Café" — with no `:lang()` rule and no runtime switch.
 //
-// ⚠️ ORDER IS LOAD-BEARING. Noto Sans Arabic ships its own Latin glyphs, so if it
-// came first, English would silently stop being Poppins and the mandated Latin
-// face would be lost. Poppins must lead. (This is also why only Noto's `arabic`
-// subset is imported above — its `latin` subset would never be reached.)
+// ⚠️ ORDER IS LOAD-BEARING. Noto IKEA Arabic is a Noto derivative and carries its
+// own Latin glyphs, so if it came first, English would silently stop being
+// Poppins and the mandated Latin face would be lost. Poppins must lead.
 //
 // SIZE is the part that is per-language: Arabic needs more size and looser
 // leading than Latin at the same nominal step. That lives in
@@ -105,7 +179,10 @@
 // these at use time.
 :root {
 	--font-family-latin: "Poppins";
-	--font-family-arabic: "Noto Sans Arabic", "Segoe UI", Tahoma, "Noto Naskh Arabic", sans-serif;
+	// "Noto Sans Arabic" is NOT a fallback here any more — after 2026-08-30 only
+	// its Latin subset is loaded, so it would answer for Arabic with nothing to
+	// draw. The chain falls straight to the system faces.
+	--font-family-arabic: "Noto IKEA Arabic", "Segoe UI", Tahoma, "Noto Naskh Arabic", sans-serif;
 }
 
 // The NUMERALS stack is deliberately NOT declared here. This file names the two

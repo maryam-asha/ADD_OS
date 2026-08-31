@@ -42,6 +42,41 @@ is visible.
 revision naming an embeddable Arabic face. Until then the Guideline and the
 product disagree on paper.
 
+### Reversed 2026-08-30 — the mandated face now ships, the licence question does not
+
+The design owner placed **Noto IKEA Arabic** in the repo
+(`src/add-os/assets/fonts/ar/`) and instructed that it be used. ADD OS now ships
+it: Regular and Bold, self-hosted, declared in `src/assets/scss/fonts.scss`.
+Latin is Poppins, likewise self-hosted from `src/add-os/assets/fonts/en/`.
+
+**The Guideline and the product now agree.** What changed is availability, not
+the licence: the substitute existed *because* the face could not be obtained, so
+once files exist the minimum-distance argument has nothing left to stand on.
+
+**What was given up, and it is the whole reason the deviation existed:**
+
+- The files are a **third-party redistribution** (`ArbFONTS-…`), not an IKEA
+  grant. Nothing accompanying them establishes a right to embed, and Noto IKEA
+  remains IKEA's proprietary corporate typeface.
+- Noto Sans Arabic came with SIL OFL 1.1 — embedding was unambiguous. That
+  certainty is gone, and it was the point.
+- The face arrived as **Regular and Bold only**. Weights 500 and 600 are mapped
+  onto them by `@font-face` range descriptors, so no synthetic weight is drawn —
+  but the UI has four weight steps and the face has two.
+- **~1.26 MB of fonts** where the woff2 subsets were ~230 KB (TTF, unsubsetted).
+  Judged affordable on an isolated office LAN; it would not be on a public site.
+
+**Still needed, unchanged:** a licence confirmation from IKEA or ADD's own
+counsel — ideally with `woff2` — or a Guideline revision naming an embeddable
+Arabic face. **This is the brand owner's ruling, not the developer's.** A ruling
+against embedding reverts `fonts.scss` to the `@fontsource/noto-sans-arabic`
+imports; nothing else in the chain changes, because the face is named in exactly
+one place.
+
+**Note on distance:** Noto Sans Arabic remains installed and is *not* dead
+weight — its Latin subset draws numeric columns, because Poppins has no tabular
+figures. It sets no letter.
+
 ---
 
 ## 2. 🟡 "Aleppo Spice" is referenced but never defined

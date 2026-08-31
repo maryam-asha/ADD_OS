@@ -44,6 +44,18 @@ interface AllowedHost {
 	why: string
 	/** Set when the entry is temporary, naming what removes it. */
 	removedBy?: string
+	/**
+	 * The host appears in SOURCE only and by construction never reaches `dist/` —
+	 * a test fixture, or a file type the bundler does not emit.
+	 *
+	 * Such an entry is permanently "stale" to the dist pass below, which asks
+	 * whether each allowed host is still in the build. That question is only
+	 * meaningful for hosts that could be in the build. Without this flag the
+	 * self-pruning check reports a false positive forever, and a guard that is
+	 * always red stops being read — which is exactly what had happened to
+	 * `api.test`.
+	 */
+	sourceOnly?: true
 }
 
 /**
@@ -77,7 +89,13 @@ const ALLOWED: readonly AllowedHost[] = [
 	},
 	{
 		host: "api.test",
-		why: "Mocked API base URL in Vitest service-layer tests where fetch itself is stubbed — no network request possible."
+		why: "Mocked API base URL in Vitest service-layer tests where fetch itself is stubbed — no network request possible.",
+		sourceOnly: true
+	},
+	{
+		host: "scripts.sil.org",
+		why: "The SIL Open Font License text shipped with the self-hosted Poppins files (add-os/assets/fonts/en/OFL.txt). The URL is prose inside a licence the font's terms require us to keep; a .txt under assets/ is never imported by the app, so the bundler never emits it. Deleting the line would breach the licence it appears in.",
+		sourceOnly: true
 	}
 	// `api.org` was here — the Pinx placeholder VITE_API_URL. Removed from the
 	// allowlist because it is no longer in the build: the variable was emptied and
@@ -227,10 +245,25 @@ describe("network isolation — emitted artifacts", () => {
 	// is what caught `api.org` becoming stale the moment the placeholder was emptied.
 	it.runIf(built)("carries no allowlist entry that is no longer needed", () => {
 		const corpus = files.map(f => readFileSync(f, "utf8")).join("\n")
-		const stale = ALLOWED.filter(a => !corpus.includes(`//${a.host}`)).map(a => a.host)
+		const stale = ALLOWED.filter(a => !a.sourceOnly && !corpus.includes(`//${a.host}`)).map(a => a.host)
 		expect(
 			stale,
 			stale.length ? `\nAllowlist entries no longer present in the build — remove them:\n  ${stale.join("\n  ")}\n` : ""
+		).toEqual([])
+	})
+
+	// The other half of `sourceOnly`. The flag exempts an entry from the pruning
+	// check by CLAIMING the host cannot reach the build — so the claim is checked.
+	// Otherwise the flag would be a way to grant a real runtime host permanent,
+	// unexamined permission.
+	it.runIf(built)("keeps every sourceOnly host out of the build", () => {
+		const corpus = files.map(f => readFileSync(f, "utf8")).join("\n")
+		const leaked = ALLOWED.filter(a => a.sourceOnly && corpus.includes(`//${a.host}`)).map(a => a.host)
+		expect(
+			leaked,
+			leaked.length
+				? `\nThese are allowlisted as source-only but ARE in the build — drop the flag and justify them as runtime hosts:\n  ${leaked.join("\n  ")}\n`
+				: ""
 		).toEqual([])
 	})
 
