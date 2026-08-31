@@ -111,6 +111,7 @@
 <script setup lang="ts">
 import type { DataTableColumns, FormInst, FormRules, SelectOption } from "naive-ui"
 import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vue"
+import type { RoleRecord } from "@/add-os/modules/system/types/role"
 import type {
 	CreateUserPayload,
 	UpdateUserProfilePayload,
@@ -123,9 +124,10 @@ import { NAlert, NButton, NCard, NDataTable, NForm, NFormItem, NInput, NModal, N
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
+import { displayRoleName } from "@/add-os/modules/system/config/roles.config"
 import { isValidPassword, isValidSyrianPhone } from "@/add-os/modules/system/utils/validation"
 import { ApiError } from "@/add-os/services/api"
-import { listRoles } from "@/add-os/services/roles"
+import { listRoleRecords } from "@/add-os/services/roles"
 import { assignRole, createUser, listUsers, updateUserProfile, updateUserStatus } from "@/add-os/services/users"
 import { STATUS_ICONS } from "@/add-os/theme/tokens"
 import Icon from "@/components/common/Icon.vue"
@@ -139,15 +141,34 @@ const { t } = useI18n()
  * makes — rather than a hardcoded literal list. A prior version of this file
  * hardcoded the three role names on the reasoning that
  * `AssignRoleRequest`/`StoreUserRequest` validate against a fixed list
- * anyway, so a role `listRoles()` didn't return wasn't a useful option here.
- * That's true but doesn't outweigh the drift risk of two independent lists
- * of "the roles that exist" in the same app: if the roles table ever gains a
- * row, this screen and `RolesPage.vue` would silently disagree until someone
- * remembered to update this literal by hand. Fetching once here costs
- * nothing extra a user would notice, and a role the assign-role endpoint
- * would still reject fails exactly as before (a 422, generically toasted).
+ * anyway, so a role `listRoleRecords()` didn't return wasn't a useful option
+ * here. That's true but doesn't outweigh the drift risk of two independent
+ * lists of "the roles that exist" in the same app: if the roles table ever
+ * gains a row, this screen and `RolesPage.vue` would silently disagree until
+ * someone remembered to update this literal by hand. Fetching once here
+ * costs nothing extra a user would notice, and a role the assign-role
+ * endpoint would still reject fails exactly as before (a 422, generically
+ * toasted).
+ *
+ * Stores full `RoleRecord`s, not just bare names: any custom role an admin
+ * creates via `RolesPage.vue` has no `roles.names.*` translation, so
+ * `displayRoleName()` needs `protected` to decide whether to translate a
+ * role's name or show it as-is — the same distinction `RolesPage.vue` makes.
  */
-const roles = ref<UserRole[]>([])
+const roles = ref<RoleRecord[]>([])
+
+/**
+ * `User.roles` only carries bare name strings (`UserResource`'s shape), so
+ * rendering a user's role tag still needs to look the matching `RoleRecord`
+ * up in `roles` to know whether it's protected. A role a user holds that no
+ * longer exists in `roles` (deleted between page loads) falls back to an
+ * unprotected record of that name — `displayRoleName()` then shows the raw
+ * name, which is the best available answer for a role this screen can no
+ * longer describe.
+ */
+function roleRecordFor(name: UserRole): RoleRecord {
+	return roles.value.find(role => role.name === name) ?? { id: -1, name, protected: false, permissions: [] }
+}
 
 const STATUS_ICON: Record<UserStatus, string> = {
 	active: STATUS_ICONS.success,
@@ -167,7 +188,7 @@ const loadError = ref(false)
 const search = ref("")
 const roleFilter = ref<UserRole | null>(null)
 
-const roleFilterOptions = computed<SelectOption[]>(() => roles.value.map(role => ({ label: t(`roles.names.${role}`), value: role })))
+const roleFilterOptions = computed<SelectOption[]>(() => roles.value.map(role => ({ label: displayRoleName(role, t), value: role.name })))
 
 const filteredUsers = computed(() => {
 	const term = search.value.trim().toLowerCase()
@@ -198,7 +219,7 @@ function renderRoleTag(row: User) {
 	return h(
 		NTag,
 		{ round: true, bordered: true },
-		{ default: () => row.roles.map(role => t(`roles.names.${role}`)).join(", ") }
+		{ default: () => row.roles.map(role => displayRoleName(roleRecordFor(role), t)).join(", ") }
 	)
 }
 
@@ -263,7 +284,7 @@ async function loadUsers() {
 
 async function loadRoles() {
 	try {
-		roles.value = await listRoles()
+		roles.value = await listRoleRecords()
 	} catch (error) {
 		if (!(error instanceof ApiError)) throw error
 		// Left empty on failure: the filter/select options are just empty, not a page-level error —
@@ -292,7 +313,7 @@ const form = ref<CreateUserPayload>(emptyForm())
 
 /** `StoreUserRequest` never accepts `member` — member accounts self-register from the app. */
 const createRoleOptions = computed<SelectOption[]>(() =>
-	roles.value.filter(role => role !== "member").map(role => ({ label: t(`roles.names.${role}`), value: role }))
+	roles.value.filter(role => role.name !== "member").map(role => ({ label: displayRoleName(role, t), value: role.name }))
 )
 
 const rules = computed<FormRules>(() => ({
@@ -455,4 +476,19 @@ async function submitRoleChange() {
 		submittingRole.value = false
 	}
 }
+
+/**
+ * Exposed for testing only, same rationale as `RolesPage.vue`'s own
+ * `defineExpose` — `roleFilterOptions`/`createRoleOptions` are internal
+ * computeds with no other way to assert on directly (naive-ui's `<n-select>`
+ * only renders its option list into a teleported popover on open, which is
+ * brittle to drive in a mount test).
+ */
+defineExpose({
+	roles,
+	loading,
+	loadError,
+	roleFilterOptions,
+	createRoleOptions
+})
 </script>
