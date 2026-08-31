@@ -13,9 +13,14 @@
 				`logo-dark.png` the login screen uses, so the menu and the sign-in
 				page read as one product.
 
-				It replaces `<Logo type="large">`, which resolved to
-				`brand-logo_large_light.svg`. That file is not in the repo, so the
-				expanded sidebar was rendering a broken image on every page.
+				It replaces `<Logo type="large">`, which builds its filename from the
+				theme name at RUNTIME — `brand-logo_${type}_${theme}.svg` — so a
+				missing variant fails as a broken image with no build error and no
+				console error. That is how the expanded sidebar came to render blank
+				while `brand-logo_large_light.svg` was being reworked.
+
+				The lockup is a static import instead: if the file ever goes missing,
+				the bundler fails loudly rather than the page failing quietly.
 			-->
 			<img
 				v-if="!logoSmall"

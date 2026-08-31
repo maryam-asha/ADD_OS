@@ -10,7 +10,7 @@
 			line belongs in the middle, and centre reads the same in both directions.
 		-->
 		<div class="wrap flex items-center justify-center gap-3">
-			<div class="copy">Aleppo Digital District © {{ year }}</div>
+			<div class="copy"><span>Aleppo Digital District</span> © {{ year }}</div>
 		</div>
 	</footer>
 </template>
