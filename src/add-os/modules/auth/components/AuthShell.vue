@@ -22,10 +22,26 @@
 				card, the way the member app stacks surfaces. Tinted from `surface` with
 				an opacity modifier rather than a literal rgba(), so they stay a token
 				reference and the no-hardcoded-values rule holds.
+
+				Each panel carries the ADD pattern, anchored to its OUTER corner —
+				top-left on the upper panel, bottom-right on the lower one. The artwork
+				is a staircase of the wordmark with a diagonal void through it, NOT a
+				seamless tile, so it is placed rather than repeated: anchored this way
+				its dense corner sits at the edge of the composition and the void falls
+				behind the card, where a repeat would have fought the form.
+
+				Green, not the charcoal variant: the ground IS Charcoal Backbone, and
+				`pattern-dark.svg` is #42474F against it — a pattern nobody could see.
 			-->
 			<div aria-hidden="true" class="pointer-events-none absolute inset-0 hidden items-center justify-center sm:flex">
-				<div class="rounded-add-large bg-surface/5 absolute size-96 -translate-x-32 -translate-y-24" />
-				<div class="rounded-add-large border-surface/10 absolute size-96 translate-x-32 translate-y-24 border" />
+				<div class="rounded-add-large bg-surface/5 absolute size-96 -translate-x-32 -translate-y-24 overflow-hidden">
+					<div class="bg-top-left size-full bg-cover bg-no-repeat opacity-20" :style="patternLayer" />
+				</div>
+				<div
+					class="rounded-add-large border-surface/10 absolute size-96 translate-x-32 translate-y-24 overflow-hidden border"
+				>
+					<div class="bg-bottom-right size-full bg-cover bg-no-repeat opacity-20" :style="patternLayer" />
+				</div>
 			</div>
 
 			<main class="relative flex w-full max-w-md flex-col items-center">
@@ -62,6 +78,7 @@ import { computed } from "vue"
 import { useI18n } from "vue-i18n"
 import { brand, component, DEFAULT_MODE } from "@/add-os/theme/tokens"
 import logoLockup from "@/assets/images/logo-dark.png"
+import addPattern from "@/assets/images/patterns/pattern-green.svg?url"
 import Icon from "@/components/common/Icon.vue"
 import { useThemeStore } from "@/stores/theme"
 
@@ -89,6 +106,14 @@ const BackIconRtl = "carbon:arrow-right"
  * locale (see add-os/lang/locales.ts), so reading `isRTL` cannot contradict it.
  */
 const backIcon = computed<string>(() => (themeStore.isRTL ? BackIconRtl : BackIconLtr))
+
+/**
+ * Bound rather than written as a Tailwind `bg-[url(…)]`: Vite rewrites this
+ * import to the hashed, content-addressed asset URL, and an arbitrary value in a
+ * class would be resolved relative to the generated stylesheet instead. Size,
+ * position and opacity stay in utilities — only the URL has to come from here.
+ */
+const patternLayer = { backgroundImage: `url(${addPattern})` }
 
 const authAction = component[DEFAULT_MODE].auth
 
