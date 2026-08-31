@@ -20,18 +20,28 @@
 // Read from naive's own style sources rather than guessed:
 //   · `.n-card`   paints `background-color: var(--n-color)` — ONE class.
 //   · `.n-drawer` paints the same — ONE class.
-//   · `.n-dialog` paints NOTHING; it inherits whatever is behind it.
+//   · `.n-dialog` paints NOTHING; it shows whatever is behind it.
 //
-// So every rule below needs two classes to outrank naive, and the doubled
-// `.n-drawer.n-drawer` is that and nothing more — the drawer root carries no
-// second class to pair with.
+// …but a card that IS a modal has a SECOND rule. `card/styles/index.cssr.mjs`
+// wraps `asModal({ background: 'var(--n-color-modal)' })`, and `asModal` emits
+// `&.n-modal` nested in `.n-card` — that is `.n-card.n-modal`, two classes, with
+// the `background` SHORTHAND.
 //
-// `.n-modal.n-card` is deliberately NOT plain `.n-card`: a modal with
-// `preset="card"` puts both classes on the same element, so this catches dialog
-// cards while leaving the page's own cards on `surface`. That distinction is the
-// whole point of the change.
+// A first attempt here used `.n-modal.n-card`, which is the same two classes.
+// Same specificity, and naive injects at runtime so its rule lands later and
+// won: the dialog stayed #F7F5F2 with nothing in the console to say why.
+//
+// `.n-modal-container` — the wrapper naive renders around every modal — takes
+// this to three classes, which beats `.n-card.n-modal` on specificity alone and
+// therefore does not depend on injection order at all. A more specific
+// `background-color` also beats the colour component of their `background`
+// shorthand, so the shorthand is not a problem once the selector outranks it.
+//
+// The `.n-modal` half stays load-bearing for a different reason: it keeps the
+// rule off the page's ordinary cards, which must stay on `surface`. That
+// distinction is the whole point of the change.
 
-.n-modal.n-card,
+.n-modal-container .n-modal.n-card,
 .n-drawer.n-drawer,
 .n-dialog.n-dialog {
 	background-color: var(--add-surface-raised);
