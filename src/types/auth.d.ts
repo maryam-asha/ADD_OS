@@ -17,4 +17,6 @@ export interface AdminUser {
 	status?: string
 	preferred_language?: string
 	roles: string[]
+	/** Flat list of every permission (`module.action`) the account holds via any of its roles. */
+	permissions?: string[]
 }
