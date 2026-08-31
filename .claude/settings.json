@@ -1,5 +1,37 @@
 {
   "permissions": {
+    "allow": [
+      "Read(**)",
+      "Edit(src/add-os/**)",
+      "Edit(docs/**)",
+      "Bash(pnpm test*)",
+      "Bash(pnpm lint*)",
+      "Bash(pnpm typecheck*)",
+      "Bash(pnpm vitest*)",
+      "Bash(git fetch *)",
+      "PowerShell($can = \"C:\\\\Users\\\\User\\\\Desktop\\\\Aleppo Digital District\\\\ADDCore\\\\postman\\\\ADD-OS.postman_collection.json\"; $snap = \"C:\\\\Users\\\\User\\\\Desktop\\\\Aleppo Digital District\\\\ADDOS\\\\docs\\\\api\\\\ADD-OS.postman_collection.json\"; $a = Get-Content $can; $b = Get-Content $snap; \"canonical lines: $\\($a.Count\\)  snapshot lines: $\\($b.Count\\)\"; $d = Compare-Object $b $a -SyncWindow 2000; \"diff entries: $\\($d.Count\\)\"; $d | Select-Object -First 60 | ForEach-Object { \"$\\($_.SideIndicator\\) $\\($_.InputObject.Trim\\(\\)\\)\" })",
+      "PowerShell($c = \"C:\\\\Users\\\\User\\\\Desktop\\\\Aleppo Digital District\\\\ADDCore\\\\postman\\\\ADD-OS.postman_collection.json\"; $s = \"C:\\\\Users\\\\User\\\\Desktop\\\\Aleppo Digital District\\\\ADDOS\\\\docs\\\\api\\\\ADD-OS.postman_collection.json\"; Copy-Item -LiteralPath $c -Destination $s -Force; $hc = \\(Get-FileHash -LiteralPath $c -Algorithm SHA256\\).Hash; $hs = \\(Get-FileHash -LiteralPath $s -Algorithm SHA256\\).Hash; \"canonical sha256: $hc\"; \"snapshot  sha256: $hs\"; \"sha256 match: $\\($hc -eq $hs\\)\"; $bc = [IO.File]::ReadAllBytes\\($c\\); $bs = [IO.File]::ReadAllBytes\\($s\\); \"byte-for-byte identical \\(cmp\\): $\\([Linq.Enumerable]::SequenceEqual\\($bc, $bs\\)\\)\"; \"bytes: $\\($bs.Length\\)\")",
+      "PowerShell(pnpm api:collection:check 2>&1 | Select-String -Pattern \"MATCH|MISMATCH|sha256\" | ForEach-Object { $_.Line })",
+      "PowerShell(git reset -q)",
+      "PowerShell(git add \"docs/api/ADD-OS.postman_collection.json\" \"docs/api/README.md\" \"CLAUDE.md\")",
+      "PowerShell(\"autocrlf: $\\(git config core.autocrlf\\)\"; \"eol: $\\(git config core.eol\\)\"; \".gitattributes present: $\\(Test-Path .gitattributes\\)\"; if \\(Test-Path .gitattributes\\) { Get-Content .gitattributes }; \"--- attrs for the snapshot ---\"; git check-attr text eol -- \"docs/api/ADD-OS.postman_collection.json\"; \"--- does the committed blob differ from the working file? ---\"; $blob = git show \":docs/api/ADD-OS.postman_collection.json\" | Out-String; \"staged blob bytes \\(via cat-file\\): $\\(git cat-file -s $\\(git rev-parse ':docs/api/ADD-OS.postman_collection.json'\\)\\)\"; \"working file bytes: $\\(\\(Get-Item 'docs/api/ADD-OS.postman_collection.json'\\).Length\\)\")",
+      "PowerShell(git switch chore/repin-api-collection; git add .gitattributes; git commit -F \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-User-Desktop-Aleppo-Digital-District-ADDOS\\\\2515ed5c-b503-4258-aeb1-a96dfdca4b60\\\\scratchpad\\\\msg-attrs.txt\"; if \\($?\\) { \"--- attr now resolves to ---\"; git check-attr text -- \"docs/api/ADD-OS.postman_collection.json\"; \"--- guard still green? ---\"; pnpm api:collection:check 2>&1 | Select-String \"MATCH\" | ForEach-Object { $_.Line } })",
+      "PowerShell($f = \"src/add-os/utils/format/__tests__/format.spec.ts\"; \"total lines: $\\(\\(Get-Content $f\\).Count\\)\"; Get-Content $f -Tail 12)",
+      "PowerShell(pnpm type-check 2>&1 | Select-String -Pattern \"error TS|Found [0-9]+ error\" | Select-Object -First 15 | ForEach-Object { $_.Line }; \"type-check exit: $LASTEXITCODE\")",
+      "PowerShell(pnpm type-check 2>&1 | Out-String -Stream | Select-String -Pattern \"error TS|Found \\\\d+ error\" | Select-Object -First 20 | ForEach-Object { $_.Line }; \"exit: $LASTEXITCODE\")",
+      "PowerShell(git status -sb; \"--- ahead/behind vs github ---\"; git rev-list --left-right --count github/feat/kiosk-module...HEAD; \"--- local vs remote tip ---\"; \"local:  $\\(git rev-parse HEAD\\)\"; \"remote: $\\(git rev-parse github/feat/kiosk-module\\)\")",
+      "Bash(python pin-scan.py)",
+      "Bash(python -c ' *)",
+      "Bash(awk 'NR>=1 && /\"activeSessions\"/{found=NR} END{}' src/add-os/lang/en/en.json)",
+      "Bash(CI=true VSCODE_PID= VSCODE_CWD= TERM_PROGRAM= npx eslint .)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(xargs grep -l \"guard\\\\|hardcoded\\\\|no-inline-role\\\\|forbidden\")",
+      "Bash(CI=true VSCODE_PID= npx eslint .)",
+      "Bash(echo \"LINT EXIT: $?\")",
+      "Bash(tee \"C:/Users/User/AppData/Local/Temp/claude/c--Users-User-Desktop-Aleppo-Digital-District-ADDOS/57a8a2b6-f0f1-4ff4-9428-d53b5b86f2b8/scratchpad/full-suite.log\")",
+      "PowerShell(Get-ChildItem \"c:\\\\Users\\\\User\\\\Desktop\\\\Aleppo Digital District\\\\ADDOS\\\\src\\\\add-os\\\\views\" -Recurse -Depth 2 | Where-Object { $_.Name -match 'auth|login|password|otp|verify|signin|sign-in' } | Select-Object FullName; \"=== vendor views ===\"; Get-ChildItem \"c:\\\\Users\\\\User\\\\Desktop\\\\Aleppo Digital District\\\\ADDOS\\\\src\\\\views\" -Recurse -Depth 2 | Where-Object { $_.Name -match 'auth|login|password|otp|verify' } | Select-Object FullName)",
+      "PowerShell($r=\"c:\\\\Users\\\\User\\\\Desktop\\\\Aleppo Digital District\\\\ADDOS\"; git -C $r status --short | Select-Object -First 20; \"=== worktrees ===\"; git -C $r worktree list; \"=== add-os views deep ===\"; Get-ChildItem \"$r\\\\src\\\\add-os\\\\views\" -Recurse -Force | Select-Object -First 30 FullName)"
+    ],
     "deny": [
       "Edit(_pinx-vendor/**)",
       "Write(_pinx-vendor/**)",
@@ -18,15 +50,6 @@
       "Edit(.gitignore)",
       "Bash(pnpm add*)",
       "Bash(npm install*)"
-    ],
-    "allow": [
-      "Read(**)",
-      "Edit(src/add-os/**)",
-      "Edit(docs/**)",
-      "Bash(pnpm test*)",
-      "Bash(pnpm lint*)",
-      "Bash(pnpm typecheck*)",
-      "Bash(pnpm vitest*)"
     ]
   },
   "hooks": {
