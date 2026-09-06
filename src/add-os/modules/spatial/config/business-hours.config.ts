@@ -49,6 +49,37 @@ export function emptyBusinessHourPayload(branchId: number): BusinessHourPayload 
 	return { branch_id: branchId, day_of_week: "sunday", open_time: "", close_time: "" }
 }
 
+/** Form model for the bulk-create modal (multiple days, one shared time window). */
+export interface BulkHourForm {
+	branch_id: number
+	days: DayOfWeek[]
+	open_time: string
+	close_time: string
+}
+
+export function emptyBulkHourForm(branchId: number): BulkHourForm {
+	return { branch_id: branchId, days: [], open_time: "", close_time: "" }
+}
+
+export const DAYS_OF_WEEK_ORDERED: DayOfWeek[] = [
+	"saturday",
+	"sunday",
+	"monday",
+	"tuesday",
+	"wednesday",
+	"thursday",
+	"friday",
+]
+
+export const WORK_DAYS: DayOfWeek[] = [
+	"saturday",
+	"sunday",
+	"monday",
+	"tuesday",
+	"wednesday",
+	"thursday",
+]
+
 export function buildBusinessHourExceptionColumns(t: ComposerTranslation): DataTableColumns<BusinessHourException> {
 	return [
 		{ title: t("businessHours.exceptions.columns.date"), key: "date" },

@@ -7,55 +7,133 @@
 
 		<n-alert v-if="loadError" type="error" :title="t('roles.loadError')" />
 
-		<div class="flex justify-end">
+		<!-- Action bar with generous spacing before table -->
+		<div class="flex justify-end mb-4">
 			<n-button v-if="canCreate" type="primary" @click="openCreate">
 				<template #icon><Icon name="carbon:add" :size="16" /></template>
 				{{ t("roles.create.button") }}
 			</n-button>
 		</div>
 
+		<!-- Roles Table -->
 		<n-card class="add-ledger-table">
-			<n-data-table :columns :data="roles" :loading :bordered="false" :row-key />
+			<n-data-table :columns="columns" :data="roles" :loading="loading" :bordered="false" :row-key="rowKey" />
 		</n-card>
 
+		<!-- Role Create / Edit Modal -->
 		<n-modal
 			v-model:show="modalVisible"
 			preset="card"
 			:title="mode === 'create' ? t('roles.create.title') : t('roles.edit.title')"
 			closable
-			style="max-width: 40rem"
-			content-style="max-height: 60vh; overflow-y: auto"
+			style="max-width: 46rem"
+			content-style="max-height: 72vh; overflow-y: auto"
 		>
-			<n-form ref="formRef" :model="form" :rules label-placement="top">
+			<n-form ref="formRef" :model="form" :rules="rules" label-placement="top">
 				<n-form-item path="name" :label="t('roles.form.name')">
-					<n-input v-model:value="form.name" :disabled="mode === 'edit' && editingRole?.protected" />
+					<n-input
+						v-model:value="form.name"
+						:placeholder="t('roles.form.namePlaceholder')"
+						:disabled="mode === 'edit' && editingRole?.protected"
+					/>
 				</n-form-item>
-				<!--
-					Module names (group.module) and action labels (action.action) are shown
-					as their raw backend identifiers, not translated — a deliberate v1
-					simplification. Permission names are open-ended and backend-derived
-					(PermissionSyncService reflects them off route definitions), so
-					individually localizing each one isn't practical yet, unlike the fixed
-					roles.names.* set used for the three built-in role names.
-				-->
+
+				<!-- Permissions Section -->
 				<n-form-item :label="t('roles.form.permissions')">
-					<n-checkbox-group v-model:value="form.permissions" class="w-full">
-						<div v-for="group in permissionModules" :key="group.module" class="rounded-lg border p-4 mb-3">
-							<div class="flex items-center justify-between mb-2">
-								<h3 class="font-medium">{{ group.module }}</h3>
-								<n-checkbox
-									:checked="isModuleFullySelected(group, form.permissions)"
-									:indeterminate="isModulePartiallySelected(group, form.permissions)"
-									@update:checked="checked => toggleModule(group, checked)"
-								>
-									{{ t("roles.form.selectAll") }}
-								</n-checkbox>
+					<div class="flex flex-col gap-3 w-full">
+						<!-- Permissions Toolbar: count + select/clear all -->
+						<div class="flex items-center justify-between gap-2 pb-1">
+							<div class="flex items-center gap-2">
+								<span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300">
+									{{ t("roles.form.selectedCount", { selected: form.permissions.length, total: totalPermissionsCount }) }}
+								</span>
 							</div>
-							<div class="grid grid-cols-2 gap-2">
-								<n-checkbox v-for="action in group.actions" :key="action.name" :value="action.name" :label="action.action" />
-							</div>
+							<n-button
+								size="tiny"
+								quaternary
+								type="primary"
+								@click="toggleAllPermissions"
+							>
+								{{ allPermissionsSelected ? t("roles.form.deselectAll") : t("roles.form.selectAllPermissions") }}
+							</n-button>
 						</div>
-					</n-checkbox-group>
+
+						<!-- Filter search input -->
+						<n-input
+							v-if="permissionModules.length > 3"
+							v-model:value="searchQuery"
+							:placeholder="t('roles.form.searchModules')"
+							clearable
+							size="small"
+							class="mb-1"
+						>
+							<template #prefix>
+								<Icon name="carbon:search" :size="16" class="text-neutral-400" />
+							</template>
+						</n-input>
+
+						<!-- Modules List -->
+						<n-checkbox-group v-model:value="form.permissions" class="w-full">
+							<div
+								v-for="group in filteredModules"
+								:key="group.module"
+								class="rounded-xl border border-neutral-200/90 dark:border-neutral-800/90 bg-neutral-50/40 dark:bg-neutral-900/30 p-3.5 mb-3 transition-all hover:border-neutral-300 dark:hover:border-neutral-700"
+							>
+								<!-- Module Header with translated title and count badge -->
+								<div class="flex items-center justify-between pb-2 mb-2.5 border-b border-neutral-200/60 dark:border-neutral-800/60">
+									<div class="flex items-center gap-2">
+										<h3 class="font-semibold text-sm sm:text-base text-neutral-800 dark:text-neutral-100">
+											{{ displayModuleName(group.module, t, te) }}
+										</h3>
+										<span
+											class="text-xs px-2 py-0.5 rounded-full font-medium transition-colors"
+											:class="isModuleFullySelected(group, form.permissions)
+												? 'bg-[#007F91]/15 text-[#007F91]'
+												: isModulePartiallySelected(group, form.permissions)
+												? 'bg-[#A97C57]/15 text-[#A97C57]'
+												: 'bg-neutral-200/60 dark:bg-neutral-800 text-neutral-500'"
+										>
+											{{ getModuleSelectedCount(group) }}/{{ group.actions.length }}
+										</span>
+									</div>
+									<n-checkbox
+										:checked="isModuleFullySelected(group, form.permissions)"
+										:indeterminate="isModulePartiallySelected(group, form.permissions)"
+										@update:checked="checked => toggleModule(group, checked)"
+									>
+										<span class="text-xs sm:text-sm font-medium">{{ t("roles.form.selectAll") }}</span>
+									</n-checkbox>
+								</div>
+
+								<!-- Module Actions in a responsive 4-column grid -->
+								<div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+									<div
+										v-for="action in group.actions"
+										:key="action.name"
+										class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border transition-all cursor-pointer select-none"
+										:class="form.permissions.includes(action.name)
+											? 'border-[#007F91]/50 bg-[#007F91]/10 text-neutral-900 dark:text-neutral-100 font-medium'
+											: 'border-neutral-200/80 dark:border-neutral-800/80 bg-white dark:bg-neutral-900/60 text-neutral-700 dark:text-neutral-300 hover:border-neutral-300 dark:hover:border-neutral-700'"
+										@click="toggleAction(action.name)"
+									>
+										<n-checkbox
+											:value="action.name"
+											:checked="form.permissions.includes(action.name)"
+											@click.stop
+											@update:checked="() => toggleAction(action.name)"
+										/>
+										<span class="text-xs sm:text-sm font-medium truncate" :title="displayActionName(action.action, t, te)">
+											{{ displayActionName(action.action, t, te) }}
+										</span>
+									</div>
+								</div>
+							</div>
+
+							<div v-if="filteredModules.length === 0" class="py-6 text-center text-neutral-400 text-sm">
+								{{ t("roles.form.noModulesFound") }}
+							</div>
+						</n-checkbox-group>
+					</div>
 				</n-form-item>
 			</n-form>
 			<template #footer>
@@ -91,7 +169,13 @@ import {
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { canManageRoles } from "@/add-os/config/permissions"
-import { displayRoleName, isModuleFullySelected, isModulePartiallySelected } from "@/add-os/modules/system/config/roles.config"
+import {
+	displayActionName,
+	displayModuleName,
+	displayRoleName,
+	isModuleFullySelected,
+	isModulePartiallySelected
+} from "@/add-os/modules/system/config/roles.config"
 import { ApiError } from "@/add-os/services/api"
 import { listPermissionModules } from "@/add-os/services/permissions"
 import { createRole, listRoleRecords, removeRole, updateRole } from "@/add-os/services/roles"
@@ -99,7 +183,7 @@ import Icon from "@/components/common/Icon.vue"
 
 defineProps<{ titleKey?: string }>()
 
-const { t } = useI18n()
+const { t, te } = useI18n()
 const message = useMessage()
 const dialog = useDialog()
 
@@ -109,6 +193,7 @@ const roles = ref<RoleRecord[]>([])
 const permissionModules = ref<PermissionModule[]>([])
 const loading = ref(true)
 const loadError = ref(false)
+const searchQuery = ref("")
 
 function rowKey(row: RoleRecord): number {
 	return row.id
@@ -132,9 +217,7 @@ function renderNameCell(row: RoleRecord) {
  * protected status (`api.role.member_out_of_scope`). Delete stays gated on
  * `protected` alone, since that's the flag the backend actually keys its
  * rename/delete rejection on. Both are also gated on `canManageRoles()`,
- * same defense-in-depth the Create button already has — the backend is the
- * real authority, but a user who can't manage roles shouldn't even see the
- * buttons.
+ * same defense-in-depth the Create button already has.
  */
 function renderActions(row: RoleRecord) {
 	if (!canManageRoles()) return h("div", { class: "flex gap-2" })
@@ -192,9 +275,6 @@ async function loadPermissionModules() {
 		permissionModules.value = await listPermissionModules()
 	} catch (error) {
 		if (!(error instanceof ApiError)) throw error
-		// Left empty on failure: the permission editor just has nothing to render —
-		// the roles list itself (loadRoles' own loadError) is the primary content
-		// of this page, same reasoning as UsersPage.vue's own loadRoles().
 	}
 }
 
@@ -219,6 +299,68 @@ const rules = computed<FormRules>(() => ({
 	name: [{ required: true, message: t("roles.validation.nameRequired"), trigger: ["blur", "input"] }]
 }))
 
+const totalPermissionsCount = computed(() => {
+	return permissionModules.value.reduce((acc, g) => acc + g.actions.length, 0)
+})
+
+const allPermissionsSelected = computed(() => {
+	if (totalPermissionsCount.value === 0) return false
+	return form.value.permissions.length === totalPermissionsCount.value
+})
+
+function getModuleSelectedCount(group: PermissionModule): number {
+	return group.actions.filter(a => form.value.permissions.includes(a.name)).length
+}
+
+const filteredModules = computed(() => {
+	const query = searchQuery.value.trim().toLowerCase()
+	if (!query) return permissionModules.value
+
+	return permissionModules.value
+		.map(group => {
+			const modLabel = displayModuleName(group.module, t, te).toLowerCase()
+			const modRaw = group.module.toLowerCase()
+			const matchMod = modLabel.includes(query) || modRaw.includes(query)
+
+			if (matchMod) return group
+
+			const matchingActions = group.actions.filter(a => {
+				const actLabel = displayActionName(a.action, t, te).toLowerCase()
+				return actLabel.includes(query) || a.action.toLowerCase().includes(query) || a.name.toLowerCase().includes(query)
+			})
+
+			if (matchingActions.length > 0) {
+				return { ...group, actions: matchingActions }
+			}
+			return null
+		})
+		.filter((g): g is PermissionModule => g !== null)
+})
+
+function toggleAction(name: string) {
+	const set = new Set(form.value.permissions)
+	if (set.has(name)) {
+		set.delete(name)
+	} else {
+		set.add(name)
+	}
+	form.value.permissions = [...set]
+}
+
+function toggleAllPermissions() {
+	if (allPermissionsSelected.value) {
+		form.value.permissions = []
+	} else {
+		const all: string[] = []
+		for (const group of permissionModules.value) {
+			for (const a of group.actions) {
+				all.push(a.name)
+			}
+		}
+		form.value.permissions = all
+	}
+}
+
 /**
  * The module's own "select all" checkbox sits outside `n-checkbox-group`'s
  * value-collection contract (it isn't itself a permission), so it mutates
@@ -238,6 +380,7 @@ function openCreate() {
 	mode.value = "create"
 	editingRole.value = null
 	form.value = emptyForm()
+	searchQuery.value = ""
 	modalVisible.value = true
 }
 
@@ -245,6 +388,7 @@ function openEdit(role: RoleRecord) {
 	mode.value = "edit"
 	editingRole.value = role
 	form.value = { name: role.name, permissions: [...role.permissions] }
+	searchQuery.value = ""
 	modalVisible.value = true
 }
 

@@ -28,3 +28,30 @@ export function isModulePartiallySelected(group: PermissionModule, selected: str
 export function displayRoleName(role: RoleRecord, translate: (key: string) => string): string {
 	return role.protected ? translate(`roles.names.${role.name}`) : role.name
 }
+
+/**
+ * Localizes a permission module name (e.g. "branches" -> "الفروع"),
+ * falling back gracefully to the raw module identifier if unmapped.
+ */
+export function displayModuleName(module: string, translate: (key: string) => string, hasTranslation?: (key: string) => boolean): string {
+	const key = `roles.modules.${module}`
+	if (hasTranslation && !hasTranslation(key)) {
+		return module
+	}
+	const val = translate(key)
+	return val && val !== key ? val : module
+}
+
+/**
+ * Localizes a permission action word (e.g. "view" -> "عرض", "create" -> "إضافة"),
+ * falling back gracefully to the raw action identifier if unmapped.
+ */
+export function displayActionName(action: string, translate: (key: string) => string, hasTranslation?: (key: string) => boolean): string {
+	const key = `roles.actions.${action}`
+	if (hasTranslation && !hasTranslation(key)) {
+		return action
+	}
+	const val = translate(key)
+	return val && val !== key ? val : action
+}
+

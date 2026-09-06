@@ -1,7 +1,13 @@
 // src/add-os/modules/system/config/__tests__/roles.config.spec.ts
 import type { PermissionModule, RoleRecord } from "@/add-os/modules/system/types/role"
 import { describe, expect, it } from "vitest"
-import { displayRoleName, isModuleFullySelected, isModulePartiallySelected } from "../roles.config"
+import {
+	displayActionName,
+	displayModuleName,
+	displayRoleName,
+	isModuleFullySelected,
+	isModulePartiallySelected
+} from "../roles.config"
 
 const branchesModule: PermissionModule = {
 	module: "branches",
@@ -69,3 +75,40 @@ describe("displayRoleName", () => {
 		expect(displayRoleName(custom, translate)).toBe("front-desk")
 	})
 })
+
+describe("displayModuleName", () => {
+	const translations: Record<string, string> = {
+		"roles.modules.branches": "الفروع",
+		"roles.modules.users": "المستخدمون"
+	}
+	const translate = (key: string) => translations[key] ?? key
+	const hasTranslation = (key: string) => key in translations
+
+	it("translates known module names", () => {
+		expect(displayModuleName("branches", translate, hasTranslation)).toBe("الفروع")
+		expect(displayModuleName("users", translate, hasTranslation)).toBe("المستخدمون")
+	})
+
+	it("falls back to the raw module identifier when unmapped", () => {
+		expect(displayModuleName("unknown-module", translate, hasTranslation)).toBe("unknown-module")
+	})
+})
+
+describe("displayActionName", () => {
+	const translations: Record<string, string> = {
+		"roles.actions.view": "عرض",
+		"roles.actions.create": "إضافة"
+	}
+	const translate = (key: string) => translations[key] ?? key
+	const hasTranslation = (key: string) => key in translations
+
+	it("translates known action words", () => {
+		expect(displayActionName("view", translate, hasTranslation)).toBe("عرض")
+		expect(displayActionName("create", translate, hasTranslation)).toBe("إضافة")
+	})
+
+	it("falls back to the raw action word when unmapped", () => {
+		expect(displayActionName("custom_action", translate, hasTranslation)).toBe("custom_action")
+	})
+})
+

@@ -11,6 +11,20 @@
 		"logged_out": "Logged out",
 		"logoAlt": "ADD OS logo"
 	},
+	"errors": {
+		"backHome": "Back to home",
+		"tryAgain": "Try again",
+		"notFound": {
+			"title": "Page not found",
+			"description": "The page you are looking for may have moved or no longer exists.",
+			"illustrationAlt": "An illustration for a missing page"
+		},
+		"serverError": {
+			"title": "Something went wrong",
+			"description": "We could not load this page right now. Please try again in a moment.",
+			"illustrationAlt": "An illustration for a connection error"
+		}
+	},
 	"notifications": {
 		"title": "Notifications",
 		"setAsRead": "Set as read",
@@ -47,13 +61,52 @@
 		},
 		"form": {
 			"name": "Name",
+			"namePlaceholder": "Enter role name",
 			"permissions": "Permissions",
 			"selectAll": "Select all",
+			"deselectAll": "Clear all",
+			"selectAllPermissions": "Select all permissions",
+			"searchModules": "Search modules and permissions...",
+			"noModulesFound": "No permissions match your search.",
+			"selectedCount": "{selected} of {total} selected",
 			"submit": "Save",
 			"cancel": "Cancel"
 		},
 		"validation": {
 			"nameRequired": "Name is required."
+		},
+		"actions": {
+			"view": "View",
+			"create": "Create",
+			"update": "Update",
+			"delete": "Delete",
+			"update_status": "Update status",
+			"assign_role": "Assign role"
+		},
+		"modules": {
+			"announcements": "Announcements",
+			"branches": "Branches",
+			"buildings": "Buildings",
+			"business-hours": "Business Hours",
+			"business-hour-exceptions": "Business Hour Exceptions",
+			"community-members": "Community Members",
+			"contact-links": "Contact Links",
+			"devices": "Devices",
+			"device-capabilities": "Device Capabilities",
+			"events": "Events",
+			"floors": "Floors",
+			"founders": "Founders",
+			"partners": "Partners",
+			"plans": "Plans",
+			"private-office-requests": "Private Office Requests",
+			"resources": "Resources",
+			"seats-desks": "Seats & Desks",
+			"spaces": "Spaces",
+			"zones": "Zones",
+			"users": "Users",
+			"error-logs": "Error Logs",
+			"roles": "Roles & Permissions",
+			"settings": "Settings"
 		}
 	},
 	"auth": {
@@ -235,64 +288,153 @@
 		}
 	},
 	"branches": {
-		"columns": { "name": "Name", "city": "City", "timezone": "Timezone", "isActive": "Active" },
+		"columns": {
+			"name": "Name",
+			"city": "City",
+			"timezone": "Timezone",
+			"isActive": "Active"
+		},
 		"isActiveYes": "Active",
 		"isActiveNo": "Inactive",
-		"create": { "button": "New branch", "title": "New branch", "success": "Branch created." },
-		"edit": { "title": "Edit branch", "success": "Branch updated." },
+		"create": {
+			"button": "New branch",
+			"title": "New branch",
+			"success": "Branch created."
+		},
+		"edit": {
+			"title": "Edit branch",
+			"success": "Branch updated."
+		},
 		"delete": {
 			"success": "Branch deleted.",
 			"cascadeWarning": "Deleting this branch also deletes every building, floor, zone, space, resource, and seat/desk under it."
 		},
-		"form": { "name": "Name", "city": "City", "timezone": "Timezone", "isActive": "Active" },
+		"form": {
+			"name": "Name",
+			"city": "City",
+			"timezone": "Timezone",
+			"isActive": "Active"
+		},
 		"loadError": "Couldn't load branches. You may not have permission to view this page.",
-		"stats": { "total": "Total branches", "active": "Active", "inactive": "Inactive" }
+		"stats": {
+			"total": "Total branches",
+			"active": "Active",
+			"inactive": "Inactive"
+		}
 	},
 	"buildings": {
-		"columns": { "branch": "Branch", "name": "Name", "floorCount": "Floors" },
-		"create": { "button": "New building", "title": "New building", "success": "Building created." },
-		"edit": { "title": "Edit building", "success": "Building updated." },
+		"columns": {
+			"branch": "Branch",
+			"name": "Name",
+			"floorCount": "Floors"
+		},
+		"create": {
+			"button": "New building",
+			"title": "New building",
+			"success": "Building created."
+		},
+		"edit": {
+			"title": "Edit building",
+			"success": "Building updated."
+		},
 		"delete": {
 			"success": "Building deleted.",
 			"cascadeWarning": "Deleting this building also deletes every floor, zone, space, resource, and seat/desk under it."
 		},
-		"form": { "branch": "Branch", "name": "Name", "floorCount": "Number of floors" },
+		"form": {
+			"branch": "Branch",
+			"name": "Name",
+			"floorCount": "Number of floors"
+		},
 		"loadError": "Couldn't load buildings. You may not have permission to view this page.",
-		"stats": { "total": "Total buildings", "totalFloors": "Total floors" }
+		"stats": {
+			"total": "Total buildings",
+			"totalFloors": "Total floors"
+		}
 	},
 	"floors": {
-		"columns": { "building": "Building", "label": "Label", "sortOrder": "Order" },
-		"create": { "button": "New floor", "title": "New floor", "success": "Floor created." },
-		"edit": { "title": "Edit floor", "success": "Floor updated." },
+		"columns": {
+			"building": "Building",
+			"label": "Label",
+			"sortOrder": "Order"
+		},
+		"create": {
+			"button": "New floor",
+			"title": "New floor",
+			"success": "Floor created."
+		},
+		"edit": {
+			"title": "Edit floor",
+			"success": "Floor updated."
+		},
 		"delete": {
 			"success": "Floor deleted.",
 			"cascadeWarning": "Deleting this floor also deletes every zone and space under it."
 		},
-		"form": { "branch": "Branch", "building": "Building", "label": "Label", "sortOrder": "Sort order" },
+		"form": {
+			"branch": "Branch",
+			"building": "Building",
+			"label": "Label",
+			"sortOrder": "Sort order"
+		},
 		"loadError": "Couldn't load floors. You may not have permission to view this page."
 	},
 	"zones": {
-		"columns": { "floor": "Floor", "label": "Label", "sortOrder": "Order" },
-		"create": { "button": "New zone", "title": "New zone", "success": "Zone created." },
-		"edit": { "title": "Edit zone", "success": "Zone updated." },
+		"columns": {
+			"floor": "Floor",
+			"label": "Label",
+			"sortOrder": "Order"
+		},
+		"create": {
+			"button": "New zone",
+			"title": "New zone",
+			"success": "Zone created."
+		},
+		"edit": {
+			"title": "Edit zone",
+			"success": "Zone updated."
+		},
 		"delete": {
 			"success": "Zone deleted.",
 			"cascadeWarning": "Deleting this zone also deletes every space under it."
 		},
-		"form": { "branch": "Branch", "building": "Building", "floor": "Floor", "label": "Label", "sortOrder": "Sort order" },
+		"form": {
+			"branch": "Branch",
+			"building": "Building",
+			"floor": "Floor",
+			"label": "Label",
+			"sortOrder": "Sort order"
+		},
 		"loadError": "Couldn't load zones. You may not have permission to view this page."
 	},
-	"operationalStatus": { "active": "Active", "maintenance": "Under maintenance", "retired": "Retired" },
+	"operationalStatus": {
+		"active": "Active",
+		"maintenance": "Under maintenance",
+		"retired": "Retired"
+	},
 	"spaces": {
-		"columns": { "building": "Building", "zone": "Zone", "spaceType": "Type", "capacity": "Capacity", "status": "Status" },
+		"columns": {
+			"building": "Building",
+			"zone": "Zone",
+			"spaceType": "Type",
+			"capacity": "Capacity",
+			"status": "Status"
+		},
 		"spaceType": {
 			"co_space": "Co-working space",
 			"room": "Room",
 			"business": "Business space",
 			"event_hall": "Event hall"
 		},
-		"create": { "button": "New space", "title": "New space", "success": "Space created." },
-		"edit": { "title": "Edit space", "success": "Space updated." },
+		"create": {
+			"button": "New space",
+			"title": "New space",
+			"success": "Space created."
+		},
+		"edit": {
+			"title": "Edit space",
+			"success": "Space updated."
+		},
 		"delete": {
 			"success": "Space deleted.",
 			"cascadeWarning": "Deleting this space also deletes every resource and seat/desk under it."
@@ -316,13 +458,30 @@
 			"pricingCurrency": "Currency (optional)"
 		},
 		"loadError": "Couldn't load spaces. You may not have permission to view this page.",
-		"stats": { "total": "Total spaces" }
+		"stats": {
+			"total": "Total spaces"
+		}
 	},
 	"resources": {
-		"columns": { "space": "Space", "name": "Name", "category": "Category", "quantity": "Quantity", "status": "Status" },
-		"create": { "button": "New resource", "title": "New resource", "success": "Resource created." },
-		"edit": { "title": "Edit resource", "success": "Resource updated." },
-		"delete": { "success": "Resource deleted." },
+		"columns": {
+			"space": "Space",
+			"name": "Name",
+			"category": "Category",
+			"quantity": "Quantity",
+			"status": "Status"
+		},
+		"create": {
+			"button": "New resource",
+			"title": "New resource",
+			"success": "Resource created."
+		},
+		"edit": {
+			"title": "Edit resource",
+			"success": "Resource updated."
+		},
+		"delete": {
+			"success": "Resource deleted."
+		},
 		"changeStatus": {
 			"button": "Change status",
 			"title": "Change status",
@@ -340,13 +499,28 @@
 			"quantity": "Quantity"
 		},
 		"loadError": "Couldn't load resources. You may not have permission to view this page.",
-		"stats": { "total": "Total resources" }
+		"stats": {
+			"total": "Total resources"
+		}
 	},
 	"seatsDesks": {
-		"columns": { "space": "Space", "label": "Label", "qrPointId": "QR point" },
-		"create": { "button": "New seat/desk", "title": "New seat/desk", "success": "Seat/desk created." },
-		"edit": { "title": "Edit seat/desk", "success": "Seat/desk updated." },
-		"delete": { "success": "Seat/desk deleted." },
+		"columns": {
+			"space": "Space",
+			"label": "Label",
+			"qrPointId": "QR point"
+		},
+		"create": {
+			"button": "New seat/desk",
+			"title": "New seat/desk",
+			"success": "Seat/desk created."
+		},
+		"edit": {
+			"title": "Edit seat/desk",
+			"success": "Seat/desk updated."
+		},
+		"delete": {
+			"success": "Seat/desk deleted."
+		},
 		"form": {
 			"branch": "Branch",
 			"building": "Building",
@@ -360,7 +534,10 @@
 	"businessHours": {
 		"branchLabel": "Branch",
 		"branchPlaceholder": "Select a branch",
-		"tabs": { "weeklySchedule": "Weekly schedule", "exceptions": "Exceptions" },
+		"tabs": {
+			"weeklySchedule": "Weekly schedule",
+			"exceptions": "Exceptions"
+		},
 		"days": {
 			"sunday": "Sunday",
 			"monday": "Monday",
@@ -370,21 +547,64 @@
 			"friday": "Friday",
 			"saturday": "Saturday"
 		},
-		"columns": { "dayOfWeek": "Day", "openTime": "Opens", "closeTime": "Closes" },
-		"create": { "button": "New hours", "title": "New business hours", "success": "Business hours created." },
-		"edit": { "title": "Edit business hours", "success": "Business hours updated." },
-		"delete": { "success": "Business hours deleted." },
-		"form": { "dayOfWeek": "Day of week", "openTime": "Opens at", "closeTime": "Closes at" },
-		"validation": { "timeFormat": "Enter a time as HH:mm, e.g. 08:00." },
+		"columns": {
+			"dayOfWeek": "Day",
+			"period": "Period",
+			"openTime": "Opens",
+			"closeTime": "Closes"
+		},
+		"create": {
+			"button": "New hours",
+			"title": "New business hours",
+			"success": "Business hours created."
+		},
+		"bulkCreate": {
+			"title": "New business hours",
+			"days": "Days",
+			"workDays": "Sat – Thu",
+			"selectAll": "Select all days",
+			"clearAll": "Clear all",
+			"daysRequired": "Select at least one day.",
+			"success": "Business hours created for {count} day(s)."
+		},
+		"edit": {
+			"title": "Edit business hours",
+			"success": "Business hours updated."
+		},
+		"delete": {
+			"success": "Business hours deleted."
+		},
+		"form": {
+			"dayOfWeek": "Day of week",
+			"openTime": "Opens at",
+			"closeTime": "Closes at"
+		},
+		"validation": {
+			"timeFormat": "Enter a time as HH:mm, e.g. 08:00."
+		},
 		"loadError": "Couldn't load business hours. You may not have permission to view this page.",
 		"empty": "No business hours found for this branch.",
 		"exceptions": {
-			"columns": { "date": "Date", "isClosed": "Closed", "hours": "Hours", "reason": "Reason" },
+			"columns": {
+				"date": "Date",
+				"isClosed": "Closed",
+				"hours": "Hours",
+				"reason": "Reason"
+			},
 			"isClosedYes": "Closed",
 			"isClosedNo": "Open",
-			"create": { "button": "New exception", "title": "New exception", "success": "Exception created." },
-			"edit": { "title": "Edit exception", "success": "Exception updated." },
-			"delete": { "success": "Exception deleted." },
+			"create": {
+				"button": "New exception",
+				"title": "New exception",
+				"success": "Exception created."
+			},
+			"edit": {
+				"title": "Edit exception",
+				"success": "Exception updated."
+			},
+			"delete": {
+				"success": "Exception deleted."
+			},
 			"form": {
 				"date": "Date (YYYY-MM-DD)",
 				"isClosed": "Closed all day",
@@ -392,18 +612,38 @@
 				"closeTime": "Closes at",
 				"reason": "Reason (optional)"
 			},
-			"validation": { "dateFormat": "Enter a date as YYYY-MM-DD." },
+			"validation": {
+				"dateFormat": "Enter a date as YYYY-MM-DD."
+			},
 			"empty": "No exceptions found for this branch."
 		}
 	},
 	"packages": {
-		"columns": { "name": "Name", "type": "Type", "price": "Price", "duration": "Duration (days)", "isActive": "Active" },
+		"columns": {
+			"name": "Name",
+			"type": "Type",
+			"price": "Price",
+			"duration": "Duration (days)",
+			"isActive": "Active"
+		},
 		"isActiveYes": "Active",
 		"isActiveNo": "Inactive",
-		"type": { "subscription": "Subscription", "oneTime": "One-time" },
-		"create": { "button": "New plan", "title": "New plan", "success": "Plan created." },
-		"edit": { "title": "Edit plan", "success": "Plan updated." },
-		"delete": { "success": "Plan deleted." },
+		"type": {
+			"subscription": "Subscription",
+			"oneTime": "One-time"
+		},
+		"create": {
+			"button": "New plan",
+			"title": "New plan",
+			"success": "Plan created."
+		},
+		"edit": {
+			"title": "Edit plan",
+			"success": "Plan updated."
+		},
+		"delete": {
+			"success": "Plan deleted."
+		},
 		"form": {
 			"name": "Name",
 			"isSubscription": "Subscription plan",
@@ -416,22 +656,200 @@
 			"order": "Display order"
 		},
 		"loadError": "Couldn't load plans. You may not have permission to view this page.",
-		"stats": { "total": "Total plans", "active": "Active", "subscriptions": "Subscriptions" }
+		"stats": {
+			"total": "Total plans",
+			"active": "Active",
+			"subscriptions": "Subscriptions"
+		}
+	},
+	"events": {
+		"columns": {
+			"image": "Image",
+			"title": "Title",
+			"category": "Category",
+			"startAt": "Start date & time",
+			"location": "Location",
+			"capacity": "Capacity",
+			"status": "Status"
+		},
+		"status": {
+			"draft": "Draft",
+			"published": "Published",
+			"cancelled": "Cancelled"
+		},
+		"create": {
+			"button": "New event",
+			"title": "New event",
+			"success": "Event created."
+		},
+		"edit": {
+			"title": "Edit event",
+			"success": "Event updated."
+		},
+		"delete": {
+			"success": "Event deleted."
+		},
+		"form": {
+			"title": "Title",
+			"description": "Description",
+			"category": "Category",
+			"startAt": "Start date & time",
+			"endAt": "End date & time",
+			"location": "Location",
+			"capacity": "Capacity",
+			"imageUrl": "Image",
+			"status": "Status",
+			"order": "Display order"
+		},
+		"loadError": "Couldn't load events. You may not have permission to view this page.",
+		"stats": {
+			"total": "Total events",
+			"published": "Published",
+			"draft": "Drafts"
+		}
+	},
+	"communityMembers": {
+		"columns": {
+			"name": "Name",
+			"category": "Category",
+			"company": "Company",
+			"title": "Job title",
+			"yearJoined": "Year joined",
+			"published": "Status"
+		},
+		"categories": {
+			"pioneers": "Pioneers",
+			"growth_partners": "Growth Partners",
+			"investors": "Investors",
+			"impact_partners": "Impact Partners"
+		},
+		"status": {
+			"published": "Published",
+			"hidden": "Hidden"
+		},
+		"create": {
+			"button": "New member",
+			"title": "New community member",
+			"success": "Community member added."
+		},
+		"edit": {
+			"title": "Edit community member",
+			"success": "Community member updated."
+		},
+		"delete": {
+			"success": "Community member deleted."
+		},
+		"form": {
+			"name": "Name",
+			"category": "Category",
+			"company": "Company",
+			"title": "Job title",
+			"bio": "Bio",
+			"longBio": "Extended bio",
+			"yearJoined": "Year joined",
+			"photoUrl": "Photo",
+			"order": "Display order",
+			"published": "Published"
+		},
+		"loadError": "Couldn't load community members. You may not have permission to view this page.",
+		"stats": {
+			"total": "Total members",
+			"published": "Published",
+			"hidden": "Hidden"
+		}
+	},
+	"currencies": {
+		"columns": {
+			"code": "Code",
+			"name": "Name",
+			"symbol": "Symbol",
+			"decimalPlaces": "Decimals",
+			"order": "Display order",
+			"isActive": "Status"
+		},
+		"baseBadge": "Base",
+		"isActiveYes": "Active",
+		"isActiveNo": "Inactive",
+		"create": {
+			"button": "New currency",
+			"title": "New currency",
+			"success": "Currency created."
+		},
+		"edit": {
+			"title": "Edit currency",
+			"success": "Currency updated."
+		},
+		"form": {
+			"code": "Code",
+			"name": "Name",
+			"symbol": "Symbol",
+			"decimalPlaces": "Decimal places",
+			"order": "Display order"
+		},
+		"validation": {
+			"codeFormat": "Use exactly three uppercase letters, for example EUR."
+		},
+		"actions": {
+			"setBase": "Set as base currency",
+			"activate": "Activate",
+			"deactivate": "Deactivate"
+		},
+		"setBase": {
+			"title": "Set as base currency?",
+			"content": "Every stored amount is reckoned against the base currency. Making {code} the base changes what all existing exchange rates are measured in, and it cannot be undone from this screen.",
+			"confirm": "Set as base",
+			"cancel": "Cancel",
+			"success": "Base currency updated."
+		},
+		"status": {
+			"activateSuccess": "Currency activated.",
+			"deactivateSuccess": "Currency deactivated."
+		},
+		"loadError": "Couldn't load currencies. You may not have permission to view this page.",
+		"stats": {
+			"total": "Total currencies",
+			"active": "Active",
+			"inactive": "Inactive"
+		}
 	},
 	"exchangeRates": {
-		"columns": { "currencyCode": "Currency", "rateToBase": "Rate (SYP per 1 USD)", "effectiveFrom": "Effective from" },
+		"columns": {
+			"currencyCode": "Currency",
+			"rateToBase": "Rate (SYP per 1 USD)",
+			"effectiveFrom": "Effective from"
+		},
 		"latestBadge": "Latest",
-		"create": { "button": "New rate", "title": "New exchange rate", "success": "Exchange rate created." },
-		"form": { "currencyCode": "Currency", "rateToBase": "Rate (SYP per 1 USD)", "effectiveFrom": "Effective from (YYYY-MM-DD)" },
-		"validation": { "effectiveFromFormat": "Enter a date as YYYY-MM-DD." },
+		"create": {
+			"button": "New rate",
+			"title": "New exchange rate",
+			"success": "Exchange rate created."
+		},
+		"form": {
+			"currencyCode": "Currency",
+			"rateToBase": "Rate (SYP per 1 USD)",
+			"effectiveFrom": "Effective from (YYYY-MM-DD)"
+		},
+		"validation": {
+			"effectiveFromFormat": "Enter a date as YYYY-MM-DD."
+		},
 		"loadError": "Couldn't load exchange rates. You may not have permission to view this page.",
 		"empty": "No exchange rates found.",
-		"stats": { "latestUsd": "Latest USD → SYP rate" }
+		"stats": {
+			"latestUsd": "Latest USD → SYP rate"
+		}
 	},
 	"walletTopUps": {
 		"description": "Record a manual wallet top-up taken at reception, for a member or a company wallet.",
-		"recipientType": { "user": "Member wallet", "company": "Company wallet" },
-		"paymentMethod": { "cash": "Cash", "sham": "Sham Cash", "mtn": "MTN Cash", "syriatel": "Syriatel Cash" },
+		"recipientType": {
+			"user": "Member wallet",
+			"company": "Company wallet"
+		},
+		"paymentMethod": {
+			"cash": "Cash",
+			"sham": "Sham Cash",
+			"mtn": "MTN Cash",
+			"syriatel": "Syriatel Cash"
+		},
 		"form": {
 			"recipientType": "Top up",
 			"user": "Member",
@@ -445,8 +863,49 @@
 			"userRequired": "Select a member.",
 			"companyRequired": "Select a company."
 		},
-		"submit": { "button": "Record top-up", "success": "Wallet topped up." },
+		"submit": {
+			"button": "Record top-up",
+			"success": "Wallet topped up."
+		},
 		"loadError": "Couldn't load members and companies. You may not have permission to view this page."
+	},
+	"cashRegister": {
+		"description": "Open, reconcile, and close daily cash drawer sessions for front-desk reception.",
+		"status": {
+			"open": "Open",
+			"closed": "Closed"
+		},
+		"openButton": "Open register session",
+		"closeButton": "Close register session",
+		"noOpenSession": "No active cash drawer session for your account.",
+		"historyTitle": "Register sessions history",
+		"openSuccess": "Cash register session opened.",
+		"openError": "Failed to open register session.",
+		"closeSuccess": "Cash register session closed and reconciled.",
+		"closeError": "Failed to close register session.",
+		"columns": {
+			"id": "ID",
+			"operator": "Operator",
+			"branch": "Branch",
+			"status": "Status",
+			"openedAt": "Opened at",
+			"closedAt": "Closed at",
+			"openingBalance": "Opening balance",
+			"expectedBalance": "Expected balance",
+			"closingBalance": "Closing balance",
+			"difference": "Difference"
+		},
+		"openModal": {
+			"title": "Open Cash Register Session",
+			"branch": "Branch",
+			"openingBalance": "Initial opening cash balance",
+			"notes": "Notes"
+		},
+		"closeModal": {
+			"title": "Close Cash Register Session",
+			"closingBalance": "Actual counted cash balance",
+			"notes": "Reconciliation notes"
+		}
 	},
 	"approvalQueue": {
 		"description": "Bookings waiting on a reception decision. Only spaces that require approval appear here.",
@@ -459,7 +918,10 @@
 			"requested": "Requested",
 			"actions": "Actions"
 		},
-		"approve": { "button": "Approve", "success": "Booking approved." },
+		"approve": {
+			"button": "Approve",
+			"success": "Booking approved."
+		},
 		"reject": {
 			"button": "Reject",
 			"title": "Reject booking",
@@ -484,7 +946,10 @@
 			"status": "Status",
 			"actions": "Actions"
 		},
-		"type": { "booking": "Booking", "walkin": "Walk-in" },
+		"type": {
+			"booking": "Booking",
+			"walkin": "Walk-in"
+		},
 		"checkOut": {
 			"button": "Check out",
 			"title": "Check out session",
@@ -555,8 +1020,10 @@
 			"accessLogs": "Access logs",
 			"transactions": "Transactions",
 			"paymentMethods": "Payment methods",
+			"currencies": "Currencies",
 			"exchangeRates": "Exchange rates",
 			"walletTopUps": "Wallet top-ups",
+			"cashRegister": "Cash register",
 			"events": "Events",
 			"community": "Community",
 			"cafe": "Café",
@@ -566,8 +1033,13 @@
 			"privateOfficeRequests": "Private office requests",
 			"content": "Content",
 			"partners": "Partners",
+			"announcements": "Announcements",
+			"founders": "Founders",
+			"contactLinks": "Contact links",
+			"notifications": "Broadcast notifications",
 			"accountSecurity": "Account & security",
-			"systemSettings": "System settings"
+			"systemSettings": "System settings",
+			"eventCategories": "Event Categories"
 		}
 	},
 	"resourceCrud": {
@@ -582,13 +1054,21 @@
 			"deleteAction": "Delete",
 			"deleteConfirmTitle": "Delete this record?",
 			"deleteConfirmOk": "Delete",
-			"deleteConfirmCancel": "Cancel"
+			"deleteConfirmCancel": "Cancel",
+			"refreshAction": "Refresh data"
 		},
 		"form": {
 			"submit": "Save",
 			"cancel": "Cancel",
 			"arabicPlaceholder": "Arabic",
-			"englishPlaceholder": "English"
+			"englishPlaceholder": "English",
+			"uploadImage": "Upload image",
+			"uploadImagePrompt": "Click or drag image here to upload",
+			"uploadImageHint": "Supports JPG, PNG, WEBP up to 10MB",
+			"uploadSuccess": "Image uploaded successfully",
+			"uploading": "Uploading image...",
+			"changeImage": "Change image",
+			"removeImage": "Remove image"
 		},
 		"validation": {
 			"required": "{field} is required."
@@ -596,9 +1076,23 @@
 	},
 	"privateOfficeRequests": {
 		"description": "Prospects requesting a private office, moving from requested to quoted to contracted.",
-		"columns": { "prospectName": "Prospect", "contact": "Contact", "status": "Status", "quoteRef": "Quote ref", "actions": "Actions" },
-		"status": { "requested": "Requested", "quoted": "Quoted", "contracted": "Contracted" },
-		"create": { "button": "New request", "title": "New private office request", "success": "Request created." },
+		"columns": {
+			"prospectName": "Prospect",
+			"contact": "Contact",
+			"status": "Status",
+			"quoteRef": "Quote ref",
+			"actions": "Actions"
+		},
+		"status": {
+			"requested": "Requested",
+			"quoted": "Quoted",
+			"contracted": "Contracted"
+		},
+		"create": {
+			"button": "New request",
+			"title": "New private office request",
+			"success": "Request created."
+		},
 		"markAsQuoted": {
 			"button": "Convert to quote",
 			"title": "Convert to quote",
@@ -607,8 +1101,13 @@
 			"success": "Request marked as quoted."
 		},
 		"contractedLocked": "This request became a company and can no longer change status here.",
-		"delete": { "success": "Request deleted." },
-		"form": { "prospectName": "Prospect name", "contact": "Contact" },
+		"delete": {
+			"success": "Request deleted."
+		},
+		"form": {
+			"prospectName": "Prospect name",
+			"contact": "Contact"
+		},
 		"validation": {
 			"prospectNameRequired": "Prospect name is required.",
 			"contactRequired": "Contact is required.",
@@ -616,12 +1115,26 @@
 		},
 		"loadError": "Couldn't load private office requests. You may not have permission to view this page.",
 		"empty": "No private office requests found.",
-		"stats": { "total": "Total requests", "requested": "Requested", "quoted": "Quoted", "contracted": "Contracted" }
+		"stats": {
+			"total": "Total requests",
+			"requested": "Requested",
+			"quoted": "Quoted",
+			"contracted": "Contracted"
+		}
 	},
 	"companies": {
 		"description": "Companies created from a quoted private office request. Created here only — never self-service.",
-		"columns": { "legalName": "Legal name", "contractRef": "Contract ref", "branch": "Branch", "status": "Status", "actions": "Actions" },
-		"status": { "active": "Active", "inactive": "Inactive" },
+		"columns": {
+			"legalName": "Legal name",
+			"contractRef": "Contract ref",
+			"branch": "Branch",
+			"status": "Status",
+			"actions": "Actions"
+		},
+		"status": {
+			"active": "Active",
+			"inactive": "Inactive"
+		},
 		"create": {
 			"button": "New company",
 			"title": "New company",
@@ -630,9 +1143,20 @@
 			"noQuotedRequestsBody": "A company can only be created from a quoted private office request. Go to Private Office Requests and convert one to a quote first.",
 			"goToRequests": "Go to Private Office Requests"
 		},
-		"changeStatus": { "button": "Change status", "title": "Change status", "success": "Status updated." },
-		"viewMembers": { "button": "View members" },
-		"form": { "privateOfficeRequest": "Private office request", "branch": "Branch", "legalName": "Legal name", "contractRef": "Contract ref" },
+		"changeStatus": {
+			"button": "Change status",
+			"title": "Change status",
+			"success": "Status updated."
+		},
+		"viewMembers": {
+			"button": "View members"
+		},
+		"form": {
+			"privateOfficeRequest": "Private office request",
+			"branch": "Branch",
+			"legalName": "Legal name",
+			"contractRef": "Contract ref"
+		},
 		"validation": {
 			"privateOfficeRequestRequired": "A quoted request is required.",
 			"branchRequired": "Branch is required.",
@@ -641,11 +1165,23 @@
 		},
 		"loadError": "Couldn't load companies. You may not have permission to view this page.",
 		"empty": "No companies found.",
-		"stats": { "total": "Total companies", "active": "Active", "inactive": "Inactive" },
-		"detail": { "title": "Company", "loadError": "Couldn't load this company." }
+		"stats": {
+			"total": "Total companies",
+			"active": "Active",
+			"inactive": "Inactive"
+		},
+		"detail": {
+			"title": "Company",
+			"loadError": "Couldn't load this company."
+		}
 	},
 	"companyMembers": {
-		"columns": { "userId": "User ID", "doorAccess": "Door access", "isAdmin": "Admin", "actions": "Actions" },
+		"columns": {
+			"userId": "User ID",
+			"doorAccess": "Door access",
+			"isAdmin": "Admin",
+			"actions": "Actions"
+		},
 		"add": {
 			"button": "Add member",
 			"title": "Add company member",
@@ -662,6 +1198,248 @@
 			"confirmOk": "Remove",
 			"confirmCancel": "Cancel",
 			"success": "Member removed."
+		}
+	},
+	"systemSettings": {
+		"description": "Global key-value system configuration and parameters.",
+		"searchPlaceholder": "Search settings by key or value...",
+		"refresh": "Refresh",
+		"editTitle": "Edit Setting",
+		"keyLabel": "Key",
+		"typeLabel": "Type",
+		"valueLabel": "Value",
+		"editButton": "Edit",
+		"saveSuccess": "Setting updated.",
+		"saveError": "Failed to update setting.",
+		"invalidJson": "Invalid JSON format.",
+		"loadError": "Couldn't load settings. You may not have permission to view this page.",
+		"columns": {
+			"key": "Setting Key",
+			"type": "Type",
+			"value": "Current Value",
+			"actions": "Actions"
+		}
+	},
+	"announcements": {
+		"columns": {
+			"type": "Type",
+			"startsAt": "Starts at",
+			"endsAt": "Ends at",
+			"status": "Status"
+		},
+		"status": {
+			"active": "Active",
+			"inactive": "Inactive"
+		},
+		"form": {
+			"type": "Type",
+			"imageUrl": "Banner image",
+			"linkUrl": "Link URL",
+			"startsAt": "Starts at",
+			"endsAt": "Ends at",
+			"sortOrder": "Sort order",
+			"isActive": "Active"
+		},
+		"create": {
+			"button": "New Announcement",
+			"title": "New Announcement",
+			"success": "Announcement created."
+		},
+		"edit": {
+			"title": "Edit Announcement",
+			"success": "Announcement updated."
+		},
+		"delete": {
+			"success": "Announcement deleted."
+		},
+		"stats": {
+			"total": "Total",
+			"active": "Active",
+			"inactive": "Inactive"
+		},
+		"loadError": "Couldn't load announcements."
+	},
+	"partners": {
+		"columns": {
+			"name": "Name",
+			"category": "Category",
+			"websiteUrl": "Website",
+			"status": "Status"
+		},
+		"category": {
+			"local": "Local",
+			"global": "Global"
+		},
+		"status": {
+			"active": "Active",
+			"inactive": "Inactive"
+		},
+		"form": {
+			"name": "Name",
+			"description": "Description",
+			"logoUrl": "Logo",
+			"websiteUrl": "Website URL",
+			"category": "Category",
+			"order": "Display order",
+			"isActive": "Active"
+		},
+		"create": {
+			"button": "New Partner",
+			"title": "New Partner",
+			"success": "Partner created."
+		},
+		"edit": {
+			"title": "Edit Partner",
+			"success": "Partner updated."
+		},
+		"delete": {
+			"success": "Partner deleted."
+		},
+		"stats": {
+			"total": "Total partners",
+			"active": "Active",
+			"inactive": "Inactive"
+		},
+		"loadError": "Couldn't load partners."
+	},
+	"founders": {
+		"columns": {
+			"name": "Name",
+			"role": "Role",
+			"linkedin": "LinkedIn",
+			"order": "Order"
+		},
+		"form": {
+			"name": "Name",
+			"role": "Role",
+			"bio": "Bio",
+			"photoUrl": "Photo",
+			"linkedinUrl": "LinkedIn URL",
+			"twitterUrl": "Twitter / X URL",
+			"order": "Display order"
+		},
+		"create": {
+			"button": "New Founder",
+			"title": "New Founder",
+			"success": "Founder created."
+		},
+		"edit": {
+			"title": "Edit Founder",
+			"success": "Founder updated."
+		},
+		"delete": {
+			"success": "Founder deleted."
+		},
+		"stats": {
+			"total": "Total founders"
+		},
+		"loadError": "Couldn't load founders."
+	},
+	"contactLinks": {
+		"columns": {
+			"type": "Type",
+			"value": "Value",
+			"label": "Label",
+			"status": "Status"
+		},
+		"status": {
+			"visible": "Visible",
+			"hidden": "Hidden"
+		},
+		"form": {
+			"type": "Type",
+			"value": "Value",
+			"label": "Label",
+			"sortOrder": "Sort order",
+			"isVisible": "Visible"
+		},
+		"create": {
+			"button": "New Link",
+			"title": "New Contact Link",
+			"success": "Link created."
+		},
+		"edit": {
+			"title": "Edit Contact Link",
+			"success": "Link updated."
+		},
+		"delete": {
+			"success": "Link deleted."
+		},
+		"stats": {
+			"total": "Total links",
+			"visible": "Visible",
+			"hidden": "Hidden"
+		},
+		"loadError": "Couldn't load contact links."
+	},
+	"broadcastNotifications": {
+		"description": "Send push and in-app notifications to users.",
+		"form": {
+			"titleAr": "Title (Arabic)",
+			"titleEn": "Title (English)",
+			"bodyAr": "Message (Arabic)",
+			"bodyEn": "Message (English)",
+			"target": "Target audience",
+			"roleName": "Role name",
+			"roleNamePlaceholder": "e.g. admin, operations",
+			"userIds": "User IDs",
+			"userIdsPlaceholder": "Enter IDs separated by commas or newlines",
+			"userIdsHint": "Separate multiple IDs with commas or line breaks."
+		},
+		"targets": {
+			"all": "All active users",
+			"role": "By role",
+			"users": "Specific users"
+		},
+		"validation": {
+			"titleRequired": "Title is required.",
+			"bodyRequired": "Message body is required."
+		},
+		"send": "Send Notification",
+		"sendSuccess": "Notification sent successfully.",
+		"sendError": "Failed to send notification."
+	},
+	"eventCategories": {
+		"columns": {
+			"name": "Name",
+			"slug": "Slug",
+			"color": "Color",
+			"icon": "Icon",
+			"order": "Order",
+			"status": "Status"
+		},
+		"status": {
+			"active": "Active",
+			"inactive": "Inactive"
+		},
+		"create": {
+			"button": "New category",
+			"title": "New event category",
+			"success": "Event category created."
+		},
+		"edit": {
+			"title": "Edit event category",
+			"success": "Event category updated."
+		},
+		"delete": {
+			"success": "Event category deleted.",
+			"warning": "Deleting this category will unlink associated events (their category will become unassigned)."
+		},
+		"form": {
+			"name": "Name",
+			"slug": "Slug",
+			"slugPlaceholder": "Leave blank to auto-generate",
+			"description": "Description",
+			"color": "Color (hex code)",
+			"icon": "Icon name (e.g. carbon:education)",
+			"order": "Display order",
+			"isActive": "Active status"
+		},
+		"loadError": "Couldn't load event categories. You may not have permission to view this page.",
+		"stats": {
+			"total": "Total categories",
+			"active": "Active",
+			"inactive": "Inactive"
 		}
 	}
 }
