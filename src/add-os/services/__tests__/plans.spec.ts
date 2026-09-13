@@ -10,11 +10,13 @@ const samplePlan = {
 	id: 1,
 	name: { ar: "خطة شهرية", en: "Monthly Plan" },
 	is_subscription: true,
-	price: "150.00",
-	pricing_currency: "USD" as const,
+	price_points: 1500,
+	price_usd: "150.00",
+	price_display: "2205000.00",
+	currency: "SYP",
+	overage_rate_points: 50,
 	duration_days: 30,
 	included_hours: "20.00",
-	overage_rate: "5.00",
 	is_active: true,
 	order: 1,
 	created_at: "2026-08-20T15:15:35.000000Z"
@@ -44,11 +46,10 @@ describe("plans service", () => {
 		const payload = {
 			name: samplePlan.name,
 			is_subscription: true,
-			price: 150,
-			pricing_currency: "USD" as const,
+			price_points: 1500,
 			duration_days: 30,
 			included_hours: 20,
-			overage_rate: 5,
+			overage_rate_points: 50,
 			is_active: true,
 			order: 1
 		}
@@ -76,11 +77,10 @@ describe("plans service", () => {
 		const result = await updatePlan(1, {
 			name: samplePlan.name,
 			is_subscription: true,
-			price: 175,
-			pricing_currency: "USD",
+			price_points: 1750,
 			duration_days: 30,
 			included_hours: 25,
-			overage_rate: 5,
+			overage_rate_points: 50,
 			is_active: true,
 			order: 1
 		})

@@ -24,6 +24,25 @@ export interface FieldDescriptor<TModel = Record<string, unknown>> {
 	/** Whether the field accepts multiple files/images (e.g. image gallery). */
 	multiple?: boolean
 	required?: boolean
+	/** number-only: smallest step the spinners move by. */
+	step?: number
+	/** number-only: lowest accepted value. */
+	min?: number
+	/**
+	 * number-only: restrict the input to whole numbers.
+	 *
+	 * Point fields need this — the backend validates `integer` on them and
+	 * returns a 422 for a fractional value, so the input must not be able to
+	 * produce one in the first place.
+	 */
+	integer?: boolean
+	/**
+	 * Optional read-only note rendered under the input, resolved against the
+	 * live model. Used to quote a server-derived figure next to the value it
+	 * belongs to — e.g. a space's `hourly_rate_usd` under its point rate —
+	 * without the form pretending to compute it. Return `""` for no hint.
+	 */
+	hint?: (model: TModel) => string
 	rule?: FormItemRule | FormItemRule[]
 	/** select-only, static options. */
 	options?: SelectOption[]

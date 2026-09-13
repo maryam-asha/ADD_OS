@@ -8,17 +8,14 @@ import type { Branch } from "@/add-os/modules/spatial/types/branch"
 import type { Building } from "@/add-os/modules/spatial/types/building"
 import type { Space, SpacePayload } from "@/add-os/modules/spatial/types/space"
 import type { Zone } from "@/add-os/modules/spatial/types/zone"
-import type { CurrencyCode } from "@/add-os/utils/format/currency"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import { buildOperationalStatusOptions, renderOperationalStatusTag } from "@/add-os/modules/spatial/types/operational-status"
 import { SPACE_TYPES } from "@/add-os/modules/spatial/types/space"
 import { listBuildings } from "@/add-os/services/buildings"
 import { listFloors } from "@/add-os/services/floors"
 import { listZones } from "@/add-os/services/zones"
-import { formatNumber } from "@/add-os/utils/format"
+import { formatCurrency, formatNumber, isCurrencyCode } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
-
-const CURRENCIES: CurrencyCode[] = ["SYP", "USD", "EUR"]
 
 export function buildSpaceColumns(
 	t: ComposerTranslation,
@@ -65,6 +62,25 @@ export function buildSpaceColumns(
 		},
 		{ title: t("spaces.columns.spaceType"), key: "space_type", render: row => t(`spaces.spaceType.${row.space_type}`) },
 		{ title: t("spaces.columns.capacity"), key: "capacity", render: row => formatNumber(row.capacity) },
+		{
+			title: t("spaces.columns.hourlyRate"),
+			key: "hourly_rate_points",
+			// Points lead, the server's currency rendering follows. Both figures
+			// come off the row as the API sent them; neither is derived here.
+			render: row =>
+				row.hourly_rate_points === null
+					? "—"
+					: h("div", [
+							h("div", `${formatNumber(row.hourly_rate_points)} ${t("points.unit")}`),
+							row.hourly_rate_display && isCurrencyCode(row.currency)
+								? h(
+										"div",
+										{ class: "text-secondary text-xs" },
+										`≈ ${formatCurrency(row.hourly_rate_display, { currency: row.currency })}`
+									)
+								: null
+						])
+		},
 		{ title: t("spaces.columns.status"), key: "status", render: row => renderOperationalStatusTag(row.status, t) }
 	]
 }
@@ -84,12 +100,24 @@ export function buildSpaceColumns(
  */
 interface SpaceFormModel extends SpacePayload {
 	branch_id: number | null
+	/**
+	 * The server's own USD rendering of `hourly_rate_points` for the space
+	 * being edited (`hourly_rate_usd`), quoted read-only beneath the point
+	 * input.
+	 *
+	 * Carried on the form model but deliberately given no `FieldDescriptor` of
+	 * its own: `buildPayload` copies only declared fields, so this never
+	 * reaches the API — it is the server's answer, not the operator's input. It
+	 * deliberately does not track edits to the point count: recomputing it
+	 * would need the point rate, which lives on the server precisely so this
+	 * client never holds a second copy of it. It refreshes on reload.
+	 */
+	hourly_rate_usd_hint: string | null
 }
 
 export function buildSpaceFields(t: ComposerTranslation, branches: Branch[], locale: SupportedLocale): FieldDescriptor<SpaceFormModel>[] {
 	const branchOptions: SelectOption[] = branches.map(branch => ({ label: pickLocalized(branch.name, locale), value: branch.id }))
 	const spaceTypeOptions: SelectOption[] = SPACE_TYPES.map(type => ({ label: t(`spaces.spaceType.${type}`), value: type }))
-	const currencyOptions: SelectOption[] = CURRENCIES.map(code => ({ label: code, value: code }))
 
 	return [
 		/**
@@ -131,8 +159,17 @@ export function buildSpaceFields(t: ComposerTranslation, branches: Branch[], loc
 		{ key: "allocation_model", labelKey: "spaces.form.allocationModel", type: "text" },
 		{ key: "is_lockable", labelKey: "spaces.form.isLockable", type: "switch" },
 		{ key: "capacity", labelKey: "spaces.form.capacity", type: "number", required: true },
-		{ key: "hourly_rate", labelKey: "spaces.form.hourlyRate", type: "number" },
-		{ key: "pricing_currency", labelKey: "spaces.form.pricingCurrency", type: "select", options: currencyOptions },
+		{
+			key: "hourly_rate_points",
+			labelKey: "spaces.form.hourlyRatePoints",
+			type: "number",
+			step: 1,
+			min: 0,
+			integer: true,
+			// The `$` sits here rather than in the locale bundle: a symbol-only
+			// Arabic value fails the repo's ar/en script guard.
+			hint: model => (model.hourly_rate_usd_hint ? `≈ $${model.hourly_rate_usd_hint}` : "")
+		},
 		{ key: "images", labelKey: "spaces.form.images", type: "multi-image", folder: "spaces" }
 	]
 }
@@ -146,8 +183,8 @@ export function emptySpacePayload(): SpaceFormModel {
 		allocation_model: null,
 		is_lockable: false,
 		capacity: 1,
-		hourly_rate: null,
-		pricing_currency: null,
+		hourly_rate_points: null,
+		hourly_rate_usd_hint: null,
 		images: []
 	}
 }

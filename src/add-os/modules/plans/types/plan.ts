@@ -5,7 +5,12 @@ export type WalletBalanceCategoryType = "general" | "cafe" | "printing_internet"
 export interface PlanBalanceItem {
 	id?: number
 	category: WalletBalanceCategoryType
-	amount: number
+	/**
+	 * Included balance in whole points. Points are the unit of account, so a
+	 * plan's bundled credit is counted in the same integers everything else is
+	 * priced in — the backend validates `integer` and rejects a fraction.
+	 */
+	amount_points: number
 	restricted_space_id?: number | null
 	description?: { ar: string; en: string } | null
 	order?: number
@@ -48,35 +53,14 @@ export interface Plan {
 	currency: string
 	/** Per-hour overage charge in whole points; `null` when the plan has none. */
 	overage_rate_points: number | null
-	/**
-	 * @deprecated Currency-denominated pricing was replaced by points. Still
-	 * declared because the plan table/form read it; Task 12 removes the last
-	 * readers and then this field.
-	 */
-	price?: string
-	/** @deprecated See `price` — price no longer carries a currency. */
-	pricing_currency?: "USD" | "SYP"
 	duration_days: number
 	/** Decimal string, e.g. "20.00". */
 	included_hours: string
-	/**
-	 * @deprecated Superseded by `overage_rate_points`. See `price`.
-	 */
-	overage_rate?: string
 	is_active: boolean
 	order: number
 	balances?: PlanBalanceItem[]
 	features?: PlanFeatureItem[]
 	created_at: string
-	/**
-	 * @deprecated The point system replaced this pair: `price_display` +
-	 * `currency` now carry the display-currency rendering unconditionally,
-	 * rather than appearing only when the header differed from a stored
-	 * `pricing_currency`. Kept until Task 12 drops the last readers.
-	 */
-	converted_amount?: string
-	/** @deprecated See `converted_amount`. */
-	converted_currency?: "USD" | "SYP"
 }
 
 export interface PlanPayload extends Record<string, unknown> {
@@ -84,11 +68,20 @@ export interface PlanPayload extends Record<string, unknown> {
 	name: { ar: string; en: string }
 	subtitle?: { ar: string; en: string } | null
 	is_subscription: boolean
-	price: number
-	pricing_currency: "USD" | "SYP"
+	/**
+	 * Whole points — the only price the backend accepts. It validates
+	 * `integer`, so a fractional value comes back a 422 by design rather than
+	 * a rounding question this client gets to answer.
+	 *
+	 * There is deliberately no companion currency key: a price in points does
+	 * not carry one. `price_usd`/`price_display` on `Plan` are server-derived
+	 * views of this number and are never sent back.
+	 */
+	price_points: number
 	duration_days: number
 	included_hours: number
-	overage_rate: number
+	/** Per-hour overage in whole points; `0` when the plan has none. */
+	overage_rate_points: number
 	is_active: boolean
 	order: number
 	balances?: PlanBalanceItem[]

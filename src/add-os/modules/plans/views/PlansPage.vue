@@ -28,6 +28,7 @@
 		<PlanFormDrawer
 			v-model:show="drawerVisible"
 			v-model:model="form"
+			:price-usd="editingPriceUsd"
 			:title="mode === 'create' ? t('packages.create.title') : t('packages.edit.title')"
 			:submitting="mutations.isSubmitting.value"
 			:on-submit="submit"
@@ -78,11 +79,18 @@ const mutations = useResourceMutations({ create: createPlan, update: updatePlan,
 const drawerVisible = ref(false)
 const mode = ref<"create" | "edit">("create")
 const editingId = ref<number | null>(null)
+/**
+ * The server's USD rendering of the plan currently open in the drawer, quoted
+ * back to the operator read-only. `null` on create: there is no server value
+ * yet, and this client must not derive one — the point rate is server state.
+ */
+const editingPriceUsd = ref<string | null>(null)
 const form = ref<PlanPayload>(emptyPlanPayload())
 
 function openCreate() {
 	mode.value = "create"
 	editingId.value = null
+	editingPriceUsd.value = null
 	form.value = emptyPlanPayload()
 	drawerVisible.value = true
 }
@@ -90,24 +98,24 @@ function openCreate() {
 function openEdit(row: Plan) {
 	mode.value = "edit"
 	editingId.value = row.id
+	editingPriceUsd.value = row.price_usd ?? null
 	form.value = {
 		plan_module_id: row.plan_module_id ?? null,
 		name: { ...row.name },
 		subtitle: row.subtitle ? { ...row.subtitle } : { ar: "", en: "" },
 		is_subscription: row.is_subscription,
-		// The plan write shape is still currency-denominated; Task 12 converts the
-		// form to a point input. Until then these read the deprecated fields and
-		// fall back, so editing a plan cannot crash on their absence.
-		price: Number(row.price ?? 0),
-		pricing_currency: row.pricing_currency ?? "USD",
+		// Points in, points out: the form edits the same integer the backend
+		// stores. `overage_rate_points` is nullable on the wire ("this plan has
+		// no overage") but the input is a plain number, so `null` seeds as 0.
+		price_points: row.price_points,
 		duration_days: row.duration_days,
 		included_hours: Number(row.included_hours),
-		overage_rate: Number(row.overage_rate),
+		overage_rate_points: row.overage_rate_points ?? 0,
 		is_active: row.is_active,
 		order: row.order,
 		balances: (row.balances ?? []).map(b => ({
 			category: b.category,
-			amount: Number(b.amount),
+			amount_points: b.amount_points,
 			restricted_space_id: b.restricted_space_id ?? null,
 			description: b.description ? { ...b.description } : { ar: "", en: "" },
 			order: b.order ?? 0

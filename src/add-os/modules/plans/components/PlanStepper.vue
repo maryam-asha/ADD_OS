@@ -15,6 +15,7 @@
 			:min="min"
 			:max="max"
 			:step="step"
+			:inputmode="integer ? 'numeric' : 'decimal'"
 			class="w-full text-center text-xs md:text-sm font-semibold text-neutral-800 bg-transparent focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none px-1 font-mono"
 			@input="onInput"
 		/>
@@ -38,12 +39,23 @@ const props = withDefaults(
 		min?: number
 		max?: number
 		step?: number
+		/**
+		 * Constrain the value to a whole number.
+		 *
+		 * Point fields need this: the backend validates `integer` and rejects a
+		 * fractional price with a 422, so a `12.5` the user can still type into
+		 * a `type="number"` box (`step` is only a hint browsers apply to the
+		 * spinners, not a parse rule) has to be truncated before it becomes the
+		 * model value. Off by default — the stepper's other users are decimal.
+		 */
+		integer?: boolean
 	}>(),
 	{
 		modelValue: 0,
 		min: 0,
 		max: undefined,
-		step: 1
+		step: 1,
+		integer: false
 	}
 )
 
@@ -54,7 +66,9 @@ const emit = defineEmits<{
 const currentValue = computed(() => Number(props.modelValue) || 0)
 
 function clamp(val: number): number {
-	let next = val
+	// Truncate toward zero before clamping, so an integer field can never hand
+	// its parent a fraction the API would reject.
+	let next = props.integer ? Math.trunc(val) : val
 	if (props.min !== undefined && next < props.min) next = props.min
 	if (props.max !== undefined && next > props.max) next = props.max
 	return next

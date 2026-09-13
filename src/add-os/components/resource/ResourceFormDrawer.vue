@@ -52,11 +52,23 @@
 						</n-text>
 					</div>
 				</div>
-				<n-input-number
-					v-else-if="field.type === 'number'"
-					v-model:value="(model as Record<string, unknown>)[field.key] as number | null"
-					class="w-full"
-				/>
+				<div v-else-if="field.type === 'number'" class="w-full">
+					<n-input-number
+						v-model:value="(model as Record<string, unknown>)[field.key] as number | null"
+						:step="field.step"
+						:min="field.min"
+						:precision="field.integer ? 0 : undefined"
+						class="w-full"
+					/>
+					<!--
+						Read-only, and supplied by the field descriptor — never computed
+						by this drawer. A point field's currency equivalent comes from
+						the server, which owns the rate.
+					-->
+					<n-text v-if="field.hint?.(model)" depth="3" class="text-xs">
+						{{ field.hint(model) }}
+					</n-text>
+				</div>
 				<n-select
 					v-else-if="field.type === 'select'"
 					v-model:value="(model as Record<string, unknown>)[field.key] as string | number | null"

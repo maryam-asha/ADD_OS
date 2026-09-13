@@ -141,8 +141,10 @@ function openEdit(row: Space) {
 		allocation_model: row.allocation_model,
 		is_lockable: row.is_lockable,
 		capacity: row.capacity,
-		hourly_rate: row.hourly_rate,
-		pricing_currency: row.pricing_currency,
+		hourly_rate_points: row.hourly_rate_points,
+		// Read-only: the server's own USD rendering, quoted under the input.
+		// Never recomputed here — the point rate is server state.
+		hourly_rate_usd_hint: row.hourly_rate_usd,
 		images: resolvedImages
 	}
 	drawerVisible.value = true

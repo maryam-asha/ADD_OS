@@ -179,6 +179,22 @@
 										</div>
 									</n-form-item>
 
+									<!--
+										What this cash actually buys. Always the server's answer,
+										never computed here: the rate and its ceil-once rounding
+										live in one place on the backend.
+									-->
+									<div class="min-h-5 text-xs">
+										<span v-if="isPreviewLoading" class="text-stone-400 flex items-center gap-1">
+											<n-spin :size="12" />
+											{{ t("points.previewLoading") }}
+										</span>
+										<span v-else-if="previewError" class="text-red-600">{{ previewError }}</span>
+										<span v-else-if="previewPoints !== null" class="font-bold text-teal-700 add-numeric">
+											≈ {{ formatPoints(previewPoints) }}
+										</span>
+									</div>
+
 									<!-- Quick Preset Chips -->
 									<div class="grid grid-cols-4 gap-2">
 										<button
@@ -246,11 +262,17 @@
 										</div>
 										<div class="flex flex-col p-2 bg-emerald-100/50 rounded-lg border border-emerald-200">
 											<span class="text-emerald-700 text-[11px] font-medium">{{ t("walletTopUps.topUpAmount") }}</span>
-											<span class="font-extrabold text-emerald-800 text-xs sm:text-sm mt-0.5">+ {{ (Number(form.amount) || 0).toLocaleString() }} {{ selectedCurrency }}</span>
+											<!-- The points the server quoted, above the cash that buys them. -->
+											<span class="font-extrabold text-emerald-800 text-xs sm:text-sm mt-0.5">
+												{{ previewPoints === null ? "—" : `+ ${formatPoints(previewPoints)}` }}
+											</span>
+											<span class="text-emerald-700/70 text-[10px] add-numeric">{{ formattedInputAmount }}</span>
 										</div>
 										<div class="flex flex-col p-2 bg-white rounded-lg border border-emerald-100">
 											<span class="text-stone-400 text-[11px]">{{ t("walletTopUps.newGeneralBalance") }}</span>
-											<span class="font-bold text-teal-800 text-xs sm:text-sm mt-0.5">{{ calculatedNewBalance.toLocaleString() }} {{ selectedCurrency }}</span>
+											<span class="font-bold text-teal-800 text-xs sm:text-sm mt-0.5">
+												{{ calculatedNewBalancePoints === null ? "—" : formatPoints(calculatedNewBalancePoints) }}
+											</span>
 										</div>
 									</div>
 								</div>
@@ -296,18 +318,19 @@
 
 				<!-- Receipt Details List -->
 				<div class="flex flex-col gap-2.5 text-xs">
-					<!-- Credited Amount -->
+					<!--
+						A receipt has to show both halves: what was paid, and what was
+						bought. Points lead — they are what the wallet actually holds —
+						with the cash tendered underneath.
+					-->
 					<div class="flex items-center justify-between p-3 rounded-xl bg-stone-50 border border-stone-100">
-						<span class="text-stone-500 font-medium">{{ t("walletCredited.creditedAmount") }}</span>
+						<span class="text-stone-500 font-medium">{{ t("points.credited") }}</span>
 						<div class="flex flex-col items-end">
-							<span class="text-base font-extrabold text-stone-900">
-								{{ lastReceipt.payment_amount || lastReceipt.amount }} {{ lastReceipt.payment_currency || lastReceipt.currency || selectedCurrency }}
+							<span class="text-base font-extrabold text-stone-900 add-numeric">
+								{{ formatPoints(lastReceipt.points_credited) }}
 							</span>
-							<span
-								v-if="lastReceipt.payment_currency && lastReceipt.currency && lastReceipt.payment_currency !== lastReceipt.currency"
-								class="text-[10px] text-stone-400 font-mono"
-							>
-								(≈ {{ lastReceipt.amount }} {{ lastReceipt.currency }})
+							<span class="text-[10px] text-stone-400 font-mono">
+								{{ lastReceipt.payment_amount || lastReceipt.amount }} {{ lastReceipt.payment_currency || lastReceipt.currency || selectedCurrency }}
 							</span>
 						</div>
 					</div>
@@ -324,15 +347,15 @@
 						<span class="font-semibold text-stone-800 capitalize">{{ lastReceipt.payment_method }}</span>
 					</div>
 
-					<!-- Balances (Previous & New) -->
-					<div v-if="lastReceipt.new_balance" class="flex items-center justify-between py-2 border-b border-stone-100">
+					<!-- Balances (Previous & New), in the unit the wallet is kept in. -->
+					<div class="flex items-center justify-between py-2 border-b border-stone-100">
 						<span class="text-stone-400">{{ t("walletCredited.newGeneralBalance") }}</span>
-						<span class="font-bold text-teal-700 font-mono">{{ lastReceipt.new_balance }} {{ lastReceipt.currency || 'USD' }}</span>
+						<span class="font-bold text-teal-700 add-numeric">{{ formatPoints(lastReceipt.new_balance_points) }}</span>
 					</div>
 
-					<div v-if="lastReceipt.previous_balance" class="flex items-center justify-between py-2 border-b border-stone-100">
+					<div class="flex items-center justify-between py-2 border-b border-stone-100">
 						<span class="text-stone-400">{{ t("walletCredited.previousGeneralBalance") }}</span>
-						<span class="text-stone-600 font-mono">{{ lastReceipt.previous_balance }} {{ lastReceipt.currency || 'USD' }}</span>
+						<span class="text-stone-600 add-numeric">{{ formatPoints(lastReceipt.previous_balance_points) }}</span>
 					</div>
 
 					<!-- Date & Time -->
@@ -366,8 +389,8 @@
 <script setup lang="ts">
 import type { FormInst, FormRules, SelectOption } from "naive-ui"
 import type { PaymentMethod, WalletBalanceResponse, WalletTopUp, WalletTopUpPayload } from "@/add-os/modules/payments/types/wallet-top-up"
-import { NAlert, NAvatar, NButton, NCard, NForm, NFormItem, NInput, NModal, NRadio, NRadioButton, NRadioGroup, NSelect, NTag, useMessage } from "naive-ui"
-import { computed, defineComponent, h, onMounted, provide, ref, watch } from "vue"
+import { NAlert, NAvatar, NButton, NCard, NForm, NFormItem, NInput, NModal, NRadio, NRadioButton, NRadioGroup, NSelect, NSpin, NTag, useMessage } from "naive-ui"
+import { computed, defineComponent, h, onBeforeUnmount, onMounted, provide, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 
@@ -380,10 +403,12 @@ const FormIsolatedSelect = defineComponent({
 })
 import Icon from "@/components/common/Icon.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
+import { usePoints } from "@/add-os/modules/payments/composables/usePoints"
 import { ApiError } from "@/add-os/services/api"
 import { listCompanies } from "@/add-os/services/companies"
 import { listUsers } from "@/add-os/services/users"
-import { createWalletTopUp, getWalletBalance } from "@/add-os/services/wallet-top-ups"
+import { createWalletTopUp, getWalletBalance, previewWalletTopUp } from "@/add-os/services/wallet-top-ups"
+import { formatCurrency, isCurrencyCode } from "@/add-os/utils/format"
 import { useCurrencyStore } from "@/stores/currency"
 import { useLocalesStore } from "@/stores/i18n"
 import { useThemeStore } from "@/stores/theme"
@@ -392,6 +417,7 @@ import { getActivePinia } from "pinia"
 defineProps<{ titleKey?: string }>()
 
 const { t } = useI18n()
+const { formatPoints } = usePoints()
 const router = useRouter()
 const message = useMessage()
 const themeStore = getActivePinia() ? useThemeStore() : null
@@ -462,8 +488,112 @@ const amountPresets = computed(() => {
 })
 
 const currentBalance = ref<number | null>(null)
+/** The wallet's balance in whole points, as the server reported it. */
+const currentBalancePoints = ref<number | null>(null)
 const balanceData = ref<WalletBalanceResponse | null>(null)
 const isLoadingBalance = ref(false)
+
+const PREVIEW_DEBOUNCE_MS = 300
+
+/**
+ * What the typed cash would buy, quoted by the server.
+ *
+ * This page has its own top-up form, separate from the reception dialog, and
+ * had no preview at all. It gets the same treatment for the same reason: the
+ * point rate and its ceil-once rounding live on the backend, so the only way
+ * to show an operator what they are about to credit — before they credit it —
+ * is to ask. Nothing here divides cash by a rate.
+ */
+const previewPoints = ref<number | null>(null)
+const isPreviewLoading = ref(false)
+/** Set when the server refused to quote — most importantly the below-one-point 422. */
+const previewError = ref<string | null>(null)
+
+let previewTimer: ReturnType<typeof setTimeout> | null = null
+/**
+ * Monotonic token for the newest preview the UI is willing to display, so a
+ * slow answer for "500" can never overwrite a fresh one for "5000".
+ * `nextPreviewId()` is the only writer: superseding a request and issuing one
+ * are the same single step, leaving no window where two live requests share
+ * an id. Mirrors WalletTopUpDialog.vue.
+ */
+let latestPreviewId = 0
+
+function nextPreviewId(): number {
+	latestPreviewId += 1
+	return latestPreviewId
+}
+
+function cancelPendingPreview() {
+	if (previewTimer !== null) {
+		clearTimeout(previewTimer)
+		previewTimer = null
+	}
+	// Invalidate anything already in flight as well as anything merely queued.
+	nextPreviewId()
+	isPreviewLoading.value = false
+}
+
+function resetPreview() {
+	cancelPendingPreview()
+	previewPoints.value = null
+	previewError.value = null
+}
+
+async function runPreview(requestId: number) {
+	const recipient = buildRecipient()
+	if (recipient === null) return
+
+	try {
+		const preview = await previewWalletTopUp({
+			...recipient,
+			amount: form.value.amount.trim(),
+			currency: selectedCurrency.value,
+			payment_method: form.value.payment_method
+		})
+
+		if (requestId !== latestPreviewId) return
+
+		previewPoints.value = preview.points
+		previewError.value = null
+	} catch (e) {
+		if (requestId !== latestPreviewId) return
+		if (!(e instanceof ApiError)) throw e
+
+		previewPoints.value = null
+		// 422 is the meaningful case: the payment is too small to buy a whole
+		// point. Show the server's own message when it sent one.
+		previewError.value
+			= e.status === 422
+				? (e.data?.message ?? t("points.belowOnePoint"))
+				: t("points.previewFailed")
+	} finally {
+		if (requestId === latestPreviewId) isPreviewLoading.value = false
+	}
+}
+
+function schedulePreview() {
+	cancelPendingPreview()
+
+	const amount = form.value.amount.trim()
+
+	// Nothing to quote yet — stay silent rather than asking the server to
+	// reject a half-typed box, or quoting before a recipient is chosen.
+	if (!isValidAmount(amount) || buildRecipient() === null) {
+		previewPoints.value = null
+		previewError.value = null
+		return
+	}
+
+	// Claim the id now, so this request owns it from the debounce window
+	// through to its response landing.
+	const requestId = nextPreviewId()
+	isPreviewLoading.value = true
+	previewTimer = setTimeout(() => {
+		previewTimer = null
+		void runPreview(requestId)
+	}, PREVIEW_DEBOUNCE_MS)
+}
 
 // Fetch only members for the user dropdown
 const { data: users, isLoading: isLoadingUsers, error: usersError } = useResourceList(() => listUsers({ role: "member" }))
@@ -529,12 +659,22 @@ const recipientInitials = computed(() => {
 	return name.slice(0, 2).toUpperCase()
 })
 
+/**
+ * Points first, the currency equivalent second: `340 points (≈ 24,990 SYP)`.
+ *
+ * Both halves come off the balance response as the server rendered them —
+ * `balance_points` and `balance_display` — so the parenthesised figure is the
+ * backend's own conversion, not one made here.
+ */
 const formattedCurrentBalance = computed(() => {
-	if (currentBalance.value === null) return `0 ${selectedCurrency.value}`
-	const primary = `${currentBalance.value.toLocaleString()} ${selectedCurrency.value}`
-	if (balanceData.value?.currency && balanceData.value.currency !== selectedCurrency.value) {
-		const baseAmount = Number(balanceData.value.general_balance) || 0
-		return `${primary} (≈ $${baseAmount.toLocaleString()} ${balanceData.value.currency})`
+	if (currentBalancePoints.value === null) return formatPoints(0)
+
+	const primary = formatPoints(currentBalancePoints.value)
+	const display = balanceData.value?.balance_display
+	const displayCurrency = balanceData.value?.display_currency ?? balanceData.value?.currency
+
+	if (display && isCurrencyCode(displayCurrency)) {
+		return `${primary} (≈ ${formatCurrency(display, { currency: displayCurrency })})`
 	}
 	return primary
 })
@@ -544,10 +684,19 @@ const formattedInputAmount = computed(() => {
 	return Number.isNaN(num) || num === 0 ? `0 ${selectedCurrency.value}` : `${num.toLocaleString()} ${selectedCurrency.value}`
 })
 
-const calculatedNewBalance = computed(() => {
-	const base = currentBalance.value ?? 0
-	const added = Number(form.value.amount) || 0
-	return base + added
+/**
+ * The balance after this top-up, in points — or `null` while there is nothing
+ * to show yet.
+ *
+ * This adds two whole point counts the server produced (`balance_points` and
+ * the preview's `points`). It is not a conversion: no cash is divided by a
+ * rate anywhere on this page, which is why it has to wait for the quote
+ * rather than doing the sum the moment digits are typed.
+ */
+const calculatedNewBalancePoints = computed(() => {
+	if (currentBalancePoints.value === null) return null
+	if (previewPoints.value === null) return currentBalancePoints.value
+	return currentBalancePoints.value + previewPoints.value
 })
 
 const paymentMethodList = computed(() => [
@@ -594,6 +743,7 @@ async function fetchBalance() {
 
 	if (!ownerParams) {
 		currentBalance.value = null
+		currentBalancePoints.value = null
 		balanceData.value = null
 		return
 	}
@@ -605,12 +755,14 @@ async function fetchBalance() {
 			currency: selectedCurrency.value
 		})
 		balanceData.value = res
+		currentBalancePoints.value = res.balance_points
 		const num = res.converted_balance !== null && res.converted_balance !== undefined
 			? Number(res.converted_balance)
 			: Number(res.general_balance)
 		currentBalance.value = Number.isNaN(num) ? 0 : num
 	} catch {
 		currentBalance.value = 0
+		currentBalancePoints.value = null
 		balanceData.value = null
 	} finally {
 		isLoadingBalance.value = false
@@ -620,6 +772,25 @@ async function fetchBalance() {
 watch([() => form.value.user_id, () => form.value.company_id, userBalanceScope, selectedCurrency], () => {
 	fetchBalance()
 })
+
+/**
+ * Currency is part of the quote, not just a label: the same digits buy a very
+ * different number of points in SYP than in USD. The recipient matters too —
+ * the preview is posted against a specific wallet.
+ */
+watch(
+	[
+		() => form.value.amount,
+		selectedCurrency,
+		() => form.value.payment_method,
+		() => form.value.user_id,
+		() => form.value.company_id,
+		userBalanceScope
+	],
+	schedulePreview
+)
+
+onBeforeUnmount(cancelPendingPreview)
 
 watch(selectedCurrency, () => {
 	fieldErrors.value = {}
@@ -640,8 +811,10 @@ watch(recipientType, type => {
 		form.value.user_id = null
 	}
 	currentBalance.value = null
+	currentBalancePoints.value = null
 	balanceData.value = null
 	userBalanceScope.value = "personal"
+	resetPreview()
 	fieldErrors.value = {}
 	formRef.value?.restoreValidation()
 })
@@ -715,11 +888,17 @@ async function submit() {
 		message.success(t("walletTopUps.submit.success"))
 		form.value = emptyForm()
 		currentBalance.value = null
+		currentBalancePoints.value = null
 		balanceData.value = null
+		resetPreview()
 		formRef.value?.restoreValidation()
 	} catch (caught) {
 		if (!(caught instanceof ApiError)) throw caught
 		if (caught.status === 422 && caught.data?.errors) fieldErrors.value = caught.data.errors
+		// A 422 with a message but no field errors is the below-one-point
+		// rejection: the rate can move between quoting and submitting, so the
+		// preview passing is not a guarantee this will.
+		else if (caught.status === 422) message.error(caught.data?.message ?? t("points.belowOnePoint"))
 		else if (caught.status === 403) message.error(t("resourceCrud.mutations.permissionError"))
 		else message.error(caught.data?.message ?? t("resourceCrud.mutations.genericError"))
 	} finally {
@@ -756,6 +935,9 @@ defineExpose({
 	selectedCurrency,
 	receiptModalVisible,
 	lastReceipt,
-	closeReceiptModal
+	closeReceiptModal,
+	previewPoints,
+	previewError,
+	calculatedNewBalancePoints
 })
 </script>

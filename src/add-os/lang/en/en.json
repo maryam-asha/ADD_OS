@@ -420,6 +420,7 @@
       "zone": "Zone",
       "spaceType": "Type",
       "capacity": "Capacity",
+      "hourlyRate": "Hourly rate",
       "status": "Status"
     },
     "spaceType": {
@@ -456,8 +457,7 @@
       "allocationModel": "Allocation model (optional)",
       "isLockable": "Lockable",
       "capacity": "Capacity",
-      "hourlyRate": "Hourly rate (optional)",
-      "pricingCurrency": "Currency (optional)",
+      "hourlyRatePoints": "Hourly rate in points (optional)",
       "image": "Image (optional)",
       "images": "Images (optional)"
     },
@@ -654,11 +654,10 @@
     "form": {
       "name": "Name",
       "isSubscription": "Subscription plan",
-      "price": "Price",
-      "pricingCurrency": "Currency",
+      "pricePoints": "Price (points)",
       "durationDays": "Duration (days)",
       "includedHours": "Included hours",
-      "overageRate": "Overage rate (per hour)",
+      "overageRatePoints": "Overage rate (points per hour)",
       "isActive": "Active",
       "order": "Display order",
       "subtitle": "Subtitle",
@@ -686,7 +685,7 @@
       "includedDescription": "Specify balances and allowances automatically included with this plan.",
       "add": "Add Balance",
       "empty": "No included balances added to this plan.",
-      "amount": "Amount / Credit",
+      "amountPoints": "Amount / Credit (points)",
       "category": "Balance Category",
       "restrictedSpace": "Restricted Space",
       "selectSpace": "Select Space",
@@ -951,6 +950,8 @@
     "previewLoading": "Calculating…",
     "belowOnePoint": "This amount is too small to buy a single point. Enter a larger amount.",
     "previewFailed": "Could not calculate the point value. Check the amount and try again.",
+    "rateWarning": "Changing the point rate reprices the entire catalogue and revalues every wallet balance. Plans, spaces and existing balances are all denominated in points — only what they are worth in cash moves.",
+    "rateLabel": "Point rate (USD per point)",
     "credited": "Points credited",
     "newBalance": "New balance"
   },

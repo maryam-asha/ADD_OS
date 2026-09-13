@@ -14,8 +14,10 @@ const sampleSpace = {
 	allocation_model: "open",
 	is_lockable: false,
 	capacity: 20,
-	hourly_rate: null,
-	pricing_currency: null,
+	hourly_rate_points: null,
+	hourly_rate_usd: null,
+	hourly_rate_display: null,
+	currency: "SYP",
 	status: "active" as const,
 	status_reason: null
 }
@@ -72,8 +74,7 @@ describe("spaces service", () => {
 			allocation_model: "open",
 			is_lockable: false,
 			capacity: 20,
-			hourly_rate: null,
-			pricing_currency: null
+			hourly_rate_points: null
 		}
 		const space = await createSpace(payload)
 
@@ -103,8 +104,7 @@ describe("spaces service", () => {
 			allocation_model: null,
 			is_lockable: true,
 			capacity: 4,
-			hourly_rate: 5,
-			pricing_currency: "USD" as const
+			hourly_rate_points: 50
 		}
 		const result = await updateSpace(1, payload)
 

@@ -42,6 +42,15 @@
 			class="max-w-lg"
 		>
 			<div v-if="currentEditing" class="flex flex-col gap-4">
+				<!--
+					Editing the point rate is not a local change: every price in the
+					catalogue and every wallet balance is denominated in points, so
+					moving the rate moves what all of them are worth in cash.
+				-->
+				<n-alert v-if="isPointRate(currentEditing)" type="warning" show-icon>
+					{{ t("points.rateWarning") }}
+				</n-alert>
+
 				<div class="flex flex-col gap-1">
 					<span class="text-xs text-secondary">{{ t('systemSettings.keyLabel') }}</span>
 					<code class="font-mono text-sm bg-surface-sunken p-2 rounded">{{ currentEditing.key }}</code>
@@ -122,6 +131,22 @@ const editingTextValue = ref("")
 const editingNumberValue = ref<number | null>(null)
 const editingBooleanValue = ref(false)
 
+/**
+ * `point.rate_usd` — the USD value of one point, and the only setting here
+ * that reprices the whole catalogue when it moves.
+ *
+ * The backend keeps it as a decimal STRING (validated `numeric|gt:0|
+ * decimal:0,4`), so it arrives with `type: "string"` and edits through the
+ * plain text path above. That is deliberate: routing it through the numeric
+ * input would put it through a JS `number` and risk losing a digit of a value
+ * every price in the system is derived from.
+ */
+const POINT_RATE_KEY = "point.rate_usd"
+
+function isPointRate(row: SettingItem): boolean {
+	return row.key === POINT_RATE_KEY
+}
+
 const filteredSettings = computed(() => {
 	const q = searchQuery.value.trim().toLowerCase()
 	if (!q) return settings.value
@@ -132,7 +157,14 @@ const columns = computed<DataTableColumns<SettingItem>>(() => [
 	{
 		title: t("systemSettings.columns.key"),
 		key: "key",
-		render: row => h("code", { class: "font-mono text-xs font-semibold text-primary" }, row.key)
+		render: row =>
+			h("div", { class: "flex flex-col gap-0.5" }, [
+				h("code", { class: "font-mono text-xs font-semibold text-primary" }, row.key),
+				// The point rate is the one setting on this generic table whose
+				// raw key does not say what it controls, and the one whose edit
+				// has catalogue-wide consequences. Name it in plain language.
+				isPointRate(row) ? h("span", { class: "text-xs text-secondary" }, t("points.rateLabel")) : null
+			])
 	},
 	{
 		title: t("systemSettings.columns.type"),

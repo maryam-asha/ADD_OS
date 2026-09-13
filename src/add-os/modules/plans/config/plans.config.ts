@@ -44,18 +44,17 @@ export function buildPlanColumns(t: ComposerTranslation, locale: SupportedLocale
 		},
 		{
 			title: t("packages.columns.price"),
-			key: "price",
+			key: "price_points",
 			// Points lead, currency follows: `price_points` is what the backend
-			// stores and charges, `price_display`/`currency` are its server-derived
-			// rendering. Task 12 restyles this column; it reads the point fields
-			// here already because the old `price`/`pricing_currency` no longer
-			// arrive at all, and a fallback would have quietly rendered nothing.
+			// stores and charges; `price_display`/`currency` are its
+			// server-derived rendering, reproduced here verbatim. Nothing on this
+			// row is converted client-side — the rate lives on the server.
 			render: row =>
 				h("div", [
 					// `usePoints()` needs setup scope; this builder is a plain function
 					// given `t`, so it formats with the repo's own number formatter
 					// rather than reaching for the composable outside a component.
-					h("div", `${formatNumber(row.price_points)} ${t("points.unit")}`),
+					h("div", { class: "font-medium" }, `${formatNumber(row.price_points)} ${t("points.unit")}`),
 					row.price_display && isCurrencyCode(row.currency)
 						? h("div", { class: "text-secondary text-xs" }, `≈ ${formatCurrency(row.price_display, { currency: row.currency })}`)
 						: null
@@ -110,11 +109,10 @@ export function emptyPlanPayload(): PlanPayload {
 		name: { ar: "", en: "" },
 		subtitle: { ar: "", en: "" },
 		is_subscription: false,
-		price: 0,
-		pricing_currency: "USD",
+		price_points: 0,
 		duration_days: 30,
 		included_hours: 0,
-		overage_rate: 0,
+		overage_rate_points: 0,
 		is_active: true,
 		order: 1,
 		balances: [],

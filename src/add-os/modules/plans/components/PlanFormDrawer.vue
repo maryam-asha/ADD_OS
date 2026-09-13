@@ -146,16 +146,21 @@
 							<span>{{ t('packages.sections.pricing') }}</span>
 						</div>
 
-						<!-- Row 1: Currency, Price, Module -->
-						<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+						<!-- Row 1: Price (points), Module -->
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 							<div class="flex flex-col gap-1">
-								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.pricingCurrency') }} *</span>
-								<n-select v-model:value="model.pricing_currency" :options="currencyOptions" size="small" />
-							</div>
-							<div class="flex flex-col gap-1">
-								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.price') }} *</span>
-								<PlanStepper v-model="model.price" :min="0" :step="5" />
-								<span v-if="errors['price']" class="text-xs text-red-500">{{ errors['price'][0] }}</span>
+								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.pricePoints') }} *</span>
+								<PlanStepper v-model="model.price_points" :min="0" :step="1" integer />
+								<!--
+									Read-only, and read straight off the server's own rendering of
+									this plan. The point rate lives on the backend and an admin can
+									change it, so a value computed here would be a second, drifting
+									copy of the same rule.
+								-->
+								<span v-if="serverPriceUsdHint" class="text-[11px] text-neutral-400 add-numeric">
+									≈ {{ serverPriceUsdHint }}
+								</span>
+								<span v-if="errors['price_points']" class="text-xs text-red-500">{{ errors['price_points'][0] }}</span>
 							</div>
 							<div class="flex flex-col gap-1">
 								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.module') }}</span>
@@ -166,8 +171,9 @@
 						<!-- Row 2: Overage Rate, Included Hours, Duration -->
 						<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
 							<div class="flex flex-col gap-1">
-								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.overageRate') }}</span>
-								<PlanStepper v-model="model.overage_rate" :min="0" :step="1" />
+								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.overageRatePoints') }}</span>
+								<PlanStepper v-model="model.overage_rate_points" :min="0" :step="1" integer />
+								<span v-if="errors['overage_rate_points']" class="text-xs text-red-500">{{ errors['overage_rate_points'][0] }}</span>
 							</div>
 							<div class="flex flex-col gap-1">
 								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.includedHours') }} *</span>
@@ -256,8 +262,8 @@
 						<!-- Row 1: Amount, Category Select (and space if specific) -->
 						<div :class="['grid gap-3', balance.category === 'space_specific' ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2']">
 							<div class="flex flex-col gap-1">
-								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.balances.amount') }}</span>
-								<PlanStepper v-model="balance.amount" :min="0" :step="5" />
+								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.balances.amountPoints') }}</span>
+								<PlanStepper v-model="balance.amount_points" :min="0" :step="1" integer />
 							</div>
 
 							<div class="flex flex-col gap-1">
@@ -302,7 +308,7 @@
 					<!-- Bottom Summary Banner -->
 					<div class="bg-[#f0f7ee] border border-[#d6e8d2] text-[#38642e] rounded-xl p-3 px-4 flex items-center justify-between">
 						<span class="text-xs font-bold">{{ t('packages.balances.totalIncluded') }}</span>
-						<span class="text-sm md:text-base font-bold add-numeric">{{ model.pricing_currency }} {{ totalBalancesAmount }}</span>
+						<span class="text-sm md:text-base font-bold add-numeric">{{ formatPoints(totalBalancePoints) }}</span>
 					</div>
 				</div>
 
@@ -492,6 +498,7 @@ import { computed, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import { currentLocale } from "@/add-os/lang/currentLocale"
+import { usePoints } from "@/add-os/modules/payments/composables/usePoints"
 import PlanStepper from "@/add-os/modules/plans/components/PlanStepper.vue"
 import { ApiError } from "@/add-os/services/api"
 import { listPlanModules } from "@/add-os/services/plan-modules"
@@ -502,6 +509,18 @@ const props = defineProps<{
 	title: string
 	submitting: boolean
 	onSubmit: (payload: PlanPayload) => Promise<void>
+	/**
+	 * The server's own USD rendering of the plan being edited, as a decimal
+	 * string (`price_usd`), shown read-only under the point input.
+	 *
+	 * Passed in rather than derived: the point rate is server state an admin
+	 * can change, so the only honest USD figure is the one the API sent with
+	 * this plan. Absent on create — there is no server value to quote yet —
+	 * and deliberately NOT recomputed as the operator edits the point count,
+	 * since that would require the rate this component must not hold. It
+	 * refreshes when the list reloads after a save.
+	 */
+	priceUsd?: string | null
 }>()
 
 const show = defineModel<boolean>("show", { required: true })
@@ -516,10 +535,14 @@ const moduleOptions = ref<SelectOption[]>([])
 const spaceOptions = ref<SelectOption[]>([])
 const rawModules = ref<{ id: number; name: { ar: string; en: string } }[]>([])
 
-const currencyOptions = [
-	{ label: "USD", value: "USD" },
-	{ label: "SYP", value: "SYP" }
-]
+const { formatPoints } = usePoints()
+
+/**
+ * `≈ $50.00`, or empty when the server sent nothing to quote (create mode).
+ * The `$` is written here rather than in the locale bundle: a symbol-only
+ * Arabic value fails the repo's ar/en script guard.
+ */
+const serverPriceUsdHint = computed(() => (props.priceUsd ? `$${props.priceUsd}` : ""))
 
 const railStyle = ({ checked }: { checked: boolean }) => ({
 	background: checked ? "#557e46" : "#d1d5db"
@@ -589,9 +612,8 @@ const featuresList = computed<PlanFeatureItem[]>({
 	}
 })
 
-const totalBalancesAmount = computed(() => {
-	const sum = (model.value.balances ?? []).reduce((acc, b) => acc + (Number(b.amount) || 0), 0)
-	return sum
+const totalBalancePoints = computed(() => {
+	return (model.value.balances ?? []).reduce((acc, b) => acc + (Number(b.amount_points) || 0), 0)
 })
 
 function getCategoryTitle(category: string): string {
@@ -642,7 +664,7 @@ function addBalance() {
 	if (!model.value.balances) model.value.balances = []
 	model.value.balances.push({
 		category: "cafe",
-		amount: 20,
+		amount_points: 20,
 		description: { ar: "", en: "" },
 		order: model.value.balances.length + 1
 	})
@@ -792,7 +814,9 @@ async function handleSubmit() {
 		subtitle: model.value.subtitle?.ar || model.value.subtitle?.en ? model.value.subtitle : null,
 		balances: (model.value.balances ?? []).map(b => ({
 			category: b.category,
-			amount: Number(b.amount),
+			// The backend validates `integer` on this: a fractional point count
+			// is a 422, not something to round away silently here.
+			amount_points: Number(b.amount_points),
 			restricted_space_id: b.category === "space_specific" ? b.restricted_space_id ?? null : null,
 			description: b.description?.ar || b.description?.en ? b.description : null,
 			order: b.order ?? 0

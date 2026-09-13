@@ -67,6 +67,16 @@ export interface WalletBalanceResponse {
 	owner_name: string
 	owner_phone: string | null
 	status?: string
+	/**
+	 * The wallet's general balance in whole points — the authoritative figure,
+	 * and what the UI shows first. Everything below is the server's own
+	 * rendering of this same number, never a client-side conversion of it.
+	 */
+	balance_points: number
+	/** `balance_points` in USD, decimal string e.g. "34.00". */
+	balance_usd: string
+	/** `balance_points` in `display_currency`, decimal string. */
+	balance_display: string
 	general_balance: string
 	currency: string
 	converted_balance?: string | null

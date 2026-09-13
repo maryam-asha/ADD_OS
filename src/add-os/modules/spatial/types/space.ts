@@ -1,6 +1,5 @@
 import type { OperationalStatus } from "./operational-status"
 // src/add-os/modules/spatial/types/space.ts
-import type { CurrencyCode } from "@/add-os/utils/format/currency"
 
 export type SpaceType = "co_space" | "room" | "business" | "event_hall"
 
@@ -24,8 +23,21 @@ export interface Space {
 	allocation_model: string | null
 	is_lockable: boolean
 	capacity: number
-	hourly_rate: number | null
-	pricing_currency: CurrencyCode | null
+	/**
+	 * Hourly rate in whole points — the authoritative figure, and what the
+	 * backend charges against. `null` when the space is not hourly-priced.
+	 */
+	hourly_rate_points: number | null
+	/**
+	 * `hourly_rate_points` rendered in USD by the server, as a decimal string
+	 * e.g. "2.50". Display only: never parse it back into points, and never
+	 * divide by the rate here — the rate is server state and can change.
+	 */
+	hourly_rate_usd: string | null
+	/** Same value in the request's display currency, decimal string. Pairs with `currency`. */
+	hourly_rate_display: string | null
+	/** ISO code `hourly_rate_display` is denominated in, e.g. "SYP". */
+	currency: string
 	status: OperationalStatus
 	status_reason: string | null
 	image_url?: string | null
@@ -73,8 +85,12 @@ export interface SpacePayload extends Record<string, unknown> {
 	allocation_model: string | null
 	is_lockable: boolean
 	capacity: number
-	hourly_rate: number | null
-	pricing_currency: CurrencyCode | null
+	/**
+	 * Whole points, or `null` for an unpriced space. The backend validates
+	 * `integer`, so a fraction is a 422 by design. No companion currency key:
+	 * a rate in points does not carry one.
+	 */
+	hourly_rate_points: number | null
 	image_url?: string | null
 	main_image?: string | null
 	images?: string[] | null
