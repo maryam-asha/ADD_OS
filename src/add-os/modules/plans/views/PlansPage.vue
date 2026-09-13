@@ -95,8 +95,11 @@ function openEdit(row: Plan) {
 		name: { ...row.name },
 		subtitle: row.subtitle ? { ...row.subtitle } : { ar: "", en: "" },
 		is_subscription: row.is_subscription,
-		price: Number(row.price),
-		pricing_currency: row.pricing_currency,
+		// The plan write shape is still currency-denominated; Task 12 converts the
+		// form to a point input. Until then these read the deprecated fields and
+		// fall back, so editing a plan cannot crash on their absence.
+		price: Number(row.price ?? 0),
+		pricing_currency: row.pricing_currency ?? "USD",
 		duration_days: row.duration_days,
 		included_hours: Number(row.included_hours),
 		overage_rate: Number(row.overage_rate),

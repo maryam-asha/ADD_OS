@@ -34,6 +34,19 @@ const CURRENCIES: Record<CurrencyCode, CurrencyDefinition> = {
 
 export const DEFAULT_CURRENCY: CurrencyCode = "SYP"
 
+/**
+ * Narrows an API-supplied currency code to one this formatter knows.
+ *
+ * The backend types `currency` as an open string (it is whatever the display
+ * currency resolved to), while `CurrencyCode` is deliberately closed to the
+ * three we can render a symbol for. Callers use this to pass a known code
+ * through and let `formatCurrency` fall back on anything else, rather than
+ * casting an unchecked string into the union.
+ */
+export function isCurrencyCode(code: string | null | undefined): code is CurrencyCode {
+	return code != null && code in CURRENCIES
+}
+
 export interface CurrencyFormatOptions extends Pick<NumberFormatOptions, "grouping"> {
 	currency?: CurrencyCode
 	locale?: SupportedLocale

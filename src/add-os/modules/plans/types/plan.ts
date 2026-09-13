@@ -27,27 +27,55 @@ export interface Plan {
 	name: { ar: string; en: string }
 	subtitle?: { ar: string; en: string } | null
 	is_subscription: boolean
-	/** Decimal string as returned by the API, e.g. "150.00". */
-	price: string
-	pricing_currency: "USD" | "SYP"
+	/**
+	 * Authoritative price, a whole integer of points. Points are the unit of
+	 * account: this is the value the backend stores and charges against, and
+	 * the only one that is exact. Everything below is derived for display.
+	 */
+	price_points: number
+	/**
+	 * `price_points` rendered in the base currency (USD) by the server, as a
+	 * decimal string, e.g. "50.00". Display only — never parse it back into a
+	 * point count, and never divide by the rate client-side.
+	 */
+	price_usd: string
+	/**
+	 * `price_points` rendered in the request's display currency by the server,
+	 * as a decimal string, e.g. "735000.12". Pairs with `currency`.
+	 */
+	price_display: string
+	/** ISO code `price_display` is denominated in, e.g. "SYP". */
+	currency: string
+	/** Per-hour overage charge in whole points; `null` when the plan has none. */
+	overage_rate_points: number | null
+	/**
+	 * @deprecated Currency-denominated pricing was replaced by points. Still
+	 * declared because the plan table/form read it; Task 12 removes the last
+	 * readers and then this field.
+	 */
+	price?: string
+	/** @deprecated See `price` — price no longer carries a currency. */
+	pricing_currency?: "USD" | "SYP"
 	duration_days: number
 	/** Decimal string, e.g. "20.00". */
 	included_hours: string
-	/** Decimal string, e.g. "5.00". */
-	overage_rate: string
+	/**
+	 * @deprecated Superseded by `overage_rate_points`. See `price`.
+	 */
+	overage_rate?: string
 	is_active: boolean
 	order: number
 	balances?: PlanBalanceItem[]
 	features?: PlanFeatureItem[]
 	created_at: string
 	/**
-	 * Present ONLY when the request's `currency` header differs from
-	 * `pricing_currency` — confirmed live (verification report §"Currency header
-	 * effect on Plans pricing"). `price`/`pricing_currency` never change; this is
-	 * an additive server-side conversion using the latest applicable exchange
-	 * rate as of now.
+	 * @deprecated The point system replaced this pair: `price_display` +
+	 * `currency` now carry the display-currency rendering unconditionally,
+	 * rather than appearing only when the header differed from a stored
+	 * `pricing_currency`. Kept until Task 12 drops the last readers.
 	 */
 	converted_amount?: string
+	/** @deprecated See `converted_amount`. */
 	converted_currency?: "USD" | "SYP"
 }
 

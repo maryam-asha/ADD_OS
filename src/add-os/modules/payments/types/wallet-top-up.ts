@@ -21,7 +21,27 @@ export const PAYMENT_METHODS: readonly PaymentMethod[] = ["cash", "sham", "mtn",
 export interface WalletTopUp {
 	id: number
 	transaction_code?: string
-	/** Decimal string as returned by the API, e.g. "50.00" — see `Plan.price`. */
+	/**
+	 * Points actually credited to the wallet — the authoritative figure, and a
+	 * whole integer. The cash keys below record what was paid; this records
+	 * what was bought, and the two only agree via the server's rate.
+	 */
+	points_credited: number
+	/** Wallet balance in whole points before this top-up. */
+	previous_balance_points: number
+	/** Wallet balance in whole points after this top-up. */
+	new_balance_points: number
+	/**
+	 * USD value of one point at the moment of the top-up, as a decimal string,
+	 * e.g. "0.1000". Recorded per-transaction because an admin can change the
+	 * rate: it is an audit value, not a conversion factor to reuse.
+	 */
+	point_rate_usd: string
+	/**
+	 * Decimal string as returned by the API, e.g. "50.00". Legacy USD view of
+	 * `points_credited`, kept additively by the backend and derived from the
+	 * stored point value, so the two always agree.
+	 */
 	amount: string
 	currency?: string
 	payment_amount?: string
@@ -73,3 +93,37 @@ export type WalletTopUpPayload = {
 	description: string | null
 } & ({ user_id: number } | { company_id: number })
 
+/**
+ * Response of `POST .../wallet-top-ups/preview` — what the operator's cash
+ * would buy, computed by the server and never by this client.
+ *
+ * The preview exists precisely so the dialog does not have to divide by the
+ * point rate itself: rounding is a ceil-once rule that lives in the backend's
+ * PointConversionService, and a second implementation here would drift the
+ * moment an admin edits the rate. Ask, don't compute.
+ *
+ * A payment too small to buy one whole point is a 422 from this endpoint
+ * (`api.wallet.amount_below_one_point`), not a zero-point success.
+ */
+export interface WalletTopUpPreview {
+	/** Whole points the payment would credit. */
+	points: number
+	/** USD value of those points, decimal string, e.g. "50.00". */
+	usd: string
+	/** Cash echoed back as the server parsed it, decimal string. */
+	payment_amount: string
+	/** ISO code `payment_amount` is denominated in. */
+	payment_currency: string
+	/** USD value of one point used for this quote, e.g. "0.1000". */
+	point_rate_usd: string
+}
+
+/**
+ * Preview takes the same body as the create call minus the bookkeeping-only
+ * `description`, so the quote reflects exactly the payment about to be made.
+ */
+export type WalletTopUpPreviewPayload = {
+	amount: string
+	currency?: string
+	payment_method: PaymentMethod
+} & ({ user_id: number } | { company_id: number })

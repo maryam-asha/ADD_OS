@@ -944,6 +944,16 @@
       "success": "Exchange rates synced successfully."
     }
   },
+  "points": {
+    "unit": "points",
+    "label": "Points",
+    "rate": "Point rate",
+    "previewLoading": "Calculating…",
+    "belowOnePoint": "This amount is too small to buy a single point. Enter a larger amount.",
+    "previewFailed": "Could not calculate the point value. Check the amount and try again.",
+    "credited": "Points credited",
+    "newBalance": "New balance"
+  },
   "walletTopUps": {
     "description": "Record a manual wallet top-up taken at reception, for a member or a company wallet.",
     "recipientType": {

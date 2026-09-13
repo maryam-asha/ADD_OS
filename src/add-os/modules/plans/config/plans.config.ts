@@ -6,7 +6,7 @@ import { NTag } from "naive-ui"
 import { h } from "vue"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import { STATUS_ICONS } from "@/add-os/theme/tokens"
-import { formatCurrency, formatNumber } from "@/add-os/utils/format"
+import { formatCurrency, formatNumber, isCurrencyCode } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
 export function buildPlanColumns(t: ComposerTranslation, locale: SupportedLocale): DataTableColumns<Plan> {
@@ -45,11 +45,19 @@ export function buildPlanColumns(t: ComposerTranslation, locale: SupportedLocale
 		{
 			title: t("packages.columns.price"),
 			key: "price",
+			// Points lead, currency follows: `price_points` is what the backend
+			// stores and charges, `price_display`/`currency` are its server-derived
+			// rendering. Task 12 restyles this column; it reads the point fields
+			// here already because the old `price`/`pricing_currency` no longer
+			// arrive at all, and a fallback would have quietly rendered nothing.
 			render: row =>
 				h("div", [
-					h("div", formatCurrency(row.price, { currency: row.pricing_currency })),
-					row.converted_amount && row.converted_currency
-						? h("div", { class: "text-secondary text-xs" }, `≈ ${formatCurrency(row.converted_amount, { currency: row.converted_currency })}`)
+					// `usePoints()` needs setup scope; this builder is a plain function
+					// given `t`, so it formats with the repo's own number formatter
+					// rather than reaching for the composable outside a component.
+					h("div", `${formatNumber(row.price_points)} ${t("points.unit")}`),
+					row.price_display && isCurrencyCode(row.currency)
+						? h("div", { class: "text-secondary text-xs" }, `≈ ${formatCurrency(row.price_display, { currency: row.currency })}`)
 						: null
 				])
 		},
