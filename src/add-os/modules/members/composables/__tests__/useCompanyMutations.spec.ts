@@ -10,6 +10,7 @@ vi.mock("naive-ui", () => ({
 }))
 
 vi.mock("vue-i18n", () => ({
+	createI18n: () => ({ global: { locale: { value: "ar" }, t: (k: string) => k } }),
 	useI18n: () => ({
 		t: (key: string) => {
 			if (key === "resourceCrud.mutations.genericError") return "Something went wrong. Please try again."
@@ -29,8 +30,8 @@ vi.mock("@/add-os/services/companies", () => ({
 	updateCompanyStatus: (id: number, payload: unknown) => updateCompanyStatusMock(id, payload)
 }))
 
-const samplePayload = { private_office_request_id: 1, legal_name: "Acme", contract_ref: "C-1", branch_id: 1 }
-const sampleCompany = { id: 1, ...samplePayload, status: "active" }
+const samplePayload = { private_office_request_id: 1, legal_name: "Acme", contract_ref: "C-1" }
+const sampleCompany = { id: 1, ...samplePayload, branch_id: 1, status: "active" }
 
 describe("useCompanyCreation", () => {
 	beforeEach(() => vi.clearAllMocks())
@@ -51,7 +52,7 @@ describe("useCompanyCreation", () => {
 	})
 
 	it("on a 422, rethrows without toasting (so the drawer maps field errors)", async () => {
-		const failure = new ApiError(422, JSON.stringify({ message: "Invalid.", errors: { branch_id: ["Required."] } }))
+		const failure = new ApiError(422, JSON.stringify({ message: "Invalid.", errors: { legal_name: ["Required."] } }))
 		createCompanyMock.mockRejectedValue(failure)
 		const refetchRequests = vi.fn()
 		const refetchCompanies = vi.fn()

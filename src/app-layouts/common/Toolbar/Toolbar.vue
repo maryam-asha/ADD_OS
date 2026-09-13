@@ -16,6 +16,7 @@
 				<PillWrapper bordered>
 					<Search />
 					<LocaleSwitch />
+					<CurrencySwitch />
 					<FullscreenSwitch />
 					<Notifications />
 					<Avatar />
@@ -35,6 +36,7 @@ import Logo from "../Logo.vue"
 import Avatar from "./Avatar.vue"
 import BlurEffect from "./BlurEffect.vue"
 import Breadcrumb from "./Breadcrumb.vue"
+import CurrencySwitch from "./CurrencySwitch.vue"
 import FullscreenSwitch from "./FullscreenSwitch.vue"
 import LocaleSwitch from "./LocaleSwitch.vue"
 import Notifications from "./Notifications.vue"

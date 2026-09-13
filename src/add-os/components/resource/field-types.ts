@@ -1,7 +1,7 @@
 import type { FormItemRule, SelectOption } from "naive-ui"
 import type { SupportedLocale } from "@/add-os/lang/locales"
 
-export type FieldType = "text" | "bilingual-text" | "number" | "select" | "switch" | "time" | "date"
+export type FieldType = "text" | "bilingual-text" | "textarea" | "bilingual-textarea" | "number" | "select" | "switch" | "time" | "date" | "datetime" | "image" | "multi-image" | "color"
 
 export interface Bilingual {
 	ar: string
@@ -19,6 +19,10 @@ export interface FieldDescriptor<TModel = Record<string, unknown>> {
 	/** i18n key; the drawer calls t() itself, so config files hold keys, never resolved strings. */
 	labelKey: string
 	type: FieldType
+	/** Optional destination folder/category for image uploads (e.g. 'founders', 'events'). */
+	folder?: string
+	/** Whether the field accepts multiple files/images (e.g. image gallery). */
+	multiple?: boolean
 	required?: boolean
 	rule?: FormItemRule | FormItemRule[]
 	/** select-only, static options. */
@@ -42,6 +46,7 @@ export interface FieldDescriptor<TModel = Record<string, unknown>> {
 	 */
 	virtual?: boolean
 	disabledWhen?: (model: TModel) => boolean
+	hiddenWhen?: (model: TModel) => boolean
 }
 
 /** Strips every `virtual` field so a submit payload matches the resource's real API shape. */

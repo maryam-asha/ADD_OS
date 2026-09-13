@@ -10,7 +10,7 @@
 			line belongs in the middle, and centre reads the same in both directions.
 		-->
 		<div class="wrap flex items-center justify-center gap-3">
-			<div class="copy"><span>Aleppo Digital District</span> © {{ year }}</div>
+			<div class="copy"><span class="aleppo-economic">Aleppo Digital District</span> © {{ year }}</div>
 		</div>
 	</footer>
 </template>
@@ -32,6 +32,9 @@ const year = ref(new Date().getFullYear())
 	overflow: hidden;
 	font-size: 13px;
 
+	.aleppo-economic{
+		color: #DC4128;
+	}
 	.wrap {
 		overflow: hidden;
 		width: 100%;

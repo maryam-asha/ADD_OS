@@ -13,6 +13,7 @@ vi.mock("naive-ui", () => ({
 }))
 
 vi.mock("vue-i18n", () => ({
+	createI18n: () => ({ global: { locale: { value: "ar" }, t: (k: string) => k } }),
 	useI18n: () => ({
 		t: (key: string) => {
 			if (key === "resourceCrud.mutations.genericError") return "Something went wrong. Please try again."

@@ -1,42 +1,58 @@
 <!-- src/add-os/modules/members/components/CompanyDetailPanel.vue -->
 <template>
-	<n-drawer v-model:show="show" :width="480">
-		<n-drawer-content :title="company?.legal_name ?? t('companies.detail.title')" closable>
-			<n-spin v-if="isLoadingCompany" size="small" />
-			<n-alert v-else-if="companyError" type="error" :title="t('companies.detail.loadError')" />
-			<div v-else-if="company" class="flex flex-col gap-4">
-				<dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-					<dt class="text-secondary">{{ t("companies.columns.contractRef") }}</dt>
-					<dd>{{ company.contract_ref }}</dd>
-					<dt class="text-secondary">{{ t("companies.columns.status") }}</dt>
-					<dd>{{ t(`companies.status.${company.status}`) }}</dd>
-				</dl>
-
-				<div class="flex justify-end">
-					<n-button size="small" type="primary" @click="addDialogShow = true">
-						<template #icon><Icon name="carbon:add" :size="16" /></template>
-						{{ t("companyMembers.add.button") }}
-					</n-button>
+	<n-modal
+		v-model:show="show"
+		preset="card"
+		:title="company?.legal_name ?? t('companies.detail.title')"
+		closable
+		style="width: min(48rem, 95vw)"
+		content-style="max-height: 80vh; overflow-y: auto"
+	>
+		<div v-if="isInitialLoading" class="py-20 flex items-center justify-center">
+			<n-spin size="large" />
+		</div>
+		<n-alert v-else-if="companyError" type="error" :title="t('companies.detail.loadError')" />
+		<div v-else-if="company" class="flex flex-col gap-4">
+			<dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm bg-neutral-50 dark:bg-neutral-800/40 p-3 rounded-lg border border-black/5 dark:border-white/5">
+				<div>
+					<dt class="text-secondary text-xs">{{ t("companies.columns.contractRef") }}</dt>
+					<dd class="font-medium mt-0.5">{{ company.contract_ref }}</dd>
 				</div>
-
-				<!--
-					`add-ledger-table` is the specificity anchor for the shared DataTable
-					header treatment — see theme-overrides/_resource-table.scss. It was
-					the one table in add-os missing it, so this drawer alone rendered
-					naive's default grey header band.
-				-->
-				<div class="add-ledger-table">
-					<n-data-table
-						:columns="memberColumns"
-						:data="members"
-						:loading="isLoadingMembers"
-						:bordered="false"
-						:row-key="memberRowKey"
-					/>
+				<div>
+					<dt class="text-secondary text-xs">{{ t("companies.columns.status") }}</dt>
+					<dd class="font-medium mt-0.5">
+						<n-tag :type="company.status === 'active' ? 'success' : 'error'" size="small" round :bordered="true">
+							{{ t(`companies.status.${company.status}`) }}
+						</n-tag>
+					</dd>
 				</div>
+			</dl>
+
+			<div class="flex items-center justify-between">
+				<h3 class="text-sm font-semibold text-secondary">{{ t("companyMembers.columns.member") }}</h3>
+				<n-button size="small" type="primary" @click="addDialogShow = true">
+					<template #icon><Icon name="carbon:add" :size="16" /></template>
+					{{ t("companyMembers.add.button") }}
+				</n-button>
 			</div>
-		</n-drawer-content>
-	</n-drawer>
+
+			<!--
+				`add-ledger-table` is the specificity anchor for the shared DataTable
+				header treatment — see theme-overrides/_resource-table.scss.
+			-->
+			<div class="add-ledger-table w-full overflow-x-auto">
+				<n-data-table
+					:columns="memberColumns"
+					:data="members"
+					:loading="isLoadingMembers"
+					:bordered="false"
+					:row-key="memberRowKey"
+					:max-height="360"
+					:scroll-x="520"
+				/>
+			</div>
+		</div>
+	</n-modal>
 
 	<AddCompanyMemberDialog v-model:show="addDialogShow" :company-id @added="refetchMembers" />
 </template>
@@ -44,7 +60,7 @@
 <script setup lang="ts">
 import type { DataTableColumns } from "naive-ui"
 import type { CompanyMember } from "@/add-os/modules/members/types/company-member"
-import { NAlert, NButton, NDataTable, NDrawer, NDrawerContent, NSpin, NSwitch, useDialog, useMessage } from "naive-ui"
+import { NAlert, NButton, NDataTable, NModal, NSpin, NSwitch, NTag, useDialog, useMessage } from "naive-ui"
 import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useCompanyDetail } from "@/add-os/modules/members/composables/useCompanyDetail"
@@ -62,10 +78,18 @@ const dialog = useDialog()
 const { company, isLoadingCompany, companyError, members, isLoadingMembers, refetchMembers, setDoorAccess, setAdminFlag, removeMember, refetchCompany } =
 	useCompanyDetail(props.companyId)
 
+const isInitialLoading = computed(
+	() => !companyError.value && (isLoadingCompany.value || (isLoadingMembers.value && members.value.length === 0))
+)
+
 const addDialogShow = ref(false)
 
+function getMemberUserId(row: CompanyMember): number {
+	return row.user?.id ?? row.user_id ?? (row.id as number)
+}
+
 function memberRowKey(row: CompanyMember) {
-	return row.user_id
+	return getMemberUserId(row)
 }
 
 function toastFailure(caught: unknown) {
@@ -74,10 +98,12 @@ function toastFailure(caught: unknown) {
 }
 
 async function onToggleDoorAccess(row: CompanyMember, value: boolean) {
+	const userId = getMemberUserId(row)
+	if (!userId) return
 	const previous = row.door_access_enabled
 	row.door_access_enabled = value
 	try {
-		await setDoorAccess(row.user_id, { door_access_enabled: value })
+		await setDoorAccess(userId, { door_access_enabled: value })
 	} catch (caught) {
 		row.door_access_enabled = previous
 		toastFailure(caught)
@@ -86,10 +112,12 @@ async function onToggleDoorAccess(row: CompanyMember, value: boolean) {
 }
 
 async function onToggleAdmin(row: CompanyMember, value: boolean) {
+	const userId = getMemberUserId(row)
+	if (!userId) return
 	const previous = row.is_admin
 	row.is_admin = value
 	try {
-		await setAdminFlag(row.user_id, { is_admin: value })
+		await setAdminFlag(userId, { is_admin: value })
 	} catch (caught) {
 		row.is_admin = previous
 		toastFailure(caught)
@@ -98,8 +126,10 @@ async function onToggleAdmin(row: CompanyMember, value: boolean) {
 }
 
 async function performRemove(row: CompanyMember) {
+	const userId = getMemberUserId(row)
+	if (!userId) return
 	try {
-		await removeMember(row.user_id)
+		await removeMember(userId)
 		message.success(t("companyMembers.remove.success"))
 	} catch (caught) {
 		toastFailure(caught)
@@ -116,20 +146,36 @@ function confirmRemove(row: CompanyMember) {
 }
 
 const memberColumns = computed<DataTableColumns<CompanyMember>>(() => [
-	{ title: t("companyMembers.columns.userId"), key: "user_id" },
+	{
+		title: t("companyMembers.columns.member"),
+		key: "user",
+		minWidth: 180,
+		render: row => {
+			if (row.user) {
+				return h("div", { class: "flex flex-col gap-0.5 py-1 whitespace-nowrap" }, [
+					h("span", { class: "font-medium text-sm leading-snug" }, row.user.name),
+					row.user.phone ? h("span", { class: "text-xs text-secondary leading-snug font-mono" }, row.user.phone) : null
+				])
+			}
+			return h("span", { class: "text-sm text-secondary whitespace-nowrap" }, row.user_id ? `${t("companyMembers.columns.userId")}: ${row.user_id}` : "—")
+		}
+	},
 	{
 		title: t("companyMembers.columns.doorAccess"),
 		key: "door_access_enabled",
+		width: 140,
 		render: row => h(NSwitch, { value: row.door_access_enabled, "onUpdate:value": (value: boolean) => onToggleDoorAccess(row, value) })
 	},
 	{
 		title: t("companyMembers.columns.isAdmin"),
 		key: "is_admin",
+		width: 100,
 		render: row => h(NSwitch, { value: row.is_admin, "onUpdate:value": (value: boolean) => onToggleAdmin(row, value) })
 	},
 	{
 		title: t("resourceCrud.table.actionsColumn"),
 		key: "actions",
+		width: 100,
 		render: row =>
 			h(
 				NButton,

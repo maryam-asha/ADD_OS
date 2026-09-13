@@ -74,3 +74,17 @@
 // `text-transform: uppercase` was part of the superseded ledger treatment and is
 // deliberately NOT reinstated: at body size and bold it shouts, and it does
 // nothing at all for Arabic, which is the dashboard's primary language.
+
+.add-ledger-table .n-data-table .n-data-table__pagination {
+	margin-top: 12px;
+
+	.n-pagination {
+		width: 100%;
+		display: flex;
+		align-items: center;
+
+		.n-pagination-prefix {
+			margin-inline-end: auto;
+		}
+	}
+}

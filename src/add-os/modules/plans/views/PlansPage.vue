@@ -1,27 +1,33 @@
 <!-- src/add-os/modules/plans/views/PlansPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.packages") }}</h1>
+		<div class="flex items-center justify-between">
+			<div class="flex flex-col gap-1">
+				<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.packages") }}</h1>
+			</div>
+			<div class="flex items-center gap-2">
+				<router-link to="/plans/modules">
+					<n-button secondary>
+						<template #icon><Icon name="carbon:layers" :size="16" /></template>
+						{{ t("packages.modules.title") }}
+					</n-button>
+				</router-link>
+				<n-button type="primary" @click="openCreate">
+					<template #icon><Icon name="carbon:add" :size="16" /></template>
+					{{ t("packages.create.button") }}
+				</n-button>
+			</div>
 		</div>
 
 		<ResourceStatCards v-if="!error && !isLoading" :cards="statCards" />
 
 		<n-alert v-if="error" type="error" :title="t('packages.loadError')" />
 
-		<div class="flex justify-end">
-			<n-button type="primary" @click="openCreate">
-				<template #icon><Icon name="carbon:add" :size="16" /></template>
-				{{ t("packages.create.button") }}
-			</n-button>
-		</div>
-
 		<ResourceTable :columns :data :loading="isLoading" :on-edit="openEdit" :on-delete="async row => { await mutations.remove(row.id) }" />
 
-		<ResourceFormDrawer
+		<PlanFormDrawer
 			v-model:show="drawerVisible"
 			v-model:model="form"
-			:fields="planFields"
 			:title="mode === 'create' ? t('packages.create.title') : t('packages.edit.title')"
 			:submitting="mutations.isSubmitting.value"
 			:on-submit="submit"
@@ -32,15 +38,16 @@
 <script setup lang="ts">
 import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vue"
 import type { Plan, PlanPayload } from "@/add-os/modules/plans/types/plan"
+import { NAlert, NButton } from "naive-ui"
 import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
-import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.vue"
 import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
 import { currentLocale } from "@/add-os/lang/currentLocale"
-import { buildPlanColumns, emptyPlanPayload, planFields } from "@/add-os/modules/plans/config/plans.config"
+import PlanFormDrawer from "@/add-os/modules/plans/components/PlanFormDrawer.vue"
+import { buildPlanColumns, emptyPlanPayload } from "@/add-os/modules/plans/config/plans.config"
 import { createPlan, listPlans, removePlan, updatePlan } from "@/add-os/services/plans"
 import Icon from "@/components/common/Icon.vue"
 
@@ -84,7 +91,9 @@ function openEdit(row: Plan) {
 	mode.value = "edit"
 	editingId.value = row.id
 	form.value = {
+		plan_module_id: row.plan_module_id ?? null,
 		name: { ...row.name },
+		subtitle: row.subtitle ? { ...row.subtitle } : { ar: "", en: "" },
 		is_subscription: row.is_subscription,
 		price: Number(row.price),
 		pricing_currency: row.pricing_currency,
@@ -92,16 +101,30 @@ function openEdit(row: Plan) {
 		included_hours: Number(row.included_hours),
 		overage_rate: Number(row.overage_rate),
 		is_active: row.is_active,
-		order: row.order
+		order: row.order,
+		balances: (row.balances ?? []).map(b => ({
+			category: b.category,
+			amount: Number(b.amount),
+			restricted_space_id: b.restricted_space_id ?? null,
+			description: b.description ? { ...b.description } : { ar: "", en: "" },
+			order: b.order ?? 0
+		})),
+		features: (row.features ?? []).map(f => ({
+			name: { ...f.name },
+			value: f.value ? { ...f.value } : { ar: "", en: "" },
+			icon: f.icon ?? "",
+			is_included: f.is_included,
+			order: f.order ?? 0
+		}))
 	}
 	drawerVisible.value = true
 }
 
-async function submit(payload: Record<string, unknown>) {
+async function submit(payload: PlanPayload) {
 	if (mode.value === "create") {
-		await mutations.create(payload as unknown as PlanPayload)
+		await mutations.create(payload)
 	} else if (editingId.value !== null) {
-		await mutations.update(editingId.value, payload as unknown as PlanPayload)
+		await mutations.update(editingId.value, payload)
 	}
 }
 </script>

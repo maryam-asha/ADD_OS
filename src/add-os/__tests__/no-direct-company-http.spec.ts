@@ -31,7 +31,7 @@ function walk(dir: string, out: string[] = []): string[] {
 		if (entry.isDirectory()) {
 			if (entry.name === "node_modules") continue
 			walk(full, out)
-		} else if (TEXT_EXT.test(entry.name)) {
+		} else if (TEXT_EXT.test(entry.name) || /\.(?:js|mjs)$/i.test(entry.name)) {
 			out.push(full)
 		}
 	}

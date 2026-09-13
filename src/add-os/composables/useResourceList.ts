@@ -1,7 +1,9 @@
-import type { Ref } from "vue"
+import type { InjectionKey, Ref } from "vue"
 import type { Paginated, PaginationMeta } from "@/add-os/services/pagination"
-import { ref, watch } from "vue"
+import { getCurrentInstance, provide, ref, watch } from "vue"
 import { ApiError } from "@/add-os/services/api"
+
+export const RESOURCE_REFETCH_KEY: InjectionKey<() => Promise<void>> = Symbol("resourceRefetch")
 
 export function useResourceList<T>(
 	list: (query?: Record<string, unknown>) => Promise<T[] | Paginated<T>>,
@@ -34,6 +36,10 @@ export function useResourceList<T>(
 		} finally {
 			isLoading.value = false
 		}
+	}
+
+	if (getCurrentInstance()) {
+		provide(RESOURCE_REFETCH_KEY, refetch)
 	}
 
 	if (page) {

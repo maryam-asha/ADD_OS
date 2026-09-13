@@ -1,4 +1,4 @@
-import type { DataTableColumns, FormItemRule } from "naive-ui"
+import type { DataTableColumns, FormItemRule, SelectOption } from "naive-ui"
 import type { ComposerTranslation } from "vue-i18n"
 import type { FieldDescriptor } from "@/add-os/components/resource/field-types"
 import type { ExchangeRate, ExchangeRatePayload } from "@/add-os/modules/payments/types/exchange-rate"
@@ -12,7 +12,22 @@ export function buildExchangeRateColumns(t: ComposerTranslation, latestIds: Set<
 		{
 			title: t("exchangeRates.columns.rateToBase"),
 			key: "rate_to_base",
-			render: row => formatNumber(row.rate_to_base, { fractionDigits: 4 })
+			render: row => {
+				if (row.display_rate) {
+					return row.display_rate
+				}
+				const num = Number(row.rate_to_base)
+				if (num <= 0) return "-"
+				if (row.currency_code === "SYP") {
+					const displayRate = num < 1 ? Math.round(1 / num) : num
+					return `${formatNumber(displayRate, { fractionDigits: 0 })} ل.س`
+				}
+				if (num < 1) {
+					const inverse = Math.round(1 / num)
+					return `1 USD = ${formatNumber(inverse, { fractionDigits: 2 })} ${row.currency_code}`
+				}
+				return `${formatNumber(num, { fractionDigits: 4 })} USD`
+			}
 		},
 		{
 			title: t("exchangeRates.columns.effectiveFrom"),
@@ -30,10 +45,13 @@ export function buildExchangeRateColumns(t: ComposerTranslation, latestIds: Set<
 	]
 }
 
-export function exchangeRateFields(t: ComposerTranslation): FieldDescriptor<ExchangeRatePayload>[] {
+export function exchangeRateFields(
+	t: ComposerTranslation,
+	currencyOptions: SelectOption[] = [{ label: "SYP", value: "SYP" }]
+): FieldDescriptor<ExchangeRatePayload>[] {
 	const dateRule: FormItemRule = {
 		required: true,
-		trigger: ["blur", "input"],
+		trigger: ["blur", "change", "input"],
 		validator: (_rule, value) =>
 			(typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) || new Error(t("exchangeRates.validation.effectiveFromFormat"))
 	}
@@ -44,22 +62,15 @@ export function exchangeRateFields(t: ComposerTranslation): FieldDescriptor<Exch
 			labelKey: "exchangeRates.form.currencyCode",
 			type: "select",
 			required: true,
-			options: [{ label: "USD", value: "USD" }],
-			/**
-			 * Only "USD" has ever been accepted (SYP/EUR/GBP/TRY/SAR all rejected as
-			 * 422 invalid — SYP is the fixed base currency the rate converts into).
-			 * Fixed and disabled rather than a free choice: there is nothing else
-			 * valid to pick, and no endpoint anywhere lists a currency set.
-			 */
-			disabledWhen: () => true
+			options: currencyOptions.length > 0 ? currencyOptions : [{ label: "SYP", value: "SYP" }]
 		},
 		{ key: "rate_to_base", labelKey: "exchangeRates.form.rateToBase", type: "number", required: true },
-		{ key: "effective_from", labelKey: "exchangeRates.form.effectiveFrom", type: "text", rule: dateRule }
+		{ key: "effective_from", labelKey: "exchangeRates.form.effectiveFrom", type: "date", required: true, rule: dateRule }
 	]
 }
 
-export function emptyExchangeRatePayload(): ExchangeRatePayload {
-	return { currency_code: "USD", rate_to_base: 0, effective_from: "" }
+export function emptyExchangeRatePayload(defaultCode = "SYP"): ExchangeRatePayload {
+	return { currency_code: defaultCode, rate_to_base: 0, effective_from: "" }
 }
 
 /**

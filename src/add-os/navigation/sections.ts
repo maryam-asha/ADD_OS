@@ -113,8 +113,10 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		 * horizontal-nav note in `.claude/rules/shell-and-controls.md`.
 		 */
 		pages: [
+			{ key: "receptionDesk", path: "reception-desk" },
 			{ key: "approvalQueue", path: "approval-queue" },
 			{ key: "activeSessions", path: "active-sessions" },
+			{ key: "closeSession", path: "close-session" },
 			{ key: "allBookings", path: "all" },
 			{ key: "calendar", path: "calendar" }
 		]
@@ -126,6 +128,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		status: "active",
 		pages: [
 			{ key: "packages", path: "packages" },
+			{ key: "modules", path: "modules" },
 			{ key: "wallet", path: "wallet" }
 		]
 	},
@@ -147,17 +150,21 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		pages: [
 			{ key: "transactions", path: "transactions" },
 			{ key: "paymentMethods", path: "methods" },
+			{ key: "currencies", path: "currencies" },
 			{ key: "exchangeRates", path: "exchange-rates" },
-			{ key: "walletTopUps", path: "wallet-top-ups" }
+			{ key: "walletTopUps", path: "wallet-top-ups" },
+			{ key: "cashRegister", path: "cash-register" }
 		]
 	},
 	{
 		key: "community",
 		path: "/community",
 		icon: "carbon:events",
-		status: "coming-soon",
+		status: "active",
 		pages: [
 			{ key: "events", path: "events" },
+			{ key: "eventCategories", path: "event-categories" },
+			{ key: "eventCancellation", path: "event-cancellation" },
 			{ key: "community", path: "directory" },
 			{ key: "cafe", path: "cafe" }
 		]
@@ -178,23 +185,29 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		path: "/address",
 		icon: "carbon:enterprise",
 		status: "active",
-		pages: [{ key: "privateOfficeRequests", path: "private-office-requests" }]
+		pages: [
+			{ key: "privateOfficeRequests", path: "private-office-requests" },
+			{ key: "operationsRequests", path: "operations-requests" }
+		]
 	},
 	{
 		key: "cms",
 		path: "/cms",
 		icon: "carbon:document",
-		status: "coming-soon",
+		status: "active",
 		pages: [
-			{ key: "content", path: "content" },
-			{ key: "partners", path: "partners" }
+			{ key: "announcements", path: "announcements" },
+			{ key: "partners", path: "partners" },
+			{ key: "founders", path: "founders" },
+			{ key: "contactLinks", path: "contact-links" },
+			{ key: "notifications", path: "notifications" }
 		]
 	},
 	{
 		key: "settings",
 		path: "/settings",
 		icon: "carbon:settings",
-		status: "coming-soon",
+		status: "active",
 		pages: [
 			{ key: "accountSecurity", path: "account" },
 			{ key: "systemSettings", path: "system" }

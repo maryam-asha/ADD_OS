@@ -105,10 +105,11 @@
 								:feedback="bulkOpenTimeError ?? undefined"
 							>
 								<n-time-picker
-									:value="toPickerTime(bulkForm.open_time)"
+									:formatted-value="toPickerTime(bulkForm.open_time)"
+									value-format="HH:mm"
 									format="HH:mm"
 									class="w-full"
-									@update:value="v => { bulkForm.open_time = v ?? ''; bulkOpenTimeError = null }"
+									@update:formatted-value="v => { bulkForm.open_time = v ?? ''; bulkOpenTimeError = null }"
 								/>
 							</n-form-item>
 							<n-form-item
@@ -117,10 +118,11 @@
 								:feedback="bulkCloseTimeError ?? undefined"
 							>
 								<n-time-picker
-									:value="toPickerTime(bulkForm.close_time)"
+									:formatted-value="toPickerTime(bulkForm.close_time)"
+									value-format="HH:mm"
 									format="HH:mm"
 									class="w-full"
-									@update:value="v => { bulkForm.close_time = v ?? ''; bulkCloseTimeError = null }"
+									@update:formatted-value="v => { bulkForm.close_time = v ?? ''; bulkCloseTimeError = null }"
 								/>
 							</n-form-item>
 						</div>
@@ -143,7 +145,7 @@
 					:fields="businessHourFields(t)"
 					:title="hourMode === 'create' ? t('businessHours.create.title') : t('businessHours.edit.title')"
 					:submitting="hourMutations.isSubmitting.value"
-					:on-submit="submitHour"
+					:on-submit="(payload: Record<string, unknown>) => submitHour(payload as unknown as BusinessHourPayload)"
 				/>
 			</n-tab-pane>
 
@@ -205,10 +207,11 @@
 								:feedback="exceptionOpenTimeError ?? undefined"
 							>
 								<n-time-picker
-									:value="toPickerTime(exceptionForm.open_time ?? '')"
+									:formatted-value="toPickerTime(exceptionForm.open_time ?? '')"
+									value-format="HH:mm"
 									format="HH:mm"
 									class="w-full"
-									@update:value="v => { exceptionForm.open_time = v; exceptionOpenTimeError = null }"
+									@update:formatted-value="v => { exceptionForm.open_time = v; exceptionOpenTimeError = null }"
 								/>
 							</n-form-item>
 							<n-form-item
@@ -217,10 +220,11 @@
 								:feedback="exceptionCloseTimeError ?? undefined"
 							>
 								<n-time-picker
-									:value="toPickerTime(exceptionForm.close_time ?? '')"
+									:formatted-value="toPickerTime(exceptionForm.close_time ?? '')"
+									value-format="HH:mm"
 									format="HH:mm"
 									class="w-full"
-									@update:value="v => { exceptionForm.close_time = v; exceptionCloseTimeError = null }"
+									@update:formatted-value="v => { exceptionForm.close_time = v; exceptionCloseTimeError = null }"
 								/>
 							</n-form-item>
 						</div>
@@ -269,7 +273,6 @@ import { currentLocale } from "@/add-os/lang/currentLocale"
 import {
 	DAYS_OF_WEEK_ORDERED,
 	WORK_DAYS,
-	buildBusinessHourColumns,
 	buildBusinessHourExceptionColumns,
 	businessHourFields,
 	emptyBulkHourForm,
@@ -636,6 +639,8 @@ function openEditHour(row: BusinessHour) {
 	}
 	hourDrawerVisible.value = true
 }
+
+defineExpose({ openCreateHour, openEditHour })
 
 async function submitHour(payload: BusinessHourPayload) {
 	const withBranch = { ...payload, branch_id: selectedBranchId.value ?? 0 }

@@ -129,7 +129,10 @@ function openEdit(row: Space) {
 	// `branch_id` is virtual (it only narrows the building dropdown), but it still
 	// has to be seeded or the drawer opens with an empty branch above a populated
 	// building. buildingsById is already loaded here for the table's building
-	// column, so derive it the same way FloorsPage.openEdit does.
+	const resolvedImages = Array.isArray(row.images) && row.images.length > 0
+		? [...row.images]
+		: (row.main_image || row.image_url ? [row.main_image || row.image_url!] : [])
+
 	form.value = {
 		branch_id: buildingsById.value[row.building_id]?.branch_id ?? null,
 		building_id: row.building_id,
@@ -139,7 +142,8 @@ function openEdit(row: Space) {
 		is_lockable: row.is_lockable,
 		capacity: row.capacity,
 		hourly_rate: row.hourly_rate,
-		pricing_currency: row.pricing_currency
+		pricing_currency: row.pricing_currency,
+		images: resolvedImages
 	}
 	drawerVisible.value = true
 }

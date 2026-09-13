@@ -82,10 +82,11 @@ const ALLOWED: readonly AllowedHost[] = [
 		host: "www.naiveui.com",
 		why: "naive-ui dev warnings link to its docs. Text in a console message; no request."
 	},
+	// `pinx.vercel.app` was here — removed in Phase 4 (brand assets: title, meta, favicon).
+	//
 	{
-		host: "pinx.vercel.app",
-		why: "Pinx template <meta> tags in index.html (canonical, og:image, twitter:image). Inert markup — no fetch — but wrong branding.",
-		removedBy: "Phase 4 (brand assets: title, meta, favicon)"
+		host: "github.com",
+		why: "date-fns token formatting warnings link to docs on GitHub. Static error message string; no network request."
 	},
 	{
 		host: "api.test",
@@ -184,10 +185,9 @@ describe("network isolation — the allowlist itself", () => {
 		for (const a of temporary) {
 			expect(a.removedBy!.length, `${a.host}.removedBy`).toBeGreaterThan(10)
 		}
-		// Pinned so a shrinking allowlist is visible progress. Two entries have
-		// already gone: `maps.googleapis.com` with the Google Maps plugin, and
-		// `api.org` with the placeholder API base.
-		expect(temporary.map(a => a.host).sort()).toEqual(["pinx.vercel.app"])
+		// Pinned so a shrinking allowlist is visible progress. `maps.googleapis.com`,
+		// `api.org`, and `pinx.vercel.app` (Phase 4) have all been removed.
+		expect(temporary.map(a => a.host).sort()).toEqual([])
 	})
 })
 

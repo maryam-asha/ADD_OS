@@ -1,6 +1,31 @@
+import type { PlanModule } from "./plan-module"
+
+export type WalletBalanceCategoryType = "general" | "cafe" | "printing_internet" | "space_specific"
+
+export interface PlanBalanceItem {
+	id?: number
+	category: WalletBalanceCategoryType
+	amount: number
+	restricted_space_id?: number | null
+	description?: { ar: string; en: string } | null
+	order?: number
+}
+
+export interface PlanFeatureItem {
+	id?: number
+	name: { ar: string; en: string }
+	value?: { ar: string; en: string } | null
+	icon?: string | null
+	is_included: boolean
+	order?: number
+}
+
 export interface Plan {
 	id: number
+	plan_module_id?: number | null
+	plan_module?: PlanModule | null
 	name: { ar: string; en: string }
+	subtitle?: { ar: string; en: string } | null
 	is_subscription: boolean
 	/** Decimal string as returned by the API, e.g. "150.00". */
 	price: string
@@ -12,6 +37,8 @@ export interface Plan {
 	overage_rate: string
 	is_active: boolean
 	order: number
+	balances?: PlanBalanceItem[]
+	features?: PlanFeatureItem[]
 	created_at: string
 	/**
 	 * Present ONLY when the request's `currency` header differs from
@@ -24,17 +51,10 @@ export interface Plan {
 	converted_currency?: "USD" | "SYP"
 }
 
-/**
- * Extends `Record<string, unknown>` so this is structurally assignable to
- * `ResourceFormDrawer`'s `TModel extends Record<string, unknown>` generic (see
- * `BranchPayload`'s identical doc comment for why a plain interface needs this).
- *
- * `price`/`included_hours`/`overage_rate` are `number` here, not `string` like
- * `Plan` — the API accepts numeric JSON for all three (confirmed live) and this
- * is what `n-input-number` binds to.
- */
 export interface PlanPayload extends Record<string, unknown> {
+	plan_module_id?: number | null
 	name: { ar: string; en: string }
+	subtitle?: { ar: string; en: string } | null
 	is_subscription: boolean
 	price: number
 	pricing_currency: "USD" | "SYP"
@@ -43,4 +63,6 @@ export interface PlanPayload extends Record<string, unknown> {
 	overage_rate: number
 	is_active: boolean
 	order: number
+	balances?: PlanBalanceItem[]
+	features?: PlanFeatureItem[]
 }

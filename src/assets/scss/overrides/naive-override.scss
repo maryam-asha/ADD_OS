@@ -7,6 +7,13 @@
 	backdrop-filter: blur(20px);
 	max-width: 90%;
 	margin: 10vh auto;
+
+	&.max-w-xs { max-width: min(20rem, 90vw); }
+	&.max-w-sm { max-width: min(24rem, 90vw); }
+	&.max-w-md { max-width: min(28rem, 90vw); }
+	&.max-w-lg { max-width: min(32rem, 90vw); }
+	&.max-w-xl { max-width: min(36rem, 90vw); }
+	&.max-w-2xl { max-width: min(42rem, 90vw); }
 }
 .n-card {
 	.n-card-header {

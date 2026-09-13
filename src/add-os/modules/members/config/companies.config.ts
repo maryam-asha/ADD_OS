@@ -34,21 +34,16 @@ export function buildCompanyColumns(t: ComposerTranslation, branches: Branch[], 
 }
 
 export function buildCompanyFields(
-	t: ComposerTranslation,
-	quotedRequests: PrivateOfficeRequest[],
-	branches: Branch[],
-	locale: SupportedLocale
+	_t: ComposerTranslation,
+	quotedRequests: PrivateOfficeRequest[]
 ): FieldDescriptor<CompanyPayload>[] {
-	const branchOptions: SelectOption[] = branches.map(branch => ({ label: pickLocalized(branch.name, locale), value: branch.id }))
-
 	return [
 		{ key: "private_office_request_id", labelKey: "companies.form.privateOfficeRequest", type: "select", required: true, options: quotedRequestOptions(quotedRequests) },
-		{ key: "branch_id", labelKey: "companies.form.branch", type: "select", required: true, options: branchOptions },
 		{ key: "legal_name", labelKey: "companies.form.legalName", type: "text", required: true },
 		{ key: "contract_ref", labelKey: "companies.form.contractRef", type: "text", required: true }
 	]
 }
 
 export function emptyCompanyPayload(): CompanyPayload {
-	return { private_office_request_id: null, branch_id: null, legal_name: "", contract_ref: "" }
+	return { private_office_request_id: null, legal_name: "", contract_ref: "" }
 }

@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest"
 import { h, nextTick } from "vue"
 import { createI18n } from "vue-i18n"
 
+import { RESOURCE_REFETCH_KEY } from "@/add-os/composables/useResourceList"
 import ResourceTable from "../ResourceTable.vue"
 
 const i18n = createI18n({
@@ -20,7 +21,8 @@ const i18n = createI18n({
 					deleteAction: "Delete",
 					deleteConfirmTitle: "Delete this record?",
 					deleteConfirmOk: "Delete",
-					deleteConfirmCancel: "Cancel"
+					deleteConfirmCancel: "Cancel",
+					refreshAction: "Refresh data"
 				}
 			}
 		}
@@ -61,6 +63,61 @@ describe("resourceTable", () => {
 
 		expect(wrapper.text()).toContain("Row A")
 		expect(wrapper.text()).toContain("Actions")
+
+		wrapper.unmount()
+	})
+
+	/**
+	 * Not every admin resource has an autoincrement id. Currencies are keyed by
+	 * a 3-letter `code` string, and without an override every row would key on
+	 * `undefined` — one key shared by the whole table. `rowKey` is the hook for
+	 * that; `row.id` stays the default so the twelve existing callers are
+	 * untouched.
+	 */
+	it("keys rows with the provided rowKey for a resource that has no numeric id", () => {
+		interface CodeRow extends Record<string, unknown> {
+			code: string
+			label: string
+		}
+		const rowKey = vi.fn((row: CodeRow) => row.code)
+		const codeColumns: DataTableColumns<CodeRow> = [{ title: "Label", key: "label" }]
+		const wrapper = mount(
+			{
+				render: () =>
+					h(NDialogProvider, null, {
+						default: () =>
+							h(ResourceTable<CodeRow>, {
+								columns: codeColumns,
+								data: [
+									{ code: "USD", label: "US Dollar" },
+									{ code: "SYP", label: "Syrian Pound" }
+								],
+								loading: false,
+								rowKey
+							})
+					})
+			},
+			{ global: { plugins: [i18n] }, attachTo: document.body }
+		)
+
+		expect(rowKey).toHaveBeenCalled()
+		expect(rowKey.mock.results.map(result => result.value)).toEqual(expect.arrayContaining(["USD", "SYP"]))
+		expect(wrapper.text()).toContain("US Dollar")
+		expect(wrapper.text()).toContain("Syrian Pound")
+
+		wrapper.unmount()
+	})
+
+	it("falls back to row.id when no rowKey is given, so id-keyed callers are unaffected", () => {
+		const wrapper = mountTable({
+			data: [
+				{ id: 1, label: "Row A" },
+				{ id: 2, label: "Row B" }
+			]
+		})
+
+		expect(wrapper.text()).toContain("Row A")
+		expect(wrapper.text()).toContain("Row B")
 
 		wrapper.unmount()
 	})
@@ -201,6 +258,60 @@ describe("resourceTable", () => {
 		const extraButton = wrapper.findAll("button").find(button => button.text() === "Extra")
 		expect(extraButton?.exists()).toBe(true)
 
+		wrapper.unmount()
+	})
+
+	it("calls onRefresh exactly once when the refresh button is clicked", async () => {
+		const onRefresh = vi.fn()
+		const wrapper = mountTable({ onRefresh })
+
+		const refreshButton = wrapper.findAll("button").find(button => button.attributes("aria-label") === "Refresh data")
+		expect(refreshButton?.exists()).toBe(true)
+		await refreshButton?.trigger("click")
+
+		expect(onRefresh).toHaveBeenCalledTimes(1)
+		wrapper.unmount()
+	})
+
+	it("does not render the refresh button when table data is empty", () => {
+		const onRefresh = vi.fn()
+		const wrapper = mountTable({ data: [], onRefresh })
+
+		const refreshButton = wrapper.findAll("button").find(button => button.attributes("aria-label") === "Refresh data")
+		expect(refreshButton).toBeUndefined()
+		wrapper.unmount()
+	})
+
+	it("uses injected RESOURCE_REFETCH_KEY when onRefresh prop is not provided", async () => {
+		const injectedRefetch = vi.fn()
+		const wrapper = mount(
+			{
+				render: () =>
+					h(NDialogProvider, null, {
+						default: () =>
+							h(ResourceTable<Row>, {
+								columns,
+								data: [{ id: 1, label: "Row A" }],
+								loading: false
+							})
+					})
+			},
+			{
+				global: {
+					plugins: [i18n],
+					provide: {
+						[RESOURCE_REFETCH_KEY as symbol]: injectedRefetch
+					}
+				},
+				attachTo: document.body
+			}
+		)
+
+		const refreshButton = wrapper.findAll("button").find(button => button.attributes("aria-label") === "Refresh data")
+		expect(refreshButton?.exists()).toBe(true)
+		await refreshButton?.trigger("click")
+
+		expect(injectedRefetch).toHaveBeenCalledTimes(1)
 		wrapper.unmount()
 	})
 })

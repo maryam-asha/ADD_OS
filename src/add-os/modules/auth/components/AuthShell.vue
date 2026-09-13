@@ -18,22 +18,49 @@
 			for anything else; a desktop login does. What the two share is the
 			palette and the type — one identity, different medium.
 		-->
-		<div
-			class="auth-shell relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--add-auth-panel-background)] p-6"
-		>
-			<!--
-				Decoration only, hence aria-hidden: two offset rounded panels behind the
-				card, the way the member app stacks surfaces. Tinted from `surface` with
-				an opacity modifier rather than a literal rgba(), so they stay a token
-				reference and the no-hardcoded-values rule holds.
-			-->
-			<div aria-hidden="true" class="pointer-events-none absolute inset-0 hidden items-center justify-center sm:flex">
-				<div class="rounded-add-large bg-surface/5 absolute size-96 -translate-x-32 -translate-y-24" />
-				<div class="rounded-add-large border-surface/10 absolute size-96 translate-x-32 translate-y-24 border" />
-			</div>
+		<div class="auth-shell bg-surface grid min-h-screen lg:grid-cols-2">
+			<section
+				class="relative hidden min-h-screen overflow-hidden bg-[var(--add-auth-panel-background)] px-10 py-12 text-[var(--add-auth-panel-text)] lg:flex lg:flex-col lg:justify-between xl:px-16"
+				aria-labelledby="auth-panel-title"
+			>
+				<!--
+					The brand's own interlocking-wordmark pattern, corner-anchored the way
+					the printed rollup banner crops it — not the full-bleed stretch the
+					leftover Pinx `pattern-onboard.png` used. `end-0`/`bottom-0` so it sits
+					at the trailing corner and mirrors correctly under RTL via logical
+					properties, with no separate RTL stylesheet.
+				-->
+				<div
+					aria-hidden="true"
+					class="pointer-events-none absolute bottom-0 end-0 -mb-12 -me-12 size-[30rem] opacity-20"
+				>
+					<img :src="pattern" alt="" class="size-full object-contain object-bottom" />
+				</div>
 
-			<main class="relative flex w-full max-w-md flex-col items-center">
-				<div class="bg-surface rounded-add-large shadow-add-overlay w-full p-8">
+				<div class="relative flex items-center">
+					<img :src="logoLight" :alt="t('common.logoAlt')" class="h-12 w-auto object-contain" />
+				</div>
+
+				<div class="relative max-w-xl pb-8">
+					<!--
+						Replaces the old isolated success dot with a short accent rule,
+						echoing the banner's lime-highlighted line above its headline.
+						Still the same `success` ramp — the contrast-adjusted Smart Olive
+						already asserted in tokens.spec.ts — no new colour introduced.
+					-->
+					<div aria-hidden="true" class="bg-success h-1.5 w-20 rounded-full" />
+					<h2 id="auth-panel-title" class="mt-6 text-4xl font-bold leading-tight xl:text-5xl">{{ title }}</h2>
+					<p v-if="subtitle" class="mt-5 max-w-lg text-lg leading-relaxed opacity-80">{{ subtitle }}</p>
+				</div>
+
+				<div class="relative flex items-center gap-3 text-sm opacity-70">
+					<span class="bg-success h-px w-10" />
+					<span>{{ t("common.logoAlt") }}</span>
+				</div>
+			</section>
+
+			<main class="flex min-h-screen items-center justify-center px-6 py-10 sm:px-12 lg:px-16 xl:px-24">
+				<div class="w-full max-w-md">
 					<n-button v-if="showBack" text class="mb-4" @click="emit('back')">
 						<Icon :name="backIcon" :size="20" />
 						<span class="ms-2">{{ t("auth.common.back") }}</span>
@@ -45,12 +72,12 @@
 						variant is the compact mark. `logo-dark.png` is the transparent,
 						dark-ink file, which is the one that belongs on a white card.
 					-->
-					<div class="mb-6 flex justify-center">
+					<div class="mb-8 flex justify-center lg:justify-start">
 						<img :src="logoLockup" :alt="t('common.logoAlt')" class="h-12 w-auto" />
 					</div>
 
-					<h1 class="text-text-primary mb-2 text-center text-2xl font-bold">{{ title }}</h1>
-					<p v-if="subtitle" class="text-text-secondary mb-8 text-center">{{ subtitle }}</p>
+					<h1 class="text-text-primary mb-2 text-3xl font-bold">{{ title }}</h1>
+					<p v-if="subtitle" class="text-text-secondary mb-8">{{ subtitle }}</p>
 
 					<slot />
 				</div>
@@ -68,6 +95,22 @@ import { useI18n } from "vue-i18n"
 // the panel colours reach the template as CSS vars, not as imports.
 import { brand } from "@/add-os/theme/tokens"
 import logoLockup from "@/assets/images/logo-dark.png"
+import logoLight from "@/assets/images/logo-light.png"
+// The brand's own interlocking-wordmark motif, replacing the leftover Pinx
+// `pattern-onboard.png` the design spec (§4) called out as not carried over.
+// `-green` (not `-dark`), deliberately: `pattern-dark.svg` is filled #42474F,
+// which is within one RGB step of this panel's own Charcoal Backbone ground
+// (#43474F) and would blend away to nothing once alpha-composited. The green
+// fill reads as a visible tonal watermark against the dark panel instead —
+// the same light-on-dark relationship the printed rollup banner's line art
+// has against its charcoal ground.
+//
+// `?url`, not the bare import: `vite-svg-loader` (vite.config.ts) makes a
+// bare `*.svg` import resolve to a Vue component by default, project-wide.
+// This is rendered through a plain `<img :src>`, so it needs the raw URL —
+// the same `?url` suffix already used at src/components/maps/leaflet/Map.vue
+// and the Tables grid-asset plugins.
+import pattern from "@/assets/images/patterns/pattern-green.svg?url"
 import Icon from "@/components/common/Icon.vue"
 import { useThemeStore } from "@/stores/theme"
 

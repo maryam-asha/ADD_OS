@@ -13,6 +13,7 @@ vi.mock("naive-ui", () => ({
 }))
 
 vi.mock("vue-i18n", () => ({
+	createI18n: () => ({ global: { locale: { value: "ar" }, t: (k: string) => k } }),
 	useI18n: () => ({
 		t: (key: string) => {
 			if (key === "resourceCrud.mutations.genericError") return "Something went wrong. Please try again."
@@ -56,6 +57,29 @@ describe("useResourceMutations", () => {
 
 		expect(api.update).toHaveBeenCalledWith(1, { label: "B" })
 		expect(refetch).toHaveBeenCalledOnce()
+		expect(successMock).toHaveBeenCalledWith("Updated.")
+	})
+
+	/**
+	 * Not every admin resource is keyed by an autoincrement id. Currencies are
+	 * keyed by a 3-letter `code` string (`Currency::$primaryKey = 'code'`), so
+	 * the key type is a generic rather than a hardcoded `number`. This case is
+	 * as much a type assertion as a runtime one: `tsconfig.vitest.json` type-
+	 * checks spec files, so a regression narrowing the key back to `number`
+	 * fails `pnpm type-check` here even though the runtime call still works.
+	 */
+	it("update() accepts a string primary key for resources not keyed by a numeric id", async () => {
+		const api = {
+			create: vi.fn(),
+			update: vi.fn((_code: string, _payload: { symbol: string }) => Promise.resolve({ message: "Updated." })),
+			remove: vi.fn()
+		}
+		const refetch = vi.fn().mockResolvedValue(undefined)
+		const { update } = useResourceMutations(api, refetch, MESSAGES)
+
+		await update("USD", { symbol: "$" })
+
+		expect(api.update).toHaveBeenCalledWith("USD", { symbol: "$" })
 		expect(successMock).toHaveBeenCalledWith("Updated.")
 	})
 

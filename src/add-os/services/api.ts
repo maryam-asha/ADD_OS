@@ -2,6 +2,7 @@ import { currentLocale } from "@/add-os/lang/currentLocale"
 import { DEFAULT_CURRENCY } from "@/add-os/utils/format/currency"
 import router from "@/router"
 import { useAuthStore } from "@/stores/auth"
+import { useCurrencyStore } from "@/stores/currency"
 
 import { apiUrl } from "../config/env"
 
@@ -46,20 +47,26 @@ function readXsrfToken(): string | null {
  * The backend expects `lang`/`currency` (lower-case, exactly — see
  * ADD-OS.postman_collection.json) on every endpoint, admin dashboard included.
  *
- * Read at request time, not import time: `currentLocale` is a ref so a
- * language switch takes effect on the very next request, without a reload.
- *
- * Currency has no per-user store yet (out of scope here) — every request
- * currently uses the single app-wide DEFAULT_CURRENCY. A caller can still
- * override it per-request via `options.headers`, which layers on top of
- * this and wins (see `request()` below).
+ * Read at request time, not import time: `currentLocale` and `useCurrencyStore().currency`
+ * are reactive so language and currency switches take effect on the very next
+ * request, without a reload.
  */
 function buildDefaultHeaders(): Record<string, string> {
+	let currency: string = DEFAULT_CURRENCY
+	try {
+		const currencyStore = useCurrencyStore()
+		if (currencyStore.currency) {
+			currency = currencyStore.currency
+		}
+	} catch {
+		// Outside Pinia or before store initialization — fallback to DEFAULT_CURRENCY
+	}
+
 	return {
 		"Accept": "application/json",
 		"Content-Type": "application/json",
 		"lang": currentLocale.value,
-		"currency": DEFAULT_CURRENCY
+		"currency": currency
 	}
 }
 
@@ -176,6 +183,50 @@ export async function patch<T>(path: string, body?: unknown, query?: Record<stri
 
 export async function del<T>(path: string, query?: Record<string, unknown>, headers?: Record<string, string>, credentials?: RequestCredentials): Promise<T> {
 	return request<T>("DELETE", path, { query, headers, credentials })
+}
+
+export async function uploadFile<T>(
+	path: string,
+	file: File,
+	fieldName = "file",
+	extraData?: Record<string, string>
+): Promise<T> {
+	const formData = new FormData()
+	formData.append(fieldName, file)
+	if (extraData) {
+		for (const [key, value] of Object.entries(extraData)) {
+			if (value !== undefined && value !== null) {
+				formData.append(key, value)
+			}
+		}
+	}
+
+	const headers: Record<string, string> = {
+		Accept: "application/json"
+	}
+	const xsrfToken = readXsrfToken()
+	if (xsrfToken) {
+		headers["X-XSRF-TOKEN"] = xsrfToken
+	}
+
+	const url = buildUrl(path)
+	const res = await fetch(url, {
+		method: "POST",
+		headers,
+		body: formData,
+		credentials: "include"
+	})
+
+	const text = await res.text()
+	if (!res.ok) {
+		throw new ApiError(res.status, text)
+	}
+
+	try {
+		return JSON.parse(text) as T
+	} catch {
+		return text as unknown as T
+	}
 }
 
 export { ApiError }

@@ -27,7 +27,6 @@ export interface Company {
  */
 export interface CompanyPayload extends Record<string, unknown> {
 	private_office_request_id: number | null
-	branch_id: number | null
 	legal_name: string
 	contract_ref: string
 }

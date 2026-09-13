@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { ref } from "vue"
 import { createI18n } from "vue-i18n"
 
+import type { CompanyMember } from "@/add-os/modules/members/types/company-member"
 import { ApiError } from "@/add-os/services/api"
 import CompanyDetailPanel from "../CompanyDetailPanel.vue"
 
@@ -20,7 +21,7 @@ const refetchMembersMock = vi.fn()
 // `members` directly (Step 3 below), and Vue's expose/auto-unwrap machinery only
 // behaves correctly against a genuine ref — matching what the real
 // useCompanyDetail (Task 9) actually returns.
-let membersFixture: ReturnType<typeof ref<{ user_id: number; door_access_enabled: boolean; is_admin: boolean }[]>>
+let membersFixture: ReturnType<typeof ref<CompanyMember[]>>
 
 vi.mock("@/add-os/modules/members/composables/useCompanyDetail", () => ({
 	useCompanyDetail: () => ({
@@ -58,7 +59,7 @@ const i18n = createI18n({
 			companies: { detail: { title: "Company", loadError: "Load error." }, columns: { contractRef: "Contract ref", status: "Status" }, status: { active: "Active", inactive: "Inactive" } },
 			companyMembers: {
 				add: { button: "Add member" },
-				columns: { userId: "User ID", doorAccess: "Door access", isAdmin: "Admin" },
+				columns: { member: "Member", userId: "User ID", doorAccess: "Door access", isAdmin: "Admin" },
 				remove: { confirmTitle: "Remove?", confirmOk: "Remove", confirmCancel: "Cancel", success: "Removed." }
 			},
 			resourceCrud: { table: { actionsColumn: "Actions", deleteAction: "Delete" }, mutations: { genericError: "Error.", permissionError: "No permission." } }
@@ -85,6 +86,18 @@ describe("companyDetailPanel", () => {
 		await flushPromises()
 
 		expect(document.body.textContent).toContain("Acme LLC")
+		wrapper.unmount()
+	})
+
+	it("renders member user name and phone when user object is present in response", async () => {
+		membersFixture.value = [
+			{ id: 1, user: { id: 5, name: "Sara Ahmad", phone: "+963912345678" }, door_access_enabled: true, is_admin: false }
+		]
+		const wrapper = mountPanel()
+		await flushPromises()
+
+		expect(document.body.textContent).toContain("Sara Ahmad")
+		expect(document.body.textContent).toContain("+963912345678")
 		wrapper.unmount()
 	})
 

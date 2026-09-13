@@ -1,1450 +1,1748 @@
 {
-	"locales": {
-		"ar": "العربية",
-		"en": "الإنجليزية"
-	},
-	"common": {
-		"comingSoon": "قريباً",
-		"search": "بحث",
-		"close": "إغلاق",
-		"save": "حفظ",
-		"delete": "حذف",
-		"clear": "مسح",
-		"viewAll": "عرض الكل",
-		"logout": "تسجيل الخروج",
-		"logged_out": "تم تسجيل الخروج",
-		"logoAlt": "شعار ADD OS"
-	},
-	"errors": {
-		"backHome": "العودة إلى الرئيسية",
-		"tryAgain": "حاول مجدداً",
-		"notFound": {
-			"title": "الصفحة غير موجودة",
-			"description": "قد تكون الصفحة التي تبحث عنها قد نُقلت أو لم تعد موجودة.",
-			"illustrationAlt": "رسم توضيحي لصفحة مفقودة"
-		},
-		"serverError": {
-			"title": "حدث خطأ ما",
-			"description": "تعذّر تحميل هذه الصفحة الآن. يرجى المحاولة مجدداً بعد قليل.",
-			"illustrationAlt": "رسم توضيحي لخطأ في الاتصال"
-		}
-	},
-	"notifications": {
-		"title": "الإشعارات",
-		"setAsRead": "تعليم كمقروء",
-		"markAllAsRead": "تعليم الكل كمقروء"
-	},
-	"roles": {
-		"description": "إدارة الأدوار وصلاحيات لوحة التحكم التي يمنحها كل دور.",
-		"loadError": "تعذّر تحميل الأدوار. قد لا تملك صلاحية الوصول لهذه الصفحة.",
-		"names": {
-			"member": "عضو",
-			"operations": "التشغيل",
-			"admin": "المدير"
-		},
-		"builtIn": "مدمج",
-		"columns": {
-			"name": "الاسم",
-			"permissions": "الصلاحيات",
-			"permissionCount": "{count} صلاحية",
-			"actions": "إجراءات"
-		},
-		"create": {
-			"button": "دور جديد",
-			"title": "دور جديد",
-			"success": "تم إنشاء الدور."
-		},
-		"edit": {
-			"title": "تعديل الدور",
-			"button": "تعديل",
-			"success": "تم تحديث الدور."
-		},
-		"delete": {
-			"button": "حذف",
-			"success": "تم حذف الدور."
-		},
-		"form": {
-			"name": "الاسم",
-			"namePlaceholder": "أدخل اسم الدور",
-			"permissions": "الصلاحيات",
-			"selectAll": "تحديد الكل",
-			"deselectAll": "إلغاء التحديد",
-			"selectAllPermissions": "تحديد كل الصلاحيات",
-			"searchModules": "بحث في الوحدات والصلاحيات...",
-			"noModulesFound": "لا توجد صلاحيات تطابق البحث.",
-			"selectedCount": "{selected} من {total} محددة",
-			"submit": "حفظ",
-			"cancel": "إلغاء"
-		},
-		"validation": {
-			"nameRequired": "الاسم مطلوب."
-		},
-		"actions": {
-			"view": "عرض",
-			"create": "إضافة",
-			"update": "تعديل",
-			"delete": "حذف",
-			"update_status": "تعديل الحالة",
-			"assign_role": "تعيين الأدوار"
-		},
-		"modules": {
-			"announcements": "الإعلانات",
-			"branches": "الفروع",
-			"buildings": "المباني",
-			"business-hours": "ساعات العمل",
-			"business-hour-exceptions": "استثناءات ساعات العمل",
-			"community-members": "أعضاء المجتمع",
-			"contact-links": "روابط الاتصال",
-			"devices": "الأجهزة",
-			"device-capabilities": "إمكانيات الأجهزة",
-			"events": "الفعاليات",
-			"floors": "الطوابق",
-			"founders": "المؤسسون",
-			"partners": "الشركاء",
-			"plans": "الخطط والباقات",
-			"private-office-requests": "طلبات المكاتب الخاصة",
-			"resources": "الموارد",
-			"seats-desks": "المقاعد والمكاتب",
-			"spaces": "المساحات",
-			"zones": "المناطق",
-			"users": "المستخدمون",
-			"error-logs": "سجلات الأخطاء",
-			"roles": "الأدوار والصلاحيات",
-			"settings": "الإعدادات"
-		}
-	},
-	"auth": {
-		"common": {
-			"back": "رجوع"
-		},
-		"signIn": {
-			"title": "أهلاً بعودتك",
-			"subtitle": "سجّل الدخول لإدارة العضويات والحجوزات والوصول.",
-			"emailLabel": "البريد الإلكتروني",
-			"emailPlaceholder": "أدخل بريدك الإلكتروني",
-			"emailRequired": "البريد الإلكتروني مطلوب.",
-			"emailInvalid": "أدخل بريداً إلكترونياً صحيحاً.",
-			"passwordLabel": "كلمة المرور",
-			"passwordPlaceholder": "أدخل كلمة المرور",
-			"passwordRequired": "كلمة المرور مطلوبة.",
-			"forgotLink": "نسيت كلمة المرور؟",
-			"submit": "تسجيل الدخول",
-			"genericError": "تعذّر تسجيل الدخول. تحقّق من بياناتك وأعد المحاولة."
-		},
-		"twoFactor": {
-			"title": "التحقّق بخطوتين",
-			"subtitle": "أدخل الرمز من تطبيق المصادقة لإتمام تسجيل الدخول.",
-			"codeLabel": "رمز المصادقة",
-			"codePlaceholder": "أدخل الرمز المكوّن من ست خانات",
-			"codeRequired": "أدخل الرمز من تطبيق المصادقة.",
-			"recoveryLabel": "رمز الاسترداد",
-			"recoveryPlaceholder": "أدخل رمز استرداد",
-			"recoveryRequired": "أدخل رمز استرداد.",
-			"useRecoveryCode": "استخدم رمز استرداد بدلاً من ذلك",
-			"useAuthCode": "استخدم رمز المصادقة بدلاً من ذلك",
-			"submit": "تحقّق",
-			"genericError": "تعذّر التحقّق من الرمز. أعد المحاولة."
-		},
-		"forgotPassword": {
-			"title": "إعادة تعيين كلمة المرور",
-			"subtitle": "أدخل بريدك الإلكتروني وسنرسل إليك رابطاً لتعيين كلمة مرور جديدة.",
-			"backToSignIn": "العودة إلى تسجيل الدخول",
-			"emailLabel": "البريد الإلكتروني",
-			"emailPlaceholder": "أدخل بريدك الإلكتروني",
-			"emailRequired": "البريد الإلكتروني مطلوب.",
-			"emailInvalid": "أدخل بريداً إلكترونياً صحيحاً.",
-			"submit": "إرسال رابط إعادة التعيين",
-			"success": "إذا كان هذا البريد مرتبطاً بحساب، فسيصلك رابط إعادة التعيين قريباً.",
-			"alreadySignedIn": "أنت مسجّل الدخول بالفعل.",
-			"genericError": "تعذّر إرسال رابط إعادة التعيين. حاول مجدداً."
-		},
-		"resetPassword": {
-			"title": "تعيين كلمة مرور جديدة",
-			"subtitle": "اختر كلمة مرور لم تستخدمها من قبل.",
-			"backToSignIn": "العودة إلى تسجيل الدخول",
-			"passwordPlaceholder": "ثماني خانات على الأقل",
-			"passwordConfirmationPlaceholder": "أعد إدخال كلمة المرور الجديدة",
-			"passwordLabel": "كلمة المرور الجديدة",
-			"passwordConfirmationLabel": "تأكيد كلمة المرور الجديدة",
-			"passwordRequired": "كلمة المرور مطلوبة.",
-			"passwordTooShort": "يجب أن تتكوّن كلمة المرور من 8 أحرف على الأقل.",
-			"passwordConfirmationRequired": "يرجى تأكيد كلمة المرور.",
-			"passwordConfirmationMismatch": "كلمتا المرور غير متطابقتين.",
-			"submit": "إعادة تعيين كلمة المرور",
-			"success": "تم إعادة تعيين كلمة المرور. يرجى تسجيل الدخول.",
-			"genericError": "تعذّرت إعادة تعيين كلمة المرور. حاول مجدداً."
-		}
-	},
-	"account": {
-		"description": "إدارة ملفك الشخصي وكلمة المرور والمصادقة الثنائية.",
-		"genericError": "حدث خطأ ما. الرجاء المحاولة مجدداً.",
-		"profile": {
-			"title": "الملف الشخصي",
-			"nameLabel": "الاسم الكامل",
-			"emailLabel": "البريد الإلكتروني",
-			"nameRequired": "الاسم مطلوب.",
-			"emailRequired": "البريد الإلكتروني مطلوب.",
-			"emailInvalid": "أدخل بريداً إلكترونياً صحيحاً.",
-			"submit": "حفظ",
-			"success": "تم تحديث الملف الشخصي."
-		},
-		"password": {
-			"title": "كلمة المرور",
-			"currentLabel": "كلمة المرور الحالية",
-			"newLabel": "كلمة المرور الجديدة",
-			"confirmLabel": "تأكيد كلمة المرور الجديدة",
-			"currentRequired": "كلمة المرور الحالية مطلوبة.",
-			"newRequired": "كلمة المرور الجديدة مطلوبة.",
-			"newTooShort": "يجب أن تتكوّن كلمة المرور من 8 أحرف على الأقل.",
-			"confirmRequired": "يرجى تأكيد كلمة المرور الجديدة.",
-			"confirmMismatch": "كلمتا المرور غير متطابقتين.",
-			"submit": "تغيير كلمة المرور",
-			"success": "تم تغيير كلمة المرور."
-		},
-		"twoFactor": {
-			"title": "المصادقة الثنائية",
-			"description": "طلب رمز من تطبيق مصادقة بالإضافة إلى كلمة المرور عند تسجيل الدخول.",
-			"enableButton": "تفعيل المصادقة الثنائية",
-			"activeBadge": "المصادقة الثنائية مُعدّة",
-			"codeLabel": "رمز المصادقة",
-			"codePlaceholder": "مثال: 123456",
-			"confirmButton": "تأكيد",
-			"confirmSuccess": "تم تأكيد المصادقة الثنائية.",
-			"recoveryCodesTitle": "رموز الاسترداد",
-			"regenerateButton": "إعادة توليد رموز الاسترداد",
-			"disableButton": "تعطيل المصادقة الثنائية"
-		},
-		"confirmPassword": {
-			"title": "تأكيد كلمة المرور",
-			"description": "لأمان حسابك، يرجى تأكيد كلمة المرور للمتابعة.",
-			"passwordLabel": "كلمة المرور",
-			"cancel": "إلغاء",
-			"submit": "تأكيد"
-		}
-	},
-	"users": {
-		"description": "حسابات التشغيل والإدارة في اللوحة. الأعضاء يسجّلون من التطبيق ولا يظهرون هنا.",
-		"searchPlaceholder": "البحث بالاسم أو الهاتف أو البريد الإلكتروني",
-		"roleFilterPlaceholder": "تصفية حسب الدور",
-		"columns": {
-			"name": "الاسم",
-			"phone": "الهاتف",
-			"email": "البريد الإلكتروني",
-			"role": "الدور",
-			"status": "الحالة",
-			"actions": "إجراءات"
-		},
-		"status": {
-			"active": "نشط",
-			"deactivated": "معطّل",
-			"blocked": "محظور"
-		},
-		"create": {
-			"button": "مستخدم جديد",
-			"title": "مستخدم جديد",
-			"success": "تم إنشاء المستخدم."
-		},
-		"edit": {
-			"title": "تعديل المستخدم",
-			"button": "تعديل",
-			"success": "تم تحديث البيانات."
-		},
-		"changeStatus": {
-			"button": "تغيير الحالة",
-			"title": "تغيير الحالة",
-			"warning": "تعطيل الحساب أو حظره يسجّل خروج المستخدم من كل الأجهزة فوراً.",
-			"reasonLabel": "السبب (اختياري)",
-			"reasonPlaceholder": "سبب تغيير الحالة",
-			"success": "تم تحديث الحالة."
-		},
-		"changeRole": {
-			"button": "تغيير الدور",
-			"title": "تغيير الدور",
-			"success": "تم تحديث الدور."
-		},
-		"form": {
-			"name": "الاسم الكامل",
-			"phone": "رقم الهاتف",
-			"phonePlaceholder": "مثال: 09XXXXXXXX",
-			"email": "البريد الإلكتروني",
-			"password": "كلمة المرور",
-			"passwordConfirmation": "تأكيد كلمة المرور",
-			"role": "الدور",
-			"rolePlaceholder": "اختر دوراً",
-			"submit": "حفظ",
-			"cancel": "إلغاء"
-		},
-		"validation": {
-			"nameRequired": "الاسم مطلوب.",
-			"phoneRequired": "رقم الهاتف مطلوب.",
-			"phoneInvalid": "أدخل رقم هاتف سوري صحيح (09XXXXXXXX).",
-			"emailRequired": "البريد الإلكتروني مطلوب.",
-			"emailInvalid": "أدخل بريداً إلكترونياً صحيحاً.",
-			"passwordRequired": "كلمة المرور مطلوبة.",
-			"passwordTooShort": "يجب أن تتكوّن كلمة المرور من 8 أحرف على الأقل.",
-			"passwordConfirmationMismatch": "كلمتا المرور غير متطابقتين.",
-			"roleRequired": "الدور مطلوب."
-		},
-		"loadError": "تعذّر تحميل المستخدمين. قد لا تملك صلاحية الوصول لهذه الصفحة.",
-		"empty": "لا يوجد مستخدمون.",
-		"stats": {
-			"total": "إجمالي المستخدمين"
-		}
-	},
-	"branches": {
-		"columns": {
-			"name": "الاسم",
-			"city": "المدينة",
-			"timezone": "المنطقة الزمنية",
-			"isActive": "نشط"
-		},
-		"isActiveYes": "نشط",
-		"isActiveNo": "غير نشط",
-		"create": {
-			"button": "فرع جديد",
-			"title": "فرع جديد",
-			"success": "تم إنشاء الفرع."
-		},
-		"edit": {
-			"title": "تعديل الفرع",
-			"success": "تم تحديث الفرع."
-		},
-		"delete": {
-			"success": "تم حذف الفرع.",
-			"cascadeWarning": "حذف هذا الفرع يحذف أيضاً كل مبنى وطابق ومنطقة ومساحة ومورد ومقعد/طاولة تحته."
-		},
-		"form": {
-			"name": "الاسم",
-			"city": "المدينة",
-			"timezone": "المنطقة الزمنية",
-			"isActive": "نشط"
-		},
-		"loadError": "تعذّر تحميل الفروع. قد لا تملك صلاحية عرض هذه الصفحة.",
-		"stats": {
-			"total": "إجمالي الفروع",
-			"active": "نشط",
-			"inactive": "غير نشط"
-		}
-	},
-	"buildings": {
-		"columns": {
-			"branch": "الفرع",
-			"name": "الاسم",
-			"floorCount": "عدد الطوابق"
-		},
-		"create": {
-			"button": "مبنى جديد",
-			"title": "مبنى جديد",
-			"success": "تم إنشاء المبنى."
-		},
-		"edit": {
-			"title": "تعديل المبنى",
-			"success": "تم تحديث المبنى."
-		},
-		"delete": {
-			"success": "تم حذف المبنى.",
-			"cascadeWarning": "حذف هذا المبنى يحذف أيضاً كل طابق ومنطقة ومساحة ومورد ومقعد/طاولة تحته."
-		},
-		"form": {
-			"branch": "الفرع",
-			"name": "الاسم",
-			"floorCount": "عدد الطوابق"
-		},
-		"loadError": "تعذّر تحميل المباني. قد لا تملك صلاحية عرض هذه الصفحة.",
-		"stats": {
-			"total": "إجمالي المباني",
-			"totalFloors": "إجمالي الطوابق"
-		}
-	},
-	"floors": {
-		"columns": {
-			"building": "المبنى",
-			"label": "التسمية",
-			"sortOrder": "الترتيب"
-		},
-		"create": {
-			"button": "طابق جديد",
-			"title": "طابق جديد",
-			"success": "تم إنشاء الطابق."
-		},
-		"edit": {
-			"title": "تعديل الطابق",
-			"success": "تم تحديث الطابق."
-		},
-		"delete": {
-			"success": "تم حذف الطابق.",
-			"cascadeWarning": "حذف هذا الطابق يحذف أيضاً كل منطقة ومساحة تحته."
-		},
-		"form": {
-			"branch": "الفرع",
-			"building": "المبنى",
-			"label": "التسمية",
-			"sortOrder": "ترتيب الفرز"
-		},
-		"loadError": "تعذّر تحميل الطوابق. قد لا تملك صلاحية عرض هذه الصفحة."
-	},
-	"zones": {
-		"columns": {
-			"floor": "الطابق",
-			"label": "التسمية",
-			"sortOrder": "الترتيب"
-		},
-		"create": {
-			"button": "منطقة جديدة",
-			"title": "منطقة جديدة",
-			"success": "تم إنشاء المنطقة."
-		},
-		"edit": {
-			"title": "تعديل المنطقة",
-			"success": "تم تحديث المنطقة."
-		},
-		"delete": {
-			"success": "تم حذف المنطقة.",
-			"cascadeWarning": "حذف هذه المنطقة يحذف أيضاً كل مساحة تحتها."
-		},
-		"form": {
-			"branch": "الفرع",
-			"building": "المبنى",
-			"floor": "الطابق",
-			"label": "التسمية",
-			"sortOrder": "ترتيب الفرز"
-		},
-		"loadError": "تعذّر تحميل المناطق. قد لا تملك صلاحية عرض هذه الصفحة."
-	},
-	"operationalStatus": {
-		"active": "نشط",
-		"maintenance": "قيد الصيانة",
-		"retired": "خارج الخدمة"
-	},
-	"spaces": {
-		"columns": {
-			"building": "المبنى",
-			"zone": "المنطقة",
-			"spaceType": "النوع",
-			"capacity": "السعة",
-			"status": "الحالة"
-		},
-		"spaceType": {
-			"co_space": "مساحة عمل مشتركة",
-			"room": "غرفة",
-			"business": "مساحة أعمال",
-			"event_hall": "قاعة فعاليات"
-		},
-		"create": {
-			"button": "مساحة جديدة",
-			"title": "مساحة جديدة",
-			"success": "تم إنشاء المساحة."
-		},
-		"edit": {
-			"title": "تعديل المساحة",
-			"success": "تم تحديث المساحة."
-		},
-		"delete": {
-			"success": "تم حذف المساحة.",
-			"cascadeWarning": "حذف هذه المساحة يحذف أيضاً كل مورد ومقعد/طاولة تحتها."
-		},
-		"changeStatus": {
-			"button": "تغيير الحالة",
-			"title": "تغيير الحالة",
-			"statusLabel": "الحالة",
-			"reasonLabel": "السبب (اختياري)",
-			"success": "تم تحديث الحالة."
-		},
-		"form": {
-			"branch": "الفرع",
-			"building": "المبنى",
-			"zone": "المنطقة (اختياري)",
-			"spaceType": "النوع",
-			"allocationModel": "نموذج التخصيص (اختياري)",
-			"isLockable": "قابلة للإغلاق",
-			"capacity": "السعة",
-			"hourlyRate": "السعر بالساعة (اختياري)",
-			"pricingCurrency": "العملة (اختياري)"
-		},
-		"loadError": "تعذّر تحميل المساحات. قد لا تملك صلاحية عرض هذه الصفحة.",
-		"stats": {
-			"total": "إجمالي المساحات"
-		}
-	},
-	"resources": {
-		"columns": {
-			"space": "المساحة",
-			"name": "الاسم",
-			"category": "الفئة",
-			"quantity": "الكمية",
-			"status": "الحالة"
-		},
-		"create": {
-			"button": "مورد جديد",
-			"title": "مورد جديد",
-			"success": "تم إنشاء المورد."
-		},
-		"edit": {
-			"title": "تعديل المورد",
-			"success": "تم تحديث المورد."
-		},
-		"delete": {
-			"success": "تم حذف المورد."
-		},
-		"changeStatus": {
-			"button": "تغيير الحالة",
-			"title": "تغيير الحالة",
-			"statusLabel": "الحالة",
-			"reasonLabel": "السبب (اختياري)",
-			"success": "تم تحديث الحالة."
-		},
-		"form": {
-			"branch": "الفرع",
-			"building": "المبنى",
-			"zone": "المنطقة (اختياري)",
-			"space": "المساحة",
-			"name": "الاسم",
-			"category": "الفئة",
-			"quantity": "الكمية"
-		},
-		"loadError": "تعذّر تحميل الموارد. قد لا تملك صلاحية عرض هذه الصفحة.",
-		"stats": {
-			"total": "إجمالي الموارد"
-		}
-	},
-	"seatsDesks": {
-		"columns": {
-			"space": "المساحة",
-			"label": "التسمية",
-			"qrPointId": "نقطة QR"
-		},
-		"create": {
-			"button": "مقعد/طاولة جديدة",
-			"title": "مقعد/طاولة جديدة",
-			"success": "تم إنشاء المقعد/الطاولة."
-		},
-		"edit": {
-			"title": "تعديل المقعد/الطاولة",
-			"success": "تم تحديث المقعد/الطاولة."
-		},
-		"delete": {
-			"success": "تم حذف المقعد/الطاولة."
-		},
-		"form": {
-			"branch": "الفرع",
-			"building": "المبنى",
-			"zone": "المنطقة (اختياري)",
-			"space": "المساحة",
-			"label": "التسمية",
-			"qrPointId": "معرّف نقطة QR (اختياري)"
-		},
-		"loadError": "تعذّر تحميل المقاعد والطاولات. قد لا تملك صلاحية عرض هذه الصفحة."
-	},
-	"businessHours": {
-		"branchLabel": "الفرع",
-		"branchPlaceholder": "اختر فرعاً",
-		"tabs": {
-			"weeklySchedule": "الجدول الأسبوعي",
-			"exceptions": "الاستثناءات"
-		},
-		"days": {
-			"sunday": "الأحد",
-			"monday": "الاثنين",
-			"tuesday": "الثلاثاء",
-			"wednesday": "الأربعاء",
-			"thursday": "الخميس",
-			"friday": "الجمعة",
-			"saturday": "السبت"
-		},
-		"columns": {
-			"dayOfWeek": "اليوم",
-			"period": "فترة الدوام",
-			"openTime": "يفتح",
-			"closeTime": "يغلق"
-		},
-		"create": {
-			"button": "ساعات جديدة",
-			"title": "ساعات عمل جديدة",
-			"success": "تم إنشاء ساعات العمل."
-		},
-		"bulkCreate": {
-			"title": "ساعات عمل جديدة",
-			"days": "الأيام",
-			"workDays": "السبت – الخميس",
-			"selectAll": "تحديد كل الأيام",
-			"clearAll": "إلغاء التحديد",
-			"daysRequired": "اختر يوماً واحداً على الأقل.",
-			"success": "تم إنشاء ساعات العمل لـ {count} يوم."
-		},
-		"edit": {
-			"title": "تعديل ساعات العمل",
-			"success": "تم تحديث ساعات العمل."
-		},
-		"delete": {
-			"success": "تم حذف ساعات العمل."
-		},
-		"form": {
-			"dayOfWeek": "يوم الأسبوع",
-			"openTime": "يفتح الساعة",
-			"closeTime": "يغلق الساعة"
-		},
-		"validation": {
-			"timeFormat": "أدخل وقتاً بصيغة HH:mm، مثل 08:00."
-		},
-		"loadError": "تعذّر تحميل ساعات العمل. قد لا تملك صلاحية عرض هذه الصفحة.",
-		"empty": "لا توجد ساعات عمل لهذا الفرع.",
-		"exceptions": {
-			"columns": {
-				"date": "التاريخ",
-				"isClosed": "مغلق",
-				"hours": "الساعات",
-				"reason": "السبب"
-			},
-			"isClosedYes": "مغلق",
-			"isClosedNo": "مفتوح",
-			"create": {
-				"button": "استثناء جديد",
-				"title": "استثناء جديد",
-				"success": "تم إنشاء الاستثناء."
-			},
-			"edit": {
-				"title": "تعديل الاستثناء",
-				"success": "تم تحديث الاستثناء."
-			},
-			"delete": {
-				"success": "تم حذف الاستثناء."
-			},
-			"form": {
-				"date": "التاريخ (YYYY-MM-DD)",
-				"isClosed": "مغلق طوال اليوم",
-				"openTime": "يفتح الساعة",
-				"closeTime": "يغلق الساعة",
-				"reason": "السبب (اختياري)"
-			},
-			"validation": {
-				"dateFormat": "أدخل تاريخاً بصيغة YYYY-MM-DD."
-			},
-			"empty": "لا توجد استثناءات لهذا الفرع."
-		}
-	},
-	"packages": {
-		"columns": {
-			"name": "الاسم",
-			"type": "النوع",
-			"price": "السعر",
-			"duration": "المدة (أيام)",
-			"isActive": "نشط"
-		},
-		"isActiveYes": "نشط",
-		"isActiveNo": "غير نشط",
-		"type": {
-			"subscription": "اشتراك",
-			"oneTime": "دفعة واحدة"
-		},
-		"create": {
-			"button": "باقة جديدة",
-			"title": "باقة جديدة",
-			"success": "تم إنشاء الباقة."
-		},
-		"edit": {
-			"title": "تعديل الباقة",
-			"success": "تم تحديث الباقة."
-		},
-		"delete": {
-			"success": "تم حذف الباقة."
-		},
-		"form": {
-			"name": "الاسم",
-			"isSubscription": "باقة اشتراك",
-			"price": "السعر",
-			"pricingCurrency": "العملة",
-			"durationDays": "المدة (أيام)",
-			"includedHours": "الساعات المتضمنة",
-			"overageRate": "سعر الساعة الإضافية",
-			"isActive": "نشط",
-			"order": "ترتيب العرض"
-		},
-		"loadError": "تعذّر تحميل الباقات. قد لا تملك صلاحية عرض هذه الصفحة.",
-		"stats": {
-			"total": "إجمالي الباقات",
-			"active": "نشطة",
-			"subscriptions": "اشتراكات"
-		}
-	},
-	"events": {
-		"columns": {
-			"image": "الصورة",
-			"title": "العنوان",
-			"category": "الفئة",
-			"startAt": "تاريخ ووقت البدء",
-			"location": "الموقع",
-			"capacity": "السعة",
-			"status": "الحالة"
-		},
-		"status": {
-			"draft": "مسودة",
-			"published": "منشور",
-			"cancelled": "ملغى"
-		},
-		"create": {
-			"button": "فعالية جديدة",
-			"title": "إضافة فعالية جديدة",
-			"success": "تم إنشاء الفعالية بنجاح."
-		},
-		"edit": {
-			"title": "تعديل الفعالية",
-			"success": "تم تحديث الفعالية بنجاح."
-		},
-		"delete": {
-			"success": "تم حذف الفعالية بنجاح."
-		},
-		"form": {
-			"title": "العنوان",
-			"description": "الوصف",
-			"category": "الفئة",
-			"startAt": "تاريخ ووقت البدء",
-			"endAt": "تاريخ ووقت الانتهاء",
-			"location": "الموقع",
-			"capacity": "السعة",
-			"imageUrl": "صورة الفعالية",
-			"status": "الحالة",
-			"order": "ترتيب العرض"
-		},
-		"loadError": "تعذر تحميل الفعاليات. قد لا تملك الصلاحية الكافية لعرض هذه الصفحة.",
-		"stats": {
-			"total": "إجمالي الفعاليات",
-			"published": "منشورة",
-			"draft": "مسودات"
-		}
-	},
-	"communityMembers": {
-		"columns": {
-			"name": "الاسم",
-			"category": "الفئة",
-			"company": "الشركة",
-			"title": "المسمى الوظيفي",
-			"yearJoined": "سنة الانضمام",
-			"published": "الحالة"
-		},
-		"categories": {
-			"pioneers": "الرواد",
-			"growth_partners": "شركاء النمو",
-			"investors": "المستثمرون",
-			"impact_partners": "شركاء الأثر"
-		},
-		"status": {
-			"published": "منشور",
-			"hidden": "مخفي"
-		},
-		"create": {
-			"button": "عضو جديد",
-			"title": "إضافة عضو مجتمع جديد",
-			"success": "تمت إضافة عضو المجتمع بنجاح."
-		},
-		"edit": {
-			"title": "تعديل عضو المجتمع",
-			"success": "تم تحديث بيانات العضو بنجاح."
-		},
-		"delete": {
-			"success": "تم حذف العضو بنجاح."
-		},
-		"form": {
-			"name": "الاسم",
-			"category": "الفئة",
-			"company": "الشركة",
-			"title": "المسمى الوظيفي",
-			"bio": "نبذة موجزة",
-			"longBio": "السيرة الذاتية المفصلة",
-			"yearJoined": "سنة الانضمام",
-			"photoUrl": "الصورة الشخصية",
-			"order": "ترتيب العرض",
-			"published": "منشور"
-		},
-		"loadError": "تعذر تحميل أعضاء المجتمع. قد لا تملك الصلاحية الكافية لعرض هذه الصفحة.",
-		"stats": {
-			"total": "إجمالي الأعضاء",
-			"published": "منشور",
-			"hidden": "مخفي"
-		}
-	},
-	"currencies": {
-		"columns": {
-			"code": "الرمز",
-			"name": "الاسم",
-			"symbol": "الرمز الكتابي",
-			"decimalPlaces": "الخانات العشرية",
-			"order": "ترتيب العرض",
-			"isActive": "الحالة"
-		},
-		"baseBadge": "العملة الأساسية",
-		"isActiveYes": "مفعّلة",
-		"isActiveNo": "معطّلة",
-		"create": {
-			"button": "عملة جديدة",
-			"title": "عملة جديدة",
-			"success": "تم إنشاء العملة."
-		},
-		"edit": {
-			"title": "تعديل العملة",
-			"success": "تم تحديث العملة."
-		},
-		"form": {
-			"code": "الرمز",
-			"name": "الاسم",
-			"symbol": "الرمز الكتابي",
-			"decimalPlaces": "الخانات العشرية",
-			"order": "ترتيب العرض"
-		},
-		"validation": {
-			"codeFormat": "أدخل ثلاثة أحرف لاتينية كبيرة تماماً، مثل EUR."
-		},
-		"actions": {
-			"setBase": "تعيين كعملة أساسية",
-			"activate": "تفعيل",
-			"deactivate": "تعطيل"
-		},
-		"setBase": {
-			"title": "تعيينها كعملة أساسية؟",
-			"content": "تُحتسب كل المبالغ المخزّنة بالنسبة إلى العملة الأساسية. تعيين {code} كعملة أساسية يغيّر الوحدة التي تُقاس بها كل أسعار الصرف الحالية، ولا يمكن التراجع عنه من هذه الشاشة.",
-			"confirm": "تعيين كعملة أساسية",
-			"cancel": "إلغاء",
-			"success": "تم تحديث العملة الأساسية."
-		},
-		"status": {
-			"activateSuccess": "تم تفعيل العملة.",
-			"deactivateSuccess": "تم تعطيل العملة."
-		},
-		"loadError": "تعذّر تحميل العملات. قد لا تملك صلاحية عرض هذه الصفحة.",
-		"stats": {
-			"total": "إجمالي العملات",
-			"active": "المفعّلة",
-			"inactive": "المعطّلة"
-		}
-	},
-	"exchangeRates": {
-		"columns": {
-			"currencyCode": "العملة",
-			"rateToBase": "السعر (ليرة سورية لكل دولار)",
-			"effectiveFrom": "ساري من"
-		},
-		"latestBadge": "الأحدث",
-		"create": {
-			"button": "سعر صرف جديد",
-			"title": "سعر صرف جديد",
-			"success": "تم إنشاء سعر الصرف."
-		},
-		"form": {
-			"currencyCode": "العملة",
-			"rateToBase": "السعر (ليرة سورية لكل دولار)",
-			"effectiveFrom": "ساري من (YYYY-MM-DD)"
-		},
-		"validation": {
-			"effectiveFromFormat": "أدخل تاريخاً بصيغة YYYY-MM-DD."
-		},
-		"loadError": "تعذّر تحميل أسعار الصرف. قد لا تملك صلاحية عرض هذه الصفحة.",
-		"empty": "لا توجد أسعار صرف.",
-		"stats": {
-			"latestUsd": "أحدث سعر صرف دولار → ليرة"
-		}
-	},
-	"walletTopUps": {
-		"description": "سجّل شحن محفظة يدوياً من الاستقبال، لمحفظة عضو أو محفظة شركة.",
-		"recipientType": {
-			"user": "محفظة عضو",
-			"company": "محفظة شركة"
-		},
-		"paymentMethod": {
-			"cash": "نقداً",
-			"sham": "شام كاش",
-			"mtn": "إم تي إن كاش",
-			"syriatel": "سيرياتيل كاش"
-		},
-		"form": {
-			"recipientType": "شحن لـ",
-			"user": "العضو",
-			"company": "الشركة",
-			"amount": "المبلغ",
-			"paymentMethod": "طريقة الدفع",
-			"description": "الوصف (اختياري)"
-		},
-		"validation": {
-			"amountFormat": "أدخل مبلغاً لا يقل عن 0.01، بخانتين عشريتين على الأكثر.",
-			"userRequired": "اختر عضواً.",
-			"companyRequired": "اختر شركة."
-		},
-		"submit": {
-			"button": "تسجيل الشحن",
-			"success": "تم شحن المحفظة."
-		},
-		"loadError": "تعذّر تحميل الأعضاء والشركات. قد لا تملك صلاحية عرض هذه الصفحة."
-	},
-	"cashRegister": {
-		"description": "فتح، مطابقة، وإغلاق ورديات وجلسات صندوق النقد لموظفي الاستقبال.",
-		"status": {
-			"open": "مفتوحة",
-			"closed": "مغلقة"
-		},
-		"openButton": "فتح وردية صندوق جديدة",
-		"closeButton": "إغلاق وردية الصندوق",
-		"noOpenSession": "لا توجد وردية صندوق نقد نشطة لحسابك حالياً.",
-		"historyTitle": "سجل جلسات الصندوق",
-		"openSuccess": "تم فتح وردية صندوق النقد بنجاح.",
-		"openError": "تعذر فتح وردية الصندوق.",
-		"closeSuccess": "تم إغلاق ومطابقة وردية صندوق النقد بنجاح.",
-		"closeError": "تعذر إغلاق وردية الصندوق.",
-		"columns": {
-			"id": "المعرف",
-			"operator": "المسؤول",
-			"branch": "الفرع",
-			"status": "الحالة",
-			"openedAt": "وقت الفتح",
-			"closedAt": "وقت الإغلاق",
-			"openingBalance": "رصيد الافتتاح",
-			"expectedBalance": "الرصيد المتوقع",
-			"closingBalance": "الرصيد الفعلي",
-			"difference": "الفارق"
-		},
-		"openModal": {
-			"title": "فتح وردية صندوق النقد",
-			"branch": "الفرع",
-			"openingBalance": "رصيد الصندوق الافتتاحي",
-			"notes": "ملاحظات"
-		},
-		"closeModal": {
-			"title": "إغلاق وردية صندوق النقد ومطابقته",
-			"closingBalance": "رصيد النقد الفعلي المحصي",
-			"notes": "ملاحظات المطابقة"
-		}
-	},
-	"approvalQueue": {
-		"description": "حجوزات بانتظار قرار من الاستقبال. لا تظهر هنا إلا المساحات التي تتطلب موافقة.",
-		"loadError": "تعذّر تحميل طلبات الموافقة. قد لا تملك صلاحية عرض هذه الصفحة.",
-		"empty": "لا يوجد ما ينتظر الموافقة.",
-		"columns": {
-			"requester": "مقدّم الطلب",
-			"space": "المساحة",
-			"when": "موعد الحجز",
-			"requested": "تاريخ الطلب",
-			"actions": "الإجراءات"
-		},
-		"approve": {
-			"button": "موافقة",
-			"success": "تمت الموافقة على الحجز."
-		},
-		"reject": {
-			"button": "رفض",
-			"title": "رفض الحجز",
-			"reasonLabel": "سبب الرفض",
-			"reasonPlaceholder": "يرى مقدّم الطلب هذا النص، فاذكر ما الذي يجعل الحجز ممكناً.",
-			"reasonRequired": "اذكر سبب الرفض.",
-			"success": "تم رفض الحجز."
-		}
-	},
-	"activeSessions": {
-		"description": "كل من هم داخل المكان الآن، الحجوزات والزيارات المباشرة معاً.",
-		"loadError": "تعذّر تحميل الجلسات النشطة. قد لا تملك صلاحية عرض هذه الصفحة.",
-		"empty": "لا أحد داخل المكان الآن.",
-		"refresh": "تحديث",
-		"overdue": "متأخّرة",
-		"onTime": "ضمن الوقت",
-		"columns": {
-			"occupant": "الشاغل",
-			"space": "المساحة",
-			"type": "النوع",
-			"checkedInAt": "وقت الدخول",
-			"status": "الحالة",
-			"actions": "الإجراءات"
-		},
-		"type": {
-			"booking": "حجز",
-			"walkin": "زيارة مباشرة"
-		},
-		"checkOut": {
-			"button": "تسجيل الخروج",
-			"title": "تسجيل خروج الجلسة",
-			"atLabel": "وقت الخروج",
-			"futureNotAllowed": "لا يمكن أن يكون وقت الخروج في المستقبل.",
-			"settleLabel": "تسوية الدفع الآن",
-			"settleNone": "بدون تسوية الآن",
-			"success": "تم تسجيل خروج الجلسة.",
-			"settleSuccess": "تمت تسوية الدفع."
-		},
-		"extend": {
-			"button": "تمديد",
-			"title": "تمديد الحجز",
-			"minutesLabel": "دقائق إضافية",
-			"minutesInvalid": "أدخل عدداً صحيحاً من الدقائق، واحدة أو أكثر.",
-			"success": "تم تمديد الحجز."
-		},
-		"cancel": {
-			"button": "إلغاء الحجز",
-			"confirmTitle": "إلغاء هذا الحجز؟",
-			"confirmText": "ينتهي حجز العضو الآن وتصبح المساحة متاحة.",
-			"confirmOk": "إلغاء الحجز",
-			"confirmCancel": "الإبقاء عليه",
-			"success": "تم إلغاء الحجز."
-		}
-	},
-	"shortcuts": {
-		"title": "الاختصارات"
-	},
-	"nav": {
-		"sections": {
-			"dashboard": "لوحة القيادة",
-			"spatial": "الهيكل المكاني",
-			"system": "النظام والصلاحيات",
-			"members": "الأعضاء",
-			"bookings": "الحجوزات",
-			"plans": "الاشتراكات والباقات",
-			"access": "التحكم بالدخول",
-			"payments": "المدفوعات",
-			"community": "المجتمع والفعاليات",
-			"incubation": "الحاضنة والتسريع",
-			"address": "العنوان التجاري",
-			"cms": "إدارة الموقع",
-			"settings": "الإعدادات"
-		},
-		"pages": {
-			"overview": "نظرة عامة",
-			"branches": "الفروع",
-			"buildings": "المباني",
-			"floors": "الطوابق",
-			"zones": "المناطق",
-			"spaces": "المساحات",
-			"resources": "الموارد",
-			"seatsDesks": "المقاعد والطاولات",
-			"businessHours": "ساعات العمل",
-			"users": "المستخدمون",
-			"roles": "الأدوار والصلاحيات",
-			"individuals": "الأفراد",
-			"companies": "الشركات",
-			"memberships": "العضويات",
-			"approvalQueue": "طلبات الموافقة",
-			"activeSessions": "الجلسات النشطة",
-			"allBookings": "كل الحجوزات",
-			"calendar": "التقويم",
-			"packages": "الباقات",
-			"wallet": "المحفظة",
-			"locks": "الأقفال",
-			"accessLogs": "سجلّات الدخول",
-			"transactions": "المعاملات",
-			"paymentMethods": "طرق الدفع",
-			"currencies": "العملات",
-			"exchangeRates": "أسعار الصرف",
-			"walletTopUps": "شحن المحافظ",
-			"cashRegister": "صندوق النقد",
-			"events": "الفعاليات",
-			"community": "المجتمع",
-			"cafe": "الكافيه",
-			"incubate": "برنامج Incubate",
-			"accelerate": "برنامج Accelerate",
-			"mentors": "المرشدون",
-			"privateOfficeRequests": "طلبات المكاتب الخاصة",
-			"content": "المحتوى",
-			"partners": "الشركاء",
-			"announcements": "الإعلانات",
-			"founders": "المؤسسون",
-			"contactLinks": "روابط التواصل",
-			"notifications": "إرسال إشعار عام",
-			"accountSecurity": "الحساب والأمان",
-			"systemSettings": "إعدادات النظام",
-			"eventCategories": "فئات الفعاليات"
-		}
-	},
-	"resourceCrud": {
-		"mutations": {
-			"genericError": "حدث خطأ ما. الرجاء المحاولة مجدداً.",
-			"permissionError": "لا تملك صلاحية هذا الإجراء."
-		},
-		"table": {
-			"actionsColumn": "إجراءات",
-			"empty": "لا توجد سجلات.",
-			"editAction": "تعديل",
-			"deleteAction": "حذف",
-			"deleteConfirmTitle": "حذف هذا العنصر؟",
-			"deleteConfirmOk": "حذف",
-			"deleteConfirmCancel": "إلغاء",
-			"refreshAction": "تحديث البيانات"
-		},
-		"form": {
-			"submit": "حفظ",
-			"cancel": "إلغاء",
-			"arabicPlaceholder": "العربية",
-			"englishPlaceholder": "الإنجليزية",
-			"uploadImage": "رفع صورة",
-			"uploadImagePrompt": "انقر أو اسحب الصورة هنا للرفع",
-			"uploadImageHint": "يدعم صيغ JPG, PNG, WEBP بحد أقصى 10MB",
-			"uploadSuccess": "تم رفع الصورة بنجاح",
-			"uploading": "جاري رفع الصورة...",
-			"changeImage": "تغيير الصورة",
-			"removeImage": "حذف الصورة"
-		},
-		"validation": {
-			"required": "{field} مطلوب."
-		}
-	},
-	"privateOfficeRequests": {
-		"description": "طلبات العملاء المحتملين لمكتب خاص، من مُقدَّم إلى مُسعَّر إلى متعاقَد.",
-		"columns": {
-			"prospectName": "العميل المحتمل",
-			"contact": "التواصل",
-			"status": "الحالة",
-			"quoteRef": "مرجع العرض",
-			"actions": "إجراءات"
-		},
-		"status": {
-			"requested": "مُقدَّم",
-			"quoted": "مُسعَّر",
-			"contracted": "متعاقَد"
-		},
-		"create": {
-			"button": "طلب جديد",
-			"title": "طلب مكتب خاص جديد",
-			"success": "تم إنشاء الطلب."
-		},
-		"markAsQuoted": {
-			"button": "تحويل إلى عرض سعر",
-			"title": "تحويل إلى عرض سعر",
-			"quoteRefLabel": "مرجع عرض السعر",
-			"quoteRefPlaceholder": "مثال: Q-2026-0001",
-			"success": "تم تحويل الطلب إلى مُسعَّر."
-		},
-		"contractedLocked": "أصبح هذا الطلب شركة ولا يمكن تغيير حالته من هنا بعد الآن.",
-		"delete": {
-			"success": "تم حذف الطلب."
-		},
-		"form": {
-			"prospectName": "اسم العميل المحتمل",
-			"contact": "التواصل"
-		},
-		"validation": {
-			"prospectNameRequired": "اسم العميل المحتمل مطلوب.",
-			"contactRequired": "معلومات التواصل مطلوبة.",
-			"quoteRefRequired": "مرجع عرض السعر مطلوب."
-		},
-		"loadError": "تعذّر تحميل طلبات المكاتب الخاصة. قد لا تملك صلاحية عرض هذه الصفحة.",
-		"empty": "لا توجد طلبات مكاتب خاصة.",
-		"stats": {
-			"total": "إجمالي الطلبات",
-			"requested": "مُقدَّمة",
-			"quoted": "مُسعَّرة",
-			"contracted": "متعاقَدة"
-		}
-	},
-	"companies": {
-		"description": "الشركات المُنشأة من طلب مكتب خاص مُسعَّر. تُنشأ من هنا فقط — لا خدمة ذاتية أبداً.",
-		"columns": {
-			"legalName": "الاسم القانوني",
-			"contractRef": "مرجع العقد",
-			"branch": "الفرع",
-			"status": "الحالة",
-			"actions": "إجراءات"
-		},
-		"status": {
-			"active": "نشطة",
-			"inactive": "غير نشطة"
-		},
-		"create": {
-			"button": "شركة جديدة",
-			"title": "شركة جديدة",
-			"success": "تم إنشاء الشركة.",
-			"noQuotedRequestsTitle": "لا توجد طلبات مُسعَّرة بعد",
-			"noQuotedRequestsBody": "لا يمكن إنشاء شركة إلا من طلب مكتب خاص مُسعَّر. توجّه إلى طلبات المكاتب الخاصة وحوّل طلباً إلى عرض سعر أولاً.",
-			"goToRequests": "الذهاب إلى طلبات المكاتب الخاصة"
-		},
-		"changeStatus": {
-			"button": "تغيير الحالة",
-			"title": "تغيير الحالة",
-			"success": "تم تحديث الحالة."
-		},
-		"viewMembers": {
-			"button": "عرض الأعضاء"
-		},
-		"form": {
-			"privateOfficeRequest": "طلب المكتب الخاص",
-			"branch": "الفرع",
-			"legalName": "الاسم القانوني",
-			"contractRef": "مرجع العقد"
-		},
-		"validation": {
-			"privateOfficeRequestRequired": "طلب مُسعَّر مطلوب.",
-			"branchRequired": "الفرع مطلوب.",
-			"legalNameRequired": "الاسم القانوني مطلوب.",
-			"contractRefRequired": "مرجع العقد مطلوب."
-		},
-		"loadError": "تعذّر تحميل الشركات. قد لا تملك صلاحية عرض هذه الصفحة.",
-		"empty": "لا توجد شركات.",
-		"stats": {
-			"total": "إجمالي الشركات",
-			"active": "نشطة",
-			"inactive": "غير نشطة"
-		},
-		"detail": {
-			"title": "الشركة",
-			"loadError": "تعذّر تحميل بيانات هذه الشركة."
-		}
-	},
-	"companyMembers": {
-		"columns": {
-			"userId": "معرّف المستخدم",
-			"doorAccess": "الوصول للأبواب",
-			"isAdmin": "أدمن",
-			"actions": "إجراءات"
-		},
-		"add": {
-			"button": "إضافة عضو",
-			"title": "إضافة عضو للشركة",
-			"userLabel": "المستخدم",
-			"userRequired": "اختر مستخدماً.",
-			"doorAccessLabel": "تفعيل الوصول للأبواب",
-			"adminLabel": "أدمن الشركة",
-			"adminHint": "أول أدمن للشركة لا يُعيَّن إلا من هنا — أدمن الشركة القائم لا يستطيع إلا ترقية عضو موجود، لا تعيين الأول.",
-			"success": "تمت إضافة العضو.",
-			"alreadyMemberError": "هذا المستخدم عضو بالفعل في هذه الشركة."
-		},
-		"remove": {
-			"confirmTitle": "إزالة هذا العضو؟",
-			"confirmOk": "إزالة",
-			"confirmCancel": "إلغاء",
-			"success": "تمت إزالة العضو."
-		}
-	},
-	"systemSettings": {
-		"description": "إعدادات النظام والمتغيرات التشغيلية العامة.",
-		"searchPlaceholder": "البحث في الإعدادات حسب المفتاح أو القيمة...",
-		"refresh": "تحديث",
-		"editTitle": "تعديل الإعداد",
-		"keyLabel": "المفتاح",
-		"typeLabel": "النوع",
-		"valueLabel": "القيمة",
-		"editButton": "تعديل",
-		"saveSuccess": "تم تحديث الإعداد بنجاح.",
-		"saveError": "تعذر تحديث الإعداد.",
-		"invalidJson": "صيغة JSON غير صحيحة.",
-		"loadError": "تعذر تحميل إعدادات النظام. قد لا تملك الصلاحية الكافية لعرض هذه الصفحة.",
-		"columns": {
-			"key": "مفتاح الإعداد",
-			"type": "النوع",
-			"value": "القيمة الحالية",
-			"actions": "الإجراءات"
-		}
-	},
-	"announcements": {
-		"columns": {
-			"type": "النوع",
-			"startsAt": "تاريخ البدء",
-			"endsAt": "تاريخ الانتهاء",
-			"status": "الحالة"
-		},
-		"status": {
-			"active": "نشط",
-			"inactive": "غير نشط"
-		},
-		"form": {
-			"type": "النوع",
-			"imageUrl": "صورة الإعلان",
-			"linkUrl": "رابط التوجيه",
-			"startsAt": "تاريخ البدء",
-			"endsAt": "تاريخ الانتهاء",
-			"sortOrder": "ترتيب العرض",
-			"isActive": "نشط"
-		},
-		"create": {
-			"button": "إعلان جديد",
-			"title": "إضافة إعلان جديد",
-			"success": "تم إنشاء الإعلان بنجاح."
-		},
-		"edit": {
-			"title": "تعديل الإعلان",
-			"success": "تم تحديث الإعلان بنجاح."
-		},
-		"delete": {
-			"success": "تم حذف الإعلان بنجاح."
-		},
-		"stats": {
-			"total": "إجمالي الإعلانات",
-			"active": "نشط",
-			"inactive": "غير نشط"
-		},
-		"loadError": "تعذر تحميل الإعلانات."
-	},
-	"partners": {
-		"columns": {
-			"name": "الاسم",
-			"category": "الفئة",
-			"websiteUrl": "الموقع الإلكتروني",
-			"status": "الحالة"
-		},
-		"category": {
-			"local": "محلي",
-			"global": "عالمي"
-		},
-		"status": {
-			"active": "نشط",
-			"inactive": "غير نشط"
-		},
-		"form": {
-			"name": "الاسم",
-			"description": "الوصف",
-			"logoUrl": "الشعار",
-			"websiteUrl": "رابط الموقع",
-			"category": "الفئة",
-			"order": "ترتيب العرض",
-			"isActive": "نشط"
-		},
-		"create": {
-			"button": "شريك جديد",
-			"title": "إضافة شريك جديد",
-			"success": "تم إنشاء الشريك بنجاح."
-		},
-		"edit": {
-			"title": "تعديل الشريك",
-			"success": "تم تحديث الشريك بنجاح."
-		},
-		"delete": {
-			"success": "تم حذف الشريك بنجاح."
-		},
-		"stats": {
-			"total": "إجمالي الشركاء",
-			"active": "نشط",
-			"inactive": "غير نشط"
-		},
-		"loadError": "تعذر تحميل الشركاء."
-	},
-	"founders": {
-		"columns": {
-			"name": "الاسم",
-			"role": "الدور",
-			"linkedin": "لينكد إن",
-			"order": "الترتيب"
-		},
-		"form": {
-			"name": "الاسم",
-			"role": "الدور",
-			"bio": "السيرة الذاتية",
-			"photoUrl": "الصورة الشخصية",
-			"linkedinUrl": "رابط لينكد إن",
-			"twitterUrl": "رابط تويتر / X",
-			"order": "ترتيب العرض"
-		},
-		"create": {
-			"button": "مؤسس جديد",
-			"title": "إضافة مؤسس جديد",
-			"success": "تم إضافة المؤسس بنجاح."
-		},
-		"edit": {
-			"title": "تعديل المؤسس",
-			"success": "تم تحديث بيانات المؤسس بنجاح."
-		},
-		"delete": {
-			"success": "تم حذف المؤسس بنجاح."
-		},
-		"stats": {
-			"total": "إجمالي المؤسسين"
-		},
-		"loadError": "تعذر تحميل بيانات المؤسسين."
-	},
-	"contactLinks": {
-		"columns": {
-			"type": "النوع",
-			"value": "القيمة / الرابط",
-			"label": "التسمية",
-			"status": "الحالة"
-		},
-		"status": {
-			"visible": "مرئي",
-			"hidden": "مخفي"
-		},
-		"form": {
-			"type": "النوع",
-			"value": "القيمة / الرابط",
-			"label": "التسمية",
-			"sortOrder": "ترتيب العرض",
-			"isVisible": "مرئي"
-		},
-		"create": {
-			"button": "رابط جديد",
-			"title": "إضافة رابط تواصل جديد",
-			"success": "تم إنشاء الرابط بنجاح."
-		},
-		"edit": {
-			"title": "تعديل رابط التواصل",
-			"success": "تم تحديث الرابط بنجاح."
-		},
-		"delete": {
-			"success": "تم حذف الرابط بنجاح."
-		},
-		"stats": {
-			"total": "إجمالي الروابط",
-			"visible": "مرئي",
-			"hidden": "مخفي"
-		},
-		"loadError": "تعذر تحميل روابط التواصل."
-	},
-	"broadcastNotifications": {
-		"description": "إرسال إشعارات فورية وداخلية للمستخدمين.",
-		"form": {
-			"titleAr": "العنوان (بالعربية)",
-			"titleEn": "العنوان (بالإنجليزية)",
-			"bodyAr": "نص الرسالة (بالعربية)",
-			"bodyEn": "نص الرسالة (بالإنجليزية)",
-			"target": "الفئة المستهدفة",
-			"roleName": "اسم الدور",
-			"roleNamePlaceholder": "مثال: admin, operations",
-			"userIds": "معرفات المستخدمين (User IDs)",
-			"userIdsPlaceholder": "أدخل الأرقام مفصولة بفواصل أو أسطر جديدة",
-			"userIdsHint": "افصل بين المعرفات المتعددة بفواصل أو أسطر جديدة."
-		},
-		"targets": {
-			"all": "جميع المستخدمين النشطين",
-			"role": "حسب الدور",
-			"users": "مستخدمين محددين"
-		},
-		"validation": {
-			"titleRequired": "العنوان مطلوب.",
-			"bodyRequired": "نص الرسالة مطلوب."
-		},
-		"send": "إرسال الإشعار",
-		"sendSuccess": "تم إرسال الإشعار بنجاح.",
-		"sendError": "تعذر إرسال الإشعار."
-	},
-	"sun_description": "الشمس نجم متوسط الحجم يقع في مركز نظامنا الشمسي. وهي مصدر الضوء والحرارة اللذين يحفظان الحياة على الأرض. تتكوّن أساساً من الهيدروجين والهيليوم، وتولّد طاقتها عبر الاندماج النووي. وتُبقي كتلتها وجاذبيتها الكواكب والأجرام السماوية الأخرى في مدارات حولها.",
-	"eventCategories": {
-		"columns": {
-			"name": "اسم الفئة",
-			"slug": "المعرف اللطيف (Slug)",
-			"color": "اللون",
-			"icon": "الأيقونة",
-			"order": "الترتيب",
-			"status": "الحالة"
-		},
-		"status": {
-			"active": "نشط",
-			"inactive": "معطل"
-		},
-		"create": {
-			"button": "فئة جديدة",
-			"title": "إضافة فئة فعاليات جديدة",
-			"success": "تم إنشاء فئة الفعاليات بنجاح."
-		},
-		"edit": {
-			"title": "تعديل فئة الفعاليات",
-			"success": "تم تحديث فئة الفعاليات بنجاح."
-		},
-		"delete": {
-			"success": "تم حذف فئة الفعاليات بنجاح.",
-			"warning": "حذف هذه الفئة سيفك ارتباطها بالفعاليات التابعة لها (ستصبح بدون فئة)."
-		},
-		"form": {
-			"name": "اسم الفئة",
-			"slug": "المعرف اللطيف (Slug)",
-			"slugPlaceholder": "اتركه فارغاً للتوليد التلقائي",
-			"description": "الوصف",
-			"color": "رمز اللون (Hex Code)",
-			"icon": "اسم الأيقونة",
-			"order": "ترتيب العرض",
-			"isActive": "الحالة (نشط)"
-		},
-		"loadError": "تعذر تحميل فئات الفعاليات. قد لا تملك الصلاحية الكافية لعرض هذه الصفحة.",
-		"stats": {
-			"total": "إجمالي الفئات",
-			"active": "نشطة",
-			"inactive": "معطلة"
-		}
-	}
+  "locales": {
+    "ar": "العربية",
+    "en": "الإنجليزية"
+  },
+  "common": {
+    "comingSoon": "قريباً",
+    "search": "بحث",
+    "close": "إغلاق",
+    "save": "حفظ",
+    "delete": "حذف",
+    "clear": "مسح",
+    "viewAll": "عرض الكل",
+    "logout": "تسجيل الخروج",
+    "logged_out": "تم تسجيل الخروج",
+    "logoAlt": "شعار ADD OS",
+    "back": "رجوع"
+  },
+  "errors": {
+    "backHome": "العودة إلى الرئيسية",
+    "tryAgain": "حاول مجدداً",
+    "notFound": {
+      "title": "الصفحة غير موجودة",
+      "description": "قد تكون الصفحة التي تبحث عنها قد نُقلت أو لم تعد موجودة.",
+      "illustrationAlt": "رسم توضيحي لصفحة مفقودة"
+    },
+    "serverError": {
+      "title": "حدث خطأ ما",
+      "description": "تعذّر تحميل هذه الصفحة الآن. يرجى المحاولة مجدداً بعد قليل.",
+      "illustrationAlt": "رسم توضيحي لخطأ في الاتصال"
+    }
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "setAsRead": "تعليم كمقروء",
+    "markAllAsRead": "تعليم الكل كمقروء"
+  },
+  "roles": {
+    "description": "إدارة الأدوار وصلاحيات لوحة التحكم التي يمنحها كل دور.",
+    "loadError": "تعذّر تحميل الأدوار. قد لا تملك صلاحية الوصول لهذه الصفحة.",
+    "names": {
+      "member": "عضو",
+      "operations": "التشغيل",
+      "admin": "المدير"
+    },
+    "builtIn": "مدمج",
+    "columns": {
+      "name": "الاسم",
+      "permissions": "الصلاحيات",
+      "permissionCount": "{count} صلاحية",
+      "actions": "إجراءات"
+    },
+    "create": {
+      "button": "دور جديد",
+      "title": "دور جديد",
+      "success": "تم إنشاء الدور."
+    },
+    "edit": {
+      "title": "تعديل الدور",
+      "button": "تعديل",
+      "success": "تم تحديث الدور."
+    },
+    "delete": {
+      "button": "حذف",
+      "success": "تم حذف الدور."
+    },
+    "form": {
+      "name": "الاسم",
+      "namePlaceholder": "أدخل اسم الدور",
+      "permissions": "الصلاحيات",
+      "selectAll": "تحديد الكل",
+      "deselectAll": "إلغاء التحديد",
+      "selectAllPermissions": "تحديد كل الصلاحيات",
+      "searchModules": "بحث في الوحدات والصلاحيات...",
+      "noModulesFound": "لا توجد صلاحيات تطابق البحث.",
+      "selectedCount": "{selected} من {total} محددة",
+      "submit": "حفظ",
+      "cancel": "إلغاء"
+    },
+    "validation": {
+      "nameRequired": "الاسم مطلوب."
+    },
+    "actions": {
+      "view": "عرض",
+      "create": "إضافة",
+      "update": "تعديل",
+      "delete": "حذف",
+      "update_status": "تعديل الحالة",
+      "assign_role": "تعيين الأدوار"
+    },
+    "modules": {
+      "announcements": "الإعلانات",
+      "branches": "الفروع",
+      "buildings": "المباني",
+      "business-hours": "ساعات العمل",
+      "business-hour-exceptions": "استثناءات ساعات العمل",
+      "community-members": "أعضاء المجتمع",
+      "contact-links": "روابط الاتصال",
+      "devices": "الأجهزة",
+      "device-capabilities": "إمكانيات الأجهزة",
+      "events": "الفعاليات",
+      "floors": "الطوابق",
+      "founders": "المؤسسون",
+      "partners": "الشركاء",
+      "plans": "الخطط والباقات",
+      "private-office-requests": "طلبات المكاتب الخاصة",
+      "resources": "الموارد",
+      "seats-desks": "المقاعد والمكاتب",
+      "spaces": "المساحات",
+      "zones": "المناطق",
+      "users": "المستخدمون",
+      "error-logs": "سجلات الأخطاء",
+      "roles": "الأدوار والصلاحيات",
+      "settings": "الإعدادات"
+    }
+  },
+  "auth": {
+    "common": {
+      "back": "رجوع"
+    },
+    "signIn": {
+      "title": "أهلاً بعودتك",
+      "subtitle": "سجّل الدخول لإدارة العضويات والحجوزات والوصول.",
+      "emailLabel": "البريد الإلكتروني",
+      "emailPlaceholder": "أدخل بريدك الإلكتروني",
+      "emailRequired": "البريد الإلكتروني مطلوب.",
+      "emailInvalid": "أدخل بريداً إلكترونياً صحيحاً.",
+      "passwordLabel": "كلمة المرور",
+      "passwordPlaceholder": "أدخل كلمة المرور",
+      "passwordRequired": "كلمة المرور مطلوبة.",
+      "forgotLink": "نسيت كلمة المرور؟",
+      "submit": "تسجيل الدخول",
+      "genericError": "تعذّر تسجيل الدخول. تحقّق من بياناتك وأعد المحاولة."
+    },
+    "twoFactor": {
+      "title": "التحقّق بخطوتين",
+      "subtitle": "أدخل الرمز من تطبيق المصادقة لإتمام تسجيل الدخول.",
+      "codeLabel": "رمز المصادقة",
+      "codePlaceholder": "أدخل الرمز المكوّن من ست خانات",
+      "codeRequired": "أدخل الرمز من تطبيق المصادقة.",
+      "recoveryLabel": "رمز الاسترداد",
+      "recoveryPlaceholder": "أدخل رمز استرداد",
+      "recoveryRequired": "أدخل رمز استرداد.",
+      "useRecoveryCode": "استخدم رمز استرداد بدلاً من ذلك",
+      "useAuthCode": "استخدم رمز المصادقة بدلاً من ذلك",
+      "submit": "تحقّق",
+      "genericError": "تعذّر التحقّق من الرمز. أعد المحاولة."
+    },
+    "forgotPassword": {
+      "title": "إعادة تعيين كلمة المرور",
+      "subtitle": "أدخل بريدك الإلكتروني وسنرسل إليك رابطاً لتعيين كلمة مرور جديدة.",
+      "backToSignIn": "العودة إلى تسجيل الدخول",
+      "emailLabel": "البريد الإلكتروني",
+      "emailPlaceholder": "أدخل بريدك الإلكتروني",
+      "emailRequired": "البريد الإلكتروني مطلوب.",
+      "emailInvalid": "أدخل بريداً إلكترونياً صحيحاً.",
+      "submit": "إرسال رابط إعادة التعيين",
+      "success": "إذا كان هذا البريد مرتبطاً بحساب، فسيصلك رابط إعادة التعيين قريباً.",
+      "alreadySignedIn": "أنت مسجّل الدخول بالفعل.",
+      "genericError": "تعذّر إرسال رابط إعادة التعيين. حاول مجدداً."
+    },
+    "resetPassword": {
+      "title": "تعيين كلمة مرور جديدة",
+      "subtitle": "اختر كلمة مرور لم تستخدمها من قبل.",
+      "backToSignIn": "العودة إلى تسجيل الدخول",
+      "passwordPlaceholder": "ثماني خانات على الأقل",
+      "passwordConfirmationPlaceholder": "أعد إدخال كلمة المرور الجديدة",
+      "passwordLabel": "كلمة المرور الجديدة",
+      "passwordConfirmationLabel": "تأكيد كلمة المرور الجديدة",
+      "passwordRequired": "كلمة المرور مطلوبة.",
+      "passwordTooShort": "يجب أن تتكوّن كلمة المرور من 8 أحرف على الأقل.",
+      "passwordConfirmationRequired": "يرجى تأكيد كلمة المرور.",
+      "passwordConfirmationMismatch": "كلمتا المرور غير متطابقتين.",
+      "submit": "إعادة تعيين كلمة المرور",
+      "success": "تم إعادة تعيين كلمة المرور. يرجى تسجيل الدخول.",
+      "genericError": "تعذّرت إعادة تعيين كلمة المرور. حاول مجدداً."
+    }
+  },
+  "account": {
+    "description": "إدارة ملفك الشخصي وكلمة المرور والمصادقة الثنائية.",
+    "genericError": "حدث خطأ ما. الرجاء المحاولة مجدداً.",
+    "profile": {
+      "title": "الملف الشخصي",
+      "nameLabel": "الاسم الكامل",
+      "emailLabel": "البريد الإلكتروني",
+      "nameRequired": "الاسم مطلوب.",
+      "emailRequired": "البريد الإلكتروني مطلوب.",
+      "emailInvalid": "أدخل بريداً إلكترونياً صحيحاً.",
+      "submit": "حفظ",
+      "success": "تم تحديث الملف الشخصي."
+    },
+    "password": {
+      "title": "كلمة المرور",
+      "currentLabel": "كلمة المرور الحالية",
+      "newLabel": "كلمة المرور الجديدة",
+      "confirmLabel": "تأكيد كلمة المرور الجديدة",
+      "currentRequired": "كلمة المرور الحالية مطلوبة.",
+      "newRequired": "كلمة المرور الجديدة مطلوبة.",
+      "newTooShort": "يجب أن تتكوّن كلمة المرور من 8 أحرف على الأقل.",
+      "confirmRequired": "يرجى تأكيد كلمة المرور الجديدة.",
+      "confirmMismatch": "كلمتا المرور غير متطابقتين.",
+      "submit": "تغيير كلمة المرور",
+      "success": "تم تغيير كلمة المرور."
+    },
+    "twoFactor": {
+      "title": "المصادقة الثنائية",
+      "description": "طلب رمز من تطبيق مصادقة بالإضافة إلى كلمة المرور عند تسجيل الدخول.",
+      "enableButton": "تفعيل المصادقة الثنائية",
+      "activeBadge": "المصادقة الثنائية مُعدّة",
+      "codeLabel": "رمز المصادقة",
+      "codePlaceholder": "مثال: 123456",
+      "confirmButton": "تأكيد",
+      "confirmSuccess": "تم تأكيد المصادقة الثنائية.",
+      "recoveryCodesTitle": "رموز الاسترداد",
+      "regenerateButton": "إعادة توليد رموز الاسترداد",
+      "disableButton": "تعطيل المصادقة الثنائية"
+    },
+    "confirmPassword": {
+      "title": "تأكيد كلمة المرور",
+      "description": "لأمان حسابك، يرجى تأكيد كلمة المرور للمتابعة.",
+      "passwordLabel": "كلمة المرور",
+      "cancel": "إلغاء",
+      "submit": "تأكيد"
+    }
+  },
+  "users": {
+    "description": "حسابات التشغيل والإدارة في اللوحة. الأعضاء يسجّلون من التطبيق ولا يظهرون هنا.",
+    "searchPlaceholder": "البحث بالاسم أو الهاتف أو البريد الإلكتروني",
+    "roleFilterPlaceholder": "تصفية حسب الدور",
+    "columns": {
+      "name": "الاسم",
+      "phone": "الهاتف",
+      "email": "البريد الإلكتروني",
+      "role": "الدور",
+      "status": "الحالة",
+      "actions": "إجراءات"
+    },
+    "status": {
+      "active": "نشط",
+      "deactivated": "معطّل",
+      "blocked": "محظور"
+    },
+    "create": {
+      "button": "مستخدم جديد",
+      "title": "مستخدم جديد",
+      "success": "تم إنشاء المستخدم."
+    },
+    "edit": {
+      "title": "تعديل المستخدم",
+      "button": "تعديل",
+      "success": "تم تحديث البيانات."
+    },
+    "changeStatus": {
+      "button": "تغيير الحالة",
+      "title": "تغيير الحالة",
+      "warning": "تعطيل الحساب أو حظره يسجّل خروج المستخدم من كل الأجهزة فوراً.",
+      "reasonLabel": "السبب (اختياري)",
+      "reasonPlaceholder": "سبب تغيير الحالة",
+      "success": "تم تحديث الحالة."
+    },
+    "changeRole": {
+      "button": "تغيير الدور",
+      "title": "تغيير الدور",
+      "success": "تم تحديث الدور."
+    },
+    "form": {
+      "name": "الاسم الكامل",
+      "phone": "رقم الهاتف",
+      "phonePlaceholder": "مثال: 09XXXXXXXX",
+      "email": "البريد الإلكتروني",
+      "password": "كلمة المرور",
+      "passwordConfirmation": "تأكيد كلمة المرور",
+      "role": "الدور",
+      "rolePlaceholder": "اختر دوراً",
+      "submit": "حفظ",
+      "cancel": "إلغاء"
+    },
+    "validation": {
+      "nameRequired": "الاسم مطلوب.",
+      "phoneRequired": "رقم الهاتف مطلوب.",
+      "phoneInvalid": "أدخل رقم هاتف سوري صحيح (09XXXXXXXX).",
+      "emailRequired": "البريد الإلكتروني مطلوب.",
+      "emailInvalid": "أدخل بريداً إلكترونياً صحيحاً.",
+      "passwordRequired": "كلمة المرور مطلوبة.",
+      "passwordTooShort": "يجب أن تتكوّن كلمة المرور من 8 أحرف على الأقل.",
+      "passwordConfirmationMismatch": "كلمتا المرور غير متطابقتين.",
+      "roleRequired": "الدور مطلوب."
+    },
+    "loadError": "تعذّر تحميل المستخدمين. قد لا تملك صلاحية الوصول لهذه الصفحة.",
+    "empty": "لا يوجد مستخدمون.",
+    "stats": {
+      "total": "إجمالي المستخدمين"
+    }
+  },
+  "branches": {
+    "columns": {
+      "name": "الاسم",
+      "city": "المدينة",
+      "timezone": "المنطقة الزمنية",
+      "isActive": "نشط"
+    },
+    "isActiveYes": "نشط",
+    "isActiveNo": "غير نشط",
+    "create": {
+      "button": "فرع جديد",
+      "title": "فرع جديد",
+      "success": "تم إنشاء الفرع."
+    },
+    "edit": {
+      "title": "تعديل الفرع",
+      "success": "تم تحديث الفرع."
+    },
+    "delete": {
+      "success": "تم حذف الفرع.",
+      "cascadeWarning": "حذف هذا الفرع يحذف أيضاً كل مبنى وطابق ومنطقة ومساحة ومورد ومقعد/طاولة تحته."
+    },
+    "form": {
+      "name": "الاسم",
+      "city": "المدينة",
+      "timezone": "المنطقة الزمنية",
+      "isActive": "نشط"
+    },
+    "loadError": "تعذّر تحميل الفروع. قد لا تملك صلاحية عرض هذه الصفحة.",
+    "stats": {
+      "total": "إجمالي الفروع",
+      "active": "نشط",
+      "inactive": "غير نشط"
+    }
+  },
+  "buildings": {
+    "columns": {
+      "branch": "الفرع",
+      "name": "الاسم",
+      "floorCount": "عدد الطوابق"
+    },
+    "create": {
+      "button": "مبنى جديد",
+      "title": "مبنى جديد",
+      "success": "تم إنشاء المبنى."
+    },
+    "edit": {
+      "title": "تعديل المبنى",
+      "success": "تم تحديث المبنى."
+    },
+    "delete": {
+      "success": "تم حذف المبنى.",
+      "cascadeWarning": "حذف هذا المبنى يحذف أيضاً كل طابق ومنطقة ومساحة ومورد ومقعد/طاولة تحته."
+    },
+    "form": {
+      "branch": "الفرع",
+      "name": "الاسم",
+      "floorCount": "عدد الطوابق"
+    },
+    "loadError": "تعذّر تحميل المباني. قد لا تملك صلاحية عرض هذه الصفحة.",
+    "stats": {
+      "total": "إجمالي المباني",
+      "totalFloors": "إجمالي الطوابق"
+    }
+  },
+  "floors": {
+    "columns": {
+      "building": "المبنى",
+      "label": "التسمية",
+      "sortOrder": "الترتيب"
+    },
+    "create": {
+      "button": "طابق جديد",
+      "title": "طابق جديد",
+      "success": "تم إنشاء الطابق."
+    },
+    "edit": {
+      "title": "تعديل الطابق",
+      "success": "تم تحديث الطابق."
+    },
+    "delete": {
+      "success": "تم حذف الطابق.",
+      "cascadeWarning": "حذف هذا الطابق يحذف أيضاً كل منطقة ومساحة تحته."
+    },
+    "form": {
+      "branch": "الفرع",
+      "building": "المبنى",
+      "label": "التسمية",
+      "sortOrder": "ترتيب الفرز"
+    },
+    "loadError": "تعذّر تحميل الطوابق. قد لا تملك صلاحية عرض هذه الصفحة."
+  },
+  "zones": {
+    "columns": {
+      "floor": "الطابق",
+      "label": "التسمية",
+      "sortOrder": "الترتيب"
+    },
+    "create": {
+      "button": "منطقة جديدة",
+      "title": "منطقة جديدة",
+      "success": "تم إنشاء المنطقة."
+    },
+    "edit": {
+      "title": "تعديل المنطقة",
+      "success": "تم تحديث المنطقة."
+    },
+    "delete": {
+      "success": "تم حذف المنطقة.",
+      "cascadeWarning": "حذف هذه المنطقة يحذف أيضاً كل مساحة تحتها."
+    },
+    "form": {
+      "branch": "الفرع",
+      "building": "المبنى",
+      "floor": "الطابق",
+      "label": "التسمية",
+      "sortOrder": "ترتيب الفرز"
+    },
+    "loadError": "تعذّر تحميل المناطق. قد لا تملك صلاحية عرض هذه الصفحة."
+  },
+  "operationalStatus": {
+    "active": "نشط",
+    "maintenance": "قيد الصيانة",
+    "retired": "خارج الخدمة"
+  },
+  "spaces": {
+    "columns": {
+      "image": "الصورة",
+      "building": "المبنى",
+      "zone": "المنطقة",
+      "spaceType": "النوع",
+      "capacity": "السعة",
+      "status": "الحالة"
+    },
+    "spaceType": {
+      "co_space": "مساحة عمل مشتركة",
+      "room": "غرفة",
+      "business": "مساحة أعمال",
+      "event_hall": "قاعة فعاليات"
+    },
+    "create": {
+      "button": "مساحة جديدة",
+      "title": "مساحة جديدة",
+      "success": "تم إنشاء المساحة."
+    },
+    "edit": {
+      "title": "تعديل المساحة",
+      "success": "تم تحديث المساحة."
+    },
+    "delete": {
+      "success": "تم حذف المساحة.",
+      "cascadeWarning": "حذف هذه المساحة يحذف أيضاً كل مورد ومقعد/طاولة تحتها."
+    },
+    "changeStatus": {
+      "button": "تغيير الحالة",
+      "title": "تغيير الحالة",
+      "statusLabel": "الحالة",
+      "reasonLabel": "السبب (اختياري)",
+      "success": "تم تحديث الحالة."
+    },
+    "form": {
+      "branch": "الفرع",
+      "building": "المبنى",
+      "zone": "المنطقة (اختياري)",
+      "spaceType": "النوع",
+      "allocationModel": "نموذج التخصيص (اختياري)",
+      "isLockable": "قابلة للإغلاق",
+      "capacity": "السعة",
+      "hourlyRate": "السعر بالساعة (اختياري)",
+      "pricingCurrency": "العملة (اختياري)",
+      "image": "الصورة (اختياري)",
+      "images": "الصور (اختياري)"
+    },
+    "loadError": "تعذّر تحميل المساحات. قد لا تملك صلاحية عرض هذه الصفحة.",
+    "stats": {
+      "total": "إجمالي المساحات"
+    }
+  },
+  "resources": {
+    "columns": {
+      "space": "المساحة",
+      "name": "الاسم",
+      "category": "الفئة",
+      "quantity": "الكمية",
+      "status": "الحالة"
+    },
+    "create": {
+      "button": "مورد جديد",
+      "title": "مورد جديد",
+      "success": "تم إنشاء المورد."
+    },
+    "edit": {
+      "title": "تعديل المورد",
+      "success": "تم تحديث المورد."
+    },
+    "delete": {
+      "success": "تم حذف المورد."
+    },
+    "changeStatus": {
+      "button": "تغيير الحالة",
+      "title": "تغيير الحالة",
+      "statusLabel": "الحالة",
+      "reasonLabel": "السبب (اختياري)",
+      "success": "تم تحديث الحالة."
+    },
+    "form": {
+      "branch": "الفرع",
+      "building": "المبنى",
+      "zone": "المنطقة (اختياري)",
+      "space": "المساحة",
+      "name": "الاسم",
+      "category": "الفئة",
+      "quantity": "الكمية"
+    },
+    "loadError": "تعذّر تحميل الموارد. قد لا تملك صلاحية عرض هذه الصفحة.",
+    "stats": {
+      "total": "إجمالي الموارد"
+    }
+  },
+  "seatsDesks": {
+    "columns": {
+      "space": "المساحة",
+      "label": "التسمية",
+      "qrPointId": "نقطة QR"
+    },
+    "create": {
+      "button": "مقعد/طاولة جديدة",
+      "title": "مقعد/طاولة جديدة",
+      "success": "تم إنشاء المقعد/الطاولة."
+    },
+    "edit": {
+      "title": "تعديل المقعد/الطاولة",
+      "success": "تم تحديث المقعد/الطاولة."
+    },
+    "delete": {
+      "success": "تم حذف المقعد/الطاولة."
+    },
+    "form": {
+      "branch": "الفرع",
+      "building": "المبنى",
+      "zone": "المنطقة (اختياري)",
+      "space": "المساحة",
+      "label": "التسمية",
+      "qrPointId": "معرّف نقطة QR (اختياري)"
+    },
+    "loadError": "تعذّر تحميل المقاعد والطاولات. قد لا تملك صلاحية عرض هذه الصفحة."
+  },
+  "businessHours": {
+    "branchLabel": "الفرع",
+    "branchPlaceholder": "اختر فرعاً",
+    "tabs": {
+      "weeklySchedule": "الجدول الأسبوعي",
+      "exceptions": "الاستثناءات"
+    },
+    "days": {
+      "sunday": "الأحد",
+      "monday": "الاثنين",
+      "tuesday": "الثلاثاء",
+      "wednesday": "الأربعاء",
+      "thursday": "الخميس",
+      "friday": "الجمعة",
+      "saturday": "السبت"
+    },
+    "columns": {
+      "dayOfWeek": "اليوم",
+      "period": "فترة الدوام",
+      "openTime": "يفتح",
+      "closeTime": "يغلق"
+    },
+    "create": {
+      "button": "ساعات جديدة",
+      "title": "ساعات عمل جديدة",
+      "success": "تم إنشاء ساعات العمل."
+    },
+    "bulkCreate": {
+      "title": "ساعات عمل جديدة",
+      "days": "الأيام",
+      "workDays": "السبت – الخميس",
+      "selectAll": "تحديد كل الأيام",
+      "clearAll": "إلغاء التحديد",
+      "daysRequired": "اختر يوماً واحداً على الأقل.",
+      "success": "تم إنشاء ساعات العمل لـ {count} يوم."
+    },
+    "edit": {
+      "title": "تعديل ساعات العمل",
+      "success": "تم تحديث ساعات العمل."
+    },
+    "delete": {
+      "success": "تم حذف ساعات العمل."
+    },
+    "form": {
+      "dayOfWeek": "يوم الأسبوع",
+      "openTime": "يفتح الساعة",
+      "closeTime": "يغلق الساعة"
+    },
+    "validation": {
+      "timeFormat": "أدخل وقتاً بصيغة HH:mm، مثل 08:00."
+    },
+    "loadError": "تعذّر تحميل ساعات العمل. قد لا تملك صلاحية عرض هذه الصفحة.",
+    "empty": "لا توجد ساعات عمل لهذا الفرع.",
+    "exceptions": {
+      "columns": {
+        "date": "التاريخ",
+        "isClosed": "مغلق",
+        "hours": "الساعات",
+        "reason": "السبب"
+      },
+      "isClosedYes": "مغلق",
+      "isClosedNo": "مفتوح",
+      "create": {
+        "button": "استثناء جديد",
+        "title": "استثناء جديد",
+        "success": "تم إنشاء الاستثناء."
+      },
+      "edit": {
+        "title": "تعديل الاستثناء",
+        "success": "تم تحديث الاستثناء."
+      },
+      "delete": {
+        "success": "تم حذف الاستثناء."
+      },
+      "form": {
+        "date": "التاريخ (YYYY-MM-DD)",
+        "isClosed": "مغلق طوال اليوم",
+        "openTime": "يفتح الساعة",
+        "closeTime": "يغلق الساعة",
+        "reason": "السبب (اختياري)"
+      },
+      "validation": {
+        "dateFormat": "أدخل تاريخاً بصيغة YYYY-MM-DD."
+      },
+      "empty": "لا توجد استثناءات لهذا الفرع."
+    }
+  },
+  "packages": {
+    "columns": {
+      "name": "الاسم",
+      "type": "النوع",
+      "price": "السعر",
+      "duration": "المدة (أيام)",
+      "isActive": "نشط",
+      "module": "الوحدة",
+      "balances": "الأرصدة",
+      "features": "الميزات"
+    },
+    "isActiveYes": "نشط",
+    "isActiveNo": "غير نشط",
+    "type": {
+      "subscription": "اشتراك",
+      "oneTime": "دفعة واحدة"
+    },
+    "create": {
+      "button": "باقة جديدة",
+      "title": "باقة جديدة",
+      "success": "تم إنشاء الباقة."
+    },
+    "edit": {
+      "title": "تعديل الباقة",
+      "success": "تم تحديث الباقة."
+    },
+    "delete": {
+      "success": "تم حذف الباقة."
+    },
+    "form": {
+      "name": "الاسم",
+      "isSubscription": "باقة اشتراك",
+      "price": "السعر",
+      "pricingCurrency": "العملة",
+      "durationDays": "المدة (أيام)",
+      "includedHours": "الساعات المتضمنة",
+      "overageRate": "سعر الساعة الإضافية",
+      "isActive": "نشط",
+      "order": "ترتيب العرض",
+      "subtitle": "العنوان الفرعي",
+      "module": "الوحدة التابعة لها",
+      "selectModule": "اختر الوحدة"
+    },
+    "loadError": "تعذّر تحميل الباقات. قد لا تملك صلاحية عرض هذه الصفحة.",
+    "stats": {
+      "total": "إجمالي الباقات",
+      "active": "نشطة",
+      "subscriptions": "اشتراكات"
+    },
+    "noModule": "بدون وحدة",
+    "tabs": {
+      "basic": "المعلومات الأساسية",
+      "balances": "الأرصدة المضمنة",
+      "features": "الميزات"
+    },
+    "sections": {
+      "basicInfo": "البيانات الأساسية",
+      "pricing": "التسعير والوحدة",
+      "displaySettings": "إعدادات العرض"
+    },
+    "balances": {
+      "includedDescription": "حدد الأرصدة والخدمات المضمنة في هذه الباقة تلقائياً عند الاشتراك.",
+      "add": "إضافة رصيد",
+      "empty": "لا توجد أرصدة مضافة لهذه الباقة.",
+      "amount": "المبلغ / الرصيد",
+      "category": "فئة الرصيد",
+      "restrictedSpace": "مساحة محددة",
+      "selectSpace": "اختر المساحة",
+      "description": "الوصف",
+      "totalIncluded": "إجمالي الأرصدة المضمنة",
+      "categories": {
+        "cafe": "رصيد كافيه",
+        "printing_internet": "طباعة وإنترنت",
+        "general": "رصيد عام",
+        "space_specific": "مساحة مخصصة"
+      }
+    },
+    "features": {
+      "userVisible": "ميزات مرئية للمستخدم",
+      "add": "إضافة ميزة",
+      "edit": "تعديل الميزة",
+      "name": "اسم الميزة",
+      "value": "القيمة / التوضيح",
+      "icon": "الأيقونة",
+      "order": "الترتيب",
+      "isIncluded": "مضمنة",
+      "notIncluded": "غير مضمنة",
+      "save": "حفظ الميزة",
+      "empty": "لا توجد ميزات مضافة.",
+      "details": "التفاصيل"
+    },
+    "actions": {
+      "cancel": "إلغاء",
+      "save": "حفظ"
+    },
+    "modules": {
+      "title": "وحدات الاشتراكات",
+      "backToPlans": "العودة للباقات",
+      "create": {
+        "button": "وحدة جديدة",
+        "title": "إضافة وحدة باقات جديدة",
+        "success": "تم إنشاء الوحدة بنجاح."
+      },
+      "edit": {
+        "title": "تعديل وحدة الباقات",
+        "success": "تم تحديث الوحدة بنجاح."
+      },
+      "delete": {
+        "success": "تم حذف الوحدة بنجاح."
+      },
+      "columns": {
+        "slug": "المعرف (Slug)",
+        "plansCount": "عدد الباقات"
+      },
+      "stats": {
+        "total": "إجمالي الوحدات",
+        "active": "وحدات نشطة"
+      }
+    }
+  },
+  "events": {
+    "columns": {
+      "image": "الصورة",
+      "title": "العنوان",
+      "category": "الفئة",
+      "startAt": "تاريخ ووقت البدء",
+      "location": "الموقع",
+      "capacity": "السعة",
+      "status": "الحالة",
+      "price": "السعر"
+    },
+    "status": {
+      "draft": "مسودة",
+      "published": "منشور",
+      "cancelled": "ملغى"
+    },
+    "create": {
+      "button": "فعالية جديدة",
+      "title": "إضافة فعالية جديدة",
+      "success": "تم إنشاء الفعالية بنجاح."
+    },
+    "edit": {
+      "title": "تعديل الفعالية",
+      "success": "تم تحديث الفعالية بنجاح."
+    },
+    "delete": {
+      "success": "تم حذف الفعالية بنجاح."
+    },
+    "form": {
+      "title": "العنوان",
+      "description": "الوصف",
+      "category": "الفئة",
+      "startAt": "تاريخ ووقت البدء",
+      "endAt": "تاريخ ووقت الانتهاء",
+      "location": "الموقع",
+      "capacity": "السعة",
+      "imageUrl": "صورة الفعالية",
+      "status": "الحالة",
+      "order": "ترتيب العرض",
+      "isFree": "حدث مجاني",
+      "price": "سعر التذكرة",
+      "currency": "العملة"
+    },
+    "loadError": "تعذر تحميل الفعاليات. قد لا تملك الصلاحية الكافية لعرض هذه الصفحة.",
+    "stats": {
+      "total": "إجمالي الفعاليات",
+      "published": "منشورة",
+      "draft": "مسودات"
+    },
+    "free": "مجاني"
+  },
+  "communityMembers": {
+    "columns": {
+      "name": "الاسم",
+      "category": "الفئة",
+      "company": "الشركة",
+      "title": "المسمى الوظيفي",
+      "yearJoined": "سنة الانضمام",
+      "published": "الحالة",
+      "photo": "الصورة"
+    },
+    "categories": {
+      "pioneers": "الرواد",
+      "growth_partners": "شركاء النمو",
+      "investors": "المستثمرون",
+      "impact_partners": "شركاء الأثر"
+    },
+    "status": {
+      "published": "منشور",
+      "hidden": "مخفي"
+    },
+    "create": {
+      "button": "عضو جديد",
+      "title": "إضافة عضو مجتمع جديد",
+      "success": "تمت إضافة عضو المجتمع بنجاح."
+    },
+    "edit": {
+      "title": "تعديل عضو المجتمع",
+      "success": "تم تحديث بيانات العضو بنجاح."
+    },
+    "delete": {
+      "success": "تم حذف العضو بنجاح."
+    },
+    "form": {
+      "name": "الاسم",
+      "category": "الفئة",
+      "company": "الشركة",
+      "title": "المسمى الوظيفي",
+      "bio": "نبذة موجزة",
+      "longBio": "السيرة الذاتية المفصلة",
+      "yearJoined": "سنة الانضمام",
+      "photoUrl": "الصورة الشخصية",
+      "order": "ترتيب العرض",
+      "published": "منشور"
+    },
+    "loadError": "تعذر تحميل أعضاء المجتمع. قد لا تملك الصلاحية الكافية لعرض هذه الصفحة.",
+    "stats": {
+      "total": "إجمالي الأعضاء",
+      "published": "منشور",
+      "hidden": "مخفي"
+    }
+  },
+  "currencies": {
+    "columns": {
+      "code": "الرمز",
+      "name": "الاسم",
+      "symbol": "الرمز الكتابي",
+      "decimalPlaces": "الخانات العشرية",
+      "order": "ترتيب العرض",
+      "isActive": "الحالة"
+    },
+    "baseBadge": "العملة الأساسية",
+    "isActiveYes": "مفعّلة",
+    "isActiveNo": "معطّلة",
+    "create": {
+      "button": "عملة جديدة",
+      "title": "عملة جديدة",
+      "success": "تم إنشاء العملة."
+    },
+    "edit": {
+      "title": "تعديل العملة",
+      "success": "تم تحديث العملة."
+    },
+    "form": {
+      "code": "الرمز",
+      "name": "الاسم",
+      "symbol": "الرمز الكتابي",
+      "decimalPlaces": "الخانات العشرية",
+      "order": "ترتيب العرض"
+    },
+    "validation": {
+      "codeFormat": "أدخل ثلاثة أحرف لاتينية كبيرة تماماً، مثل EUR."
+    },
+    "actions": {
+      "setBase": "تعيين كعملة أساسية",
+      "activate": "تفعيل",
+      "deactivate": "تعطيل"
+    },
+    "setBase": {
+      "title": "تعيينها كعملة أساسية؟",
+      "content": "تُحتسب كل المبالغ المخزّنة بالنسبة إلى العملة الأساسية. تعيين {code} كعملة أساسية يغيّر الوحدة التي تُقاس بها كل أسعار الصرف الحالية، ولا يمكن التراجع عنه من هذه الشاشة.",
+      "confirm": "تعيين كعملة أساسية",
+      "cancel": "إلغاء",
+      "success": "تم تحديث العملة الأساسية."
+    },
+    "status": {
+      "activateSuccess": "تم تفعيل العملة.",
+      "deactivateSuccess": "تم تعطيل العملة."
+    },
+    "loadError": "تعذّر تحميل العملات. قد لا تملك صلاحية عرض هذه الصفحة.",
+    "stats": {
+      "total": "إجمالي العملات",
+      "active": "المفعّلة",
+      "inactive": "المعطّلة"
+    }
+  },
+  "exchangeRates": {
+    "columns": {
+      "currencyCode": "العملة",
+      "rateToBase": "السعر (ليرة سورية لكل دولار)",
+      "effectiveFrom": "ساري من"
+    },
+    "latestBadge": "الأحدث",
+    "create": {
+      "button": "سعر صرف جديد",
+      "title": "سعر صرف جديد",
+      "success": "تم إنشاء سعر الصرف."
+    },
+    "form": {
+      "currencyCode": "العملة",
+      "rateToBase": "السعر (ليرة سورية لكل دولار)",
+      "effectiveFrom": "ساري من تاريخ"
+    },
+    "validation": {
+      "effectiveFromFormat": "أدخل تاريخاً بصيغة YYYY-MM-DD."
+    },
+    "loadError": "تعذّر تحميل أسعار الصرف. قد لا تملك صلاحية عرض هذه الصفحة.",
+    "empty": "لا توجد أسعار صرف.",
+    "stats": {
+      "latestUsd": "أحدث سعر صرف دولار → ليرة"
+    },
+    "suggestion": {
+      "title": "اقتراح سعر الصرف اليومي (sp-today)",
+      "description": "تم جلب سعر صرف جديد تلقائياً من خدمة sp-today بانتظار مراجعتك.",
+      "rate": "السعر المقترح",
+      "currentRate": "السعر الحالي",
+      "deviation": "نسبة الانحراف",
+      "fetchedAt": "وقت الجلب",
+      "staleWarning": "تنبيه: مصدر البيانات لم يتم تحديثه منذ أكثر من 48 ساعة.",
+      "accept": "قبول بالسعر المقترح",
+      "modifyAndAccept": "تعديل وقبول",
+      "dismiss": "تجاهل",
+      "acceptSuccess": "تم قبول الاقتراح وتطبيق سعر الصرف بنجاح.",
+      "dismissSuccess": "تم تجاهل الاقتراح.",
+      "dismissConfirmTitle": "تجاهل الاقتراح",
+      "dismissConfirmContent": "هل أنت متأكد من تجاهل هذا الاقتراح؟"
+    },
+    "sync": {
+      "button": "مزامنة فورية من sp-today",
+      "success": "تمت مزامنة أسعار الصرف بنجاح."
+    }
+  },
+  "walletTopUps": {
+    "description": "سجّل شحن محفظة يدوياً من الاستقبال، لمحفظة عضو أو محفظة شركة.",
+    "recipientType": {
+      "user": "محفظة عضو",
+      "company": "محفظة شركة"
+    },
+    "paymentMethod": {
+      "cash": "نقداً",
+      "sham": "شام كاش",
+      "mtn": "إم تي إن كاش",
+      "syriatel": "سيرياتيل كاش"
+    },
+    "form": {
+      "recipientType": "شحن لـ",
+      "user": "العضو",
+      "company": "الشركة",
+      "amount": "المبلغ",
+      "paymentMethod": "طريقة الدفع",
+      "description": "الوصف (اختياري)"
+    },
+    "validation": {
+      "amountFormat": "أدخل مبلغاً لا يقل عن 0.01، بخانتين عشريتين على الأكثر.",
+      "userRequired": "اختر عضواً.",
+      "companyRequired": "اختر شركة."
+    },
+    "submit": {
+      "button": "تسجيل الشحن",
+      "success": "تم شحن المحفظة."
+    },
+    "loadError": "تعذّر تحميل الأعضاء والشركات. قد لا تملك صلاحية عرض هذه الصفحة.",
+    "title": "شحن المحفظة",
+    "receptionSubtitle": "مكتب الاستقبال • إضافة رصيد يدوي",
+    "searchMember": "بحث عن عضو",
+    "searchMemberPlaceholder": "ابحث بالاسم أو رقم الهاتف...",
+    "searchCompany": "بحث عن شركة",
+    "searchCompanyPlaceholder": "ابحث باسم الشركة أو مرجع العقد...",
+    "generalBalance": "الرصيد العام",
+    "dedicatedBalance": "الرصيد المخصص",
+    "dedicatedBalanceOptional": "نوع الرصيد المخصص (اختياري)",
+    "expiryDateOptional": "تاريخ انتهاء الصلاحية (اختياري)",
+    "walletPreview": "معاينة الرصيد والمحفظة",
+    "currentGeneralBalance": "الرصيد العام الحالي",
+    "topUpAmount": "مبلغ الشحن",
+    "newGeneralBalance": "الرصيد العام الجديد المتوقع",
+    "addCreditButton": "تأكيد وإضافة الرصيد",
+    "selectRecipientFirst": "يرجى اختيار عضو أو شركة للاطلاع على الرصيد ومعلومات الحساب.",
+    "balanceScope": "جهة شحن الرصيد",
+    "personalBalance": "رصيد شخصي (المحفظة الشخصية للعضو)",
+    "companyBalance": "رصيد شركة (محفظة الشركة التابع لها)",
+    "companyInactiveWarning": "تنبيه: هذه الشركة معطلة حالياً، ولا يمكن شحن رصيد لها.",
+    "inactive": "معطلة",
+    "active": "نشطة",
+    "affiliation": "ينتمي إلى شركة:",
+    "loadingBalance": "جاري استعلام الرصيد الحالي...",
+    "cannotTopUpInactive": "لا يمكن شحن رصيد لشركة معطلة."
+  },
+  "cashRegister": {
+    "description": "فتح، مطابقة، وإغلاق ورديات وجلسات صندوق النقد لموظفي الاستقبال.",
+    "status": {
+      "open": "مفتوحة",
+      "closed": "مغلقة"
+    },
+    "openButton": "فتح وردية صندوق جديدة",
+    "closeButton": "إغلاق وردية الصندوق",
+    "noOpenSession": "لا توجد وردية صندوق نقد نشطة لحسابك حالياً.",
+    "historyTitle": "سجل جلسات الصندوق",
+    "openSuccess": "تم فتح وردية صندوق النقد بنجاح.",
+    "openError": "تعذر فتح وردية الصندوق.",
+    "closeSuccess": "تم إغلاق ومطابقة وردية صندوق النقد بنجاح.",
+    "closeError": "تعذر إغلاق وردية الصندوق.",
+    "columns": {
+      "id": "المعرف",
+      "operator": "المسؤول",
+      "branch": "الفرع",
+      "status": "الحالة",
+      "openedAt": "وقت الفتح",
+      "closedAt": "وقت الإغلاق",
+      "openingBalance": "رصيد الافتتاح",
+      "expectedBalance": "الرصيد المتوقع",
+      "closingBalance": "الرصيد الفعلي",
+      "difference": "الفارق"
+    },
+    "openModal": {
+      "title": "فتح وردية صندوق النقد",
+      "branch": "الفرع",
+      "openingBalance": "رصيد الصندوق الافتتاحي",
+      "notes": "ملاحظات"
+    },
+    "closeModal": {
+      "title": "إغلاق وردية صندوق النقد ومطابقته",
+      "closingBalance": "رصيد النقد الفعلي المحصي",
+      "notes": "ملاحظات المطابقة"
+    }
+  },
+  "approvalQueue": {
+    "description": "حجوزات بانتظار قرار من الاستقبال. لا تظهر هنا إلا المساحات التي تتطلب موافقة.",
+    "loadError": "تعذّر تحميل طلبات الموافقة. قد لا تملك صلاحية عرض هذه الصفحة.",
+    "empty": "لا يوجد ما ينتظر الموافقة.",
+    "columns": {
+      "requester": "مقدّم الطلب",
+      "space": "المساحة",
+      "when": "موعد الحجز",
+      "requested": "تاريخ الطلب",
+      "actions": "الإجراءات"
+    },
+    "approve": {
+      "button": "موافقة",
+      "success": "تمت الموافقة على الحجز."
+    },
+    "reject": {
+      "button": "رفض",
+      "title": "رفض الحجز",
+      "reasonLabel": "سبب الرفض",
+      "reasonPlaceholder": "يرى مقدّم الطلب هذا النص، فاذكر ما الذي يجعل الحجز ممكناً.",
+      "reasonRequired": "اذكر سبب الرفض.",
+      "success": "تم رفض الحجز."
+    }
+  },
+  "activeSessions": {
+    "description": "كل من هم داخل المكان الآن، الحجوزات والزيارات المباشرة معاً.",
+    "loadError": "تعذّر تحميل الجلسات النشطة. قد لا تملك صلاحية عرض هذه الصفحة.",
+    "empty": "لا أحد داخل المكان الآن.",
+    "refresh": "تحديث",
+    "overdue": "متأخّرة",
+    "onTime": "ضمن الوقت",
+    "columns": {
+      "occupant": "الشاغل",
+      "space": "المساحة",
+      "type": "النوع",
+      "checkedInAt": "وقت الدخول",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "type": {
+      "booking": "حجز",
+      "walkin": "زيارة مباشرة"
+    },
+    "checkOut": {
+      "button": "تسجيل الخروج",
+      "title": "تسجيل خروج الجلسة",
+      "atLabel": "وقت الخروج",
+      "futureNotAllowed": "لا يمكن أن يكون وقت الخروج في المستقبل.",
+      "settleLabel": "تسوية الدفع الآن",
+      "settleNone": "بدون تسوية الآن",
+      "success": "تم تسجيل خروج الجلسة.",
+      "settleSuccess": "تمت تسوية الدفع."
+    },
+    "extend": {
+      "button": "تمديد",
+      "title": "تمديد الحجز",
+      "minutesLabel": "دقائق إضافية",
+      "minutesInvalid": "أدخل عدداً صحيحاً من الدقائق، واحدة أو أكثر.",
+      "success": "تم تمديد الحجز."
+    },
+    "cancel": {
+      "button": "إلغاء الحجز",
+      "confirmTitle": "إلغاء هذا الحجز؟",
+      "confirmText": "ينتهي حجز العضو الآن وتصبح المساحة متاحة.",
+      "confirmOk": "إلغاء الحجز",
+      "confirmCancel": "الإبقاء عليه",
+      "success": "تم إلغاء الحجز."
+    }
+  },
+  "shortcuts": {
+    "title": "الاختصارات"
+  },
+  "nav": {
+    "sections": {
+      "dashboard": "لوحة القيادة",
+      "spatial": "الهيكل المكاني",
+      "system": "النظام والصلاحيات",
+      "members": "الأعضاء",
+      "bookings": "الحجوزات",
+      "plans": "الاشتراكات والباقات",
+      "access": "التحكم بالدخول",
+      "payments": "المدفوعات",
+      "community": "المجتمع والفعاليات",
+      "incubation": "الحاضنة والتسريع",
+      "address": "العنوان التجاري",
+      "cms": "إدارة الموقع",
+      "settings": "الإعدادات"
+    },
+    "pages": {
+      "overview": "نظرة عامة",
+      "branches": "الفروع",
+      "buildings": "المباني",
+      "floors": "الطوابق",
+      "zones": "المناطق",
+      "spaces": "المساحات",
+      "resources": "الموارد",
+      "seatsDesks": "المقاعد والطاولات",
+      "businessHours": "ساعات العمل",
+      "users": "المستخدمون",
+      "roles": "الأدوار والصلاحيات",
+      "individuals": "الأفراد",
+      "companies": "الشركات",
+      "memberships": "العضويات",
+      "approvalQueue": "طلبات الموافقة",
+      "activeSessions": "الجلسات النشطة",
+      "allBookings": "كل الحجوزات",
+      "calendar": "التقويم",
+      "packages": "الباقات",
+      "wallet": "المحفظة",
+      "locks": "الأقفال",
+      "accessLogs": "سجلّات الدخول",
+      "transactions": "المعاملات",
+      "paymentMethods": "طرق الدفع",
+      "currencies": "العملات",
+      "exchangeRates": "أسعار الصرف",
+      "walletTopUps": "شحن المحافظ",
+      "cashRegister": "صندوق النقد",
+      "events": "الفعاليات",
+      "community": "المجتمع",
+      "cafe": "الكافيه",
+      "incubate": "برنامج Incubate",
+      "accelerate": "برنامج Accelerate",
+      "mentors": "المرشدون",
+      "privateOfficeRequests": "طلبات المكاتب الخاصة",
+      "content": "المحتوى",
+      "partners": "الشركاء",
+      "announcements": "الإعلانات",
+      "founders": "المؤسسون",
+      "contactLinks": "روابط التواصل",
+      "notifications": "إرسال إشعار عام",
+      "accountSecurity": "الحساب والأمان",
+      "systemSettings": "إعدادات النظام",
+      "eventCategories": "فئات الفعاليات",
+      "receptionDesk": "مكتب الاستقبال",
+      "closeSession": "إنهاء الجلسة",
+      "modules": "الوحدات",
+      "walletCredited": "تم شحن المحفظة",
+      "eventCancellation": "إلغاء الفعالية",
+      "operationsRequests": "طلبات التشغيل"
+    }
+  },
+  "resourceCrud": {
+    "mutations": {
+      "genericError": "حدث خطأ ما. الرجاء المحاولة مجدداً.",
+      "permissionError": "لا تملك صلاحية هذا الإجراء."
+    },
+    "table": {
+      "actionsColumn": "إجراءات",
+      "empty": "لا توجد سجلات.",
+      "editAction": "تعديل",
+      "deleteAction": "حذف",
+      "deleteConfirmTitle": "حذف هذا العنصر؟",
+      "deleteConfirmOk": "حذف",
+      "deleteConfirmCancel": "إلغاء",
+      "refreshAction": "تحديث البيانات"
+    },
+    "form": {
+      "submit": "حفظ",
+      "cancel": "إلغاء",
+      "arabicPlaceholder": "العربية",
+      "englishPlaceholder": "الإنجليزية",
+      "uploadImage": "رفع صورة",
+      "uploadImagePrompt": "انقر أو اسحب الصورة هنا للرفع",
+      "uploadImageHint": "يدعم صيغ JPG, PNG, WEBP بحد أقصى 10MB",
+      "uploadSuccess": "تم رفع الصورة بنجاح",
+      "uploading": "جاري رفع الصورة...",
+      "changeImage": "تغيير الصورة",
+      "removeImage": "حذف الصورة",
+      "uploadImagesPrompt": "انقر أو اسحب الصور هنا للرفع",
+      "uploadImagesHint": "يدعم صيغ JPG, PNG, WEBP بحد أقصى 10MB (يمكن اختيار عدة صور)",
+      "addImages": "إضافة صور أخرى",
+      "primaryImage": "الرئيسية",
+      "setPrimary": "تعيين كصورة رئيسية",
+      "imagesCount": "صور",
+      "save": "حفظ"
+    },
+    "validation": {
+      "required": "{field} مطلوب."
+    }
+  },
+  "privateOfficeRequests": {
+    "description": "طلبات العملاء المحتملين لمكتب خاص، من مُقدَّم إلى مُسعَّر إلى متعاقَد.",
+    "columns": {
+      "prospectName": "العميل المحتمل",
+      "contact": "التواصل",
+      "status": "الحالة",
+      "quoteRef": "مرجع العرض",
+      "actions": "إجراءات"
+    },
+    "status": {
+      "requested": "مُقدَّم",
+      "quoted": "مُسعَّر",
+      "contracted": "متعاقَد"
+    },
+    "create": {
+      "button": "طلب جديد",
+      "title": "طلب مكتب خاص جديد",
+      "success": "تم إنشاء الطلب."
+    },
+    "markAsQuoted": {
+      "button": "تحويل إلى عرض سعر",
+      "title": "تحويل إلى عرض سعر",
+      "quoteRefLabel": "مرجع عرض السعر",
+      "quoteRefPlaceholder": "مثال: Q-2026-0001",
+      "success": "تم تحويل الطلب إلى مُسعَّر.",
+      "quoteRefRequired": "مرجع عرض السعر مطلوب."
+    },
+    "contractedLocked": "أصبح هذا الطلب شركة ولا يمكن تغيير حالته من هنا بعد الآن.",
+    "delete": {
+      "success": "تم حذف الطلب."
+    },
+    "form": {
+      "prospectName": "اسم العميل المحتمل",
+      "contact": "التواصل"
+    },
+    "validation": {
+      "prospectNameRequired": "اسم العميل المحتمل مطلوب.",
+      "contactRequired": "معلومات التواصل مطلوبة.",
+      "quoteRefRequired": "مرجع عرض السعر مطلوب."
+    },
+    "loadError": "تعذّر تحميل طلبات المكاتب الخاصة. قد لا تملك صلاحية عرض هذه الصفحة.",
+    "empty": "لا توجد طلبات مكاتب خاصة.",
+    "stats": {
+      "total": "إجمالي الطلبات",
+      "requested": "مُقدَّمة",
+      "quoted": "مُسعَّرة",
+      "contracted": "متعاقَدة"
+    }
+  },
+  "companies": {
+    "description": "الشركات المُنشأة من طلب مكتب خاص مُسعَّر. تُنشأ من هنا فقط — لا خدمة ذاتية أبداً.",
+    "columns": {
+      "legalName": "الاسم القانوني",
+      "contractRef": "مرجع العقد",
+      "branch": "الفرع",
+      "status": "الحالة",
+      "actions": "إجراءات"
+    },
+    "status": {
+      "active": "نشطة",
+      "inactive": "غير نشطة"
+    },
+    "create": {
+      "button": "شركة جديدة",
+      "title": "شركة جديدة",
+      "success": "تم إنشاء الشركة.",
+      "noQuotedRequestsTitle": "لا توجد طلبات مُسعَّرة بعد",
+      "noQuotedRequestsBody": "لا يمكن إنشاء شركة إلا من طلب مكتب خاص مُسعَّر. توجّه إلى طلبات المكاتب الخاصة وحوّل طلباً إلى عرض سعر أولاً.",
+      "goToRequests": "الذهاب إلى طلبات المكاتب الخاصة"
+    },
+    "changeStatus": {
+      "button": "تغيير الحالة",
+      "title": "تغيير الحالة",
+      "success": "تم تحديث الحالة."
+    },
+    "viewMembers": {
+      "button": "عرض الأعضاء"
+    },
+    "form": {
+      "privateOfficeRequest": "طلب المكتب الخاص",
+      "branch": "الفرع",
+      "legalName": "الاسم القانوني",
+      "contractRef": "مرجع العقد"
+    },
+    "validation": {
+      "privateOfficeRequestRequired": "طلب مُسعَّر مطلوب.",
+      "branchRequired": "الفرع مطلوب.",
+      "legalNameRequired": "الاسم القانوني مطلوب.",
+      "contractRefRequired": "مرجع العقد مطلوب."
+    },
+    "loadError": "تعذّر تحميل الشركات. قد لا تملك صلاحية عرض هذه الصفحة.",
+    "empty": "لا توجد شركات.",
+    "stats": {
+      "total": "إجمالي الشركات",
+      "active": "نشطة",
+      "inactive": "غير نشطة"
+    },
+    "detail": {
+      "title": "الشركة",
+      "loadError": "تعذّر تحميل بيانات هذه الشركة."
+    }
+  },
+  "companyMembers": {
+    "columns": {
+      "member": "العضو",
+      "userId": "معرّف المستخدم",
+      "doorAccess": "الوصول للأبواب",
+      "isAdmin": "أدمن",
+      "actions": "إجراءات"
+    },
+    "add": {
+      "button": "إضافة عضو",
+      "title": "إضافة عضو للشركة",
+      "userLabel": "المستخدم",
+      "userRequired": "اختر مستخدماً.",
+      "doorAccessLabel": "تفعيل الوصول للأبواب",
+      "adminLabel": "أدمن الشركة",
+      "adminHint": "أول أدمن للشركة لا يُعيَّن إلا من هنا — أدمن الشركة القائم لا يستطيع إلا ترقية عضو موجود، لا تعيين الأول.",
+      "success": "تمت إضافة العضو.",
+      "alreadyMemberError": "هذا المستخدم عضو بالفعل في هذه الشركة."
+    },
+    "remove": {
+      "confirmTitle": "إزالة هذا العضو؟",
+      "confirmOk": "إزالة",
+      "confirmCancel": "إلغاء",
+      "success": "تمت إزالة العضو."
+    }
+  },
+  "systemSettings": {
+    "description": "إعدادات النظام والمتغيرات التشغيلية العامة.",
+    "searchPlaceholder": "البحث في الإعدادات حسب المفتاح أو القيمة...",
+    "refresh": "تحديث",
+    "editTitle": "تعديل الإعداد",
+    "keyLabel": "المفتاح",
+    "typeLabel": "النوع",
+    "valueLabel": "القيمة",
+    "editButton": "تعديل",
+    "saveSuccess": "تم تحديث الإعداد بنجاح.",
+    "saveError": "تعذر تحديث الإعداد.",
+    "invalidJson": "صيغة JSON غير صحيحة.",
+    "loadError": "تعذر تحميل إعدادات النظام. قد لا تملك الصلاحية الكافية لعرض هذه الصفحة.",
+    "columns": {
+      "key": "مفتاح الإعداد",
+      "type": "النوع",
+      "value": "القيمة الحالية",
+      "actions": "الإجراءات"
+    }
+  },
+  "announcements": {
+    "columns": {
+      "type": "النوع",
+      "startsAt": "تاريخ البدء",
+      "endsAt": "تاريخ الانتهاء",
+      "status": "الحالة",
+      "image": "الصورة"
+    },
+    "status": {
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "form": {
+      "type": "النوع",
+      "imageUrl": "صورة الإعلان",
+      "linkUrl": "رابط التوجيه",
+      "startsAt": "تاريخ البدء",
+      "endsAt": "تاريخ الانتهاء",
+      "sortOrder": "ترتيب العرض",
+      "isActive": "نشط"
+    },
+    "create": {
+      "button": "إعلان جديد",
+      "title": "إضافة إعلان جديد",
+      "success": "تم إنشاء الإعلان بنجاح."
+    },
+    "edit": {
+      "title": "تعديل الإعلان",
+      "success": "تم تحديث الإعلان بنجاح."
+    },
+    "delete": {
+      "success": "تم حذف الإعلان بنجاح."
+    },
+    "stats": {
+      "total": "إجمالي الإعلانات",
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "loadError": "تعذر تحميل الإعلانات."
+  },
+  "partners": {
+    "columns": {
+      "name": "الاسم",
+      "category": "الفئة",
+      "websiteUrl": "الموقع الإلكتروني",
+      "status": "الحالة",
+      "logo": "الشعار"
+    },
+    "category": {
+      "local": "محلي",
+      "global": "عالمي"
+    },
+    "status": {
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "form": {
+      "name": "الاسم",
+      "description": "الوصف",
+      "logoUrl": "الشعار",
+      "websiteUrl": "رابط الموقع",
+      "category": "الفئة",
+      "order": "ترتيب العرض",
+      "isActive": "نشط"
+    },
+    "create": {
+      "button": "شريك جديد",
+      "title": "إضافة شريك جديد",
+      "success": "تم إنشاء الشريك بنجاح."
+    },
+    "edit": {
+      "title": "تعديل الشريك",
+      "success": "تم تحديث الشريك بنجاح."
+    },
+    "delete": {
+      "success": "تم حذف الشريك بنجاح."
+    },
+    "stats": {
+      "total": "إجمالي الشركاء",
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "loadError": "تعذر تحميل الشركاء."
+  },
+  "founders": {
+    "columns": {
+      "name": "الاسم",
+      "role": "الدور",
+      "linkedin": "لينكد إن",
+      "order": "الترتيب",
+      "photo": "الصورة الشخصية"
+    },
+    "form": {
+      "name": "الاسم",
+      "role": "الدور",
+      "bio": "السيرة الذاتية",
+      "photoUrl": "الصورة الشخصية",
+      "linkedinUrl": "رابط لينكد إن",
+      "twitterUrl": "رابط تويتر / X",
+      "order": "ترتيب العرض"
+    },
+    "create": {
+      "button": "مؤسس جديد",
+      "title": "إضافة مؤسس جديد",
+      "success": "تم إضافة المؤسس بنجاح."
+    },
+    "edit": {
+      "title": "تعديل المؤسس",
+      "success": "تم تحديث بيانات المؤسس بنجاح."
+    },
+    "delete": {
+      "success": "تم حذف المؤسس بنجاح."
+    },
+    "stats": {
+      "total": "إجمالي المؤسسين"
+    },
+    "loadError": "تعذر تحميل بيانات المؤسسين."
+  },
+  "contactLinks": {
+    "columns": {
+      "type": "النوع",
+      "value": "القيمة / الرابط",
+      "label": "التسمية",
+      "status": "الحالة"
+    },
+    "status": {
+      "visible": "مرئي",
+      "hidden": "مخفي"
+    },
+    "form": {
+      "type": "النوع",
+      "value": "القيمة / الرابط",
+      "label": "التسمية",
+      "sortOrder": "ترتيب العرض",
+      "isVisible": "مرئي"
+    },
+    "create": {
+      "button": "رابط جديد",
+      "title": "إضافة رابط تواصل جديد",
+      "success": "تم إنشاء الرابط بنجاح."
+    },
+    "edit": {
+      "title": "تعديل رابط التواصل",
+      "success": "تم تحديث الرابط بنجاح."
+    },
+    "delete": {
+      "success": "تم حذف الرابط بنجاح."
+    },
+    "stats": {
+      "total": "إجمالي الروابط",
+      "visible": "مرئي",
+      "hidden": "مخفي"
+    },
+    "loadError": "تعذر تحميل روابط التواصل."
+  },
+  "broadcastNotifications": {
+    "description": "إرسال إشعارات فورية وداخلية للمستخدمين.",
+    "form": {
+      "titleAr": "العنوان (بالعربية)",
+      "titleEn": "العنوان (بالإنجليزية)",
+      "bodyAr": "نص الرسالة (بالعربية)",
+      "bodyEn": "نص الرسالة (بالإنجليزية)",
+      "target": "الفئة المستهدفة",
+      "roleName": "اسم الدور",
+      "roleNamePlaceholder": "مثال: admin, operations",
+      "userIds": "معرفات المستخدمين (User IDs)",
+      "userIdsPlaceholder": "أدخل الأرقام مفصولة بفواصل أو أسطر جديدة",
+      "userIdsHint": "افصل بين المعرفات المتعددة بفواصل أو أسطر جديدة."
+    },
+    "targets": {
+      "all": "جميع المستخدمين النشطين",
+      "role": "حسب الدور",
+      "users": "مستخدمين محددين"
+    },
+    "validation": {
+      "titleRequired": "العنوان مطلوب.",
+      "bodyRequired": "نص الرسالة مطلوب."
+    },
+    "send": "إرسال الإشعار",
+    "sendSuccess": "تم إرسال الإشعار بنجاح.",
+    "sendError": "تعذر إرسال الإشعار."
+  },
+  "sun_description": "الشمس نجم متوسط الحجم يقع في مركز نظامنا الشمسي. وهي مصدر الضوء والحرارة اللذين يحفظان الحياة على الأرض. تتكوّن أساساً من الهيدروجين والهيليوم، وتولّد طاقتها عبر الاندماج النووي. وتُبقي كتلتها وجاذبيتها الكواكب والأجرام السماوية الأخرى في مدارات حولها.",
+  "eventCategories": {
+    "columns": {
+      "name": "اسم الفئة",
+      "slug": "المعرف اللطيف (Slug)",
+      "color": "اللون",
+      "icon": "الأيقونة",
+      "order": "الترتيب",
+      "status": "الحالة"
+    },
+    "status": {
+      "active": "نشط",
+      "inactive": "معطل"
+    },
+    "create": {
+      "button": "فئة جديدة",
+      "title": "إضافة فئة فعاليات جديدة",
+      "success": "تم إنشاء فئة الفعاليات بنجاح."
+    },
+    "edit": {
+      "title": "تعديل فئة الفعاليات",
+      "success": "تم تحديث فئة الفعاليات بنجاح."
+    },
+    "delete": {
+      "success": "تم حذف فئة الفعاليات بنجاح.",
+      "warning": "حذف هذه الفئة سيفك ارتباطها بالفعاليات التابعة لها (ستصبح بدون فئة)."
+    },
+    "form": {
+      "name": "اسم الفئة",
+      "slug": "المعرف اللطيف (Slug)",
+      "slugPlaceholder": "اتركه فارغاً للتوليد التلقائي",
+      "description": "الوصف",
+      "color": "رمز اللون (Hex Code)",
+      "icon": "اسم الأيقونة",
+      "order": "ترتيب العرض",
+      "isActive": "الحالة (نشط)"
+    },
+    "loadError": "تعذر تحميل فئات الفعاليات. قد لا تملك الصلاحية الكافية لعرض هذه الصفحة.",
+    "stats": {
+      "total": "إجمالي الفئات",
+      "active": "نشطة",
+      "inactive": "معطلة"
+    }
+  },
+  "operationsRequests": {
+    "title": "طلبات التشغيل",
+    "subtitle": "إدارة ومتابعة طلبات الخدمات والحجوزات والمشاكل التقنية.",
+    "viewDetails": "عرض التفاصيل"
+  },
+  "closeSession": {
+    "title": "إنهاء الجلسة والدفع",
+    "activeMember": "عضو نشط",
+    "workspace": "مساحة العمل",
+    "branch": "الفرع",
+    "checkIn": "وقت الدخول",
+    "checkOut": "وقت الخروج",
+    "duration": "المدة",
+    "subtotal": "المجموع الفرعي",
+    "total": "الإجمالي",
+    "paymentStatusPartially": "مدفوع جزئياً",
+    "availableBalance": "الرصيد المتاح",
+    "remainingCashDue": "المبلغ المتبقي للدفع نقداً",
+    "useWalletBalance": "استخدام رصيد المحفظة",
+    "payCashAtReception": "دفع نقدي في الاستقبال",
+    "sessionID": "معرف الجلسة",
+    "paymentMethod": "طريقة الدفع",
+    "receiptNote": "ملاحظة الإيصال",
+    "infoNotice": "سيتم تحصيل المبلغ المتبقي نقداً وتحديث حالة الجلسة إلى منتهية فور التأكيد.",
+    "submitButton": "تأكيد الدفع وإنهاء الجلسة",
+    "successMessage": "تم إنهاء الجلسة وتسوية الحساب بنجاح."
+  },
+  "walletCredited": {
+    "transactionID": "معرف المعاملة",
+    "title": "إيصال شحن المحفظة",
+    "receptionSubtitle": "مكتب الاستقبال • شحن يدوي",
+    "heroTitle": "تم شحن المحفظة بنجاح",
+    "heroSubtitle": "تم إضافة الرصيد إلى المحفظة وجاهز للاستخدام الفوري.",
+    "creditedAmount": "المبلغ المشحون",
+    "paymentMethod": "طريقة الدفع",
+    "balanceType": "نوع الرصيد",
+    "expiryDate": "تاريخ انتهاء الصلاحية",
+    "newGeneralBalance": "الرصيد العام الجديد",
+    "previousGeneralBalance": "الرصيد العام السابق",
+    "creditedBy": "تم الشحن بواسطة",
+    "dateTime": "التاريخ والوقت",
+    "shareReceipt": "مشاركة الإيصال",
+    "printReceipt": "طباعة الإيصال",
+    "newTopUp": "إجراء شحن جديد",
+    "noReceiptData": "لا توجد بيانات عملية شحن سابقة لعرضها.",
+    "backToReception": "العودة إلى الاستقبال"
+  },
+  "reception": {
+    "statusOperational": "العمليات جاهزة ونشطة",
+    "quickActionsTitle": "إجراءات سريعة",
+    "actions": {
+      "startSession": "بدء جلسة",
+      "registerGuest": "تسجيل ضيف",
+      "topUpWallet": "شحن محفظة",
+      "closeSession": "إنهاء جلسة"
+    },
+    "upNextTitle": "القادم تالياً",
+    "stats": {
+      "activeSessions": "الجلسات النشطة",
+      "expectedBookings": "الحجوزات المتوقعة",
+      "pendingGuests": "الضيوف المعلقين",
+      "pendingPayments": "مدفوعات معلقة"
+    },
+    "vsYesterday": "مقارنة بالأمس"
+  },
+  "eventCancellation": {
+    "title": "تفاصيل إلغاء الفعالية",
+    "supportSubtitle": "إدارة الفعاليات • معالجة الاسترداد",
+    "heroTitle": "تم إلغاء هذه الفعالية",
+    "heroSubtitle": "تمت معالجة استرداد المبالغ وإرجاع الرصيد إلى محافظ المشتركين.",
+    "opsNoteTitle": "إشعار فريق العمليات",
+    "refundSummaryTitle": "ملخص استرداد التذاكر",
+    "amountPaid": "المبلغ المدفوع",
+    "refundedTo": "تم الاسترداد إلى",
+    "refundStatus": "حالة الاسترداد",
+    "walletReturnedInfo": "تمت إعادة مبالغ التذاكر بالكامل إلى المحفظة العامة لجميع المشتركين المسجلين."
+  },
+  "members": {
+    "description": "إدارة واستعلام بيانات الأعضاء المسجلين عبر التطبيق (رصيد المحفظة، الجلسات النشطة، والحالة).",
+    "searchPlaceholder": "البحث بالاسم أو الهاتف أو البريد الإلكتروني...",
+    "statusFilterPlaceholder": "تصفية حسب الحالة",
+    "loadError": "تعذّر تحميل قائمة الأعضاء. يرجى المحاولة لاحقاً.",
+    "columns": {
+      "member": "العضو",
+      "email": "البريد الإلكتروني",
+      "company": "الشركة",
+      "status": "الحالة"
+    },
+    "status": {
+      "active": "نشط",
+      "deactivated": "معطّل",
+      "blocked": "محظور"
+    },
+    "stats": {
+      "total": "إجمالي الأعضاء"
+    },
+    "detail": {
+      "title": "تفاصيل العضو",
+      "button": "استعلام المحفظة والجلسات",
+      "walletBalance": "رصيد المحفظة",
+      "generalBalance": "الرصيد العام الحالي",
+      "loadingBalance": "جاري جلب الرصيد...",
+      "balanceError": "تعذّر جلب رصيد المحفظة.",
+      "activeSessions": "الجلسات النشطة حالياً",
+      "loadingSessions": "جاري جلب الجلسات...",
+      "sessionsError": "تعذّر جلب الجلسات النشطة.",
+      "noActiveSessions": "لا توجد جلسات نشطة حالياً لهذا العضو.",
+      "overdue": "متأخر عن الخروج",
+      "checkedInAt": "تسجيل الدخول",
+      "sessionType": {
+        "booking": "حجز مساحة",
+        "walkin": "دخول مباشر"
+      }
+    },
+    "changeStatus": {
+      "button": "تغيير الحالة",
+      "title": "تغيير حالة العضو",
+      "warning": "تعطيل حساب العضو أو حظره يُلغي جميع جلساته النشطة وصلاحيات دخوله فوراً.",
+      "reasonLabel": "السبب (اختياري)",
+      "reasonPlaceholder": "اكتب سبب تغيير الحالة...",
+      "success": "تم تحديث حالة العضو بنجاح."
+    },
+    "topUp": {
+      "button": "شحن المحفظة",
+      "title": "شحن رصيد العضو",
+      "recipientMember": "عضو فردي",
+      "amount": "المبلغ",
+      "amountPlaceholder": "أدخل المبلغ...",
+      "paymentMethod": "طريقة الدفع",
+      "description": "ملاحظات / بيان الإيصال",
+      "descriptionPlaceholder": "ملاحظة اختيارية...",
+      "submit": "تأكيد الشحن",
+      "success": "تم شحن المحفظة بنجاح."
+    },
+    "profile": {
+      "personalTitle": "المعلومات الشخصية",
+      "professionalTitle": "المعلومات المهنية",
+      "bio": "نبذة شخصية",
+      "city": "المدينة",
+      "gender": "الجنس",
+      "genderMale": "ذكر",
+      "genderFemale": "أنثى",
+      "jobTitle": "المسمى الوظيفي",
+      "companyName": "اسم الشركة / جهة العمل",
+      "industry": "مجال العمل",
+      "socialLinks": "روابط التواصل والملفات المهنية",
+      "noProfileInfo": "لم يقم العضو بإدخال تفاصيل بروفايل إضافية بعد."
+    }
+  }
 }

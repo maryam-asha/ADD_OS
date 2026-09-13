@@ -28,6 +28,9 @@ export interface Space {
 	pricing_currency: CurrencyCode | null
 	status: OperationalStatus
 	status_reason: string | null
+	image_url?: string | null
+	main_image?: string | null
+	images?: string[] | null
 }
 
 /**
@@ -72,6 +75,9 @@ export interface SpacePayload extends Record<string, unknown> {
 	capacity: number
 	hourly_rate: number | null
 	pricing_currency: CurrencyCode | null
+	image_url?: string | null
+	main_image?: string | null
+	images?: string[] | null
 }
 
 export interface SpaceStatusPayload {

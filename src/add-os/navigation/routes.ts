@@ -32,6 +32,7 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"system.roles": () => import("@/add-os/modules/system/views/RolesPage.vue"),
 	"system.users": () => import("@/add-os/modules/system/views/UsersPage.vue"),
 	"settings.accountSecurity": () => import("@/add-os/modules/settings/views/AccountSecurityPage.vue"),
+	"settings.systemSettings": () => import("@/add-os/modules/settings/views/SystemSettingsPage.vue"),
 	"spatial.branches": () => import("@/add-os/modules/spatial/views/BranchesPage.vue"),
 	"spatial.buildings": () => import("@/add-os/modules/spatial/views/BuildingsPage.vue"),
 	"spatial.floors": () => import("@/add-os/modules/spatial/views/FloorsPage.vue"),
@@ -41,12 +42,28 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"spatial.seatsDesks": () => import("@/add-os/modules/spatial/views/SeatsDesksPage.vue"),
 	"spatial.businessHours": () => import("@/add-os/modules/spatial/views/BusinessHoursPage.vue"),
 	"address.privateOfficeRequests": () => import("@/add-os/modules/members/views/PrivateOfficeRequestsPage.vue"),
+	"address.operationsRequests": () => import("@/add-os/modules/operations/views/OperationsRequestsPage.vue"),
+	"bookings.receptionDesk": () => import("@/add-os/modules/reception/views/ReceptionDeskPage.vue"),
 	"bookings.approvalQueue": () => import("@/add-os/modules/booking/views/ApprovalQueuePage.vue"),
 	"bookings.activeSessions": () => import("@/add-os/modules/booking/views/ActiveSessionsPage.vue"),
+	"bookings.closeSession": () => import("@/add-os/modules/booking/views/CloseSessionPage.vue"),
+	"members.individuals": () => import("@/add-os/modules/members/views/IndividualMembersPage.vue"),
 	"members.companies": () => import("@/add-os/modules/members/views/CompaniesPage.vue"),
 	"plans.packages": () => import("@/add-os/modules/plans/views/PlansPage.vue"),
+	"plans.modules": () => import("@/add-os/modules/plans/views/PlanModulesPage.vue"),
+	"payments.currencies": () => import("@/add-os/modules/payments/views/CurrenciesPage.vue"),
 	"payments.exchangeRates": () => import("@/add-os/modules/payments/views/ExchangeRatesPage.vue"),
-	"payments.walletTopUps": () => import("@/add-os/modules/payments/views/WalletTopUpsPage.vue")
+	"payments.walletTopUps": () => import("@/add-os/modules/payments/views/WalletTopUpsPage.vue"),
+	"payments.cashRegister": () => import("@/add-os/modules/payments/views/CashRegisterPage.vue"),
+	"community.events": () => import("@/add-os/modules/events/views/EventsPage.vue"),
+	"community.eventCategories": () => import("@/add-os/modules/events/views/EventCategoriesPage.vue"),
+	"community.eventCancellation": () => import("@/add-os/modules/events/views/EventCancellationDetailsPage.vue"),
+	"community.community": () => import("@/add-os/modules/community/views/CommunityMembersPage.vue"),
+	"cms.announcements": () => import("@/add-os/modules/cms/views/AnnouncementsPage.vue"),
+	"cms.partners": () => import("@/add-os/modules/cms/views/PartnersPage.vue"),
+	"cms.founders": () => import("@/add-os/modules/cms/views/FoundersPage.vue"),
+	"cms.contactLinks": () => import("@/add-os/modules/cms/views/ContactLinksPage.vue"),
+	"cms.notifications": () => import("@/add-os/modules/cms/views/NotificationsPage.vue")
 }
 
 export function createAddOsRoutes(): RouteRecordRaw[] {

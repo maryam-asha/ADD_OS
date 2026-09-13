@@ -54,4 +54,3 @@ export function displayActionName(action: string, translate: (key: string) => st
 	const val = translate(key)
 	return val && val !== key ? val : action
 }
-

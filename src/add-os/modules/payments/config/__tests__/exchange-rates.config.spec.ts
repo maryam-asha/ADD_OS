@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { latestRatesByCurrency } from "../exchange-rates.config"
+import { exchangeRateFields, latestRatesByCurrency } from "../exchange-rates.config"
 
 describe("latestRatesByCurrency", () => {
 	it("picks the row with the latest effective_from per currency", () => {
@@ -31,5 +31,17 @@ describe("latestRatesByCurrency", () => {
 
 	it("returns an empty array for an empty input", () => {
 		expect(latestRatesByCurrency([])).toEqual([])
+	})
+})
+
+describe("exchangeRateFields", () => {
+	it("configures effective_from with date type and correct label key", () => {
+		const t = (key: string) => key
+		const fields = exchangeRateFields(t as any)
+		const effectiveFromField = fields.find(f => f.key === "effective_from")
+
+		expect(effectiveFromField).toBeDefined()
+		expect(effectiveFromField?.type).toBe("date")
+		expect(effectiveFromField?.labelKey).toBe("exchangeRates.form.effectiveFrom")
 	})
 })

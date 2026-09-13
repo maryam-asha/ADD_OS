@@ -17,7 +17,7 @@
 
 		<!-- Roles Table -->
 		<n-card class="add-ledger-table">
-			<n-data-table :columns="columns" :data="roles" :loading="loading" :bordered="false" :row-key="rowKey" />
+			<n-data-table :columns :data="roles" :loading :bordered="false" :row-key />
 		</n-card>
 
 		<!-- Role Create / Edit Modal -->
@@ -29,7 +29,7 @@
 			style="max-width: 46rem"
 			content-style="max-height: 72vh; overflow-y: auto"
 		>
-			<n-form ref="formRef" :model="form" :rules="rules" label-placement="top">
+			<n-form ref="formRef" :model="form" :rules label-placement="top">
 				<n-form-item path="name" :label="t('roles.form.name')">
 					<n-input
 						v-model:value="form.name"
@@ -90,8 +90,8 @@
 											:class="isModuleFullySelected(group, form.permissions)
 												? 'bg-[#007F91]/15 text-[#007F91]'
 												: isModulePartiallySelected(group, form.permissions)
-												? 'bg-[#A97C57]/15 text-[#A97C57]'
-												: 'bg-neutral-200/60 dark:bg-neutral-800 text-neutral-500'"
+													? 'bg-[#A97C57]/15 text-[#A97C57]'
+													: 'bg-neutral-200/60 dark:bg-neutral-800 text-neutral-500'"
 										>
 											{{ getModuleSelectedCount(group) }}/{{ group.actions.length }}
 										</span>

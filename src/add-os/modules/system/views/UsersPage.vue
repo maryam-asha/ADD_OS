@@ -69,7 +69,13 @@
 			</template>
 		</n-modal>
 
-		<n-modal v-model:show="statusModalVisible" preset="card" :title="t('users.changeStatus.title')" class="max-w-md">
+		<n-modal
+			v-model:show="statusModalVisible"
+			preset="card"
+			:title="t('users.changeStatus.title')"
+			closable
+			style="max-width: 28rem"
+		>
 			<n-alert type="warning" :title="t('users.changeStatus.warning')" class="mb-4" />
 			<n-form>
 				<n-form-item :label="t('users.columns.status')">
@@ -92,7 +98,13 @@
 			</template>
 		</n-modal>
 
-		<n-modal v-model:show="roleModalVisible" preset="card" :title="t('users.changeRole.title')" class="max-w-md">
+		<n-modal
+			v-model:show="roleModalVisible"
+			preset="card"
+			:title="t('users.changeRole.title')"
+			closable
+			style="max-width: 28rem"
+		>
 			<n-form>
 				<n-form-item :label="t('users.columns.role')">
 					<n-select v-model:value="roleForm" :options="roleFilterOptions" />

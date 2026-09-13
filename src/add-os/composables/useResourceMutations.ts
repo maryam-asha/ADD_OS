@@ -9,11 +9,19 @@ interface MutationMessages {
 	deleteSuccess: string
 }
 
-export function useResourceMutations<T, CreatePayload, UpdatePayload>(
+/**
+ * `TKey` defaults to `number` because almost every admin resource here is an
+ * autoincrement id, and several callers pass rejecting stubs for verbs their
+ * resource does not have (see ExchangeRatesPage) — those give TS no parameter
+ * to infer from, so the default is what keeps them typed as they were. It
+ * widens to `string` for a resource keyed by something else: currencies use a
+ * 3-letter `code` (`Currency::$primaryKey = 'code'`, `$incrementing = false`).
+ */
+export function useResourceMutations<T, CreatePayload, UpdatePayload, TKey extends string | number = number>(
 	api: {
 		create: (payload: CreatePayload) => Promise<T>
-		update: (id: number, payload: UpdatePayload) => Promise<{ message?: string }>
-		remove: (id: number) => Promise<{ message?: string }>
+		update: (id: TKey, payload: UpdatePayload) => Promise<{ message?: string }>
+		remove: (id: TKey) => Promise<{ message?: string }>
 	},
 	refetch: () => Promise<void>,
 	messages: MutationMessages
@@ -56,8 +64,8 @@ export function useResourceMutations<T, CreatePayload, UpdatePayload>(
 
 	return {
 		create: (payload: CreatePayload) => run(() => api.create(payload), messages.createSuccess),
-		update: (id: number, payload: UpdatePayload) => run(() => api.update(id, payload), messages.updateSuccess),
-		remove: (id: number) => run(() => api.remove(id), messages.deleteSuccess),
+		update: (id: TKey, payload: UpdatePayload) => run(() => api.update(id, payload), messages.updateSuccess),
+		remove: (id: TKey) => run(() => api.remove(id), messages.deleteSuccess),
 		isSubmitting
 	}
 }

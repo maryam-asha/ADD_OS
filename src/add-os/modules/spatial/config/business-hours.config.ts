@@ -68,7 +68,7 @@ export const DAYS_OF_WEEK_ORDERED: DayOfWeek[] = [
 	"tuesday",
 	"wednesday",
 	"thursday",
-	"friday",
+	"friday"
 ]
 
 export const WORK_DAYS: DayOfWeek[] = [
@@ -77,7 +77,7 @@ export const WORK_DAYS: DayOfWeek[] = [
 	"monday",
 	"tuesday",
 	"wednesday",
-	"thursday",
+	"thursday"
 ]
 
 export function buildBusinessHourExceptionColumns(t: ComposerTranslation): DataTableColumns<BusinessHourException> {

@@ -1,19 +1,24 @@
 import { flushPromises, mount } from "@vue/test-utils"
+import { createPinia, setActivePinia } from "pinia"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { createI18n } from "vue-i18n"
 
 import { ApiError } from "@/add-os/services/api"
 import WalletTopUpsPage from "../WalletTopUpsPage.vue"
 
-const { listUsersMock, listCompaniesMock, createWalletTopUpMock } = vi.hoisted(() => ({
+const { listUsersMock, listCompaniesMock, createWalletTopUpMock, getWalletBalanceMock } = vi.hoisted(() => ({
 	listUsersMock: vi.fn(),
 	listCompaniesMock: vi.fn(),
-	createWalletTopUpMock: vi.fn()
+	createWalletTopUpMock: vi.fn(),
+	getWalletBalanceMock: vi.fn()
 }))
 
 vi.mock("@/add-os/services/users", () => ({ listUsers: listUsersMock }))
 vi.mock("@/add-os/services/companies", () => ({ listCompanies: listCompaniesMock }))
-vi.mock("@/add-os/services/wallet-top-ups", () => ({ createWalletTopUp: createWalletTopUpMock }))
+vi.mock("@/add-os/services/wallet-top-ups", () => ({
+	createWalletTopUp: createWalletTopUpMock,
+	getWalletBalance: getWalletBalanceMock
+}))
 
 // Same pitfall AddCompanyMemberDialog.spec.ts documents: the page calls
 // useMessage() directly, which needs a provider it has no reason to mount.
@@ -77,15 +82,26 @@ const i18n = createI18n({
 })
 
 function mountPage() {
-	return mount(WalletTopUpsPage, { global: { plugins: [i18n] }, attachTo: document.body })
+	const pinia = createPinia()
+	setActivePinia(pinia)
+	return mount(WalletTopUpsPage, { global: { plugins: [i18n, pinia] }, attachTo: document.body })
 }
 
 describe("walletTopUpsPage", () => {
 	beforeEach(() => {
 		vi.clearAllMocks()
+		setActivePinia(createPinia())
 		listUsersMock.mockResolvedValue([sampleUser])
 		listCompaniesMock.mockResolvedValue([sampleCompany])
 		createWalletTopUpMock.mockResolvedValue({ id: 789, amount: "50.00", source: "top_up", payment_method: "cash", performed_by_user_id: 12 })
+		getWalletBalanceMock.mockResolvedValue({
+			owner_type: "user",
+			owner_id: 5,
+			owner_name: "Sara",
+			owner_phone: "0999111222",
+			general_balance: "100.00",
+			currency: "SYP"
+		})
 	})
 
 	it("posts a member top-up with user_id and no company_id, then resets the form", async () => {
@@ -101,6 +117,7 @@ describe("walletTopUpsPage", () => {
 
 		expect(createWalletTopUpMock).toHaveBeenCalledWith({
 			amount: "50.00",
+			currency: "SYP",
 			payment_method: "cash",
 			user_id: 5,
 			description: "Front-desk cash top-up"
@@ -128,6 +145,7 @@ describe("walletTopUpsPage", () => {
 
 		expect(createWalletTopUpMock).toHaveBeenCalledWith({
 			amount: "50.00",
+			currency: "SYP",
 			payment_method: "syriatel",
 			company_id: 45,
 			description: null
@@ -235,4 +253,126 @@ describe("walletTopUpsPage", () => {
 		expect(createWalletTopUpMock).not.toHaveBeenCalled()
 		wrapper.unmount()
 	})
+
+	it("posts a company top-up when an affiliated member selects company balance scope", async () => {
+		const memberWithCompany = {
+			...sampleUser,
+			companies: [{ id: 45, legal_name: "Halab Tech", status: "active" }]
+		}
+		listUsersMock.mockResolvedValue([memberWithCompany])
+		const wrapper = mountPage()
+		await flushPromises()
+
+		wrapper.vm.form.user_id = 5
+		wrapper.vm.userBalanceScope = "company"
+		wrapper.vm.form.amount = "75.00"
+		wrapper.vm.form.payment_method = "cash"
+		await wrapper.vm.submit()
+		await flushPromises()
+
+		expect(createWalletTopUpMock).toHaveBeenCalledWith({
+			amount: "75.00",
+			currency: "SYP",
+			payment_method: "cash",
+			company_id: 45,
+			description: "Top-up via member Sara"
+		})
+		wrapper.unmount()
+	})
+
+	it("posts a top-up with a custom selected currency (e.g. USD)", async () => {
+		const wrapper = mountPage()
+		await flushPromises()
+
+		wrapper.vm.form.user_id = 5
+		wrapper.vm.selectedCurrency = "USD"
+		wrapper.vm.form.amount = "100.00"
+		wrapper.vm.form.payment_method = "cash"
+		await wrapper.vm.submit()
+		await flushPromises()
+
+		expect(createWalletTopUpMock).toHaveBeenCalledWith({
+			amount: "100.00",
+			currency: "USD",
+			payment_method: "cash",
+			user_id: 5,
+			description: null
+		})
+		wrapper.unmount()
+	})
+
+	it("blocks submit when selected company is inactive", async () => {
+		const inactiveCompany = { ...sampleCompany, status: "inactive" }
+		listCompaniesMock.mockResolvedValue([inactiveCompany])
+		const wrapper = mountPage()
+		await flushPromises()
+
+		wrapper.vm.recipientType = "company"
+		await flushPromises()
+		wrapper.vm.form.company_id = 45
+		wrapper.vm.form.amount = "50.00"
+		await wrapper.vm.submit()
+		expect(createWalletTopUpMock).not.toHaveBeenCalled()
+		wrapper.unmount()
+	})
+
+	it("does not trigger validation errors when currency or language changes", async () => {
+		const wrapper = mountPage()
+		await flushPromises()
+
+		expect(wrapper.find(".n-form-item-feedback__line").exists()).toBe(false)
+
+		wrapper.vm.selectedCurrency = "USD"
+		await flushPromises()
+		expect(wrapper.find(".n-form-item-feedback__line").exists()).toBe(false)
+
+		// @ts-ignore
+		i18n.global.locale.value = "ar"
+		await flushPromises()
+		expect(wrapper.find(".n-form-item-feedback__line").exists()).toBe(false)
+
+		wrapper.unmount()
+	})
+
+	it("adapts the back arrow to document direction", async () => {
+		const { useThemeStore } = await import("@/stores/theme")
+		const wrapper = mountPage()
+		await flushPromises()
+
+		useThemeStore().setRTL(true)
+		await wrapper.vm.$nextTick()
+		expect(wrapper.findComponent({ name: "Icon" }).props("name")).toBe("carbon:arrow-right")
+
+		useThemeStore().setRTL(false)
+		await wrapper.vm.$nextTick()
+		expect(wrapper.findComponent({ name: "Icon" }).props("name")).toBe("carbon:arrow-left")
+
+		wrapper.unmount()
+	})
+
+	it("opens the receipt modal with transaction details upon successful top-up", async () => {
+		const wrapper = mountPage()
+		await flushPromises()
+
+		expect(wrapper.vm.receiptModalVisible).toBe(false)
+		expect(wrapper.vm.lastReceipt).toBeNull()
+
+		wrapper.vm.form.user_id = 5
+		wrapper.vm.form.amount = "50.00"
+		wrapper.vm.form.payment_method = "cash"
+		await wrapper.vm.submit()
+		await flushPromises()
+
+		expect(wrapper.vm.receiptModalVisible).toBe(true)
+		expect(wrapper.vm.lastReceipt).toMatchObject({
+			id: 789,
+			amount: "50.00"
+		})
+
+		wrapper.vm.closeReceiptModal()
+		expect(wrapper.vm.receiptModalVisible).toBe(false)
+		wrapper.unmount()
+	})
 })
+
+

@@ -1,5 +1,7 @@
 import type { DataTableColumns, SelectOption } from "naive-ui"
+import { NImage } from "naive-ui"
 import type { ComposerTranslation } from "vue-i18n"
+import { h } from "vue"
 import type { FieldDescriptor } from "@/add-os/components/resource/field-types"
 import type { SupportedLocale } from "@/add-os/lang/locales"
 import type { Branch } from "@/add-os/modules/spatial/types/branch"
@@ -14,6 +16,7 @@ import { listBuildings } from "@/add-os/services/buildings"
 import { listFloors } from "@/add-os/services/floors"
 import { listZones } from "@/add-os/services/zones"
 import { formatNumber } from "@/add-os/utils/format"
+import Icon from "@/components/common/Icon.vue"
 
 const CURRENCIES: CurrencyCode[] = ["SYP", "USD", "EUR"]
 
@@ -24,6 +27,32 @@ export function buildSpaceColumns(
 	zonesById: Record<number, Zone>
 ): DataTableColumns<Space> {
 	return [
+		{
+			title: t("spaces.columns.image"),
+			key: "image_url",
+			width: 70,
+			render: row => {
+				const src = (row.images && row.images[0]) || row.main_image || row.image_url
+				return src
+					? h(NImage, {
+							width: 44,
+							height: 44,
+							src,
+							class: "rounded-lg overflow-hidden flex items-center justify-center",
+							imgProps: {
+								class: "rounded-lg object-cover w-11 h-11 border border-black/10 shadow-2xs"
+							}
+						})
+					: h(
+							"div",
+							{
+								class:
+									"w-11 h-11 rounded-lg bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-neutral-400 border border-black/5"
+							},
+							[h(Icon, { name: "carbon:image", size: 18 })]
+						)
+			}
+		},
 		{
 			title: t("spaces.columns.building"),
 			key: "building_id",
@@ -103,7 +132,8 @@ export function buildSpaceFields(t: ComposerTranslation, branches: Branch[], loc
 		{ key: "is_lockable", labelKey: "spaces.form.isLockable", type: "switch" },
 		{ key: "capacity", labelKey: "spaces.form.capacity", type: "number", required: true },
 		{ key: "hourly_rate", labelKey: "spaces.form.hourlyRate", type: "number" },
-		{ key: "pricing_currency", labelKey: "spaces.form.pricingCurrency", type: "select", options: currencyOptions }
+		{ key: "pricing_currency", labelKey: "spaces.form.pricingCurrency", type: "select", options: currencyOptions },
+		{ key: "images", labelKey: "spaces.form.images", type: "multi-image", folder: "spaces" }
 	]
 }
 
@@ -117,7 +147,8 @@ export function emptySpacePayload(): SpaceFormModel {
 		is_lockable: false,
 		capacity: 1,
 		hourly_rate: null,
-		pricing_currency: null
+		pricing_currency: null,
+		images: []
 	}
 }
 

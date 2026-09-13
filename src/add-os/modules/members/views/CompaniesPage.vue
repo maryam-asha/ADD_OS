@@ -140,11 +140,11 @@ function renderActions(row: Company) {
 
 const columns = computed<DataTableColumns<Company>>(() => {
 	const baseColumns = buildCompanyColumns(t, branches.value, currentLocale.value)
-	return [...baseColumns, { title: t("resourceCrud.table.actionsColumn"), key: "actions", render: renderActions }]
+	return [...baseColumns, { title: t("resourceCrud.table.actionsColumn"), key: "actions", width: 150, render: renderActions }]
 })
 
 const creation = useCompanyCreation(refetchRequests, refetchCompanies)
-const companyFields = computed(() => buildCompanyFields(t, quotedRequests.value, branches.value, currentLocale.value))
+const companyFields = computed(() => buildCompanyFields(t, quotedRequests.value))
 
 const createDrawerVisible = ref(false)
 const createForm = ref(emptyCompanyPayload())

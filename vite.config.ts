@@ -72,6 +72,14 @@ export default defineConfig(({ mode }) => {
 				"node:process": "process/browser"
 			}
 		},
+		server: {
+			proxy: {
+				"/storage": {
+					target: process.env.VITE_API_URL || "http://localhost:8000",
+					changeOrigin: true
+				}
+			}
+		},
 		optimizeDeps: {
 			include: ["@fawmi/vue-google-maps"],
 			// ADD OS: keep @iconify/vue out of the esbuild pre-bundle so the plugin above

@@ -15,6 +15,13 @@ export type UserRole = RoleName
 
 export type UserStatus = "active" | "deactivated" | "blocked"
 
+export interface UserCompanyAffiliation {
+	id: number
+	legal_name: string
+	status: string
+	is_admin?: boolean
+}
+
 /** Shape of `UserResource` — every field ADDCore's API actually returns. */
 export interface User {
 	id: number
@@ -25,6 +32,7 @@ export interface User {
 	preferred_currency: string
 	status: UserStatus
 	roles: UserRole[]
+	companies?: UserCompanyAffiliation[]
 }
 
 /**

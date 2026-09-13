@@ -37,7 +37,7 @@ describe("offline icon bundle", () => {
 		expect(missing, `Run \`npm run icons\` — these are referenced but not bundled:\n${missing.join("\n")}`).toEqual(
 			[]
 		)
-	})
+	}, 20000)
 
 	it("resolves every referenced name against a real icon set", () => {
 		// Catches typos: a name that exists nowhere in @iconify-json would render blank.

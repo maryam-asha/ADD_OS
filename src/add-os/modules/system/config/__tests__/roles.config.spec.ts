@@ -111,4 +111,3 @@ describe("displayActionName", () => {
 		expect(displayActionName("custom_action", translate, hasTranslation)).toBe("custom_action")
 	})
 })
-

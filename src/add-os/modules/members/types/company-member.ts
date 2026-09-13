@@ -1,15 +1,16 @@
-/**
- * Only `user_id`, `door_access_enabled`, `is_admin` are confirmed — they are the
- * exact fields in Add Company Member's POST body, and the collection has no
- * GET/List response example to confirm anything else (e.g. a nested user name
- * or phone). Do NOT add a `name`/`user` field here without verifying a real
- * response first — the members table (Task 15) renders `user_id` directly for
- * this reason, and that limitation is called out again there.
- */
+export interface CompanyMemberUser {
+	id: number
+	name: string
+	phone: string | null
+}
+
 export interface CompanyMember {
-	user_id: number
+	id?: number
+	user_id?: number
+	user?: CompanyMemberUser | null
 	door_access_enabled: boolean
 	is_admin: boolean
+	created_at?: string
 }
 
 export interface AddCompanyMemberPayload extends Record<string, unknown> {

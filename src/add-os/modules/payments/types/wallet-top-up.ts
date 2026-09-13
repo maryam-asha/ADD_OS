@@ -20,11 +20,37 @@ export const PAYMENT_METHODS: readonly PaymentMethod[] = ["cash", "sham", "mtn",
 
 export interface WalletTopUp {
 	id: number
+	transaction_code?: string
 	/** Decimal string as returned by the API, e.g. "50.00" — see `Plan.price`. */
 	amount: string
+	currency?: string
+	payment_amount?: string
+	payment_currency?: string
+	exchange_rate?: string | null
 	source: string
 	payment_method: PaymentMethod
+	description?: string | null
 	performed_by_user_id: number
+	performed_by_name?: string
+	owner_type?: "user" | "company"
+	owner_id?: number
+	recipient_name?: string
+	recipient_phone?: string | null
+	previous_balance?: string
+	new_balance?: string
+	created_at?: string
+}
+
+export interface WalletBalanceResponse {
+	owner_type: "user" | "company"
+	owner_id: number
+	owner_name: string
+	owner_phone: string | null
+	status?: string
+	general_balance: string
+	currency: string
+	converted_balance?: string | null
+	display_currency?: string
 }
 
 /**
@@ -41,7 +67,9 @@ export interface WalletTopUp {
  */
 export type WalletTopUpPayload = {
 	amount: string
+	currency?: string
 	payment_method: PaymentMethod
 	/** Optional, max 255 server-side. `null` when the operator left it blank. */
 	description: string | null
 } & ({ user_id: number } | { company_id: number })
+

@@ -1,6 +1,5 @@
 import type { DataTableColumns } from "naive-ui"
 import type { ComposerTranslation } from "vue-i18n"
-import type { FieldDescriptor } from "@/add-os/components/resource/field-types"
 import type { SupportedLocale } from "@/add-os/lang/locales"
 import type { Plan, PlanPayload } from "@/add-os/modules/plans/types/plan"
 import { NTag } from "naive-ui"
@@ -12,7 +11,27 @@ import Icon from "@/components/common/Icon.vue"
 
 export function buildPlanColumns(t: ComposerTranslation, locale: SupportedLocale): DataTableColumns<Plan> {
 	return [
-		{ title: t("packages.columns.name"), key: "name", render: row => pickLocalized(row.name, locale) },
+		{
+			title: t("packages.columns.name"),
+			key: "name",
+			render: row =>
+				h("div", { class: "flex flex-col gap-0.5" }, [
+					h("span", { class: "font-medium" }, pickLocalized(row.name, locale)),
+					row.subtitle ? h("span", { class: "text-xs text-secondary" }, pickLocalized(row.subtitle, locale)) : null
+				])
+		},
+		{
+			title: t("packages.columns.module"),
+			key: "plan_module_id",
+			render: row =>
+				row.plan_module
+					? h(
+							NTag,
+							{ type: "warning", round: true, bordered: false, size: "small" },
+							{ default: () => pickLocalized(row.plan_module!.name, locale) }
+						)
+					: h("span", { class: "text-xs text-secondary" }, `— ${t("packages.noModule")} —`)
+		},
 		{
 			title: t("packages.columns.type"),
 			key: "is_subscription",
@@ -34,6 +53,30 @@ export function buildPlanColumns(t: ComposerTranslation, locale: SupportedLocale
 						: null
 				])
 		},
+		{
+			title: t("packages.columns.balances"),
+			key: "balances",
+			render: row => {
+				const count = row.balances?.length ?? 0
+				return h(
+					NTag,
+					{ type: count > 0 ? "success" : "default", round: true, bordered: false, size: "small" },
+					{ default: () => `${count} ${t("packages.columns.balances")}` }
+				)
+			}
+		},
+		{
+			title: t("packages.columns.features"),
+			key: "features",
+			render: row => {
+				const count = row.features?.length ?? 0
+				return h(
+					NTag,
+					{ type: count > 0 ? "info" : "default", round: true, bordered: false, size: "small" },
+					{ default: () => `${count} ${t("packages.columns.features")}` }
+				)
+			}
+		},
 		{ title: t("packages.columns.duration"), key: "duration_days", render: row => formatNumber(row.duration_days) },
 		{
 			title: t("packages.columns.isActive"),
@@ -53,34 +96,11 @@ export function buildPlanColumns(t: ComposerTranslation, locale: SupportedLocale
 	]
 }
 
-/**
- * `pricing_currency` accepts "USD" and "SYP" only (confirmed live — "EUR" was rejected
- * as 422 invalid). Plain codes, not translated labels: a currency code isn't a phrase.
- */
-export const planFields: FieldDescriptor<PlanPayload>[] = [
-	{ key: "name", labelKey: "packages.form.name", type: "bilingual-text", required: true },
-	{ key: "is_subscription", labelKey: "packages.form.isSubscription", type: "switch" },
-	{ key: "price", labelKey: "packages.form.price", type: "number", required: true },
-	{
-		key: "pricing_currency",
-		labelKey: "packages.form.pricingCurrency",
-		type: "select",
-		required: true,
-		options: [
-			{ label: "USD", value: "USD" },
-			{ label: "SYP", value: "SYP" }
-		]
-	},
-	{ key: "duration_days", labelKey: "packages.form.durationDays", type: "number", required: true },
-	{ key: "included_hours", labelKey: "packages.form.includedHours", type: "number", required: true },
-	{ key: "overage_rate", labelKey: "packages.form.overageRate", type: "number" },
-	{ key: "is_active", labelKey: "packages.form.isActive", type: "switch" },
-	{ key: "order", labelKey: "packages.form.order", type: "number" }
-]
-
 export function emptyPlanPayload(): PlanPayload {
 	return {
+		plan_module_id: null,
 		name: { ar: "", en: "" },
+		subtitle: { ar: "", en: "" },
 		is_subscription: false,
 		price: 0,
 		pricing_currency: "USD",
@@ -88,6 +108,8 @@ export function emptyPlanPayload(): PlanPayload {
 		included_hours: 0,
 		overage_rate: 0,
 		is_active: true,
-		order: 1
+		order: 1,
+		balances: [],
+		features: []
 	}
 }

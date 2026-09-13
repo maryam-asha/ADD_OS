@@ -15,7 +15,7 @@ const i18n = createI18n({
 	messages: {
 		en: {
 			resourceCrud: {
-				form: { submit: "Save", cancel: "Cancel", arabicPlaceholder: "Arabic", englishPlaceholder: "English" },
+				form: { submit: "Save", cancel: "Cancel", arabicPlaceholder: "Arabic", englishPlaceholder: "English", uploadImage: "Upload image" },
 				validation: { required: "{field} is required." }
 			},
 			x: { region: "Region", city: "City", label: "Label", name: "Name", price: "Price", branchId: "Branch", active: "Active" }
@@ -479,5 +479,78 @@ describe("resourceFormDrawer", () => {
 		const dateWrapper = mountDrawer(dateFields, { date: "" })
 		expect(document.body.querySelector(".n-date-picker")).not.toBeNull()
 		dateWrapper.unmount()
+	})
+
+	it("renders textarea input for description and textarea fields", () => {
+		interface DescModel extends Record<string, unknown> {
+			description: Bilingual
+			notes: string
+		}
+		const fields: FieldDescriptor<DescModel>[] = [
+			{ key: "description", labelKey: "x.desc", type: "bilingual-textarea" },
+			{ key: "notes", labelKey: "x.notes", type: "text" }
+		]
+		const wrapper = mountDrawer(fields, {
+			description: { ar: "", en: "" },
+			notes: ""
+		})
+		const textareas = document.body.querySelectorAll("textarea")
+		expect(textareas.length).toBeGreaterThanOrEqual(3) // 2 for bilingual description (ar, en) + 1 for notes (auto-detected by key)
+		wrapper.unmount()
+	})
+
+	it("renders datetime picker and image uploader without crashing", () => {
+		interface EventMockModel extends Record<string, unknown> {
+			start_at: string
+			image_url: string
+		}
+		const fields: FieldDescriptor<EventMockModel>[] = [
+			{ key: "start_at", labelKey: "x.label", type: "datetime" },
+			{ key: "image_url", labelKey: "x.label", type: "image" }
+		]
+		const wrapper = mountDrawer(fields, {
+			start_at: "",
+			image_url: ""
+		})
+		expect(document.body.querySelector(".n-date-picker")).not.toBeNull()
+		expect(document.body.querySelector(".n-upload")).not.toBeNull()
+		wrapper.unmount()
+	})
+
+	it("renders full-width image preview and action buttons when image value exists", () => {
+		interface EventMockModel extends Record<string, unknown> {
+			image_url: string
+		}
+		const fields: FieldDescriptor<EventMockModel>[] = [
+			{ key: "image_url", labelKey: "x.label", type: "image" }
+		]
+		const wrapper = mountDrawer(fields, {
+			image_url: "/storage/uploads/banner.png"
+		})
+		const img = document.body.querySelector("img")
+		expect(img).not.toBeNull()
+		expect(img?.getAttribute("src")).toBe("/storage/uploads/banner.png")
+		wrapper.unmount()
+	})
+
+	it("hides fields when hiddenWhen condition returns true", async () => {
+		interface ToggleModel extends Record<string, unknown> {
+			is_free: boolean
+			price: number | null
+		}
+		const fields: FieldDescriptor<ToggleModel>[] = [
+			{ key: "is_free", labelKey: "x.label", type: "switch" },
+			{ key: "price", labelKey: "x.price", type: "number", hiddenWhen: m => Boolean(m.is_free) }
+		]
+		const model = reactive<ToggleModel>({ is_free: true, price: null })
+		const wrapper = mountDrawer(fields, model)
+
+		expect(document.body.querySelector(".n-input-number")).toBeNull()
+
+		model.is_free = false
+		await nextTick()
+		expect(document.body.querySelector(".n-input-number")).not.toBeNull()
+
+		wrapper.unmount()
 	})
 })

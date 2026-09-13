@@ -41,6 +41,7 @@ import HorizontalNav from "@/app-layouts/HorizontalNav"
 import VerticalNav from "@/app-layouts/VerticalNav"
 import SearchDialog from "@/components/common/SearchDialog.vue"
 import { useAuthStore } from "@/stores/auth"
+import { useCurrencyStore } from "@/stores/currency"
 import { useMainStore } from "@/stores/main"
 import { useThemeStore } from "@/stores/theme"
 
@@ -57,6 +58,7 @@ const layoutComponents = {
 const themeStore = useThemeStore()
 const mainStore = useMainStore()
 const authStore = useAuthStore()
+const currencyStore = useCurrencyStore()
 
 const routeName = computed<string>(() => route?.name?.toString() || "")
 const forceRefresh = computed<number>(() => mainStore.forceRefresh)
@@ -85,6 +87,7 @@ router.afterEach(currentRoute => {
 })
 
 onBeforeMount(() => {
+	currencyStore.fetchCurrencies()
 	checkThemeOverrides(route)
 
 	setTimeout(() => {

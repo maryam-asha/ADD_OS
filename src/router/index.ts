@@ -1,6 +1,9 @@
+import { watch } from "vue"
 import { createRouter, createWebHistory } from "vue-router"
+import { currentLocale } from "@/add-os/lang/currentLocale"
 import { createAddOsRoutes } from "@/add-os/navigation/routes"
 import { HOME_REDIRECT } from "@/add-os/navigation/sections"
+import { i18nGlobal } from "@/lang"
 import { Layout } from "@/types/theme.d"
 import { authCheck } from "@/utils/auth"
 
@@ -38,7 +41,7 @@ const router = createRouter({
 			// chart ramp, and its form strings were untranslated English literals.
 			component: () => import("@/add-os/modules/auth/views/LoginPage.vue"),
 			meta: {
-				title: "Login",
+				title: "auth.signIn.submit",
 				theme: { layout: Layout.Blank, boxed: { enabled: false }, padded: { enabled: false } },
 				// Sign-in is the one auth route that SHOULD bounce a signed-in caller:
 				// there is nothing for them to do here. The two password routes below
@@ -56,7 +59,7 @@ const router = createRouter({
 			// Pinx demo views.
 			component: () => import("@/add-os/modules/auth/views/ForgotPasswordPage.vue"),
 			meta: {
-				title: "Forgot Password",
+				title: "auth.forgotPassword.title",
 				theme: { layout: Layout.Blank, boxed: { enabled: false }, padded: { enabled: false } },
 				// REVERSAL (2026-08-30). This carried `checkAuth: true`, copied from
 				// `/login`. Measured: with a session in the store `authCheck()` returns
@@ -78,7 +81,7 @@ const router = createRouter({
 			name: "ResetPassword",
 			component: () => import("@/add-os/modules/auth/views/ResetPasswordPage.vue"),
 			meta: {
-				title: "Reset Password",
+				title: "auth.resetPassword.title",
 				theme: { layout: Layout.Blank, boxed: { enabled: false }, padded: { enabled: false } },
 				// Same reversal, and here it was the worse bug: this route is reached
 				// from the emailed link, `?token=…&email=…`. Bouncing a caller whose
@@ -93,10 +96,21 @@ const router = createRouter({
 			redirect: "/login"
 		},
 		{
+			path: "/500",
+			name: "ServerError",
+			component: () => import("@/add-os/modules/errors/views/ServerErrorPage.vue"),
+			meta: {
+				title: "errors.serverError.title",
+				theme: { layout: Layout.Blank, boxed: { enabled: false }, padded: { enabled: false } },
+				skipPin: true
+			}
+		},
+		{
 			path: "/:pathMatch(.*)*",
 			name: "NotFound",
-			component: () => import("@/views/NotFound.vue"),
+			component: () => import("@/add-os/modules/errors/views/NotFoundPage.vue"),
 			meta: {
+				title: "errors.notFound.title",
 				theme: { layout: Layout.Blank, boxed: { enabled: false }, padded: { enabled: false } },
 				skipPin: true
 			}
@@ -104,8 +118,30 @@ const router = createRouter({
 	]
 })
 
+export function updateDocumentTitle(route = router.currentRoute.value): void {
+	const baseTitle = "ADD | Aleppo Digital District"
+	const rawTitle = route.meta?.title as string | undefined
+	if (rawTitle) {
+		const locale = currentLocale.value
+		const translated = i18nGlobal.te(rawTitle, locale)
+			? i18nGlobal.t(rawTitle, {}, { locale })
+			: (i18nGlobal.te(rawTitle) ? i18nGlobal.t(rawTitle) : rawTitle)
+		document.title = `${translated} | ${baseTitle}`
+	} else {
+		document.title = baseTitle
+	}
+}
+
 router.beforeEach(route => {
 	return authCheck(route)
+})
+
+router.afterEach(to => {
+	updateDocumentTitle(to)
+})
+
+watch(currentLocale, () => {
+	updateDocumentTitle()
 })
 
 export default router

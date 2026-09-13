@@ -29,10 +29,21 @@ describe("section list", () => {
 		expect(NAV_SECTIONS).toHaveLength(13)
 	})
 
-	it("marks exactly the seven built sections as active", () => {
+	it("marks exactly the built sections as active", () => {
 		const active = NAV_SECTIONS.filter(section => section.status === "active").map(section => section.key)
 
-		expect(active).toEqual(["spatial", "system", "members", "bookings", "plans", "payments", "address"])
+		expect(active).toEqual([
+			"spatial",
+			"system",
+			"members",
+			"bookings",
+			"plans",
+			"payments",
+			"community",
+			"address",
+			"cms",
+			"settings"
+		])
 	})
 
 	it("gives every section at least one page", () => {
