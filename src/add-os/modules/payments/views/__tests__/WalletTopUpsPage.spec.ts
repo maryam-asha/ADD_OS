@@ -6,18 +6,20 @@ import { createI18n } from "vue-i18n"
 import { ApiError } from "@/add-os/services/api"
 import WalletTopUpsPage from "../WalletTopUpsPage.vue"
 
-const { listUsersMock, listCompaniesMock, createWalletTopUpMock, getWalletBalanceMock } = vi.hoisted(() => ({
+const { listUsersMock, listCompaniesMock, createWalletTopUpMock, getWalletBalanceMock, previewWalletTopUpMock } = vi.hoisted(() => ({
 	listUsersMock: vi.fn(),
 	listCompaniesMock: vi.fn(),
 	createWalletTopUpMock: vi.fn(),
-	getWalletBalanceMock: vi.fn()
+	getWalletBalanceMock: vi.fn(),
+	previewWalletTopUpMock: vi.fn()
 }))
 
 vi.mock("@/add-os/services/users", () => ({ listUsers: listUsersMock }))
 vi.mock("@/add-os/services/companies", () => ({ listCompanies: listCompaniesMock }))
 vi.mock("@/add-os/services/wallet-top-ups", () => ({
 	createWalletTopUp: createWalletTopUpMock,
-	getWalletBalance: getWalletBalanceMock
+	getWalletBalance: getWalletBalanceMock,
+	previewWalletTopUp: previewWalletTopUpMock
 }))
 
 // Same pitfall AddCompanyMemberDialog.spec.ts documents: the page calls
@@ -76,6 +78,13 @@ const i18n = createI18n({
 			},
 			resourceCrud: {
 				mutations: { genericError: "Something went wrong.", permissionError: "No permission." }
+			},
+			points: {
+				unit: "points",
+				credited: "Points credited",
+				previewLoading: "Calculating…",
+				belowOnePoint: "This amount is too small to buy a single point. Enter a larger amount.",
+				previewFailed: "Could not calculate the point value. Check the amount and try again."
 			}
 		}
 	}
@@ -93,14 +102,36 @@ describe("walletTopUpsPage", () => {
 		setActivePinia(createPinia())
 		listUsersMock.mockResolvedValue([sampleUser])
 		listCompaniesMock.mockResolvedValue([sampleCompany])
-		createWalletTopUpMock.mockResolvedValue({ id: 789, amount: "50.00", source: "top_up", payment_method: "cash", performed_by_user_id: 12 })
+		// Points are what the wallet actually holds; the cash keys stay because a
+		// receipt still has to show what was paid.
+		createWalletTopUpMock.mockResolvedValue({
+			id: 789,
+			amount: "50.00",
+			points_credited: 500,
+			previous_balance_points: 1000,
+			new_balance_points: 1500,
+			point_rate_usd: "0.1000",
+			source: "top_up",
+			payment_method: "cash",
+			performed_by_user_id: 12
+		})
 		getWalletBalanceMock.mockResolvedValue({
 			owner_type: "user",
 			owner_id: 5,
 			owner_name: "Sara",
 			owner_phone: "0999111222",
+			balance_points: 1000,
+			balance_usd: "100.00",
+			balance_display: "1470000.00",
 			general_balance: "100.00",
 			currency: "SYP"
+		})
+		previewWalletTopUpMock.mockResolvedValue({
+			points: 500,
+			usd: "50.00",
+			payment_amount: "50.00",
+			payment_currency: "SYP",
+			point_rate_usd: "0.1000"
 		})
 	})
 
@@ -366,7 +397,10 @@ describe("walletTopUpsPage", () => {
 		expect(wrapper.vm.receiptModalVisible).toBe(true)
 		expect(wrapper.vm.lastReceipt).toMatchObject({
 			id: 789,
-			amount: "50.00"
+			amount: "50.00",
+			// The receipt leads with what was credited, so the point count has to
+			// survive onto it too — not just the cash that bought it.
+			points_credited: 500
 		})
 
 		wrapper.vm.closeReceiptModal()
