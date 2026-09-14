@@ -15,10 +15,14 @@ export interface Event {
 	location?: string | null
 	capacity?: number | null
 	is_free: boolean
-	/** Authoritative price. Whole points — the currency figures below are derived. */
+	/** Authoritative price. Whole points — everything below is derived from it. */
 	price_points: number
+	/** Display-ready, already localised: "50 pts" / "50 نقطة", or "Free" when free. */
+	price_label: string
 	price_usd: string
 	price_display: string
+	/** Display-ready with the currency symbol: "73,500.01 ل.س". */
+	price_display_label: string
 	currency: string
 	image_url?: string | null
 	status: EventStatus

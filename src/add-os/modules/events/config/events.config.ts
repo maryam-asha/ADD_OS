@@ -80,7 +80,8 @@ export function buildEventColumns(t: ComposerTranslation, locale: SupportedLocal
 					: h(
 							"span",
 							{ class: "font-semibold add-numeric text-neutral-800" },
-							`${formatNumber(row.price_points)} ${t("points.unit")}`
+							// Already localised by the backend — no formatting here.
+							row.price_label
 						)
 		},
 		{
