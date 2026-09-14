@@ -69,9 +69,9 @@ export function buildEventColumns(t: ComposerTranslation, locale: SupportedLocal
 		},
 		{
 			title: t("events.columns.price"),
-			key: "price",
+			key: "price_points",
 			render: row =>
-				row.is_free || !row.price
+				row.is_free || !row.price_points
 					? h(
 							NTag,
 							{ type: "success", round: true, bordered: false, size: "small" },
@@ -80,7 +80,7 @@ export function buildEventColumns(t: ComposerTranslation, locale: SupportedLocal
 					: h(
 							"span",
 							{ class: "font-semibold add-numeric text-neutral-800" },
-							`${row.currency || "USD"} ${row.price}`
+							`${formatNumber(row.price_points)} ${t("points.unit")}`
 						)
 		},
 		{
@@ -115,20 +115,12 @@ export function buildEventFields(
 		{ key: "capacity", labelKey: "events.form.capacity", type: "number" },
 		{ key: "is_free", labelKey: "events.form.isFree", type: "switch" },
 		{
-			key: "price",
-			labelKey: "events.form.price",
+			// Points are the price. There is no currency selector any more —
+			// the currency figures are derived by the backend at read time.
+			key: "price_points",
+			labelKey: "events.form.pricePoints",
 			type: "number",
 			hiddenWhen: model => Boolean((model as EventPayload).is_free)
-		},
-		{
-			key: "currency",
-			labelKey: "events.form.currency",
-			type: "select",
-			hiddenWhen: model => Boolean((model as EventPayload).is_free),
-			options: [
-				{ label: "USD", value: "USD" },
-				{ label: "SYP", value: "SYP" }
-			]
 		},
 		{ key: "image_url", labelKey: "events.form.imageUrl", type: "image", folder: "events" },
 		{
@@ -170,8 +162,7 @@ export function emptyEventPayload(): EventPayload {
 		location: "",
 		capacity: null,
 		is_free: true,
-		price: 0,
-		currency: "USD",
+		price_points: 0,
 		image_url: "",
 		status: "draft",
 		order: 0

@@ -116,8 +116,7 @@ function openEdit(row: Event) {
 		location: row.location || "",
 		capacity: row.capacity ?? null,
 		is_free: row.is_free ?? true,
-		price: row.price ?? 0,
-		currency: row.currency || "USD",
+		price_points: row.price_points ?? 0,
 		image_url: row.image_url || "",
 		status: row.status,
 		order: row.order

@@ -781,8 +781,7 @@
       "status": "Status",
       "order": "Display order",
       "isFree": "Free event",
-      "price": "Ticket price",
-      "currency": "Currency"
+      "pricePoints": "Ticket price (points)"
     },
     "loadError": "Couldn't load events. You may not have permission to view this page.",
     "stats": {

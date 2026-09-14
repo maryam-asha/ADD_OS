@@ -15,7 +15,10 @@ export interface Event {
 	location?: string | null
 	capacity?: number | null
 	is_free: boolean
-	price?: number | null
+	/** Authoritative price. Whole points — the currency figures below are derived. */
+	price_points: number
+	price_usd: string
+	price_display: string
 	currency: string
 	image_url?: string | null
 	status: EventStatus
@@ -33,8 +36,8 @@ export interface EventPayload extends Record<string, unknown> {
 	location?: string
 	capacity?: number | null
 	is_free?: boolean
-	price?: number | null
-	currency?: string
+	/** Whole points. The backend rejects a fractional value with a 422. */
+	price_points?: number | null
 	image_url?: string
 	status: EventStatus
 	order: number
