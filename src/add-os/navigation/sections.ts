@@ -34,6 +34,13 @@ export interface NavPage {
 	key: string
 	/** URL segment, appended to the section path. */
 	path: string
+	/**
+	 * Routable, but not offered in the sidebar — a detail screen reached from
+	 * a row rather than from the menu, so its `:param` segment would have
+	 * nothing to fill it if clicked cold. It still lives here so the route and
+	 * the page stay defined in one place, which is the point of this file.
+	 */
+	hidden?: boolean
 }
 
 export interface NavSection {
@@ -165,6 +172,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "events", path: "events" },
 			{ key: "eventCategories", path: "event-categories" },
 			{ key: "eventCancellation", path: "event-cancellation" },
+			{ key: "eventAttendees", path: "events/:eventId/attendees", hidden: true },
 			{ key: "community", path: "directory" },
 			{ key: "cafe", path: "cafe" }
 		]

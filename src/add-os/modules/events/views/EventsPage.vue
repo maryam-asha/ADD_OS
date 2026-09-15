@@ -122,7 +122,26 @@ const fieldsEventId = ref<number | null>(null)
  */
 function registrationFormAction(row: Event) {
 	const label = t("events.fields.manage")
+	const attendeesLabel = t("events.approval.title")
+
+	// An externally-registered event has no roster and no questions of
+	// its own: the member never reaches our registration endpoint.
+	if (row.external_form_url) {
+		return []
+	}
+
 	return [
+		h(
+			NButton,
+			{
+				text: true,
+				type: row.requires_approval ? "warning" : "default",
+				"aria-label": attendeesLabel,
+				title: attendeesLabel,
+				onClick: () => router.push(`/community/events/${row.id}/attendees`)
+			},
+			{ icon: () => h(Icon, { name: "carbon:user-multiple", size: 18 }) }
+		),
 		h(
 			NButton,
 			{

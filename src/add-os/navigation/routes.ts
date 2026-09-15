@@ -58,6 +58,7 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"community.events": () => import("@/add-os/modules/events/views/EventsPage.vue"),
 	"community.eventCategories": () => import("@/add-os/modules/events/views/EventCategoriesPage.vue"),
 	"community.eventCancellation": () => import("@/add-os/modules/events/views/EventCancellationDetailsPage.vue"),
+	"community.eventAttendees": () => import("@/add-os/modules/events/views/EventAttendeesPage.vue"),
 	"community.community": () => import("@/add-os/modules/community/views/CommunityMembersPage.vue"),
 	"cms.announcements": () => import("@/add-os/modules/cms/views/AnnouncementsPage.vue"),
 	"cms.partners": () => import("@/add-os/modules/cms/views/PartnersPage.vue"),

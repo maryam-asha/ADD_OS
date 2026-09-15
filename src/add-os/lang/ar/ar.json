@@ -99,67 +99,6 @@
       "devices": "الأجهزة",
       "device-capabilities": "إمكانيات الأجهزة",
       "events": "الفعاليات",
-        "fields": {
-          "title": "فورم التسجيل",
-          "add": "إضافة حقل",
-          "edit": "تعديل الحقل",
-          "delete": "حذف الحقل",
-          "empty": "هذه الفعالية لا تطرح أسئلة. يسجّل الأعضاء ببيانات حسابهم فقط.",
-          "key": "المفتاح",
-          "label": "التسمية",
-          "placeholder": "نص إرشادي",
-          "type": "النوع",
-          "options": "الخيارات",
-          "required": "مطلوب",
-          "active": "مفعّل",
-          "order": "الترتيب",
-          "reservedKeyNote": "الاسم والهاتف والبريد تؤخذ من حساب العضو ولا يمكن طلبها مجدداً.",
-          "keyHint": "أحرف صغيرة وأرقام وشرطة سفلية فقط.",
-          "loadError": "تعذّر تحميل فورم التسجيل.",
-          "saveError": "تعذّر حفظ الحقل.",
-          "created": "تمت إضافة الحقل.",
-          "updated": "تم تحديث الحقل.",
-          "deleted": "تم حذف الحقل.",
-          "deleteConfirm": "حذف هذا الحقل؟ ستُحذف معه الإجابات المسجّلة.",
-          "addOption": "إضافة خيار",
-          "inactive": "مخفي",
-          "manage": "فورم التسجيل",
-          "types": {
-            "text": "نص قصير",
-            "textarea": "نص طويل",
-            "select": "اختيار واحد",
-            "checkbox": "اختيار متعدد",
-            "date": "تاريخ",
-            "number": "رقم",
-            "rating": "تقييم",
-            "file": "رفع ملف"
-          }
-        },
-        "approval": {
-          "title": "التسجيلات",
-          "pending": "بانتظار المراجعة",
-          "approved": "مقبول",
-          "rejected": "مرفوض",
-          "approve": "قبول",
-          "reject": "رفض",
-          "rejectAll": "رفض كل المعلّقات",
-          "rejectReason": "سبب الرفض",
-          "rejectReasonRequired": "السبب مطلوب.",
-          "approvedToast": "تمت الموافقة على التسجيل.",
-          "rejectedToast": "تم رفض التسجيل.",
-          "rejectAllConfirm": "هل تريد رفض كل التسجيلات التي ما تزال بانتظار قرار؟",
-          "rejectAllDone": "تم إغلاق {count} طلب معلّق.",
-          "empty": "لا توجد تسجيلات بعد.",
-          "answers": "الإجابات",
-          "noAnswers": "لا توجد إجابات.",
-          "seatNote": "التسجيل المعلّق والمقبول كلاهما يشغل مقعداً."
-        },
-        "columns": {
-          "requiresApproval": "الموافقة"
-        },
-        "form": {
-          "requiresApproval": "يحتاج موافقة قبل القبول"
-        },
       "floors": "الطوابق",
       "founders": "المؤسسون",
       "partners": "الشركاء",
@@ -815,7 +754,8 @@
       "location": "الموقع",
       "capacity": "السعة",
       "status": "الحالة",
-      "price": "السعر"
+      "price": "السعر",
+      "requiresApproval": "الموافقة"
     },
     "status": {
       "draft": "مسودة",
@@ -846,7 +786,9 @@
       "status": "الحالة",
       "order": "ترتيب العرض",
       "isFree": "حدث مجاني",
-      "pricePoints": "سعر التذكرة (نقاط)"
+      "pricePoints": "سعر التذكرة (نقاط)",
+      "requiresApproval": "يحتاج موافقة قبل القبول",
+      "externalFormUrl": "فورم تسجيل خارجية (رابط)"
     },
     "loadError": "تعذر تحميل الفعاليات. قد لا تملك الصلاحية الكافية لعرض هذه الصفحة.",
     "stats": {
@@ -854,7 +796,72 @@
       "published": "منشورة",
       "draft": "مسودات"
     },
-    "free": "مجاني"
+    "free": "مجاني",
+    "approval": {
+      "title": "التسجيلات",
+      "all": "الكل",
+      "pending": "بانتظار المراجعة",
+      "approved": "مقبول",
+      "rejected": "مرفوض",
+      "approve": "قبول",
+      "reject": "رفض",
+      "rejectAll": "رفض كل المعلّقات",
+      "rejectReason": "سبب الرفض",
+      "rejectReasonRequired": "السبب مطلوب.",
+      "approvedToast": "تمت الموافقة على التسجيل.",
+      "rejectedToast": "تم رفض التسجيل.",
+      "rejectAllConfirm": "هل تريد رفض كل التسجيلات التي ما تزال بانتظار قرار؟",
+      "empty": "لا توجد تسجيلات بعد.",
+      "answers": "الإجابات",
+      "noAnswers": "لا توجد إجابات.",
+      "seatNote": "التسجيل المعلّق والمقبول كلاهما يشغل مقعداً.",
+      "loadError": "تعذّر تحميل التسجيلات.",
+      "actionError": "تعذّر إتمام الإجراء.",
+      "bulkReason": "أُغلقت المراجعة من قبل إدارة العمليات.",
+      "columns": {
+        "name": "الاسم",
+        "email": "البريد",
+        "phone": "الهاتف",
+        "status": "الحالة",
+        "registeredAt": "تاريخ التسجيل",
+        "reason": "السبب"
+      }
+    },
+    "fields": {
+      "title": "فورم التسجيل",
+      "add": "إضافة حقل",
+      "edit": "تعديل الحقل",
+      "empty": "هذه الفعالية لا تطرح أسئلة. يسجّل الأعضاء ببيانات حسابهم فقط.",
+      "key": "المفتاح",
+      "label": "التسمية",
+      "placeholder": "نص إرشادي",
+      "type": "النوع",
+      "options": "الخيارات",
+      "addOption": "إضافة خيار",
+      "required": "مطلوب",
+      "active": "مفعّل",
+      "inactive": "مخفي",
+      "order": "الترتيب",
+      "reservedKeyNote": "الاسم والهاتف والبريد تؤخذ من حساب العضو ولا يمكن طلبها مجدداً.",
+      "keyHint": "أحرف صغيرة وأرقام وشرطة سفلية فقط.",
+      "loadError": "تعذّر تحميل فورم التسجيل.",
+      "saveError": "تعذّر حفظ الحقل.",
+      "created": "تمت إضافة الحقل.",
+      "updated": "تم تحديث الحقل.",
+      "deleted": "تم حذف الحقل.",
+      "deleteConfirm": "حذف هذا الحقل؟ ستُحذف معه الإجابات المسجّلة.",
+      "manage": "فورم التسجيل",
+      "types": {
+        "text": "نص قصير",
+        "textarea": "نص طويل",
+        "select": "اختيار واحد",
+        "checkbox": "اختيار متعدد",
+        "date": "تاريخ",
+        "number": "رقم",
+        "rating": "تقييم",
+        "file": "رفع ملف"
+      }
+    }
   },
   "communityMembers": {
     "columns": {
@@ -1251,7 +1258,8 @@
       "modules": "الوحدات",
       "walletCredited": "تم شحن المحفظة",
       "eventCancellation": "إلغاء الفعالية",
-      "operationsRequests": "طلبات التشغيل"
+      "operationsRequests": "طلبات التشغيل",
+      "eventAttendees": "التسجيلات"
     }
   },
   "resourceCrud": {

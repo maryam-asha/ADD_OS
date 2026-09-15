@@ -128,10 +128,28 @@ export function buildEventFields(
 		{ key: "start_at", labelKey: "events.form.startAt", type: "datetime", required: true },
 		{ key: "end_at", labelKey: "events.form.endAt", type: "datetime", required: true },
 		{ key: "location", labelKey: "events.form.location", type: "text" },
-		{ key: "capacity", labelKey: "events.form.capacity", type: "number" },
+		{
+			key: "capacity",
+			labelKey: "events.form.capacity",
+			type: "number",
+			hiddenWhen: model => Boolean((model as EventPayload).external_form_url)
+		},
 		// A pending registration still holds a seat, so this interacts with
 		// capacity above rather than standing on its own.
-		{ key: "requires_approval", labelKey: "events.form.requiresApproval", type: "switch" },
+		{
+			key: "requires_approval",
+			labelKey: "events.form.requiresApproval",
+			type: "switch",
+			hiddenWhen: model => Boolean((model as EventPayload).external_form_url)
+		},
+		// Registration happens here or on someone else's form, never both —
+		// the backend refuses in-app registration once this is set, so seats,
+		// approval and points stop applying to the event entirely.
+		{
+			key: "external_form_url",
+			labelKey: "events.form.externalFormUrl",
+			type: "text"
+		},
 		{ key: "is_free", labelKey: "events.form.isFree", type: "switch" },
 		{
 			// Points are the price. There is no currency selector any more —
@@ -172,6 +190,7 @@ export function emptyEventPayload(): EventPayload {
 		location: "",
 		capacity: null,
 		requires_approval: false,
+		external_form_url: "",
 		is_free: true,
 		price_points: 0,
 		image_url: "",

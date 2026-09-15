@@ -95,67 +95,6 @@
       "devices": "Devices",
       "device-capabilities": "Device Capabilities",
       "events": "Events",
-        "fields": {
-          "title": "Registration form",
-          "add": "Add field",
-          "edit": "Edit field",
-          "delete": "Delete field",
-          "empty": "This event asks no questions. Members register with their account details only.",
-          "key": "Key",
-          "label": "Label",
-          "placeholder": "Placeholder",
-          "type": "Type",
-          "options": "Choices",
-          "required": "Required",
-          "active": "Active",
-          "order": "Order",
-          "reservedKeyNote": "Name, phone and email come from the member account and cannot be asked again.",
-          "keyHint": "Lowercase letters, digits and underscores only.",
-          "loadError": "Could not load the registration form.",
-          "saveError": "Could not save the field.",
-          "created": "Field added.",
-          "updated": "Field updated.",
-          "deleted": "Field deleted.",
-          "deleteConfirm": "Delete this field? Answers already given are removed with it.",
-          "addOption": "Add a choice",
-          "inactive": "Hidden",
-          "manage": "Registration form",
-          "types": {
-            "text": "Short text",
-            "textarea": "Long text",
-            "select": "Single choice",
-            "checkbox": "Multiple choice",
-            "date": "Date",
-            "number": "Number",
-            "rating": "Rating",
-            "file": "File upload"
-          }
-        },
-        "approval": {
-          "title": "Registrations",
-          "pending": "Awaiting review",
-          "approved": "Approved",
-          "rejected": "Rejected",
-          "approve": "Approve",
-          "reject": "Reject",
-          "rejectAll": "Reject all pending",
-          "rejectReason": "Reason for rejection",
-          "rejectReasonRequired": "A reason is required.",
-          "approvedToast": "Registration approved.",
-          "rejectedToast": "Registration rejected.",
-          "rejectAllConfirm": "Turn down every registration still awaiting a decision?",
-          "rejectAllDone": "Closed out {count} pending registration(s).",
-          "empty": "No registrations yet.",
-          "answers": "Answers",
-          "noAnswers": "No form answers.",
-          "seatNote": "Pending and approved registrations both hold a seat."
-        },
-        "columns": {
-          "requiresApproval": "Approval"
-        },
-        "form": {
-          "requiresApproval": "Needs approval before admitting"
-        },
       "floors": "Floors",
       "founders": "Founders",
       "partners": "Partners",
@@ -811,7 +750,8 @@
       "location": "Location",
       "capacity": "Capacity",
       "status": "Status",
-      "price": "Price"
+      "price": "Price",
+      "requiresApproval": "Approval"
     },
     "status": {
       "draft": "Draft",
@@ -842,7 +782,9 @@
       "status": "Status",
       "order": "Display order",
       "isFree": "Free event",
-      "pricePoints": "Ticket price (points)"
+      "pricePoints": "Ticket price (points)",
+      "requiresApproval": "Needs approval before admitting",
+      "externalFormUrl": "External registration form (link)"
     },
     "loadError": "Couldn't load events. You may not have permission to view this page.",
     "stats": {
@@ -850,7 +792,72 @@
       "published": "Published",
       "draft": "Drafts"
     },
-    "free": "Free"
+    "free": "Free",
+    "approval": {
+      "title": "Registrations",
+      "all": "All",
+      "pending": "Awaiting review",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "approve": "Approve",
+      "reject": "Reject",
+      "rejectAll": "Reject all pending",
+      "rejectReason": "Reason for rejection",
+      "rejectReasonRequired": "A reason is required.",
+      "approvedToast": "Registration approved.",
+      "rejectedToast": "Registration rejected.",
+      "rejectAllConfirm": "Turn down every registration still awaiting a decision?",
+      "empty": "No registrations yet.",
+      "answers": "Answers",
+      "noAnswers": "No form answers.",
+      "seatNote": "Pending and approved registrations both hold a seat.",
+      "loadError": "Could not load registrations.",
+      "actionError": "The action could not be completed.",
+      "bulkReason": "Review closed by operations.",
+      "columns": {
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "status": "Status",
+        "registeredAt": "Registered",
+        "reason": "Reason"
+      }
+    },
+    "fields": {
+      "title": "Registration form",
+      "add": "Add field",
+      "edit": "Edit field",
+      "empty": "This event asks no questions. Members register with their account details only.",
+      "key": "Key",
+      "label": "Label",
+      "placeholder": "Placeholder",
+      "type": "Type",
+      "options": "Choices",
+      "addOption": "Add a choice",
+      "required": "Required",
+      "active": "Active",
+      "inactive": "Hidden",
+      "order": "Order",
+      "reservedKeyNote": "Name, phone and email come from the member account and cannot be asked again.",
+      "keyHint": "Lowercase letters, digits and underscores only.",
+      "loadError": "Could not load the registration form.",
+      "saveError": "Could not save the field.",
+      "created": "Field added.",
+      "updated": "Field updated.",
+      "deleted": "Field deleted.",
+      "deleteConfirm": "Delete this field? Answers already given are removed with it.",
+      "manage": "Registration form",
+      "types": {
+        "text": "Short text",
+        "textarea": "Long text",
+        "select": "Single choice",
+        "checkbox": "Multiple choice",
+        "date": "Date",
+        "number": "Number",
+        "rating": "Rating",
+        "file": "File upload"
+      }
+    }
   },
   "communityMembers": {
     "columns": {
@@ -1247,7 +1254,8 @@
       "modules": "Modules",
       "walletCredited": "Wallet Credited",
       "eventCancellation": "Event Cancellation",
-      "operationsRequests": "Operations Requests"
+      "operationsRequests": "Operations Requests",
+      "eventAttendees": "Registrations"
     }
   },
   "resourceCrud": {

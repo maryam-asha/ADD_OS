@@ -100,6 +100,6 @@ export default function getItems(args: { mode: "vertical" | "horizontal"; collap
 		key: section.key,
 		label: sectionLabel(section, args.collapsed),
 		icon: sectionIcon(section),
-		children: section.pages.map(page => pageOption(section, page))
+		children: section.pages.filter(page => !page.hidden).map(page => pageOption(section, page))
 	}))
 }

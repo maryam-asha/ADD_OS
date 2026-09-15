@@ -18,6 +18,12 @@ export interface Event {
 	requires_approval: boolean
 	/** Whether the event asks its own questions at registration. */
 	has_registration_form: boolean
+	/**
+	 * Registration happens on someone else's form. When set, the member is
+	 * sent there instead: no seat, no approval, no points, and nothing in our
+	 * attendee roster — the backend refuses in-app registration outright.
+	 */
+	external_form_url?: string | null
 	is_free: boolean
 	/** Authoritative price. Whole points — everything below is derived from it. */
 	price_points: number
@@ -48,6 +54,7 @@ export interface EventPayload extends Record<string, unknown> {
 	location?: string
 	capacity?: number | null
 	requires_approval?: boolean
+	external_form_url?: string | null
 	is_free?: boolean
 	/** Whole points. The backend rejects a fractional value with a 422. */
 	price_points?: number | null
