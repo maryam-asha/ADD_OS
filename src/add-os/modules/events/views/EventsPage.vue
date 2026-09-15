@@ -33,7 +33,14 @@
 			</n-button>
 		</div>
 
-		<ResourceTable :columns :data :loading="isLoading" :on-edit="openEdit" :on-delete="async row => { await mutations.remove(row.id) }" />
+		<ResourceTable
+			:columns
+			:data
+			:loading="isLoading"
+			:on-edit="openEdit"
+			:extra-actions="registrationFormAction"
+			:on-delete="async row => { await mutations.remove(row.id) }"
+		/>
 
 		<ResourceFormDrawer
 			v-model:show="drawerVisible"
@@ -43,6 +50,12 @@
 			:submitting="mutations.isSubmitting.value"
 			:on-submit="submit"
 		/>
+
+		<EventRegistrationFieldsDrawer
+			v-model:show="fieldsDrawerVisible"
+			:event-id="fieldsEventId"
+			@changed="refetch"
+		/>
 	</div>
 </template>
 
@@ -51,7 +64,7 @@ import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vu
 import type { Event, EventPayload } from "@/add-os/modules/events/types/event"
 import type { EventCategory } from "@/add-os/modules/events/types/event-category"
 import { NAlert, NButton } from "naive-ui"
-import { computed, ref } from "vue"
+import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.vue"
@@ -60,9 +73,11 @@ import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
 import { currentLocale } from "@/add-os/lang/currentLocale"
+import EventRegistrationFieldsDrawer from "@/add-os/modules/events/components/EventRegistrationFieldsDrawer.vue"
 import { buildEventColumns, buildEventFields, emptyEventPayload } from "@/add-os/modules/events/config/events.config"
 import { listEventCategories } from "@/add-os/services/event-categories"
 import { createEvent, listEvents, removeEvent, updateEvent } from "@/add-os/services/events"
+import { toOffsetIso } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
 defineProps<{ titleKey?: string }>()
@@ -97,6 +112,36 @@ const mode = ref<"create" | "edit">("create")
 const editingId = ref<number | null>(null)
 const form = ref<EventPayload>(emptyEventPayload())
 
+const fieldsDrawerVisible = ref(false)
+const fieldsEventId = ref<number | null>(null)
+
+/**
+ * A per-row way into the event's own registration form. It sits here rather
+ * than in the edit drawer because the fields are their own resource with
+ * their own endpoints — saving the event does not save them.
+ */
+function registrationFormAction(row: Event) {
+	const label = t("events.fields.manage")
+	return [
+		h(
+			NButton,
+			{
+				text: true,
+				type: row.has_registration_form ? "primary" : "default",
+				"aria-label": label,
+				title: label,
+				onClick: () => openRegistrationFields(row)
+			},
+			{ icon: () => h(Icon, { name: "carbon:list-checked", size: 18 }) }
+		)
+	]
+}
+
+function openRegistrationFields(row: Event) {
+	fieldsEventId.value = row.id
+	fieldsDrawerVisible.value = true
+}
+
 function openCreate() {
 	mode.value = "create"
 	editingId.value = null
@@ -111,10 +156,13 @@ function openEdit(row: Event) {
 		category_id: row.category_id,
 		title: { ...row.title },
 		description: row.description ? { ...row.description } : { ar: "", en: "" },
-		start_at: row.start_at ? row.start_at.replace("T", " ").substring(0, 16) : "",
-		end_at: row.end_at ? row.end_at.replace("T", " ").substring(0, 16) : "",
+		// Slicing the string here would strip the offset and hand the picker a
+		// bare UTC clock — the event would shift every time it was edited.
+		start_at: row.start_at ? toOffsetIso(row.start_at) : "",
+		end_at: row.end_at ? toOffsetIso(row.end_at) : "",
 		location: row.location || "",
 		capacity: row.capacity ?? null,
+		requires_approval: row.requires_approval ?? false,
 		is_free: row.is_free ?? true,
 		price_points: row.price_points ?? 0,
 		image_url: row.image_url || "",
@@ -126,8 +174,9 @@ function openEdit(row: Event) {
 
 async function submit(payload: Record<string, unknown>) {
 	const cleaned: EventPayload = { ...(payload as EventPayload) }
+	// Points are the only stored price; a free event carries zero of them.
 	if (cleaned.is_free) {
-		cleaned.price = 0
+		cleaned.price_points = 0
 	}
 	if (mode.value === "create") {
 		await mutations.create(cleaned)
