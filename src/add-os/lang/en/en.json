@@ -95,6 +95,48 @@
       "devices": "Devices",
       "device-capabilities": "Device Capabilities",
       "events": "Events",
+        "fields": {
+          "title": "Registration form",
+          "add": "Add field",
+          "edit": "Edit field",
+          "delete": "Delete field",
+          "empty": "This event asks no questions. Members register with their account details only.",
+          "key": "Key",
+          "label": "Label",
+          "placeholder": "Placeholder",
+          "type": "Type",
+          "options": "Choices",
+          "required": "Required",
+          "active": "Active",
+          "order": "Order",
+          "reservedKeyNote": "Name, phone and email come from the member account and cannot be asked again.",
+          "keyHint": "Lowercase letters, digits and underscores only."
+        },
+        "approval": {
+          "title": "Registrations",
+          "pending": "Awaiting review",
+          "approved": "Approved",
+          "rejected": "Rejected",
+          "approve": "Approve",
+          "reject": "Reject",
+          "rejectAll": "Reject all pending",
+          "rejectReason": "Reason for rejection",
+          "rejectReasonRequired": "A reason is required.",
+          "approvedToast": "Registration approved.",
+          "rejectedToast": "Registration rejected.",
+          "rejectAllConfirm": "Turn down every registration still awaiting a decision?",
+          "rejectAllDone": "Closed out {count} pending registration(s).",
+          "empty": "No registrations yet.",
+          "answers": "Answers",
+          "noAnswers": "No form answers.",
+          "seatNote": "Pending and approved registrations both hold a seat."
+        },
+        "columns": {
+          "requiresApproval": "Approval"
+        },
+        "form": {
+          "requiresApproval": "Needs approval before admitting"
+        },
       "floors": "Floors",
       "founders": "Founders",
       "partners": "Partners",

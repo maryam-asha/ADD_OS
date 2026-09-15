@@ -2,7 +2,7 @@ import { dateArDZ } from "naive-ui"
 import { describe, expect, it } from "vitest"
 import { MONTHS } from "../calendar"
 import { formatCurrency } from "../currency"
-import { formatDate, formatDateTime, formatTime } from "../dates"
+import { formatDate, formatDateTime, formatTime, toOffsetIso } from "../dates"
 import { dateArLevantine } from "../naiveDateLocale"
 import { formatNumber, hasFraction } from "../numbers"
 
@@ -202,5 +202,36 @@ describe("naive-ui date panel locale", () => {
 		expect(localize.day).toBe(upstream.day)
 		expect(dateArLevantine.locale.formatLong).toBe(dateArDZ.locale.formatLong)
 		expect(dateArLevantine.locale.match).toBe(dateArDZ.locale.match)
+	})
+})
+
+describe("toOffsetIso", () => {
+	it("writes local wall clock with an explicit offset, not a Z instant", () => {
+		const at = new Date(2026, 9, 1, 23, 30, 0)
+
+		expect(toOffsetIso(at)).toMatch(/^2026-10-01T23:30:00[+-]\d{2}:\d{2}$/)
+	})
+
+	/**
+	 * The reason this exists. A bare "2026-10-01 23:30:00" is read by the API
+	 * as the district's timezone; from a browser anywhere else that silently
+	 * moves the event. Stating the offset makes the instant unambiguous.
+	 */
+	it("round-trips to the instant it was given, from any timezone", () => {
+		const at = new Date(2026, 9, 1, 23, 30, 0)
+
+		expect(new Date(toOffsetIso(at)).getTime()).toBe(at.getTime())
+	})
+
+	it("keeps a late evening on its own date rather than rolling it over", () => {
+		const at = new Date(2026, 9, 1, 23, 30, 0)
+
+		expect(toOffsetIso(at).startsWith("2026-10-01T23:30")).toBe(true)
+	})
+
+	it("accepts a string or a timestamp, like the other formatters", () => {
+		const at = new Date(2026, 9, 1, 9, 5, 0)
+
+		expect(toOffsetIso(at.getTime())).toBe(toOffsetIso(at))
 	})
 })

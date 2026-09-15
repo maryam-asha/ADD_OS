@@ -1,5 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { createEvent, getEvent, listEvents, removeEvent, updateEvent } from "../events"
+import {
+	approveAttendee,
+	createEvent,
+	createRegistrationField,
+	getEvent,
+	listAttendees,
+	listEvents,
+	listPendingAttendees,
+	listRegistrationFields,
+	rejectAttendee,
+	rejectPendingAttendees,
+	removeEvent,
+	removeRegistrationField,
+	updateEvent,
+	updateRegistrationField
+} from "../events"
 
 vi.mock("@/add-os/config/env", () => ({
 	apiUrl: () => "http://api.test"
@@ -92,5 +107,133 @@ describe("events service", () => {
 		await removeEvent(1)
 
 		expect(fetch).toHaveBeenCalledWith("http://api.test/api/v1/admin/events/1", expect.objectContaining({ method: "DELETE" }))
+	})
+})
+
+describe("event registration form", () => {
+	beforeEach(() => {
+		vi.stubGlobal("fetch", vi.fn())
+	})
+
+	it("lists every field, active or not — this is the editor", async () => {
+		const field = { id: 3, key: "company", label: "Company", type: "text", is_required: false, is_active: false, order: 0 }
+		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: [field] }))
+
+		const fields = await listRegistrationFields(7)
+
+		expect(fetch).toHaveBeenCalledWith(
+			"http://api.test/api/v1/admin/events/7/registration-fields",
+			expect.objectContaining({ method: "GET" })
+		)
+		expect(fields).toEqual([field])
+	})
+
+	it("creates a field and unwraps the created row", async () => {
+		const created = { id: 9, key: "dietary_needs", label: "Dietary needs", type: "text", is_required: false, is_active: true, order: 0 }
+		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: created }, 201))
+
+		const field = await createRegistrationField(7, {
+			key: "dietary_needs",
+			label: { ar: "احتياجات", en: "Dietary needs" },
+			type: "text"
+		})
+
+		const [url, init] = vi.mocked(fetch).mock.calls[0]
+		expect(url).toBe("http://api.test/api/v1/admin/events/7/registration-fields")
+		expect((init as RequestInit).method).toBe("POST")
+		expect(field).toEqual(created)
+	})
+
+	it("updates a field with PATCH, nested under its own event", async () => {
+		vi.mocked(fetch).mockResolvedValue(jsonResponse({ message: "ok" }))
+
+		await updateRegistrationField(7, 9, { is_active: false })
+
+		const [url, init] = vi.mocked(fetch).mock.calls[0]
+		expect(url).toBe("http://api.test/api/v1/admin/events/7/registration-fields/9")
+		expect((init as RequestInit).method).toBe("PATCH")
+	})
+
+	it("deletes a field", async () => {
+		vi.mocked(fetch).mockResolvedValue(jsonResponse({ message: "ok" }))
+
+		await removeRegistrationField(7, 9)
+
+		expect(fetch).toHaveBeenCalledWith(
+			"http://api.test/api/v1/admin/events/7/registration-fields/9",
+			expect.objectContaining({ method: "DELETE" })
+		)
+	})
+})
+
+describe("event attendees and approval", () => {
+	beforeEach(() => {
+		vi.stubGlobal("fetch", vi.fn())
+	})
+
+	const attendee = {
+		id: 4,
+		event_id: 7,
+		user_id: 11,
+		name: "Member",
+		email: "m@example.com",
+		status: "pending" as const
+	}
+
+	it("keeps meta when listing attendees — the roster really does page", async () => {
+		vi.mocked(fetch).mockResolvedValue(
+			jsonResponse({ data: [attendee], meta: { current_page: 1, last_page: 3, per_page: 20, total: 47 } })
+		)
+
+		const page = await listAttendees(7)
+
+		expect(page.data).toEqual([attendee])
+		expect(page.meta.last_page).toBe(3)
+	})
+
+	it("passes a status filter through as a query parameter", async () => {
+		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: [], meta: { current_page: 1, last_page: 1, per_page: 20, total: 0 } }))
+
+		await listAttendees(7, { status: "rejected" })
+
+		expect(vi.mocked(fetch).mock.calls[0][0]).toContain("status=rejected")
+	})
+
+	it("reads the pending queue from its own endpoint", async () => {
+		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: [attendee], meta: { current_page: 1, last_page: 1, per_page: 20, total: 1 } }))
+
+		await listPendingAttendees(7)
+
+		expect(vi.mocked(fetch).mock.calls[0][0]).toBe("http://api.test/api/v1/admin/events/7/attendees/pending")
+	})
+
+	it("approves one registration", async () => {
+		vi.mocked(fetch).mockResolvedValue(jsonResponse({ message: "approved" }))
+
+		await approveAttendee(7, 4)
+
+		const [url, init] = vi.mocked(fetch).mock.calls[0]
+		expect(url).toBe("http://api.test/api/v1/admin/events/7/attendees/4/approve")
+		expect((init as RequestInit).method).toBe("POST")
+	})
+
+	it("sends the reason when rejecting — the API refuses an empty one", async () => {
+		vi.mocked(fetch).mockResolvedValue(jsonResponse({ message: "rejected" }))
+
+		await rejectAttendee(7, 4, "Not eligible")
+
+		const [url, init] = vi.mocked(fetch).mock.calls[0]
+		expect(url).toBe("http://api.test/api/v1/admin/events/7/attendees/4/reject")
+		expect(JSON.parse((init as RequestInit).body as string)).toEqual({ rejection_reason: "Not eligible" })
+	})
+
+	it("closes out the whole pending queue in one call", async () => {
+		vi.mocked(fetch).mockResolvedValue(jsonResponse({ message: "done", rejected_count: 3 }))
+
+		await rejectPendingAttendees(7, "Review closed")
+
+		const [url, init] = vi.mocked(fetch).mock.calls[0]
+		expect(url).toBe("http://api.test/api/v1/admin/events/7/attendees/reject-pending")
+		expect(JSON.parse((init as RequestInit).body as string)).toEqual({ rejection_reason: "Review closed" })
 	})
 })

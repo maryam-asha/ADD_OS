@@ -300,6 +300,7 @@ import { computed, reactive, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { ApiError } from "@/add-os/services/api"
 import { uploadMedia } from "@/add-os/services/media"
+import { toOffsetIso } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 import { buildPayload } from "./field-types"
 
@@ -463,14 +464,11 @@ function setDatetimePickerValue(key: string, timestamp: number | null) {
 		target[key] = ""
 		return
 	}
-	const d = new Date(timestamp)
-	const year = d.getFullYear()
-	const month = String(d.getMonth() + 1).padStart(2, "0")
-	const day = String(d.getDate()).padStart(2, "0")
-	const hours = String(d.getHours()).padStart(2, "0")
-	const minutes = String(d.getMinutes()).padStart(2, "0")
-	const seconds = String(d.getSeconds()).padStart(2, "0")
-	target[key] = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+	// With an explicit offset, not a bare wall clock. A bare string is read
+	// by the API as the district timezone, which is only right while the
+	// browser sits in it — staff on VPN from elsewhere would move the value
+	// by the difference without being told.
+	target[key] = toOffsetIso(new Date(timestamp))
 }
 
 function removeImage(fieldKey: string) {

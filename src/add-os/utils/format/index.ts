@@ -49,7 +49,7 @@
 export { MONTHS, MONTHS_SHORT, WEEKDAYS, WEEKDAYS_SHORT } from "./calendar"
 export type { CurrencyCode, CurrencyFormatOptions } from "./currency"
 export { DEFAULT_CURRENCY, formatCurrency, isCurrencyCode } from "./currency"
-export { formatDate, formatDateTime, formatTime } from "./dates"
+export { formatDate, formatDateTime, formatTime, toOffsetIso } from "./dates"
 
 export type { DateFormatOptions, DateInput, DateStyle } from "./dates"
 export { applyArabicCalendar } from "./dayjsArabic"

@@ -7,7 +7,7 @@ import type { EventCategory } from "@/add-os/modules/events/types/event-category
 import { NImage, NTag } from "naive-ui"
 import { h } from "vue"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
-import { formatNumber } from "@/add-os/utils/format"
+import { formatDateTime, formatNumber, toOffsetIso } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
 const STATUS_TAG_TYPE: Record<EventStatus, "default" | "success" | "error"> = {
@@ -55,7 +55,9 @@ export function buildEventColumns(t: ComposerTranslation, locale: SupportedLocal
 		{
 			title: t("events.columns.startAt"),
 			key: "start_at",
-			render: row => (row.start_at ? row.start_at.replace("T", " ").substring(0, 16) : "—")
+			// The API sends a true instant; slicing the raw string would show
+			// UTC. formatDateTime renders it in the reader's own clock.
+			render: row => (row.start_at ? formatDateTime(row.start_at, { locale }) : "—")
 		},
 		{
 			title: t("events.columns.location"),
@@ -66,6 +68,19 @@ export function buildEventColumns(t: ComposerTranslation, locale: SupportedLocal
 			title: t("events.columns.capacity"),
 			key: "capacity",
 			render: row => (row.capacity ? formatNumber(row.capacity) : "—")
+		},
+		{
+			title: t("events.columns.requiresApproval"),
+			key: "requires_approval",
+			width: 110,
+			render: row =>
+				row.requires_approval
+					? h(
+							NTag,
+							{ type: "warning", round: true, bordered: false, size: "small" },
+							{ default: () => t("events.approval.pending") }
+						)
+					: "—"
 		},
 		{
 			title: t("events.columns.price"),
@@ -114,6 +129,9 @@ export function buildEventFields(
 		{ key: "end_at", labelKey: "events.form.endAt", type: "datetime", required: true },
 		{ key: "location", labelKey: "events.form.location", type: "text" },
 		{ key: "capacity", labelKey: "events.form.capacity", type: "number" },
+		// A pending registration still holds a seat, so this interacts with
+		// capacity above rather than standing on its own.
+		{ key: "requires_approval", labelKey: "events.form.requiresApproval", type: "switch" },
 		{ key: "is_free", labelKey: "events.form.isFree", type: "switch" },
 		{
 			// Points are the price. There is no currency selector any more —
@@ -144,24 +162,16 @@ export const eventFields: FieldDescriptor<EventPayload>[] = buildEventFields([],
 export function emptyEventPayload(): EventPayload {
 	const now = new Date()
 	const twoHoursLater = new Date(now.getTime() + 2 * 3600 * 1000)
-	const formatDt = (d: Date) => {
-		const year = d.getFullYear()
-		const month = String(d.getMonth() + 1).padStart(2, "0")
-		const day = String(d.getDate()).padStart(2, "0")
-		const hours = String(d.getHours()).padStart(2, "0")
-		const minutes = String(d.getMinutes()).padStart(2, "0")
-		const seconds = String(d.getSeconds()).padStart(2, "0")
-		return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
-	}
 
 	return {
 		category_id: null,
 		title: { ar: "", en: "" },
 		description: { ar: "", en: "" },
-		start_at: formatDt(now),
-		end_at: formatDt(twoHoursLater),
+		start_at: toOffsetIso(now),
+		end_at: toOffsetIso(twoHoursLater),
 		location: "",
 		capacity: null,
+		requires_approval: false,
 		is_free: true,
 		price_points: 0,
 		image_url: "",

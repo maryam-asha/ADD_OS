@@ -94,3 +94,31 @@ export function formatDateTime(value: DateInput, options: Omit<DateFormatOptions
 export function formatTime(value: DateInput, options: Omit<DateFormatOptions, "style"> = {}): string {
 	return formatDate(value, { ...options, style: "time" })
 }
+
+/**
+ * Serializes a `Date` as local wall clock with an explicit UTC offset:
+ * `2026-10-01T23:30:00+03:00` — not `toISOString()`'s `Z` form.
+ *
+ * Every datetime sent to the API goes through this. A bare
+ * `2026-10-01 23:30:00` is ambiguous on the wire: the backend reads it as
+ * the district's timezone, which is right only while the browser happens to
+ * be in that timezone too. Staff on VPN from elsewhere would silently move
+ * the event by the difference. Stating the offset removes the guess — the
+ * backend takes an explicit offset at its word.
+ *
+ * It also stays readable in a wire log as the clock the operator saw, which
+ * is why reception adopted this shape first.
+ */
+export function toOffsetIso(at: DateInput): string {
+	const date = toDate(at)
+
+	const offsetMinutes = -date.getTimezoneOffset()
+	const sign = offsetMinutes < 0 ? "-" : "+"
+	const absolute = Math.abs(offsetMinutes)
+
+	const day = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+	const time = `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+	const offset = `${pad(Math.floor(absolute / 60))}:${pad(absolute % 60)}`
+
+	return `${day}T${time}${sign}${offset}`
+}

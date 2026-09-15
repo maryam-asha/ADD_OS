@@ -99,6 +99,48 @@
       "devices": "الأجهزة",
       "device-capabilities": "إمكانيات الأجهزة",
       "events": "الفعاليات",
+        "fields": {
+          "title": "فورم التسجيل",
+          "add": "إضافة حقل",
+          "edit": "تعديل الحقل",
+          "delete": "حذف الحقل",
+          "empty": "هذه الفعالية لا تطرح أسئلة. يسجّل الأعضاء ببيانات حسابهم فقط.",
+          "key": "المفتاح",
+          "label": "التسمية",
+          "placeholder": "نص إرشادي",
+          "type": "النوع",
+          "options": "الخيارات",
+          "required": "مطلوب",
+          "active": "مفعّل",
+          "order": "الترتيب",
+          "reservedKeyNote": "الاسم والهاتف والبريد تؤخذ من حساب العضو ولا يمكن طلبها مجدداً.",
+          "keyHint": "أحرف صغيرة وأرقام وشرطة سفلية فقط."
+        },
+        "approval": {
+          "title": "التسجيلات",
+          "pending": "بانتظار المراجعة",
+          "approved": "مقبول",
+          "rejected": "مرفوض",
+          "approve": "قبول",
+          "reject": "رفض",
+          "rejectAll": "رفض كل المعلّقات",
+          "rejectReason": "سبب الرفض",
+          "rejectReasonRequired": "السبب مطلوب.",
+          "approvedToast": "تمت الموافقة على التسجيل.",
+          "rejectedToast": "تم رفض التسجيل.",
+          "rejectAllConfirm": "هل تريد رفض كل التسجيلات التي ما تزال بانتظار قرار؟",
+          "rejectAllDone": "تم إغلاق {count} طلب معلّق.",
+          "empty": "لا توجد تسجيلات بعد.",
+          "answers": "الإجابات",
+          "noAnswers": "لا توجد إجابات.",
+          "seatNote": "التسجيل المعلّق والمقبول كلاهما يشغل مقعداً."
+        },
+        "columns": {
+          "requiresApproval": "الموافقة"
+        },
+        "form": {
+          "requiresApproval": "يحتاج موافقة قبل القبول"
+        },
       "floors": "الطوابق",
       "founders": "المؤسسون",
       "partners": "الشركاء",
