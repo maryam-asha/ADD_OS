@@ -56,6 +56,12 @@
 			:event-id="fieldsEventId"
 			@changed="refetch"
 		/>
+
+		<EventSessionsDrawer
+			v-model:show="sessionsDrawerVisible"
+			:event-id="sessionsEventId"
+			@saved="refetch"
+		/>
 	</div>
 </template>
 
@@ -74,6 +80,7 @@ import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import EventRegistrationFieldsDrawer from "@/add-os/modules/events/components/EventRegistrationFieldsDrawer.vue"
+import EventSessionsDrawer from "@/add-os/modules/events/components/EventSessionsDrawer.vue"
 import { buildEventColumns, buildEventFields, emptyEventPayload } from "@/add-os/modules/events/config/events.config"
 import { listEventCategories } from "@/add-os/services/event-categories"
 import { createEvent, listEvents, removeEvent, updateEvent } from "@/add-os/services/events"
@@ -114,6 +121,8 @@ const form = ref<EventPayload>(emptyEventPayload())
 
 const fieldsDrawerVisible = ref(false)
 const fieldsEventId = ref<number | null>(null)
+const sessionsDrawerVisible = ref(false)
+const sessionsEventId = ref<number | null>(null)
 
 /**
  * A per-row way into the event's own registration form. It sits here rather
@@ -126,11 +135,28 @@ function registrationFormAction(row: Event) {
 
 	// An externally-registered event has no roster and no questions of
 	// its own: the member never reaches our registration endpoint.
+	const scheduleLabel = t("events.sessions.manage")
+
+	const schedule = h(
+		NButton,
+		{
+			text: true,
+			type: row.sessions?.length ? "primary" : "default",
+			"aria-label": scheduleLabel,
+			title: scheduleLabel,
+			onClick: () => openSessions(row)
+		},
+		{ icon: () => h(Icon, { name: "carbon:calendar", size: 18 }) }
+	)
+
+	// An externally-registered event still has hours worth stating, even
+	// though it has no roster and no questions of its own.
 	if (row.external_form_url) {
-		return []
+		return [schedule]
 	}
 
 	return [
+		schedule,
 		h(
 			NButton,
 			{
@@ -154,6 +180,11 @@ function registrationFormAction(row: Event) {
 			{ icon: () => h(Icon, { name: "carbon:license-draft", size: 18 }) }
 		)
 	]
+}
+
+function openSessions(row: Event) {
+	sessionsEventId.value = row.id
+	sessionsDrawerVisible.value = true
 }
 
 function openRegistrationFields(row: Event) {

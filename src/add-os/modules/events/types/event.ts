@@ -3,6 +3,28 @@ import type { Bilingual } from "@/add-os/components/resource/field-types"
 
 export type EventStatus = "draft" | "published" | "cancelled"
 
+/**
+ * One sitting of an event: a day, a track, a session.
+ *
+ * An event whose hours differ per day is several of these. The event's own
+ * start_at/end_at stay the envelope around them — derived by the backend, not
+ * typed — so a screen that only reads those keeps working.
+ */
+export interface EventSession {
+	id?: number
+	/** An instant with its offset, as the admin API returns and accepts it. */
+	start_at: string
+	end_at: string
+	sessions?: EventSession[]
+	title?: Bilingual | null
+}
+
+/** A session as the editor holds it: epoch ms, which n-date-picker binds. */
+export interface DraftSession {
+	start: number | null
+	end: number | null
+}
+
 export interface Event {
 	id: number
 	branch_id?: number | null
@@ -51,6 +73,7 @@ export interface EventPayload extends Record<string, unknown> {
 	description?: Bilingual
 	start_at: string
 	end_at: string
+	sessions?: EventSession[]
 	location?: string
 	capacity?: number | null
 	requires_approval?: boolean

@@ -847,6 +847,21 @@
       "deleted": "Field deleted.",
       "deleteConfirm": "Delete this field? Answers already given are removed with it.",
       "manage": "Registration form"
+    },
+    "sessions": {
+      "title": "Schedule",
+      "manage": "Schedule",
+      "note": "Add a sitting for each day the event runs. The event's own dates follow the schedule automatically.",
+      "empty": "No schedule yet. The event runs once, at the dates on its form.",
+      "add": "Add a sitting",
+      "remove": "Remove this sitting",
+      "startAt": "Starts",
+      "endAt": "Ends",
+      "orderError": "A sitting must end after it starts.",
+      "incomplete": "Every sitting needs both a start and an end.",
+      "saved": "Schedule saved.",
+      "loadError": "Could not load the schedule.",
+      "saveError": "Could not save the schedule."
     }
   },
   "communityMembers": {
