@@ -151,7 +151,7 @@ function registrationFormAction(row: Event) {
 				title: label,
 				onClick: () => openRegistrationFields(row)
 			},
-			{ icon: () => h(Icon, { name: "carbon:list-checked", size: 18 }) }
+			{ icon: () => h(Icon, { name: "carbon:license-draft", size: 18 }) }
 		)
 	]
 }

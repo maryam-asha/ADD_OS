@@ -255,7 +255,7 @@
 								class="rounded-lg font-semibold"
 								@click="openFieldsDrawer(st)"
 							>
-								<template #icon><Icon name="carbon:settings" :size="16" /></template>
+								<template #icon><Icon name="carbon:license-draft" :size="16" /></template>
 								{{ t('operationsRequests.catalog.fields') }}
 							</n-button>
 							<div v-else class="text-xs text-stone-400 italic">

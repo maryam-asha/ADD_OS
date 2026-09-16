@@ -1695,7 +1695,6 @@
       "updateStatus": "Update Status",
       "addService": "Add Service",
       "editService": "Edit Service",
-      "addField": "Add Field",
       "close": "Close"
     },
     "details": {
@@ -1735,12 +1734,7 @@
       "confirmCancel": "Cancel",
       "statusUpdated": "Service status updated successfully",
       "locationRequired": "Requires Location",
-      "fields": "Form Fields",
-      "fieldKey": "Key",
-      "fieldLabelEn": "Label (English)",
-      "fieldLabelAr": "Label (Arabic)",
-      "fieldType": "Type",
-      "required": "Required"
+      "fields": "Form Fields"
     }
   },
   "closeSession": {
@@ -1885,6 +1879,41 @@
       "industry": "Industry",
       "socialLinks": "Professional Links & Social",
       "noProfileInfo": "Member has not provided additional profile information yet."
+    }
+  },
+  "formFields": {
+    "title": "Form fields",
+    "add": "Add field",
+    "edit": "Edit field",
+    "delete": "Delete field",
+    "empty": "No fields yet. Add one to start building the form.",
+    "key": "Key",
+    "label": "Label",
+    "placeholder": "Placeholder",
+    "type": "Type",
+    "options": "Choices",
+    "addOption": "Add a choice",
+    "removeOption": "Remove this choice",
+    "required": "Required",
+    "active": "Active",
+    "inactive": "Hidden",
+    "order": "Order",
+    "keyHint": "Lowercase letters, digits and underscores only.",
+    "loadError": "Could not load the form fields.",
+    "saveError": "Could not save the field.",
+    "created": "Field added.",
+    "updated": "Field updated.",
+    "deleted": "Field deleted.",
+    "deleteConfirm": "Delete this field? Answers already given are removed with it.",
+    "types": {
+      "text": "Short text",
+      "textarea": "Long text",
+      "select": "Single choice",
+      "checkbox": "Multiple choice",
+      "date": "Date",
+      "number": "Number",
+      "rating": "Rating",
+      "file": "File upload"
     }
   }
 }

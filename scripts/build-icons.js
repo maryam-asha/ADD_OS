@@ -41,7 +41,14 @@ const ICON_PATTERN = /["'`]([a-z][a-z0-9-]{1,20}):([a-z0-9][a-z0-9-]*)["'`]/g
  * Prefixes that look like icons but are not. Keep this list short and obvious —
  * anything else genuinely missing should surface as a build error, not be hidden.
  */
-const NOT_ICON_PREFIXES = new Set(["node"])
+// Prefixes that look like icon references but are not:
+//   `rtl`/`ltr` — Tailwind direction variants. `class="rtl:rotate-180"` is a
+//     whole attribute value, so it matches ICON_PATTERN the way an icon does.
+//   `update`    — Vue model events, quoted as `"update:show"`.
+// Left unlisted, the scanner demands an `@iconify-json/<prefix>` that does not
+// exist and `npm run icons` aborts. That silently froze the bundle: every icon
+// added afterwards was never bundled, and rendered blank on offline builds.
+const NOT_ICON_PREFIXES = new Set(["node", "rtl", "ltr", "update"])
 
 /**
  * Icons composed at runtime, which the scanner cannot see.
