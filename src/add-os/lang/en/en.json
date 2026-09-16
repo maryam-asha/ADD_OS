@@ -1895,6 +1895,43 @@
     "updated": "Field updated.",
     "deleted": "Field deleted.",
     "deleteConfirm": "Delete this field? Answers already given are removed with it.",
-    "count": "{count} field(s)"
+    "count": "{count} field(s)",
+    "validation": {
+      "title": "Limits",
+      "hint": "Leave a limit empty to allow anything.",
+      "minChars": "Fewest characters",
+      "maxChars": "Most characters",
+      "minValue": "Smallest value",
+      "maxValue": "Largest value",
+      "minDate": "Earliest date",
+      "maxDate": "Latest date",
+      "minSelections": "Fewest choices",
+      "maxSelections": "Most choices",
+      "minStars": "Fewest stars",
+      "maxStars": "Most stars",
+      "pattern": "Allowed format",
+      "patternAny": "Any text",
+      "accept": "Allowed file types",
+      "acceptAny": "Any file",
+      "maxKb": "Largest size (KB)",
+      "rangeError": "The lower limit must not be greater than the upper one.",
+      "patterns": {
+        "alpha": "Letters only",
+        "alphanumeric": "Letters and numbers",
+        "digits": "Digits only",
+        "email": "Email address",
+        "url": "Web link",
+        "syrian_phone": "Syrian phone number",
+        "no_urls": "No links allowed"
+      },
+      "accepts": {
+        "image": "Images",
+        "video": "Video",
+        "audio": "Audio",
+        "pdf": "PDF",
+        "word": "Word document",
+        "excel": "Excel sheet"
+      }
+    }
   }
 }
