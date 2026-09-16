@@ -56,12 +56,6 @@
 			:event-id="fieldsEventId"
 			@changed="refetch"
 		/>
-
-		<EventSessionsDrawer
-			v-model:show="sessionsDrawerVisible"
-			:event-id="sessionsEventId"
-			@saved="refetch"
-		/>
 	</div>
 </template>
 
@@ -80,10 +74,9 @@ import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import EventRegistrationFieldsDrawer from "@/add-os/modules/events/components/EventRegistrationFieldsDrawer.vue"
-import EventSessionsDrawer from "@/add-os/modules/events/components/EventSessionsDrawer.vue"
 import { buildEventColumns, buildEventFields, emptyEventPayload } from "@/add-os/modules/events/config/events.config"
 import { listEventCategories } from "@/add-os/services/event-categories"
-import { createEvent, listEvents, removeEvent, updateEvent } from "@/add-os/services/events"
+import { createEvent, getEvent, listEvents, removeEvent, updateEvent } from "@/add-os/services/events"
 import { toOffsetIso } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
@@ -121,8 +114,6 @@ const form = ref<EventPayload>(emptyEventPayload())
 
 const fieldsDrawerVisible = ref(false)
 const fieldsEventId = ref<number | null>(null)
-const sessionsDrawerVisible = ref(false)
-const sessionsEventId = ref<number | null>(null)
 
 /**
  * A per-row way into the event's own registration form. It sits here rather
@@ -135,28 +126,13 @@ function registrationFormAction(row: Event) {
 
 	// An externally-registered event has no roster and no questions of
 	// its own: the member never reaches our registration endpoint.
-	const scheduleLabel = t("events.sessions.manage")
-
-	const schedule = h(
-		NButton,
-		{
-			text: true,
-			type: row.sessions?.length ? "primary" : "default",
-			"aria-label": scheduleLabel,
-			title: scheduleLabel,
-			onClick: () => openSessions(row)
-		},
-		{ icon: () => h(Icon, { name: "carbon:calendar", size: 18 }) }
-	)
-
-	// An externally-registered event still has hours worth stating, even
-	// though it has no roster and no questions of its own.
+	// An externally-registered event has no roster and no questions of
+	// its own: the member never reaches our registration endpoint.
 	if (row.external_form_url) {
-		return [schedule]
+		return []
 	}
 
 	return [
-		schedule,
 		h(
 			NButton,
 			{
@@ -182,11 +158,6 @@ function registrationFormAction(row: Event) {
 	]
 }
 
-function openSessions(row: Event) {
-	sessionsEventId.value = row.id
-	sessionsDrawerVisible.value = true
-}
-
 function openRegistrationFields(row: Event) {
 	fieldsEventId.value = row.id
 	fieldsDrawerVisible.value = true
@@ -199,17 +170,33 @@ function openCreate() {
 	drawerVisible.value = true
 }
 
-function openEdit(row: Event) {
+async function openEdit(row: Event) {
 	mode.value = "edit"
 	editingId.value = row.id
+
+	// The listing does not carry the schedule, and an event edited without it
+	// would save an empty one — wiping every sitting the admin had entered.
+	let sessions = row.sessions ?? []
+
+	if (!sessions.length) {
+		try {
+			sessions = (await getEvent(row.id)).sessions ?? []
+		} catch {
+			// Fall back to the envelope below rather than blocking the edit.
+		}
+	}
+
 	form.value = {
 		category_id: row.category_id,
 		title: { ...row.title },
 		description: row.description ? { ...row.description } : { ar: "", en: "" },
-		// Slicing the string here would strip the offset and hand the picker a
-		// bare UTC clock — the event would shift every time it was edited.
-		start_at: row.start_at ? toOffsetIso(row.start_at) : "",
-		end_at: row.end_at ? toOffsetIso(row.end_at) : "",
+		// An event created before schedules existed has none; show its own
+		// interval as the single sitting it effectively is.
+		sessions: sessions.length
+			? sessions.map(s => ({ start_at: toOffsetIso(s.start_at), end_at: toOffsetIso(s.end_at) }))
+			: row.start_at && row.end_at
+				? [{ start_at: toOffsetIso(row.start_at), end_at: toOffsetIso(row.end_at) }]
+				: [],
 		location: row.location || "",
 		capacity: row.capacity ?? null,
 		requires_approval: row.requires_approval ?? false,

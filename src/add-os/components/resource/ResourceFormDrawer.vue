@@ -100,6 +100,16 @@
 						without ever showing a time — which reads as a real start nobody
 						chose. Both halves write the one model value.
 					-->
+					<!--
+						A schedule replaces a single start/end pair: an event whose
+						hours differ per day cannot be described by two pickers.
+					-->
+					<SessionsField
+						v-else-if="field.type === 'sessions'"
+						:model-value="(model as Record<string, unknown>)[field.key] as SessionValue[] | null"
+						@update:model-value="value => writeField(field.key, value)"
+					/>
+
 					<div v-else-if="field.type === 'datetime'" class="flex w-full gap-2">
 						<n-date-picker
 							:formatted-value="datetimeDatePart((model as Record<string, unknown>)[field.key])"
@@ -318,6 +328,8 @@ import { useI18n } from "vue-i18n"
 import { ApiError } from "@/add-os/services/api"
 import { uploadMedia } from "@/add-os/services/media"
 import { toOffsetIso } from "@/add-os/utils/format"
+import type { SessionValue } from "@/add-os/components/resource/SessionsField.vue"
+import SessionsField from "@/add-os/components/resource/SessionsField.vue"
 import Icon from "@/components/common/Icon.vue"
 import { buildPayload } from "./field-types"
 
@@ -491,6 +503,12 @@ function datetimeTimePart(value: unknown): string | null {
 	const date = datetimeAsDate(value)
 	if (!date) return null
 	return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`
+}
+
+/** Write a value the field owns outright, such as a schedule. */
+function writeField(key: string, value: unknown) {
+	const target = model.value as Record<string, unknown>
+	target[key] = value
 }
 
 /** Written back with an explicit offset, so the API never has to guess. */

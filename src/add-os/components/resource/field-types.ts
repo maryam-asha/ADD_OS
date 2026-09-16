@@ -1,7 +1,7 @@
 import type { FormItemRule, SelectOption } from "naive-ui"
 import type { SupportedLocale } from "@/add-os/lang/locales"
 
-export type FieldType = "text" | "bilingual-text" | "textarea" | "bilingual-textarea" | "number" | "select" | "switch" | "time" | "date" | "datetime" | "image" | "multi-image" | "color"
+export type FieldType = "text" | "bilingual-text" | "textarea" | "bilingual-textarea" | "number" | "select" | "switch" | "time" | "date" | "datetime" | "image" | "multi-image" | "color" | "sessions"
 
 export interface Bilingual {
 	ar: string

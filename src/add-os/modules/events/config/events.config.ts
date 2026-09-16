@@ -125,8 +125,11 @@ export function buildEventFields(
 		{ key: "title", labelKey: "events.form.title", type: "bilingual-text", required: true },
 		{ key: "description", labelKey: "events.form.description", type: "bilingual-textarea" },
 		{ key: "category_id", labelKey: "events.form.category", type: "select", options: categoryOptions },
-		{ key: "start_at", labelKey: "events.form.startAt", type: "datetime", required: true },
-		{ key: "end_at", labelKey: "events.form.endAt", type: "datetime", required: true },
+		// The schedule replaces a single start/end pair. An event whose hours
+		// differ per day cannot be described by two pickers, and the event's
+		// own start_at/end_at are derived from these by the backend — so they
+		// are not entered here at all.
+		{ key: "sessions", labelKey: "events.form.schedule", type: "sessions", required: true },
 		{ key: "location", labelKey: "events.form.location", type: "text" },
 		{
 			key: "capacity",
@@ -185,8 +188,7 @@ export function emptyEventPayload(): EventPayload {
 		category_id: null,
 		title: { ar: "", en: "" },
 		description: { ar: "", en: "" },
-		start_at: toOffsetIso(now),
-		end_at: toOffsetIso(twoHoursLater),
+		sessions: [{ start_at: toOffsetIso(now), end_at: toOffsetIso(twoHoursLater) }],
 		location: "",
 		capacity: null,
 		requires_approval: false,
