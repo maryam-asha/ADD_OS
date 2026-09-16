@@ -44,16 +44,7 @@ const i18n = createI18n({
 				updated: "Field updated.",
 				deleted: "Field deleted.",
 				deleteConfirm: "Delete?",
-				types: {
-					text: "Short text",
-					textarea: "Long text",
-					select: "Single choice",
-					checkbox: "Multiple choice",
-					date: "Date",
-					number: "Number",
-					rating: "Rating",
-					file: "File upload"
-				}
+				count: "{count} field(s)"
 			}
 		}
 	}
@@ -94,6 +85,13 @@ function renderedText(): string {
 	return document.body.textContent ?? ""
 }
 
+/** Enabled buttons whose label contains `label`, found in the teleported DOM. */
+function enabledButtons(label: string): HTMLButtonElement[] {
+	return [...document.body.querySelectorAll("button")].filter(
+		b => (b.textContent ?? "").includes(label) && !b.disabled
+	) as HTMLButtonElement[]
+}
+
 interface BuilderVm {
 	startCreate: () => void
 	startEdit: (f: FormFieldDefinition) => void
@@ -117,6 +115,46 @@ describe("formFieldsBuilder", () => {
 	beforeEach(() => {
 		document.body.innerHTML = ""
 		api = makeApi()
+	})
+
+	// Reported: after saving a field there was no visible way to add another.
+	// The button existed but sat below the editor and the list, out of view in
+	// a scrolling modal, so it has to survive a save and keep one position.
+	it("still offers an add button once a field has been saved", async () => {
+		const vm = vmOf(mountBuilder(7))
+		await flushPromises()
+
+		vm.startCreate()
+		vm.draft.key = "company"
+		api.list.mockResolvedValue([textField])
+		await vm.save()
+		await flushPromises()
+
+		expect(enabledButtons("Add field").length).toBeGreaterThan(0)
+	})
+
+	it("offers the add button next to a non-empty list, not only an empty one", async () => {
+		api.list.mockResolvedValue([textField])
+
+		mountBuilder(7)
+		await flushPromises()
+
+		expect(enabledButtons("Add field").length).toBeGreaterThan(0)
+	})
+
+	// Reported: the type is the API vocabulary — the value stored and validated
+	// against — so it is shown verbatim rather than translated.
+	it("names a field type the way the API does, not translated", async () => {
+		api.list.mockResolvedValue([{ ...textField, type: "textarea" as const }])
+
+		mountBuilder(7)
+		await flushPromises()
+
+		// Asserting on the tag itself, not the whole modal: a missing
+		// translation key falls back to the key text, which also contains
+		// "textarea" and would let a translated build pass.
+		const tag = document.body.querySelector(".n-tag")
+		expect(tag?.textContent?.trim()).toBe("textarea")
 	})
 
 	it("loads the fields of the row it was opened for", async () => {

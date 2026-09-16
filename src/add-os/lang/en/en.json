@@ -846,17 +846,7 @@
       "updated": "Field updated.",
       "deleted": "Field deleted.",
       "deleteConfirm": "Delete this field? Answers already given are removed with it.",
-      "manage": "Registration form",
-      "types": {
-        "text": "Short text",
-        "textarea": "Long text",
-        "select": "Single choice",
-        "checkbox": "Multiple choice",
-        "date": "Date",
-        "number": "Number",
-        "rating": "Rating",
-        "file": "File upload"
-      }
+      "manage": "Registration form"
     }
   },
   "communityMembers": {
@@ -1905,15 +1895,6 @@
     "updated": "Field updated.",
     "deleted": "Field deleted.",
     "deleteConfirm": "Delete this field? Answers already given are removed with it.",
-    "types": {
-      "text": "Short text",
-      "textarea": "Long text",
-      "select": "Single choice",
-      "checkbox": "Multiple choice",
-      "date": "Date",
-      "number": "Number",
-      "rating": "Rating",
-      "file": "File upload"
-    }
+    "count": "{count} field(s)"
   }
 }

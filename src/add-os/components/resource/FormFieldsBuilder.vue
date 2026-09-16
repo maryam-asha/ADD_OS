@@ -25,22 +25,32 @@
 
 				<n-alert v-if="loadError" type="error" :title="t('formFields.loadError')" />
 
-				<n-empty v-else-if="!fields.length && !isEditing" :description="emptyText ?? t('formFields.empty')">
-					<template #extra>
-						<n-button size="small" @click="startCreate">
-							{{ t("formFields.add") }}
-						</n-button>
-					</template>
-				</n-empty>
+				<!-- The add button lives here, above the list, so it keeps one
+				     position whether the list is empty, long, or the editor is
+				     open. Below the editor it scrolled out of reach after a
+				     save and read as "there is no way to add another". -->
+				<div v-if="!loadError" class="flex items-center justify-between gap-3">
+					<span class="text-xs opacity-60">
+						{{ t("formFields.count", { count: fields.length }) }}
+					</span>
+					<n-button size="small" type="primary" secondary :disabled="isEditing" @click="startCreate">
+						<template #icon>
+							<Icon name="carbon:add" :size="16" />
+						</template>
+						{{ t("formFields.add") }}
+					</n-button>
+				</div>
 
-				<n-list v-else-if="fields.length" bordered clickable>
+				<n-empty v-if="!loadError && !fields.length && !isEditing" :description="emptyText ?? t('formFields.empty')" />
+
+				<n-list v-if="fields.length" bordered clickable>
 					<n-list-item v-for="field in fields" :key="field.id">
 						<div class="flex items-center justify-between gap-3 w-full">
 							<div class="flex flex-col gap-1 min-w-0">
 								<div class="flex items-center gap-2 flex-wrap">
 									<span class="font-medium truncate">{{ field.label }}</span>
-									<n-tag size="small" round :bordered="false">
-										{{ t(`formFields.types.${field.type}`) }}
+									<n-tag size="small" round :bordered="false" class="font-mono">
+										{{ field.type }}
 									</n-tag>
 									<n-tag v-if="field.is_required" size="small" round type="warning" :bordered="false">
 										{{ t("formFields.required") }}
@@ -84,15 +94,6 @@
 						</div>
 					</n-list-item>
 				</n-list>
-
-				<div v-if="fields.length && !isEditing" class="flex justify-end">
-					<n-button size="small" @click="startCreate">
-						<template #icon>
-							<Icon name="carbon:add" :size="16" />
-						</template>
-						{{ t("formFields.add") }}
-					</n-button>
-				</div>
 
 				<!-- Editor -->
 				<n-card
@@ -310,7 +311,7 @@ function emptyDraft(): Draft {
 const draft = reactive<Draft>(emptyDraft())
 
 const typeOptions = computed<SelectOption[]>(() =>
-	FORM_FIELD_TYPES.map(type => ({ label: t(`formFields.types.${type}`), value: type }))
+	FORM_FIELD_TYPES.map(type => ({ label: type, value: type }))
 )
 
 const needsOptions = computed(() => draft.type === "select" || draft.type === "checkbox")
