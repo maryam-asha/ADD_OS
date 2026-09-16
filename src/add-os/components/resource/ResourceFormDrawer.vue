@@ -93,14 +93,31 @@
 					class="w-full"
 					@update:formatted-value="(value: string | null) => setPickerValue(field.key, value)"
 				/>
-				<n-date-picker
-					v-else-if="field.type === 'datetime'"
-					:value="toPickerDatetimeTimestamp((model as Record<string, unknown>)[field.key])"
-					type="datetime"
-					clearable
-					class="w-full"
-					@update:value="(ts: number | null) => setDatetimePickerValue(field.key, ts)"
-				/>
+					<!--
+						Date and time as two controls, not one `type="datetime"` panel. In
+						the combined panel the clock is a secondary control inside the
+						calendar popup, so picking a day and closing it saves midnight
+						without ever showing a time — which reads as a real start nobody
+						chose. Both halves write the one model value.
+					-->
+					<div v-else-if="field.type === 'datetime'" class="flex w-full gap-2">
+						<n-date-picker
+							:formatted-value="datetimeDatePart((model as Record<string, unknown>)[field.key])"
+							type="date"
+							format="yyyy-MM-dd"
+							value-format="yyyy-MM-dd"
+							clearable
+							class="flex-1"
+							@update:formatted-value="(value: string | null) => setDatetimeDatePart(field.key, value)"
+						/>
+						<n-time-picker
+							:formatted-value="datetimeTimePart((model as Record<string, unknown>)[field.key])"
+							format="HH:mm"
+							value-format="HH:mm"
+							class="w-36"
+							@update:formatted-value="(value: string | null) => setDatetimeTimePart(field.key, value)"
+						/>
+					</div>
 				<div v-else-if="field.type === 'color'" class="flex items-center gap-3 w-full">
 					<input
 						type="color"
@@ -448,27 +465,60 @@ function setPickerValue(key: string, value: string | null) {
 	target[key] = value ?? ""
 }
 
-function toPickerDatetimeTimestamp(value: unknown): number | null {
-	if (typeof value === "number" && !isNaN(value)) return value
+/**
+ * The two halves of one stored instant.
+ *
+ * The model still holds a single value carrying an explicit offset — the
+ * pickers are only two ways into it, so nothing downstream has to know the
+ * field was split.
+ */
+function datetimeAsDate(value: unknown): Date | null {
+	if (typeof value === "number" && !Number.isNaN(value)) return new Date(value)
 	if (typeof value !== "string") return null
 	const str = value.trim()
 	if (!str) return null
-	const normalized = str.includes("T") ? str : str.replace(" ", "T")
-	const ts = Date.parse(normalized)
-	return isNaN(ts) ? null : ts
+	const ts = Date.parse(str.includes("T") ? str : str.replace(" ", "T"))
+	return Number.isNaN(ts) ? null : new Date(ts)
 }
 
-function setDatetimePickerValue(key: string, timestamp: number | null) {
+function datetimeDatePart(value: unknown): string | null {
+	const date = datetimeAsDate(value)
+	if (!date) return null
+	return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`
+}
+
+function datetimeTimePart(value: unknown): string | null {
+	const date = datetimeAsDate(value)
+	if (!date) return null
+	return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`
+}
+
+/** Written back with an explicit offset, so the API never has to guess. */
+function writeDatetime(key: string, date: Date) {
 	const target = model.value as Record<string, unknown>
-	if (timestamp === null || isNaN(timestamp)) {
+	target[key] = toOffsetIso(date)
+}
+
+function setDatetimeDatePart(key: string, value: string | null) {
+	const target = model.value as Record<string, unknown>
+	if (!value) {
 		target[key] = ""
 		return
 	}
-	// With an explicit offset, not a bare wall clock. A bare string is read
-	// by the API as the district timezone, which is only right while the
-	// browser sits in it — staff on VPN from elsewhere would move the value
-	// by the difference without being told.
-	target[key] = toOffsetIso(new Date(timestamp))
+	const [year, month, day] = value.split("-").map(Number)
+	// Keep the time already chosen; fall back to 09:00 rather than midnight,
+	// which would read as a deliberate start nobody picked.
+	const existing = datetimeAsDate(target[key])
+	writeDatetime(key, new Date(year, month - 1, day, existing?.getHours() ?? 9, existing?.getMinutes() ?? 0, 0))
+}
+
+function setDatetimeTimePart(key: string, value: string | null) {
+	const target = model.value as Record<string, unknown>
+	if (!value) return
+	const [hours, minutes] = value.split(":").map(Number)
+	// A time cannot invent a day, so an untouched date field means today.
+	const base = datetimeAsDate(target[key]) ?? new Date()
+	writeDatetime(key, new Date(base.getFullYear(), base.getMonth(), base.getDate(), hours, minutes, 0))
 }
 
 function removeImage(fieldKey: string) {

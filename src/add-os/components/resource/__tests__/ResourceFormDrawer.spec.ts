@@ -554,3 +554,129 @@ describe("resourceFormDrawer", () => {
 		wrapper.unmount()
 	})
 })
+
+describe("datetime fields are entered as a date and a time", () => {
+	interface DatetimeModel extends Record<string, unknown> {
+		start_at: string
+	}
+
+	const fields: FieldDescriptor<DatetimeModel>[] = [
+		{ key: "start_at", labelKey: "x.label", type: "datetime" }
+	]
+
+	function drawerFor(start: string) {
+		return mountDrawer(fields, { start_at: start })
+	}
+
+	it("offers a separate date and time control, not one combined panel", () => {
+		const wrapper = drawerFor("")
+
+		expect(document.body.querySelector(".n-date-picker")).not.toBeNull()
+		expect(document.body.querySelector(".n-time-picker")).not.toBeNull()
+		wrapper.unmount()
+	})
+
+	it("splits a stored instant into the two halves a person reads", () => {
+		const wrapper = drawerFor("2026-10-01T19:30:00+03:00")
+		const vm = wrapper.vm as unknown as {
+			datetimeDatePart: (v: unknown) => string | null
+			datetimeTimePart: (v: unknown) => string | null
+		}
+
+		const local = new Date("2026-10-01T19:30:00+03:00")
+		const pad = (n: number) => String(n).padStart(2, "0")
+
+		expect(vm.datetimeDatePart("2026-10-01T19:30:00+03:00"))
+			.toBe(`${local.getFullYear()}-${pad(local.getMonth() + 1)}-${pad(local.getDate())}`)
+		expect(vm.datetimeTimePart("2026-10-01T19:30:00+03:00"))
+			.toBe(`${pad(local.getHours())}:${pad(local.getMinutes())}`)
+		wrapper.unmount()
+	})
+
+	it("shows nothing rather than a default when the field is empty", () => {
+		const wrapper = drawerFor("")
+		const vm = wrapper.vm as unknown as {
+			datetimeDatePart: (v: unknown) => string | null
+			datetimeTimePart: (v: unknown) => string | null
+		}
+
+		expect(vm.datetimeDatePart("")).toBeNull()
+		expect(vm.datetimeTimePart("")).toBeNull()
+		wrapper.unmount()
+	})
+
+	/**
+	 * The reason the field was split: a combined picker saves 00:00 for a day
+	 * chosen without opening the clock, and midnight reads as a real start.
+	 */
+	it("defaults a newly picked date to 09:00, never midnight", () => {
+		const wrapper = drawerFor("")
+		const vm = wrapper.vm as unknown as {
+			setDatetimeDatePart: (key: string, value: string) => void
+			model: DatetimeModel
+		}
+
+		vm.setDatetimeDatePart("start_at", "2026-10-01")
+
+		expect(vm.model.start_at).toContain("T09:00:00")
+		wrapper.unmount()
+	})
+
+	it("keeps the chosen time when only the date moves", () => {
+		const wrapper = drawerFor("2026-10-01T19:30:00+03:00")
+		const vm = wrapper.vm as unknown as {
+			setDatetimeDatePart: (key: string, value: string) => void
+			datetimeTimePart: (v: unknown) => string | null
+			model: DatetimeModel
+		}
+
+		const timeBefore = vm.datetimeTimePart(vm.model.start_at)
+		vm.setDatetimeDatePart("start_at", "2026-11-20")
+
+		expect(vm.model.start_at).toContain("2026-11-20")
+		expect(vm.datetimeTimePart(vm.model.start_at)).toBe(timeBefore)
+		wrapper.unmount()
+	})
+
+	it("keeps the chosen date when only the time moves", () => {
+		const wrapper = drawerFor("2026-10-01T19:30:00+03:00")
+		const vm = wrapper.vm as unknown as {
+			setDatetimeTimePart: (key: string, value: string) => void
+			datetimeDatePart: (v: unknown) => string | null
+			model: DatetimeModel
+		}
+
+		const dateBefore = vm.datetimeDatePart(vm.model.start_at)
+		vm.setDatetimeTimePart("start_at", "07:15")
+
+		expect(vm.datetimeDatePart(vm.model.start_at)).toBe(dateBefore)
+		expect(vm.model.start_at).toContain("T07:15:00")
+		wrapper.unmount()
+	})
+
+	it("writes back with an explicit offset, so the API never guesses", () => {
+		const wrapper = drawerFor("")
+		const vm = wrapper.vm as unknown as {
+			setDatetimeDatePart: (key: string, value: string) => void
+			model: DatetimeModel
+		}
+
+		vm.setDatetimeDatePart("start_at", "2026-10-01")
+
+		expect(vm.model.start_at).toMatch(/^2026-10-01T09:00:00[+-]\d{2}:\d{2}$/)
+		wrapper.unmount()
+	})
+
+	it("clears the value when the date is cleared", () => {
+		const wrapper = drawerFor("2026-10-01T19:30:00+03:00")
+		const vm = wrapper.vm as unknown as {
+			setDatetimeDatePart: (key: string, value: string | null) => void
+			model: DatetimeModel
+		}
+
+		vm.setDatetimeDatePart("start_at", null)
+
+		expect(vm.model.start_at).toBe("")
+		wrapper.unmount()
+	})
+})
