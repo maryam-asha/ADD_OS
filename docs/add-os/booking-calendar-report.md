@@ -99,10 +99,12 @@ string half of a dead control.
 
 ## Known gaps
 
-- **`getBooking` has no screen.** The service function exists and is typed, but
-  neither page opens a booking detail yet. It is one `n-modal` away, and the
-  backend already returns the same breakdown and approval stepper the member
-  sees. Left out deliberately rather than half-built.
+- **`getBooking` still has no screen.** Clicking an event now opens a detail
+  built from the calendar payload it already has — member, space, window,
+  status, payment, check-in — so no extra request is made. The richer detail
+  that endpoint returns (price breakdown, approval stepper) has no consumer
+  yet; wiring it would mean a fetch per click for fields the calendar does not
+  carry, which is worth doing only once a screen needs them.
 - **`calendar/occupancy` unused.** Right endpoint for a dashboard tile; wrong
   one for either of these screens.
 - **`branch_id` filter not surfaced.** The calendar defaults to the default
@@ -114,16 +116,46 @@ string half of a dead control.
   re-derives the list. A dedicated spaces fetch would be steadier; it would also
   be a second source able to disagree with the calendar.
 
+## Added after first review — detail and create
+
+The first pass shipped the calendar as a pure read surface with unlabelled
+filters. Three corrections:
+
+**Clicking a booking opens its details.** Read-only, built from the payload the
+calendar already holds rather than a fetch per click. A click on a
+closed-day background event opens nothing, since it carries no booking.
+
+**A header button books a member in.** It posts to
+`/api/v1/admin/reception/bookings`, which reuses the backend's own
+`BookingCreationService` — so reception cannot double-book a room the member
+endpoint would refuse, and cannot back-date one either.
+
+Times are sent as district wall-clock (`YYYY-MM-DD HH:mm`), matching the
+request body in the pinned collection. That endpoint reads a bare value as
+local by design; sending an ISO offset would be re-interpreted rather than
+honoured, so a test pins the exact string that reaches the service.
+
+The only rule validated client-side is that an end must follow its start,
+because it needs no knowledge the client lacks. Granularity, minimum duration,
+overlap, buffer and back-dating are all the server's, and its 422 is shown in
+its own words — it already names the rule that was broken, in the requested
+language.
+
+**The filter selects were unlabelled.** They shipped with a placeholder only,
+which disappears the moment a value is chosen; in RTL they read as two blank
+pills. Both now carry a visible label, at the default size the other filter
+screens use.
+
 ## Verification run
 
 ```
 pnpm lint:check         # clean for these files
 pnpm type-check         # only the 2 pre-existing operations/* errors remain
-pnpm test:unit          # 95 files / 870 tests, all passing, guards included
+pnpm test:unit          # 95 files / 875 tests, all passing, guards included
 pnpm api:collection:check  # MATCH (re-pinned 2026-09-20)
 ```
 
-17 new tests across the two pages. Three of them found real defects while being
+22 new tests across the two pages. Three of them found real defects while being
 written, which is the reason they are worth reading:
 
 - the cell branch that printed "Free" over a fully-booked day (grid version),
