@@ -1,1944 +1,2005 @@
 {
-  "common": {
-    "comingSoon": "Coming soon",
-    "search": "Search",
-    "close": "Close",
-    "save": "Save",
-    "delete": "Delete",
-    "clear": "Clear",
-    "viewAll": "View all",
-    "logout": "Log out",
-    "logged_out": "Logged out",
-    "logoAlt": "ADD OS logo",
-    "back": "Back"
-  },
-  "errors": {
-    "backHome": "Back to home",
-    "tryAgain": "Try again",
-    "notFound": {
-      "title": "Page not found",
-      "description": "The page you are looking for may have moved or no longer exists.",
-      "illustrationAlt": "An illustration for a missing page"
-    },
-    "serverError": {
-      "title": "Something went wrong",
-      "description": "We could not load this page right now. Please try again in a moment.",
-      "illustrationAlt": "An illustration for a connection error"
-    }
-  },
-  "notifications": {
-    "title": "Notifications",
-    "setAsRead": "Set as read",
-    "markAllAsRead": "Mark all as read"
-  },
-  "roles": {
-    "description": "Manage roles and the admin-dashboard permissions each one grants.",
-    "loadError": "Couldn't load roles. You may not have permission to view this page.",
-    "names": {
-      "member": "Member",
-      "operations": "Operations",
-      "admin": "Admin"
-    },
-    "builtIn": "Built-in",
-    "columns": {
-      "name": "Name",
-      "permissions": "Permissions",
-      "permissionCount": "{count} permissions",
-      "actions": "Actions"
-    },
-    "create": {
-      "button": "New role",
-      "title": "New role",
-      "success": "Role created."
-    },
-    "edit": {
-      "title": "Edit role",
-      "button": "Edit",
-      "success": "Role updated."
-    },
-    "delete": {
-      "button": "Delete",
-      "success": "Role deleted."
-    },
-    "form": {
-      "name": "Name",
-      "namePlaceholder": "Enter role name",
-      "permissions": "Permissions",
-      "selectAll": "Select all",
-      "deselectAll": "Clear all",
-      "selectAllPermissions": "Select all permissions",
-      "searchModules": "Search modules and permissions...",
-      "noModulesFound": "No permissions match your search.",
-      "selectedCount": "{selected} of {total} selected",
-      "submit": "Save",
-      "cancel": "Cancel"
-    },
-    "validation": {
-      "nameRequired": "Name is required."
-    },
-    "actions": {
-      "view": "View",
-      "create": "Create",
-      "update": "Update",
-      "delete": "Delete",
-      "update_status": "Update status",
-      "assign_role": "Assign role"
-    },
-    "modules": {
-      "announcements": "Announcements",
-      "branches": "Branches",
-      "buildings": "Buildings",
-      "business-hours": "Business Hours",
-      "business-hour-exceptions": "Business Hour Exceptions",
-      "community-members": "Community Members",
-      "contact-links": "Contact Links",
-      "devices": "Devices",
-      "device-capabilities": "Device Capabilities",
-      "events": "Events",
-      "floors": "Floors",
-      "founders": "Founders",
-      "partners": "Partners",
-      "plans": "Plans",
-      "private-office-requests": "Private Office Requests",
-      "resources": "Resources",
-      "seats-desks": "Seats & Desks",
-      "spaces": "Spaces",
-      "zones": "Zones",
-      "users": "Users",
-      "error-logs": "Error Logs",
-      "roles": "Roles & Permissions",
-      "settings": "Settings"
-    }
-  },
-  "auth": {
-    "common": {
-      "back": "Back"
-    },
-    "signIn": {
-      "title": "Welcome back",
-      "subtitle": "Sign in to manage memberships, bookings and access.",
-      "emailLabel": "Email",
-      "emailPlaceholder": "Enter your email",
-      "emailRequired": "Email is required.",
-      "emailInvalid": "Enter a valid email address.",
-      "passwordLabel": "Password",
-      "passwordPlaceholder": "Enter your password",
-      "passwordRequired": "Password is required.",
-      "forgotLink": "Forgot your password?",
-      "submit": "Sign in",
-      "genericError": "Couldn't sign in. Check your details and try again."
-    },
-    "twoFactor": {
-      "title": "Two-step verification",
-      "subtitle": "Enter the code from your authenticator app to finish signing in.",
-      "codeLabel": "Authentication code",
-      "codePlaceholder": "Enter the six-digit code",
-      "codeRequired": "Enter the code from your authenticator app.",
-      "recoveryLabel": "Recovery code",
-      "recoveryPlaceholder": "Enter a recovery code",
-      "recoveryRequired": "Enter a recovery code.",
-      "useRecoveryCode": "Use a recovery code instead",
-      "useAuthCode": "Use an authentication code instead",
-      "submit": "Verify",
-      "genericError": "Couldn't verify that code. Please try again."
-    },
-    "forgotPassword": {
-      "title": "Reset your password",
-      "subtitle": "Enter your email and we'll send you a link to set a new password.",
-      "backToSignIn": "Back to sign in",
-      "emailLabel": "Email",
-      "emailPlaceholder": "Insert your email",
-      "emailRequired": "Email is required.",
-      "emailInvalid": "Enter a valid email address.",
-      "submit": "Send reset link",
-      "success": "If that email has an account, a reset link is on its way.",
-      "alreadySignedIn": "You're already signed in.",
-      "genericError": "Couldn't send the reset link. Please try again."
-    },
-    "resetPassword": {
-      "title": "Set a new password",
-      "subtitle": "Choose a password you haven't used before.",
-      "backToSignIn": "Back to sign in",
-      "passwordPlaceholder": "At least 8 characters",
-      "passwordConfirmationPlaceholder": "Re-enter the new password",
-      "passwordLabel": "New password",
-      "passwordConfirmationLabel": "Confirm new password",
-      "passwordRequired": "Password is required.",
-      "passwordTooShort": "Password must be at least 8 characters.",
-      "passwordConfirmationRequired": "Please confirm the password.",
-      "passwordConfirmationMismatch": "Passwords do not match.",
-      "submit": "Reset password",
-      "success": "Password reset. Please sign in.",
-      "genericError": "Couldn't reset the password. Please try again."
-    }
-  },
-  "account": {
-    "description": "Manage your own profile, password, and two-factor authentication.",
-    "genericError": "Something went wrong. Please try again.",
-    "profile": {
-      "title": "Profile",
-      "nameLabel": "Full name",
-      "emailLabel": "Email",
-      "nameRequired": "Name is required.",
-      "emailRequired": "Email is required.",
-      "emailInvalid": "Enter a valid email address.",
-      "submit": "Save",
-      "success": "Profile updated."
-    },
-    "password": {
-      "title": "Password",
-      "currentLabel": "Current password",
-      "newLabel": "New password",
-      "confirmLabel": "Confirm new password",
-      "currentRequired": "Current password is required.",
-      "newRequired": "New password is required.",
-      "newTooShort": "Password must be at least 8 characters.",
-      "confirmRequired": "Please confirm the new password.",
-      "confirmMismatch": "Passwords do not match.",
-      "submit": "Change password",
-      "success": "Password changed."
-    },
-    "twoFactor": {
-      "title": "Two-factor authentication",
-      "description": "Require an authenticator-app code in addition to your password when signing in.",
-      "enableButton": "Enable two-factor authentication",
-      "activeBadge": "Two-factor authentication is set up",
-      "codeLabel": "Authentication code",
-      "codePlaceholder": "123456",
-      "confirmButton": "Confirm",
-      "confirmSuccess": "Two-factor authentication confirmed.",
-      "recoveryCodesTitle": "Recovery codes",
-      "regenerateButton": "Regenerate recovery codes",
-      "disableButton": "Disable two-factor authentication"
-    },
-    "confirmPassword": {
-      "title": "Confirm your password",
-      "description": "For your security, please confirm your password to continue.",
-      "passwordLabel": "Password",
-      "cancel": "Cancel",
-      "submit": "Confirm"
-    }
-  },
-  "users": {
-    "description": "Operations and admin accounts on the dashboard. Members register from the app and never appear here.",
-    "searchPlaceholder": "Search by name, phone or email",
-    "roleFilterPlaceholder": "Filter by role",
-    "columns": {
-      "name": "Name",
-      "phone": "Phone",
-      "email": "Email",
-      "role": "Role",
-      "status": "Status",
-      "actions": "Actions"
-    },
-    "status": {
-      "active": "Active",
-      "deactivated": "Deactivated",
-      "blocked": "Blocked"
-    },
-    "create": {
-      "button": "New user",
-      "title": "New user",
-      "success": "User created."
-    },
-    "edit": {
-      "title": "Edit user",
-      "button": "Edit",
-      "success": "Profile updated."
-    },
-    "changeStatus": {
-      "button": "Change status",
-      "title": "Change status",
-      "warning": "Deactivating or blocking signs this user out of every device immediately.",
-      "reasonLabel": "Reason (optional)",
-      "reasonPlaceholder": "Why is the status changing?",
-      "success": "Status updated."
-    },
-    "changeRole": {
-      "button": "Change role",
-      "title": "Change role",
-      "success": "Role updated."
-    },
-    "form": {
-      "name": "Full name",
-      "phone": "Phone",
-      "phonePlaceholder": "09XXXXXXXX",
-      "email": "Email",
-      "password": "Password",
-      "passwordConfirmation": "Confirm password",
-      "role": "Role",
-      "rolePlaceholder": "Select a role",
-      "submit": "Save",
-      "cancel": "Cancel"
-    },
-    "validation": {
-      "nameRequired": "Name is required.",
-      "phoneRequired": "Phone is required.",
-      "phoneInvalid": "Enter a valid Syrian mobile number (09XXXXXXXX).",
-      "emailRequired": "Email is required.",
-      "emailInvalid": "Enter a valid email address.",
-      "passwordRequired": "Password is required.",
-      "passwordTooShort": "Password must be at least 8 characters.",
-      "passwordConfirmationMismatch": "Passwords do not match.",
-      "roleRequired": "Role is required."
-    },
-    "loadError": "Couldn't load users. You may not have permission to view this page.",
-    "empty": "No users found.",
-    "stats": {
-      "total": "Total users"
-    }
-  },
-  "branches": {
-    "columns": {
-      "name": "Name",
-      "city": "City",
-      "timezone": "Timezone",
-      "isActive": "Active"
-    },
-    "isActiveYes": "Active",
-    "isActiveNo": "Inactive",
-    "create": {
-      "button": "New branch",
-      "title": "New branch",
-      "success": "Branch created."
-    },
-    "edit": {
-      "title": "Edit branch",
-      "success": "Branch updated."
-    },
-    "delete": {
-      "success": "Branch deleted.",
-      "cascadeWarning": "Deleting this branch also deletes every building, floor, zone, space, resource, and seat/desk under it."
-    },
-    "form": {
-      "name": "Name",
-      "city": "City",
-      "timezone": "Timezone",
-      "isActive": "Active"
-    },
-    "loadError": "Couldn't load branches. You may not have permission to view this page.",
-    "stats": {
-      "total": "Total branches",
-      "active": "Active",
-      "inactive": "Inactive"
-    }
-  },
-  "buildings": {
-    "columns": {
-      "branch": "Branch",
-      "name": "Name",
-      "floorCount": "Floors"
-    },
-    "create": {
-      "button": "New building",
-      "title": "New building",
-      "success": "Building created."
-    },
-    "edit": {
-      "title": "Edit building",
-      "success": "Building updated."
-    },
-    "delete": {
-      "success": "Building deleted.",
-      "cascadeWarning": "Deleting this building also deletes every floor, zone, space, resource, and seat/desk under it."
-    },
-    "form": {
-      "branch": "Branch",
-      "name": "Name",
-      "floorCount": "Number of floors"
-    },
-    "loadError": "Couldn't load buildings. You may not have permission to view this page.",
-    "stats": {
-      "total": "Total buildings",
-      "totalFloors": "Total floors"
-    }
-  },
-  "floors": {
-    "columns": {
-      "building": "Building",
-      "label": "Label",
-      "sortOrder": "Order"
-    },
-    "create": {
-      "button": "New floor",
-      "title": "New floor",
-      "success": "Floor created."
-    },
-    "edit": {
-      "title": "Edit floor",
-      "success": "Floor updated."
-    },
-    "delete": {
-      "success": "Floor deleted.",
-      "cascadeWarning": "Deleting this floor also deletes every zone and space under it."
-    },
-    "form": {
-      "branch": "Branch",
-      "building": "Building",
-      "label": "Label",
-      "sortOrder": "Sort order"
-    },
-    "loadError": "Couldn't load floors. You may not have permission to view this page."
-  },
-  "zones": {
-    "columns": {
-      "floor": "Floor",
-      "label": "Label",
-      "sortOrder": "Order"
-    },
-    "create": {
-      "button": "New zone",
-      "title": "New zone",
-      "success": "Zone created."
-    },
-    "edit": {
-      "title": "Edit zone",
-      "success": "Zone updated."
-    },
-    "delete": {
-      "success": "Zone deleted.",
-      "cascadeWarning": "Deleting this zone also deletes every space under it."
-    },
-    "form": {
-      "branch": "Branch",
-      "building": "Building",
-      "floor": "Floor",
-      "label": "Label",
-      "sortOrder": "Sort order"
-    },
-    "loadError": "Couldn't load zones. You may not have permission to view this page."
-  },
-  "operationalStatus": {
-    "active": "Active",
-    "maintenance": "Under maintenance",
-    "retired": "Retired"
-  },
-  "spaces": {
-    "columns": {
-      "image": "Image",
-      "building": "Building",
-      "zone": "Zone",
-      "spaceType": "Type",
-      "capacity": "Capacity",
-      "hourlyRate": "Hourly rate",
-      "status": "Status"
-    },
-    "spaceType": {
-      "co_space": "Co-working space",
-      "room": "Room",
-      "business": "Business space",
-      "event_hall": "Event hall"
-    },
-    "create": {
-      "button": "New space",
-      "title": "New space",
-      "success": "Space created."
-    },
-    "edit": {
-      "title": "Edit space",
-      "success": "Space updated."
-    },
-    "delete": {
-      "success": "Space deleted.",
-      "cascadeWarning": "Deleting this space also deletes every resource and seat/desk under it."
-    },
-    "changeStatus": {
-      "button": "Change status",
-      "title": "Change status",
-      "statusLabel": "Status",
-      "reasonLabel": "Reason (optional)",
-      "success": "Status updated."
-    },
-    "form": {
-      "branch": "Branch",
-      "building": "Building",
-      "zone": "Zone (optional)",
-      "spaceType": "Type",
-      "allocationModel": "Allocation model (optional)",
-      "isLockable": "Lockable",
-      "capacity": "Capacity",
-      "hourlyRatePoints": "Hourly rate in points (optional)",
-      "image": "Image (optional)",
-      "images": "Images (optional)"
-    },
-    "loadError": "Couldn't load spaces. You may not have permission to view this page.",
-    "stats": {
-      "total": "Total spaces"
-    }
-  },
-  "resources": {
-    "columns": {
-      "space": "Space",
-      "name": "Name",
-      "category": "Category",
-      "quantity": "Quantity",
-      "status": "Status"
-    },
-    "create": {
-      "button": "New resource",
-      "title": "New resource",
-      "success": "Resource created."
-    },
-    "edit": {
-      "title": "Edit resource",
-      "success": "Resource updated."
-    },
-    "delete": {
-      "success": "Resource deleted."
-    },
-    "changeStatus": {
-      "button": "Change status",
-      "title": "Change status",
-      "statusLabel": "Status",
-      "reasonLabel": "Reason (optional)",
-      "success": "Status updated."
-    },
-    "form": {
-      "branch": "Branch",
-      "building": "Building",
-      "zone": "Zone (optional)",
-      "space": "Space",
-      "name": "Name",
-      "category": "Category",
-      "quantity": "Quantity"
-    },
-    "loadError": "Couldn't load resources. You may not have permission to view this page.",
-    "stats": {
-      "total": "Total resources"
-    }
-  },
-  "seatsDesks": {
-    "columns": {
-      "space": "Space",
-      "label": "Label",
-      "qrPointId": "QR point"
-    },
-    "create": {
-      "button": "New seat/desk",
-      "title": "New seat/desk",
-      "success": "Seat/desk created."
-    },
-    "edit": {
-      "title": "Edit seat/desk",
-      "success": "Seat/desk updated."
-    },
-    "delete": {
-      "success": "Seat/desk deleted."
-    },
-    "form": {
-      "branch": "Branch",
-      "building": "Building",
-      "zone": "Zone (optional)",
-      "space": "Space",
-      "label": "Label",
-      "qrPointId": "QR point ID (optional)"
-    },
-    "loadError": "Couldn't load seats & desks. You may not have permission to view this page."
-  },
-  "businessHours": {
-    "branchLabel": "Branch",
-    "branchPlaceholder": "Select a branch",
-    "tabs": {
-      "weeklySchedule": "Weekly schedule",
-      "exceptions": "Exceptions"
-    },
-    "days": {
-      "sunday": "Sunday",
-      "monday": "Monday",
-      "tuesday": "Tuesday",
-      "wednesday": "Wednesday",
-      "thursday": "Thursday",
-      "friday": "Friday",
-      "saturday": "Saturday"
-    },
-    "columns": {
-      "dayOfWeek": "Day",
-      "period": "Period",
-      "openTime": "Opens",
-      "closeTime": "Closes"
-    },
-    "create": {
-      "button": "New hours",
-      "title": "New business hours",
-      "success": "Business hours created."
-    },
-    "bulkCreate": {
-      "title": "New business hours",
-      "days": "Days",
-      "workDays": "Sat – Thu",
-      "selectAll": "Select all days",
-      "clearAll": "Clear all",
-      "daysRequired": "Select at least one day.",
-      "success": "Business hours created for {count} day(s)."
-    },
-    "edit": {
-      "title": "Edit business hours",
-      "success": "Business hours updated."
-    },
-    "delete": {
-      "success": "Business hours deleted."
-    },
-    "form": {
-      "dayOfWeek": "Day of week",
-      "openTime": "Opens at",
-      "closeTime": "Closes at"
-    },
-    "validation": {
-      "timeFormat": "Enter a time as HH:mm, e.g. 08:00."
-    },
-    "loadError": "Couldn't load business hours. You may not have permission to view this page.",
-    "empty": "No business hours found for this branch.",
-    "exceptions": {
-      "columns": {
-        "date": "Date",
-        "isClosed": "Closed",
-        "hours": "Hours",
-        "reason": "Reason"
-      },
-      "isClosedYes": "Closed",
-      "isClosedNo": "Open",
-      "create": {
-        "button": "New exception",
-        "title": "New exception",
-        "success": "Exception created."
-      },
-      "edit": {
-        "title": "Edit exception",
-        "success": "Exception updated."
-      },
-      "delete": {
-        "success": "Exception deleted."
-      },
-      "form": {
-        "date": "Date (YYYY-MM-DD)",
-        "isClosed": "Closed all day",
-        "openTime": "Opens at",
-        "closeTime": "Closes at",
-        "reason": "Reason (optional)"
-      },
-      "validation": {
-        "dateFormat": "Enter a date as YYYY-MM-DD."
-      },
-      "empty": "No exceptions found for this branch."
-    }
-  },
-  "packages": {
-    "columns": {
-      "name": "Name",
-      "type": "Type",
-      "price": "Price",
-      "duration": "Duration (days)",
-      "isActive": "Active",
-      "module": "Module",
-      "balances": "Balances",
-      "features": "Features"
-    },
-    "isActiveYes": "Active",
-    "isActiveNo": "Inactive",
-    "type": {
-      "subscription": "Subscription",
-      "oneTime": "One-time"
-    },
-    "create": {
-      "button": "New plan",
-      "title": "New plan",
-      "success": "Plan created."
-    },
-    "edit": {
-      "title": "Edit plan",
-      "success": "Plan updated."
-    },
-    "delete": {
-      "success": "Plan deleted."
-    },
-    "form": {
-      "name": "Name",
-      "isSubscription": "Subscription plan",
-      "pricePoints": "Price (points)",
-      "durationDays": "Duration (days)",
-      "includedHours": "Included hours",
-      "overageRatePoints": "Overage rate (points per hour)",
-      "isActive": "Active",
-      "order": "Display order",
-      "subtitle": "Subtitle",
-      "module": "Assigned Module",
-      "selectModule": "Select Module"
-    },
-    "loadError": "Couldn't load plans. You may not have permission to view this page.",
-    "stats": {
-      "total": "Total plans",
-      "active": "Active",
-      "subscriptions": "Subscriptions"
-    },
-    "noModule": "No Module",
-    "tabs": {
-      "basic": "Basic Info",
-      "balances": "Included Balances",
-      "features": "Features"
-    },
-    "sections": {
-      "basicInfo": "Basic Information",
-      "pricing": "Pricing & Module",
-      "displaySettings": "Display Settings"
-    },
-    "balances": {
-      "includedDescription": "Specify balances and allowances automatically included with this plan.",
-      "add": "Add Balance",
-      "empty": "No included balances added to this plan.",
-      "amountPoints": "Amount / Credit (points)",
-      "category": "Balance Category",
-      "restrictedSpace": "Restricted Space",
-      "selectSpace": "Select Space",
-      "description": "Description",
-      "totalIncluded": "Total Included Balances",
-      "categories": {
-        "cafe": "Café Balance",
-        "printing_internet": "Printing & Internet",
-        "general": "General Balance",
-        "space_specific": "Space Specific"
-      }
-    },
-    "features": {
-      "userVisible": "User-Visible Features",
-      "add": "Add Feature",
-      "edit": "Edit Feature",
-      "name": "Feature Name",
-      "value": "Value / Details",
-      "icon": "Icon",
-      "order": "Display Order",
-      "isIncluded": "Included",
-      "notIncluded": "Not Included",
-      "save": "Save Feature",
-      "empty": "No features added.",
-      "details": "Details"
-    },
-    "actions": {
-      "cancel": "Cancel",
-      "save": "Save"
-    },
-    "modules": {
-      "title": "Plan Modules",
-      "backToPlans": "Back to Plans",
-      "create": {
-        "button": "New Module",
-        "title": "Add New Plan Module",
-        "success": "Module created successfully."
-      },
-      "edit": {
-        "title": "Edit Plan Module",
-        "success": "Module updated successfully."
-      },
-      "delete": {
-        "success": "Module deleted successfully."
-      },
-      "columns": {
-        "slug": "Slug",
-        "plansCount": "Plans Count"
-      },
-      "stats": {
-        "total": "Total Modules",
-        "active": "Active Modules"
-      }
-    }
-  },
-  "events": {
-    "columns": {
-      "image": "Image",
-      "title": "Title",
-      "category": "Category",
-      "startAt": "Start date & time",
-      "location": "Location",
-      "capacity": "Capacity",
-      "status": "Status",
-      "price": "Price",
-      "requiresApproval": "Approval"
-    },
-    "status": {
-      "draft": "Draft",
-      "published": "Published",
-      "cancelled": "Cancelled"
-    },
-    "create": {
-      "button": "New event",
-      "title": "New event",
-      "success": "Event created."
-    },
-    "edit": {
-      "title": "Edit event",
-      "success": "Event updated."
-    },
-    "delete": {
-      "success": "Event deleted."
-    },
-    "form": {
-      "title": "Title",
-      "description": "Description",
-      "category": "Category",
-      "location": "Location",
-      "capacity": "Capacity",
-      "imageUrl": "Image",
-      "status": "Status",
-      "order": "Display order",
-      "isFree": "Free event",
-      "pricePoints": "Ticket price (points)",
-      "requiresApproval": "Needs approval before admitting",
-      "externalFormUrl": "External registration form (link)",
-      "schedule": "Schedule"
-    },
-    "loadError": "Couldn't load events. You may not have permission to view this page.",
-    "stats": {
-      "total": "Total events",
-      "published": "Published",
-      "draft": "Drafts"
-    },
-    "free": "Free",
-    "approval": {
-      "title": "Registrations",
-      "all": "All",
-      "pending": "Awaiting review",
-      "approved": "Approved",
-      "rejected": "Rejected",
-      "approve": "Approve",
-      "reject": "Reject",
-      "rejectAll": "Reject all pending",
-      "rejectReason": "Reason for rejection",
-      "rejectReasonRequired": "A reason is required.",
-      "approvedToast": "Registration approved.",
-      "rejectedToast": "Registration rejected.",
-      "rejectAllConfirm": "Turn down every registration still awaiting a decision?",
-      "empty": "No registrations yet.",
-      "answers": "Answers",
-      "noAnswers": "No form answers.",
-      "seatNote": "Pending and approved registrations both hold a seat.",
-      "loadError": "Could not load registrations.",
-      "actionError": "The action could not be completed.",
-      "bulkReason": "Review closed by operations.",
-      "columns": {
-        "name": "Name",
-        "email": "Email",
-        "phone": "Phone",
-        "status": "Status",
-        "registeredAt": "Registered",
-        "reason": "Reason"
-      }
-    },
-    "fields": {
-      "title": "Registration form",
-      "add": "Add field",
-      "edit": "Edit field",
-      "empty": "This event asks no questions. Members register with their account details only.",
-      "key": "Key",
-      "label": "Label",
-      "placeholder": "Placeholder",
-      "type": "Type",
-      "options": "Choices",
-      "addOption": "Add a choice",
-      "required": "Required",
-      "active": "Active",
-      "inactive": "Hidden",
-      "order": "Order",
-      "reservedKeyNote": "Name, phone and email come from the member account and cannot be asked again.",
-      "keyHint": "Lowercase letters, digits and underscores only.",
-      "loadError": "Could not load the registration form.",
-      "saveError": "Could not save the field.",
-      "created": "Field added.",
-      "updated": "Field updated.",
-      "deleted": "Field deleted.",
-      "deleteConfirm": "Delete this field? Answers already given are removed with it.",
-      "manage": "Registration form"
-    }
-  },
-  "communityMembers": {
-    "columns": {
-      "name": "Name",
-      "category": "Category",
-      "company": "Company",
-      "title": "Job title",
-      "yearJoined": "Year joined",
-      "published": "Status",
-      "photo": "Photo"
-    },
-    "categories": {
-      "pioneers": "Pioneers",
-      "growth_partners": "Growth Partners",
-      "investors": "Investors",
-      "impact_partners": "Impact Partners"
-    },
-    "status": {
-      "published": "Published",
-      "hidden": "Hidden"
-    },
-    "create": {
-      "button": "New member",
-      "title": "New community member",
-      "success": "Community member added."
-    },
-    "edit": {
-      "title": "Edit community member",
-      "success": "Community member updated."
-    },
-    "delete": {
-      "success": "Community member deleted."
-    },
-    "form": {
-      "name": "Name",
-      "category": "Category",
-      "company": "Company",
-      "title": "Job title",
-      "bio": "Bio",
-      "longBio": "Extended bio",
-      "yearJoined": "Year joined",
-      "photoUrl": "Photo",
-      "order": "Display order",
-      "published": "Published"
-    },
-    "loadError": "Couldn't load community members. You may not have permission to view this page.",
-    "stats": {
-      "total": "Total members",
-      "published": "Published",
-      "hidden": "Hidden"
-    }
-  },
-  "currencies": {
-    "columns": {
-      "code": "Code",
-      "name": "Name",
-      "symbol": "Symbol",
-      "decimalPlaces": "Decimals",
-      "order": "Display order",
-      "isActive": "Status"
-    },
-    "baseBadge": "Base",
-    "isActiveYes": "Active",
-    "isActiveNo": "Inactive",
-    "create": {
-      "button": "New currency",
-      "title": "New currency",
-      "success": "Currency created."
-    },
-    "edit": {
-      "title": "Edit currency",
-      "success": "Currency updated."
-    },
-    "form": {
-      "code": "Code",
-      "name": "Name",
-      "symbol": "Symbol",
-      "decimalPlaces": "Decimal places",
-      "order": "Display order"
-    },
-    "validation": {
-      "codeFormat": "Use exactly three uppercase letters, for example EUR."
-    },
-    "actions": {
-      "setBase": "Set as base currency",
-      "activate": "Activate",
-      "deactivate": "Deactivate"
-    },
-    "setBase": {
-      "title": "Set as base currency?",
-      "content": "Every stored amount is reckoned against the base currency. Making {code} the base changes what all existing exchange rates are measured in, and it cannot be undone from this screen.",
-      "confirm": "Set as base",
-      "cancel": "Cancel",
-      "success": "Base currency updated."
-    },
-    "status": {
-      "activateSuccess": "Currency activated.",
-      "deactivateSuccess": "Currency deactivated."
-    },
-    "loadError": "Couldn't load currencies. You may not have permission to view this page.",
-    "stats": {
-      "total": "Total currencies",
-      "active": "Active",
-      "inactive": "Inactive"
-    }
-  },
-  "exchangeRates": {
-    "columns": {
-      "currencyCode": "Currency",
-      "rateToBase": "Rate (SYP per 1 USD)",
-      "effectiveFrom": "Effective from"
-    },
-    "latestBadge": "Latest",
-    "create": {
-      "button": "New rate",
-      "title": "New exchange rate",
-      "success": "Exchange rate created."
-    },
-    "form": {
-      "currencyCode": "Currency",
-      "rateToBase": "Rate (SYP per 1 USD)",
-      "effectiveFrom": "Effective from date"
-    },
-    "validation": {
-      "effectiveFromFormat": "Enter a date as YYYY-MM-DD."
-    },
-    "loadError": "Couldn't load exchange rates. You may not have permission to view this page.",
-    "empty": "No exchange rates found.",
-    "stats": {
-      "latestUsd": "Latest USD → SYP rate"
-    },
-    "suggestion": {
-      "title": "Daily Exchange Rate Suggestion (sp-today)",
-      "description": "A new exchange rate was automatically fetched from sp-today pending your review.",
-      "rate": "Suggested rate",
-      "currentRate": "Current rate",
-      "deviation": "Deviation",
-      "fetchedAt": "Fetched at",
-      "staleWarning": "Warning: Data source has not updated for more than 48 hours.",
-      "accept": "Accept suggested rate",
-      "modifyAndAccept": "Edit & accept",
-      "dismiss": "Dismiss",
-      "acceptSuccess": "Suggestion accepted and exchange rate applied successfully.",
-      "dismissSuccess": "Suggestion dismissed.",
-      "dismissConfirmTitle": "Dismiss Suggestion",
-      "dismissConfirmContent": "Are you sure you want to dismiss this rate suggestion?"
-    },
-    "sync": {
-      "button": "Sync now from sp-today",
-      "success": "Exchange rates synced successfully."
-    }
-  },
-  "points": {
-    "unit": "points",
-    "label": "Points",
-    "rate": "Point rate",
-    "previewLoading": "Calculating…",
-    "belowOnePoint": "This amount is too small to buy a single point. Enter a larger amount.",
-    "previewFailed": "Could not calculate the point value. Check the amount and try again.",
-    "rateWarning": "Changing the point rate reprices the entire catalogue and revalues every wallet balance. Plans, spaces and existing balances are all denominated in points — only what they are worth in cash moves.",
-    "rateLabel": "Point rate (USD per point)",
-    "credited": "Points credited",
-    "newBalance": "New balance"
-  },
-  "walletTopUps": {
-    "description": "Record a manual wallet top-up taken at reception, for a member or a company wallet.",
-    "recipientType": {
-      "user": "Member wallet",
-      "company": "Company wallet"
-    },
-    "paymentMethod": {
-      "cash": "Cash",
-      "sham": "Sham Cash",
-      "mtn": "MTN Cash",
-      "syriatel": "Syriatel Cash"
-    },
-    "form": {
-      "recipientType": "Top up",
-      "user": "Member",
-      "company": "Company",
-      "amount": "Amount",
-      "paymentMethod": "Payment method",
-      "description": "Description (optional)"
-    },
-    "validation": {
-      "amountFormat": "Enter an amount of at least 0.01, using at most two decimals.",
-      "userRequired": "Select a member.",
-      "companyRequired": "Select a company."
-    },
-    "submit": {
-      "button": "Record top-up",
-      "success": "Wallet topped up."
-    },
-    "loadError": "Couldn't load members and companies. You may not have permission to view this page.",
-    "title": "Wallet Top-Up",
-    "receptionSubtitle": "ADD OS Reception Desk • Manual Top-Up",
-    "searchMember": "Search Member",
-    "searchMemberPlaceholder": "Search by name or phone...",
-    "searchCompany": "Search Company",
-    "searchCompanyPlaceholder": "Search by company name or contract ref...",
-    "generalBalance": "General Balance",
-    "dedicatedBalance": "Dedicated Balance",
-    "dedicatedBalanceOptional": "Dedicated Balance Type (Optional)",
-    "expiryDateOptional": "Expiry Date (Optional)",
-    "walletPreview": "Wallet & Balance Preview",
-    "currentGeneralBalance": "Current General Balance",
-    "topUpAmount": "Top-Up Amount",
-    "newGeneralBalance": "Expected New Balance",
-    "addCreditButton": "Confirm & Add Credit",
-    "selectRecipientFirst": "Please select a member or company to view balance and account details.",
-    "balanceScope": "Credit Destination",
-    "personalBalance": "Personal Balance (Member's personal wallet)",
-    "companyBalance": "Company Balance (Affiliated company wallet)",
-    "companyInactiveWarning": "Notice: This company is currently inactive and cannot receive wallet credit.",
-    "inactive": "Inactive",
-    "active": "Active",
-    "affiliation": "Affiliated with:",
-    "loadingBalance": "Checking current balance...",
-    "cannotTopUpInactive": "Cannot top up wallet for an inactive company."
-  },
-  "cashRegister": {
-    "description": "Open, reconcile, and close daily cash drawer sessions for front-desk reception.",
-    "status": {
-      "open": "Open",
-      "closed": "Closed"
-    },
-    "openButton": "Open register session",
-    "closeButton": "Close register session",
-    "noOpenSession": "No active cash drawer session for your account.",
-    "historyTitle": "Register sessions history",
-    "openSuccess": "Cash register session opened.",
-    "openError": "Failed to open register session.",
-    "closeSuccess": "Cash register session closed and reconciled.",
-    "closeError": "Failed to close register session.",
-    "columns": {
-      "id": "ID",
-      "operator": "Operator",
-      "branch": "Branch",
-      "status": "Status",
-      "openedAt": "Opened at",
-      "closedAt": "Closed at",
-      "openingBalance": "Opening balance",
-      "expectedBalance": "Expected balance",
-      "closingBalance": "Closing balance",
-      "difference": "Difference"
-    },
-    "openModal": {
-      "title": "Open Cash Register Session",
-      "branch": "Branch",
-      "openingBalance": "Initial opening cash balance",
-      "notes": "Notes"
-    },
-    "closeModal": {
-      "title": "Close Cash Register Session",
-      "closingBalance": "Actual counted cash balance",
-      "notes": "Reconciliation notes"
-    }
-  },
-  "approvalQueue": {
-    "description": "Bookings waiting on a reception decision. Only spaces that require approval appear here.",
-    "loadError": "Couldn't load the approval queue. You may not have permission to view this page.",
-    "empty": "Nothing is waiting for approval.",
-    "columns": {
-      "requester": "Requester",
-      "space": "Space",
-      "when": "Booked for",
-      "requested": "Requested",
-      "actions": "Actions"
-    },
-    "approve": {
-      "button": "Approve",
-      "success": "Booking approved."
-    },
-    "reject": {
-      "button": "Reject",
-      "title": "Reject booking",
-      "reasonLabel": "Reason for rejection",
-      "reasonPlaceholder": "The requester sees this, so say what would make it work.",
-      "reasonRequired": "Give a reason for the rejection.",
-      "success": "Booking rejected."
-    }
-  },
-  "activeSessions": {
-    "description": "Everyone currently checked in, bookings and walk-ins together.",
-    "loadError": "Couldn't load active sessions. You may not have permission to view this page.",
-    "empty": "Nobody is checked in right now.",
-    "refresh": "Refresh",
-    "overdue": "Overdue",
-    "onTime": "On time",
-    "columns": {
-      "occupant": "Occupant",
-      "space": "Space",
-      "type": "Type",
-      "checkedInAt": "Checked in",
-      "status": "Status",
-      "actions": "Actions"
-    },
-    "type": {
-      "booking": "Booking",
-      "walkin": "Walk-in"
-    },
-    "checkOut": {
-      "button": "Check out",
-      "title": "Check out session",
-      "atLabel": "Checked out at",
-      "futureNotAllowed": "The check-out time cannot be in the future.",
-      "settleLabel": "Settle payment now",
-      "settleNone": "Don't settle now",
-      "success": "Session checked out.",
-      "settleSuccess": "Payment settled."
-    },
-    "extend": {
-      "button": "Extend",
-      "title": "Extend booking",
-      "minutesLabel": "Additional minutes",
-      "minutesInvalid": "Enter a whole number of minutes, 1 or more.",
-      "success": "Booking extended."
-    },
-    "cancel": {
-      "button": "Cancel booking",
-      "confirmTitle": "Cancel this booking?",
-      "confirmText": "The member's booking ends now and the space is freed.",
-      "confirmOk": "Cancel booking",
-      "confirmCancel": "Keep it",
-      "success": "Booking cancelled."
-    }
-  },
-  "shortcuts": {
-    "title": "Shortcuts"
-  },
-  "nav": {
-    "sections": {
-      "dashboard": "Dashboard",
-      "spatial": "Spatial structure",
-      "system": "System & permissions",
-      "members": "Members",
-      "bookings": "Bookings",
-      "plans": "Plans & subscriptions",
-      "access": "Access control",
-      "payments": "Payments",
-      "community": "Community & events",
-      "incubation": "Incubation & acceleration",
-      "address": "Business address",
-      "cms": "Website management",
-      "settings": "Settings"
-    },
-    "pages": {
-      "overview": "Overview",
-      "branches": "Branches",
-      "buildings": "Buildings",
-      "floors": "Floors",
-      "zones": "Zones",
-      "spaces": "Spaces",
-      "resources": "Resources",
-      "seatsDesks": "Seats & Desks",
-      "businessHours": "Business Hours",
-      "users": "Users",
-      "roles": "Roles & permissions",
-      "individuals": "Individuals",
-      "companies": "Companies",
-      "memberships": "Memberships",
-      "approvalQueue": "Approval queue",
-      "activeSessions": "Active sessions",
-      "allBookings": "All bookings",
-      "calendar": "Calendar",
-      "packages": "Packages",
-      "wallet": "Wallet",
-      "locks": "Locks",
-      "accessLogs": "Access logs",
-      "transactions": "Transactions",
-      "paymentMethods": "Payment methods",
-      "currencies": "Currencies",
-      "exchangeRates": "Exchange rates",
-      "walletTopUps": "Wallet top-ups",
-      "cashRegister": "Cash register",
-      "events": "Events",
-      "community": "Community",
-      "cafe": "Café",
-      "incubate": "Incubate",
-      "accelerate": "Accelerate",
-      "mentors": "Mentors",
-      "privateOfficeRequests": "Private office requests",
-      "content": "Content",
-      "partners": "Partners",
-      "announcements": "Announcements",
-      "founders": "Founders",
-      "contactLinks": "Contact links",
-      "notifications": "Broadcast notifications",
-      "accountSecurity": "Account & security",
-      "systemSettings": "System settings",
-      "eventCategories": "Event Categories",
-      "receptionDesk": "Reception Desk",
-      "closeSession": "Close Session",
-      "modules": "Modules",
-      "walletCredited": "Wallet Credited",
-      "eventCancellation": "Event Cancellation",
-      "operationsRequests": "Operations Requests",
-      "eventAttendees": "Registrations"
-    }
-  },
-  "resourceCrud": {
-    "mutations": {
-      "genericError": "Something went wrong. Please try again.",
-      "permissionError": "You don't have permission for this action."
-    },
-    "table": {
-      "actionsColumn": "Actions",
-      "empty": "No records found.",
-      "editAction": "Edit",
-      "deleteAction": "Delete",
-      "deleteConfirmTitle": "Delete this record?",
-      "deleteConfirmOk": "Delete",
-      "deleteConfirmCancel": "Cancel",
-      "refreshAction": "Refresh data"
-    },
-    "form": {
-      "submit": "Save",
-      "cancel": "Cancel",
-      "arabicPlaceholder": "Arabic",
-      "englishPlaceholder": "English",
-      "uploadImage": "Upload image",
-      "uploadImagePrompt": "Click or drag image here to upload",
-      "uploadImageHint": "Supports JPG, PNG, WEBP up to 10MB",
-      "uploadSuccess": "Image uploaded successfully",
-      "uploading": "Uploading image...",
-      "changeImage": "Change image",
-      "removeImage": "Remove image",
-      "uploadImagesPrompt": "Click or drag images here to upload",
-      "uploadImagesHint": "Supports JPG, PNG, WEBP up to 10MB (multiple files allowed)",
-      "addImages": "Add more images",
-      "primaryImage": "Primary",
-      "setPrimary": "Set as primary image",
-      "imagesCount": "images",
-      "save": "Save"
-    },
-    "validation": {
-      "required": "{field} is required."
-    }
-  },
-  "privateOfficeRequests": {
-    "description": "Prospects requesting a private office, moving from requested to quoted to contracted.",
-    "columns": {
-      "prospectName": "Prospect",
-      "contact": "Contact",
-      "status": "Status",
-      "quoteRef": "Quote ref",
-      "actions": "Actions"
-    },
-    "status": {
-      "requested": "Requested",
-      "quoted": "Quoted",
-      "contracted": "Contracted"
-    },
-    "create": {
-      "button": "New request",
-      "title": "New private office request",
-      "success": "Request created."
-    },
-    "markAsQuoted": {
-      "button": "Convert to quote",
-      "title": "Convert to quote",
-      "quoteRefLabel": "Quote reference",
-      "quoteRefPlaceholder": "Q-2026-0001",
-      "success": "Request marked as quoted.",
-      "quoteRefRequired": "Quote reference is required."
-    },
-    "contractedLocked": "This request became a company and can no longer change status here.",
-    "delete": {
-      "success": "Request deleted."
-    },
-    "form": {
-      "prospectName": "Prospect name",
-      "contact": "Contact"
-    },
-    "validation": {
-      "prospectNameRequired": "Prospect name is required.",
-      "contactRequired": "Contact is required.",
-      "quoteRefRequired": "Quote reference is required."
-    },
-    "loadError": "Couldn't load private office requests. You may not have permission to view this page.",
-    "empty": "No private office requests found.",
-    "stats": {
-      "total": "Total requests",
-      "requested": "Requested",
-      "quoted": "Quoted",
-      "contracted": "Contracted"
-    }
-  },
-  "companies": {
-    "description": "Companies created from a quoted private office request. Created here only — never self-service.",
-    "columns": {
-      "legalName": "Legal name",
-      "contractRef": "Contract ref",
-      "branch": "Branch",
-      "status": "Status",
-      "actions": "Actions"
-    },
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive"
-    },
-    "create": {
-      "button": "New company",
-      "title": "New company",
-      "success": "Company created.",
-      "noQuotedRequestsTitle": "No quoted requests yet",
-      "noQuotedRequestsBody": "A company can only be created from a quoted private office request. Go to Private Office Requests and convert one to a quote first.",
-      "goToRequests": "Go to Private Office Requests"
-    },
-    "changeStatus": {
-      "button": "Change status",
-      "title": "Change status",
-      "success": "Status updated."
-    },
-    "viewMembers": {
-      "button": "View members"
-    },
-    "form": {
-      "privateOfficeRequest": "Private office request",
-      "branch": "Branch",
-      "legalName": "Legal name",
-      "contractRef": "Contract ref"
-    },
-    "validation": {
-      "privateOfficeRequestRequired": "A quoted request is required.",
-      "branchRequired": "Branch is required.",
-      "legalNameRequired": "Legal name is required.",
-      "contractRefRequired": "Contract ref is required."
-    },
-    "loadError": "Couldn't load companies. You may not have permission to view this page.",
-    "empty": "No companies found.",
-    "stats": {
-      "total": "Total companies",
-      "active": "Active",
-      "inactive": "Inactive"
-    },
-    "detail": {
-      "title": "Company",
-      "loadError": "Couldn't load this company."
-    }
-  },
-  "companyMembers": {
-    "columns": {
-      "member": "Member",
-      "userId": "User ID",
-      "doorAccess": "Door access",
-      "isAdmin": "Admin",
-      "actions": "Actions"
-    },
-    "add": {
-      "button": "Add member",
-      "title": "Add company member",
-      "userLabel": "User",
-      "userRequired": "Select a user.",
-      "doorAccessLabel": "Door access enabled",
-      "adminLabel": "Company admin",
-      "adminHint": "The first admin for a company can only be set here — an existing company admin can only promote another member, not appoint the first one.",
-      "success": "Member added.",
-      "alreadyMemberError": "This user is already a member of this company."
-    },
-    "remove": {
-      "confirmTitle": "Remove this member?",
-      "confirmOk": "Remove",
-      "confirmCancel": "Cancel",
-      "success": "Member removed."
-    }
-  },
-  "systemSettings": {
-    "description": "Global key-value system configuration and parameters.",
-    "searchPlaceholder": "Search settings by key or value...",
-    "refresh": "Refresh",
-    "editTitle": "Edit Setting",
-    "keyLabel": "Key",
-    "typeLabel": "Type",
-    "valueLabel": "Value",
-    "editButton": "Edit",
-    "saveSuccess": "Setting updated.",
-    "saveError": "Failed to update setting.",
-    "invalidJson": "Invalid JSON format.",
-    "loadError": "Couldn't load settings. You may not have permission to view this page.",
-    "columns": {
-      "key": "Setting Key",
-      "type": "Type",
-      "value": "Current Value",
-      "actions": "Actions"
-    }
-  },
-  "announcements": {
-    "columns": {
-      "type": "Type",
-      "startsAt": "Starts at",
-      "endsAt": "Ends at",
-      "status": "Status",
-      "image": "Image"
-    },
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive"
-    },
-    "form": {
-      "type": "Type",
-      "imageUrl": "Banner image",
-      "linkUrl": "Link URL",
-      "startsAt": "Starts at",
-      "endsAt": "Ends at",
-      "sortOrder": "Sort order",
-      "isActive": "Active"
-    },
-    "create": {
-      "button": "New Announcement",
-      "title": "New Announcement",
-      "success": "Announcement created."
-    },
-    "edit": {
-      "title": "Edit Announcement",
-      "success": "Announcement updated."
-    },
-    "delete": {
-      "success": "Announcement deleted."
-    },
-    "stats": {
-      "total": "Total",
-      "active": "Active",
-      "inactive": "Inactive"
-    },
-    "loadError": "Couldn't load announcements."
-  },
-  "partners": {
-    "columns": {
-      "name": "Name",
-      "category": "Category",
-      "websiteUrl": "Website",
-      "status": "Status",
-      "logo": "Logo"
-    },
-    "category": {
-      "local": "Local",
-      "global": "Global"
-    },
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive"
-    },
-    "form": {
-      "name": "Name",
-      "description": "Description",
-      "logoUrl": "Logo",
-      "websiteUrl": "Website URL",
-      "category": "Category",
-      "order": "Display order",
-      "isActive": "Active"
-    },
-    "create": {
-      "button": "New Partner",
-      "title": "New Partner",
-      "success": "Partner created."
-    },
-    "edit": {
-      "title": "Edit Partner",
-      "success": "Partner updated."
-    },
-    "delete": {
-      "success": "Partner deleted."
-    },
-    "stats": {
-      "total": "Total partners",
-      "active": "Active",
-      "inactive": "Inactive"
-    },
-    "loadError": "Couldn't load partners."
-  },
-  "founders": {
-    "columns": {
-      "name": "Name",
-      "role": "Role",
-      "linkedin": "LinkedIn",
-      "order": "Order",
-      "photo": "Photo"
-    },
-    "form": {
-      "name": "Name",
-      "role": "Role",
-      "bio": "Bio",
-      "photoUrl": "Photo",
-      "linkedinUrl": "LinkedIn URL",
-      "twitterUrl": "Twitter / X URL",
-      "order": "Display order"
-    },
-    "create": {
-      "button": "New Founder",
-      "title": "New Founder",
-      "success": "Founder created."
-    },
-    "edit": {
-      "title": "Edit Founder",
-      "success": "Founder updated."
-    },
-    "delete": {
-      "success": "Founder deleted."
-    },
-    "stats": {
-      "total": "Total founders"
-    },
-    "loadError": "Couldn't load founders."
-  },
-  "contactLinks": {
-    "columns": {
-      "type": "Type",
-      "value": "Value",
-      "label": "Label",
-      "status": "Status"
-    },
-    "status": {
-      "visible": "Visible",
-      "hidden": "Hidden"
-    },
-    "form": {
-      "type": "Type",
-      "value": "Value",
-      "label": "Label",
-      "sortOrder": "Sort order",
-      "isVisible": "Visible"
-    },
-    "create": {
-      "button": "New Link",
-      "title": "New Contact Link",
-      "success": "Link created."
-    },
-    "edit": {
-      "title": "Edit Contact Link",
-      "success": "Link updated."
-    },
-    "delete": {
-      "success": "Link deleted."
-    },
-    "stats": {
-      "total": "Total links",
-      "visible": "Visible",
-      "hidden": "Hidden"
-    },
-    "loadError": "Couldn't load contact links."
-  },
-  "broadcastNotifications": {
-    "description": "Send push and in-app notifications to users.",
-    "form": {
-      "titleAr": "Title (Arabic)",
-      "titleEn": "Title (English)",
-      "bodyAr": "Message (Arabic)",
-      "bodyEn": "Message (English)",
-      "target": "Target audience",
-      "roleName": "Role name",
-      "roleNamePlaceholder": "e.g. admin, operations",
-      "userIds": "User IDs",
-      "userIdsPlaceholder": "Enter IDs separated by commas or newlines",
-      "userIdsHint": "Separate multiple IDs with commas or line breaks."
-    },
-    "targets": {
-      "all": "All active users",
-      "role": "By role",
-      "users": "Specific users"
-    },
-    "validation": {
-      "titleRequired": "Title is required.",
-      "bodyRequired": "Message body is required."
-    },
-    "send": "Send Notification",
-    "sendSuccess": "Notification sent successfully.",
-    "sendError": "Failed to send notification."
-  },
-  "eventCategories": {
-    "columns": {
-      "name": "Name",
-      "slug": "Slug",
-      "color": "Color",
-      "icon": "Icon",
-      "order": "Order",
-      "status": "Status"
-    },
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive"
-    },
-    "create": {
-      "button": "New category",
-      "title": "New event category",
-      "success": "Event category created."
-    },
-    "edit": {
-      "title": "Edit event category",
-      "success": "Event category updated."
-    },
-    "delete": {
-      "success": "Event category deleted.",
-      "warning": "Deleting this category will unlink associated events (their category will become unassigned)."
-    },
-    "form": {
-      "name": "Name",
-      "slug": "Slug",
-      "slugPlaceholder": "Leave blank to auto-generate",
-      "description": "Description",
-      "color": "Color (hex code)",
-      "icon": "Icon name (e.g. carbon:education)",
-      "order": "Display order",
-      "isActive": "Active status"
-    },
-    "loadError": "Couldn't load event categories. You may not have permission to view this page.",
-    "stats": {
-      "total": "Total categories",
-      "active": "Active",
-      "inactive": "Inactive"
-    }
-  },
-  "operationsRequests": {
-    "title": "Operations Requests",
-    "subtitle": "Manage and track service requests, bookings, and technical issues.",
-    "viewDetails": "View Details",
-    "allRequests": "All Requests",
-    "serviceCatalog": "Service Catalog",
-    "noRequests": "No requests found",
-    "noServices": "No services found",
-    "filterBranch": "Filter by Branch",
-    "allBranches": "All Branches",
-    "status": {
-      "all": "All",
-      "pending": "Pending",
-      "in_progress": "In Progress",
-      "resolved": "Resolved",
-      "rejected": "Rejected",
-      "cancelled": "Cancelled"
-    },
-    "actions": {
-      "start": "Start Processing",
-      "resolve": "Resolve",
-      "reject": "Reject",
-      "updateStatus": "Update Status",
-      "addService": "Add Service",
-      "editService": "Edit Service",
-      "close": "Close"
-    },
-    "details": {
-      "title": "Request Details",
-      "service": "Service",
-      "status": "Status",
-      "requester": "Requester",
-      "branch": "Branch",
-      "space": "Space",
-      "locationSource": "Location Source",
-      "submittedAt": "Submitted At",
-      "updatedAt": "Updated At",
-      "formResponses": "Submitted Data",
-      "noResponses": "No form fields submitted",
-      "resolutionNote": "Resolution Note",
-      "noteEn": "Resolution Note (English)",
-      "noteAr": "Resolution Note (Arabic)"
-    },
-    "catalog": {
-      "title": "Service Types",
-      "slug": "Slug",
-      "nameEn": "Name (English)",
-      "nameAr": "Name (Arabic)",
-      "descEn": "Description (English)",
-      "descAr": "Description (Arabic)",
-      "method": "Request Method",
-      "comingSoon": "Coming Soon",
-      "available": "Available Now",
-      "active": "Active",
-      "inactive": "Inactive",
-      "makeAvailable": "Make Available",
-      "setComingSoon": "Set as Coming Soon",
-      "confirmStatusChangeTitle": "Change Service Status",
-      "confirmMakeAvailable": "Make service \"{name}\" available for members now? Members will be able to view and request it immediately.",
-      "confirmSetComingSoon": "Mark service \"{name}\" as Coming Soon? It will appear as an upcoming service without the ability to submit requests.",
-      "confirmOk": "Confirm",
-      "confirmCancel": "Cancel",
-      "statusUpdated": "Service status updated successfully",
-      "locationRequired": "Requires Location",
-      "fields": "Form Fields"
-    }
-  },
-  "closeSession": {
-    "title": "Close Session & Checkout",
-    "activeMember": "Active Member",
-    "workspace": "Workspace",
-    "branch": "Branch",
-    "checkIn": "Check-in",
-    "checkOut": "Check-out",
-    "duration": "Duration",
-    "subtotal": "Subtotal",
-    "total": "Total",
-    "paymentStatusPartially": "Partially Paid",
-    "availableBalance": "Available Balance",
-    "remainingCashDue": "Remaining Cash Due",
-    "useWalletBalance": "Use Wallet Balance",
-    "payCashAtReception": "Pay Cash at Reception",
-    "sessionID": "Session ID",
-    "paymentMethod": "Payment Method",
-    "receiptNote": "Receipt Note",
-    "infoNotice": "The remaining balance will be collected in cash and the session status marked as completed upon confirmation.",
-    "submitButton": "Confirm Payment & Close Session",
-    "successMessage": "Session closed and settled successfully."
-  },
-  "walletCredited": {
-    "transactionID": "Transaction ID",
-    "title": "Wallet Credit Receipt",
-    "receptionSubtitle": "ADD OS Reception Desk • Manual Top-Up",
-    "heroTitle": "Wallet Successfully Credited",
-    "heroSubtitle": "Funds have been added to the balance and are available immediately.",
-    "creditedAmount": "Credited Amount",
-    "paymentMethod": "Payment Method",
-    "balanceType": "Balance Type",
-    "expiryDate": "Expiry Date",
-    "newGeneralBalance": "New General Balance",
-    "previousGeneralBalance": "Previous General Balance",
-    "creditedBy": "Credited By",
-    "dateTime": "Date & Time",
-    "shareReceipt": "Share Receipt",
-    "printReceipt": "Print Receipt",
-    "newTopUp": "New Top-Up",
-    "noReceiptData": "No previous top-up transaction data to display.",
-    "backToReception": "Back to Reception"
-  },
-  "reception": {
-    "statusOperational": "Desk Operational",
-    "quickActionsTitle": "Quick Actions",
-    "actions": {
-      "startSession": "Start Session",
-      "registerGuest": "Register Guest",
-      "topUpWallet": "Top Up Wallet",
-      "closeSession": "Close Session"
-    },
-    "upNextTitle": "Up Next",
-    "stats": {
-      "activeSessions": "Active Sessions",
-      "expectedBookings": "Expected Bookings",
-      "pendingGuests": "Pending Guests",
-      "pendingPayments": "Pending Payments"
-    },
-    "vsYesterday": "vs yesterday"
-  },
-  "eventCancellation": {
-    "title": "Event Cancellation Details",
-    "supportSubtitle": "ADD Events • Refund Processing",
-    "heroTitle": "This Event Has Been Cancelled",
-    "heroSubtitle": "Refunds have been processed and balances returned to attendee wallets.",
-    "opsNoteTitle": "Operations Notice",
-    "refundSummaryTitle": "Ticket Refund Summary",
-    "amountPaid": "Amount Paid",
-    "refundedTo": "Refunded To",
-    "refundStatus": "Refund Status",
-    "walletReturnedInfo": "Ticket amounts have been fully refunded to the general wallet balance of all registered attendees."
-  },
-  "members": {
-    "description": "Manage and query individual app members (wallet balances, live sessions, and account status).",
-    "searchPlaceholder": "Search by name, phone, or email...",
-    "statusFilterPlaceholder": "Filter by status",
-    "loadError": "Could not load members list. Please try again later.",
-    "columns": {
-      "member": "Member",
-      "email": "Email",
-      "company": "Company",
-      "status": "Status"
-    },
-    "status": {
-      "active": "Active",
-      "deactivated": "Deactivated",
-      "blocked": "Blocked"
-    },
-    "stats": {
-      "total": "Total Members"
-    },
-    "detail": {
-      "title": "Member Details",
-      "button": "Query Wallet & Sessions",
-      "walletBalance": "Wallet Balance",
-      "generalBalance": "Current General Balance",
-      "loadingBalance": "Loading balance...",
-      "balanceError": "Could not fetch wallet balance.",
-      "activeSessions": "Currently Active Sessions",
-      "loadingSessions": "Loading sessions...",
-      "sessionsError": "Could not fetch active sessions.",
-      "noActiveSessions": "No active sessions currently for this member.",
-      "overdue": "Overdue",
-      "checkedInAt": "Checked in at",
-      "sessionType": {
-        "booking": "Booking",
-        "walkin": "Walk-in"
-      }
-    },
-    "changeStatus": {
-      "button": "Change Status",
-      "title": "Change Member Status",
-      "warning": "Deactivating or blocking a member account immediately revokes all active sessions and access permissions.",
-      "reasonLabel": "Reason (Optional)",
-      "reasonPlaceholder": "Enter reason for status change...",
-      "success": "Member status updated successfully."
-    },
-    "topUp": {
-      "button": "Top Up Wallet",
-      "title": "Top Up Member Wallet",
-      "recipientMember": "Individual Member",
-      "amount": "Amount",
-      "amountPlaceholder": "Enter amount...",
-      "paymentMethod": "Payment Method",
-      "description": "Notes / Remarks",
-      "descriptionPlaceholder": "Optional note...",
-      "submit": "Confirm Top-up",
-      "success": "Wallet topped up successfully."
-    },
-    "profile": {
-      "personalTitle": "Personal Information",
-      "professionalTitle": "Professional Information",
-      "bio": "Bio",
-      "city": "City",
-      "gender": "Gender",
-      "genderMale": "Male",
-      "genderFemale": "Female",
-      "jobTitle": "Job Title",
-      "companyName": "Company Name",
-      "industry": "Industry",
-      "socialLinks": "Professional Links & Social",
-      "noProfileInfo": "Member has not provided additional profile information yet."
-    }
-  },
-  "formFields": {
-    "title": "Form fields",
-    "add": "Add field",
-    "edit": "Edit field",
-    "delete": "Delete field",
-    "empty": "No fields yet. Add one to start building the form.",
-    "key": "Key",
-    "label": "Label",
-    "placeholder": "Placeholder",
-    "type": "Type",
-    "options": "Choices",
-    "addOption": "Add a choice",
-    "removeOption": "Remove this choice",
-    "required": "Required",
-    "active": "Active",
-    "inactive": "Hidden",
-    "order": "Order",
-    "keyHint": "Lowercase letters, digits and underscores only.",
-    "loadError": "Could not load the form fields.",
-    "saveError": "Could not save the field.",
-    "created": "Field added.",
-    "updated": "Field updated.",
-    "deleted": "Field deleted.",
-    "deleteConfirm": "Delete this field? Answers already given are removed with it.",
-    "count": "{count} field(s)",
-    "validation": {
-      "title": "Limits",
-      "hint": "Leave a limit empty to allow anything.",
-      "minChars": "Fewest characters",
-      "maxChars": "Most characters",
-      "minValue": "Smallest value",
-      "maxValue": "Largest value",
-      "minDate": "Earliest date",
-      "maxDate": "Latest date",
-      "minSelections": "Fewest choices",
-      "maxSelections": "Most choices",
-      "minStars": "Fewest stars",
-      "maxStars": "Most stars",
-      "pattern": "Allowed format",
-      "patternAny": "Any text",
-      "accept": "Allowed file types",
-      "acceptAny": "Any file",
-      "maxKb": "Largest size (KB)",
-      "rangeError": "The lower limit must not be greater than the upper one.",
-      "patterns": {
-        "alpha": "Letters only",
-        "alphanumeric": "Letters and numbers",
-        "digits": "Digits only",
-        "email": "Email address",
-        "url": "Web link",
-        "syrian_phone": "Syrian phone number",
-        "no_urls": "No links allowed"
-      },
-      "accepts": {
-        "image": "Images",
-        "video": "Video",
-        "audio": "Audio",
-        "pdf": "PDF",
-        "word": "Word document",
-        "excel": "Excel sheet"
-      }
-    }
-  },
-  "sessionsField": {
-    "date": "Date",
-    "from": "From",
-    "to": "To",
-    "add": "Add another day",
-    "remove": "Remove this day",
-    "orderError": "A day must end after it starts."
-  }
+	"common": {
+		"comingSoon": "Coming soon",
+		"search": "Search",
+		"close": "Close",
+		"save": "Save",
+		"delete": "Delete",
+		"clear": "Clear",
+		"viewAll": "View all",
+		"logout": "Log out",
+		"logged_out": "Logged out",
+		"logoAlt": "ADD OS logo",
+		"back": "Back"
+	},
+	"errors": {
+		"backHome": "Back to home",
+		"tryAgain": "Try again",
+		"notFound": {
+			"title": "Page not found",
+			"description": "The page you are looking for may have moved or no longer exists.",
+			"illustrationAlt": "An illustration for a missing page"
+		},
+		"serverError": {
+			"title": "Something went wrong",
+			"description": "We could not load this page right now. Please try again in a moment.",
+			"illustrationAlt": "An illustration for a connection error"
+		}
+	},
+	"notifications": {
+		"title": "Notifications",
+		"setAsRead": "Set as read",
+		"markAllAsRead": "Mark all as read"
+	},
+	"roles": {
+		"description": "Manage roles and the admin-dashboard permissions each one grants.",
+		"loadError": "Couldn't load roles. You may not have permission to view this page.",
+		"names": {
+			"member": "Member",
+			"operations": "Operations",
+			"admin": "Admin"
+		},
+		"builtIn": "Built-in",
+		"columns": {
+			"name": "Name",
+			"permissions": "Permissions",
+			"permissionCount": "{count} permissions",
+			"actions": "Actions"
+		},
+		"create": {
+			"button": "New role",
+			"title": "New role",
+			"success": "Role created."
+		},
+		"edit": {
+			"title": "Edit role",
+			"button": "Edit",
+			"success": "Role updated."
+		},
+		"delete": {
+			"button": "Delete",
+			"success": "Role deleted."
+		},
+		"form": {
+			"name": "Name",
+			"namePlaceholder": "Enter role name",
+			"permissions": "Permissions",
+			"selectAll": "Select all",
+			"deselectAll": "Clear all",
+			"selectAllPermissions": "Select all permissions",
+			"searchModules": "Search modules and permissions...",
+			"noModulesFound": "No permissions match your search.",
+			"selectedCount": "{selected} of {total} selected",
+			"submit": "Save",
+			"cancel": "Cancel"
+		},
+		"validation": {
+			"nameRequired": "Name is required."
+		},
+		"actions": {
+			"view": "View",
+			"create": "Create",
+			"update": "Update",
+			"delete": "Delete",
+			"update_status": "Update status",
+			"assign_role": "Assign role"
+		},
+		"modules": {
+			"announcements": "Announcements",
+			"branches": "Branches",
+			"buildings": "Buildings",
+			"business-hours": "Business Hours",
+			"business-hour-exceptions": "Business Hour Exceptions",
+			"community-members": "Community Members",
+			"contact-links": "Contact Links",
+			"devices": "Devices",
+			"device-capabilities": "Device Capabilities",
+			"events": "Events",
+			"floors": "Floors",
+			"founders": "Founders",
+			"partners": "Partners",
+			"plans": "Plans",
+			"private-office-requests": "Private Office Requests",
+			"resources": "Resources",
+			"seats-desks": "Seats & Desks",
+			"spaces": "Spaces",
+			"zones": "Zones",
+			"users": "Users",
+			"error-logs": "Error Logs",
+			"roles": "Roles & Permissions",
+			"settings": "Settings"
+		}
+	},
+	"auth": {
+		"common": {
+			"back": "Back"
+		},
+		"signIn": {
+			"title": "Welcome back",
+			"subtitle": "Sign in to manage memberships, bookings and access.",
+			"emailLabel": "Email",
+			"emailPlaceholder": "Enter your email",
+			"emailRequired": "Email is required.",
+			"emailInvalid": "Enter a valid email address.",
+			"passwordLabel": "Password",
+			"passwordPlaceholder": "Enter your password",
+			"passwordRequired": "Password is required.",
+			"forgotLink": "Forgot your password?",
+			"submit": "Sign in",
+			"genericError": "Couldn't sign in. Check your details and try again."
+		},
+		"twoFactor": {
+			"title": "Two-step verification",
+			"subtitle": "Enter the code from your authenticator app to finish signing in.",
+			"codeLabel": "Authentication code",
+			"codePlaceholder": "Enter the six-digit code",
+			"codeRequired": "Enter the code from your authenticator app.",
+			"recoveryLabel": "Recovery code",
+			"recoveryPlaceholder": "Enter a recovery code",
+			"recoveryRequired": "Enter a recovery code.",
+			"useRecoveryCode": "Use a recovery code instead",
+			"useAuthCode": "Use an authentication code instead",
+			"submit": "Verify",
+			"genericError": "Couldn't verify that code. Please try again."
+		},
+		"forgotPassword": {
+			"title": "Reset your password",
+			"subtitle": "Enter your email and we'll send you a link to set a new password.",
+			"backToSignIn": "Back to sign in",
+			"emailLabel": "Email",
+			"emailPlaceholder": "Insert your email",
+			"emailRequired": "Email is required.",
+			"emailInvalid": "Enter a valid email address.",
+			"submit": "Send reset link",
+			"success": "If that email has an account, a reset link is on its way.",
+			"alreadySignedIn": "You're already signed in.",
+			"genericError": "Couldn't send the reset link. Please try again."
+		},
+		"resetPassword": {
+			"title": "Set a new password",
+			"subtitle": "Choose a password you haven't used before.",
+			"backToSignIn": "Back to sign in",
+			"passwordPlaceholder": "At least 8 characters",
+			"passwordConfirmationPlaceholder": "Re-enter the new password",
+			"passwordLabel": "New password",
+			"passwordConfirmationLabel": "Confirm new password",
+			"passwordRequired": "Password is required.",
+			"passwordTooShort": "Password must be at least 8 characters.",
+			"passwordConfirmationRequired": "Please confirm the password.",
+			"passwordConfirmationMismatch": "Passwords do not match.",
+			"submit": "Reset password",
+			"success": "Password reset. Please sign in.",
+			"genericError": "Couldn't reset the password. Please try again."
+		}
+	},
+	"account": {
+		"description": "Manage your own profile, password, and two-factor authentication.",
+		"genericError": "Something went wrong. Please try again.",
+		"profile": {
+			"title": "Profile",
+			"nameLabel": "Full name",
+			"emailLabel": "Email",
+			"nameRequired": "Name is required.",
+			"emailRequired": "Email is required.",
+			"emailInvalid": "Enter a valid email address.",
+			"submit": "Save",
+			"success": "Profile updated."
+		},
+		"password": {
+			"title": "Password",
+			"currentLabel": "Current password",
+			"newLabel": "New password",
+			"confirmLabel": "Confirm new password",
+			"currentRequired": "Current password is required.",
+			"newRequired": "New password is required.",
+			"newTooShort": "Password must be at least 8 characters.",
+			"confirmRequired": "Please confirm the new password.",
+			"confirmMismatch": "Passwords do not match.",
+			"submit": "Change password",
+			"success": "Password changed."
+		},
+		"twoFactor": {
+			"title": "Two-factor authentication",
+			"description": "Require an authenticator-app code in addition to your password when signing in.",
+			"enableButton": "Enable two-factor authentication",
+			"activeBadge": "Two-factor authentication is set up",
+			"codeLabel": "Authentication code",
+			"codePlaceholder": "123456",
+			"confirmButton": "Confirm",
+			"confirmSuccess": "Two-factor authentication confirmed.",
+			"recoveryCodesTitle": "Recovery codes",
+			"regenerateButton": "Regenerate recovery codes",
+			"disableButton": "Disable two-factor authentication"
+		},
+		"confirmPassword": {
+			"title": "Confirm your password",
+			"description": "For your security, please confirm your password to continue.",
+			"passwordLabel": "Password",
+			"cancel": "Cancel",
+			"submit": "Confirm"
+		}
+	},
+	"users": {
+		"description": "Operations and admin accounts on the dashboard. Members register from the app and never appear here.",
+		"searchPlaceholder": "Search by name, phone or email",
+		"roleFilterPlaceholder": "Filter by role",
+		"columns": {
+			"name": "Name",
+			"phone": "Phone",
+			"email": "Email",
+			"role": "Role",
+			"status": "Status",
+			"actions": "Actions"
+		},
+		"status": {
+			"active": "Active",
+			"deactivated": "Deactivated",
+			"blocked": "Blocked"
+		},
+		"create": {
+			"button": "New user",
+			"title": "New user",
+			"success": "User created."
+		},
+		"edit": {
+			"title": "Edit user",
+			"button": "Edit",
+			"success": "Profile updated."
+		},
+		"changeStatus": {
+			"button": "Change status",
+			"title": "Change status",
+			"warning": "Deactivating or blocking signs this user out of every device immediately.",
+			"reasonLabel": "Reason (optional)",
+			"reasonPlaceholder": "Why is the status changing?",
+			"success": "Status updated."
+		},
+		"changeRole": {
+			"button": "Change role",
+			"title": "Change role",
+			"success": "Role updated."
+		},
+		"form": {
+			"name": "Full name",
+			"phone": "Phone",
+			"phonePlaceholder": "09XXXXXXXX",
+			"email": "Email",
+			"password": "Password",
+			"passwordConfirmation": "Confirm password",
+			"role": "Role",
+			"rolePlaceholder": "Select a role",
+			"submit": "Save",
+			"cancel": "Cancel"
+		},
+		"validation": {
+			"nameRequired": "Name is required.",
+			"phoneRequired": "Phone is required.",
+			"phoneInvalid": "Enter a valid Syrian mobile number (09XXXXXXXX).",
+			"emailRequired": "Email is required.",
+			"emailInvalid": "Enter a valid email address.",
+			"passwordRequired": "Password is required.",
+			"passwordTooShort": "Password must be at least 8 characters.",
+			"passwordConfirmationMismatch": "Passwords do not match.",
+			"roleRequired": "Role is required."
+		},
+		"loadError": "Couldn't load users. You may not have permission to view this page.",
+		"empty": "No users found.",
+		"stats": {
+			"total": "Total users"
+		}
+	},
+	"branches": {
+		"columns": {
+			"name": "Name",
+			"city": "City",
+			"timezone": "Timezone",
+			"isActive": "Active"
+		},
+		"isActiveYes": "Active",
+		"isActiveNo": "Inactive",
+		"create": {
+			"button": "New branch",
+			"title": "New branch",
+			"success": "Branch created."
+		},
+		"edit": {
+			"title": "Edit branch",
+			"success": "Branch updated."
+		},
+		"delete": {
+			"success": "Branch deleted.",
+			"cascadeWarning": "Deleting this branch also deletes every building, floor, zone, space, resource, and seat/desk under it."
+		},
+		"form": {
+			"name": "Name",
+			"city": "City",
+			"timezone": "Timezone",
+			"isActive": "Active"
+		},
+		"loadError": "Couldn't load branches. You may not have permission to view this page.",
+		"stats": {
+			"total": "Total branches",
+			"active": "Active",
+			"inactive": "Inactive"
+		}
+	},
+	"buildings": {
+		"columns": {
+			"branch": "Branch",
+			"name": "Name",
+			"floorCount": "Floors"
+		},
+		"create": {
+			"button": "New building",
+			"title": "New building",
+			"success": "Building created."
+		},
+		"edit": {
+			"title": "Edit building",
+			"success": "Building updated."
+		},
+		"delete": {
+			"success": "Building deleted.",
+			"cascadeWarning": "Deleting this building also deletes every floor, zone, space, resource, and seat/desk under it."
+		},
+		"form": {
+			"branch": "Branch",
+			"name": "Name",
+			"floorCount": "Number of floors"
+		},
+		"loadError": "Couldn't load buildings. You may not have permission to view this page.",
+		"stats": {
+			"total": "Total buildings",
+			"totalFloors": "Total floors"
+		}
+	},
+	"floors": {
+		"columns": {
+			"building": "Building",
+			"label": "Label",
+			"sortOrder": "Order"
+		},
+		"create": {
+			"button": "New floor",
+			"title": "New floor",
+			"success": "Floor created."
+		},
+		"edit": {
+			"title": "Edit floor",
+			"success": "Floor updated."
+		},
+		"delete": {
+			"success": "Floor deleted.",
+			"cascadeWarning": "Deleting this floor also deletes every zone and space under it."
+		},
+		"form": {
+			"branch": "Branch",
+			"building": "Building",
+			"label": "Label",
+			"sortOrder": "Sort order"
+		},
+		"loadError": "Couldn't load floors. You may not have permission to view this page."
+	},
+	"zones": {
+		"columns": {
+			"floor": "Floor",
+			"label": "Label",
+			"sortOrder": "Order"
+		},
+		"create": {
+			"button": "New zone",
+			"title": "New zone",
+			"success": "Zone created."
+		},
+		"edit": {
+			"title": "Edit zone",
+			"success": "Zone updated."
+		},
+		"delete": {
+			"success": "Zone deleted.",
+			"cascadeWarning": "Deleting this zone also deletes every space under it."
+		},
+		"form": {
+			"branch": "Branch",
+			"building": "Building",
+			"floor": "Floor",
+			"label": "Label",
+			"sortOrder": "Sort order"
+		},
+		"loadError": "Couldn't load zones. You may not have permission to view this page."
+	},
+	"operationalStatus": {
+		"active": "Active",
+		"maintenance": "Under maintenance",
+		"retired": "Retired"
+	},
+	"spaces": {
+		"columns": {
+			"image": "Image",
+			"building": "Building",
+			"zone": "Zone",
+			"spaceType": "Type",
+			"capacity": "Capacity",
+			"hourlyRate": "Hourly rate",
+			"status": "Status"
+		},
+		"spaceType": {
+			"co_space": "Co-working space",
+			"room": "Room",
+			"business": "Business space",
+			"event_hall": "Event hall"
+		},
+		"create": {
+			"button": "New space",
+			"title": "New space",
+			"success": "Space created."
+		},
+		"edit": {
+			"title": "Edit space",
+			"success": "Space updated."
+		},
+		"delete": {
+			"success": "Space deleted.",
+			"cascadeWarning": "Deleting this space also deletes every resource and seat/desk under it."
+		},
+		"changeStatus": {
+			"button": "Change status",
+			"title": "Change status",
+			"statusLabel": "Status",
+			"reasonLabel": "Reason (optional)",
+			"success": "Status updated."
+		},
+		"form": {
+			"branch": "Branch",
+			"building": "Building",
+			"zone": "Zone (optional)",
+			"spaceType": "Type",
+			"allocationModel": "Allocation model (optional)",
+			"isLockable": "Lockable",
+			"capacity": "Capacity",
+			"hourlyRatePoints": "Hourly rate in points (optional)",
+			"image": "Image (optional)",
+			"images": "Images (optional)"
+		},
+		"loadError": "Couldn't load spaces. You may not have permission to view this page.",
+		"stats": {
+			"total": "Total spaces"
+		}
+	},
+	"resources": {
+		"columns": {
+			"space": "Space",
+			"name": "Name",
+			"category": "Category",
+			"quantity": "Quantity",
+			"status": "Status"
+		},
+		"create": {
+			"button": "New resource",
+			"title": "New resource",
+			"success": "Resource created."
+		},
+		"edit": {
+			"title": "Edit resource",
+			"success": "Resource updated."
+		},
+		"delete": {
+			"success": "Resource deleted."
+		},
+		"changeStatus": {
+			"button": "Change status",
+			"title": "Change status",
+			"statusLabel": "Status",
+			"reasonLabel": "Reason (optional)",
+			"success": "Status updated."
+		},
+		"form": {
+			"branch": "Branch",
+			"building": "Building",
+			"zone": "Zone (optional)",
+			"space": "Space",
+			"name": "Name",
+			"category": "Category",
+			"quantity": "Quantity"
+		},
+		"loadError": "Couldn't load resources. You may not have permission to view this page.",
+		"stats": {
+			"total": "Total resources"
+		}
+	},
+	"seatsDesks": {
+		"columns": {
+			"space": "Space",
+			"label": "Label",
+			"qrPointId": "QR point"
+		},
+		"create": {
+			"button": "New seat/desk",
+			"title": "New seat/desk",
+			"success": "Seat/desk created."
+		},
+		"edit": {
+			"title": "Edit seat/desk",
+			"success": "Seat/desk updated."
+		},
+		"delete": {
+			"success": "Seat/desk deleted."
+		},
+		"form": {
+			"branch": "Branch",
+			"building": "Building",
+			"zone": "Zone (optional)",
+			"space": "Space",
+			"label": "Label",
+			"qrPointId": "QR point ID (optional)"
+		},
+		"loadError": "Couldn't load seats & desks. You may not have permission to view this page."
+	},
+	"businessHours": {
+		"branchLabel": "Branch",
+		"branchPlaceholder": "Select a branch",
+		"tabs": {
+			"weeklySchedule": "Weekly schedule",
+			"exceptions": "Exceptions"
+		},
+		"days": {
+			"sunday": "Sunday",
+			"monday": "Monday",
+			"tuesday": "Tuesday",
+			"wednesday": "Wednesday",
+			"thursday": "Thursday",
+			"friday": "Friday",
+			"saturday": "Saturday"
+		},
+		"columns": {
+			"dayOfWeek": "Day",
+			"period": "Period",
+			"openTime": "Opens",
+			"closeTime": "Closes"
+		},
+		"create": {
+			"button": "New hours",
+			"title": "New business hours",
+			"success": "Business hours created."
+		},
+		"bulkCreate": {
+			"title": "New business hours",
+			"days": "Days",
+			"workDays": "Sat – Thu",
+			"selectAll": "Select all days",
+			"clearAll": "Clear all",
+			"daysRequired": "Select at least one day.",
+			"success": "Business hours created for {count} day(s)."
+		},
+		"edit": {
+			"title": "Edit business hours",
+			"success": "Business hours updated."
+		},
+		"delete": {
+			"success": "Business hours deleted."
+		},
+		"form": {
+			"dayOfWeek": "Day of week",
+			"openTime": "Opens at",
+			"closeTime": "Closes at"
+		},
+		"validation": {
+			"timeFormat": "Enter a time as HH:mm, e.g. 08:00."
+		},
+		"loadError": "Couldn't load business hours. You may not have permission to view this page.",
+		"empty": "No business hours found for this branch.",
+		"exceptions": {
+			"columns": {
+				"date": "Date",
+				"isClosed": "Closed",
+				"hours": "Hours",
+				"reason": "Reason"
+			},
+			"isClosedYes": "Closed",
+			"isClosedNo": "Open",
+			"create": {
+				"button": "New exception",
+				"title": "New exception",
+				"success": "Exception created."
+			},
+			"edit": {
+				"title": "Edit exception",
+				"success": "Exception updated."
+			},
+			"delete": {
+				"success": "Exception deleted."
+			},
+			"form": {
+				"date": "Date (YYYY-MM-DD)",
+				"isClosed": "Closed all day",
+				"openTime": "Opens at",
+				"closeTime": "Closes at",
+				"reason": "Reason (optional)"
+			},
+			"validation": {
+				"dateFormat": "Enter a date as YYYY-MM-DD."
+			},
+			"empty": "No exceptions found for this branch."
+		}
+	},
+	"packages": {
+		"columns": {
+			"name": "Name",
+			"type": "Type",
+			"price": "Price",
+			"duration": "Duration (days)",
+			"isActive": "Active",
+			"module": "Module",
+			"balances": "Balances",
+			"features": "Features"
+		},
+		"isActiveYes": "Active",
+		"isActiveNo": "Inactive",
+		"type": {
+			"subscription": "Subscription",
+			"oneTime": "One-time"
+		},
+		"create": {
+			"button": "New plan",
+			"title": "New plan",
+			"success": "Plan created."
+		},
+		"edit": {
+			"title": "Edit plan",
+			"success": "Plan updated."
+		},
+		"delete": {
+			"success": "Plan deleted."
+		},
+		"form": {
+			"name": "Name",
+			"isSubscription": "Subscription plan",
+			"pricePoints": "Price (points)",
+			"durationDays": "Duration (days)",
+			"includedHours": "Included hours",
+			"overageRatePoints": "Overage rate (points per hour)",
+			"isActive": "Active",
+			"order": "Display order",
+			"subtitle": "Subtitle",
+			"module": "Assigned Module",
+			"selectModule": "Select Module"
+		},
+		"loadError": "Couldn't load plans. You may not have permission to view this page.",
+		"stats": {
+			"total": "Total plans",
+			"active": "Active",
+			"subscriptions": "Subscriptions"
+		},
+		"noModule": "No Module",
+		"tabs": {
+			"basic": "Basic Info",
+			"balances": "Included Balances",
+			"features": "Features"
+		},
+		"sections": {
+			"basicInfo": "Basic Information",
+			"pricing": "Pricing & Module",
+			"displaySettings": "Display Settings"
+		},
+		"balances": {
+			"includedDescription": "Specify balances and allowances automatically included with this plan.",
+			"add": "Add Balance",
+			"empty": "No included balances added to this plan.",
+			"amountPoints": "Amount / Credit (points)",
+			"category": "Balance Category",
+			"restrictedSpace": "Restricted Space",
+			"selectSpace": "Select Space",
+			"description": "Description",
+			"totalIncluded": "Total Included Balances",
+			"categories": {
+				"cafe": "Café Balance",
+				"printing_internet": "Printing & Internet",
+				"general": "General Balance",
+				"space_specific": "Space Specific"
+			}
+		},
+		"features": {
+			"userVisible": "User-Visible Features",
+			"add": "Add Feature",
+			"edit": "Edit Feature",
+			"name": "Feature Name",
+			"value": "Value / Details",
+			"icon": "Icon",
+			"order": "Display Order",
+			"isIncluded": "Included",
+			"notIncluded": "Not Included",
+			"save": "Save Feature",
+			"empty": "No features added.",
+			"details": "Details"
+		},
+		"actions": {
+			"cancel": "Cancel",
+			"save": "Save"
+		},
+		"modules": {
+			"title": "Plan Modules",
+			"backToPlans": "Back to Plans",
+			"create": {
+				"button": "New Module",
+				"title": "Add New Plan Module",
+				"success": "Module created successfully."
+			},
+			"edit": {
+				"title": "Edit Plan Module",
+				"success": "Module updated successfully."
+			},
+			"delete": {
+				"success": "Module deleted successfully."
+			},
+			"columns": {
+				"slug": "Slug",
+				"plansCount": "Plans Count"
+			},
+			"stats": {
+				"total": "Total Modules",
+				"active": "Active Modules"
+			}
+		}
+	},
+	"events": {
+		"columns": {
+			"image": "Image",
+			"title": "Title",
+			"category": "Category",
+			"startAt": "Start date & time",
+			"location": "Location",
+			"capacity": "Capacity",
+			"status": "Status",
+			"price": "Price",
+			"requiresApproval": "Approval"
+		},
+		"status": {
+			"draft": "Draft",
+			"published": "Published",
+			"cancelled": "Cancelled"
+		},
+		"create": {
+			"button": "New event",
+			"title": "New event",
+			"success": "Event created."
+		},
+		"edit": {
+			"title": "Edit event",
+			"success": "Event updated."
+		},
+		"delete": {
+			"success": "Event deleted."
+		},
+		"form": {
+			"title": "Title",
+			"description": "Description",
+			"category": "Category",
+			"location": "Location",
+			"capacity": "Capacity",
+			"imageUrl": "Image",
+			"status": "Status",
+			"order": "Display order",
+			"isFree": "Free event",
+			"pricePoints": "Ticket price (points)",
+			"requiresApproval": "Needs approval before admitting",
+			"externalFormUrl": "External registration form (link)",
+			"schedule": "Schedule"
+		},
+		"loadError": "Couldn't load events. You may not have permission to view this page.",
+		"stats": {
+			"total": "Total events",
+			"published": "Published",
+			"draft": "Drafts"
+		},
+		"free": "Free",
+		"approval": {
+			"title": "Registrations",
+			"all": "All",
+			"pending": "Awaiting review",
+			"approved": "Approved",
+			"rejected": "Rejected",
+			"approve": "Approve",
+			"reject": "Reject",
+			"rejectAll": "Reject all pending",
+			"rejectReason": "Reason for rejection",
+			"rejectReasonRequired": "A reason is required.",
+			"approvedToast": "Registration approved.",
+			"rejectedToast": "Registration rejected.",
+			"rejectAllConfirm": "Turn down every registration still awaiting a decision?",
+			"empty": "No registrations yet.",
+			"answers": "Answers",
+			"noAnswers": "No form answers.",
+			"seatNote": "Pending and approved registrations both hold a seat.",
+			"loadError": "Could not load registrations.",
+			"actionError": "The action could not be completed.",
+			"bulkReason": "Review closed by operations.",
+			"columns": {
+				"name": "Name",
+				"email": "Email",
+				"phone": "Phone",
+				"status": "Status",
+				"registeredAt": "Registered",
+				"reason": "Reason"
+			}
+		},
+		"fields": {
+			"title": "Registration form",
+			"add": "Add field",
+			"edit": "Edit field",
+			"empty": "This event asks no questions. Members register with their account details only.",
+			"key": "Key",
+			"label": "Label",
+			"placeholder": "Placeholder",
+			"type": "Type",
+			"options": "Choices",
+			"addOption": "Add a choice",
+			"required": "Required",
+			"active": "Active",
+			"inactive": "Hidden",
+			"order": "Order",
+			"reservedKeyNote": "Name, phone and email come from the member account and cannot be asked again.",
+			"keyHint": "Lowercase letters, digits and underscores only.",
+			"loadError": "Could not load the registration form.",
+			"saveError": "Could not save the field.",
+			"created": "Field added.",
+			"updated": "Field updated.",
+			"deleted": "Field deleted.",
+			"deleteConfirm": "Delete this field? Answers already given are removed with it.",
+			"manage": "Registration form"
+		}
+	},
+	"communityMembers": {
+		"columns": {
+			"name": "Name",
+			"category": "Category",
+			"company": "Company",
+			"title": "Job title",
+			"yearJoined": "Year joined",
+			"published": "Status",
+			"photo": "Photo"
+		},
+		"categories": {
+			"pioneers": "Pioneers",
+			"growth_partners": "Growth Partners",
+			"investors": "Investors",
+			"impact_partners": "Impact Partners"
+		},
+		"status": {
+			"published": "Published",
+			"hidden": "Hidden"
+		},
+		"create": {
+			"button": "New member",
+			"title": "New community member",
+			"success": "Community member added."
+		},
+		"edit": {
+			"title": "Edit community member",
+			"success": "Community member updated."
+		},
+		"delete": {
+			"success": "Community member deleted."
+		},
+		"form": {
+			"name": "Name",
+			"category": "Category",
+			"company": "Company",
+			"title": "Job title",
+			"bio": "Bio",
+			"longBio": "Extended bio",
+			"yearJoined": "Year joined",
+			"photoUrl": "Photo",
+			"order": "Display order",
+			"published": "Published"
+		},
+		"loadError": "Couldn't load community members. You may not have permission to view this page.",
+		"stats": {
+			"total": "Total members",
+			"published": "Published",
+			"hidden": "Hidden"
+		}
+	},
+	"currencies": {
+		"columns": {
+			"code": "Code",
+			"name": "Name",
+			"symbol": "Symbol",
+			"decimalPlaces": "Decimals",
+			"order": "Display order",
+			"isActive": "Status"
+		},
+		"baseBadge": "Base",
+		"isActiveYes": "Active",
+		"isActiveNo": "Inactive",
+		"create": {
+			"button": "New currency",
+			"title": "New currency",
+			"success": "Currency created."
+		},
+		"edit": {
+			"title": "Edit currency",
+			"success": "Currency updated."
+		},
+		"form": {
+			"code": "Code",
+			"name": "Name",
+			"symbol": "Symbol",
+			"decimalPlaces": "Decimal places",
+			"order": "Display order"
+		},
+		"validation": {
+			"codeFormat": "Use exactly three uppercase letters, for example EUR."
+		},
+		"actions": {
+			"setBase": "Set as base currency",
+			"activate": "Activate",
+			"deactivate": "Deactivate"
+		},
+		"setBase": {
+			"title": "Set as base currency?",
+			"content": "Every stored amount is reckoned against the base currency. Making {code} the base changes what all existing exchange rates are measured in, and it cannot be undone from this screen.",
+			"confirm": "Set as base",
+			"cancel": "Cancel",
+			"success": "Base currency updated."
+		},
+		"status": {
+			"activateSuccess": "Currency activated.",
+			"deactivateSuccess": "Currency deactivated."
+		},
+		"loadError": "Couldn't load currencies. You may not have permission to view this page.",
+		"stats": {
+			"total": "Total currencies",
+			"active": "Active",
+			"inactive": "Inactive"
+		}
+	},
+	"exchangeRates": {
+		"columns": {
+			"currencyCode": "Currency",
+			"rateToBase": "Rate (SYP per 1 USD)",
+			"effectiveFrom": "Effective from"
+		},
+		"latestBadge": "Latest",
+		"create": {
+			"button": "New rate",
+			"title": "New exchange rate",
+			"success": "Exchange rate created."
+		},
+		"form": {
+			"currencyCode": "Currency",
+			"rateToBase": "Rate (SYP per 1 USD)",
+			"effectiveFrom": "Effective from date"
+		},
+		"validation": {
+			"effectiveFromFormat": "Enter a date as YYYY-MM-DD."
+		},
+		"loadError": "Couldn't load exchange rates. You may not have permission to view this page.",
+		"empty": "No exchange rates found.",
+		"stats": {
+			"latestUsd": "Latest USD → SYP rate"
+		},
+		"suggestion": {
+			"title": "Daily Exchange Rate Suggestion (sp-today)",
+			"description": "A new exchange rate was automatically fetched from sp-today pending your review.",
+			"rate": "Suggested rate",
+			"currentRate": "Current rate",
+			"deviation": "Deviation",
+			"fetchedAt": "Fetched at",
+			"staleWarning": "Warning: Data source has not updated for more than 48 hours.",
+			"accept": "Accept suggested rate",
+			"modifyAndAccept": "Edit & accept",
+			"dismiss": "Dismiss",
+			"acceptSuccess": "Suggestion accepted and exchange rate applied successfully.",
+			"dismissSuccess": "Suggestion dismissed.",
+			"dismissConfirmTitle": "Dismiss Suggestion",
+			"dismissConfirmContent": "Are you sure you want to dismiss this rate suggestion?"
+		},
+		"sync": {
+			"button": "Sync now from sp-today",
+			"success": "Exchange rates synced successfully."
+		}
+	},
+	"points": {
+		"unit": "points",
+		"label": "Points",
+		"rate": "Point rate",
+		"previewLoading": "Calculating…",
+		"belowOnePoint": "This amount is too small to buy a single point. Enter a larger amount.",
+		"previewFailed": "Could not calculate the point value. Check the amount and try again.",
+		"rateWarning": "Changing the point rate reprices the entire catalogue and revalues every wallet balance. Plans, spaces and existing balances are all denominated in points — only what they are worth in cash moves.",
+		"rateLabel": "Point rate (USD per point)",
+		"credited": "Points credited",
+		"newBalance": "New balance"
+	},
+	"walletTopUps": {
+		"description": "Record a manual wallet top-up taken at reception, for a member or a company wallet.",
+		"recipientType": {
+			"user": "Member wallet",
+			"company": "Company wallet"
+		},
+		"paymentMethod": {
+			"cash": "Cash",
+			"sham": "Sham Cash",
+			"mtn": "MTN Cash",
+			"syriatel": "Syriatel Cash"
+		},
+		"form": {
+			"recipientType": "Top up",
+			"user": "Member",
+			"company": "Company",
+			"amount": "Amount",
+			"paymentMethod": "Payment method",
+			"description": "Description (optional)"
+		},
+		"validation": {
+			"amountFormat": "Enter an amount of at least 0.01, using at most two decimals.",
+			"userRequired": "Select a member.",
+			"companyRequired": "Select a company."
+		},
+		"submit": {
+			"button": "Record top-up",
+			"success": "Wallet topped up."
+		},
+		"loadError": "Couldn't load members and companies. You may not have permission to view this page.",
+		"title": "Wallet Top-Up",
+		"receptionSubtitle": "ADD OS Reception Desk • Manual Top-Up",
+		"searchMember": "Search Member",
+		"searchMemberPlaceholder": "Search by name or phone...",
+		"searchCompany": "Search Company",
+		"searchCompanyPlaceholder": "Search by company name or contract ref...",
+		"generalBalance": "General Balance",
+		"dedicatedBalance": "Dedicated Balance",
+		"dedicatedBalanceOptional": "Dedicated Balance Type (Optional)",
+		"expiryDateOptional": "Expiry Date (Optional)",
+		"walletPreview": "Wallet & Balance Preview",
+		"currentGeneralBalance": "Current General Balance",
+		"topUpAmount": "Top-Up Amount",
+		"newGeneralBalance": "Expected New Balance",
+		"addCreditButton": "Confirm & Add Credit",
+		"selectRecipientFirst": "Please select a member or company to view balance and account details.",
+		"balanceScope": "Credit Destination",
+		"personalBalance": "Personal Balance (Member's personal wallet)",
+		"companyBalance": "Company Balance (Affiliated company wallet)",
+		"companyInactiveWarning": "Notice: This company is currently inactive and cannot receive wallet credit.",
+		"inactive": "Inactive",
+		"active": "Active",
+		"affiliation": "Affiliated with:",
+		"loadingBalance": "Checking current balance...",
+		"cannotTopUpInactive": "Cannot top up wallet for an inactive company."
+	},
+	"cashRegister": {
+		"description": "Open, reconcile, and close daily cash drawer sessions for front-desk reception.",
+		"status": {
+			"open": "Open",
+			"closed": "Closed"
+		},
+		"openButton": "Open register session",
+		"closeButton": "Close register session",
+		"noOpenSession": "No active cash drawer session for your account.",
+		"historyTitle": "Register sessions history",
+		"openSuccess": "Cash register session opened.",
+		"openError": "Failed to open register session.",
+		"closeSuccess": "Cash register session closed and reconciled.",
+		"closeError": "Failed to close register session.",
+		"columns": {
+			"id": "ID",
+			"operator": "Operator",
+			"branch": "Branch",
+			"status": "Status",
+			"openedAt": "Opened at",
+			"closedAt": "Closed at",
+			"openingBalance": "Opening balance",
+			"expectedBalance": "Expected balance",
+			"closingBalance": "Closing balance",
+			"difference": "Difference"
+		},
+		"openModal": {
+			"title": "Open Cash Register Session",
+			"branch": "Branch",
+			"openingBalance": "Initial opening cash balance",
+			"notes": "Notes"
+		},
+		"closeModal": {
+			"title": "Close Cash Register Session",
+			"closingBalance": "Actual counted cash balance",
+			"notes": "Reconciliation notes"
+		}
+	},
+	"approvalQueue": {
+		"description": "Bookings waiting on a reception decision. Only spaces that require approval appear here.",
+		"loadError": "Couldn't load the approval queue. You may not have permission to view this page.",
+		"empty": "Nothing is waiting for approval.",
+		"columns": {
+			"requester": "Requester",
+			"space": "Space",
+			"when": "Booked for",
+			"requested": "Requested",
+			"actions": "Actions"
+		},
+		"approve": {
+			"button": "Approve",
+			"success": "Booking approved."
+		},
+		"reject": {
+			"button": "Reject",
+			"title": "Reject booking",
+			"reasonLabel": "Reason for rejection",
+			"reasonPlaceholder": "The requester sees this, so say what would make it work.",
+			"reasonRequired": "Give a reason for the rejection.",
+			"success": "Booking rejected."
+		}
+	},
+	"activeSessions": {
+		"description": "Everyone currently checked in, bookings and walk-ins together.",
+		"loadError": "Couldn't load active sessions. You may not have permission to view this page.",
+		"empty": "Nobody is checked in right now.",
+		"refresh": "Refresh",
+		"overdue": "Overdue",
+		"onTime": "On time",
+		"columns": {
+			"occupant": "Occupant",
+			"space": "Space",
+			"type": "Type",
+			"checkedInAt": "Checked in",
+			"status": "Status",
+			"actions": "Actions"
+		},
+		"type": {
+			"booking": "Booking",
+			"walkin": "Walk-in"
+		},
+		"checkOut": {
+			"button": "Check out",
+			"title": "Check out session",
+			"atLabel": "Checked out at",
+			"futureNotAllowed": "The check-out time cannot be in the future.",
+			"settleLabel": "Settle payment now",
+			"settleNone": "Don't settle now",
+			"success": "Session checked out.",
+			"settleSuccess": "Payment settled."
+		},
+		"extend": {
+			"button": "Extend",
+			"title": "Extend booking",
+			"minutesLabel": "Additional minutes",
+			"minutesInvalid": "Enter a whole number of minutes, 1 or more.",
+			"success": "Booking extended."
+		},
+		"cancel": {
+			"button": "Cancel booking",
+			"confirmTitle": "Cancel this booking?",
+			"confirmText": "The member's booking ends now and the space is freed.",
+			"confirmOk": "Cancel booking",
+			"confirmCancel": "Keep it",
+			"success": "Booking cancelled."
+		}
+	},
+	"bookingCalendar": {
+		"description": "Which spaces are booked, and how full each day is. Read-only — act on a booking from the reception desk.",
+		"loadError": "Couldn't load the calendar. You may not have permission to view this page.",
+		"empty": "No active spaces match these filters.",
+		"filters": {
+			"spaceType": "Space type",
+			"allSpaceTypes": "All space types",
+			"allSpaces": "All spaces"
+		},
+		"totals": {
+			"spaces": "Spaces",
+			"bookings": "Bookings",
+			"occupancy": "Average occupancy"
+		},
+		"legend": {
+			"title": "Occupancy",
+			"closed": "Closed"
+		},
+		"hours": {
+			"closedToday": "Closed on this date"
+		}
+	},
+	"allBookings": {
+		"description": "Every booking across the district, whatever its state.",
+		"loadError": "Couldn't load bookings. You may not have permission to view this page.",
+		"empty": "No bookings match these filters.",
+		"filters": {
+			"search": "Search",
+			"searchPlaceholder": "Member name or phone",
+			"status": "Status",
+			"anyStatus": "Any status",
+			"paymentState": "Payment",
+			"anyPaymentState": "Any payment state",
+			"from": "From",
+			"to": "To",
+			"clear": "Clear filters"
+		},
+		"columns": {
+			"member": "Member",
+			"space": "Space",
+			"when": "Booked for",
+			"status": "Status",
+			"payment": "Payment",
+			"amount": "Amount"
+		},
+		"status": {
+			"confirmed": "Confirmed",
+			"pending": "Under review",
+			"cancelled": "Cancelled",
+			"rejected": "Rejected"
+		},
+		"paymentState": {
+			"paid": "Paid",
+			"unpaid": "Unpaid"
+		},
+		"paymentSource": {
+			"wallet": "Wallet",
+			"cash": "Cash"
+		},
+		"notSettled": "Not settled yet"
+	},
+	"shortcuts": {
+		"title": "Shortcuts"
+	},
+	"nav": {
+		"sections": {
+			"dashboard": "Dashboard",
+			"spatial": "Spatial structure",
+			"system": "System & permissions",
+			"members": "Members",
+			"bookings": "Bookings",
+			"plans": "Plans & subscriptions",
+			"access": "Access control",
+			"payments": "Payments",
+			"community": "Community & events",
+			"incubation": "Incubation & acceleration",
+			"address": "Business address",
+			"cms": "Website management",
+			"settings": "Settings"
+		},
+		"pages": {
+			"overview": "Overview",
+			"branches": "Branches",
+			"buildings": "Buildings",
+			"floors": "Floors",
+			"zones": "Zones",
+			"spaces": "Spaces",
+			"resources": "Resources",
+			"seatsDesks": "Seats & Desks",
+			"businessHours": "Business Hours",
+			"users": "Users",
+			"roles": "Roles & permissions",
+			"individuals": "Individuals",
+			"companies": "Companies",
+			"memberships": "Memberships",
+			"approvalQueue": "Approval queue",
+			"activeSessions": "Active sessions",
+			"allBookings": "All bookings",
+			"calendar": "Calendar",
+			"packages": "Packages",
+			"wallet": "Wallet",
+			"locks": "Locks",
+			"accessLogs": "Access logs",
+			"transactions": "Transactions",
+			"paymentMethods": "Payment methods",
+			"currencies": "Currencies",
+			"exchangeRates": "Exchange rates",
+			"walletTopUps": "Wallet top-ups",
+			"cashRegister": "Cash register",
+			"events": "Events",
+			"community": "Community",
+			"cafe": "Café",
+			"incubate": "Incubate",
+			"accelerate": "Accelerate",
+			"mentors": "Mentors",
+			"privateOfficeRequests": "Private office requests",
+			"content": "Content",
+			"partners": "Partners",
+			"announcements": "Announcements",
+			"founders": "Founders",
+			"contactLinks": "Contact links",
+			"notifications": "Broadcast notifications",
+			"accountSecurity": "Account & security",
+			"systemSettings": "System settings",
+			"eventCategories": "Event Categories",
+			"receptionDesk": "Reception Desk",
+			"closeSession": "Close Session",
+			"modules": "Modules",
+			"walletCredited": "Wallet Credited",
+			"eventCancellation": "Event Cancellation",
+			"operationsRequests": "Operations Requests",
+			"eventAttendees": "Registrations"
+		}
+	},
+	"resourceCrud": {
+		"mutations": {
+			"genericError": "Something went wrong. Please try again.",
+			"permissionError": "You don't have permission for this action."
+		},
+		"table": {
+			"actionsColumn": "Actions",
+			"empty": "No records found.",
+			"editAction": "Edit",
+			"deleteAction": "Delete",
+			"deleteConfirmTitle": "Delete this record?",
+			"deleteConfirmOk": "Delete",
+			"deleteConfirmCancel": "Cancel",
+			"refreshAction": "Refresh data"
+		},
+		"form": {
+			"submit": "Save",
+			"cancel": "Cancel",
+			"arabicPlaceholder": "Arabic",
+			"englishPlaceholder": "English",
+			"uploadImage": "Upload image",
+			"uploadImagePrompt": "Click or drag image here to upload",
+			"uploadImageHint": "Supports JPG, PNG, WEBP up to 10MB",
+			"uploadSuccess": "Image uploaded successfully",
+			"uploading": "Uploading image...",
+			"changeImage": "Change image",
+			"removeImage": "Remove image",
+			"uploadImagesPrompt": "Click or drag images here to upload",
+			"uploadImagesHint": "Supports JPG, PNG, WEBP up to 10MB (multiple files allowed)",
+			"addImages": "Add more images",
+			"primaryImage": "Primary",
+			"setPrimary": "Set as primary image",
+			"imagesCount": "images",
+			"save": "Save"
+		},
+		"validation": {
+			"required": "{field} is required."
+		}
+	},
+	"privateOfficeRequests": {
+		"description": "Prospects requesting a private office, moving from requested to quoted to contracted.",
+		"columns": {
+			"prospectName": "Prospect",
+			"contact": "Contact",
+			"status": "Status",
+			"quoteRef": "Quote ref",
+			"actions": "Actions"
+		},
+		"status": {
+			"requested": "Requested",
+			"quoted": "Quoted",
+			"contracted": "Contracted"
+		},
+		"create": {
+			"button": "New request",
+			"title": "New private office request",
+			"success": "Request created."
+		},
+		"markAsQuoted": {
+			"button": "Convert to quote",
+			"title": "Convert to quote",
+			"quoteRefLabel": "Quote reference",
+			"quoteRefPlaceholder": "Q-2026-0001",
+			"success": "Request marked as quoted.",
+			"quoteRefRequired": "Quote reference is required."
+		},
+		"contractedLocked": "This request became a company and can no longer change status here.",
+		"delete": {
+			"success": "Request deleted."
+		},
+		"form": {
+			"prospectName": "Prospect name",
+			"contact": "Contact"
+		},
+		"validation": {
+			"prospectNameRequired": "Prospect name is required.",
+			"contactRequired": "Contact is required.",
+			"quoteRefRequired": "Quote reference is required."
+		},
+		"loadError": "Couldn't load private office requests. You may not have permission to view this page.",
+		"empty": "No private office requests found.",
+		"stats": {
+			"total": "Total requests",
+			"requested": "Requested",
+			"quoted": "Quoted",
+			"contracted": "Contracted"
+		}
+	},
+	"companies": {
+		"description": "Companies created from a quoted private office request. Created here only — never self-service.",
+		"columns": {
+			"legalName": "Legal name",
+			"contractRef": "Contract ref",
+			"branch": "Branch",
+			"status": "Status",
+			"actions": "Actions"
+		},
+		"status": {
+			"active": "Active",
+			"inactive": "Inactive"
+		},
+		"create": {
+			"button": "New company",
+			"title": "New company",
+			"success": "Company created.",
+			"noQuotedRequestsTitle": "No quoted requests yet",
+			"noQuotedRequestsBody": "A company can only be created from a quoted private office request. Go to Private Office Requests and convert one to a quote first.",
+			"goToRequests": "Go to Private Office Requests"
+		},
+		"changeStatus": {
+			"button": "Change status",
+			"title": "Change status",
+			"success": "Status updated."
+		},
+		"viewMembers": {
+			"button": "View members"
+		},
+		"form": {
+			"privateOfficeRequest": "Private office request",
+			"branch": "Branch",
+			"legalName": "Legal name",
+			"contractRef": "Contract ref"
+		},
+		"validation": {
+			"privateOfficeRequestRequired": "A quoted request is required.",
+			"branchRequired": "Branch is required.",
+			"legalNameRequired": "Legal name is required.",
+			"contractRefRequired": "Contract ref is required."
+		},
+		"loadError": "Couldn't load companies. You may not have permission to view this page.",
+		"empty": "No companies found.",
+		"stats": {
+			"total": "Total companies",
+			"active": "Active",
+			"inactive": "Inactive"
+		},
+		"detail": {
+			"title": "Company",
+			"loadError": "Couldn't load this company."
+		}
+	},
+	"companyMembers": {
+		"columns": {
+			"member": "Member",
+			"userId": "User ID",
+			"doorAccess": "Door access",
+			"isAdmin": "Admin",
+			"actions": "Actions"
+		},
+		"add": {
+			"button": "Add member",
+			"title": "Add company member",
+			"userLabel": "User",
+			"userRequired": "Select a user.",
+			"doorAccessLabel": "Door access enabled",
+			"adminLabel": "Company admin",
+			"adminHint": "The first admin for a company can only be set here — an existing company admin can only promote another member, not appoint the first one.",
+			"success": "Member added.",
+			"alreadyMemberError": "This user is already a member of this company."
+		},
+		"remove": {
+			"confirmTitle": "Remove this member?",
+			"confirmOk": "Remove",
+			"confirmCancel": "Cancel",
+			"success": "Member removed."
+		}
+	},
+	"systemSettings": {
+		"description": "Global key-value system configuration and parameters.",
+		"searchPlaceholder": "Search settings by key or value...",
+		"refresh": "Refresh",
+		"editTitle": "Edit Setting",
+		"keyLabel": "Key",
+		"typeLabel": "Type",
+		"valueLabel": "Value",
+		"editButton": "Edit",
+		"saveSuccess": "Setting updated.",
+		"saveError": "Failed to update setting.",
+		"invalidJson": "Invalid JSON format.",
+		"loadError": "Couldn't load settings. You may not have permission to view this page.",
+		"columns": {
+			"key": "Setting Key",
+			"type": "Type",
+			"value": "Current Value",
+			"actions": "Actions"
+		}
+	},
+	"announcements": {
+		"columns": {
+			"type": "Type",
+			"startsAt": "Starts at",
+			"endsAt": "Ends at",
+			"status": "Status",
+			"image": "Image"
+		},
+		"status": {
+			"active": "Active",
+			"inactive": "Inactive"
+		},
+		"form": {
+			"type": "Type",
+			"imageUrl": "Banner image",
+			"linkUrl": "Link URL",
+			"startsAt": "Starts at",
+			"endsAt": "Ends at",
+			"sortOrder": "Sort order",
+			"isActive": "Active"
+		},
+		"create": {
+			"button": "New Announcement",
+			"title": "New Announcement",
+			"success": "Announcement created."
+		},
+		"edit": {
+			"title": "Edit Announcement",
+			"success": "Announcement updated."
+		},
+		"delete": {
+			"success": "Announcement deleted."
+		},
+		"stats": {
+			"total": "Total",
+			"active": "Active",
+			"inactive": "Inactive"
+		},
+		"loadError": "Couldn't load announcements."
+	},
+	"partners": {
+		"columns": {
+			"name": "Name",
+			"category": "Category",
+			"websiteUrl": "Website",
+			"status": "Status",
+			"logo": "Logo"
+		},
+		"category": {
+			"local": "Local",
+			"global": "Global"
+		},
+		"status": {
+			"active": "Active",
+			"inactive": "Inactive"
+		},
+		"form": {
+			"name": "Name",
+			"description": "Description",
+			"logoUrl": "Logo",
+			"websiteUrl": "Website URL",
+			"category": "Category",
+			"order": "Display order",
+			"isActive": "Active"
+		},
+		"create": {
+			"button": "New Partner",
+			"title": "New Partner",
+			"success": "Partner created."
+		},
+		"edit": {
+			"title": "Edit Partner",
+			"success": "Partner updated."
+		},
+		"delete": {
+			"success": "Partner deleted."
+		},
+		"stats": {
+			"total": "Total partners",
+			"active": "Active",
+			"inactive": "Inactive"
+		},
+		"loadError": "Couldn't load partners."
+	},
+	"founders": {
+		"columns": {
+			"name": "Name",
+			"role": "Role",
+			"linkedin": "LinkedIn",
+			"order": "Order",
+			"photo": "Photo"
+		},
+		"form": {
+			"name": "Name",
+			"role": "Role",
+			"bio": "Bio",
+			"photoUrl": "Photo",
+			"linkedinUrl": "LinkedIn URL",
+			"twitterUrl": "Twitter / X URL",
+			"order": "Display order"
+		},
+		"create": {
+			"button": "New Founder",
+			"title": "New Founder",
+			"success": "Founder created."
+		},
+		"edit": {
+			"title": "Edit Founder",
+			"success": "Founder updated."
+		},
+		"delete": {
+			"success": "Founder deleted."
+		},
+		"stats": {
+			"total": "Total founders"
+		},
+		"loadError": "Couldn't load founders."
+	},
+	"contactLinks": {
+		"columns": {
+			"type": "Type",
+			"value": "Value",
+			"label": "Label",
+			"status": "Status"
+		},
+		"status": {
+			"visible": "Visible",
+			"hidden": "Hidden"
+		},
+		"form": {
+			"type": "Type",
+			"value": "Value",
+			"label": "Label",
+			"sortOrder": "Sort order",
+			"isVisible": "Visible"
+		},
+		"create": {
+			"button": "New Link",
+			"title": "New Contact Link",
+			"success": "Link created."
+		},
+		"edit": {
+			"title": "Edit Contact Link",
+			"success": "Link updated."
+		},
+		"delete": {
+			"success": "Link deleted."
+		},
+		"stats": {
+			"total": "Total links",
+			"visible": "Visible",
+			"hidden": "Hidden"
+		},
+		"loadError": "Couldn't load contact links."
+	},
+	"broadcastNotifications": {
+		"description": "Send push and in-app notifications to users.",
+		"form": {
+			"titleAr": "Title (Arabic)",
+			"titleEn": "Title (English)",
+			"bodyAr": "Message (Arabic)",
+			"bodyEn": "Message (English)",
+			"target": "Target audience",
+			"roleName": "Role name",
+			"roleNamePlaceholder": "e.g. admin, operations",
+			"userIds": "User IDs",
+			"userIdsPlaceholder": "Enter IDs separated by commas or newlines",
+			"userIdsHint": "Separate multiple IDs with commas or line breaks."
+		},
+		"targets": {
+			"all": "All active users",
+			"role": "By role",
+			"users": "Specific users"
+		},
+		"validation": {
+			"titleRequired": "Title is required.",
+			"bodyRequired": "Message body is required."
+		},
+		"send": "Send Notification",
+		"sendSuccess": "Notification sent successfully.",
+		"sendError": "Failed to send notification."
+	},
+	"eventCategories": {
+		"columns": {
+			"name": "Name",
+			"slug": "Slug",
+			"color": "Color",
+			"icon": "Icon",
+			"order": "Order",
+			"status": "Status"
+		},
+		"status": {
+			"active": "Active",
+			"inactive": "Inactive"
+		},
+		"create": {
+			"button": "New category",
+			"title": "New event category",
+			"success": "Event category created."
+		},
+		"edit": {
+			"title": "Edit event category",
+			"success": "Event category updated."
+		},
+		"delete": {
+			"success": "Event category deleted.",
+			"warning": "Deleting this category will unlink associated events (their category will become unassigned)."
+		},
+		"form": {
+			"name": "Name",
+			"slug": "Slug",
+			"slugPlaceholder": "Leave blank to auto-generate",
+			"description": "Description",
+			"color": "Color (hex code)",
+			"icon": "Icon name (e.g. carbon:education)",
+			"order": "Display order",
+			"isActive": "Active status"
+		},
+		"loadError": "Couldn't load event categories. You may not have permission to view this page.",
+		"stats": {
+			"total": "Total categories",
+			"active": "Active",
+			"inactive": "Inactive"
+		}
+	},
+	"operationsRequests": {
+		"title": "Operations Requests",
+		"subtitle": "Manage and track service requests, bookings, and technical issues.",
+		"viewDetails": "View Details",
+		"allRequests": "All Requests",
+		"serviceCatalog": "Service Catalog",
+		"noRequests": "No requests found",
+		"noServices": "No services found",
+		"filterBranch": "Filter by Branch",
+		"allBranches": "All Branches",
+		"status": {
+			"all": "All",
+			"pending": "Pending",
+			"in_progress": "In Progress",
+			"resolved": "Resolved",
+			"rejected": "Rejected",
+			"cancelled": "Cancelled"
+		},
+		"actions": {
+			"start": "Start Processing",
+			"resolve": "Resolve",
+			"reject": "Reject",
+			"updateStatus": "Update Status",
+			"addService": "Add Service",
+			"editService": "Edit Service",
+			"close": "Close"
+		},
+		"details": {
+			"title": "Request Details",
+			"service": "Service",
+			"status": "Status",
+			"requester": "Requester",
+			"branch": "Branch",
+			"space": "Space",
+			"locationSource": "Location Source",
+			"submittedAt": "Submitted At",
+			"updatedAt": "Updated At",
+			"formResponses": "Submitted Data",
+			"noResponses": "No form fields submitted",
+			"resolutionNote": "Resolution Note",
+			"noteEn": "Resolution Note (English)",
+			"noteAr": "Resolution Note (Arabic)"
+		},
+		"catalog": {
+			"title": "Service Types",
+			"slug": "Slug",
+			"nameEn": "Name (English)",
+			"nameAr": "Name (Arabic)",
+			"descEn": "Description (English)",
+			"descAr": "Description (Arabic)",
+			"method": "Request Method",
+			"comingSoon": "Coming Soon",
+			"available": "Available Now",
+			"active": "Active",
+			"inactive": "Inactive",
+			"makeAvailable": "Make Available",
+			"setComingSoon": "Set as Coming Soon",
+			"confirmStatusChangeTitle": "Change Service Status",
+			"confirmMakeAvailable": "Make service \"{name}\" available for members now? Members will be able to view and request it immediately.",
+			"confirmSetComingSoon": "Mark service \"{name}\" as Coming Soon? It will appear as an upcoming service without the ability to submit requests.",
+			"confirmOk": "Confirm",
+			"confirmCancel": "Cancel",
+			"statusUpdated": "Service status updated successfully",
+			"locationRequired": "Requires Location",
+			"fields": "Form Fields"
+		}
+	},
+	"closeSession": {
+		"title": "Close Session & Checkout",
+		"activeMember": "Active Member",
+		"workspace": "Workspace",
+		"branch": "Branch",
+		"checkIn": "Check-in",
+		"checkOut": "Check-out",
+		"duration": "Duration",
+		"subtotal": "Subtotal",
+		"total": "Total",
+		"paymentStatusPartially": "Partially Paid",
+		"availableBalance": "Available Balance",
+		"remainingCashDue": "Remaining Cash Due",
+		"useWalletBalance": "Use Wallet Balance",
+		"payCashAtReception": "Pay Cash at Reception",
+		"sessionID": "Session ID",
+		"paymentMethod": "Payment Method",
+		"receiptNote": "Receipt Note",
+		"infoNotice": "The remaining balance will be collected in cash and the session status marked as completed upon confirmation.",
+		"submitButton": "Confirm Payment & Close Session",
+		"successMessage": "Session closed and settled successfully."
+	},
+	"walletCredited": {
+		"transactionID": "Transaction ID",
+		"title": "Wallet Credit Receipt",
+		"receptionSubtitle": "ADD OS Reception Desk • Manual Top-Up",
+		"heroTitle": "Wallet Successfully Credited",
+		"heroSubtitle": "Funds have been added to the balance and are available immediately.",
+		"creditedAmount": "Credited Amount",
+		"paymentMethod": "Payment Method",
+		"balanceType": "Balance Type",
+		"expiryDate": "Expiry Date",
+		"newGeneralBalance": "New General Balance",
+		"previousGeneralBalance": "Previous General Balance",
+		"creditedBy": "Credited By",
+		"dateTime": "Date & Time",
+		"shareReceipt": "Share Receipt",
+		"printReceipt": "Print Receipt",
+		"newTopUp": "New Top-Up",
+		"noReceiptData": "No previous top-up transaction data to display.",
+		"backToReception": "Back to Reception"
+	},
+	"reception": {
+		"statusOperational": "Desk Operational",
+		"quickActionsTitle": "Quick Actions",
+		"actions": {
+			"startSession": "Start Session",
+			"registerGuest": "Register Guest",
+			"topUpWallet": "Top Up Wallet",
+			"closeSession": "Close Session"
+		},
+		"upNextTitle": "Up Next",
+		"stats": {
+			"activeSessions": "Active Sessions",
+			"expectedBookings": "Expected Bookings",
+			"pendingGuests": "Pending Guests",
+			"pendingPayments": "Pending Payments"
+		},
+		"vsYesterday": "vs yesterday"
+	},
+	"eventCancellation": {
+		"title": "Event Cancellation Details",
+		"supportSubtitle": "ADD Events • Refund Processing",
+		"heroTitle": "This Event Has Been Cancelled",
+		"heroSubtitle": "Refunds have been processed and balances returned to attendee wallets.",
+		"opsNoteTitle": "Operations Notice",
+		"refundSummaryTitle": "Ticket Refund Summary",
+		"amountPaid": "Amount Paid",
+		"refundedTo": "Refunded To",
+		"refundStatus": "Refund Status",
+		"walletReturnedInfo": "Ticket amounts have been fully refunded to the general wallet balance of all registered attendees."
+	},
+	"members": {
+		"description": "Manage and query individual app members (wallet balances, live sessions, and account status).",
+		"searchPlaceholder": "Search by name, phone, or email...",
+		"statusFilterPlaceholder": "Filter by status",
+		"loadError": "Could not load members list. Please try again later.",
+		"columns": {
+			"member": "Member",
+			"email": "Email",
+			"company": "Company",
+			"status": "Status"
+		},
+		"status": {
+			"active": "Active",
+			"deactivated": "Deactivated",
+			"blocked": "Blocked"
+		},
+		"stats": {
+			"total": "Total Members"
+		},
+		"detail": {
+			"title": "Member Details",
+			"button": "Query Wallet & Sessions",
+			"walletBalance": "Wallet Balance",
+			"generalBalance": "Current General Balance",
+			"loadingBalance": "Loading balance...",
+			"balanceError": "Could not fetch wallet balance.",
+			"activeSessions": "Currently Active Sessions",
+			"loadingSessions": "Loading sessions...",
+			"sessionsError": "Could not fetch active sessions.",
+			"noActiveSessions": "No active sessions currently for this member.",
+			"overdue": "Overdue",
+			"checkedInAt": "Checked in at",
+			"sessionType": {
+				"booking": "Booking",
+				"walkin": "Walk-in"
+			}
+		},
+		"changeStatus": {
+			"button": "Change Status",
+			"title": "Change Member Status",
+			"warning": "Deactivating or blocking a member account immediately revokes all active sessions and access permissions.",
+			"reasonLabel": "Reason (Optional)",
+			"reasonPlaceholder": "Enter reason for status change...",
+			"success": "Member status updated successfully."
+		},
+		"topUp": {
+			"button": "Top Up Wallet",
+			"title": "Top Up Member Wallet",
+			"recipientMember": "Individual Member",
+			"amount": "Amount",
+			"amountPlaceholder": "Enter amount...",
+			"paymentMethod": "Payment Method",
+			"description": "Notes / Remarks",
+			"descriptionPlaceholder": "Optional note...",
+			"submit": "Confirm Top-up",
+			"success": "Wallet topped up successfully."
+		},
+		"profile": {
+			"personalTitle": "Personal Information",
+			"professionalTitle": "Professional Information",
+			"bio": "Bio",
+			"city": "City",
+			"gender": "Gender",
+			"genderMale": "Male",
+			"genderFemale": "Female",
+			"jobTitle": "Job Title",
+			"companyName": "Company Name",
+			"industry": "Industry",
+			"socialLinks": "Professional Links & Social",
+			"noProfileInfo": "Member has not provided additional profile information yet."
+		}
+	},
+	"formFields": {
+		"title": "Form fields",
+		"add": "Add field",
+		"edit": "Edit field",
+		"delete": "Delete field",
+		"empty": "No fields yet. Add one to start building the form.",
+		"key": "Key",
+		"label": "Label",
+		"placeholder": "Placeholder",
+		"type": "Type",
+		"options": "Choices",
+		"addOption": "Add a choice",
+		"removeOption": "Remove this choice",
+		"required": "Required",
+		"active": "Active",
+		"inactive": "Hidden",
+		"order": "Order",
+		"keyHint": "Lowercase letters, digits and underscores only.",
+		"loadError": "Could not load the form fields.",
+		"saveError": "Could not save the field.",
+		"created": "Field added.",
+		"updated": "Field updated.",
+		"deleted": "Field deleted.",
+		"deleteConfirm": "Delete this field? Answers already given are removed with it.",
+		"count": "{count} field(s)",
+		"validation": {
+			"title": "Limits",
+			"hint": "Leave a limit empty to allow anything.",
+			"minChars": "Fewest characters",
+			"maxChars": "Most characters",
+			"minValue": "Smallest value",
+			"maxValue": "Largest value",
+			"minDate": "Earliest date",
+			"maxDate": "Latest date",
+			"minSelections": "Fewest choices",
+			"maxSelections": "Most choices",
+			"minStars": "Fewest stars",
+			"maxStars": "Most stars",
+			"pattern": "Allowed format",
+			"patternAny": "Any text",
+			"accept": "Allowed file types",
+			"acceptAny": "Any file",
+			"maxKb": "Largest size (KB)",
+			"rangeError": "The lower limit must not be greater than the upper one.",
+			"patterns": {
+				"alpha": "Letters only",
+				"alphanumeric": "Letters and numbers",
+				"digits": "Digits only",
+				"email": "Email address",
+				"url": "Web link",
+				"syrian_phone": "Syrian phone number",
+				"no_urls": "No links allowed"
+			},
+			"accepts": {
+				"image": "Images",
+				"video": "Video",
+				"audio": "Audio",
+				"pdf": "PDF",
+				"word": "Word document",
+				"excel": "Excel sheet"
+			}
+		}
+	},
+	"sessionsField": {
+		"date": "Date",
+		"from": "From",
+		"to": "To",
+		"add": "Add another day",
+		"remove": "Remove this day",
+		"orderError": "A day must end after it starts."
+	}
 }
