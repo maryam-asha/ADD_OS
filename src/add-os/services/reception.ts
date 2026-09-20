@@ -3,6 +3,7 @@ import type { MessageResponse } from "./resource-factory"
 import type {
 	ActiveSession,
 	CheckOutSessionPayload,
+	CreateReceptionBookingPayload,
 	ExtendBookingPayload,
 	PendingApprovalBooking,
 	RejectBookingPayload,
@@ -47,6 +48,23 @@ export { toOffsetIso }
 /** The one place `type` becomes a URL. Every shared action routes through it. */
 function sessionPrefix(type: SessionType): string {
 	return type === "booking" ? `${BASE}/bookings` : `${BASE}/walk-ins`
+}
+
+/**
+ * Reception booking a member in at the desk.
+ *
+ * Reuses the backend's own BookingCreationService unchanged, so every rule the
+ * member-facing endpoint enforces applies here too — reception cannot
+ * double-book a room the member endpoint would have refused, and cannot
+ * back-date one either. The only difference is that the member is named in the
+ * body rather than taken from the token.
+ *
+ * 422 `{message}` for any availability violation; 422 with a `wallet_options`
+ * array when the member has more than one wallet that could pay and none was
+ * chosen.
+ */
+export async function createReceptionBooking(payload: CreateReceptionBookingPayload): Promise<{ data: { id: number } }> {
+	return post<{ data: { id: number } }>(`${BASE}/bookings`, payload)
 }
 
 /**

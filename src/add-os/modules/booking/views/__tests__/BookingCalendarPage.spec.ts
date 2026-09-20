@@ -6,9 +6,22 @@ import { createI18n } from "vue-i18n"
 import { ApiError } from "@/add-os/services/api"
 import BookingCalendarPage from "../BookingCalendarPage.vue"
 
-const { getCalendarMock } = vi.hoisted(() => ({ getCalendarMock: vi.fn() }))
+const { getCalendarMock, createBookingMock, listMembersMock } = vi.hoisted(() => ({
+	getCalendarMock: vi.fn(),
+	createBookingMock: vi.fn(),
+	listMembersMock: vi.fn()
+}))
 
 vi.mock("@/add-os/services/booking-calendar", () => ({ getCalendar: getCalendarMock }))
+vi.mock("@/add-os/services/reception", () => ({ createReceptionBooking: createBookingMock }))
+vi.mock("@/add-os/services/members", () => ({ listMembers: listMembersMock }))
+
+// Same pitfall ApprovalQueuePage.spec.ts documents: the page calls useMessage()
+// directly, which needs a provider it has no reason to mount.
+vi.mock("naive-ui", async () => {
+	const actual = await vi.importActual<typeof import("naive-ui")>("naive-ui")
+	return { ...actual, useMessage: () => ({ success: vi.fn(), error: vi.fn() }) }
+})
 
 /**
  * FullCalendar renders to a real DOM and runs its own layout on mount, which is
@@ -113,15 +126,49 @@ const i18n = createI18n({
 		en: {
 			nav: { pages: { calendar: "Calendar" } },
 			spaces: { spaceType: { co_space: "Co-working space", room: "Room", business: "Business", event_hall: "Event hall" } },
-			allBookings: { status: { confirmed: "Confirmed", pending: "Under review", cancelled: "Cancelled", rejected: "Rejected" } },
+			resourceCrud: { form: { cancel: "Cancel" } },
+			allBookings: {
+				status: { confirmed: "Confirmed", pending: "Under review", cancelled: "Cancelled", rejected: "Rejected" },
+				paymentState: { paid: "Paid", unpaid: "Unpaid" }
+			},
 			bookingCalendar: {
 				description: "Which spaces are booked.",
 				loadError: "Couldn't load the calendar.",
 				empty: "No active spaces match these filters.",
-				filters: { spaceType: "Space type", allSpaceTypes: "All space types", allSpaces: "All spaces" },
+				filters: { spaceType: "Space type", space: "Space", allSpaceTypes: "All space types", allSpaces: "All spaces" },
 				totals: { spaces: "Spaces", bookings: "Bookings", occupancy: "Average occupancy" },
 				legend: { title: "Occupancy", closed: "Closed" },
-				hours: { closedToday: "Closed on this date" }
+				hours: { closedToday: "Closed on this date" },
+				detail: {
+					title: "Booking details",
+					member: "Member",
+					space: "Space",
+					when: "Booked for",
+					status: "Status",
+					payment: "Payment",
+					note: "Note",
+					checkedIn: "Checked in",
+					notCheckedIn: "Not checked in yet",
+					noPhone: "No phone on file",
+					openInBookings: "Open in all bookings"
+				},
+				create: {
+					button: "Add booking",
+					title: "Book a space for a member",
+					member: "Member",
+					memberPlaceholder: "Search by name",
+					space: "Space",
+					spacePlaceholder: "Choose a space",
+					date: "Date",
+					start: "Start",
+					end: "End",
+					note: "Note (optional)",
+					notePlaceholder: "e.g. booked at the desk",
+					submit: "Create booking",
+					success: "Booking created.",
+					endBeforeStart: "The end time must be after the start time.",
+					rulesNote: "The same availability rules apply."
+				}
 			}
 		}
 	}
@@ -146,6 +193,10 @@ describe("bookingCalendarPage", () => {
 		lastOptions = null
 		getCalendarMock.mockReset()
 		getCalendarMock.mockResolvedValue(response())
+		createBookingMock.mockReset()
+		createBookingMock.mockResolvedValue({ data: { id: 1 } })
+		listMembersMock.mockReset()
+		listMembersMock.mockResolvedValue([{ id: 3, name: "Layla Haddad", phone: "0912345678" }])
 	})
 
 	it("mounts a FullCalendar with month, week, day and list views", async () => {
@@ -282,5 +333,112 @@ describe("bookingCalendarPage", () => {
 		await flushPromises()
 
 		expect(wrapper.text()).toContain("Couldn't load the calendar.")
+	})
+
+	/**
+	 * Clicking a booking is the one read action the grid offers. Everything
+	 * that changes a booking stays on the reception screens.
+	 */
+	it("opens a read-only detail when a booking is clicked", async () => {
+		const wrapper = mountPage()
+		await navigate("dayGridMonth", "2026-08-01", "2026-09-01")
+
+		const event = (lastOptions!.events as EventInput[]).find(item => item.id === "9")!
+		lastOptions!.eventClick?.({ event: { extendedProps: event.extendedProps } } as never)
+		await flushPromises()
+
+		// n-modal teleports to body, so the wrapper's own subtree never contains
+		// it — assert against the document instead.
+		const text = document.body.textContent ?? ""
+		expect(text).toContain("Booking details")
+		expect(text).toContain("Layla Haddad")
+		expect(text).toContain("0912345678")
+		expect(text).toContain("Meeting Room A")
+
+		wrapper.unmount()
+	})
+
+	it("ignores a click on a background (closed-day) event", async () => {
+		const wrapper = mountPage()
+		await navigate("dayGridMonth", "2026-08-01", "2026-09-01")
+
+		// A background event carries no bookingId, so there is nothing to open.
+		lastOptions!.eventClick?.({ event: { extendedProps: {} } } as never)
+		await flushPromises()
+
+		expect(document.body.textContent ?? "").not.toContain("Booking details")
+
+		wrapper.unmount()
+	})
+
+	it("sends a reception booking as district wall-clock, not an ISO instant", async () => {
+		const wrapper = mountPage()
+		await flushPromises()
+
+		await wrapper.findAll("button").find(button => button.text().includes("Add booking"))!.trigger("click")
+		await flushPromises()
+
+		// The pickers are driven directly: this asserts what reaches the
+		// service, which is the part that can be wrong in a way an operator
+		// would not see.
+		const vm = wrapper.vm as unknown as {
+			createForm: { user_id: number | null, space_id: number | null, date: string, start: string, end: string, note: string }
+			submitCreate: () => Promise<void>
+		}
+		vm.createForm.user_id = 3
+		vm.createForm.space_id = 1
+		vm.createForm.date = "2026-09-24"
+		vm.createForm.start = "14:00"
+		vm.createForm.end = "15:00"
+		await vm.submitCreate()
+
+		expect(createBookingMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				user_id: 3,
+				space_id: 1,
+				start_at: "2026-09-24 14:00",
+				end_at: "2026-09-24 15:00"
+			})
+		)
+	})
+
+	/**
+	 * Availability is the server's to enforce, so a refusal has to reach the
+	 * operator as the server worded it rather than being re-worded here.
+	 */
+	it("refetches the calendar after a successful booking", async () => {
+		const wrapper = mountPage()
+		await flushPromises()
+		const before = getCalendarMock.mock.calls.length
+
+		const vm = wrapper.vm as unknown as {
+			createForm: { user_id: number | null, space_id: number | null, date: string, start: string, end: string, note: string }
+			submitCreate: () => Promise<void>
+		}
+		vm.createForm.user_id = 3
+		vm.createForm.space_id = 1
+		await vm.submitCreate()
+		await flushPromises()
+
+		expect(getCalendarMock.mock.calls.length).toBeGreaterThan(before)
+	})
+
+	it("surfaces the server's own refusal rather than inventing one", async () => {
+		createBookingMock.mockRejectedValue(
+			new ApiError(422, JSON.stringify({ message: "This space is not available for the requested time." }))
+		)
+
+		const wrapper = mountPage()
+		await flushPromises()
+
+		const vm = wrapper.vm as unknown as {
+			createForm: { user_id: number | null, space_id: number | null, date: string, start: string, end: string, note: string }
+			submitCreate: () => Promise<void>
+		}
+		vm.createForm.user_id = 3
+		vm.createForm.space_id = 1
+
+		// Must not throw: an ApiError is an expected outcome here, not a crash.
+		await expect(vm.submitCreate()).resolves.toBeUndefined()
 	})
 })

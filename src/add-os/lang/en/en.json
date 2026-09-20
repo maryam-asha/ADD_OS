@@ -1181,7 +1181,8 @@
 		"filters": {
 			"spaceType": "Space type",
 			"allSpaceTypes": "All space types",
-			"allSpaces": "All spaces"
+			"allSpaces": "All spaces",
+			"space": "Space"
 		},
 		"totals": {
 			"spaces": "Spaces",
@@ -1194,6 +1195,36 @@
 		},
 		"hours": {
 			"closedToday": "Closed on this date"
+		},
+		"detail": {
+			"title": "Booking details",
+			"member": "Member",
+			"space": "Space",
+			"when": "Booked for",
+			"status": "Status",
+			"payment": "Payment",
+			"note": "Note",
+			"checkedIn": "Checked in",
+			"notCheckedIn": "Not checked in yet",
+			"noPhone": "No phone on file",
+			"openInBookings": "Open in all bookings"
+		},
+		"create": {
+			"button": "Add booking",
+			"title": "Book a space for a member",
+			"member": "Member",
+			"memberPlaceholder": "Search by name",
+			"space": "Space",
+			"spacePlaceholder": "Choose a space",
+			"date": "Date",
+			"start": "Start",
+			"end": "End",
+			"note": "Note (optional)",
+			"notePlaceholder": "e.g. booked at the desk",
+			"submit": "Create booking",
+			"success": "Booking created.",
+			"endBeforeStart": "The end time must be after the start time.",
+			"rulesNote": "The same availability rules apply as on the member app: business hours, slot times, minimum duration and no back-dating."
 		}
 	},
 	"allBookings": {

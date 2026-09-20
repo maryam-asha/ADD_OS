@@ -1,9 +1,17 @@
 <!-- src/add-os/modules/booking/views/BookingCalendarPage.vue -->
 <template>
 	<div class="add-booking-calendar flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.calendar") }}</h1>
-			<p>{{ t("bookingCalendar.description") }}</p>
+		<div class="flex items-start justify-between gap-4">
+			<div class="flex flex-col gap-1">
+				<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.calendar") }}</h1>
+				<p>{{ t("bookingCalendar.description") }}</p>
+			</div>
+			<n-button type="primary" @click="openCreate()">
+				<template #icon>
+					<Icon name="carbon:calendar-add" :size="18" />
+				</template>
+				{{ t("bookingCalendar.create.button") }}
+			</n-button>
 		</div>
 
 		<n-alert v-if="error" type="error" :title="t('bookingCalendar.loadError')" />
@@ -11,22 +19,32 @@
 		<n-card>
 			<div class="flex flex-wrap items-end justify-between gap-4">
 				<div class="flex flex-wrap items-end gap-4">
-					<n-select
-						v-model:value="spaceType"
-						class="w-52"
-						size="small"
-						clearable
-						:options="spaceTypeOptions"
-						:placeholder="t('bookingCalendar.filters.allSpaceTypes')"
-					/>
-					<n-select
-						v-model:value="spaceId"
-						class="w-56"
-						size="small"
-						clearable
-						:options="spaceOptions"
-						:placeholder="t('bookingCalendar.filters.allSpaces')"
-					/>
+					<!--
+						Each select carries a visible label, not just a placeholder. A
+						placeholder disappears the moment a value is chosen, which left
+						two unlabelled pills on screen with nothing to say what they
+						filtered.
+					-->
+					<label class="flex flex-col gap-1">
+						<span class="text-xs">{{ t("bookingCalendar.filters.spaceType") }}</span>
+						<n-select
+							v-model:value="spaceType"
+							class="w-52"
+							clearable
+							:options="spaceTypeOptions"
+							:placeholder="t('bookingCalendar.filters.allSpaceTypes')"
+						/>
+					</label>
+					<label class="flex flex-col gap-1">
+						<span class="text-xs">{{ t("bookingCalendar.filters.space") }}</span>
+						<n-select
+							v-model:value="spaceId"
+							class="w-56"
+							clearable
+							:options="spaceOptions"
+							:placeholder="t('bookingCalendar.filters.allSpaces')"
+						/>
+					</label>
 				</div>
 
 				<div class="flex flex-wrap items-center gap-6">
@@ -64,26 +82,161 @@
 				</div>
 			</n-spin>
 		</n-card>
+
+		<!-- Booking detail -->
+		<n-modal
+			v-model:show="detailVisible"
+			preset="card"
+			class="max-w-md"
+			:title="t('bookingCalendar.detail.title')"
+		>
+			<n-descriptions v-if="selected" :column="1" label-placement="left" bordered size="small">
+				<n-descriptions-item :label="t('bookingCalendar.detail.member')">
+					<div class="flex flex-col">
+						<span>{{ selected.memberName || "—" }}</span>
+						<span class="text-xs">{{ selected.memberPhone || t("bookingCalendar.detail.noPhone") }}</span>
+					</div>
+				</n-descriptions-item>
+				<n-descriptions-item :label="t('bookingCalendar.detail.space')">
+					{{ selected.spaceName }}
+				</n-descriptions-item>
+				<n-descriptions-item :label="t('bookingCalendar.detail.when')">
+					<div class="flex flex-col">
+						<span>{{ selected.dateLabel }}</span>
+						<span class="text-xs">{{ selected.timeLabel }}</span>
+					</div>
+				</n-descriptions-item>
+				<n-descriptions-item :label="t('bookingCalendar.detail.status')">
+					<n-tag :type="STATUS_TAG_TYPE[selected.status]" size="small" :bordered="false">
+						{{ selected.statusLabel }}
+					</n-tag>
+				</n-descriptions-item>
+				<n-descriptions-item :label="t('bookingCalendar.detail.payment')">
+					{{ t(`allBookings.paymentState.${selected.paymentState}`) }}
+				</n-descriptions-item>
+				<n-descriptions-item :label="t('bookingCalendar.detail.checkedIn')">
+					{{ selected.checkedInAt ? formatDateTime(selected.checkedInAt) : t("bookingCalendar.detail.notCheckedIn") }}
+				</n-descriptions-item>
+			</n-descriptions>
+		</n-modal>
+
+		<!-- Create booking -->
+		<n-modal
+			v-model:show="createVisible"
+			preset="card"
+			class="max-w-lg"
+			:title="t('bookingCalendar.create.title')"
+		>
+			<n-form :model="createForm">
+				<n-form-item
+					:label="t('bookingCalendar.create.member')"
+					:feedback="createErrors.user_id?.[0]"
+					:validation-status="createErrors.user_id ? 'error' : undefined"
+				>
+					<n-select
+						v-model:value="createForm.user_id"
+						filterable
+						:options="memberOptions"
+						:loading="isLoadingMembers"
+						:placeholder="t('bookingCalendar.create.memberPlaceholder')"
+					/>
+				</n-form-item>
+
+				<n-form-item
+					:label="t('bookingCalendar.create.space')"
+					:feedback="createErrors.space_id?.[0]"
+					:validation-status="createErrors.space_id ? 'error' : undefined"
+				>
+					<n-select
+						v-model:value="createForm.space_id"
+						:options="creatableSpaceOptions"
+						:placeholder="t('bookingCalendar.create.spacePlaceholder')"
+					/>
+				</n-form-item>
+
+				<div class="flex gap-3">
+					<n-form-item
+						class="grow"
+						:label="t('bookingCalendar.create.date')"
+						:feedback="createErrors.start_at?.[0]"
+						:validation-status="createErrors.start_at ? 'error' : undefined"
+					>
+						<n-date-picker v-model:formatted-value="createForm.date" type="date" value-format="yyyy-MM-dd" class="w-full" />
+					</n-form-item>
+					<n-form-item class="w-28" :label="t('bookingCalendar.create.start')">
+						<n-time-picker v-model:formatted-value="createForm.start" format="HH:mm" value-format="HH:mm" class="w-full" />
+					</n-form-item>
+					<n-form-item
+						class="w-28"
+						:label="t('bookingCalendar.create.end')"
+						:feedback="endError"
+						:validation-status="endError ? 'error' : undefined"
+					>
+						<n-time-picker v-model:formatted-value="createForm.end" format="HH:mm" value-format="HH:mm" class="w-full" />
+					</n-form-item>
+				</div>
+
+				<n-form-item :label="t('bookingCalendar.create.note')">
+					<n-input
+						v-model:value="createForm.note"
+						type="textarea"
+						:rows="2"
+						:placeholder="t('bookingCalendar.create.notePlaceholder')"
+					/>
+				</n-form-item>
+
+				<n-alert type="info" :bordered="false">{{ t("bookingCalendar.create.rulesNote") }}</n-alert>
+			</n-form>
+
+			<template #footer>
+				<div class="flex justify-end gap-2">
+					<n-button @click="createVisible = false">{{ t("resourceCrud.form.cancel") }}</n-button>
+					<n-button type="primary" :loading="isCreating" :disabled="!canSubmit" @click="submitCreate">
+						{{ t("bookingCalendar.create.submit") }}
+					</n-button>
+				</div>
+			</template>
+		</n-modal>
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { CalendarApi, CalendarOptions, EventInput } from "@fullcalendar/core"
 import type { SelectOption } from "naive-ui"
-import type { BookingStatus, CalendarResponse, CalendarView } from "@/add-os/modules/booking/types/calendar"
+import type { BookingPaymentState, BookingStatus, CalendarResponse, CalendarView } from "@/add-os/modules/booking/types/calendar"
+import type { Member } from "@/add-os/modules/members/types/member"
 import type { SpaceType } from "@/add-os/modules/spatial/types/space"
 import dayGridPlugin from "@fullcalendar/daygrid"
 import listPlugin from "@fullcalendar/list"
 import timeGridPlugin from "@fullcalendar/timegrid"
 import FullCalendar from "@fullcalendar/vue3"
-import { NAlert, NCard, NSelect, NSpin } from "naive-ui"
+import {
+	NAlert,
+	NButton,
+	NCard,
+	NDatePicker,
+	NDescriptions,
+	NDescriptionsItem,
+	NForm,
+	NFormItem,
+	NInput,
+	NModal,
+	NSelect,
+	NSpin,
+	NTag,
+	NTimePicker,
+	useMessage
+} from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { spaceTypeLabel } from "@/add-os/modules/booking/config/space-type-label"
 import { SPACE_TYPES } from "@/add-os/modules/spatial/types/space"
 import { ApiError } from "@/add-os/services/api"
 import { getCalendar } from "@/add-os/services/booking-calendar"
-import { formatNumber } from "@/add-os/utils/format"
+import { listMembers } from "@/add-os/services/members"
+import { createReceptionBooking } from "@/add-os/services/reception"
+import { formatDate, formatDateTime, formatNumber, formatTime } from "@/add-os/utils/format"
+import Icon from "@/components/common/Icon.vue"
 
 /**
  * The operations calendar: every booking in the district, on the FullCalendar
@@ -92,36 +245,43 @@ import { formatNumber } from "@/add-os/utils/format"
  * FullCalendar rather than a hand-built grid, and it is worth saying why the
  * first attempt was wrong: a table of shaded cells answers "how full is this
  * space today" but not "what is actually on at 2pm", which is the question an
- * operator standing at the desk is usually asking. Month, week, day and list
- * views come from the library, and the vendor's own `Apps/Calendars` screen
- * already establishes how it is wired and styled here.
+ * operator standing at the desk is usually asking.
  *
- * `@fullcalendar/*` is imported directly from `node_modules` — it is a
- * dependency of this project, already in `package.json`, not vendor source.
- * Nothing is imported from `src/views/Apps/**`, which stays Category C.
+ * `@fullcalendar/*` is imported from `node_modules` — a declared dependency,
+ * not vendor source. Nothing is imported from `src/views/Apps/**`, which stays
+ * Category C.
  *
- * Read-only. Every write verb on a booking already lives on the reception
- * screens, and a calendar that could also approve and cancel would be a second
- * place those rules are expressed. This screen answers where the pressure is;
- * acting on it happens at the desk.
+ * Two actions live here, and only two. Clicking a booking opens a read-only
+ * detail; the header button books a member in. Everything else about a booking
+ * — approve, reject, check in, check out, cancel, settle, extend — stays on the
+ * reception screens, because that is where those rules already live and a
+ * second copy of them would be free to drift.
  *
- * The server decides the range. `datesSet` reports whichever period the user
- * navigated to, and the fetch follows it — so the visible window and the data
- * behind it can never drift apart.
+ * Creation goes through the same `BookingCreationService` the member app uses,
+ * so reception cannot double-book a room the member endpoint would refuse, and
+ * cannot back-date one either. Every refusal arrives as a 422 with its own
+ * translated message, which is shown verbatim rather than re-worded here.
  */
 
 defineProps<{ titleKey?: string }>()
 
 const { t, locale } = useI18n()
+const message = useMessage()
 
 /** The statuses the legend explains, in the order it lists them. */
 const LEGEND_STATUSES: readonly BookingStatus[] = ["confirmed", "pending", "cancelled", "rejected"]
 
+const STATUS_TAG_TYPE: Readonly<Record<BookingStatus, "success" | "warning" | "default" | "error">> = {
+	confirmed: "success",
+	pending: "warning",
+	cancelled: "default",
+	rejected: "error"
+}
+
 /**
- * FullCalendar view name → the `view` this API accepts.
- *
- * `listMonth` maps to `month`: the list is a different rendering of the same
- * month, not a different range.
+ * FullCalendar view name → the `view` this API accepts. `listMonth` maps to
+ * `month`: the list is a different rendering of the same month, not a
+ * different range.
  */
 const VIEW_BY_FC_TYPE: Readonly<Record<string, CalendarView>> = {
 	dayGridMonth: "month",
@@ -150,7 +310,7 @@ const spaceId = ref<number | null>(null)
  * Seeded with today so the first paint has data: FullCalendar opens on the
  * current month, and waiting for its first `datesSet` would leave the screen
  * blank until the user navigated. Every later change comes from `datesSet`,
- * which is authoritative — these are never guessed again.
+ * which is authoritative.
  */
 const activeView = ref<CalendarView>("month")
 const activeDate = ref<string>(toIsoDate(new Date()))
@@ -172,9 +332,9 @@ const spaceTypeOptions = computed<SelectOption[]>(() =>
 )
 
 /**
- * Space filter options, read off whatever the current response returned rather
- * than fetched separately — the calendar has already named every active space
- * in range, and a second request would only risk disagreeing with it.
+ * Space options, read off whatever the current response returned rather than
+ * fetched separately — the calendar has already named every active space in
+ * range, and a second request would only risk disagreeing with it.
  */
 const spaceOptions = computed<SelectOption[]>(() =>
 	(response.value?.resources ?? []).map(resource => ({
@@ -183,14 +343,32 @@ const spaceOptions = computed<SelectOption[]>(() =>
 	}))
 )
 
-/**
- * The response flattened into FullCalendar events.
- *
- * One event per booking, titled with the space it is in and the member who
- * holds it — on a month grid the space is what distinguishes two rows at the
- * same hour. A closed day becomes a background event instead, which is how
- * FullCalendar shades a day without putting a clickable block on it.
- */
+/** The create form offers the same spaces, minus any the filter narrowed away. */
+const creatableSpaceOptions = spaceOptions
+
+// ---------------------------------------------------------------
+// Detail — declared before the calendar options that populate it
+// ---------------------------------------------------------------
+
+interface SelectedBooking {
+	id: number
+	status: BookingStatus
+	statusLabel: string
+	spaceName: string
+	memberName: string | null
+	memberPhone: string | null
+	paymentState: BookingPaymentState
+	checkedInAt: string | null
+	dateLabel: string
+	timeLabel: string
+}
+
+const selected = ref<SelectedBooking | null>(null)
+
+// ---------------------------------------------------------------
+// Events
+// ---------------------------------------------------------------
+
 const events = computed<EventInput[]>(() => {
 	const out: EventInput[] = []
 	const closedDates = new Set<string>()
@@ -211,11 +389,16 @@ const events = computed<EventInput[]>(() => {
 					end: booking.end_at,
 					classNames: [`c-${booking.status}`, "styled"],
 					extendedProps: {
+						bookingId: booking.id,
 						statusLabel: booking.status_label,
+						status: booking.status,
 						spaceName,
 						memberName: booking.member.name,
 						memberPhone: booking.member.phone,
-						paymentState: booking.payment_state
+						paymentState: booking.payment_state,
+						checkedInAt: booking.checked_in_at,
+						startAt: booking.start_at,
+						endAt: booking.end_at
 					}
 				})
 			}
@@ -230,12 +413,7 @@ const events = computed<EventInput[]>(() => {
 			resource => resource.days.find(day => day.date === date)?.state === "closed"
 		)
 		if (closedEverywhere && spaceCount > 0) {
-			out.push({
-				start: date,
-				allDay: true,
-				display: "background",
-				classNames: ["c-closed"]
-			})
+			out.push({ start: date, allDay: true, display: "background", classNames: ["c-closed"] })
 		}
 	}
 
@@ -257,10 +435,27 @@ const calendarOptions = computed<CalendarOptions>(() => ({
 	height: "auto",
 	dayMaxEvents: 3,
 	navLinks: true,
-	// Read-only: no editable, no dateClick, no eventDrop. Acting on a booking
-	// happens at the reception desk.
 	events: events.value,
 	eventTimeFormat: { hour: "2-digit", minute: "2-digit", meridiem: "short" },
+	// Read-only on the grid itself: no editable, no drag, no resize. Clicking
+	// opens a detail; creating goes through the form, where the member and the
+	// space are stated explicitly.
+	eventClick(info) {
+		const props = info.event.extendedProps as Record<string, unknown>
+		if (!props.bookingId) return
+		selected.value = {
+			id: props.bookingId as number,
+			status: props.status as BookingStatus,
+			statusLabel: props.statusLabel as string,
+			spaceName: props.spaceName as string,
+			memberName: props.memberName as string | null,
+			memberPhone: props.memberPhone as string | null,
+			paymentState: props.paymentState as BookingPaymentState,
+			checkedInAt: props.checkedInAt as string | null,
+			dateLabel: formatDate(props.startAt as string),
+			timeLabel: `${formatTime(props.startAt as string)} – ${formatTime(props.endAt as string)}`
+		}
+	},
 	datesSet(info) {
 		const view = VIEW_BY_FC_TYPE[info.view.type] ?? "month"
 		// `info.start` is the first visible cell, which in a month grid can be
@@ -275,6 +470,108 @@ const calendarOptions = computed<CalendarOptions>(() => ({
 		}
 	}
 }))
+
+const detailVisible = computed({
+	get: () => selected.value !== null,
+	set: (value: boolean) => {
+		if (!value) selected.value = null
+	}
+})
+
+// ---------------------------------------------------------------
+// Create
+// ---------------------------------------------------------------
+
+const createVisible = ref(false)
+const isCreating = ref(false)
+const createErrors = ref<Record<string, string[]>>({})
+
+const members = ref<Member[]>([])
+const isLoadingMembers = ref(false)
+
+const createForm = ref({
+	user_id: null as number | null,
+	space_id: null as number | null,
+	date: toIsoDate(new Date()),
+	start: "09:00",
+	end: "10:00",
+	note: ""
+})
+
+const memberOptions = computed<SelectOption[]>(() =>
+	members.value.map(member => ({ label: `${member.name} · ${member.phone}`, value: member.id }))
+)
+
+/**
+ * The one rule checked here rather than server-side, because it needs no
+ * knowledge the client lacks: an end before its start is nonsense regardless
+ * of business hours. Everything else — granularity, minimum duration, overlap,
+ * buffer, back-dating — is the server's to enforce, and re-implementing any of
+ * it here would be a second copy free to disagree.
+ */
+const endError = computed(() =>
+	createForm.value.end <= createForm.value.start ? t("bookingCalendar.create.endBeforeStart") : undefined
+)
+
+const canSubmit = computed(
+	() => createForm.value.user_id !== null && createForm.value.space_id !== null && !endError.value
+)
+
+function openCreate(): void {
+	createErrors.value = {}
+	createVisible.value = true
+
+	if (members.value.length === 0 && !isLoadingMembers.value) {
+		void loadMembers()
+	}
+}
+
+async function loadMembers(): Promise<void> {
+	isLoadingMembers.value = true
+	try {
+		members.value = await listMembers()
+	} catch (caught) {
+		if (!(caught instanceof ApiError)) throw caught
+		// A failed member list leaves the picker empty rather than blocking the
+		// modal; the operator sees an empty select and can close it.
+		members.value = []
+	} finally {
+		isLoadingMembers.value = false
+	}
+}
+
+async function submitCreate(): Promise<void> {
+	if (!canSubmit.value) return
+
+	isCreating.value = true
+	createErrors.value = {}
+	try {
+		await createReceptionBooking({
+			user_id: createForm.value.user_id as number,
+			space_id: createForm.value.space_id as number,
+			// Wall-clock in the district's own timezone, which is what the
+			// endpoint expects — an offset here would be re-interpreted.
+			start_at: `${createForm.value.date} ${createForm.value.start}`,
+			end_at: `${createForm.value.date} ${createForm.value.end}`,
+			...(createForm.value.note ? { note: createForm.value.note } : {})
+		})
+		message.success(t("bookingCalendar.create.success"))
+		createVisible.value = false
+		await load()
+	} catch (caught) {
+		if (!(caught instanceof ApiError)) throw caught
+		createErrors.value = caught.data?.errors ?? {}
+		// The server's own sentence, shown as-is: it already names the rule
+		// that was broken, in the requested language.
+		if (caught.data?.message) message.error(caught.data.message)
+	} finally {
+		isCreating.value = false
+	}
+}
+
+// ---------------------------------------------------------------
+// Load
+// ---------------------------------------------------------------
 
 async function load(): Promise<void> {
 	isLoading.value = true
@@ -352,6 +649,7 @@ defineExpose({
 			border-inline-start-width: 3px;
 			border-inline-start-style: solid;
 			padding-inline: 2px;
+			cursor: pointer;
 
 			&.c-confirmed {
 				background-color: rgba(var(--success-color-rgb) / 0.12);

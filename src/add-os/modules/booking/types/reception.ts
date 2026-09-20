@@ -90,3 +90,25 @@ export interface CheckOutSessionPayload {
 export interface SettlePaymentPayload {
 	payment_method: PaymentMethod
 }
+
+/**
+ * Reception creating a booking on a member's behalf — the walk-up at the desk,
+ * and the "book it for them" action on the calendar.
+ *
+ * `start_at`/`end_at` are wall-clock strings in the district's own timezone
+ * (`YYYY-MM-DD HH:mm`), not ISO instants, matching the request body in the API
+ * snapshot pinned 2026-09-20. The backend reads a bare value as local time by
+ * design; sending an offset here would be re-interpreted rather than honoured.
+ *
+ * Every availability rule the member endpoint enforces applies to this one too
+ * — business hours, granularity, minimum duration, overlap, buffer, the
+ * space's own ceiling, and the no-back-dating rule. A violation comes back as
+ * a 422 carrying its own translated message.
+ */
+export interface CreateReceptionBookingPayload {
+	user_id: number
+	space_id: number
+	start_at: string
+	end_at: string
+	note?: string
+}
