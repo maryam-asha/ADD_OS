@@ -1240,7 +1240,9 @@
 			"anyPaymentState": "Any payment state",
 			"from": "From",
 			"to": "To",
-			"clear": "Clear filters"
+			"clear": "Clear filters",
+			"dateRange": "Date range",
+			"legend": "Filter bookings"
 		},
 		"columns": {
 			"member": "Member",
@@ -1264,7 +1266,8 @@
 			"wallet": "Wallet",
 			"cash": "Cash"
 		},
-		"notSettled": "Not settled yet"
+		"notSettled": "Not settled yet",
+		"resultCount": "bookings"
 	},
 	"shortcuts": {
 		"title": "Shortcuts"

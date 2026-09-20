@@ -55,13 +55,16 @@ const i18n = createI18n({
 					anyPaymentState: "Any payment state",
 					from: "From",
 					to: "To",
-					clear: "Clear filters"
+					clear: "Clear filters",
+					dateRange: "Date range",
+					legend: "Filter bookings"
 				},
 				columns: { member: "Member", space: "Space", when: "Booked for", status: "Status", payment: "Payment", amount: "Amount" },
 				status: { confirmed: "Confirmed", pending: "Under review", cancelled: "Cancelled", rejected: "Rejected" },
 				paymentState: { paid: "Paid", unpaid: "Unpaid" },
 				paymentSource: { wallet: "Wallet", cash: "Cash" },
-				notSettled: "Not settled yet"
+				notSettled: "Not settled yet",
+				resultCount: "bookings"
 			}
 		}
 	}
@@ -190,5 +193,129 @@ describe("allBookingsPage", () => {
 		await flushPromises()
 
 		expect(wrapper.text()).toContain("Couldn't load bookings.")
+	})
+
+	/**
+	 * The filters shipped placeholder-only. A placeholder vanishes the moment a
+	 * value is chosen — precisely when a filtered list most needs to say what is
+	 * filtering it — and in RTL the row rendered as blank pills. Pinned as text
+	 * rather than as a class so it keeps testing what an operator can read.
+	 */
+	it("labels every filter control visibly", async () => {
+		const wrapper = mountPage()
+		await flushPromises()
+
+		expect(wrapper.text()).toContain("Search")
+		expect(wrapper.text()).toContain("Payment")
+		expect(wrapper.text()).toContain("Date range")
+	})
+
+	/**
+	 * Status is a chip row, so all five choices are visible without opening
+	 * anything — the filter an operator uses most should not cost a click to
+	 * read.
+	 */
+	it("offers every status as a chip, plus an all-statuses chip", async () => {
+		const wrapper = mountPage()
+		await flushPromises()
+
+		const chips = wrapper.findAll(".add-chip").map(chip => chip.text())
+
+		expect(chips).toEqual(["Any status", "Confirmed", "Under review", "Cancelled", "Rejected"])
+	})
+
+	it("sends the status to the server when its chip is clicked", async () => {
+		const wrapper = mountPage()
+		await flushPromises()
+
+		const cancelled = wrapper.findAll(".add-chip").find(chip => chip.text() === "Cancelled")
+		expect(cancelled, "expected a Cancelled chip").toBeTruthy()
+		await cancelled!.trigger("click")
+		await flushPromises()
+
+		expect(listBookingsMock).toHaveBeenLastCalledWith(expect.objectContaining({ status: "cancelled" }))
+	})
+
+	/**
+	 * "All" is the absence of the filter, not a value for it: sending
+	 * `status: null` would have the server filter on a status no booking holds.
+	 */
+	it("drops the status filter entirely when the all-statuses chip is clicked", async () => {
+		const wrapper = mountPage()
+		await flushPromises()
+
+		const chips = () => wrapper.findAll(".add-chip")
+		await chips().find(chip => chip.text() === "Confirmed")!.trigger("click")
+		await flushPromises()
+		expect(listBookingsMock).toHaveBeenLastCalledWith(expect.objectContaining({ status: "confirmed" }))
+
+		await chips().find(chip => chip.text() === "Any status")!.trigger("click")
+		await flushPromises()
+
+		const lastQuery = listBookingsMock.mock.lastCall![0] as Record<string, unknown>
+		expect(lastQuery).not.toHaveProperty("status")
+	})
+
+	/** The active chip is marked for assistive tech, not by colour alone. */
+	it("marks the active status chip as pressed", async () => {
+		const wrapper = mountPage()
+		await flushPromises()
+
+		expect(wrapper.find(".add-chip[aria-pressed=\"true\"]").text()).toBe("Any status")
+
+		await wrapper.findAll(".add-chip").find(chip => chip.text() === "Rejected")!.trigger("click")
+		await flushPromises()
+
+		expect(wrapper.find(".add-chip[aria-pressed=\"true\"]").text()).toBe("Rejected")
+	})
+
+	/**
+	 * The count is `meta.total` — the total for the current filter, which is the
+	 * only count this endpoint returns. Deriving it from the loaded rows would
+	 * count 25 and call it the district.
+	 */
+	it("shows the server's total for the current filter, not the loaded row count", async () => {
+		listBookingsMock.mockResolvedValue(pageOf([booking()], { last_page: 15, total: 372 }))
+
+		const wrapper = mountPage()
+		await flushPromises()
+
+		expect(wrapper.text()).toContain("372")
+		expect(wrapper.text()).toContain("bookings")
+	})
+
+	/**
+	 * An operator who filtered their way into an empty table needs the way back
+	 * out, not just the news — and with no filters set there is nothing to clear,
+	 * so the button would be a no-op control.
+	 */
+	it("offers a way out of an empty result only when a filter caused it", async () => {
+		listBookingsMock.mockResolvedValue(pageOf([]))
+
+		const wrapper = mountPage()
+		await flushPromises()
+
+		expect(wrapper.findAll("button").some(b => b.text() === "Clear filters")).toBe(false)
+
+		await wrapper.find("input").setValue("nobody")
+		await flushPromises()
+
+		expect(wrapper.findAll("button").some(b => b.text() === "Clear filters")).toBe(true)
+	})
+
+	it("clears every filter at once", async () => {
+		const wrapper = mountPage()
+		await flushPromises()
+
+		await wrapper.find("input").setValue("Layla")
+		await flushPromises()
+		await wrapper.findAll(".add-chip").find(chip => chip.text() === "Confirmed")!.trigger("click")
+		await flushPromises()
+		expect(listBookingsMock).toHaveBeenLastCalledWith(expect.objectContaining({ q: "Layla", status: "confirmed" }))
+
+		await wrapper.findAll("button").find(b => b.text().includes("Clear filters"))!.trigger("click")
+		await flushPromises()
+
+		expect(listBookingsMock).toHaveBeenLastCalledWith({ page: 1 })
 	})
 })

@@ -1244,7 +1244,9 @@
 			"anyPaymentState": "كل حالات الدفع",
 			"from": "من",
 			"to": "إلى",
-			"clear": "مسح الفلاتر"
+			"clear": "مسح الفلاتر",
+			"dateRange": "الفترة الزمنية",
+			"legend": "تصفية الحجوزات"
 		},
 		"columns": {
 			"member": "العضو",
@@ -1268,7 +1270,8 @@
 			"wallet": "المحفظة",
 			"cash": "نقداً"
 		},
-		"notSettled": "لم تتم التسوية بعد"
+		"notSettled": "لم تتم التسوية بعد",
+		"resultCount": "حجز"
 	},
 	"shortcuts": {
 		"title": "الاختصارات"

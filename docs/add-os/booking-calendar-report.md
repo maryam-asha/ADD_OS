@@ -146,16 +146,51 @@ which disappears the moment a value is chosen; in RTL they read as two blank
 pills. Both now carry a visible label, at the default size the other filter
 screens use.
 
+## Added after second review — the filter bar
+
+The all-bookings filters had the same defect the calendar's did, and the same
+cause: four controls in a row, each with a placeholder and no label. A
+placeholder is gone exactly when a filter is active, so a filtered list said
+nothing about what was filtering it; in RTL the row read as blank pills.
+
+**Status became a chip row, not a fourth dropdown.** It is the filter an
+operator reaches for most, it has four values plus "all", and chips show every
+option and the current one without being opened. The precedent is
+`OperationsRequestsPage`, which already filters this way. The other three stay
+as fields because their value sets are open (search, dates) or rarely touched
+(payment state) — the point is not that chips are better, it is that a small
+closed set is what chips suit.
+
+"All" clears the filter rather than sending a value: `status: null` would ask
+the server to match a status no booking holds. Pinned by a test, because the
+query object is where that mistake would be invisible.
+
+**The count beside the title is `meta.total` — the total for the current
+filter.** Per-status tallies on each chip were considered and dropped: this
+endpoint returns one total, so four counts would cost four extra requests per
+keystroke, and deriving them from the loaded page would count 25 rows and call
+it the district. One honest number beats five guessed ones.
+
+**The empty state offers the way out.** "No bookings match these filters" is
+accurate but unhelpful when the operator has filtered themselves into a corner;
+the clear button now appears there — and only when a filter is actually set,
+since with none there is nothing to clear and the control would be a no-op.
+
+Styling is tokens only: `--add-primary` for the active chip, `--add-surface`
+and `--add-border` for the panel, `--add-space-*` and `--add-radius-*` for
+metrics. The active chip carries weight as well as fill, since at this palette's
+contrast colour alone is what a deuteranopic viewer loses.
+
 ## Verification run
 
 ```
 pnpm lint:check         # clean for these files
 pnpm type-check         # only the 2 pre-existing operations/* errors remain
-pnpm test:unit          # 95 files / 875 tests, all passing, guards included
+pnpm test:unit          # 95 files / 883 tests, all passing, guards included
 pnpm api:collection:check  # MATCH (re-pinned 2026-09-20)
 ```
 
-22 new tests across the two pages. Three of them found real defects while being
+30 new tests across the two pages. Three of them found real defects while being
 written, which is the reason they are worth reading:
 
 - the cell branch that printed "Free" over a fully-booked day (grid version),
