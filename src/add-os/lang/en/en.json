@@ -1218,13 +1218,17 @@
 			"spacePlaceholder": "Choose a space",
 			"date": "Date",
 			"start": "Start",
-			"end": "End",
 			"note": "Note (optional)",
 			"notePlaceholder": "e.g. booked at the desk",
 			"submit": "Create booking",
 			"success": "Booking created.",
-			"endBeforeStart": "The end time must be after the start time.",
-			"rulesNote": "The same availability rules apply as on the member app: business hours, slot times, minimum duration and no back-dating."
+			"rulesNote": "Only times this space can actually take are offered. A time can still be taken while this form is open, so the booking is confirmed on submit.",
+			"duration": "Duration",
+			"noSlots": "No bookable times on this date.",
+			"slotsError": "Couldn't load times for this space.",
+			"slotCounts": "{available} of {total} times free",
+			"endsAt": "Ends {time}",
+			"points": "points"
 		}
 	},
 	"allBookings": {

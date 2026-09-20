@@ -1,4 +1,5 @@
 import type { Paginated, RawPaginatedResponse } from "./pagination"
+import type { QuoteResponse, SlotsResponse } from "@/add-os/modules/booking/types/availability"
 import type {
 	AdminBooking,
 	AdminBookingFilters,
@@ -77,6 +78,36 @@ export async function listBookings(query?: Record<string, unknown>): Promise<Pag
  */
 export async function getBooking(id: number): Promise<{ data: AdminBooking & Record<string, unknown> }> {
 	return get<{ data: AdminBooking & Record<string, unknown> }>(`${BASE}/bookings/${id}`)
+}
+
+/**
+ * The bookable slots for one space on one date.
+ *
+ * This is the same payload the member app's time picker reads — the backend
+ * serves both from one `AvailabilityBrowseService`, and asserts in its own
+ * test that the two responses are identical. That sameness is the point: the
+ * desk offers exactly the windows `BookingCreationService` will accept, so an
+ * operator stops discovering the rules one rejection at a time.
+ *
+ * `date` is a district-local calendar date (`YYYY-MM-DD`), not an instant.
+ */
+export async function getSpaceSlots(spaceId: number, date: string): Promise<SlotsResponse> {
+	return get<SlotsResponse>(`${BASE}/spaces/${spaceId}/availability/slots`, { date })
+}
+
+/**
+ * The duration ladder for a chosen start, each rung priced and flagged.
+ *
+ * `startAt` is district wall-clock (`YYYY-MM-DD HH:mm`) — the same convention
+ * `createReceptionBooking` uses, and for the same reason: the server reads a
+ * bare value as local by design, so an ISO offset would be re-interpreted
+ * rather than honoured.
+ *
+ * An unbookable duration comes back `available: false` with its reason rather
+ * than omitted; render it disabled and show the reason.
+ */
+export async function getSpaceQuote(spaceId: number, startAt: string): Promise<QuoteResponse> {
+	return get<QuoteResponse>(`${BASE}/spaces/${spaceId}/availability/quote`, { start_at: startAt })
 }
 
 /** Re-exported so `AdminBookingFilters` has one import site alongside the calls. */

@@ -22,6 +22,94 @@ snapshot is unverified until someone re-reads the canonical file and re-pins it.
 
 | | |
 |---|---|
+| Pinned | 2026-09-21 |
+| Source | the canonical path above, read directly, copied byte-for-byte (`cp`, not a JSON re-serialize — key order and formatting are exactly the source's) |
+| Verified identical | `sha256` match between source and this copy at pin time, plus a `cmp` byte comparison |
+| Size | 842,375 bytes / 14,734 lines |
+| Leaf endpoints (parsed) | 336 — `GET` 129, `POST` 122, `DELETE` 30, `PATCH` 29, `PUT` 26 |
+| Distinct `METHOD + URL` | 300 |
+
+### What changed since the 2026-09-20 pin
+
+A **small, purely additive** delta: 334 → 336 leaf endpoints, 298 → 300 distinct
+`METHOD + URL` pairs, +100 lines and nothing removed (verified by parsing both and
+diffing the request-path sets: two added, zero removed, zero renamed).
+
+**2 endpoints added**, both in `Admin (Dashboard) / Calendar & Bookings`:
+
+- `GET /api/v1/admin/spaces/{space}/availability/slots`
+- `GET /api/v1/admin/spaces/{space}/availability/quote`
+
+They expose the member-side availability reads to operations so the dashboard's
+booking form can offer the windows the server will accept, instead of a free-form
+clock that learns the rules from 422s. The backend serves them from the same
+`AvailabilityBrowseService` as the member routes and asserts in
+`SpaceAvailabilityControllerTest` that the two responses are identical for the same
+space and date — so this is one contract exposed twice, not a second contract.
+
+### Credential scan at this pin
+
+Both halves of the scan were repeated against the canonical file. **Nothing new.**
+
+Structural: every `auth` block value is a `{{placeholder}}`; the five `Authorization`
+headers each interpolate a placeholder; no literal host appears in any `url.raw`
+(all interpolate `base_url`).
+
+Pattern/password-field: nine credential-shaped body fields hold populated literals —
+`token` in the two Notifications device-token requests, and `password` /
+`password_confirmation` / `token` across `Password/Update Password`,
+`Password/Reset Password` and `Users/Create User`. **This is the same set, in the same
+requests, as the 2026-09-20 pin** (verified by scanning the outgoing snapshot and
+comparing the sets, not by assuming). They are sample values in the canonical source,
+not introduced here, and correcting them would mean an edited contract is no longer the
+contract. Named here as fields and requests only, never values — unchanged exposure,
+and declining to re-pin would not have reduced it.
+
+The two added requests introduce **no** credential-shaped populated field: their auth
+is `{{admin_token}}` and they carry no body.
+
+### Encoding at this pin
+
+Unchanged from the 2026-09-20 pin and re-measured against this copy: the raw bytes
+decode as strict, valid UTF-8; the double-encoded em dash (`â€”`) still appears 19
+times and the correct em dash (`—`) 72 times, all in `description` fields, still
+present in the canonical source and still not corrected here.
+
+## Re-pinning
+
+1. Run `pnpm api:collection:check`. If it reports `MATCH`, nothing to do.
+2. If it reports `MISMATCH`: read the canonical file fresh and repeat **both** halves of
+   the scan above — the structural checks (variables, `auth` blocks, `Authorization` and
+   `Cookie` headers, literal `base_url`), *and* the pattern and password-field checks.
+   Stop and report instead of copying if anything credential-shaped now holds a
+   populated value that is not a `{{placeholder}}`. Report findings the same way: name
+   the field and the request, never the value.
+3. Copy the canonical file over this one byte-for-byte (no hand edits, no reformatting).
+   Verify with `sha256` **and** `cmp`.
+4. Update "Current pin" above with the new date, size, endpoint count, and scan
+   results — **append**, don't overwrite the prior pin's record, so a future reader can
+   see when a given claim's citation stopped being current. Move the outgoing record
+   into "Superseded pins" below, verbatim.
+5. Check `CLAUDE.md`'s "API contract" section still reads correctly. **It deliberately
+   carries no pin date** — it points here instead ("see `docs/api/README.md` for the pin
+   date"), so there is normally nothing to change in step 5. This step used to say
+   "update the pin date in `CLAUDE.md`", which described an edit that file has no place
+   for; corrected at the 2026-08-25 re-pin. Keep it that way: a date in two files is a
+   date that can disagree with itself, and the table above is the one that must win.
+
+---
+
+## Superseded pins
+
+Kept verbatim. A claim written while one of these was current cites *that* pin, and a
+future reader needs to see what it actually said.
+
+### Pin of 2026-09-20 — superseded 2026-09-21
+
+#### Record as it stood
+
+| | |
+|---|---|
 | Pinned | 2026-09-20 |
 | Source | the canonical path above, read directly, copied byte-for-byte (`cp`, not a JSON re-serialize — key order and formatting are exactly the source's) |
 | Verified identical | `sha256` match between source and this copy at pin time, plus a `cmp` byte comparison |
@@ -122,34 +210,6 @@ names, which is where most of it lived. What remains is in `description` fields,
 still present in the canonical source rather than introduced here, and is still **not
 corrected** in this snapshot — an edited contract is no longer the contract. Worth
 raising with the backend team separately; not actioned here.
-## Re-pinning
-
-1. Run `pnpm api:collection:check`. If it reports `MATCH`, nothing to do.
-2. If it reports `MISMATCH`: read the canonical file fresh and repeat **both** halves of
-   the scan above — the structural checks (variables, `auth` blocks, `Authorization` and
-   `Cookie` headers, literal `base_url`), *and* the pattern and password-field checks.
-   Stop and report instead of copying if anything credential-shaped now holds a
-   populated value that is not a `{{placeholder}}`. Report findings the same way: name
-   the field and the request, never the value.
-3. Copy the canonical file over this one byte-for-byte (no hand edits, no reformatting).
-   Verify with `sha256` **and** `cmp`.
-4. Update "Current pin" above with the new date, size, endpoint count, and scan
-   results — **append**, don't overwrite the prior pin's record, so a future reader can
-   see when a given claim's citation stopped being current. Move the outgoing record
-   into "Superseded pins" below, verbatim.
-5. Check `CLAUDE.md`'s "API contract" section still reads correctly. **It deliberately
-   carries no pin date** — it points here instead ("see `docs/api/README.md` for the pin
-   date"), so there is normally nothing to change in step 5. This step used to say
-   "update the pin date in `CLAUDE.md`", which described an edit that file has no place
-   for; corrected at the 2026-08-25 re-pin. Keep it that way: a date in two files is a
-   date that can disagree with itself, and the table above is the one that must win.
-
----
-
-## Superseded pins
-
-Kept verbatim. A claim written while one of these was current cites *that* pin, and a
-future reader needs to see what it actually said.
 
 ### Pin of 2026-08-25 — superseded 2026-09-20
 

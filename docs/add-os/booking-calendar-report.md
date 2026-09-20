@@ -107,6 +107,12 @@ string half of a dead control.
   carry, which is worth doing only once a screen needs them.
 - **`calendar/occupancy` unused.** Right endpoint for a dashboard tile; wrong
   one for either of these screens.
+- **The space rule columns still have no admin API surface.**
+  `slot_granularity_minutes`, `buffer_minutes`, `cancellation_window_minutes`
+  and `requires_approval` are not editable from the dashboard (the backend's
+  own deferred phase). This no longer blocks booking — the availability
+  endpoints report their *effect* — but the values themselves cannot be seen
+  or changed here.
 - **`branch_id` filter not surfaced.** The calendar defaults to the default
   branch and the service accepts `branch_id`, but no control sets it. Correct
   for a single-branch district; a second branch makes it a real gap.
@@ -181,16 +187,69 @@ and `--add-border` for the panel, `--add-space-*` and `--add-radius-*` for
 metrics. The active chip carries weight as well as fill, since at this palette's
 contrast colour alone is what a deuteranopic viewer loses.
 
+## Added after third review — booking a real time
+
+The form shipped with a date picker and two free-form clocks. That was wrong in
+two ways an operator feels immediately:
+
+**It let them enter times the space cannot take.** A clock accepts 14:07 on a
+space with 30-minute slots, and it cannot know 14:00 is already booked. The
+rules that decide — granularity, minimum duration, buffer, overlap, capacity,
+no back-dating — all live on the server, so the form could only discover them
+by being refused, one 422 at a time.
+
+**It ignored where the operator clicked.** The modal always opened on today at
+09:00, so clicking Thursday on the grid and then re-typing Thursday in the form
+was the actual workflow. That is what made the form feel unattached to the
+calendar it sits on.
+
+### The fix, and why it needed a backend change
+
+The server already computes exactly this: `GET .../availability/slots` returns
+the day's slots each carrying `is_available` and a translated `reason`, and
+`.../availability/quote` returns the duration ladder priced with each rung
+flagged bookable or not. Both existed — but only under `role:member`, so the
+dashboard got a 403.
+
+So the two reads are now exposed under `admin/` as well, delegating to the same
+`AvailabilityBrowseService`. **Not reimplemented — delegated**, and a backend
+test asserts the admin and member responses are byte-identical for the same
+space and date. If that ever stops being true, that test fails rather than the
+two surfaces quietly disagreeing about what is bookable.
+
+The form now offers chips, not a clock. A taken slot stays on screen, struck
+through and disabled, carrying the server's reason in its tooltip: "2pm is
+booked" and "2pm is not a slot here" are different facts, and an operator
+explaining a refusal needs the first. Durations behave the same way — an option
+that cannot be booked is shown disabled with its reason rather than hidden, so
+"why is 1.5h missing" is never a question.
+
+Clicking any day on the grid now opens the form on that date. The grid stays
+read-only otherwise: no drag, no resize, no inline edit, each pinned by a test,
+because moving a booking re-runs approval and payment and that lives on the
+reception screens.
+
+**The client no longer validates availability at all.** The old
+`endBeforeStart` check is gone with its i18n keys, because the form can now
+only submit a start the server listed and a duration it approved. What remains
+the server's alone is unchanged: the slot list can go stale between load and
+submit, so the POST still re-checks under a row lock, and its 422 is still
+shown verbatim.
+
+The end time sent is the chosen duration's `end_time` from the quote, never
+start-plus-minutes computed here — a duration crossing a midday closure ends
+somewhere only the server knows.
+
 ## Verification run
 
 ```
 pnpm lint:check         # clean for these files
 pnpm type-check         # only the 2 pre-existing operations/* errors remain
-pnpm test:unit          # 95 files / 883 tests, all passing, guards included
-pnpm api:collection:check  # MATCH (re-pinned 2026-09-20)
+pnpm test:unit          # 95 files / 889 tests, all passing, guards included
+pnpm api:collection:check  # MATCH (re-pinned 2026-09-21, +2 endpoints)
 ```
 
-30 new tests across the two pages. Three of them found real defects while being
+38 new tests across the two pages. Three of them found real defects while being
 written, which is the reason they are worth reading:
 
 - the cell branch that printed "Free" over a fully-booked day (grid version),

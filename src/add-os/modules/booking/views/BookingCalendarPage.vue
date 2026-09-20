@@ -154,27 +154,100 @@
 					/>
 				</n-form-item>
 
-				<div class="flex gap-3">
-					<n-form-item
-						class="grow"
-						:label="t('bookingCalendar.create.date')"
-						:feedback="createErrors.start_at?.[0]"
-						:validation-status="createErrors.start_at ? 'error' : undefined"
-					>
-						<n-date-picker v-model:formatted-value="createForm.date" type="date" value-format="yyyy-MM-dd" class="w-full" />
-					</n-form-item>
-					<n-form-item class="w-28" :label="t('bookingCalendar.create.start')">
-						<n-time-picker v-model:formatted-value="createForm.start" format="HH:mm" value-format="HH:mm" class="w-full" />
-					</n-form-item>
-					<n-form-item
-						class="w-28"
-						:label="t('bookingCalendar.create.end')"
-						:feedback="endError"
-						:validation-status="endError ? 'error' : undefined"
-					>
-						<n-time-picker v-model:formatted-value="createForm.end" format="HH:mm" value-format="HH:mm" class="w-full" />
-					</n-form-item>
-				</div>
+				<n-form-item
+					:label="t('bookingCalendar.create.date')"
+					:feedback="createErrors.start_at?.[0]"
+					:validation-status="createErrors.start_at ? 'error' : undefined"
+				>
+					<n-date-picker
+						v-model:formatted-value="createForm.date"
+						type="date"
+						value-format="yyyy-MM-dd"
+						class="w-full"
+						:is-date-disabled
+					/>
+				</n-form-item>
+
+				<!--
+					The start time is chosen from the slots the server says exist,
+					never typed. A free-form clock lets an operator enter 14:07 on
+					a space with 30-minute slots and learn it was wrong only from
+					the 422 — and it cannot show that 14:00 is already taken.
+				-->
+				<n-form-item :label="t('bookingCalendar.create.start')">
+					<div class="flex w-full flex-col gap-2">
+						<n-spin :show="isLoadingSlots" :size="14">
+							<div v-if="slotsBanner" class="add-slot-note">{{ slotsBanner }}</div>
+
+							<div v-else-if="slots.length > 0" class="add-slot-grid">
+								<!--
+									A taken slot stays visible and disabled rather than
+									being dropped: "2pm is booked" and "2pm does not
+									exist here" are different facts, and an operator
+									needs to tell them apart.
+								-->
+								<button
+									v-for="slot in slots"
+									:key="slot.start_time"
+									type="button"
+									class="add-slot"
+									:class="{
+										'add-slot--active': createForm.start === slot.start_time,
+										'add-slot--taken': !slot.is_available
+									}"
+									:disabled="!slot.is_available"
+									:title="slot.reason ?? undefined"
+									:aria-pressed="createForm.start === slot.start_time"
+									@click="selectSlot(slot)"
+								>
+									{{ slot.label }}
+								</button>
+							</div>
+
+							<div v-else-if="!isLoadingSlots" class="add-slot-note">
+								{{ t("bookingCalendar.create.noSlots") }}
+							</div>
+						</n-spin>
+
+						<p v-if="slotCountsNote" class="add-slot-counts">{{ slotCountsNote }}</p>
+					</div>
+				</n-form-item>
+
+				<!--
+					Durations come from the server priced and pre-judged. An option
+					that cannot be booked is shown disabled WITH its reason rather
+					than hidden, so "why is 1.5h missing" is never a question.
+				-->
+				<n-form-item v-if="createForm.start" :label="t('bookingCalendar.create.duration')">
+					<div class="flex w-full flex-col gap-2">
+						<n-spin :show="isLoadingQuote" :size="14">
+							<div v-if="durations.length > 0" class="add-slot-grid">
+								<button
+									v-for="option in durations"
+									:key="option.minutes"
+									type="button"
+									class="add-slot"
+									:class="{
+										'add-slot--active': createForm.durationMinutes === option.minutes,
+										'add-slot--taken': !option.available
+									}"
+									:disabled="!option.available"
+									:title="option.reason ?? undefined"
+									:aria-pressed="createForm.durationMinutes === option.minutes"
+									@click="createForm.durationMinutes = option.minutes"
+								>
+									<span>{{ option.label }}</span>
+									<span class="add-slot__meta">{{ option.end_time }}</span>
+								</button>
+							</div>
+						</n-spin>
+
+						<p v-if="selectedDuration" class="add-slot-counts">
+							{{ t("bookingCalendar.create.endsAt", { time: selectedDuration.end_time }) }}
+							· {{ formatNumber(selectedDuration.points) }} {{ t("bookingCalendar.create.points") }}
+						</p>
+					</div>
+				</n-form-item>
 
 				<n-form-item :label="t('bookingCalendar.create.note')">
 					<n-input
@@ -203,10 +276,12 @@
 <script setup lang="ts">
 import type { CalendarApi, CalendarOptions, EventInput } from "@fullcalendar/core"
 import type { SelectOption } from "naive-ui"
+import type { AvailabilitySlot, DurationOption } from "@/add-os/modules/booking/types/availability"
 import type { BookingPaymentState, BookingStatus, CalendarResponse, CalendarView } from "@/add-os/modules/booking/types/calendar"
 import type { Member } from "@/add-os/modules/members/types/member"
 import type { SpaceType } from "@/add-os/modules/spatial/types/space"
 import dayGridPlugin from "@fullcalendar/daygrid"
+import interactionPlugin from "@fullcalendar/interaction"
 import listPlugin from "@fullcalendar/list"
 import timeGridPlugin from "@fullcalendar/timegrid"
 import FullCalendar from "@fullcalendar/vue3"
@@ -224,7 +299,6 @@ import {
 	NSelect,
 	NSpin,
 	NTag,
-	NTimePicker,
 	useMessage
 } from "naive-ui"
 import { computed, ref, watch } from "vue"
@@ -232,7 +306,7 @@ import { useI18n } from "vue-i18n"
 import { spaceTypeLabel } from "@/add-os/modules/booking/config/space-type-label"
 import { SPACE_TYPES } from "@/add-os/modules/spatial/types/space"
 import { ApiError } from "@/add-os/services/api"
-import { getCalendar } from "@/add-os/services/booking-calendar"
+import { getCalendar, getSpaceQuote, getSpaceSlots } from "@/add-os/services/booking-calendar"
 import { listMembers } from "@/add-os/services/members"
 import { createReceptionBooking } from "@/add-os/services/reception"
 import { formatDate, formatDateTime, formatNumber, formatTime } from "@/add-os/utils/format"
@@ -421,7 +495,7 @@ const events = computed<EventInput[]>(() => {
 })
 
 const calendarOptions = computed<CalendarOptions>(() => ({
-	plugins: [dayGridPlugin, timeGridPlugin, listPlugin],
+	plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin],
 	initialView: "dayGridMonth",
 	headerToolbar: {
 		start: "prev,next today",
@@ -440,8 +514,17 @@ const calendarOptions = computed<CalendarOptions>(() => ({
 	// Read-only on the grid itself: no editable, no drag, no resize. Clicking
 	// opens a detail; creating goes through the form, where the member and the
 	// space are stated explicitly.
+	// Clicking an empty day opens the form on that date. The grid stays
+	// read-only otherwise — no drag, no resize, no inline edit — because
+	// moving a booking is an approval-bearing action that lives on the
+	// reception screens.
+	dateClick(info) {
+		openCreate({ date: info.dateStr.slice(0, 10) })
+	},
 	eventClick(info) {
 		const props = info.event.extendedProps as Record<string, unknown>
+		// A closed-day background event carries no booking; clicking it opens
+		// nothing rather than an empty detail.
 		if (!props.bookingId) return
 		selected.value = {
 			id: props.bookingId as number,
@@ -493,38 +576,173 @@ const createForm = ref({
 	user_id: null as number | null,
 	space_id: null as number | null,
 	date: toIsoDate(new Date()),
-	start: "09:00",
-	end: "10:00",
+	/** A `start_time` from the server's own slot list, never typed. */
+	start: "" as string,
+	durationMinutes: null as number | null,
 	note: ""
 })
+
+const slots = ref<AvailabilitySlot[]>([])
+const isLoadingSlots = ref(false)
+const slotsBanner = ref<string | null>(null)
+
+const durations = ref<DurationOption[]>([])
+const isLoadingQuote = ref(false)
+
+const selectedDuration = computed(
+	() => durations.value.find(option => option.minutes === createForm.value.durationMinutes) ?? null
+)
+
+/**
+ * How many of the day's slots are free, so an operator can see at a glance
+ * that a day is busy rather than inferring it from greyed chips.
+ */
+const slotCountsNote = computed(() => {
+	if (slots.value.length === 0) return null
+	const available = slots.value.filter(slot => slot.is_available).length
+	return t("bookingCalendar.create.slotCounts", { available, total: slots.value.length })
+})
+
+/**
+ * Days the calendar itself reports closed for every space are not offerable.
+ * This mirrors the closed-day shading rather than recomputing openness: the
+ * response is the only thing that knows about exceptions and holidays.
+ */
+function isDateDisabled(timestamp: number): boolean {
+	const date = toIsoDate(new Date(timestamp))
+	const resources = response.value?.resources ?? []
+	if (resources.length === 0) return false
+	return resources.every(resource => resource.days.find(day => day.date === date)?.state === "closed")
+}
 
 const memberOptions = computed<SelectOption[]>(() =>
 	members.value.map(member => ({ label: `${member.name} · ${member.phone}`, value: member.id }))
 )
 
 /**
- * The one rule checked here rather than server-side, because it needs no
- * knowledge the client lacks: an end before its start is nonsense regardless
- * of business hours. Everything else — granularity, minimum duration, overlap,
- * buffer, back-dating — is the server's to enforce, and re-implementing any of
- * it here would be a second copy free to disagree.
+ * Nothing about availability is judged here any more.
+ *
+ * The form can only submit a start the server listed as available and a
+ * duration it marked bookable, so the client no longer needs an opinion about
+ * granularity, minimum duration, overlap, buffer or back-dating — it renders
+ * the server's verdict instead of forming its own. That verdict can still go
+ * stale between load and submit, which is why the POST re-checks under a row
+ * lock and its 422 is still shown verbatim.
  */
-const endError = computed(() =>
-	createForm.value.end <= createForm.value.start ? t("bookingCalendar.create.endBeforeStart") : undefined
-)
-
 const canSubmit = computed(
-	() => createForm.value.user_id !== null && createForm.value.space_id !== null && !endError.value
+	() =>
+		createForm.value.user_id !== null
+		&& createForm.value.space_id !== null
+		&& createForm.value.start !== ""
+		&& selectedDuration.value !== null
+		&& selectedDuration.value.available
 )
 
-function openCreate(): void {
+/**
+ * Opens the form, optionally on a date and space the operator already clicked.
+ *
+ * Prefilling from the click is the point: an operator who clicked Thursday on
+ * the grid has already said which day they mean, and making them re-enter it
+ * is how the form felt disconnected from the calendar it sits on.
+ */
+function openCreate(prefill?: { date?: string, spaceId?: number }): void {
 	createErrors.value = {}
+	createForm.value.date = prefill?.date ?? toIsoDate(new Date())
+	createForm.value.start = ""
+	createForm.value.durationMinutes = null
+	durations.value = []
+
+	if (prefill?.spaceId !== undefined) {
+		createForm.value.space_id = prefill.spaceId
+	} else if (createForm.value.space_id === null) {
+		// One space in view is not a choice; preselecting it saves a click and
+		// lets the slot grid load immediately.
+		const only = creatableSpaceOptions.value.length === 1 ? creatableSpaceOptions.value[0] : null
+		createForm.value.space_id = only ? (only.value as number) : null
+	}
+
 	createVisible.value = true
 
 	if (members.value.length === 0 && !isLoadingMembers.value) {
 		void loadMembers()
 	}
+	void loadSlots()
 }
+
+/**
+ * The slots for the chosen space and date.
+ *
+ * Re-fetched on every change of either, because a slot list is only true for
+ * one space on one day — reusing yesterday's would offer windows that are
+ * already gone.
+ */
+async function loadSlots(): Promise<void> {
+	const { space_id: spaceId, date } = createForm.value
+	if (spaceId === null || !date) {
+		slots.value = []
+		slotsBanner.value = null
+		return
+	}
+
+	isLoadingSlots.value = true
+	slotsBanner.value = null
+	try {
+		const response_ = await getSpaceSlots(spaceId, date)
+		slots.value = response_.data
+		// A closed day carries the server's own banner, reason included.
+		slotsBanner.value = response_.closed_banner?.text ?? null
+	} catch (caught) {
+		if (!(caught instanceof ApiError)) throw caught
+		slots.value = []
+		slotsBanner.value = caught.data?.message ?? t("bookingCalendar.create.slotsError")
+	} finally {
+		isLoadingSlots.value = false
+	}
+}
+
+/** The duration ladder for the chosen start, priced by the server. */
+async function loadQuote(): Promise<void> {
+	const { space_id: spaceId, date, start } = createForm.value
+	if (spaceId === null || !date || !start) {
+		durations.value = []
+		return
+	}
+
+	isLoadingQuote.value = true
+	try {
+		// Wall-clock, matching what the create endpoint expects.
+		const response_ = await getSpaceQuote(spaceId, `${date} ${start}`)
+		durations.value = response_.durations
+		// Land on the shortest bookable duration rather than none, so a
+		// booking is one click away once a time is picked.
+		createForm.value.durationMinutes = response_.durations.find(option => option.available)?.minutes ?? null
+	} catch (caught) {
+		if (!(caught instanceof ApiError)) throw caught
+		durations.value = []
+		createForm.value.durationMinutes = null
+	} finally {
+		isLoadingQuote.value = false
+	}
+}
+
+function selectSlot(slot: AvailabilitySlot): void {
+	if (!slot.is_available) return
+	createForm.value.start = slot.start_time
+}
+
+// A new space or date invalidates both the slots and any chosen time: the
+// window that was free on Tuesday says nothing about Wednesday.
+watch(
+	() => [createForm.value.space_id, createForm.value.date],
+	() => {
+		createForm.value.start = ""
+		createForm.value.durationMinutes = null
+		durations.value = []
+		if (createVisible.value) void loadSlots()
+	}
+)
+
+watch(() => createForm.value.start, () => void loadQuote())
 
 async function loadMembers(): Promise<void> {
 	isLoadingMembers.value = true
@@ -551,8 +769,12 @@ async function submitCreate(): Promise<void> {
 			space_id: createForm.value.space_id as number,
 			// Wall-clock in the district's own timezone, which is what the
 			// endpoint expects — an offset here would be re-interpreted.
+			//
+			// The end comes from the duration the server priced, not from
+			// adding minutes here: a duration crossing a midday closure ends
+			// somewhere only the server knows.
 			start_at: `${createForm.value.date} ${createForm.value.start}`,
-			end_at: `${createForm.value.date} ${createForm.value.end}`,
+			end_at: `${createForm.value.date} ${(selectedDuration.value as DurationOption).end_time}`,
 			...(createForm.value.note ? { note: createForm.value.note } : {})
 		})
 		message.success(t("bookingCalendar.create.success"))
@@ -713,5 +935,78 @@ defineExpose({
 		border-color: var(--border-color);
 		opacity: 0.65;
 	}
+}
+
+/**
+ * The slot and duration chips.
+ *
+ * A chip is a real button, not a styled div: it must be reachable by keyboard
+ * and announce its pressed state, since choosing a time is the whole task of
+ * this form.
+ *
+ * A taken slot stays visible and disabled rather than being removed. "2pm is
+ * booked" and "2pm is not a slot here" are different facts, and an operator
+ * telling a member why they cannot have 2pm needs the first one.
+ */
+.add-slot-grid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--add-space-3);
+}
+
+.add-slot {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--add-space-1);
+	padding: var(--add-space-3) var(--add-space-5);
+	border-radius: var(--add-radius-default);
+	border: var(--add-border-width-hairline) solid var(--add-border);
+	background: var(--add-surface-raised);
+	color: var(--add-text-primary);
+	font-size: var(--add-font-size-caption);
+	font-weight: var(--add-font-weight-medium);
+	cursor: pointer;
+	transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+	&:hover:not(:disabled):not(.add-slot--active) {
+		border-color: var(--add-primary);
+		color: var(--add-primary-text);
+	}
+
+	&:focus-visible {
+		outline: var(--add-border-width-emphasis) solid var(--add-focus-ring-inner);
+		outline-offset: var(--add-space-1);
+	}
+
+	// Fill AND weight, never fill alone — colour is the one signal a
+	// deuteranopic viewer loses.
+	&--active {
+		background: var(--add-primary);
+		border-color: var(--add-primary);
+		color: var(--add-primary-on);
+		font-weight: var(--add-font-weight-bold);
+	}
+
+	// Struck through as well as dimmed, so "unavailable" survives being read
+	// in greyscale or by someone who cannot separate the two greys.
+	&--taken {
+		opacity: var(--add-disabled-opacity);
+		cursor: var(--add-disabled-cursor);
+		text-decoration: line-through;
+	}
+
+	&__meta {
+		font-size: var(--add-font-size-caption);
+		font-weight: var(--add-font-weight-regular);
+		opacity: 0.8;
+	}
+}
+
+.add-slot-note,
+.add-slot-counts {
+	font-size: var(--add-font-size-caption);
+	color: var(--add-text-muted);
+	margin: var(--add-space-0);
 }
 </style>
