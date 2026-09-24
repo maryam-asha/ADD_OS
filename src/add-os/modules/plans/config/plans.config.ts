@@ -190,7 +190,6 @@ export function emptyPlanPayload(): PlanPayload {
 		is_subscription: false,
 		price_points: 0,
 		duration_days: 30,
-		included_hours: 0,
 		access_window_start: null,
 		access_window_end: null,
 		is_active: true,

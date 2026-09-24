@@ -707,15 +707,12 @@
 			"isSubscription": "Subscription plan",
 			"pricePoints": "Price (points)",
 			"durationDays": "Duration (days)",
-			"includedHours": "Included hours",
 			"isActive": "Active",
 			"order": "Display order",
 			"subtitle": "Subtitle",
 			"module": "Assigned Module",
 			"selectModule": "Select Module",
 			"isPublic": "Listed in catalogues",
-			"isPublicHint": "Visible in the member app, the public site and the kiosk.",
-			"isPrivateHint": "Hidden everywhere. Assign it to members from the Memberships page.",
 			"hasAccessWindow": "Restrict to specific hours",
 			"accessWindowStart": "From",
 			"accessWindowEnd": "To",
@@ -732,7 +729,9 @@
 		"tabs": {
 			"basic": "Basic Info",
 			"balances": "Included Balances",
-			"features": "Features"
+			"features": "Features",
+			"discounts": "Discounts",
+			"resources": "Resources"
 		},
 		"sections": {
 			"basicInfo": "Basic Information",

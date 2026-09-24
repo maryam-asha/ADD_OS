@@ -114,7 +114,6 @@ function openEdit(row: Plan) {
 		// stores.
 		price_points: row.price_points,
 		duration_days: row.duration_days,
-		included_hours: Number(row.included_hours),
 		// Wall-clock strings, copied across untouched — they are not instants,
 		// so there is nothing here to parse, format or convert.
 		access_window_start: row.access_window_start ?? null,

@@ -102,8 +102,6 @@ export interface Plan {
 	/** ISO code `price_display` is denominated in, e.g. "SYP". */
 	currency: string
 	duration_days: number
-	/** Decimal string, e.g. "20.00". */
-	included_hours: string
 	/**
 	 * Daily access window as `H:i` wall-clock strings, e.g. `"20:00"` /
 	 * `"00:00"` for an evening package. Both `null` means the plan applies at
@@ -152,7 +150,6 @@ export interface PlanPayload extends Record<string, unknown> {
 	 */
 	price_points: number
 	duration_days: number
-	included_hours: number
 	/**
 	 * `H:i` strings, or both `null` for a plan with no window. The backend
 	 * validates them as a pair (`required_with` each way), so sending one

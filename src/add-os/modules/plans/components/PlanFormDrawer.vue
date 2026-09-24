@@ -200,12 +200,8 @@
 							</div>
 						</div>
 
-						<!-- Row 2: Included Hours, Duration -->
+						<!-- Row 2: Duration -->
 						<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-							<div class="flex flex-col gap-1">
-								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.includedHours') }} *</span>
-								<PlanStepper v-model="model.included_hours" :min="0" :step="1" />
-							</div>
 							<div class="flex flex-col gap-1">
 								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.durationDays') }} *</span>
 								<PlanStepper v-model="model.duration_days" :min="1" :step="1" />
@@ -237,16 +233,11 @@
 								<span class="text-xs font-semibold text-neutral-700">{{ t('packages.form.isSubscription') }}</span>
 								<n-switch v-model:value="model.is_subscription" :rail-style="railStyle" size="small" />
 							</div>
-						</div>
 
-						<div class="flex items-start justify-between gap-3 p-2 px-3 bg-neutral-50 rounded-lg border border-neutral-100">
-							<div class="flex flex-col gap-0.5">
+							<div class="flex items-center justify-between gap-2 p-2 px-3 bg-neutral-50 rounded-lg border border-neutral-100">
 								<span class="text-xs font-semibold text-neutral-700">{{ t('packages.form.isPublic') }}</span>
-								<span class="text-[11px] text-neutral-500">
-									{{ model.is_public ? t('packages.form.isPublicHint') : t('packages.form.isPrivateHint') }}
-								</span>
+								<n-switch v-model:value="model.is_public" :rail-style="railStyle" size="small" />
 							</div>
-							<n-switch v-model:value="model.is_public" :rail-style="railStyle" size="small" class="shrink-0 mt-0.5" />
 						</div>
 					</div>
 

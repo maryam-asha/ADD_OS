@@ -711,15 +711,12 @@
 			"isSubscription": "باقة اشتراك",
 			"pricePoints": "السعر (نقاط)",
 			"durationDays": "المدة (أيام)",
-			"includedHours": "الساعات المتضمنة",
 			"isActive": "نشط",
 			"order": "ترتيب العرض",
 			"subtitle": "العنوان الفرعي",
 			"module": "الوحدة التابعة لها",
 			"selectModule": "اختر الوحدة",
 			"isPublic": "تظهر في القوائم",
-			"isPublicHint": "تظهر في تطبيق الأعضاء والموقع العام والكشك.",
-			"isPrivateHint": "مخفية في كل مكان. تُسند للأعضاء من صفحة الاشتراكات.",
 			"hasAccessWindow": "تحديد أوقات معينة",
 			"accessWindowStart": "من",
 			"accessWindowEnd": "إلى",
@@ -736,7 +733,9 @@
 		"tabs": {
 			"basic": "المعلومات الأساسية",
 			"balances": "الأرصدة المضمنة",
-			"features": "الميزات"
+			"features": "الميزات",
+			"discounts": "الخصومات",
+			"resources": "الموارد"
 		},
 		"sections": {
 			"basicInfo": "البيانات الأساسية",
