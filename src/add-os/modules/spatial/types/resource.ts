@@ -1,10 +1,32 @@
 import type { OperationalStatus } from "./operational-status"
 
+/**
+ * Mirrors the backend's `App\Domain\Foundation\Enums\ResourceCategory` — a
+ * string-backed PHP enum deliberately kept open-ended, so this list grows in
+ * lockstep with it rather than validating against a fixed set the server
+ * itself doesn't enforce.
+ */
+export type ResourceCategory =
+	| "projector"
+	| "mic"
+	| "screen"
+	| "whiteboard"
+	| "other"
+
+export const RESOURCE_CATEGORIES: readonly ResourceCategory[] = [
+	"projector",
+	"mic",
+	"screen",
+	"whiteboard",
+	"other"
+]
+
 export interface SpaceResource {
 	id: number
-	space_id: number
+	/** `null` for general/shared inventory not tied to any single space. */
+	space_id: number | null
 	name: string
-	category: string
+	category: ResourceCategory
 	quantity: number
 	status: OperationalStatus
 	status_reason: string | null
@@ -30,22 +52,15 @@ export interface SpaceResource {
  */
 export interface SpaceResourcePayload extends Record<string, unknown> {
 	/**
-	 * `number | null`, not `number`: `null` is the "nothing selected yet"
-	 * sentinel for the form's `space_id` select. async-validator's
-	 * `isEmptyValue` only treats `undefined`, `null`, an empty array (`type:
-	 * 'array'`), or an empty string (`typeof value === 'string'`) as empty — a
-	 * numeric `0` matches none of those branches, so a `required: true` rule
-	 * would never fire against it. `null` is caught unconditionally by
-	 * `isEmptyValue`'s very first check, regardless of the rule's `type`. By
-	 * the time `ResourceFormDrawer`'s validation passes and `onSubmit` fires,
-	 * this is guaranteed to hold a real space id, so the widening only affects
-	 * transient form-editing state, never what's actually sent to the API.
-	 * `SpaceResource.space_id` above stays `number` — it is never passed as
-	 * `ResourceFormDrawer`'s model generic.
+	 * `number | null`: `null` is both the form's "nothing selected yet" state
+	 * AND a valid submitted value — the field is optional (see
+	 * `buildResourceFields` in resources.config.ts), so a resource left
+	 * unassigned to any space is real general/shared inventory, not a
+	 * validation failure waiting to happen.
 	 */
 	space_id: number | null
 	name: string
-	category: string
+	category: ResourceCategory
 	quantity: number
 }
 

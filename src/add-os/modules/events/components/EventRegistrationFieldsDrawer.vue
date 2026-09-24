@@ -9,7 +9,7 @@
 	<FormFieldsBuilder
 		v-model:show="show"
 		:owner-id="eventId"
-		:api
+		:api="(api as any)"
 		:title="t('events.fields.title')"
 		:empty-text="t('events.fields.empty')"
 		:reserved-key-note="t('events.fields.reservedKeyNote')"

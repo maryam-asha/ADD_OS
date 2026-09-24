@@ -6,6 +6,7 @@ import type {
 	ServiceTypePayload
 } from "@/add-os/modules/operations/types/service"
 import { del, get, patch, post } from "./api"
+import { rowsOf } from "./pagination"
 
 const BASE = "/api/v1/admin/service-types"
 
@@ -13,7 +14,7 @@ const BASE = "/api/v1/admin/service-types"
 
 export async function listServiceTypes(): Promise<ServiceType[]> {
 	const res = await get<{ data: ServiceType[] }>(BASE)
-	return res.data
+	return rowsOf<ServiceType>(res.data)
 }
 
 export async function getServiceType(id: number): Promise<ServiceType> {
@@ -41,7 +42,7 @@ export async function removeServiceType(id: number): Promise<MessageResponse> {
 
 export async function listServiceTypeFields(serviceTypeId: number): Promise<ServiceTypeField[]> {
 	const res = await get<{ data: ServiceTypeField[] }>(`${BASE}/${serviceTypeId}/fields`)
-	return res.data
+	return rowsOf<ServiceTypeField>(res.data)
 }
 
 export async function createServiceTypeField(

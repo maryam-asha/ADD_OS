@@ -1,12 +1,13 @@
 import type { MessageResponse } from "./resource-factory"
 import type { Company, CompanyPayload, CompanyStatusPayload } from "@/add-os/modules/members/types/company"
 import { get, patch, post } from "./api"
+import { rowsOf } from "./pagination"
 
 const BASE = "/api/v1/admin/companies"
 
 export async function listCompanies(): Promise<Company[]> {
 	const res = await get<{ data: Company[] }>(BASE)
-	return res.data
+	return rowsOf<Company>(res.data)
 }
 
 export async function getCompany(id: number): Promise<Company> {

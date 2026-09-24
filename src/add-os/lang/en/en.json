@@ -111,6 +111,10 @@
 		}
 	},
 	"auth": {
+		"panel": {
+			"headline": "The unified operations workspace"
+		},
+		"help": "Need help? Contact your IT administrator.",
 		"common": {
 			"back": "Back"
 		},
@@ -416,6 +420,7 @@
 	"spaces": {
 		"columns": {
 			"image": "Image",
+			"name": "Name",
 			"building": "Building",
 			"zone": "Zone",
 			"spaceType": "Type",
@@ -449,11 +454,18 @@
 			"reasonLabel": "Reason (optional)",
 			"success": "Status updated."
 		},
+		"manageAmenities": {
+			"button": "Manage amenities",
+			"title": "Manage amenities",
+			"success": "Amenities updated."
+		},
 		"form": {
+			"name": "Name",
 			"branch": "Branch",
 			"building": "Building",
 			"zone": "Zone (optional)",
 			"spaceType": "Type",
+			"amenities": "Amenities",
 			"allocationModel": "Allocation model (optional)",
 			"isLockable": "Lockable",
 			"capacity": "Capacity",
@@ -466,13 +478,50 @@
 			"total": "Total spaces"
 		}
 	},
+	"amenities": {
+		"types": {
+			"wifi": "Wi-Fi",
+			"power_outlet": "Power Outlets",
+			"printing": "Printing Access",
+			"ergonomic_chairs": "Ergonomic Chairs",
+			"locker": "Locker",
+			"cafe_access": "Cafe Access",
+			"ac": "Air Conditioning",
+			"stage": "Stage"
+		},
+		"manage": {
+			"title": "Space Types",
+			"description": "Choose which amenities are available for each space type. A specific space can only toggle amenities from its own type's list here.",
+			"columns": {
+				"spaceType": "Space Type",
+				"amenities": "Configured Amenities",
+				"actions": "Actions"
+			},
+			"editButton": "Edit amenities",
+			"none": "None configured",
+			"dialogTitle": "Amenities for {type}",
+			"save": "Save",
+			"cancel": "Cancel",
+			"saveSuccess": "Amenities updated.",
+			"saveError": "Couldn't save amenities.",
+			"loadError": "Couldn't load the amenities matrix. You may not have permission to view this page."
+		}
+	},
 	"resources": {
 		"columns": {
 			"space": "Space",
+			"general": "General (no space)",
 			"name": "Name",
 			"category": "Category",
 			"quantity": "Quantity",
 			"status": "Status"
+		},
+		"category": {
+			"projector": "Projector",
+			"mic": "Microphone",
+			"screen": "Screen",
+			"whiteboard": "Whiteboard",
+			"other": "Other"
 		},
 		"create": {
 			"button": "New resource",
@@ -497,7 +546,7 @@
 			"branch": "Branch",
 			"building": "Building",
 			"zone": "Zone (optional)",
-			"space": "Space",
+			"space": "Space (optional — leave empty for general inventory)",
 			"name": "Name",
 			"category": "Category",
 			"quantity": "Quantity"
@@ -631,7 +680,9 @@
 			"isActive": "Active",
 			"module": "Module",
 			"balances": "Balances",
-			"features": "Features"
+			"features": "Features",
+			"accessWindow": "Access window",
+			"visibility": "Visibility"
 		},
 		"isActiveYes": "Active",
 		"isActiveNo": "Inactive",
@@ -657,12 +708,19 @@
 			"pricePoints": "Price (points)",
 			"durationDays": "Duration (days)",
 			"includedHours": "Included hours",
-			"overageRatePoints": "Overage rate (points per hour)",
 			"isActive": "Active",
 			"order": "Display order",
 			"subtitle": "Subtitle",
 			"module": "Assigned Module",
-			"selectModule": "Select Module"
+			"selectModule": "Select Module",
+			"isPublic": "Listed in catalogues",
+			"isPublicHint": "Visible in the member app, the public site and the kiosk.",
+			"isPrivateHint": "Hidden everywhere. Assign it to members from the Memberships page.",
+			"hasAccessWindow": "Restrict to specific hours",
+			"accessWindowStart": "From",
+			"accessWindowEnd": "To",
+			"accessWindowHint": "Hours inside this window are drawn from the plan. Hours outside it are charged at the standard rate.",
+			"accessWindowWraps": "This window runs past midnight and ends the following day."
 		},
 		"loadError": "Couldn't load plans. You may not have permission to view this page.",
 		"stats": {
@@ -679,7 +737,8 @@
 		"sections": {
 			"basicInfo": "Basic Information",
 			"pricing": "Pricing & Module",
-			"displaySettings": "Display Settings"
+			"displaySettings": "Display Settings",
+			"accessWindow": "Plan hours"
 		},
 		"balances": {
 			"includedDescription": "Specify balances and allowances automatically included with this plan.",
@@ -739,7 +798,12 @@
 				"total": "Total Modules",
 				"active": "Active Modules"
 			}
-		}
+		},
+		"visibility": {
+			"public": "Public",
+			"private": "Private"
+		},
+		"anyTime": "Any time"
 	},
 	"events": {
 		"columns": {
@@ -1300,6 +1364,7 @@
 			"zones": "Zones",
 			"spaces": "Spaces",
 			"resources": "Resources",
+			"spaceTypeAmenities": "Space Types",
 			"seatsDesks": "Seats & Desks",
 			"businessHours": "Business Hours",
 			"users": "Users",
@@ -1340,6 +1405,7 @@
 			"receptionDesk": "Reception Desk",
 			"closeSession": "Close Session",
 			"modules": "Modules",
+			"resourceTypes": "Resource Types",
 			"walletCredited": "Wallet Credited",
 			"eventCancellation": "Event Cancellation",
 			"operationsRequests": "Operations Requests",
@@ -2039,5 +2105,27 @@
 		"add": "Add another day",
 		"remove": "Remove this day",
 		"orderError": "A day must end after it starts."
+	},
+	"memberships": {
+		"description": "Activate a plan for a member or a company without charging their wallet.",
+		"adminOnly": "Only an admin can activate memberships.",
+		"loadError": "Couldn't load plans or members. You may not have permission to view this page.",
+		"activate": {
+			"title": "Activate a membership",
+			"hint": "Use this for plans arranged outside the app — including private plans, which members cannot see or buy themselves.",
+			"ownerType": "Activate for",
+			"ownerMember": "Member",
+			"ownerCompany": "Company",
+			"selectMember": "Select a member",
+			"selectCompany": "Select a company",
+			"plan": "Plan",
+			"selectPlan": "Select a plan",
+			"durationDays": "{days} days",
+			"windowLabel": "Plan hours:",
+			"noCharge": "No points are deducted. The plan is granted directly and its balances are credited.",
+			"submit": "Activate",
+			"success": "Membership activated.",
+			"error": "Couldn't activate the membership."
+		}
 	}
 }

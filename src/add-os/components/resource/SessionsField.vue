@@ -77,7 +77,6 @@
 import { NButton, NDatePicker, NTimePicker } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
-import { toOffsetIso } from "@/add-os/utils/format/dates"
 import Icon from "@/components/common/Icon.vue"
 
 /** A sitting as the API carries it: two instants, each with its offset. */
@@ -85,6 +84,8 @@ export interface SessionValue {
 	start_at: string
 	end_at: string
 }
+
+const pad = (n: number) => `${n}`.padStart(2, "0")
 
 /** A sitting as the editor holds it: a day and two wall clocks. */
 interface Row {
@@ -111,8 +112,9 @@ function toRow(session: SessionValue): Row {
 
 	if (Number.isNaN(start.getTime())) return blankRow()
 
-	const pad = (n: number) => `${n}`.padStart(2, "0")
 
+	// An overnight sitting is stored with its end on the following day; it
+	// belongs to the row of the day it began.
 	return {
 		date: `${start.getFullYear()}-${pad(start.getMonth() + 1)}-${pad(start.getDate())}`,
 		start: `${pad(start.getHours())}:${pad(start.getMinutes())}`,
@@ -135,12 +137,28 @@ watch(
 	{ immediate: true }
 )
 
-/** A sitting must end after it starts; the API refuses one that does not. */
+/**
+ * Only an exactly-equal pair is an error now: 22:30 to 04:00 is a sitting
+ * that runs past midnight, which the emitted end date accounts for.
+ */
 const rowError = computed<string | null>(() => {
-	const wrong = rows.value.some(r => r.start && r.end && r.end <= r.start)
+	const wrong = rows.value.some(r => r.start && r.end && r.end === r.start)
 
 	return wrong ? t("sessionsField.orderError") : null
 })
+
+/** A sitting that ends earlier than it begins runs past midnight. */
+function crossesMidnight(row: Row): boolean {
+	return Boolean(row.start && row.end && row.end <= row.start)
+}
+
+/** The day after `date`, as YYYY-MM-DD. */
+function nextDay(date: string): string {
+	const d = new Date(`${date}T12:00:00`)
+	d.setDate(d.getDate() + 1)
+
+	return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
 
 function emitValue() {
 	const complete = rows.value.filter(r => r.date && r.start && r.end)
@@ -148,11 +166,15 @@ function emitValue() {
 	emit(
 		"update:modelValue",
 		complete.map(r => ({
-			// An explicit offset, so the hours the admin sees are the hours
-			// stored — a bare wall clock would be read as UTC and could move
-			// a late sitting onto the next day.
-			start_at: toOffsetIso(new Date(`${r.date}T${r.start}:00`)),
-			end_at: toOffsetIso(new Date(`${r.date}T${r.end}:00`))
+			// A bare wall clock, deliberately. These hours mean the district's
+			// clock, which only the server knows — building an instant here
+			// would stamp the BROWSER's offset, so an admin working from
+			// another timezone would store hours they never typed. The Form
+			// Request interprets it, as it does every other typed time.
+			start_at: `${r.date} ${r.start}:00`,
+			// 22:30 to 04:00 is one sitting that runs past midnight, not a
+			// sitting that ends eighteen hours before it starts.
+			end_at: `${crossesMidnight(r) ? nextDay(r.date as string) : r.date} ${r.end}:00`
 		}))
 	)
 }
@@ -175,7 +197,6 @@ function addRow() {
 	if (last?.date) {
 		const next = new Date(`${last.date}T00:00:00`)
 		next.setDate(next.getDate() + 1)
-		const pad = (n: number) => `${n}`.padStart(2, "0")
 
 		rows.value.push({
 			date: `${next.getFullYear()}-${pad(next.getMonth() + 1)}-${pad(next.getDate())}`,

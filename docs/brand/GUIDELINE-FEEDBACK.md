@@ -352,3 +352,76 @@ user-facing string. This is a staff-facing admin field, not the customer-facing
 service catalog, but the same term is at stake. Flagging so the eventual ruling
 on `Co-Space`/`Business Café` updates this screen's copy too, not just the
 public-site copy.
+
+---
+
+## 11. 🔴 A supplied login design puts Aleppo Economic Orange on the primary CTA
+
+**Raised 2026-09-22.** The brand/design owner supplied a login-screen reference
+and asked for the dashboard's login to be rebuilt in its technique. Most of it
+was built. One element was **deliberately not built**, because a developer may
+not settle it: its primary "تسجيل الدخول" button is **Aleppo Economic Orange**.
+
+### What the reference shows
+
+An orange filled CTA, measured from the supplied image at approximately
+`#D9411F` — within rounding of `brand.aleppoEconomicOrange` `#DC4128`, and of
+`semantic.danger.base` `#D93D23`, which is that orange contrast-adjusted.
+
+### Why it was not built
+
+Two independent blocks, either of which is sufficient:
+
+1. **Orange is `danger` in this dashboard, exclusively.** `tokens.ts`
+   (SERVICE PILLARS) states the rule and its reason: *"In this dashboard orange
+   means `danger`, and nothing else — that is what makes destructive actions
+   unmistakable."* A sign-in button in `danger` orange would be the same colour
+   as "Delete member". The cost is not aesthetic; it is that the destructive-
+   action signal stops being reliable everywhere else in the product.
+2. **It is a pillar colour, and pillar colour may not enter chrome.**
+   `tokens.spec.ts` asserts that no semantic and no component token equals any
+   pillar hex, per mode. Adopting it fails `pnpm test:unit` outright.
+
+### What ships in the meantime
+
+The CTA stays `primary`, which is the contrast-adjusted Smart Olive green
+(`#657C50`, white text 4.61:1). Everything else from the reference was built:
+the card-on-warm-ground composition, the enlarged top-corner pattern crop, the
+eyebrow, the pillar row, the footer and the language switch.
+
+The reference's **pillar dots** were built in a single `success` green rather
+than in per-pillar colour, for the same reason — and that substitution follows
+the remedy `tokens.ts` itself prescribes: *"Where a dashboard screen needs
+service identity, it carries it with an icon or a label — never with colour."*
+The three pillars are distinguished by their labels.
+
+### Two other elements of the reference were not built, for a different reason
+
+Neither is a brand question; both are recorded here so the owner is not
+surprised by their absence from a screen they designed:
+
+| Element in the reference | Why it is absent |
+|---|---|
+| "تذكرني" / Remember me | No such field exists. Searched the pinned collection (`docs/api/`, 2026-08-27, 211 leaf endpoints) for `remember`, case-insensitively: **zero matches**. It was already removed once on these grounds — see the auth design spec §2.2. Invariant 4 forbids shipping a control that does nothing. |
+| "الدخول عبر SSO" | No SSO, SAML or OAuth endpoint exists in that collection. Same invariant. |
+
+Adding either means adding the capability first, which is a backend question,
+not a design one.
+
+### What is needed
+
+A ruling on **one** question:
+
+> Should the ADD OS dashboard's primary call-to-action be Aleppo Economic
+> Orange — accepting that orange would then mean both "proceed" and "this will
+> delete something" — or does the dashboard keep orange reserved for
+> destructive actions, with the supplied login reference read as
+> member-app/marketing language rather than dashboard chrome?
+
+If the ruling is **orange**, it is not a login-screen change: it moves the
+`danger`/pillar relationship at the token layer and affects every destructive
+control in the product. That should be its own change with its own review, not
+folded into a login redesign.
+
+**Owner: Brand.** Until then the login ships green, and this entry is the record
+that the difference from the supplied reference is deliberate.

@@ -9,6 +9,7 @@
 
 import type { Member, MemberActiveSession, MemberWalletBalance, UpdateMemberStatusPayload } from "@/add-os/modules/members/types/member"
 import { get, patch } from "./api"
+import { rowsOf } from "./pagination"
 
 const USERS_BASE = "/api/v1/admin/users"
 const WALLET_BALANCE_URL = "/api/v1/admin/reception/wallet-balance"
@@ -17,7 +18,7 @@ const SESSIONS_URL = "/api/v1/admin/reception/sessions/active"
 /** Returns only users whose role is "member". */
 export async function listMembers(): Promise<Member[]> {
 	const res = await get<{ data: Member[] }>(USERS_BASE, { role: "member" })
-	return res.data
+	return rowsOf<Member>(res.data)
 }
 
 /** Fetches a single member by ID with their profiles. */
@@ -51,7 +52,7 @@ export async function getMemberWalletBalance(
  */
 export async function getMemberActiveSessions(userId: number): Promise<MemberActiveSession[]> {
 	const res = await get<{ data: MemberActiveSession[] }>(SESSIONS_URL)
-	return res.data.filter(s => s.user_id === userId)
+	return rowsOf<MemberActiveSession>(res.data).filter(s => s.user_id === userId)
 }
 
 /**

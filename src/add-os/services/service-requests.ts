@@ -6,7 +6,7 @@ import type {
 	UpdateServiceRequestStatusPayload
 } from "@/add-os/modules/operations/types/service"
 import { get, patch } from "./api"
-import { toPaginated } from "./pagination"
+import { rowsOf, toPaginated } from "./pagination"
 
 const BASE = "/api/v1/admin/service-requests"
 
@@ -14,7 +14,7 @@ export async function listServiceRequests(
 	query?: ServiceRequestQueryParams
 ): Promise<ServiceRequest[]> {
 	const res = await get<RawPaginatedResponse<ServiceRequest>>(BASE, query as Record<string, unknown>)
-	return res.data
+	return rowsOf<ServiceRequest>(res.data)
 }
 
 export async function listServiceRequestsPage(

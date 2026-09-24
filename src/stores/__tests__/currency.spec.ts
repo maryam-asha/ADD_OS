@@ -12,11 +12,17 @@ describe("useCurrencyStore", () => {
 		expect(store.currency).toBe("SYP")
 	})
 
-	it("updates current currency", () => {
+	it("exposes no write path for currency", () => {
+		// The toolbar CurrencySwitch and setCurrency() were removed together on
+		// 2026-09-23. currency is read-only, as themeName is; api.ts still reads it
+		// to build the per-request currency header.
 		const store = useCurrencyStore()
-		store.setCurrency("USD")
-		expect(store.currency).toBe("USD")
-		expect(store.currentCurrencySymbol).toBe("$")
+		expect("setCurrency" in store).toBe(false)
+	})
+
+	it("resolves the symbol for the default currency", () => {
+		const store = useCurrencyStore()
+		expect(store.currentCurrencySymbol).toBe("ل.س")
 	})
 
 	it("provides select options for naive-ui popselect", () => {

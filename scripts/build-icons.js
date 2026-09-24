@@ -45,10 +45,29 @@ const ICON_PATTERN = /["'`]([a-z][a-z0-9-]{1,20}):([a-z0-9][a-z0-9-]*)["'`]/g
 //   `rtl`/`ltr` — Tailwind direction variants. `class="rtl:rotate-180"` is a
 //     whole attribute value, so it matches ICON_PATTERN the way an icon does.
 //   `update`    — Vue model events, quoted as `"update:show"`.
+//   `sm`…`2xl`  — Tailwind BREAKPOINT variants, for exactly the same reason.
+//     Added 2026-09-22, when AuthShell's `class="lg:col-span-7 …"` — a prettier
+//     line wrap that left the class list starting with a `lg:` variant — made
+//     the scanner demand `@iconify-json/lg`. The whole responsive scale is
+//     listed, not just `lg`, because the next wrap will land on a different
+//     breakpoint and this trap should be sprung once. `xs` and `mobile` are the
+//     project's own custom breakpoints (`src/tailwind.css`).
 // Left unlisted, the scanner demands an `@iconify-json/<prefix>` that does not
 // exist and `npm run icons` aborts. That silently froze the bundle: every icon
 // added afterwards was never bundled, and rendered blank on offline builds.
-const NOT_ICON_PREFIXES = new Set(["node", "rtl", "ltr", "update"])
+const NOT_ICON_PREFIXES = new Set([
+	"node",
+	"rtl",
+	"ltr",
+	"update",
+	"xs",
+	"sm",
+	"md",
+	"lg",
+	"xl",
+	"2xl",
+	"mobile"
+])
 
 /**
  * Icons composed at runtime, which the scanner cannot see.

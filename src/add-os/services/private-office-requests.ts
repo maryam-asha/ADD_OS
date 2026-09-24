@@ -5,12 +5,13 @@ import type {
 	PrivateOfficeRequestPayload
 } from "@/add-os/modules/members/types/private-office-request"
 import { del, get, post, put } from "./api"
+import { rowsOf } from "./pagination"
 
 const BASE = "/api/v1/admin/private-office-requests"
 
 export async function listPrivateOfficeRequests(): Promise<PrivateOfficeRequest[]> {
 	const res = await get<{ data: PrivateOfficeRequest[] }>(BASE)
-	return res.data
+	return rowsOf<PrivateOfficeRequest>(res.data)
 }
 
 export async function getPrivateOfficeRequest(id: number): Promise<PrivateOfficeRequest> {

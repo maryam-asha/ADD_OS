@@ -1,6 +1,6 @@
 import type { Paginated, RawPaginatedResponse } from "./pagination"
 import { del, get, post, put } from "./api"
-import { toPaginated } from "./pagination"
+import { rowsOf, toPaginated } from "./pagination"
 
 /**
  * Exported (not just module-local): `vue-tsc --build --force` emits
@@ -47,7 +47,9 @@ export function createResourceApi<T, CreatePayload = Partial<T>, UpdatePayload =
 		list: (query?: Record<string, unknown>) =>
 			get<RawPaginatedResponse<T>>(baseEndpoint, query).then(r => {
 				warnIfTruncated(baseEndpoint, r)
-				return r.data
+				// `rowsOf`, not `r.data`: an empty list can arrive as `{}` rather than
+				// `[]`, and every caller here destructures or iterates the result.
+				return rowsOf<T>(r.data)
 			}),
 		listPage: (query?: Record<string, unknown>): Promise<Paginated<T>> =>
 			get<RawPaginatedResponse<T>>(baseEndpoint, query).then(toPaginated),

@@ -9,7 +9,7 @@ import type {
 	EventRegistrationStatus
 } from "@/add-os/modules/events/types/event"
 import { del, get, patch, post } from "./api"
-import { toPaginated } from "./pagination"
+import { rowsOf, toPaginated } from "./pagination"
 import { createResourceApi } from "./resource-factory"
 
 const BASE = "/api/v1/admin/events"
@@ -27,7 +27,7 @@ export const removeEvent = api.remove
 /** Every field, active or not — this is the editor, not the member's form. */
 export async function listRegistrationFields(eventId: number): Promise<EventRegistrationField[]> {
 	const raw = await get<{ data: EventRegistrationField[] }>(`${BASE}/${eventId}/registration-fields`)
-	return raw.data
+	return rowsOf<EventRegistrationField>(raw.data)
 }
 
 export async function createRegistrationField(

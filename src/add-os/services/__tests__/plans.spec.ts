@@ -14,10 +14,12 @@ const samplePlan = {
 	price_usd: "150.00",
 	price_display: "2205000.00",
 	currency: "SYP",
-	overage_rate_points: 50,
 	duration_days: 30,
 	included_hours: "20.00",
+	access_window_start: null,
+	access_window_end: null,
 	is_active: true,
+	is_public: true,
 	order: 1,
 	created_at: "2026-08-20T15:15:35.000000Z"
 }
@@ -49,8 +51,10 @@ describe("plans service", () => {
 			price_points: 1500,
 			duration_days: 30,
 			included_hours: 20,
-			overage_rate_points: 50,
+			access_window_start: null,
+			access_window_end: null,
 			is_active: true,
+			is_public: true,
 			order: 1
 		}
 		const plan = await createPlan(payload)
@@ -80,8 +84,10 @@ describe("plans service", () => {
 			price_points: 1750,
 			duration_days: 30,
 			included_hours: 25,
-			overage_rate_points: 50,
+			access_window_start: null,
+			access_window_end: null,
 			is_active: true,
+			is_public: true,
 			order: 1
 		})
 

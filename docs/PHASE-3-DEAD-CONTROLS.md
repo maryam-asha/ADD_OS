@@ -156,3 +156,56 @@ and allowlisted with `removedBy` notes so they cannot be forgotten:
    template import timestamp), so they are the template vendor's, not ADD's —
    ADD has no account to revoke them from. Nothing in ADD OS read them, and
    `api.maptiler.com` never reached a build.
+
+---
+
+## F. ✅ REMOVED 2026-09-23 — toolbar currency switch
+
+**`src/app-layouts/common/Toolbar/CurrencySwitch.vue`** — `n-popselect` in the
+toolbar `PillWrapper`, letting any staff member change the display currency.
+
+Removed at the brand/product owner's request. Three reasons it does not belong in
+the shell:
+
+1. **It was a per-user write to a value the backend treats as an account
+   preference.** `setCurrency()` PATCHed `/api/v1/member/preferences/currency` —
+   a *member* endpoint, reached from the *admin* dashboard. Staff reading the
+   operations dashboard in EUR while the till runs in SYP is a reconciliation
+   hazard, not a convenience.
+2. **It changed the `currency` header on every subsequent request.** `api.ts`
+   reads the store at request time, so one popselect click silently re-denominated
+   every number on every screen, with no affordance saying so.
+3. **It was unthemed.** Hardcoded `border-stone-200`, `bg-stone-50`,
+   `text-emerald-600` (the Pinx green) and four `dark:` variants, in a project
+   where dark mode is out of scope. Category C, so the invariant-2 grep over
+   `src/add-os/` never saw it.
+
+### What was removed, and what deliberately stayed
+
+| Removed | Where |
+|---|---|
+| `<CurrencySwitch />` + import | `Toolbar.vue` |
+| `CurrencySwitch.vue` | **deleted** |
+| `setCurrency()` — the only write path | `stores/currency.ts` |
+
+**The store stays, and this is the difference from §A.** ThemeSwitch's capability
+was genuinely dead once the control went. Currency's is not: `buildDefaultHeaders()`
+in `src/add-os/services/api.ts` reads `currencyStore.currency` to set the `currency`
+header the backend expects **on every endpoint, every verb**. Deleting the store
+would have broken the entire API layer, not removed a no-op.
+
+So `currency` is now **read-only at `DEFAULT_CURRENCY` (SYP)**, exactly as
+`themeName` is read-only at `Light`. The state, both getters and
+`fetchCurrencies()` (called once from `App.vue`) remain — the `/api/v1/currencies`
+integration is untouched. What is gone is the ability of a UI to *write* it.
+
+Invariant 4 is satisfied: no shipped control is a no-op, because the control is
+gone and the reachable-but-unreachable write path went with it.
+
+`src/stores/__tests__/currency.spec.ts` now asserts `setCurrency` is absent from
+the store, so re-adding a write path fails the suite rather than passing silently.
+
+**Not affected:** `CurrenciesPage.vue` and `ExchangeRatesPage.vue` in the payments
+module are real admin product screens managing the currency catalogue and rates.
+`setCurrencyStatus()` in `services/currencies.ts` is a different function entirely.
+This section is only about the shell control.

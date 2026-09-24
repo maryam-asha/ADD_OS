@@ -13,7 +13,7 @@ import type {
 import type { PaymentMethod } from "@/add-os/modules/payments/types/wallet-top-up"
 import { toOffsetIso } from "@/add-os/utils/format"
 import { get, post } from "./api"
-import { toPaginated } from "./pagination"
+import { rowsOf, toPaginated } from "./pagination"
 
 /**
  * Reception desk actions — approvals and live sessions.
@@ -80,7 +80,7 @@ export async function listPendingApprovals(query?: Record<string, unknown>): Pro
 /** Not paginated — a small live list, refetched whole. */
 export async function listActiveSessions(): Promise<ActiveSession[]> {
 	const raw = await get<{ data: ActiveSession[] }>(`${BASE}/sessions/active`)
-	return raw.data
+	return rowsOf<ActiveSession>(raw.data)
 }
 
 /** 409 `{message}` when the booking is already confirmed, rejected or cancelled. */

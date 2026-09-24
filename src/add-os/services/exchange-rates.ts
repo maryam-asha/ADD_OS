@@ -1,11 +1,12 @@
 import type { ExchangeRate, ExchangeRatePayload, ExchangeRateSuggestion } from "@/add-os/modules/payments/types/exchange-rate"
 import { get, post } from "./api"
+import { rowsOf } from "./pagination"
 
 const BASE = "/api/v1/admin/exchange-rates"
 
 export async function listExchangeRates(): Promise<ExchangeRate[]> {
 	const res = await get<{ data: ExchangeRate[] }>(BASE)
-	return res.data
+	return rowsOf<ExchangeRate>(res.data)
 }
 
 export async function createExchangeRate(payload: ExchangeRatePayload): Promise<ExchangeRate> {
@@ -24,4 +25,3 @@ export async function dismissExchangeRateSuggestion(id: number): Promise<{ messa
 export async function syncExchangeRates(): Promise<{ message: string; data: ExchangeRate | null }> {
 	return post<{ message: string; data: ExchangeRate | null }>(`${BASE}/sync`)
 }
-

@@ -156,3 +156,22 @@ export const ROLE_MANAGEMENT_ROLE: Role = "admin"
 export function canManageRoles(): boolean {
 	return useAuthStore().isRoleGranted(ROLE_MANAGEMENT_ROLE)
 }
+
+/**
+ * Activating a plan for someone without charging their wallet
+ * (`POST /api/v1/admin/memberships`).
+ *
+ * Role-gated for the same reason as role management: the backend route sits
+ * inside `admin.php`'s narrower `role:admin` group, not the shared
+ * `admin|operations` block that covers most of this dashboard — granting a
+ * paid subscription for free is money-adjacent, so operations is excluded
+ * there and must be excluded here. Not permission-gated, because no
+ * `memberships.*` permission exists: `PermissionSyncService` only derives
+ * permissions for `AdminResourceController` subclasses plus a short manual
+ * list, and the membership controller is in neither.
+ */
+export const MEMBERSHIP_ACTIVATION_ROLE: Role = "admin"
+
+export function canActivateMemberships(): boolean {
+	return useAuthStore().isRoleGranted(MEMBERSHIP_ACTIVATION_ROLE)
+}

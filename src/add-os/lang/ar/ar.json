@@ -115,6 +115,10 @@
 		}
 	},
 	"auth": {
+		"panel": {
+			"headline": "مساحة العمل التشغيلية الموحّدة"
+		},
+		"help": "بحاجة إلى مساعدة؟ تواصل مع مسؤول تقنية المعلومات.",
 		"common": {
 			"back": "رجوع"
 		},
@@ -420,6 +424,7 @@
 	"spaces": {
 		"columns": {
 			"image": "الصورة",
+			"name": "الاسم",
 			"building": "المبنى",
 			"zone": "المنطقة",
 			"spaceType": "النوع",
@@ -453,11 +458,18 @@
 			"reasonLabel": "السبب (اختياري)",
 			"success": "تم تحديث الحالة."
 		},
+		"manageAmenities": {
+			"button": "إدارة المرافق",
+			"title": "إدارة المرافق",
+			"success": "تم تحديث المرافق."
+		},
 		"form": {
+			"name": "الاسم",
 			"branch": "الفرع",
 			"building": "المبنى",
 			"zone": "المنطقة (اختياري)",
 			"spaceType": "النوع",
+			"amenities": "المرافق",
 			"allocationModel": "نموذج التخصيص (اختياري)",
 			"isLockable": "قابلة للإغلاق",
 			"capacity": "السعة",
@@ -470,13 +482,50 @@
 			"total": "إجمالي المساحات"
 		}
 	},
+	"amenities": {
+		"types": {
+			"wifi": "واي فاي",
+			"power_outlet": "مقابس كهرباء",
+			"printing": "خدمة الطباعة",
+			"ergonomic_chairs": "كراسي مريحة",
+			"locker": "خزانة",
+			"cafe_access": "دخول الكافيه",
+			"ac": "تكييف هواء",
+			"stage": "منصة"
+		},
+		"manage": {
+			"title": "أنواع المساحات",
+			"description": "حدّد المرافق المتاحة لكل نوع مساحة. أي مساحة بعينها بتقدر تفعّل بس من ضمن قائمة نوعها هون.",
+			"columns": {
+				"spaceType": "نوع المساحة",
+				"amenities": "المرافق المفعّلة",
+				"actions": "إجراءات"
+			},
+			"editButton": "تعديل المرافق",
+			"none": "ما في شي مفعّل",
+			"dialogTitle": "مرافق {type}",
+			"save": "حفظ",
+			"cancel": "إلغاء",
+			"saveSuccess": "تم تحديث المرافق.",
+			"saveError": "تعذّر حفظ المرافق.",
+			"loadError": "تعذّر تحميل مصفوفة المرافق. قد لا تملك صلاحية عرض هذه الصفحة."
+		}
+	},
 	"resources": {
 		"columns": {
 			"space": "المساحة",
+			"general": "عام (بدون مساحة)",
 			"name": "الاسم",
 			"category": "الفئة",
 			"quantity": "الكمية",
 			"status": "الحالة"
+		},
+		"category": {
+			"projector": "جهاز عرض",
+			"mic": "ميكروفون",
+			"screen": "شاشة",
+			"whiteboard": "لوح أبيض",
+			"other": "أخرى"
 		},
 		"create": {
 			"button": "مورد جديد",
@@ -501,7 +550,7 @@
 			"branch": "الفرع",
 			"building": "المبنى",
 			"zone": "المنطقة (اختياري)",
-			"space": "المساحة",
+			"space": "المساحة (اختياري — اتركها فارغة لمخزون عام)",
 			"name": "الاسم",
 			"category": "الفئة",
 			"quantity": "الكمية"
@@ -635,7 +684,9 @@
 			"isActive": "نشط",
 			"module": "الوحدة",
 			"balances": "الأرصدة",
-			"features": "الميزات"
+			"features": "الميزات",
+			"accessWindow": "وقت الباقة",
+			"visibility": "الظهور"
 		},
 		"isActiveYes": "نشط",
 		"isActiveNo": "غير نشط",
@@ -661,12 +712,19 @@
 			"pricePoints": "السعر (نقاط)",
 			"durationDays": "المدة (أيام)",
 			"includedHours": "الساعات المتضمنة",
-			"overageRatePoints": "سعر الساعة الإضافية (نقاط)",
 			"isActive": "نشط",
 			"order": "ترتيب العرض",
 			"subtitle": "العنوان الفرعي",
 			"module": "الوحدة التابعة لها",
-			"selectModule": "اختر الوحدة"
+			"selectModule": "اختر الوحدة",
+			"isPublic": "تظهر في القوائم",
+			"isPublicHint": "تظهر في تطبيق الأعضاء والموقع العام والكشك.",
+			"isPrivateHint": "مخفية في كل مكان. تُسند للأعضاء من صفحة الاشتراكات.",
+			"hasAccessWindow": "تحديد أوقات معينة",
+			"accessWindowStart": "من",
+			"accessWindowEnd": "إلى",
+			"accessWindowHint": "الساعات ضمن هذه الفترة تُخصم من الباقة، وما خارجها يُحتسب بالسعر العادي.",
+			"accessWindowWraps": "هذه الفترة تمتد بعد منتصف الليل وتنتهي في اليوم التالي."
 		},
 		"loadError": "تعذّر تحميل الباقات. قد لا تملك صلاحية عرض هذه الصفحة.",
 		"stats": {
@@ -683,7 +741,8 @@
 		"sections": {
 			"basicInfo": "البيانات الأساسية",
 			"pricing": "التسعير والوحدة",
-			"displaySettings": "إعدادات العرض"
+			"displaySettings": "إعدادات العرض",
+			"accessWindow": "أوقات الباقة"
 		},
 		"balances": {
 			"includedDescription": "حدد الأرصدة والخدمات المضمنة في هذه الباقة تلقائياً عند الاشتراك.",
@@ -743,7 +802,12 @@
 				"total": "إجمالي الوحدات",
 				"active": "وحدات نشطة"
 			}
-		}
+		},
+		"visibility": {
+			"public": "عامة",
+			"private": "خاصة"
+		},
+		"anyTime": "أي وقت"
 	},
 	"events": {
 		"columns": {
@@ -1304,6 +1368,7 @@
 			"zones": "المناطق",
 			"spaces": "المساحات",
 			"resources": "الموارد",
+			"spaceTypeAmenities": "أنواع المساحات",
 			"seatsDesks": "المقاعد والطاولات",
 			"businessHours": "ساعات العمل",
 			"users": "المستخدمون",
@@ -1344,6 +1409,7 @@
 			"receptionDesk": "مكتب الاستقبال",
 			"closeSession": "إنهاء الجلسة",
 			"modules": "الوحدات",
+			"resourceTypes": "أنواع الموارد",
 			"walletCredited": "تم شحن المحفظة",
 			"eventCancellation": "إلغاء الفعالية",
 			"operationsRequests": "طلبات التشغيل",
@@ -2044,5 +2110,27 @@
 		"add": "إضافة يوم آخر",
 		"remove": "حذف هذا اليوم",
 		"orderError": "يجب أن ينتهي اليوم بعد بدايته."
+	},
+	"memberships": {
+		"description": "فعّل باقة لعضو أو شركة دون خصم أي رصيد من محفظتهم.",
+		"adminOnly": "تفعيل الاشتراكات متاح للمدير فقط.",
+		"loadError": "تعذّر تحميل الباقات أو الأعضاء. قد لا تملك صلاحية عرض هذه الصفحة.",
+		"activate": {
+			"title": "تفعيل اشتراك",
+			"hint": "يُستخدم للباقات المتفق عليها خارج التطبيق، ومنها الباقات الخاصة التي لا يراها الأعضاء ولا يمكنهم شراؤها.",
+			"ownerType": "التفعيل لصالح",
+			"ownerMember": "عضو",
+			"ownerCompany": "شركة",
+			"selectMember": "اختر عضواً",
+			"selectCompany": "اختر شركة",
+			"plan": "الباقة",
+			"selectPlan": "اختر باقة",
+			"durationDays": "{days} يوم",
+			"windowLabel": "أوقات الباقة:",
+			"noCharge": "لا يتم خصم أي نقاط. تُمنح الباقة مباشرة وتُضاف أرصدتها.",
+			"submit": "تفعيل",
+			"success": "تم تفعيل الاشتراك.",
+			"error": "تعذّر تفعيل الاشتراك."
+		}
 	}
 }

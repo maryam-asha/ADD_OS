@@ -1,18 +1,20 @@
 import type { DataTableColumns, SelectOption } from "naive-ui"
-import { NImage } from "naive-ui"
 import type { ComposerTranslation } from "vue-i18n"
-import { h } from "vue"
 import type { FieldDescriptor } from "@/add-os/components/resource/field-types"
 import type { SupportedLocale } from "@/add-os/lang/locales"
+import type { AmenityType } from "@/add-os/modules/spatial/types/amenity"
 import type { Branch } from "@/add-os/modules/spatial/types/branch"
 import type { Building } from "@/add-os/modules/spatial/types/building"
-import type { Space, SpacePayload } from "@/add-os/modules/spatial/types/space"
+import type { Space, SpacePayload, SpaceType } from "@/add-os/modules/spatial/types/space"
 import type { Zone } from "@/add-os/modules/spatial/types/zone"
+import { NImage } from "naive-ui"
+import { h } from "vue"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import { buildOperationalStatusOptions, renderOperationalStatusTag } from "@/add-os/modules/spatial/types/operational-status"
 import { SPACE_TYPES } from "@/add-os/modules/spatial/types/space"
 import { listBuildings } from "@/add-os/services/buildings"
 import { listFloors } from "@/add-os/services/floors"
+import { listSpaceTypeAmenities } from "@/add-os/services/space-type-amenities"
 import { listZones } from "@/add-os/services/zones"
 import { formatCurrency, formatNumber, isCurrencyCode } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
@@ -49,6 +51,11 @@ export function buildSpaceColumns(
 							[h(Icon, { name: "carbon:image", size: 18 })]
 						)
 			}
+		},
+		{
+			title: t("spaces.columns.name"),
+			key: "name",
+			render: row => (row.name ? pickLocalized(row.name, locale) : "—")
 		},
 		{
 			title: t("spaces.columns.building"),
@@ -130,6 +137,7 @@ export function buildSpaceFields(t: ComposerTranslation, branches: Branch[], loc
 		 * ancestor is deliberately left unset (see `openEdit` below) — the same
 		 * problem Task 11 (Zone) already fixed for its own virtual ancestor field.
 		 */
+		{ key: "name", labelKey: "spaces.form.name", type: "bilingual-text", required: true },
 		{ key: "branch_id", labelKey: "spaces.form.branch", type: "select", options: branchOptions, virtual: true },
 		{
 			key: "building_id",
@@ -179,6 +187,7 @@ export function emptySpacePayload(): SpaceFormModel {
 		branch_id: null,
 		building_id: null,
 		zone_id: null,
+		name: { ar: "", en: "" },
 		space_type: "co_space",
 		allocation_model: null,
 		is_lockable: false,
@@ -198,5 +207,28 @@ export function buildSpaceStatusFields(t: ComposerTranslation): FieldDescriptor<
 	return [
 		{ key: "status", labelKey: "spaces.changeStatus.statusLabel", type: "select", required: true, options: buildOperationalStatusOptions(t) },
 		{ key: "status_reason", labelKey: "spaces.changeStatus.reasonLabel", type: "text" }
+	]
+}
+
+/**
+ * The dedicated "manage amenities" action's own field list — a single
+ * switch-group, same as `status` above is its own separate form rather than
+ * a field on the general create/edit drawer. `space_type` isn't a field here
+ * (it's fixed for whichever space this action is opened for) but still has
+ * to be on the model `optionsFrom` reads via its `dependsOn`.
+ */
+export function buildSpaceAmenitiesFields(t: ComposerTranslation): FieldDescriptor<{ space_type: SpaceType; amenities: AmenityType[] }>[] {
+	return [
+		{
+			key: "amenities",
+			labelKey: "spaces.form.amenities",
+			type: "switch-group",
+			dependsOn: "space_type",
+			optionsFrom: async ({ space_type }) => {
+				const matrix = await listSpaceTypeAmenities()
+				const forType = matrix.find(row => row.space_type === space_type)
+				return (forType?.amenities ?? []).map(amenity => ({ label: t(`amenities.types.${amenity}`), value: amenity }))
+			}
+		}
 	]
 }

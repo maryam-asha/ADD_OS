@@ -254,6 +254,9 @@ path and query contract (`?token=&email=`) unchanged.
 
 ### Layout
 
+> **Superseded in part, 2026-09-22 — see §7b.** "Beside" shipped as an even half-and-half
+> and is now a 70/30 split in the panel's favour. The rest of this section still holds.
+
 Wide: a `levantDeepTeal` panel beside a white sheet on the Warm Mist body. The panel
 carries the light-ink logo (`brand-logo_*_dark.svg`, already in `src/assets/images/`) and
 one line of copy. Below the existing 800px breakpoint the panel is dropped and the sheet
@@ -384,6 +387,191 @@ Verified at build time, not assumed: naive-ui 2.44.1's `ConfigProvider` **merges
 `themeOverrides` with its ancestor's unless the prop is exactly `null`
 (`config-provider/src/ConfigProvider.mjs`, "use inherited themeOverrides"). So the auth
 screens remap `primary` only, and keep every other value the app-level provider sets.
+
+## 7b · REVERSAL, 2026-09-22 — the split is 70/30, not 2-up
+
+Appended rather than edited into §4, so the trade-off stays visible. The original
+reasoning was not wrong; the owner weighed it differently.
+
+**What changed.** §4's "panel beside a white sheet" shipped as `lg:grid-cols-2` — an even
+half-and-half. At the owner's request the panel now takes **70%** and the form **30%**:
+`lg:grid-cols-10`, `lg:col-span-7` on the panel, `lg:col-span-3` on the form.
+
+**It was built at 3/1 first, and that is why it is not 3/1 now.** Recorded because the
+retreat is the useful part: a 25% form column measured 360px at 1440px, and after the
+`lg:px-16` padding that shipped with the 2-up it left **232px** for email, password and a
+button. Reducing the padding to `lg:px-8` recovered it to 296px and dropping `max-w-md`
+to `max-w-sm` kept it from overflowing — but that is two compensations to hold one
+decision upright, and the form was still visibly cramped. The owner asked for more room
+on seeing it. At 30% both compensations became unnecessary and were reverted.
+
+| Viewport | Form column at 25% (abandoned) | Form column at 30% (as built) |
+|---|---|---|
+| 1024px | 256px | 307px |
+| 1280px | 320px | 384px |
+| 1440px | 360px | 432px |
+| 1920px | 480px | 576px |
+
+**What 30% costs, stated plainly.** The panel is narrower than the 3/1 the owner first
+asked for, so the pattern and the headline have less room than that version gave them.
+This is the exchange that was accepted: the widest panel the form survives at the size
+batch 2 designed it.
+
+**What is unchanged from batch 2 after the revert.** `max-w-md` (448px) — at 30% the
+column only reaches it around 1500px viewport, so it clamps on large screens exactly as
+it always did rather than becoming the binding constraint. Desktop padding is `lg:px-10
+xl:px-12`, still below the pre-split `lg:px-16 xl:px-24` because 64px a side is most of a
+1024px-viewport column.
+
+Below `lg` **nothing moved**. The panel is still `hidden`, the form still has its full
+`px-6 sm:px-12`, so every phone and tablet screen is byte-for-byte what batch 2 shipped.
+
+**Unchanged by this.** No token moved, no colour changed, no new asset. The pattern keeps
+its approved corner crop and `opacity-20`, scaled `30rem → 42rem` for the wider panel.
+Panel type scales with the column (`text-4xl/5xl → text-5xl/6xl`). RTL mirroring is still
+carried by grid source order and the pattern's `end-0` logical anchor — no RTL-only class
+was added, and none was needed.
+
+Pinned by `AuthShell.spec.ts` → "the desktop split is 70% panel, 30% form", which asserts
+the column count, both spans, that the panel stays off small screens, and explicitly that
+the 3/1 attempt has not returned. Without it a stray utility-class edit would restore a
+50/50 screen with every other test still green.
+
+## 7c · REDESIGN, 2026-09-22 — the owner's reference screen
+
+Same day as §7b and after it. The owner supplied a rendered login design and
+asked for a rebuild "in the same technique, not literally". Recorded here rather
+than edited into §4 for the same reason §7b is.
+
+### The split moved a fourth time, and this is the whole path
+
+`50/50` (batch 2) → `75/25` → `70/30` → **`60/40`**. Every step went the same
+direction: toward room for the form. The last one is the informative one — 70/30
+was chosen and approved when the form was a bare stack of inputs on white. The
+reference turns it into a **card**, and a card needs visible ground around it, so
+a proportion that fit a bare form crowded a carded one. As built:
+`lg:grid-cols-5`, panel `lg:col-span-3`, form `lg:col-span-2`.
+
+`max-w-sm` and the reduced `lg:px-8` from the 25% experiment are both gone; the
+form is back to `max-w-md` at `lg:px-10 xl:px-14`.
+
+### What was taken from the reference
+
+| Element | As built |
+|---|---|
+| Form in a raised card on a warm ground | `bg-surface-raised` + `shadow-add-raised` + `rounded-add-large`, on `bg-surface-sunken`. All four are shipping tokens; the card/ground relationship is one the palette already described and nothing new was minted. |
+| Pattern very large, cropped at the panel's top corner | `top-0 end-0`, `size-[52rem]`, bleeding off both edges. Was a `30rem` bottom-corner mark at `opacity-20`; now `opacity-25` because it no longer sits behind the headline. Logical properties, so it still mirrors under RTL unaided. |
+| Eyebrow label above the panel content | `auth.panel.eyebrow`. Uppercase + letterspacing are applied **only under `:lang(en)`** — see below. |
+| Three pillar labels with dots | Built, but **not in pillar colour** — see below. |
+| Footer line | `auth.panel.footer`, with the year interpolated. |
+| Language switcher at the top corner | The existing `LocaleSwitch`, reused rather than rebuilt. It writes through the locales store, which derives direction; it is a real control, not decoration. |
+
+The form-side logo is now `lg:hidden`: the panel's own light logo is on screen
+beside it above `lg`, and the reference shows the mark once, not twice.
+
+### The eyebrow's casing is language-scoped, and that is not a detail
+
+`text-transform: uppercase` and `letter-spacing` are Latin devices. Arabic has no
+case, so the first is merely inert — but the second is actively harmful: Arabic
+letters join, and letterspacing pulls those joins apart. The same declaration
+that flatters the English label damages the Arabic one.
+
+So it lives in `src/add-os/theme-overrides/_auth.scss` under `:lang(en)`, which
+is reliable because `<html lang>` is bound to the locale. `0.08em`, not a px
+value, because the type scale is per-language and a fixed length would drift
+against it.
+
+### Three elements of the reference were deliberately not built
+
+Recorded in full at `docs/brand/GUIDELINE-FEEDBACK.md` §11. In short:
+
+| Not built | Why |
+|---|---|
+| **Orange CTA** | It is Aleppo Economic Orange ≈ `danger` `#D93D23`. Orange means "destructive" in this dashboard and nothing else; a sign-in button in it is the same colour as "Delete member". Also a pillar hex, so `tokens.spec.ts` fails outright. **Brand owner's call** — the CTA ships `primary` green meanwhile. |
+| **Per-pillar dot colours** | Same rule. Built as three `success` dots distinguished by their **labels**, which is the remedy `tokens.ts` prescribes verbatim: "carries it with an icon or a label — never with colour." |
+| **"Remember me" and "Sign in via SSO"** | Neither capability exists: zero matches for `remember`, and no SSO/SAML/OAuth endpoint, across the pinned collection's 211 leaf endpoints. Invariant 4 — "Remember me" was already removed once on these exact grounds (§2.2). |
+
+The owner chose (2026-09-22) to ship green and log the orange question rather
+than block the redesign on it. If the ruling later comes back "orange", that is a
+token-layer change touching every destructive control in the product, and it
+should be its own reviewed change — not a patch to this screen.
+
+### Pinned by
+
+`AuthShell.spec.ts` → "the desktop split is 60% panel, 40% form" and "the
+reference redesign". The load-bearing assertion is **"lets no pillar colour reach
+the markup"**, which greps the rendered HTML for every hex in `PILLAR_COLORS`. It
+is written against rendered output rather than against the token objects on
+purpose: an inline style or an arbitrary Tailwind value is exactly what would
+slip past the token-level guard, and this screen is the one that was asked to
+look like the thing that guard forbids.
+
+## 7d · REVERSAL, 2026-09-22 — §7c's panel was rejected on sight
+
+Same day, one build later. §7c stays as written: it records what was intended
+and it was wrong in a way worth keeping legible.
+
+**What the owner said, rendering it:** *"التصميم جدا سيئ الباترن والنصوص الكثيرة
+الغير مفهومة"* — the design is very bad, the pattern and the excessive
+unintelligible text.
+
+**They were right on both counts, and the screenshot showed why.**
+
+### The pattern was not a watermark
+
+Built at `size-[52rem]` / `opacity-25`, anchored top-trailing, **behind the text
+block**. At that scale 25% does not read as a tint — it reads as solid green
+shapes, and the body paragraph sitting on top of them broke up mid-line.
+
+Three faults compounded, and no one of them alone would have done this:
+
+| | §7c as built | Corrected |
+|---|---|---|
+| Size | `52rem` | `36rem` |
+| Opacity | `opacity-25` | `opacity-8` |
+| Anchor | top-trailing, under the copy | bottom-trailing, clear of it |
+
+The generalisable lesson: **visual weight is area × strength, so a watermark's
+opacity has to fall as its size rises.** 25% was inherited from a `30rem` mark
+where it had been fine, and carried onto something nearly three times the area
+without rechecking. Pinned now by a test, because the next person to nudge it
+will nudge it upward.
+
+### Five pieces of copy, where a login needs one
+
+§7c put an eyebrow, a headline, a body paragraph, a three-item pillar row and a
+footer into one panel. All five came from the reference, and reproducing them
+all is what "in the same technique, not literally" was asking me *not* to do. A
+login panel is not a landing page; nobody reads it, they sign in.
+
+**Now: the logo, the accent rule, and the headline.** Nothing else.
+
+Removed with their i18n in the same change, per Invariant 4 — `auth.panel.eyebrow`,
+`.body`, `.pillars.*` and `.footer` are gone from both catalogues, and the dead
+`pillarLabels` / `year` constants are gone from the component.
+
+### And one removal closed a rule violation that had gone unnoticed
+
+The pillar row rendered each label beside a small coloured dot. §7c was careful
+that the dots were not *pillar* colour — but `.claude/rules/tokens-and-color.md`
+states plainly: **"never a bare coloured dot"**, for any status. Three identical
+green dots distinguished only by adjacent text is exactly the pattern that rule
+forbids, and §7c's own note about labels-not-colour talked past it.
+
+It is gone as a side effect of the copy cut, not because the cut was aimed at
+it. Recorded because the next person to want dots on a panel should find the
+rule, not rediscover it.
+
+`src/add-os/theme-overrides/_auth.scss` — added in §7c for the eyebrow's
+`:lang(en)` casing — is **deleted**, and its `@import` with it. The eyebrow was
+its only consumer; an override file with no consumer is the orphaned SCSS
+Invariant 4 names.
+
+### What §7c got right and is unchanged
+
+The card on the warm ground, the 60/40 split, the language switch, the
+`lg:hidden` form-side logo, and the three refusals (orange CTA, per-pillar
+colour, Remember-me/SSO). None of that is touched.
 
 ## 8 · Open — brand owner
 

@@ -52,11 +52,45 @@ export interface Paginated<T> {
 	links?: unknown
 }
 
-/** What a list endpoint actually sends today: `data` always, `meta`/`links` maybe. */
+/**
+ * What a list endpoint actually sends today: `data` always, `meta`/`links` maybe.
+ *
+ * `data` is typed `T[]` because that is the contract every caller codes against,
+ * but the wire is not that disciplined — see `rowsOf` below. The type is the
+ * intent; `rowsOf` is the enforcement.
+ */
 export interface RawPaginatedResponse<T> {
 	data: T[]
 	meta?: Partial<PaginationMeta>
 	links?: unknown
+}
+
+/**
+ * The rows of a list response, as an array — always.
+ *
+ * **Why this exists.** A list endpoint is supposed to send `"data": []` when it
+ * has no rows. PHP has no distinct empty-list type, so an empty associative
+ * array serializes to `"data": {}` instead, and the same endpoint then sends an
+ * object when empty and an array when populated. Observed against a live
+ * backend response on 2026-09-23.
+ *
+ * That difference is not cosmetic. `{}` reaching a caller that expects `T[]`
+ * gives `.length === undefined` (so a synthesized `total`/`per_page` of
+ * `undefined`, and a pager rendering `NaN`) and a `v-for` over a non-iterable.
+ * The table breaks on the empty case — the case least likely to be caught in
+ * review and most likely to be a brand-new deployment with no data yet.
+ *
+ * So every list path funnels through here: anything that is not an array is an
+ * empty list. This never "fixes up" a populated response — a real array passes
+ * through untouched — and it deliberately does not try to salvage `{"0": {...}}`
+ * style objects, because that shape has not been observed and guessing at it
+ * would invent rows the backend did not send.
+ *
+ * The root fix belongs in ADDCore (cast to a list before responding). This stays
+ * regardless: one endpoint regressing should not blank a table.
+ */
+export function rowsOf<T>(data: unknown): T[] {
+	return Array.isArray(data) ? (data as T[]) : []
 }
 
 /**
@@ -70,11 +104,14 @@ export interface RawPaginatedResponse<T> {
  * not a fact confirmed from the backend.
  */
 export function toPaginated<T>(raw: RawPaginatedResponse<T>): Paginated<T> {
-	const total = raw.data.length
+	// Not `raw.data.length`: an empty list can arrive as `{}`, whose `.length` is
+	// `undefined` and would propagate into `total`/`per_page`. See `rowsOf`.
+	const rows = rowsOf<T>(raw.data)
+	const total = rows.length
 
 	if (raw.meta && typeof raw.meta.current_page === "number") {
 		return {
-			data: raw.data,
+			data: rows,
 			meta: {
 				current_page: raw.meta.current_page,
 				last_page: raw.meta.last_page ?? 1,
@@ -86,7 +123,7 @@ export function toPaginated<T>(raw: RawPaginatedResponse<T>): Paginated<T> {
 	}
 
 	return {
-		data: raw.data,
+		data: rows,
 		meta: { current_page: 1, last_page: 1, per_page: total, total }
 	}
 }

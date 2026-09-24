@@ -6,6 +6,7 @@ import type {
 	UpdateDoorAccessPayload
 } from "@/add-os/modules/members/types/company-member"
 import { del, get, patch, post } from "./api"
+import { rowsOf } from "./pagination"
 
 /**
  * Built as a factory bound to one companyId — no caller string-concatenates
@@ -17,7 +18,7 @@ export function createCompanyMembersApi(companyId: number) {
 	return {
 		list: async (): Promise<CompanyMember[]> => {
 			const res = await get<{ data: CompanyMember[] }>(BASE)
-			return res.data
+			return rowsOf<CompanyMember>(res.data)
 		},
 		add: async (payload: AddCompanyMemberPayload): Promise<CompanyMember> => {
 			const res = await post<{ data: CompanyMember }>(BASE, payload)

@@ -1,4 +1,6 @@
 import type { OperationalStatus } from "./operational-status"
+import type { Bilingual } from "@/add-os/components/resource/field-types"
+import type { AmenityType } from "@/add-os/modules/spatial/types/amenity"
 // src/add-os/modules/spatial/types/space.ts
 
 export type SpaceType = "co_space" | "room" | "business" | "event_hall"
@@ -19,6 +21,13 @@ export interface Space {
 	id: number
 	building_id: number
 	zone_id: number | null
+	/**
+	 * `null` for a space created before this column was wired up (or never
+	 * backfilled) — the backend falls back to a generic per-`space_type`
+	 * title in that case (see `SpaceBrowseService::resolveTitle`). Every new
+	 * write goes through `SpacePayload.name`, which is non-nullable.
+	 */
+	name: Bilingual | null
 	space_type: SpaceType
 	allocation_model: string | null
 	is_lockable: boolean
@@ -43,6 +52,8 @@ export interface Space {
 	image_url?: string | null
 	main_image?: string | null
 	images?: string[] | null
+	/** Which of this space's own `space_type` applicable amenities are turned on. */
+	amenities: AmenityType[]
 }
 
 /**
@@ -81,6 +92,7 @@ export interface SpacePayload extends Record<string, unknown> {
 	building_id: number | null
 	/** Genuinely optional FK — already nullable, no sentinel fix needed here. */
 	zone_id: number | null
+	name: Bilingual
 	space_type: SpaceType
 	allocation_model: string | null
 	is_lockable: boolean
@@ -99,4 +111,16 @@ export interface SpacePayload extends Record<string, unknown> {
 export interface SpaceStatusPayload {
 	status: OperationalStatus
 	status_reason?: string
+}
+
+/**
+ * A space's own `amenities` are a separate action from the general create/edit
+ * form — same reasoning as `SpaceStatusPayload` above. Every value here must
+ * already be configured as applicable to the target space's `space_type` (see
+ * SpaceTypeAmenity); the backend cross-checks and 422s otherwise, so the
+ * dedicated amenities form only ever offers that space's own type's
+ * configured set as switches in the first place.
+ */
+export interface SpaceAmenitiesPayload {
+	amenities: AmenityType[]
 }

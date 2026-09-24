@@ -1,7 +1,7 @@
 import type { FormItemRule, SelectOption } from "naive-ui"
 import type { SupportedLocale } from "@/add-os/lang/locales"
 
-export type FieldType = "text" | "bilingual-text" | "textarea" | "bilingual-textarea" | "number" | "select" | "switch" | "time" | "date" | "datetime" | "image" | "multi-image" | "color" | "sessions"
+export type FieldType = "text" | "bilingual-text" | "textarea" | "bilingual-textarea" | "number" | "select" | "switch" | "switch-group" | "time" | "date" | "datetime" | "image" | "multi-image" | "color" | "sessions"
 
 export interface Bilingual {
 	ar: string
@@ -44,12 +44,12 @@ export interface FieldDescriptor<TModel = Record<string, unknown>> {
 	 */
 	hint?: (model: TModel) => string
 	rule?: FormItemRule | FormItemRule[]
-	/** select-only, static options. */
+	/** select/switch-group only, static options. */
 	options?: SelectOption[]
 	/** One or more other fields' keys this one depends on — e.g. a Space's `space_id` narrows on both `building_id` and the optional `zone_id`. */
 	dependsOn?: string | string[]
 	/**
-	 * select-only, dynamic options. Re-invoked whenever any `dependsOn` key's value
+	 * select/switch-group only, dynamic options. Re-invoked whenever any `dependsOn` key's value
 	 * changes. `parentValues` is keyed by each `dependsOn` key (single key ⇒ one
 	 * entry); `model` is passed too so a field can read further context beyond its
 	 * declared dependencies without widening `dependsOn` for every caller.

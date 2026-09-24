@@ -1,4 +1,4 @@
-import type { Space, SpacePayload, SpaceStatusPayload } from "@/add-os/modules/spatial/types/space"
+import type { Space, SpaceAmenitiesPayload, SpacePayload, SpaceStatusPayload } from "@/add-os/modules/spatial/types/space"
 import { patch } from "./api"
 import { createResourceApi } from "./resource-factory"
 
@@ -12,4 +12,8 @@ export const removeSpace = api.remove
 
 export function updateSpaceStatus(id: number, payload: SpaceStatusPayload) {
 	return patch<{ message?: string }>(`/api/v1/admin/spaces/${id}/status`, payload)
+}
+
+export function updateSpaceAmenities(id: number, payload: SpaceAmenitiesPayload) {
+	return patch<{ message?: string }>(`/api/v1/admin/spaces/${id}/amenities`, payload)
 }

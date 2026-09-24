@@ -17,82 +17,95 @@
 					:feedback="fieldErrors[field.key]?.[0]"
 					:validation-status="fieldErrors[field.key] ? 'error' : undefined"
 				>
-				<n-input
-					v-if="field.type === 'text' || field.type === 'textarea'"
-					v-model:value="(model as Record<string, unknown>)[field.key] as string"
-					:type="isLongTextField(field) ? 'textarea' : 'text'"
-					:autosize="isLongTextField(field) ? { minRows: 3, maxRows: 8 } : undefined"
-				/>
-				<div
-					v-else-if="field.type === 'bilingual-text' || field.type === 'bilingual-textarea'"
-					:class="isLongTextField(field) ? 'flex flex-col w-full gap-3' : 'flex w-full gap-2'"
-				>
-					<div :class="isLongTextField(field) ? 'w-full' : 'flex-1'">
-						<n-input
-							v-model:value="((model as Record<string, unknown>)[field.key] as Bilingual).ar"
-							:placeholder="t('resourceCrud.form.arabicPlaceholder')"
-							:status="fieldErrors[`${field.key}.ar`] ? 'error' : undefined"
-							:type="isLongTextField(field) ? 'textarea' : 'text'"
-							:autosize="isLongTextField(field) ? { minRows: 4, maxRows: 10 } : undefined"
-						/>
-						<n-text v-if="fieldErrors[`${field.key}.ar`]" type="error" class="text-xs">
-							{{ fieldErrors[`${field.key}.ar`]?.[0] }}
-						</n-text>
-					</div>
-					<div :class="isLongTextField(field) ? 'w-full' : 'flex-1'">
-						<n-input
-							v-model:value="((model as Record<string, unknown>)[field.key] as Bilingual).en"
-							:placeholder="t('resourceCrud.form.englishPlaceholder')"
-							:status="fieldErrors[`${field.key}.en`] ? 'error' : undefined"
-							:type="isLongTextField(field) ? 'textarea' : 'text'"
-							:autosize="isLongTextField(field) ? { minRows: 4, maxRows: 10 } : undefined"
-						/>
-						<n-text v-if="fieldErrors[`${field.key}.en`]" type="error" class="text-xs">
-							{{ fieldErrors[`${field.key}.en`]?.[0] }}
-						</n-text>
-					</div>
-				</div>
-				<div v-else-if="field.type === 'number'" class="w-full">
-					<n-input-number
-						v-model:value="(model as Record<string, unknown>)[field.key] as number | null"
-						:step="field.step"
-						:min="field.min"
-						:precision="field.integer ? 0 : undefined"
-						class="w-full"
+					<n-input
+						v-if="field.type === 'text' || field.type === 'textarea'"
+						v-model:value="(model as Record<string, unknown>)[field.key] as string"
+						:type="isLongTextField(field) ? 'textarea' : 'text'"
+						:autosize="isLongTextField(field) ? { minRows: 3, maxRows: 8 } : undefined"
 					/>
-					<!--
+					<div
+						v-else-if="field.type === 'bilingual-text' || field.type === 'bilingual-textarea'"
+						:class="isLongTextField(field) ? 'flex flex-col w-full gap-3' : 'flex w-full gap-2'"
+					>
+						<div :class="isLongTextField(field) ? 'w-full' : 'flex-1'">
+							<n-input
+								v-model:value="((model as Record<string, unknown>)[field.key] as Bilingual).ar"
+								:placeholder="t('resourceCrud.form.arabicPlaceholder')"
+								:status="fieldErrors[`${field.key}.ar`] ? 'error' : undefined"
+								:type="isLongTextField(field) ? 'textarea' : 'text'"
+								:autosize="isLongTextField(field) ? { minRows: 4, maxRows: 10 } : undefined"
+							/>
+							<n-text v-if="fieldErrors[`${field.key}.ar`]" type="error" class="text-xs">
+								{{ fieldErrors[`${field.key}.ar`]?.[0] }}
+							</n-text>
+						</div>
+						<div :class="isLongTextField(field) ? 'w-full' : 'flex-1'">
+							<n-input
+								v-model:value="((model as Record<string, unknown>)[field.key] as Bilingual).en"
+								:placeholder="t('resourceCrud.form.englishPlaceholder')"
+								:status="fieldErrors[`${field.key}.en`] ? 'error' : undefined"
+								:type="isLongTextField(field) ? 'textarea' : 'text'"
+								:autosize="isLongTextField(field) ? { minRows: 4, maxRows: 10 } : undefined"
+							/>
+							<n-text v-if="fieldErrors[`${field.key}.en`]" type="error" class="text-xs">
+								{{ fieldErrors[`${field.key}.en`]?.[0] }}
+							</n-text>
+						</div>
+					</div>
+					<div v-else-if="field.type === 'number'" class="w-full">
+						<n-input-number
+							v-model:value="(model as Record<string, unknown>)[field.key] as number | null"
+							:step="field.step"
+							:min="field.min"
+							:precision="field.integer ? 0 : undefined"
+							class="w-full"
+						/>
+						<!--
 						Read-only, and supplied by the field descriptor — never computed
 						by this drawer. A point field's currency equivalent comes from
 						the server, which owns the rate.
 					-->
-					<n-text v-if="field.hint?.(model)" depth="3" class="text-xs">
-						{{ field.hint(model) }}
-					</n-text>
-				</div>
-				<n-select
-					v-else-if="field.type === 'select'"
-					v-model:value="(model as Record<string, unknown>)[field.key] as string | number | null"
-					:options="field.options ?? dynamicOptions[field.key] ?? []"
-					:disabled="field.disabledWhen?.(model) ?? false"
-					clearable
-				/>
-				<n-switch v-else-if="field.type === 'switch'" v-model:value="(model as Record<string, unknown>)[field.key] as boolean" />
-				<n-time-picker
-					v-else-if="field.type === 'time'"
-					:formatted-value="toPickerTimeValue((model as Record<string, unknown>)[field.key])"
-					format="HH:mm"
-					value-format="HH:mm"
-					class="w-full"
-					@update:formatted-value="(value: string | null) => setPickerValue(field.key, value)"
-				/>
-				<n-date-picker
-					v-else-if="field.type === 'date'"
-					:formatted-value="toPickerDateValue((model as Record<string, unknown>)[field.key])"
-					format="yyyy-MM-dd"
-					value-format="yyyy-MM-dd"
-					class="w-full"
-					@update:formatted-value="(value: string | null) => setPickerValue(field.key, value)"
-				/>
+						<n-text v-if="field.hint?.(model)" depth="3" class="text-xs">
+							{{ field.hint(model) }}
+						</n-text>
+					</div>
+					<n-select
+						v-else-if="field.type === 'select'"
+						v-model:value="(model as Record<string, unknown>)[field.key] as string | number | null"
+						:options="field.options ?? dynamicOptions[field.key] ?? []"
+						:disabled="field.disabledWhen?.(model) ?? false"
+						clearable
+					/>
+					<n-switch v-else-if="field.type === 'switch'" v-model:value="(model as Record<string, unknown>)[field.key] as boolean" />
+					<div v-else-if="field.type === 'switch-group'" class="flex flex-col gap-1 w-full">
+						<div
+							v-for="option in (field.options ?? dynamicOptions[field.key] ?? [])"
+							:key="String(option.value)"
+							class="flex items-center justify-between gap-3 py-1"
+						>
+							<span class="text-sm">{{ option.label }}</span>
+							<n-switch
+								:value="((model as Record<string, unknown>)[field.key] as unknown[]).includes(option.value)"
+								@update:value="(checked: boolean) => toggleSwitchGroupValue(field.key, option.value as string | number, checked)"
+							/>
+						</div>
+					</div>
+					<n-time-picker
+						v-else-if="field.type === 'time'"
+						:formatted-value="toPickerTimeValue((model as Record<string, unknown>)[field.key])"
+						format="HH:mm"
+						value-format="HH:mm"
+						class="w-full"
+						@update:formatted-value="(value: string | null) => setPickerValue(field.key, value)"
+					/>
+					<n-date-picker
+						v-else-if="field.type === 'date'"
+						:formatted-value="toPickerDateValue((model as Record<string, unknown>)[field.key])"
+						format="yyyy-MM-dd"
+						value-format="yyyy-MM-dd"
+						class="w-full"
+						@update:formatted-value="(value: string | null) => setPickerValue(field.key, value)"
+					/>
 					<!--
 						Date and time as two controls, not one `type="datetime"` panel. In
 						the combined panel the clock is a secondary control inside the
@@ -128,187 +141,187 @@
 							@update:formatted-value="(value: string | null) => setDatetimeTimePart(field.key, value)"
 						/>
 					</div>
-				<div v-else-if="field.type === 'color'" class="flex items-center gap-3 w-full">
-					<input
-						type="color"
-						:value="((model as Record<string, unknown>)[field.key] as string) || '#3b82f6'"
-						class="w-9 h-9 p-0.5 border rounded cursor-pointer bg-transparent shrink-0"
-						@input="e => { (model as Record<string, unknown>)[field.key] = (e.target as HTMLInputElement).value }"
-					/>
-					<n-input
-						v-model:value="(model as Record<string, unknown>)[field.key] as string"
-						placeholder="#3B82F6"
-						class="flex-1 font-mono"
-					/>
-				</div>
-				<div v-else-if="field.type === 'multi-image' || (field.type === 'image' && field.multiple)" class="flex flex-col gap-3 w-full">
-					<!-- Existing images grid -->
-					<div
-						v-if="Array.isArray((model as Record<string, unknown>)[field.key]) && ((model as Record<string, unknown>)[field.key] as string[]).length > 0"
-						class="w-full flex flex-col gap-3 p-3 border rounded-xl bg-surface-sunken"
-					>
-						<div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-							<div
-								v-for="(imgUrl, idx) in ((model as Record<string, unknown>)[field.key] as string[])"
-								:key="imgUrl + idx"
-								class="group relative rounded-lg overflow-hidden border bg-black/5 aspect-video flex items-center justify-center"
-							>
+					<div v-else-if="field.type === 'color'" class="flex items-center gap-3 w-full">
+						<input
+							type="color"
+							:value="((model as Record<string, unknown>)[field.key] as string) || '#3b82f6'"
+							class="w-9 h-9 p-0.5 border rounded cursor-pointer bg-transparent shrink-0"
+							@input="e => { (model as Record<string, unknown>)[field.key] = (e.target as HTMLInputElement).value }"
+						/>
+						<n-input
+							v-model:value="(model as Record<string, unknown>)[field.key] as string"
+							placeholder="#3B82F6"
+							class="flex-1 font-mono"
+						/>
+					</div>
+					<div v-else-if="field.type === 'multi-image' || (field.type === 'image' && field.multiple)" class="flex flex-col gap-3 w-full">
+						<!-- Existing images grid -->
+						<div
+							v-if="Array.isArray((model as Record<string, unknown>)[field.key]) && ((model as Record<string, unknown>)[field.key] as string[]).length > 0"
+							class="w-full flex flex-col gap-3 p-3 border rounded-xl bg-surface-sunken"
+						>
+							<div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+								<div
+									v-for="(imgUrl, idx) in ((model as Record<string, unknown>)[field.key] as string[])"
+									:key="imgUrl + idx"
+									class="group relative rounded-lg overflow-hidden border bg-black/5 aspect-video flex items-center justify-center"
+								>
+									<img
+										:src="imgUrl"
+										alt="Uploaded preview"
+										class="w-full h-full object-cover"
+									/>
+
+									<!-- Primary badge for first image -->
+									<div
+										v-if="idx === 0"
+										class="absolute top-1.5 right-1.5 rtl:right-auto rtl:left-1.5 flex items-center gap-1 bg-emerald-600 text-white text-[10px] font-medium px-2 py-0.5 rounded-full shadow-md backdrop-blur-sm z-10"
+									>
+										<Icon name="carbon:star-filled" :size="12" />
+										<span>{{ t("resourceCrud.form.primaryImage") }}</span>
+									</div>
+
+									<!-- Action overlay on hover -->
+									<div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-1 z-20">
+										<n-button
+											v-if="idx > 0"
+											size="tiny"
+											type="primary"
+											secondary
+											:title="t('resourceCrud.form.setPrimary')"
+											@click.stop="() => setPrimaryImage(field.key, idx)"
+										>
+											<template #icon><Icon name="carbon:star" :size="14" /></template>
+										</n-button>
+										<n-button
+											size="tiny"
+											type="error"
+											secondary
+											:title="t('resourceCrud.form.removeImage')"
+											@click.stop="() => removeMultiImage(field.key, idx)"
+										>
+											<template #icon><Icon name="carbon:trash-can" :size="14" /></template>
+										</n-button>
+									</div>
+								</div>
+							</div>
+
+							<!-- Add more button & counter -->
+							<div class="flex items-center justify-between gap-2 pt-2 border-t border-black/5">
+								<n-upload
+									accept="image/*"
+									:show-file-list="false"
+									:multiple="true"
+									:custom-request="options => handleMultiImageUpload(field.key, options, field.folder)"
+								>
+									<n-button size="small" secondary type="primary">
+										<template #icon><Icon name="carbon:add" :size="14" /></template>
+										{{ t("resourceCrud.form.addImages") }}
+									</n-button>
+								</n-upload>
+
+								<span class="text-xs text-secondary font-medium">
+									{{ ((model as Record<string, unknown>)[field.key] as string[]).length }} {{ t("resourceCrud.form.imagesCount") }}
+								</span>
+							</div>
+						</div>
+
+						<!-- Uploading in progress state -->
+						<div
+							v-if="uploadingFields[field.key]"
+							class="w-full py-6 px-4 border-2 border-dashed border-[var(--add-primary)]/50 rounded-xl flex flex-col items-center justify-center gap-2 bg-surface-sunken"
+						>
+							<n-spin size="small" />
+							<span class="text-xs font-medium text-secondary">{{ t("resourceCrud.form.uploading") }}</span>
+						</div>
+
+						<!-- Empty state: Full-width drag-and-drop uploader -->
+						<n-upload
+							v-if="!Array.isArray((model as Record<string, unknown>)[field.key]) || ((model as Record<string, unknown>)[field.key] as string[]).length === 0"
+							class="w-full"
+							accept="image/*"
+							:show-file-list="false"
+							:multiple="true"
+							:custom-request="options => handleMultiImageUpload(field.key, options, field.folder)"
+						>
+							<n-upload-dragger class="w-full !p-6 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-[var(--add-primary)] transition-colors">
+								<div class="p-3 rounded-full bg-primary/10 text-primary">
+									<Icon name="carbon:cloud-upload" :size="30" />
+								</div>
+								<div class="flex flex-col items-center text-center gap-1">
+									<span class="text-sm font-semibold text-primary">{{ t("resourceCrud.form.uploadImagesPrompt") }}</span>
+									<span class="text-xs text-secondary">{{ t("resourceCrud.form.uploadImagesHint") }}</span>
+								</div>
+							</n-upload-dragger>
+						</n-upload>
+					</div>
+					<div v-else-if="field.type === 'image'" class="flex flex-col gap-3 w-full">
+						<!-- Uploaded state: preview container with success badge and action buttons -->
+						<div
+							v-if="(model as Record<string, unknown>)[field.key]"
+							class="w-full flex flex-col gap-3 p-3 border rounded-xl bg-surface-sunken"
+						>
+							<div class="relative w-full rounded-lg overflow-hidden border bg-black/5 aspect-video max-h-56 flex items-center justify-center">
 								<img
-									:src="imgUrl"
+									:src="(model as Record<string, unknown>)[field.key] as string"
 									alt="Uploaded preview"
 									class="w-full h-full object-cover"
 								/>
+								<div class="absolute top-2 right-2 rtl:right-auto rtl:left-2 flex items-center gap-1.5 bg-emerald-600 text-white text-xs font-medium px-3 py-1 rounded-full shadow-md backdrop-blur-sm">
+									<Icon name="carbon:checkmark-filled" :size="15" />
+									<span>{{ t("resourceCrud.form.uploadSuccess") }}</span>
+								</div>
+							</div>
 
-								<!-- Primary badge for first image -->
-								<div
-									v-if="idx === 0"
-									class="absolute top-1.5 right-1.5 rtl:right-auto rtl:left-1.5 flex items-center gap-1 bg-emerald-600 text-white text-[10px] font-medium px-2 py-0.5 rounded-full shadow-md backdrop-blur-sm z-10"
+							<div class="flex items-center justify-between gap-2">
+								<n-upload
+									accept="image/*"
+									:show-file-list="false"
+									:custom-request="options => handleImageUpload(field.key, options, field.folder)"
 								>
-									<Icon name="carbon:star-filled" :size="12" />
-									<span>{{ t("resourceCrud.form.primaryImage") }}</span>
-								</div>
-
-								<!-- Action overlay on hover -->
-								<div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-1 z-20">
-									<n-button
-										v-if="idx > 0"
-										size="tiny"
-										type="primary"
-										secondary
-										:title="t('resourceCrud.form.setPrimary')"
-										@click.stop="() => setPrimaryImage(field.key, idx)"
-									>
-										<template #icon><Icon name="carbon:star" :size="14" /></template>
+									<n-button size="small" secondary type="primary">
+										<template #icon><Icon name="carbon:renew" :size="14" /></template>
+										{{ t("resourceCrud.form.changeImage") }}
 									</n-button>
-									<n-button
-										size="tiny"
-										type="error"
-										secondary
-										:title="t('resourceCrud.form.removeImage')"
-										@click.stop="() => removeMultiImage(field.key, idx)"
-									>
-										<template #icon><Icon name="carbon:trash-can" :size="14" /></template>
-									</n-button>
+								</n-upload>
+
+								<n-button size="small" secondary type="error" @click="() => removeImage(field.key)">
+									<template #icon><Icon name="carbon:trash-can" :size="14" /></template>
+									{{ t("resourceCrud.form.removeImage") }}
+								</n-button>
+							</div>
+						</div>
+
+						<!-- Uploading in progress state -->
+						<div
+							v-else-if="uploadingFields[field.key]"
+							class="w-full py-10 px-4 border-2 border-dashed border-[var(--add-primary)]/50 rounded-xl flex flex-col items-center justify-center gap-3 bg-surface-sunken"
+						>
+							<n-spin size="medium" />
+							<span class="text-sm font-medium text-secondary">{{ t("resourceCrud.form.uploading") }}</span>
+						</div>
+
+						<!-- Empty state: Full-width drag-and-drop uploader -->
+						<n-upload
+							v-else
+							class="w-full"
+							accept="image/*"
+							:show-file-list="false"
+							:custom-request="options => handleImageUpload(field.key, options, field.folder)"
+						>
+							<n-upload-dragger class="w-full !p-6 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-[var(--add-primary)] transition-colors">
+								<div class="p-3 rounded-full bg-primary/10 text-primary">
+									<Icon name="carbon:cloud-upload" :size="30" />
 								</div>
-							</div>
-						</div>
-
-						<!-- Add more button & counter -->
-						<div class="flex items-center justify-between gap-2 pt-2 border-t border-black/5">
-							<n-upload
-								accept="image/*"
-								:show-file-list="false"
-								:multiple="true"
-								:custom-request="options => handleMultiImageUpload(field.key, options, field.folder)"
-							>
-								<n-button size="small" secondary type="primary">
-									<template #icon><Icon name="carbon:add" :size="14" /></template>
-									{{ t("resourceCrud.form.addImages") }}
-								</n-button>
-							</n-upload>
-
-							<span class="text-xs text-secondary font-medium">
-								{{ ((model as Record<string, unknown>)[field.key] as string[]).length }} {{ t("resourceCrud.form.imagesCount") }}
-							</span>
-						</div>
+								<div class="flex flex-col items-center text-center gap-1">
+									<span class="text-sm font-semibold text-primary">{{ t("resourceCrud.form.uploadImagePrompt") }}</span>
+									<span class="text-xs text-secondary">{{ t("resourceCrud.form.uploadImageHint") }}</span>
+								</div>
+							</n-upload-dragger>
+						</n-upload>
 					</div>
-
-					<!-- Uploading in progress state -->
-					<div
-						v-if="uploadingFields[field.key]"
-						class="w-full py-6 px-4 border-2 border-dashed border-[var(--add-primary)]/50 rounded-xl flex flex-col items-center justify-center gap-2 bg-surface-sunken"
-					>
-						<n-spin size="small" />
-						<span class="text-xs font-medium text-secondary">{{ t("resourceCrud.form.uploading") }}</span>
-					</div>
-
-					<!-- Empty state: Full-width drag-and-drop uploader -->
-					<n-upload
-						v-if="!Array.isArray((model as Record<string, unknown>)[field.key]) || ((model as Record<string, unknown>)[field.key] as string[]).length === 0"
-						class="w-full"
-						accept="image/*"
-						:show-file-list="false"
-						:multiple="true"
-						:custom-request="options => handleMultiImageUpload(field.key, options, field.folder)"
-					>
-						<n-upload-dragger class="w-full !p-6 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-[var(--add-primary)] transition-colors">
-							<div class="p-3 rounded-full bg-primary/10 text-primary">
-								<Icon name="carbon:cloud-upload" :size="30" />
-							</div>
-							<div class="flex flex-col items-center text-center gap-1">
-								<span class="text-sm font-semibold text-primary">{{ t("resourceCrud.form.uploadImagesPrompt") }}</span>
-								<span class="text-xs text-secondary">{{ t("resourceCrud.form.uploadImagesHint") }}</span>
-							</div>
-						</n-upload-dragger>
-					</n-upload>
-				</div>
-				<div v-else-if="field.type === 'image'" class="flex flex-col gap-3 w-full">
-					<!-- Uploaded state: preview container with success badge and action buttons -->
-					<div
-						v-if="(model as Record<string, unknown>)[field.key]"
-						class="w-full flex flex-col gap-3 p-3 border rounded-xl bg-surface-sunken"
-					>
-						<div class="relative w-full rounded-lg overflow-hidden border bg-black/5 aspect-video max-h-56 flex items-center justify-center">
-							<img
-								:src="(model as Record<string, unknown>)[field.key] as string"
-								alt="Uploaded preview"
-								class="w-full h-full object-cover"
-							/>
-							<div class="absolute top-2 right-2 rtl:right-auto rtl:left-2 flex items-center gap-1.5 bg-emerald-600 text-white text-xs font-medium px-3 py-1 rounded-full shadow-md backdrop-blur-sm">
-								<Icon name="carbon:checkmark-filled" :size="15" />
-								<span>{{ t("resourceCrud.form.uploadSuccess") }}</span>
-							</div>
-						</div>
-
-						<div class="flex items-center justify-between gap-2">
-							<n-upload
-								accept="image/*"
-								:show-file-list="false"
-								:custom-request="options => handleImageUpload(field.key, options, field.folder)"
-							>
-								<n-button size="small" secondary type="primary">
-									<template #icon><Icon name="carbon:renew" :size="14" /></template>
-									{{ t("resourceCrud.form.changeImage") }}
-								</n-button>
-							</n-upload>
-
-							<n-button size="small" secondary type="error" @click="() => removeImage(field.key)">
-								<template #icon><Icon name="carbon:trash-can" :size="14" /></template>
-								{{ t("resourceCrud.form.removeImage") }}
-							</n-button>
-						</div>
-					</div>
-
-					<!-- Uploading in progress state -->
-					<div
-						v-else-if="uploadingFields[field.key]"
-						class="w-full py-10 px-4 border-2 border-dashed border-[var(--add-primary)]/50 rounded-xl flex flex-col items-center justify-center gap-3 bg-surface-sunken"
-					>
-						<n-spin size="medium" />
-						<span class="text-sm font-medium text-secondary">{{ t("resourceCrud.form.uploading") }}</span>
-					</div>
-
-					<!-- Empty state: Full-width drag-and-drop uploader -->
-					<n-upload
-						v-else
-						class="w-full"
-						accept="image/*"
-						:show-file-list="false"
-						:custom-request="options => handleImageUpload(field.key, options, field.folder)"
-					>
-						<n-upload-dragger class="w-full !p-6 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-[var(--add-primary)] transition-colors">
-							<div class="p-3 rounded-full bg-primary/10 text-primary">
-								<Icon name="carbon:cloud-upload" :size="30" />
-							</div>
-							<div class="flex flex-col items-center text-center gap-1">
-								<span class="text-sm font-semibold text-primary">{{ t("resourceCrud.form.uploadImagePrompt") }}</span>
-								<span class="text-xs text-secondary">{{ t("resourceCrud.form.uploadImageHint") }}</span>
-							</div>
-						</n-upload-dragger>
-					</n-upload>
-				</div>
-			</n-form-item>
-		</template>
+				</n-form-item>
+			</template>
 		</n-form>
 		<template #footer>
 			<div class="flex justify-end gap-2">
@@ -322,14 +335,14 @@
 <script setup lang="ts" generic="TModel extends Record<string, unknown>">
 import type { FormInst, FormRules, SelectOption, UploadCustomRequestOptions } from "naive-ui"
 import type { Bilingual, FieldDescriptor } from "./field-types"
+import type { SessionValue } from "@/add-os/components/resource/SessionsField.vue"
 import { NButton, NDatePicker, NForm, NFormItem, NInput, NInputNumber, NModal, NSelect, NSpin, NSwitch, NText, NTimePicker, NUpload, NUploadDragger } from "naive-ui"
 import { computed, reactive, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import SessionsField from "@/add-os/components/resource/SessionsField.vue"
 import { ApiError } from "@/add-os/services/api"
 import { uploadMedia } from "@/add-os/services/media"
 import { toOffsetIso } from "@/add-os/utils/format"
-import type { SessionValue } from "@/add-os/components/resource/SessionsField.vue"
-import SessionsField from "@/add-os/components/resource/SessionsField.vue"
 import Icon from "@/components/common/Icon.vue"
 import { buildPayload } from "./field-types"
 
@@ -412,7 +425,15 @@ for (const field of props.fields) {
 
 			const target = currentModel as Record<string, unknown>
 			const value = target[field.key]
-			if (value !== null && value !== undefined && !options.some(option => option.value === value)) {
+			// A switch-group field holds an array (every value that's "on"), not a
+			// single scalar — a stale entry the new options don't cover gets
+			// filtered out, never the whole selection nulled like a select's does.
+			if (Array.isArray(value)) {
+				const filtered = value.filter(v => options.some(option => option.value === v))
+				if (filtered.length !== value.length) {
+					target[field.key] = filtered
+				}
+			} else if (value !== null && value !== undefined && !options.some(option => option.value === value)) {
 				target[field.key] = null
 			}
 		},
@@ -509,6 +530,19 @@ function datetimeTimePart(value: unknown): string | null {
 function writeField(key: string, value: unknown) {
 	const target = model.value as Record<string, unknown>
 	target[key] = value
+}
+
+/** Adds/removes one option's value from a switch-group field's array. */
+function toggleSwitchGroupValue(key: string, value: string | number, checked: boolean) {
+	const target = model.value as Record<string, unknown>
+	const current = Array.isArray(target[key]) ? [...(target[key] as (string | number)[])] : []
+	const index = current.indexOf(value)
+	if (checked && index === -1) {
+		current.push(value)
+	} else if (!checked && index !== -1) {
+		current.splice(index, 1)
+	}
+	target[key] = current
 }
 
 /** Written back with an explicit offset, so the API never has to guess. */

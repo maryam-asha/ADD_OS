@@ -47,9 +47,12 @@ function readXsrfToken(): string | null {
  * The backend expects `lang`/`currency` (lower-case, exactly — see
  * ADD-OS.postman_collection.json) on every endpoint, admin dashboard included.
  *
- * Read at request time, not import time: `currentLocale` and `useCurrencyStore().currency`
- * are reactive so language and currency switches take effect on the very next
- * request, without a reload.
+ * Read at request time, not import time: `currentLocale` is reactive, so a language
+ * switch takes effect on the very next request without a reload.
+ *
+ * `currency` is read at request time for the same reason, but is **read-only** since
+ * the toolbar switch was removed on 2026-09-23 — it resolves to DEFAULT_CURRENCY.
+ * See docs/PHASE-3-DEAD-CONTROLS.md §F.
  */
 function buildDefaultHeaders(): Record<string, string> {
 	let currency: string = DEFAULT_CURRENCY

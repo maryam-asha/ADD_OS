@@ -10,6 +10,18 @@ export interface CurrencyOption {
 	is_default?: boolean
 }
 
+/**
+ * Currency is **read-only**, exactly as `themeName` is.
+ *
+ * The toolbar CurrencySwitch was removed on 2026-09-23 and `setCurrency()` went
+ * with it, because it was the only write path — see docs/PHASE-3-DEAD-CONTROLS.md §F.
+ * The store itself stays: `services/api.ts` reads `currency` at request time to
+ * build the `currency` header the backend expects on every endpoint, so deleting
+ * the store would break the whole API layer.
+ *
+ * Do not reintroduce a write path without a decision on what a staff-level
+ * display-currency switch should mean for an admin dashboard.
+ */
 export const useCurrencyStore = defineStore("currency", {
 	state: () => ({
 		currency: DEFAULT_CURRENCY as CurrencyCode | string,
@@ -20,23 +32,6 @@ export const useCurrencyStore = defineStore("currency", {
 		] as CurrencyOption[]
 	}),
 	actions: {
-		async setCurrency(code: string, syncWithBackend = true): Promise<void> {
-			this.currency = code
-			if (syncWithBackend) {
-				try {
-					const { useAuthStore } = await import("@/stores/auth")
-					const authStore = useAuthStore()
-					if (authStore.isLogged) {
-						const { patch } = await import("@/add-os/services/api")
-						await patch("/api/v1/member/preferences/currency", {
-							preferred_currency: code
-						})
-					}
-				} catch {
-					// Discard sync errors gracefully
-				}
-			}
-		},
 		async fetchCurrencies(): Promise<void> {
 			try {
 				const { get } = await import("@/add-os/services/api")

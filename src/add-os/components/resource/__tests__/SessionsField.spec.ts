@@ -74,24 +74,47 @@ describe("sessionsField", () => {
 		const emitted = lastEmitted(wrapper)!
 
 		expect(emitted).toHaveLength(2)
-		expect(emitted[0].start_at).toContain("2026-12-01T09:00")
-		expect(emitted[0].end_at).toContain("2026-12-01T17:00")
-		expect(emitted[1].start_at).toContain("2026-12-02T16:00")
-		expect(emitted[1].end_at).toContain("2026-12-02T21:00")
+		expect(emitted[0].start_at).toBe("2026-12-01 09:00:00")
+		expect(emitted[0].end_at).toBe("2026-12-01 17:00:00")
+		expect(emitted[1].start_at).toBe("2026-12-02 16:00:00")
+		expect(emitted[1].end_at).toBe("2026-12-02 21:00:00")
 	})
 
 	/**
-	 * A bare wall clock would be read as UTC by the API, moving a 21:00
-	 * sitting onto the next day — the drift this project has shipped twice.
+	 * Sends the wall clock, NOT an instant. These hours mean the district's
+	 * clock, which only the server knows — stamping the browser's offset here
+	 * stored hours the admin never typed when their laptop was set elsewhere.
 	 */
-	it("states the offset, so the stored hours are the ones on screen", () => {
+	it("sends the typed wall clock rather than the browser's idea of the instant", () => {
 		const { wrapper, vm } = mountField()
 
 		vm.rows[0].date = "2026-12-01"
+		vm.rows[0].start = "09:00"
+		vm.rows[0].end = "17:00"
 		vm.addRow()
 		vm.removeRow(1)
 
-		expect(lastEmitted(wrapper)![0].start_at).toMatch(/[+-]\d{2}:\d{2}$|Z$/)
+		const emitted = lastEmitted(wrapper)![0]
+		expect(emitted.start_at).toBe("2026-12-01 09:00:00")
+		expect(emitted.start_at).not.toMatch(/[+-]\d{2}:\d{2}$|Z$/)
+	})
+
+	/**
+	 * Reported: entering 22:30-04:00 stored 01:00-02:30. Both ends went onto
+	 * the same day, so the end landed eighteen hours before the start.
+	 */
+	it("carries a sitting that runs past midnight onto the next day", () => {
+		const { wrapper, vm } = mountField()
+
+		vm.rows[0].date = "2026-09-10"
+		vm.rows[0].start = "22:30"
+		vm.rows[0].end = "04:00"
+		vm.addRow()
+		vm.removeRow(1)
+
+		const emitted = lastEmitted(wrapper)![0]
+		expect(emitted.start_at).toBe("2026-09-10 22:30:00")
+		expect(emitted.end_at).toBe("2026-09-11 04:00:00")
 	})
 
 	it("reads a stored schedule back as days and hours", () => {
@@ -118,11 +141,23 @@ describe("sessionsField", () => {
 		expect(vm.rows[1].end).toBe("17:00")
 	})
 
-	it("flags a day that ends before it starts", () => {
+	/** 17:00 to 09:00 is an overnight sitting, not a mistake. */
+	it("does not flag an overnight sitting", () => {
 		const { vm } = mountField()
 
 		vm.rows[0].date = "2026-12-01"
 		vm.rows[0].start = "17:00"
+		vm.rows[0].end = "09:00"
+
+		expect(vm.rowError).toBeNull()
+	})
+
+	/** A zero-length sitting is still meaningless. */
+	it("flags a sitting that starts and ends at the same moment", () => {
+		const { vm } = mountField()
+
+		vm.rows[0].date = "2026-12-01"
+		vm.rows[0].start = "09:00"
 		vm.rows[0].end = "09:00"
 
 		expect(vm.rowError).toBe("A day must end after it starts.")

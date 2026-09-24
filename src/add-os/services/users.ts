@@ -6,12 +6,13 @@ import type {
 	UserRole
 } from "@/add-os/modules/system/types/user"
 import { get, patch, post, put } from "./api"
+import { rowsOf } from "./pagination"
 
 const BASE = "/api/v1/admin/users"
 
 export async function listUsers(filter?: { role?: UserRole }): Promise<User[]> {
 	const res = await get<{ data: User[] }>(BASE, filter?.role ? { role: filter.role } : undefined)
-	return res.data
+	return rowsOf<User>(res.data)
 }
 
 /** Admin-only: creates an operations or admin account. Members self-register from the app. */

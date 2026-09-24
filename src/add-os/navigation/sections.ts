@@ -72,6 +72,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "buildings", path: "buildings" },
 			{ key: "floors", path: "floors" },
 			{ key: "zones", path: "zones" },
+			{ key: "spaceTypeAmenities", path: "space-type-amenities" },
 			{ key: "spaces", path: "spaces" },
 			{ key: "resources", path: "resources" },
 			{ key: "seatsDesks", path: "seats-desks" },
@@ -136,6 +137,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		pages: [
 			{ key: "packages", path: "packages" },
 			{ key: "modules", path: "modules" },
+			{ key: "resourceTypes", path: "resource-types" },
 			{ key: "wallet", path: "wallet" }
 		]
 	},

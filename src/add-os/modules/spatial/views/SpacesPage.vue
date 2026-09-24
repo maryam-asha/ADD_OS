@@ -23,7 +23,7 @@
 			:on-edit="openEdit"
 			:on-delete="canDelete ? (async row => { await mutations.remove(row.id) }) : undefined"
 			:delete-warning="t('spaces.delete.cascadeWarning')"
-			:extra-actions="renderStatusAction"
+			:extra-actions="renderExtraActions"
 		/>
 
 		<ResourceFormDrawer
@@ -43,15 +43,25 @@
 			:submitting="statusSubmitting"
 			:on-submit="submitStatusChange"
 		/>
+
+		<ResourceFormDrawer
+			v-model:show="amenitiesDrawerVisible"
+			v-model:model="amenitiesForm"
+			:fields="amenitiesFields"
+			:title="t('spaces.manageAmenities.title')"
+			:submitting="amenitiesSubmitting"
+			:on-submit="submitAmenitiesChange"
+		/>
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vue"
+import type { AmenityType } from "@/add-os/modules/spatial/types/amenity"
 import type { Branch } from "@/add-os/modules/spatial/types/branch"
 import type { Building } from "@/add-os/modules/spatial/types/building"
 import type { OperationalStatus } from "@/add-os/modules/spatial/types/operational-status"
-import type { Space, SpacePayload, SpaceStatusPayload } from "@/add-os/modules/spatial/types/space"
+import type { Space, SpaceAmenitiesPayload, SpacePayload, SpaceStatusPayload, SpaceType } from "@/add-os/modules/spatial/types/space"
 import type { Zone } from "@/add-os/modules/spatial/types/zone"
 import { NButton, useMessage } from "naive-ui"
 import { computed, h, ref } from "vue"
@@ -64,6 +74,7 @@ import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
 import { canDeleteSpatialResource } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import {
+	buildSpaceAmenitiesFields,
 	buildSpaceColumns,
 	buildSpaceFields,
 	buildSpaceStatusFields,
@@ -72,7 +83,7 @@ import {
 import { ApiError } from "@/add-os/services/api"
 import { listBranches } from "@/add-os/services/branches"
 import { listBuildings } from "@/add-os/services/buildings"
-import { createSpace, listSpaces, removeSpace, updateSpace, updateSpaceStatus } from "@/add-os/services/spaces"
+import { createSpace, listSpaces, removeSpace, updateSpace, updateSpaceAmenities, updateSpaceStatus } from "@/add-os/services/spaces"
 import { listZones } from "@/add-os/services/zones"
 import Icon from "@/components/common/Icon.vue"
 
@@ -137,6 +148,9 @@ function openEdit(row: Space) {
 		branch_id: buildingsById.value[row.building_id]?.branch_id ?? null,
 		building_id: row.building_id,
 		zone_id: row.zone_id,
+		// A pre-existing space can still have a `null` name (never backfilled);
+		// the form field always needs a `{ar, en}` shape to edit into.
+		name: row.name ?? { ar: "", en: "" },
 		space_type: row.space_type,
 		allocation_model: row.allocation_model,
 		is_lockable: row.is_lockable,
@@ -191,7 +205,51 @@ async function submitStatusChange(payload: Record<string, unknown>) {
 	}
 }
 
-function renderStatusAction(row: Space) {
-	return [h(NButton, { text: true, onClick: () => openStatusDrawer(row) }, { default: () => t("spaces.changeStatus.button") })]
+const amenitiesDrawerVisible = ref(false)
+const amenitiesSubmitting = ref(false)
+const amenitiesTargetId = ref<number | null>(null)
+const amenitiesForm = ref<{ space_type: SpaceType; amenities: AmenityType[] }>({ space_type: "co_space", amenities: [] })
+const amenitiesFields = computed(() => buildSpaceAmenitiesFields(t))
+
+function openAmenitiesDrawer(row: Space) {
+	amenitiesTargetId.value = row.id
+	amenitiesForm.value = { space_type: row.space_type, amenities: [...row.amenities] }
+	amenitiesDrawerVisible.value = true
+}
+
+async function submitAmenitiesChange(payload: Record<string, unknown>) {
+	if (amenitiesTargetId.value === null) return
+	amenitiesSubmitting.value = true
+	try {
+		await updateSpaceAmenities(amenitiesTargetId.value, payload as unknown as SpaceAmenitiesPayload)
+		message.success(t("spaces.manageAmenities.success"))
+		await refetch()
+	} catch (caught) {
+		if (!(caught instanceof ApiError)) throw caught
+		// Same reasoning as submitStatusChange: a 422's field errors are handled
+		// inline by ResourceFormDrawer, not toasted here too.
+		if (caught.status === 422) throw caught
+		message.error(caught.data?.message ?? t("resourceCrud.mutations.genericError"))
+		throw caught
+	} finally {
+		amenitiesSubmitting.value = false
+	}
+}
+
+function renderExtraActions(row: Space) {
+	const statusLabel = t("spaces.changeStatus.button")
+	const amenitiesLabel = t("spaces.manageAmenities.button")
+	return [
+		h(
+			NButton,
+			{ text: true, type: "primary", "aria-label": statusLabel, title: statusLabel, onClick: () => openStatusDrawer(row) },
+			{ icon: () => h(Icon, { name: "carbon:status-change", size: 18 }) }
+		),
+		h(
+			NButton,
+			{ text: true, type: "primary", "aria-label": amenitiesLabel, title: amenitiesLabel, onClick: () => openAmenitiesDrawer(row) },
+			{ icon: () => h(Icon, { name: "fluent:task-list-ltr-24-regular", size: 18 }) }
+		)
+	]
 }
 </script>

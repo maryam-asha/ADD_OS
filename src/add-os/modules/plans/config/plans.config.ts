@@ -84,6 +84,85 @@ export function buildPlanColumns(t: ComposerTranslation, locale: SupportedLocale
 				)
 			}
 		},
+		{
+			title: t("packages.columns.discounts"),
+			key: "discounts",
+			render: row => {
+				const discounts = row.discounts ?? []
+				if (discounts.length === 0) {
+					return h(
+						NTag,
+						{ type: "default", round: true, bordered: false, size: "small" },
+						{ default: () => `0 ${t("packages.columns.discounts")}` }
+					)
+				}
+				// Unique percentages, not a row count — an admin scanning the
+				// table wants "30%", not "2 discounts" they then have to open
+				// the drawer to decode.
+				const percentages = [...new Set(discounts.map(d => d.percentage))].sort((a, b) => a - b)
+				return h(
+					NTag,
+					{ type: "warning", round: true, bordered: false, size: "small" },
+					{ default: () => percentages.map(p => `${p}%`).join(", ") }
+				)
+			}
+		},
+		{
+			title: t("packages.columns.resources"),
+			key: "resource_grants",
+			render: row => {
+				const grants = row.resource_grants ?? []
+				if (grants.length === 0) {
+					return h(
+						NTag,
+						{ type: "default", round: true, bordered: false, size: "small" },
+						{ default: () => `0 ${t("packages.columns.resources")}` }
+					)
+				}
+				// Same reasoning as the discounts column: an admin scanning the
+				// table wants "100 page, 5 hour", not a bare count they then have
+				// to open the drawer to decode.
+				const summary = grants
+					.map(g => `${formatNumber(g.quantity)} ${g.resource_type ? pickLocalized(g.resource_type.unit_label, locale) : ""}`.trim())
+					.join(", ")
+				return h(
+					NTag,
+					{ type: "info", round: true, bordered: false, size: "small" },
+					{ default: () => summary }
+				)
+			}
+		},
+		{
+			title: t("packages.columns.accessWindow"),
+			key: "access_window_start",
+			render: row =>
+				row.access_window_start && row.access_window_end
+					? h(
+							NTag,
+							{ type: "info", round: true, bordered: false, size: "small" },
+							// Wall-clock strings straight from the server, never
+							// reformatted: they are not instants, so a locale-aware
+							// time formatter would be the wrong tool and a timezone
+							// conversion would be actively wrong.
+							{ default: () => `${row.access_window_start} – ${row.access_window_end}` }
+						)
+					: h("span", { class: "text-xs text-secondary" }, `— ${t("packages.anyTime")} —`)
+		},
+		{
+			title: t("packages.columns.visibility"),
+			key: "is_public",
+			render: row =>
+				h(
+					NTag,
+					{ type: row.is_public ? "default" : "warning", round: true, bordered: true, size: "small" },
+					{
+						default: () => [
+							h(Icon, { name: row.is_public ? "carbon:view" : "carbon:view-off", size: 14 }),
+							` ${t(row.is_public ? "packages.visibility.public" : "packages.visibility.private")}`
+						]
+					}
+				)
+		},
 		{ title: t("packages.columns.duration"), key: "duration_days", render: row => formatNumber(row.duration_days) },
 		{
 			title: t("packages.columns.isActive"),
@@ -112,10 +191,14 @@ export function emptyPlanPayload(): PlanPayload {
 		price_points: 0,
 		duration_days: 30,
 		included_hours: 0,
-		overage_rate_points: 0,
+		access_window_start: null,
+		access_window_end: null,
 		is_active: true,
+		is_public: true,
 		order: 1,
 		balances: [],
-		features: []
+		features: [],
+		discounts: [],
+		resource_grants: []
 	}
 }

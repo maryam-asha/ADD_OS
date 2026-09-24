@@ -1,6 +1,7 @@
 import type { MessageResponse } from "./resource-factory"
 import type { Currency, CurrencyCreatePayload, CurrencyUpdatePayload } from "@/add-os/modules/payments/types/currency"
 import { get, patch, post } from "./api"
+import { rowsOf } from "./pagination"
 
 /**
  * Hand-rolled rather than `createResourceApi`: `CurrencyController` is
@@ -19,7 +20,7 @@ const BASE = "/api/v1/admin/currencies"
 
 export async function listCurrencies(): Promise<Currency[]> {
 	const res = await get<{ data: Currency[] }>(BASE)
-	return res.data
+	return rowsOf<Currency>(res.data)
 }
 
 export async function createCurrency(payload: CurrencyCreatePayload): Promise<Currency> {

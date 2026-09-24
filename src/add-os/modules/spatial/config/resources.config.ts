@@ -6,6 +6,7 @@ import type { Branch } from "@/add-os/modules/spatial/types/branch"
 import type { SpaceResource, SpaceResourcePayload } from "@/add-os/modules/spatial/types/resource"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import { buildOperationalStatusOptions, renderOperationalStatusTag } from "@/add-os/modules/spatial/types/operational-status"
+import { RESOURCE_CATEGORIES } from "@/add-os/modules/spatial/types/resource"
 import { listBuildings } from "@/add-os/services/buildings"
 import { listFloors } from "@/add-os/services/floors"
 import { listSpaces } from "@/add-os/services/spaces"
@@ -14,9 +15,9 @@ import { formatNumber } from "@/add-os/utils/format"
 
 export function buildResourceColumns(t: ComposerTranslation): DataTableColumns<SpaceResource> {
 	return [
-		{ title: t("resources.columns.space"), key: "space_id", render: row => `#${row.space_id}` },
+		{ title: t("resources.columns.space"), key: "space_id", render: row => (row.space_id === null ? t("resources.columns.general") : `#${row.space_id}`) },
 		{ title: t("resources.columns.name"), key: "name" },
-		{ title: t("resources.columns.category"), key: "category" },
+		{ title: t("resources.columns.category"), key: "category", render: row => t(`resources.category.${row.category}`) },
 		{ title: t("resources.columns.quantity"), key: "quantity", render: row => formatNumber(row.quantity) },
 		{ title: t("resources.columns.status"), key: "status", render: row => renderOperationalStatusTag(row.status, t) }
 	]
@@ -46,19 +47,17 @@ interface ResourceFormModel extends SpaceResourcePayload {
 
 export function buildResourceFields(t: ComposerTranslation, branches: Branch[], locale: SupportedLocale): FieldDescriptor<ResourceFormModel>[] {
 	const branchOptions: SelectOption[] = branches.map(branch => ({ label: pickLocalized(branch.name, locale), value: branch.id }))
+	const categoryOptions: SelectOption[] = RESOURCE_CATEGORIES.map(category => ({ label: t(`resources.category.${category}`), value: category }))
 
 	return [
 		/**
 		 * No `required: true` on either virtual ancestor field: both `branch_id`
 		 * and `building_id` are `virtual: true` and stripped before submit.
-		 * `space_id`'s own `optionsFrom` (`if (!building_id) return []`) already
-		 * structurally forces the user through `building_id` (which itself
-		 * requires `branch_id` to have options) before `space_id` can have any
-		 * valid options — so `space_id`'s own `required: true` is what actually
-		 * guarantees data quality. Making the virtual ancestor fields required
-		 * too would block Edit whenever an ancestor is deliberately left unset
-		 * (see `openEdit` below) — the same problem Tasks 11/12 already fixed
-		 * for their own virtual ancestor field(s).
+		 * Making them required would block Edit whenever an ancestor is
+		 * deliberately left unset (see `openEdit` below) — the same problem
+		 * Tasks 11/12 already fixed for their own virtual ancestor field(s) —
+		 * and would also block leaving `space_id` itself unset for a general
+		 * resource, which has no ancestor chain to walk at all.
 		 */
 		{ key: "branch_id", labelKey: "resources.form.branch", type: "select", options: branchOptions, virtual: true },
 		{
@@ -90,7 +89,6 @@ export function buildResourceFields(t: ComposerTranslation, branches: Branch[], 
 			key: "space_id",
 			labelKey: "resources.form.space",
 			type: "select",
-			required: true,
 			dependsOn: ["building_id", "zone_id"],
 			optionsFrom: async ({ building_id, zone_id }) => {
 				if (!building_id) return []
@@ -99,13 +97,13 @@ export function buildResourceFields(t: ComposerTranslation, branches: Branch[], 
 			}
 		},
 		{ key: "name", labelKey: "resources.form.name", type: "text", required: true },
-		{ key: "category", labelKey: "resources.form.category", type: "text", required: true },
+		{ key: "category", labelKey: "resources.form.category", type: "select", required: true, options: categoryOptions },
 		{ key: "quantity", labelKey: "resources.form.quantity", type: "number", required: true }
 	]
 }
 
 export function emptyResourcePayload(): ResourceFormModel {
-	return { branch_id: null, building_id: null, zone_id: null, space_id: null, name: "", category: "", quantity: 1 }
+	return { branch_id: null, building_id: null, zone_id: null, space_id: null, name: "", category: "other", quantity: 1 }
 }
 
 export function buildResourceStatusFields(t: ComposerTranslation): FieldDescriptor<{ status: string; status_reason: string }>[] {

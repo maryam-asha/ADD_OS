@@ -79,6 +79,38 @@
 						{{ featuresList.length }}
 					</span>
 				</button>
+
+				<button
+					type="button"
+					@click="activeTab = 'discounts'"
+					:class="[
+						'pb-2.5 px-1 text-xs md:text-sm font-semibold transition-all cursor-pointer border-b-2 flex items-center gap-1.5',
+						activeTab === 'discounts'
+							? 'border-[#557e46] text-[#557e46]'
+							: 'border-transparent text-neutral-500 hover:text-neutral-800'
+					]"
+				>
+					<span>{{ t('packages.tabs.discounts') }}</span>
+					<span class="px-2 py-0.5 text-[11px] rounded-full bg-[#eef7ec] text-[#47743b] font-bold leading-none">
+						{{ discountsList.length }}
+					</span>
+				</button>
+
+				<button
+					type="button"
+					@click="activeTab = 'resources'"
+					:class="[
+						'pb-2.5 px-1 text-xs md:text-sm font-semibold transition-all cursor-pointer border-b-2 flex items-center gap-1.5',
+						activeTab === 'resources'
+							? 'border-[#557e46] text-[#557e46]'
+							: 'border-transparent text-neutral-500 hover:text-neutral-800'
+					]"
+				>
+					<span>{{ t('packages.tabs.resources') }}</span>
+					<span class="px-2 py-0.5 text-[11px] rounded-full bg-[#eef7ec] text-[#47743b] font-bold leading-none">
+						{{ resourceGrantsList.length }}
+					</span>
+				</button>
 			</div>
 
 			<!-- Scrollable Content Area -->
@@ -168,13 +200,8 @@
 							</div>
 						</div>
 
-						<!-- Row 2: Overage Rate, Included Hours, Duration -->
-						<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-							<div class="flex flex-col gap-1">
-								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.overageRatePoints') }}</span>
-								<PlanStepper v-model="model.overage_rate_points" :min="0" :step="1" integer />
-								<span v-if="errors['overage_rate_points']" class="text-xs text-red-500">{{ errors['overage_rate_points'][0] }}</span>
-							</div>
+						<!-- Row 2: Included Hours, Duration -->
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 							<div class="flex flex-col gap-1">
 								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.includedHours') }} *</span>
 								<PlanStepper v-model="model.included_hours" :min="0" :step="1" />
@@ -211,6 +238,73 @@
 								<n-switch v-model:value="model.is_subscription" :rail-style="railStyle" size="small" />
 							</div>
 						</div>
+
+						<div class="flex items-start justify-between gap-3 p-2 px-3 bg-neutral-50 rounded-lg border border-neutral-100">
+							<div class="flex flex-col gap-0.5">
+								<span class="text-xs font-semibold text-neutral-700">{{ t('packages.form.isPublic') }}</span>
+								<span class="text-[11px] text-neutral-500">
+									{{ model.is_public ? t('packages.form.isPublicHint') : t('packages.form.isPrivateHint') }}
+								</span>
+							</div>
+							<n-switch v-model:value="model.is_public" :rail-style="railStyle" size="small" class="shrink-0 mt-0.5" />
+						</div>
+					</div>
+
+					<!-- Card 4: وقت الباقة -->
+					<div class="border border-neutral-200/70 rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs">
+						<div class="flex items-center gap-2 text-xs md:text-sm font-bold text-neutral-800">
+							<div class="w-6 h-6 rounded-md bg-[#eef2fb] text-[#3f5b8f] flex items-center justify-center shrink-0">
+								<Icon name="carbon:time" :size="14" />
+							</div>
+							<span>{{ t('packages.sections.accessWindow') }}</span>
+						</div>
+
+						<div class="flex items-center justify-between gap-2 p-2 px-3 bg-neutral-50 rounded-lg border border-neutral-100">
+							<span class="text-xs font-semibold text-neutral-700">{{ t('packages.form.hasAccessWindow') }}</span>
+							<n-switch :value="hasAccessWindow" :rail-style="railStyle" size="small" @update:value="toggleAccessWindow" />
+						</div>
+
+						<template v-if="hasAccessWindow">
+							<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+								<div class="flex flex-col gap-1">
+									<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.accessWindowStart') }} *</span>
+									<n-time-picker
+										:formatted-value="toPickerTimeValue(model.access_window_start)"
+										format="HH:mm"
+										value-format="HH:mm"
+										class="w-full"
+										size="small"
+										@update:formatted-value="(value: string | null) => (model.access_window_start = value)"
+									/>
+									<span v-if="errors['access_window_start']" class="text-xs text-red-500">{{ errors['access_window_start'][0] }}</span>
+								</div>
+								<div class="flex flex-col gap-1">
+									<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.accessWindowEnd') }} *</span>
+									<n-time-picker
+										:formatted-value="toPickerTimeValue(model.access_window_end)"
+										format="HH:mm"
+										value-format="HH:mm"
+										class="w-full"
+										size="small"
+										@update:formatted-value="(value: string | null) => (model.access_window_end = value)"
+									/>
+									<span v-if="errors['access_window_end']" class="text-xs text-red-500">{{ errors['access_window_end'][0] }}</span>
+								</div>
+							</div>
+
+							<!--
+								An end at or before the start is legal, not an error: the
+								window wraps past midnight, which is exactly the evening
+								package this field exists for. So this explains the
+								consequence instead of warning about a mistake.
+							-->
+							<div v-if="accessWindowWraps" class="flex items-start gap-2 p-2 px-3 bg-[#eef2fb] rounded-lg border border-[#d9e2f4] text-[11px] text-[#3f5b8f]">
+								<Icon name="carbon:information" :size="14" class="shrink-0 mt-px" />
+								<span>{{ t('packages.form.accessWindowWraps') }}</span>
+							</div>
+
+							<span class="text-[11px] text-neutral-500">{{ t('packages.form.accessWindowHint') }}</span>
+						</template>
 					</div>
 				</div>
 
@@ -464,6 +558,198 @@
 						</div>
 					</div>
 				</div>
+				<!-- TAB 4: الحسومات -->
+				<div v-show="activeTab === 'discounts'" class="flex flex-col gap-3">
+					<!-- Top Action Bar -->
+					<div class="flex items-center justify-between">
+						<span class="text-xs font-semibold text-neutral-500">{{ t('packages.discounts.description') }}</span>
+						<button
+							type="button"
+							@click="addDiscount"
+							class="h-8 px-3 text-xs font-semibold rounded-lg bg-[#f0f7ee] hover:bg-[#e4f1e1] text-[#4d783f] border border-[#d6e8d2] flex items-center gap-1.5 transition-colors cursor-pointer"
+						>
+							<Icon name="carbon:add" :size="14" />
+							<span>{{ t('packages.discounts.add') }}</span>
+						</button>
+					</div>
+
+					<!-- Empty state -->
+					<div v-if="discountsList.length === 0" class="py-10 text-center text-neutral-400 bg-white rounded-xl border border-dashed border-neutral-200 text-xs">
+						{{ t('packages.discounts.empty') }}
+					</div>
+
+					<!-- Discounts list -->
+					<div
+						v-for="(discount, idx) in discountsList"
+						:key="idx"
+						class="border border-neutral-200/80 rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs relative"
+					>
+						<!-- Card Header -->
+						<div class="flex items-center justify-between">
+							<div class="flex items-center gap-2">
+								<div class="w-7 h-7 rounded-lg flex items-center justify-center border text-xs shrink-0 bg-[#fdf3e9] text-[#c26d25] border-[#f5dfcb]">
+									<Icon name="carbon:percentage" :size="15" />
+								</div>
+								<span class="font-bold text-xs md:text-sm text-neutral-800">{{ getDiscountTargetLabel(discount) }}</span>
+							</div>
+
+							<button
+								type="button"
+								@click="removeDiscount(idx)"
+								class="w-7 h-7 rounded-lg bg-[#fef1f1] hover:bg-[#fde2e2] text-[#e04545] border border-[#fbd4d4] flex items-center justify-center transition-colors cursor-pointer"
+								title="Remove"
+							>
+								<Icon name="carbon:trash-can" :size="14" />
+							</button>
+						</div>
+
+						<!-- Row 1: Percentage, Target (and space/space-type if targeted) -->
+						<div :class="['grid gap-3', (discount.targetMode ?? 'all') === 'all' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 md:grid-cols-3']">
+							<div class="flex flex-col gap-1">
+								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.discounts.percentage') }}</span>
+								<PlanStepper v-model="discount.percentage" :min="1" :max="100" integer />
+							</div>
+
+							<div class="flex flex-col gap-1">
+								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.discounts.target.label') }}</span>
+								<n-select :value="discount.targetMode ?? 'all'" :options="targetModeOptions" size="small" @update:value="(mode: 'all' | 'space' | 'space_type') => setDiscountTarget(discount, mode)" />
+							</div>
+
+							<div v-if="discount.targetMode === 'space'" class="flex flex-col gap-1">
+								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.discounts.selectSpace') }}</span>
+								<n-select v-model:value="discount.space_id" :options="spaceOptions" :placeholder="t('packages.discounts.selectSpace')" size="small" clearable />
+							</div>
+
+							<div v-else-if="discount.targetMode === 'space_type'" class="flex flex-col gap-1">
+								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.discounts.selectSpaceType') }}</span>
+								<n-select v-model:value="discount.space_type" :options="spaceTypeOptions" :placeholder="t('packages.discounts.selectSpaceType')" size="small" clearable />
+							</div>
+						</div>
+
+						<!-- Row 2: Usage limit toggle (+ count), Active toggle -->
+						<div :class="['grid gap-3 items-center', discountUsageLimited(discount).value ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2']">
+							<div class="flex items-center justify-between gap-2 p-2 px-3 bg-neutral-50 rounded-lg border border-neutral-100">
+								<span class="text-xs font-semibold text-neutral-700">{{ t('packages.discounts.limitUsage') }}</span>
+								<n-switch v-model:value="discountUsageLimited(discount).value" :rail-style="railStyle" size="small" />
+							</div>
+
+							<div v-if="discountUsageLimited(discount).value" class="flex flex-col gap-1">
+								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.discounts.usageLimit') }}</span>
+								<PlanStepper v-model="discountUsageValue(discount).value" :min="1" :step="1" integer />
+							</div>
+
+							<div class="flex items-center justify-between gap-2 p-2 px-3 bg-neutral-50 rounded-lg border border-neutral-100">
+								<span class="text-xs font-semibold text-neutral-700">{{ t('packages.discounts.isActive') }}</span>
+								<n-switch v-model:value="discount.is_active" :rail-style="railStyle" size="small" />
+							</div>
+						</div>
+
+						<!-- Row 3: Description Arabic and English -->
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+							<div class="flex flex-col gap-1">
+								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.discounts.descriptionField') }} (عربي)</span>
+								<input
+									v-model="discountDesc(discount).ar"
+									class="w-full h-9 text-xs md:text-sm border border-neutral-200 rounded-lg px-3 bg-white focus:outline-none focus:border-[#557e46] transition-colors"
+									:placeholder="t('resourceCrud.form.arabicPlaceholder')"
+								/>
+							</div>
+
+							<div class="flex flex-col gap-1">
+								<span class="text-xs font-semibold text-neutral-600">Description (English)</span>
+								<input
+									v-model="discountDesc(discount).en"
+									class="w-full h-9 text-xs md:text-sm border border-neutral-200 rounded-lg px-3 bg-white focus:outline-none focus:border-[#557e46] transition-colors"
+									:placeholder="t('resourceCrud.form.englishPlaceholder')"
+								/>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- TAB 5: الموارد -->
+				<div v-show="activeTab === 'resources'" class="flex flex-col gap-3">
+					<!-- Top Action Bar -->
+					<div class="flex items-center justify-between">
+						<span class="text-xs font-semibold text-neutral-500">{{ t('packages.resources.description') }}</span>
+						<button
+							type="button"
+							@click="addResourceGrant"
+							:disabled="resourceTypeOptions.length === 0"
+							class="h-8 px-3 text-xs font-semibold rounded-lg bg-[#f0f7ee] hover:bg-[#e4f1e1] text-[#4d783f] border border-[#d6e8d2] flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+						>
+							<Icon name="carbon:add" :size="14" />
+							<span>{{ t('packages.resources.add') }}</span>
+						</button>
+					</div>
+
+					<!-- Empty state -->
+					<div v-if="resourceGrantsList.length === 0" class="py-10 text-center text-neutral-400 bg-white rounded-xl border border-dashed border-neutral-200 text-xs">
+						{{ t('packages.resources.empty') }}
+					</div>
+
+					<!-- Resource grants list -->
+					<div
+						v-for="(grant, idx) in resourceGrantsList"
+						:key="idx"
+						class="border border-neutral-200/80 rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs relative"
+					>
+						<!-- Card Header -->
+						<div class="flex items-center justify-between">
+							<div class="flex items-center gap-2">
+								<div class="w-7 h-7 rounded-lg flex items-center justify-center border text-xs shrink-0 bg-[#ebf3fd] text-[#2c75d8] border-[#d4e4f9]">
+									<Icon name="carbon:box" :size="15" />
+								</div>
+								<span class="font-bold text-xs md:text-sm text-neutral-800">{{ getResourceTypeLabel(grant) }}</span>
+							</div>
+
+							<button
+								type="button"
+								@click="removeResourceGrant(idx)"
+								class="w-7 h-7 rounded-lg bg-[#fef1f1] hover:bg-[#fde2e2] text-[#e04545] border border-[#fbd4d4] flex items-center justify-center transition-colors cursor-pointer"
+								title="Remove"
+							>
+								<Icon name="carbon:trash-can" :size="14" />
+							</button>
+						</div>
+
+						<!-- Row 1: Resource type, Quantity -->
+						<div class="grid gap-3 grid-cols-1 md:grid-cols-2">
+							<div class="flex flex-col gap-1">
+								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.resources.resourceType') }}</span>
+								<n-select v-model:value="grant.resource_type_id" :options="resourceTypeOptions" size="small" />
+							</div>
+
+							<div class="flex flex-col gap-1">
+								<span class="text-xs font-semibold text-neutral-600">
+									{{ t('packages.resources.quantity') }}
+									<template v-if="resourceTypeUnitLabel(grant)"> ({{ resourceTypeUnitLabel(grant) }})</template>
+								</span>
+								<PlanStepper v-model="grant.quantity" :min="0.01" :step="1" />
+							</div>
+						</div>
+
+						<!-- Row 2: Description Arabic and English -->
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+							<div class="flex flex-col gap-1">
+								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.resources.descriptionField') }} (عربي)</span>
+								<input
+									v-model="resourceGrantDesc(grant).ar"
+									class="w-full h-9 text-xs md:text-sm border border-neutral-200 rounded-lg px-3 bg-white focus:outline-none focus:border-[#557e46] transition-colors"
+									:placeholder="t('resourceCrud.form.arabicPlaceholder')"
+								/>
+							</div>
+
+							<div class="flex flex-col gap-1">
+								<span class="text-xs font-semibold text-neutral-600">Description (English)</span>
+								<input
+									v-model="resourceGrantDesc(grant).en"
+									class="w-full h-9 text-xs md:text-sm border border-neutral-200 rounded-lg px-3 bg-white focus:outline-none focus:border-[#557e46] transition-colors"
+									:placeholder="t('resourceCrud.form.englishPlaceholder')"
+								/>
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
 
 			<!-- Fixed Footer -->
@@ -492,16 +778,19 @@
 
 <script setup lang="ts">
 import type { SelectOption } from "naive-ui"
-import type { PlanBalanceItem, PlanFeatureItem, PlanPayload } from "@/add-os/modules/plans/types/plan"
-import { NModal, NSelect, NSwitch, useMessage } from "naive-ui"
+import type { PlanBalanceItem, PlanDiscountItem, PlanFeatureItem, PlanPayload, PlanResourceGrantItem } from "@/add-os/modules/plans/types/plan"
+import type { SpaceType } from "@/add-os/modules/spatial/types/space"
+import { NModal, NSelect, NSwitch, NTimePicker, useMessage } from "naive-ui"
 import { computed, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import { usePoints } from "@/add-os/modules/payments/composables/usePoints"
 import PlanStepper from "@/add-os/modules/plans/components/PlanStepper.vue"
+import { SPACE_TYPES } from "@/add-os/modules/spatial/types/space"
 import { ApiError } from "@/add-os/services/api"
 import { listPlanModules } from "@/add-os/services/plan-modules"
+import { listResourceTypes } from "@/add-os/services/resource-types"
 import { listSpaces } from "@/add-os/services/spaces"
 import Icon from "@/components/common/Icon.vue"
 
@@ -529,11 +818,14 @@ const model = defineModel<PlanPayload>("model", { required: true })
 const { t } = useI18n()
 const message = useMessage()
 
-const activeTab = ref<"basic" | "balances" | "features">("basic")
+const activeTab = ref<"basic" | "balances" | "features" | "discounts" | "resources">("basic")
 const errors = ref<Record<string, string[]>>({})
 const moduleOptions = ref<SelectOption[]>([])
 const spaceOptions = ref<SelectOption[]>([])
+const resourceTypeOptions = ref<SelectOption[]>([])
 const rawModules = ref<{ id: number; name: { ar: string; en: string } }[]>([])
+const rawSpaces = ref<{ id: number; space_type: SpaceType }[]>([])
+const rawResourceTypes = ref<{ id: number; name: { ar: string; en: string }; unit_label: { ar: string; en: string } }[]>([])
 
 const { formatPoints } = usePoints()
 
@@ -546,6 +838,64 @@ const serverPriceUsdHint = computed(() => (props.priceUsd ? `$${props.priceUsd}`
 
 const railStyle = ({ checked }: { checked: boolean }) => ({
 	background: checked ? "#557e46" : "#d1d5db"
+})
+
+/** `H:i`, 24-hour. Shape only — see `toPickerTimeValue` for why that matters. */
+const TIME_DISPLAY_PATTERN = /^(?:[01]\d|2[0-3]):[0-5]\d$/
+
+/**
+ * NTimePicker strictly parses `formatted-value` through date-fns and only
+ * special-cases `null` as "no value" — every other string, including a plain
+ * empty one, is parsed and then formatted, and formatting an Invalid Date
+ * throws synchronously during setup. The same crash-avoidance shape check
+ * `ResourceFormDrawer` already carries, for the same reason.
+ *
+ * This is not the field's business rule: a value that fails here is handed to
+ * the picker as `null` (renders empty) while the model keeps it, and the
+ * backend's own `date_format:H:i` stays the real validator.
+ */
+function toPickerTimeValue(value: unknown): string | null {
+	return typeof value === "string" && TIME_DISPLAY_PATTERN.test(value) ? value : null
+}
+
+/** Both bounds set — the pair the backend validates with `required_with`. */
+const hasAccessWindow = computed(() => Boolean(model.value.access_window_start && model.value.access_window_end))
+
+/**
+ * Turning the window off clears BOTH bounds rather than hiding a half-filled
+ * pair: the backend requires each with the other, so a lingering single value
+ * would be a 422 the operator cannot see the cause of.
+ *
+ * Turning it on seeds the evening package this feature was built for, so the
+ * common case is one switch rather than two pickers.
+ */
+function toggleAccessWindow(enabled: boolean) {
+	if (enabled) {
+		model.value.access_window_start = "20:00"
+		model.value.access_window_end = "00:00"
+	} else {
+		model.value.access_window_start = null
+		model.value.access_window_end = null
+	}
+}
+
+/**
+ * True when the window runs past midnight — `"20:00"`-`"00:00"` or
+ * `"22:00"`-`"02:00"`. Legal and intended, so this drives an explanation, not
+ * a validation error. Mirrors the backend's own minute comparison rather than
+ * comparing the strings lexically, which is exactly what breaks on midnight.
+ */
+const accessWindowWraps = computed(() => {
+	const start = toPickerTimeValue(model.value.access_window_start)
+	const end = toPickerTimeValue(model.value.access_window_end)
+	if (!start || !end) return false
+
+	const toMinutes = (value: string) => {
+		const [hours, minutes] = value.split(":").map(Number)
+		return hours * 60 + minutes
+	}
+
+	return toMinutes(end) <= toMinutes(start)
 })
 
 const isCreateMode = computed(() => !Boolean((model.value as { id?: number }).id || model.value.name?.ar?.trim()))
@@ -575,6 +925,16 @@ const categoryOptions = computed<SelectOption[]>(() => [
 	{ label: t("packages.balances.categories.general"), value: "general" },
 	{ label: t("packages.balances.categories.space_specific"), value: "space_specific" }
 ])
+
+const targetModeOptions = computed<SelectOption[]>(() => [
+	{ label: t("packages.discounts.target.all"), value: "all" },
+	{ label: t("packages.discounts.target.space"), value: "space" },
+	{ label: t("packages.discounts.target.spaceType"), value: "space_type" }
+])
+
+const spaceTypeOptions = computed<SelectOption[]>(() =>
+	SPACE_TYPES.map(type => ({ label: t(`spaces.spaceType.${type}`), value: type }))
+)
 
 const subtitleAr = computed({
 	get: () => model.value.subtitle?.ar ?? "",
@@ -609,6 +969,26 @@ const featuresList = computed<PlanFeatureItem[]>({
 	},
 	set: val => {
 		model.value.features = val
+	}
+})
+
+const discountsList = computed<PlanDiscountItem[]>({
+	get: () => {
+		if (!model.value.discounts) model.value.discounts = []
+		return model.value.discounts
+	},
+	set: val => {
+		model.value.discounts = val
+	}
+})
+
+const resourceGrantsList = computed<PlanResourceGrantItem[]>({
+	get: () => {
+		if (!model.value.resource_grants) model.value.resource_grants = []
+		return model.value.resource_grants
+	},
+	set: val => {
+		model.value.resource_grants = val
 	}
 })
 
@@ -672,6 +1052,114 @@ function addBalance() {
 
 function removeBalance(index: number) {
 	model.value.balances?.splice(index, 1)
+}
+
+function discountDesc(d: PlanDiscountItem) {
+	if (!d.description) d.description = { ar: "", en: "" }
+	return d.description
+}
+
+/**
+ * Switches target mode and keeps `space_id`/`space_type` mutually exclusive,
+ * mirroring the guard `PlanDiscount::booted()` enforces server-side. Can't
+ * be inferred purely from those two fields being null (see `targetMode`'s
+ * doc comment on `PlanDiscountItem`), so `d.targetMode` is the source of
+ * truth the template reads for which picker to show.
+ */
+function setDiscountTarget(d: PlanDiscountItem, mode: "all" | "space" | "space_type") {
+	d.targetMode = mode
+	if (mode !== "space") d.space_id = null
+	if (mode !== "space_type") d.space_type = null
+}
+
+/** `usage_limit: null` means unlimited; the switch just toggles that sentinel. */
+function discountUsageLimited(d: PlanDiscountItem) {
+	return {
+		get value(): boolean {
+			return d.usage_limit != null
+		},
+		set value(limited: boolean) {
+			d.usage_limit = limited ? (d.usage_limit ?? 1) : null
+		}
+	}
+}
+
+/**
+ * PlanStepper's `modelValue` is `number | undefined`, not `number | null` —
+ * this only renders while `discountUsageLimited` is true, where `usage_limit`
+ * is never actually null, but that fact isn't visible to the type checker
+ * from a sibling `v-if`, so the stepper binds through this instead of the
+ * field directly.
+ */
+function discountUsageValue(d: PlanDiscountItem) {
+	return {
+		get value(): number {
+			return d.usage_limit ?? 1
+		},
+		set value(val: number) {
+			d.usage_limit = val
+		}
+	}
+}
+
+function addDiscount() {
+	if (!model.value.discounts) model.value.discounts = []
+	model.value.discounts.push({
+		percentage: 10,
+		space_id: null,
+		space_type: null,
+		usage_limit: null,
+		description: { ar: "", en: "" },
+		is_active: true,
+		order: model.value.discounts.length + 1,
+		targetMode: "all"
+	})
+}
+
+function removeDiscount(index: number) {
+	model.value.discounts?.splice(index, 1)
+}
+
+function getDiscountTargetLabel(d: PlanDiscountItem): string {
+	if (d.space_id != null) {
+		const space = rawSpaces.value.find(s => s.id === d.space_id)
+		return space ? `#${space.id} - ${t(`spaces.spaceType.${space.space_type}`)}` : `#${d.space_id}`
+	}
+	if (d.space_type) {
+		return t(`spaces.spaceType.${d.space_type}`)
+	}
+	return t("packages.discounts.target.all")
+}
+
+function resourceGrantDesc(g: PlanResourceGrantItem) {
+	if (!g.description) g.description = { ar: "", en: "" }
+	return g.description
+}
+
+function addResourceGrant() {
+	if (!model.value.resource_grants) model.value.resource_grants = []
+	const firstType = rawResourceTypes.value[0]
+	if (!firstType) return
+	model.value.resource_grants.push({
+		resource_type_id: firstType.id,
+		quantity: 1,
+		description: { ar: "", en: "" },
+		order: model.value.resource_grants.length + 1
+	})
+}
+
+function removeResourceGrant(index: number) {
+	model.value.resource_grants?.splice(index, 1)
+}
+
+function getResourceTypeLabel(g: PlanResourceGrantItem): string {
+	const found = rawResourceTypes.value.find(rt => rt.id === g.resource_type_id)
+	return found ? pickLocalized(found.name, currentLocale.value) : t("packages.resources.resourceType")
+}
+
+function resourceTypeUnitLabel(g: PlanResourceGrantItem): string {
+	const found = rawResourceTypes.value.find(rt => rt.id === g.resource_type_id)
+	return found ? pickLocalized(found.unit_label, currentLocale.value) : ""
 }
 
 // Inline feature form state
@@ -765,15 +1253,21 @@ function getFeatureSubtitleText(feature: PlanFeatureItem): string {
 
 async function loadOptions() {
 	try {
-		const [modules, spaces] = await Promise.all([listPlanModules(), listSpaces()])
+		const [modules, spaces, resourceTypes] = await Promise.all([listPlanModules(), listSpaces(), listResourceTypes()])
 		rawModules.value = modules
 		moduleOptions.value = modules.map(m => ({
 			label: pickLocalized(m.name, currentLocale.value),
 			value: m.id
 		}))
+		rawSpaces.value = spaces.map(s => ({ id: s.id, space_type: s.space_type }))
 		spaceOptions.value = spaces.map(s => ({
 			label: `#${s.id} - ${t(`spaces.spaceType.${s.space_type}`)}`,
 			value: s.id
+		}))
+		rawResourceTypes.value = resourceTypes.map(rt => ({ id: rt.id, name: rt.name, unit_label: rt.unit_label }))
+		resourceTypeOptions.value = resourceTypes.map(rt => ({
+			label: `${pickLocalized(rt.name, currentLocale.value)} (${pickLocalized(rt.unit_label, currentLocale.value)})`,
+			value: rt.id
 		}))
 	} catch {
 		// Non-blocking
@@ -827,6 +1321,26 @@ async function handleSubmit() {
 			icon: f.icon?.trim() || null,
 			is_included: Boolean(f.is_included),
 			order: f.order ?? 0
+		})),
+		discounts: (model.value.discounts ?? []).map(d => ({
+			// The backend validates `integer` between 1 and 100, same reasoning
+			// as amount_points above.
+			percentage: Number(d.percentage),
+			space_id: d.space_id ?? null,
+			space_type: d.space_type ?? null,
+			usage_limit: d.usage_limit ?? null,
+			description: d.description?.ar || d.description?.en ? d.description : null,
+			is_active: Boolean(d.is_active),
+			order: d.order ?? 0
+		})),
+		resource_grants: (model.value.resource_grants ?? []).map(g => ({
+			resource_type_id: g.resource_type_id,
+			// The backend validates `numeric` (not `integer`) here — a fractional
+			// quantity like 5.5 hours is legitimate, unlike amount_points/percentage
+			// above.
+			quantity: Number(g.quantity),
+			description: g.description?.ar || g.description?.en ? g.description : null,
+			order: g.order ?? 0
 		}))
 	}
 

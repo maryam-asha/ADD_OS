@@ -7,7 +7,7 @@ import type { EventCategory } from "@/add-os/modules/events/types/event-category
 import { NImage, NTag } from "naive-ui"
 import { h } from "vue"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
-import { formatDateTime, formatNumber, toOffsetIso } from "@/add-os/utils/format"
+import { formatDate, formatDateTime, formatNumber, toOffsetIso } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
 const STATUS_TAG_TYPE: Record<EventStatus, "default" | "success" | "error"> = {
@@ -55,9 +55,26 @@ export function buildEventColumns(t: ComposerTranslation, locale: SupportedLocal
 		{
 			title: t("events.columns.startAt"),
 			key: "start_at",
-			// The API sends a true instant; slicing the raw string would show
-			// UTC. formatDateTime renders it in the reader's own clock.
-			render: row => (row.start_at ? formatDateTime(row.start_at, { locale }) : "—")
+			// The admin API sends true instants with an offset.
+			// formatDateTime reads the browser clock — staff on-site see the
+			// right wall-clock time automatically.
+			render(row) {
+				if (!row.start_at) return h("span", {}, "—")
+
+				const start = formatDateTime(row.start_at, { locale })
+
+				// Same calendar day → show start only (avoids "10 Sep, start → 10 Sep, end")
+				const sameDay
+					= row.end_at
+					&& formatDate(row.start_at, { locale, style: "iso" }) === formatDate(row.end_at, { locale, style: "iso" })
+
+				if (sameDay || !row.end_at) {
+					return h("span", { class: "tabular-nums whitespace-nowrap" }, start)
+				}
+
+				const end = formatDate(row.end_at, { locale, style: "dateTime" })
+				return h("span", { class: "tabular-nums whitespace-nowrap" }, `${start} → ${end}`)
+			}
 		},
 		{
 			title: t("events.columns.location"),

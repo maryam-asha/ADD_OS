@@ -3,6 +3,32 @@ import type { Bilingual } from "@/add-os/components/resource/field-types"
 
 export type EventStatus = "draft" | "published" | "cancelled"
 
+// ── Member-facing structured date/time objects ──────────────────────────────
+
+/**
+ * Structured date object returned by the member API.
+ * For single-day events only `month/day/weekday/formatted` are present.
+ * Multi-day events add the `end_*` counterparts.
+ */
+export interface EventDateObject {
+	month: string       // "SEP"
+	day: string         // "10"
+	weekday: string     // "THU"
+	formatted: string   // "September 10, 2026"
+	end_month?: string
+	end_day?: string
+	end_weekday?: string
+	end_formatted?: string
+}
+
+export interface EventTimeObject {
+	start: string   // "04:00 AM"
+	end: string     // "05:30 AM"
+	range: string   // "04:00 AM – 05:30 AM"
+}
+
+// ── Admin session (ISO instants) / Member session (structured) ───────────────
+
 /**
  * One sitting of an event: a day, a track, a session.
  *
@@ -17,6 +43,18 @@ export interface EventSession {
 	end_at: string
 	sessions?: EventSession[]
 	title?: Bilingual | null
+}
+
+/** Session shape returned to member-facing clients (structured date + time). */
+export interface MemberEventSession {
+	id?: number
+	title?: string | null
+	start_at: string   // "Y-m-d" local calendar day
+	end_at: string
+	start_time: string // "H:i" 24-h
+	end_time: string
+	date: EventDateObject
+	time: EventTimeObject
 }
 
 /** A session as the editor holds it: epoch ms, which n-date-picker binds. */
@@ -64,6 +102,11 @@ export interface Event {
 	status: EventStatus
 	order: number
 	created_at: string
+	/** Loaded sessions — only present when the API includes them (e.g. getById). */
+	sessions?: EventSession[]
+	is_same_time?: boolean
+	is_continuous?: boolean
+	schedule?: Array<{ date: string; start_time: string; end_time: string }>
 }
 
 export interface EventPayload extends Record<string, unknown> {
@@ -71,8 +114,8 @@ export interface EventPayload extends Record<string, unknown> {
 	category_id?: number | null
 	title: Bilingual
 	description?: Bilingual
-	start_at: string
-	end_at: string
+	start_at?: string
+	end_at?: string
 	sessions?: EventSession[]
 	location?: string
 	capacity?: number | null

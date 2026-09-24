@@ -12,6 +12,12 @@
 						{{ t("packages.modules.title") }}
 					</n-button>
 				</router-link>
+				<router-link to="/plans/resource-types">
+					<n-button secondary>
+						<template #icon><Icon name="carbon:box" :size="16" /></template>
+						{{ t("packages.resourceTypes.title") }}
+					</n-button>
+				</router-link>
 				<n-button type="primary" @click="openCreate">
 					<template #icon><Icon name="carbon:add" :size="16" /></template>
 					{{ t("packages.create.button") }}
@@ -105,13 +111,18 @@ function openEdit(row: Plan) {
 		subtitle: row.subtitle ? { ...row.subtitle } : { ar: "", en: "" },
 		is_subscription: row.is_subscription,
 		// Points in, points out: the form edits the same integer the backend
-		// stores. `overage_rate_points` is nullable on the wire ("this plan has
-		// no overage") but the input is a plain number, so `null` seeds as 0.
+		// stores.
 		price_points: row.price_points,
 		duration_days: row.duration_days,
 		included_hours: Number(row.included_hours),
-		overage_rate_points: row.overage_rate_points ?? 0,
+		// Wall-clock strings, copied across untouched — they are not instants,
+		// so there is nothing here to parse, format or convert.
+		access_window_start: row.access_window_start ?? null,
+		access_window_end: row.access_window_end ?? null,
 		is_active: row.is_active,
+		// A plan saved before this column existed reads as undefined; treat that
+		// as public, matching the backend column's own default.
+		is_public: row.is_public ?? true,
 		order: row.order,
 		balances: (row.balances ?? []).map(b => ({
 			category: b.category,
@@ -126,6 +137,23 @@ function openEdit(row: Plan) {
 			icon: f.icon ?? "",
 			is_included: f.is_included,
 			order: f.order ?? 0
+		})),
+		discounts: (row.discounts ?? []).map(d => ({
+			percentage: d.percentage,
+			space_id: d.space_id ?? null,
+			space_type: d.space_type ?? null,
+			usage_limit: d.usage_limit ?? null,
+			description: d.description ? { ...d.description } : { ar: "", en: "" },
+			is_active: d.is_active,
+			order: d.order ?? 0,
+			targetMode: d.space_id != null ? "space" : d.space_type != null ? "space_type" : "all"
+		})),
+		resource_grants: (row.resource_grants ?? []).map(g => ({
+			resource_type_id: g.resource_type_id,
+			resource_type: g.resource_type ? { ...g.resource_type } : null,
+			quantity: Number(g.quantity),
+			description: g.description ? { ...g.description } : { ar: "", en: "" },
+			order: g.order ?? 0
 		}))
 	}
 	drawerVisible.value = true

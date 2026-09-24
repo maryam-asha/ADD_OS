@@ -6,7 +6,7 @@ import { createPinia } from "pinia"
 import { createPersistedState } from "pinia-plugin-persistedstate"
 import { beforeEach, describe, expect, it } from "vitest"
 import { createI18n } from "vue-i18n"
-import { brand, component, DEFAULT_MODE, semantic } from "@/add-os/theme/tokens"
+import { brand, component, DEFAULT_MODE, PILLAR_COLORS, semantic } from "@/add-os/theme/tokens"
 import { useThemeStore } from "@/stores/theme"
 import AuthShell from "../AuthShell.vue"
 
@@ -19,7 +19,14 @@ const AA_NON_TEXT = 3
 const messages = {
 	en: {
 		auth: {
-			common: { back: "Back" }
+			common: { back: "Back" },
+			help: "Need help? Contact your IT administrator.",
+			// One key, deliberately. The eyebrow, body paragraph, pillar row and
+			// footer were built on 2026-09-22 and removed the same day — see the
+			// panel comment in AuthShell.vue. Their keys are gone from both
+			// catalogues, so a fixture carrying them would let a reintroduced
+			// element pass tests that the real catalogues would fail.
+			panel: { headline: "The unified operations workspace" }
 		}
 	}
 }
@@ -30,7 +37,12 @@ const messages = {
  * shell. The logo is a plain <img> with an imported asset URL — nothing to stub.
  */
 const stubs = {
-	Icon: { props: ["name", "size"], template: `<i class="icon-stub" :data-name="name" />` }
+	Icon: { props: ["name", "size"], template: `<i class="icon-stub" :data-name="name" />` },
+	// Renders an n-popselect against the locales store, which is a different
+	// component's contract. Stubbed so a failure here is about the shell — its
+	// presence is still asserted, because a language switch that silently stops
+	// rendering strands an English-reading admin on an Arabic-first login.
+	LocaleSwitch: { template: `<div class="locale-switch-stub" />` }
 }
 
 function mountShell(props: Record<string, unknown> = {}) {
@@ -198,6 +210,158 @@ describe("authShell", () => {
 			expect(onFill, "input-fill contrast moved — reassess the deviation").toBeCloseTo(2.6, 1)
 			expect(onCard).toBeLessThan(AA_NON_TEXT)
 			expect(onFill).toBeLessThan(AA_NON_TEXT)
+		})
+	})
+
+	/**
+	 * The 3/1 split, pinned — changed from the 2-up the 2026-08-30 design approved,
+	 * at the owner's request on 2026-09-22.
+	 *
+	 * Asserted because the proportion is the whole point of that change and nothing
+	 * else would notice it going back: the grid is Tailwind utility classes, so a
+	 * stray edit to `lg:grid-cols-*` or either span would restore a 50/50 screen
+	 * silently, and every other test here would still pass.
+	 *
+	 * The panel's `hidden lg:flex` is asserted alongside, because the split only
+	 * exists from `lg` up — below it the form is the entire screen, and a change
+	 * that dropped `hidden` would put a three-quarter charcoal panel on a phone.
+	 */
+	describe("the desktop split is 60% panel, 40% form", () => {
+		const shellOf = () => mountShell().find(".auth-shell")
+
+		it("lays out five columns at lg", () => {
+			expect(shellOf().classes()).toContain("lg:grid-cols-5")
+		})
+
+		it("gives the panel three of them", () => {
+			expect(mountShell().find("section").classes()).toContain("lg:col-span-3")
+		})
+
+		it("leaves the form the remaining two", () => {
+			expect(mountShell().find("main").classes()).toContain("lg:col-span-2")
+		})
+
+		// The split moved four times in one session — 50/50 → 75/25 → 70/30 →
+		// 60/40 — every time toward room for the form (§7b). Asserted so none of
+		// the abandoned proportions returns via a partial edit: someone changing
+		// only the panel's span would otherwise leave the columns disagreeing.
+		it("is none of the proportions it passed through", () => {
+			const shell = shellOf().classes()
+
+			expect(shell).not.toContain("lg:grid-cols-2")
+			expect(shell).not.toContain("lg:grid-cols-4")
+			expect(shell).not.toContain("lg:grid-cols-10")
+		})
+
+		it("keeps the form at its designed width, not the narrowed one", () => {
+			// `max-w-sm` was a compensation for the 25% column and was reverted with
+			// it. Its return would mean the column narrowed again without the spans
+			// saying so.
+			const card = mountShell().find("main > div:last-child").classes()
+
+			expect(card).toContain("max-w-md")
+			expect(card).not.toContain("max-w-sm")
+		})
+
+		it("keeps the panel off small screens entirely", () => {
+			const section = mountShell().find("section").classes()
+			expect(section).toContain("hidden")
+			expect(section).toContain("lg:flex")
+		})
+	})
+
+	/**
+	 * The 2026-09-22 reference redesign — see spec §7c.
+	 *
+	 * What is asserted here is the part that is load-bearing rather than
+	 * decorative: the form sits in a raised card, the language switch is present,
+	 * and — the one that matters most — NO PILLAR COLOUR reached the panel.
+	 */
+	describe("the reference redesign", () => {
+		it("puts the form in a card that lifts off a warm ground", () => {
+			// The card/ground relationship is the reference's main structural move.
+			// Both are shipping tokens, so this also fails if someone swaps either
+			// for a literal.
+			const wrapper = mountShell()
+
+			expect(wrapper.find("main").classes()).toContain("bg-surface-sunken")
+
+			const card = wrapper.find("main > div:last-child")
+			expect(card.classes()).toContain("bg-surface-raised")
+			expect(card.classes()).toContain("shadow-add-raised")
+		})
+
+		it("carries a real language switch, not a decorative one", () => {
+			// Invariant 4: a shipped control may not be a no-op. `LocaleSwitch`
+			// writes through the locales store, which derives direction.
+			expect(mountShell().find(".locale-switch-stub").exists()).toBe(true)
+		})
+
+		/**
+		 * The panel carries ONE piece of copy. Asserted as a ceiling, not a
+		 * presence check.
+		 *
+		 * The first build of this redesign put an eyebrow, a body paragraph, a
+		 * three-item pillar row and a footer in here alongside the headline. The
+		 * owner rejected it as unreadable, and the pillar row separately violated
+		 * `.claude/rules/tokens-and-color.md` — "never a bare coloured dot".
+		 *
+		 * A test that only checked the headline renders would not have caught any
+		 * of that, so this counts what is there instead.
+		 */
+		it("keeps the panel to one piece of copy", () => {
+			const panel = mountShell().find("section")
+
+			expect(panel.text()).toContain("The unified operations workspace")
+			expect(panel.findAll("p")).toHaveLength(0)
+			expect(panel.findAll("ul")).toHaveLength(0)
+		})
+
+		/**
+		 * THE assertion of this redesign.
+		 *
+		 * The reference renders each pillar dot in its own pillar colour and sets
+		 * the submit button in Aleppo Economic Orange. Neither is built: in this
+		 * dashboard orange means `danger` and nothing else, and that exclusivity
+		 * is what makes a destructive action unmistakable (tokens.ts, SERVICE
+		 * PILLARS). `tokens.spec.ts` guards the token tree; this guards the one
+		 * screen that was asked to look like the thing the guard forbids.
+		 *
+		 * Written against rendered HTML rather than against the token objects,
+		 * because that is where an inline style or arbitrary Tailwind value would
+		 * appear — and those are precisely what would bypass the token guard.
+		 */
+		it("lets no pillar colour reach the markup", () => {
+			const html = mountShell().html().toUpperCase()
+
+			for (const hex of PILLAR_COLORS) {
+				expect(html, `${hex} is a pillar colour and may not enter chrome`).not.toContain(
+					hex.toUpperCase()
+				)
+			}
+		})
+
+		/**
+		 * The watermark stays a watermark.
+		 *
+		 * Built first at 52rem wide and 25% opacity, which rendered as solid
+		 * green shapes with the body copy breaking up on top of them — the owner's
+		 * "الباترن والنصوص الكثيرة غير المفهومة". The fix was not one number but
+		 * three: smaller, far fainter, and moved off the text.
+		 *
+		 * Opacity is the one worth pinning, because it is the one a future tweak
+		 * would raise "just a little" without re-rendering the screen. Weight is
+		 * area × strength, so a large shape at 25% is far heavier than the same
+		 * number on a small one suggests.
+		 */
+		it("keeps the pattern faint enough to sit behind type", () => {
+			const layer = mountShell().find("section > div[aria-hidden='true']")
+			const classes = layer.classes().join(" ")
+
+			expect(classes).toContain("opacity-8")
+			expect(classes).not.toContain("opacity-25")
+			// Bottom-anchored, away from the headline at the block start.
+			expect(classes).toContain("bottom-0")
 		})
 	})
 
