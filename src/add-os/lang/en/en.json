@@ -1291,6 +1291,7 @@
 			"slotsError": "Couldn't load times for this space.",
 			"slotCounts": "{available} of {total} times free",
 			"endsAt": "Ends {time}",
+			"durationHours": "{hours}h",
 			"points": "points"
 		}
 	},

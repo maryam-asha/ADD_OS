@@ -1295,6 +1295,7 @@
 			"slotsError": "تعذّر تحميل أوقات هذه المساحة.",
 			"slotCounts": "{available} من {total} أوقات متاحة",
 			"endsAt": "ينتهي {time}",
+			"durationHours": "{hours} ساعة",
 			"points": "نقطة"
 		}
 	},

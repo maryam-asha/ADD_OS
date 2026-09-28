@@ -1,5 +1,5 @@
 import type { Paginated, RawPaginatedResponse } from "./pagination"
-import type { QuoteResponse, SlotsResponse } from "@/add-os/modules/booking/types/availability"
+import type { SlotsResponse } from "@/add-os/modules/booking/types/availability"
 import type {
 	AdminBooking,
 	AdminBookingFilters,
@@ -90,24 +90,23 @@ export async function getBooking(id: number): Promise<{ data: AdminBooking & Rec
  * operator stops discovering the rules one rejection at a time.
  *
  * `date` is a district-local calendar date (`YYYY-MM-DD`), not an instant.
- */
-export async function getSpaceSlots(spaceId: number, date: string): Promise<SlotsResponse> {
-	return get<SlotsResponse>(`${BASE}/spaces/${spaceId}/availability/slots`, { date })
-}
-
-/**
- * The duration ladder for a chosen start, each rung priced and flagged.
  *
- * `startAt` is district wall-clock (`YYYY-MM-DD HH:mm`) — the same convention
- * `createReceptionBooking` uses, and for the same reason: the server reads a
- * bare value as local by design, so an ISO offset would be re-interpreted
- * rather than honoured.
+ * `durationMinutes` is the booking length the operator picked. With it, each
+ * slot is a whole window of that length — its `end_time` is where the booking
+ * ends and it carries the price — and only starts that can hold the full
+ * length before closing are listed. Without it (`null`, e.g. before the
+ * space's duration options are known) the grid is plain cells; the response's
+ * `rules.duration_options_minutes` is what the duration picker offers. A length
+ * the space refuses is a 422 carrying the same sentence `POST` would return.
  *
- * An unbookable duration comes back `available: false` with its reason rather
- * than omitted; render it disabled and show the reason.
+ * This replaced the start-first `availability/quote` call: picking the time
+ * first let an operator choose a start that no length could fill.
  */
-export async function getSpaceQuote(spaceId: number, startAt: string): Promise<QuoteResponse> {
-	return get<QuoteResponse>(`${BASE}/spaces/${spaceId}/availability/quote`, { start_at: startAt })
+export async function getSpaceSlots(spaceId: number, date: string, durationMinutes: number | null = null): Promise<SlotsResponse> {
+	return get<SlotsResponse>(`${BASE}/spaces/${spaceId}/availability/slots`, {
+		date,
+		...(durationMinutes !== null ? { duration: durationMinutes } : {})
+	})
 }
 
 /** Re-exported so `AdminBookingFilters` has one import site alongside the calls. */

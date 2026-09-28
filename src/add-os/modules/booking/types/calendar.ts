@@ -135,6 +135,14 @@ export interface CalendarResource {
 	days: CalendarDay[]
 }
 
+/** One day the branch is closed all day. */
+export interface UpcomingClosure {
+	/** District-local date, `YYYY-MM-DD`. */
+	date: string
+	/** The exception's own explanation, when it was given one. */
+	reason: string | null
+}
+
 /** The branch-hours card above the grid. */
 export interface CalendarBranchHours {
 	title: string
@@ -146,6 +154,13 @@ export interface CalendarBranchHours {
 	/** e.g. "Sunday – Thursday", or a comma list when the open days are not contiguous. */
 	days_label: string | null
 	open_weekdays: string[]
+	/**
+	 * Every all-day closure (a business-hour exception with `is_closed`) from
+	 * the district's today on, in date order — not limited to the range this
+	 * response covers, so a date picker can refuse a holiday in a month the
+	 * calendar has not loaded. A day that is only shortened is not listed.
+	 */
+	upcoming_closures: UpcomingClosure[]
 	timezone: string
 	/**
 	 * e.g. "GMT+3". Derived by the server at request time rather than stored,

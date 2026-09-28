@@ -240,6 +240,77 @@ The end time sent is the chosen duration's `end_time` from the quote, never
 start-plus-minutes computed here — a duration crossing a midday closure ends
 somewhere only the server knows.
 
+## Changed 2026-09-27 — duration first, then the time
+
+**Reversal of the order above.** The form asked for a start, then quoted the
+durations for it. That let an operator pick a time no length could fill: with
+30-minute cells and a 60-minute minimum, 10:30 before an 11:00 booking — or
+19:30 before a 20:00 close — showed free, and every duration on the quote then
+came back disabled. The chip said "available" and nothing could be booked from
+it.
+
+ADD Core's booking-availability Phase 6
+(`ADDCore/docs/decisions/booking-availability-and-calendar.md`) added an
+optional `duration` to `GET .../availability/slots`. With it, each slot is the
+whole booking window for that length, priced, and only starts that can hold the
+full length before closing are listed. So the form now runs:
+
+1. **Duration** — chips from the response's `rules.duration_options_minutes`,
+   the lengths this space accepts, as the server resolved them. The shortest is
+   preselected. None are invented here.
+2. **Start** — the slots for that length. Each chip shows its start and the end
+   the server computed; a taken, buffered or too-soon one stays visible,
+   disabled, with the server's reason — the same rule as before.
+3. **Submit** — `end_at` is the chosen slot's own `end_time`, not minutes added
+   here.
+
+A length the space refuses (below the minimum, above
+`booking.max_duration_minutes`, off-granularity) is a 422 carrying the POST's
+own sentence, shown where the chips would be — not an empty grid, which would
+read as "fully booked".
+
+**What was given up:** the per-duration "why is 1.5h disabled" answer. The
+quote marked each rung available or not *for one start*; the duration chips now
+carry only the lengths the space accepts at all, and whether a length fits a
+given time shows up as that time being absent or disabled instead. For
+"which times hold 2 hours?" — the question an operator is usually asked — that
+is the better trade. The `availability/quote` call and its `QuoteResponse` /
+`DurationOption` types were removed from the dashboard, since nothing used them;
+the endpoint still exists on the server for the member app's start-first flow.
+
+Changing the space, date or duration clears the chosen time. The chosen
+duration survives a date change — it is not about any one date — and is
+replaced only when a newly chosen space does not accept it.
+
+The server's new slot states `too_soon` / `too_far_ahead` (minimum notice and
+booking horizon, both off by default) need no client handling: they arrive as
+disabled chips with their reason, like every other refusal.
+
+## Changed 2026-09-28 — past days and upcoming closures are refused up front
+
+The picker only greyed out days the calendar response showed as closed for
+every space — which covers only the range on screen, while the picker
+navigates freely. So a past day could be chosen (the server then refuses it as
+`start_in_the_past`, and every slot on it is `past`), and so could a holiday in
+next month. And on the grid, a holiday looked like any other day until it was
+clicked: the form then opened on a date the picker had already struck through.
+
+Now, driven by the new `branch_hours.upcoming_closures` (ADD Core, same
+decision doc — each all-day `business_hour_exception` from today on, not
+bounded by the range shown; a shortened day is not listed, it is open):
+
+- **The picker refuses** every day before the district's today and every
+  upcoming closure. The in-view closed-day check stays and still covers a
+  weekday with no schedule at all.
+- **The grid marks each closure**: shaded, its day number struck through, and
+  the exception's own reason written in the cell ("Labour Day"; "Closed" when
+  it was given none). Clicking it opens nothing — nor does clicking a past day.
+- **"Add booking" opens on the next bookable day**, not on today when today is
+  a holiday.
+- "Today" is the district's, from the response's `range.timezone` via `Intl`,
+  not the browser clock — a desk machine on UTC at 01:30 Damascus time must
+  not still offer yesterday.
+
 ## Verification run
 
 ```

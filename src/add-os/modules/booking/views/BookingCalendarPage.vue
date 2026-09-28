@@ -25,21 +25,25 @@
 						two unlabelled pills on screen with nothing to say what they
 						filtered.
 					-->
-					<label class="flex flex-col gap-1">
+					<!--
+						The width sits on the label, not the select: Naive injects
+						`.n-select { width: 100% }` after Tailwind, so a width class
+						on the select loses and it fills a label that has shrunk to
+						nothing in this wrapping row.
+					-->
+					<label class="add-filter-field">
 						<span class="text-xs">{{ t("bookingCalendar.filters.spaceType") }}</span>
 						<n-select
 							v-model:value="spaceType"
-							class="w-52"
 							clearable
 							:options="spaceTypeOptions"
 							:placeholder="t('bookingCalendar.filters.allSpaceTypes')"
 						/>
 					</label>
-					<label class="flex flex-col gap-1">
+					<label class="add-filter-field add-filter-field--wide">
 						<span class="text-xs">{{ t("bookingCalendar.filters.space") }}</span>
 						<n-select
 							v-model:value="spaceId"
-							class="w-56"
 							clearable
 							:options="spaceOptions"
 							:placeholder="t('bookingCalendar.filters.allSpaces')"
@@ -169,6 +173,29 @@
 				</n-form-item>
 
 				<!--
+					Duration first, then the time. The server lists only starts that
+					can hold the whole booking, so an operator never picks a time and
+					then finds no length fits before the next booking or closing.
+					The lengths are the ones this space accepts, as the server
+					resolved them — none are invented here.
+				-->
+				<n-form-item v-if="durationOptions.length > 0" :label="t('bookingCalendar.create.duration')">
+					<div class="add-slot-grid add-duration-grid">
+						<button
+							v-for="minutes in durationOptions"
+							:key="minutes"
+							type="button"
+							class="add-slot"
+							:class="{ 'add-slot--active': createForm.durationMinutes === minutes }"
+							:aria-pressed="createForm.durationMinutes === minutes"
+							@click="createForm.durationMinutes = minutes"
+						>
+							{{ durationLabel(minutes) }}
+						</button>
+					</div>
+				</n-form-item>
+
+				<!--
 					The start time is chosen from the slots the server says exist,
 					never typed. A free-form clock lets an operator enter 14:07 on
 					a space with 30-minute slots and learn it was wrong only from
@@ -200,7 +227,8 @@
 									:aria-pressed="createForm.start === slot.start_time"
 									@click="selectSlot(slot)"
 								>
-									{{ slot.label }}
+									<span>{{ slot.label }}</span>
+									<span class="add-slot__meta">{{ slot.end_time }}</span>
 								</button>
 							</div>
 
@@ -210,41 +238,12 @@
 						</n-spin>
 
 						<p v-if="slotCountsNote" class="add-slot-counts">{{ slotCountsNote }}</p>
-					</div>
-				</n-form-item>
 
-				<!--
-					Durations come from the server priced and pre-judged. An option
-					that cannot be booked is shown disabled WITH its reason rather
-					than hidden, so "why is 1.5h missing" is never a question.
-				-->
-				<n-form-item v-if="createForm.start" :label="t('bookingCalendar.create.duration')">
-					<div class="flex w-full flex-col gap-2">
-						<n-spin :show="isLoadingQuote" :size="14">
-							<div v-if="durations.length > 0" class="add-slot-grid">
-								<button
-									v-for="option in durations"
-									:key="option.minutes"
-									type="button"
-									class="add-slot"
-									:class="{
-										'add-slot--active': createForm.durationMinutes === option.minutes,
-										'add-slot--taken': !option.available
-									}"
-									:disabled="!option.available"
-									:title="option.reason ?? undefined"
-									:aria-pressed="createForm.durationMinutes === option.minutes"
-									@click="createForm.durationMinutes = option.minutes"
-								>
-									<span>{{ option.label }}</span>
-									<span class="add-slot__meta">{{ option.end_time }}</span>
-								</button>
-							</div>
-						</n-spin>
-
-						<p v-if="selectedDuration" class="add-slot-counts">
-							{{ t("bookingCalendar.create.endsAt", { time: selectedDuration.end_time }) }}
-							· {{ formatNumber(selectedDuration.points) }} {{ t("bookingCalendar.create.points") }}
+						<p v-if="selectedSlot" class="add-slot-counts">
+							{{ t("bookingCalendar.create.endsAt", { time: selectedSlot.end_time }) }}
+							<template v-if="selectedSlot.points !== undefined">
+								· {{ formatNumber(selectedSlot.points) }} {{ t("bookingCalendar.create.points") }}
+							</template>
 						</p>
 					</div>
 				</n-form-item>
@@ -276,7 +275,7 @@
 <script setup lang="ts">
 import type { CalendarApi, CalendarOptions, EventInput } from "@fullcalendar/core"
 import type { SelectOption } from "naive-ui"
-import type { AvailabilitySlot, DurationOption } from "@/add-os/modules/booking/types/availability"
+import type { AvailabilitySlot } from "@/add-os/modules/booking/types/availability"
 import type { BookingPaymentState, BookingStatus, CalendarResponse, CalendarView } from "@/add-os/modules/booking/types/calendar"
 import type { Member } from "@/add-os/modules/members/types/member"
 import type { SpaceType } from "@/add-os/modules/spatial/types/space"
@@ -306,7 +305,7 @@ import { useI18n } from "vue-i18n"
 import { spaceTypeLabel } from "@/add-os/modules/booking/config/space-type-label"
 import { SPACE_TYPES } from "@/add-os/modules/spatial/types/space"
 import { ApiError } from "@/add-os/services/api"
-import { getCalendar, getSpaceQuote, getSpaceSlots } from "@/add-os/services/booking-calendar"
+import { getCalendar, getSpaceSlots } from "@/add-os/services/booking-calendar"
 import { listMembers } from "@/add-os/services/members"
 import { createReceptionBooking } from "@/add-os/services/reception"
 import { formatDate, formatDateTime, formatNumber, formatTime } from "@/add-os/utils/format"
@@ -370,6 +369,19 @@ function toIsoDate(date: Date): string {
 	return `${date.getFullYear()}-${month}-${day}`
 }
 
+/**
+ * Today's date in the given IANA timezone, as `YYYY-MM-DD`.
+ *
+ * The district's today, not the browser's: the server decides "past" in its
+ * own timezone, and a desk machine on UTC at 01:30 Damascus time would
+ * otherwise still offer yesterday. `en-CA` is used only because it formats a
+ * date as `YYYY-MM-DD`; nothing is shown to the user.
+ */
+function todayIn(timeZone: string | undefined): string {
+	if (!timeZone) return toIsoDate(new Date())
+	return new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date())
+}
+
 const refCalendar = ref()
 const response = ref<CalendarResponse | null>(null)
 const isLoading = ref(true)
@@ -390,6 +402,31 @@ const activeView = ref<CalendarView>("month")
 const activeDate = ref<string>(toIsoDate(new Date()))
 
 const branchHours = computed(() => response.value?.branch_hours ?? null)
+
+/** The district's today, in the timezone the calendar response names. */
+function districtToday(): string {
+	return todayIn(response.value?.range.timezone ?? response.value?.branch_hours?.timezone)
+}
+
+/**
+ * The branch's all-day closures from today on, date → the exception's reason,
+ * as the server listed them: every one, not just those in the range the
+ * calendar is showing, because the date picker navigates freely.
+ */
+const closures = computed(
+	() => new Map((response.value?.branch_hours?.upcoming_closures ?? []).map(closure => [closure.date, closure.reason]))
+)
+
+/** The next date, from the district's today, that is not an upcoming closure. */
+function nextOpenDate(): string {
+	const date = new Date(`${districtToday()}T12:00:00`)
+	// Bounded: a year of consecutive closures is not a real schedule, and an
+	// unbounded loop over server data is not worth the risk.
+	for (let i = 0; i < 366 && closures.value.has(toIsoDate(date)); i++) {
+		date.setDate(date.getDate() + 1)
+	}
+	return toIsoDate(date)
+}
 
 const totalsSummary = computed(() => {
 	const totals = response.value?.totals
@@ -486,9 +523,24 @@ const events = computed<EventInput[]>(() => {
 		const closedEverywhere = (response.value?.resources ?? []).every(
 			resource => resource.days.find(day => day.date === date)?.state === "closed"
 		)
-		if (closedEverywhere && spaceCount > 0) {
+		// A listed closure is drawn below, with its reason; drawing it here too
+		// would stack two shades on one cell.
+		if (closedEverywhere && spaceCount > 0 && !closures.value.has(date)) {
 			out.push({ start: date, allDay: true, display: "background", classNames: ["c-closed"] })
 		}
+	}
+
+	// Every upcoming closure, whether or not any space row is in view, carrying
+	// the exception's own reason as its label — "Labour Day" answers "why can't
+	// I book the 30th" before anyone clicks.
+	for (const [date, reason] of closures.value) {
+		out.push({
+			start: date,
+			allDay: true,
+			display: "background",
+			title: reason ?? t("bookingCalendar.legend.closed"),
+			classNames: ["c-closed"]
+		})
 	}
 
 	return out
@@ -518,8 +570,19 @@ const calendarOptions = computed<CalendarOptions>(() => ({
 	// read-only otherwise — no drag, no resize, no inline edit — because
 	// moving a booking is an approval-bearing action that lives on the
 	// reception screens.
+	//
+	// A past day or an upcoming closure opens nothing: neither can be booked —
+	// the server refuses a past start and a closed day has no open period — so
+	// a form opened on one could only fail.
 	dateClick(info) {
-		openCreate({ date: info.dateStr.slice(0, 10) })
+		const date = info.dateStr.slice(0, 10)
+		if (date < districtToday() || closures.value.has(date)) return
+		openCreate({ date })
+	},
+	// Marks a closed day's cell so its number is struck through and it reads
+	// as unclickable, matching the struck-through date in the picker.
+	dayCellClassNames(arg) {
+		return closures.value.has(toIsoDate(arg.date)) ? ["add-day--closed"] : []
 	},
 	eventClick(info) {
 		const props = info.event.extendedProps as Record<string, unknown>
@@ -578,6 +641,7 @@ const createForm = ref({
 	date: toIsoDate(new Date()),
 	/** A `start_time` from the server's own slot list, never typed. */
 	start: "" as string,
+	/** One of the server's `duration_options_minutes`, chosen before the time. */
 	durationMinutes: null as number | null,
 	note: ""
 })
@@ -586,12 +650,21 @@ const slots = ref<AvailabilitySlot[]>([])
 const isLoadingSlots = ref(false)
 const slotsBanner = ref<string | null>(null)
 
-const durations = ref<DurationOption[]>([])
-const isLoadingQuote = ref(false)
+/** The lengths this space accepts, from the server's own rules block. */
+const durationOptions = ref<number[]>([])
 
-const selectedDuration = computed(
-	() => durations.value.find(option => option.minutes === createForm.value.durationMinutes) ?? null
+/**
+ * The chosen slot, which is the whole booking: requested for a duration, its
+ * `end_time` is where the booking ends and it carries the price.
+ */
+const selectedSlot = computed(
+	() => slots.value.find(slot => slot.start_time === createForm.value.start) ?? null
 )
+
+/** "1.5h" — the number through the shared formatter, the unit through i18n. */
+function durationLabel(minutes: number): string {
+	return t("bookingCalendar.create.durationHours", { hours: formatNumber(minutes / 60) })
+}
 
 /**
  * How many of the day's slots are free, so an operator can see at a glance
@@ -604,12 +677,21 @@ const slotCountsNote = computed(() => {
 })
 
 /**
- * Days the calendar itself reports closed for every space are not offerable.
- * This mirrors the closed-day shading rather than recomputing openness: the
- * response is the only thing that knows about exceptions and holidays.
+ * Days before the district's today, upcoming closures, and days the calendar
+ * itself reports closed for every space, are not offerable.
+ *
+ * A past day is refused by the server (`start_in_the_past`) and every slot on
+ * it comes back `past`, so offering it is only a trap. Closures come from the
+ * server's `upcoming_closures` rather than the days in view, because the
+ * picker navigates to months the calendar has not loaded. The last check
+ * mirrors the closed-day shading for the range in view, which also covers a
+ * weekday with no schedule at all.
  */
 function isDateDisabled(timestamp: number): boolean {
 	const date = toIsoDate(new Date(timestamp))
+	if (date < districtToday()) return true
+	if (closures.value.has(date)) return true
+
 	const resources = response.value?.resources ?? []
 	if (resources.length === 0) return false
 	return resources.every(resource => resource.days.find(day => day.date === date)?.state === "closed")
@@ -634,8 +716,9 @@ const canSubmit = computed(
 		createForm.value.user_id !== null
 		&& createForm.value.space_id !== null
 		&& createForm.value.start !== ""
-		&& selectedDuration.value !== null
-		&& selectedDuration.value.available
+		&& createForm.value.durationMinutes !== null
+		&& selectedSlot.value !== null
+		&& selectedSlot.value.is_available
 )
 
 /**
@@ -647,10 +730,10 @@ const canSubmit = computed(
  */
 function openCreate(prefill?: { date?: string, spaceId?: number }): void {
 	createErrors.value = {}
-	createForm.value.date = prefill?.date ?? toIsoDate(new Date())
+	// Without a clicked day, the next one that can actually be booked: on a
+	// holiday, today would open the form on a date the picker already refuses.
+	createForm.value.date = prefill?.date ?? nextOpenDate()
 	createForm.value.start = ""
-	createForm.value.durationMinutes = null
-	durations.value = []
 
 	if (prefill?.spaceId !== undefined) {
 		createForm.value.space_id = prefill.spaceId
@@ -670,58 +753,57 @@ function openCreate(prefill?: { date?: string, spaceId?: number }): void {
 }
 
 /**
- * The slots for the chosen space and date.
+ * The slots for the chosen space, date and duration.
  *
- * Re-fetched on every change of either, because a slot list is only true for
- * one space on one day — reusing yesterday's would offer windows that are
- * already gone.
+ * Re-fetched on every change of any of the three, because a slot list is only
+ * true for one space, one day and one length — reusing yesterday's would offer
+ * windows that are already gone, and a 1h list says nothing about 3h.
+ *
+ * Until a duration is chosen the call returns the plain grid, whose only use
+ * here is the space's `duration_options_minutes`: the shortest is preselected
+ * (or the current choice kept, if this space accepts it too), and that change
+ * re-runs this with the duration.
  */
+let slotsRequest = 0
+
 async function loadSlots(): Promise<void> {
-	const { space_id: spaceId, date } = createForm.value
+	const { space_id: spaceId, date, durationMinutes } = createForm.value
 	if (spaceId === null || !date) {
 		slots.value = []
 		slotsBanner.value = null
 		return
 	}
 
+	const request = ++slotsRequest
 	isLoadingSlots.value = true
 	slotsBanner.value = null
 	try {
-		const response_ = await getSpaceSlots(spaceId, date)
+		const response_ = await getSpaceSlots(spaceId, date, durationMinutes)
+		// A slower answer for a space, date or length the operator has since
+		// moved off must not overwrite the current one.
+		if (request !== slotsRequest) return
+
+		durationOptions.value = response_.rules.duration_options_minutes
+		if (durationMinutes === null || !durationOptions.value.includes(durationMinutes)) {
+			slots.value = []
+			createForm.value.durationMinutes = durationOptions.value[0] ?? null
+			// Closed or not, the banner belongs on screen now rather than
+			// after the follow-up call.
+			slotsBanner.value = response_.closed_banner?.text ?? null
+			return
+		}
+
 		slots.value = response_.data
 		// A closed day carries the server's own banner, reason included.
 		slotsBanner.value = response_.closed_banner?.text ?? null
 	} catch (caught) {
 		if (!(caught instanceof ApiError)) throw caught
+		if (request !== slotsRequest) return
 		slots.value = []
+		// Including a length this space refuses: the POST's own sentence.
 		slotsBanner.value = caught.data?.message ?? t("bookingCalendar.create.slotsError")
 	} finally {
-		isLoadingSlots.value = false
-	}
-}
-
-/** The duration ladder for the chosen start, priced by the server. */
-async function loadQuote(): Promise<void> {
-	const { space_id: spaceId, date, start } = createForm.value
-	if (spaceId === null || !date || !start) {
-		durations.value = []
-		return
-	}
-
-	isLoadingQuote.value = true
-	try {
-		// Wall-clock, matching what the create endpoint expects.
-		const response_ = await getSpaceQuote(spaceId, `${date} ${start}`)
-		durations.value = response_.durations
-		// Land on the shortest bookable duration rather than none, so a
-		// booking is one click away once a time is picked.
-		createForm.value.durationMinutes = response_.durations.find(option => option.available)?.minutes ?? null
-	} catch (caught) {
-		if (!(caught instanceof ApiError)) throw caught
-		durations.value = []
-		createForm.value.durationMinutes = null
-	} finally {
-		isLoadingQuote.value = false
+		if (request === slotsRequest) isLoadingSlots.value = false
 	}
 }
 
@@ -730,19 +812,16 @@ function selectSlot(slot: AvailabilitySlot): void {
 	createForm.value.start = slot.start_time
 }
 
-// A new space or date invalidates both the slots and any chosen time: the
-// window that was free on Tuesday says nothing about Wednesday.
+// A new space, date or length invalidates any chosen time: the window that was
+// free on Tuesday says nothing about Wednesday, and one that holds 1h may not
+// hold 3h. The length itself is kept — it is not about any one date.
 watch(
-	() => [createForm.value.space_id, createForm.value.date],
+	() => [createForm.value.space_id, createForm.value.date, createForm.value.durationMinutes],
 	() => {
 		createForm.value.start = ""
-		createForm.value.durationMinutes = null
-		durations.value = []
 		if (createVisible.value) void loadSlots()
 	}
 )
-
-watch(() => createForm.value.start, () => void loadQuote())
 
 async function loadMembers(): Promise<void> {
 	isLoadingMembers.value = true
@@ -770,11 +849,10 @@ async function submitCreate(): Promise<void> {
 			// Wall-clock in the district's own timezone, which is what the
 			// endpoint expects — an offset here would be re-interpreted.
 			//
-			// The end comes from the duration the server priced, not from
-			// adding minutes here: a duration crossing a midday closure ends
-			// somewhere only the server knows.
+			// The end is the chosen slot's own end — the server built that
+			// window for the chosen length — not minutes added here.
 			start_at: `${createForm.value.date} ${createForm.value.start}`,
-			end_at: `${createForm.value.date} ${(selectedDuration.value as DurationOption).end_time}`,
+			end_at: `${createForm.value.date} ${(selectedSlot.value as AvailabilitySlot).end_time}`,
 			...(createForm.value.note ? { note: createForm.value.note } : {})
 		})
 		message.success(t("bookingCalendar.create.success"))
@@ -902,7 +980,46 @@ defineExpose({
 		.fc-bg-event.c-closed {
 			background-color: var(--bg-secondary-color);
 			opacity: 0.65;
+
+			// The closure's reason ("Labour Day"), written in the cell so the
+			// day explains itself before anyone clicks it.
+			.fc-event-title {
+				font-size: var(--add-font-size-caption);
+				font-style: normal;
+				font-weight: var(--add-font-weight-medium);
+				color: var(--add-text-muted);
+			}
 		}
+
+		// A closed day: its number struck through, like the refused date in
+		// the picker, and the cell reads as unclickable — clicking it opens
+		// nothing. Struck AND dimmed, never colour alone.
+		.fc-daygrid-day.add-day--closed {
+			cursor: var(--add-disabled-cursor);
+
+			.fc-daygrid-day-number {
+				text-decoration: line-through;
+				opacity: var(--add-disabled-opacity);
+			}
+		}
+	}
+}
+
+/**
+ * A filter's label + select. Sized here because a width on the select itself
+ * loses to Naive's runtime `width: 100%`. Same approach and floor as the
+ * all-bookings filter bar's `.add-field`; the space filter is wider because
+ * space names run longer than space types.
+ */
+.add-filter-field {
+	display: flex;
+	flex-direction: column;
+	gap: var(--add-space-1);
+	inline-size: 13rem;
+	max-inline-size: 100%;
+
+	&--wide {
+		inline-size: 16rem;
 	}
 }
 
