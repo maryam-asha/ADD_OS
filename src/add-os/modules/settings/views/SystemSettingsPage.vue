@@ -38,7 +38,7 @@
 		<n-modal
 			v-model:show="editModalVisible"
 			preset="card"
-			:title="`${t('systemSettings.editTitle')}: ${currentEditing?.key || ''}`"
+			:title="`${t('systemSettings.editTitle')}: ${currentEditing ? labelOf(currentEditing.key) : ''}`"
 			class="max-w-lg"
 		>
 			<div v-if="currentEditing" class="flex flex-col gap-4">
@@ -51,6 +51,10 @@
 					{{ t("points.rateWarning") }}
 				</n-alert>
 
+				<p v-if="hintOf(currentEditing.key)" class="text-sm text-secondary">
+					{{ hintOf(currentEditing.key) }}
+				</p>
+
 				<div class="flex flex-col gap-1">
 					<span class="text-xs text-secondary">{{ t('systemSettings.keyLabel') }}</span>
 					<code class="font-mono text-sm bg-surface-sunken p-2 rounded">{{ currentEditing.key }}</code>
@@ -58,7 +62,7 @@
 
 				<div class="flex flex-col gap-1">
 					<span class="text-xs text-secondary">{{ t('systemSettings.typeLabel') }}</span>
-					<n-tag size="small" type="info">{{ currentEditing.type }}</n-tag>
+					<n-tag size="small" type="info">{{ typeLabel(currentEditing.type) }}</n-tag>
 				</div>
 
 				<div class="flex flex-col gap-1">
@@ -106,16 +110,17 @@
 
 <script setup lang="ts">
 import type { DataTableColumns } from "naive-ui"
-import type { SettingItem } from "@/add-os/modules/settings/types/setting"
+import type { SettingItem, SettingType } from "@/add-os/modules/settings/types/setting"
 import { NAlert, NButton, NCard, NDataTable, NInput, NInputNumber, NModal, NSwitch, NTag, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import { settingHint, settingLabel } from "@/add-os/modules/settings/utils/settingText"
 import { listSettings, updateSetting } from "@/add-os/services/settings"
 import Icon from "@/components/common/Icon.vue"
 
 defineProps<{ titleKey?: string }>()
 
-const { t } = useI18n()
+const { t, te } = useI18n()
 const message = useMessage()
 
 const settings = ref<SettingItem[]>([])
@@ -147,30 +152,49 @@ function isPointRate(row: SettingItem): boolean {
 	return row.key === POINT_RATE_KEY
 }
 
+/** The setting's name in the current language; its raw key when it has none yet. */
+function labelOf(key: string): string {
+	return settingLabel(key, t, te)
+}
+
+function hintOf(key: string): string | null {
+	return settingHint(key, t, te)
+}
+
+function typeLabel(type: SettingType): string {
+	return te(`systemSettings.types.${type}`) ? t(`systemSettings.types.${type}`) : type
+}
+
+// Matches the translated name and hint too, so a setting can be found by
+// what it does, in either language, not only by its key.
 const filteredSettings = computed(() => {
 	const q = searchQuery.value.trim().toLowerCase()
 	if (!q) return settings.value
-	return settings.value.filter(s => s.key.toLowerCase().includes(q) || String(s.value).toLowerCase().includes(q))
+	return settings.value.filter(s =>
+		[s.key, labelOf(s.key), hintOf(s.key) ?? "", String(s.value)].some(text => text.toLowerCase().includes(q))
+	)
 })
 
 const columns = computed<DataTableColumns<SettingItem>>(() => [
 	{
-		title: t("systemSettings.columns.key"),
+		title: t("systemSettings.nameLabel"),
 		key: "key",
-		render: row =>
-			h("div", { class: "flex flex-col gap-0.5" }, [
-				h("code", { class: "font-mono text-xs font-semibold text-primary" }, row.key),
-				// The point rate is the one setting on this generic table whose
-				// raw key does not say what it controls, and the one whose edit
-				// has catalogue-wide consequences. Name it in plain language.
-				isPointRate(row) ? h("span", { class: "text-xs text-secondary" }, t("points.rateLabel")) : null
+		render: row => {
+			const hint = hintOf(row.key)
+			return h("div", { class: "flex flex-col gap-0.5" }, [
+				h("span", { class: "text-sm font-semibold" }, labelOf(row.key)),
+				hint ? h("span", { class: "text-xs text-secondary" }, hint) : null,
+				// The raw key stays visible, smaller: it is what the API and the
+				// docs call the setting.
+				h("code", { class: "font-mono text-xs text-primary" }, row.key)
 			])
+		}
 	},
 	{
 		title: t("systemSettings.columns.type"),
 		key: "type",
 		width: 100,
-		render: row => h(NTag, { size: "small", round: true }, { default: () => row.type })
+		render: row => h(NTag, { size: "small", round: true }, { default: () => typeLabel(row.type) })
 	},
 	{
 		title: t("systemSettings.columns.value"),
@@ -180,7 +204,7 @@ const columns = computed<DataTableColumns<SettingItem>>(() => [
 				return h(
 					NTag,
 					{ type: row.value ? "success" : "default", size: "small" },
-					{ default: () => (row.value ? "True" : "False") }
+					{ default: () => (row.value ? t("systemSettings.on") : t("systemSettings.off")) }
 				)
 			}
 			if (row.type === "json") {

@@ -103,9 +103,8 @@ function slotsPayload(rows = [slot("14:00"), slot("15:00")], overrides: Record<s
 		rules: {
 			granularity_minutes: 60,
 			min_duration_minutes: 60,
-			max_duration_minutes: null,
-			min_advance_minutes: 0,
-			max_advance_days: null,
+			min_notice_minutes: 0,
+			max_days_ahead: null,
 			duration_options_minutes: [60, 120]
 		},
 		meta: { granularity_minutes: 60, timezone: "Asia/Damascus", duration_minutes: 60 },

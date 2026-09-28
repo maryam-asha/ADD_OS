@@ -1597,6 +1597,94 @@
 			"type": "Type",
 			"value": "Current Value",
 			"actions": "Actions"
+		},
+		"nameLabel": "Setting",
+		"types": {
+			"string": "Text",
+			"integer": "Number",
+			"float": "Decimal",
+			"boolean": "On / off",
+			"json": "List (JSON)"
+		},
+		"on": "On",
+		"off": "Off",
+		"fields": {
+			"app_timezone": {
+				"label": "Time zone",
+				"hint": "The district's time zone. Every booking time, opening hour and date is read in it."
+			},
+			"booking_allow_past_bookings": {
+				"label": "Allow bookings in the past",
+				"hint": "Off by default. When on, a booking may start before the current time (back-dating at the desk)."
+			},
+			"booking_buffer_minutes": {
+				"label": "Gap between bookings (minutes)",
+				"hint": "Free time kept between two bookings of the same space to prepare it. Does not apply to shared co-working spaces. A space can set its own value."
+			},
+			"booking_cancellation_window_minutes": {
+				"label": "Cancellation window (minutes)",
+				"hint": "A member can cancel a booking up to this many minutes before it starts. A space can set its own value."
+			},
+			"booking_duration_options_minutes": {
+				"label": "Duration options (minutes)",
+				"hint": "The lengths offered when adding a booking from the dashboard, e.g. [60, 90, 120, 180]. A length a space can't take is shown disabled."
+			},
+			"booking_max_days_ahead": {
+				"label": "Maximum days ahead",
+				"hint": "A booking can start at most this many days from today. 0 = no limit."
+			},
+			"booking_min_duration_minutes": {
+				"label": "Minimum booking length (minutes)",
+				"hint": "No booking can be shorter than this. There is no maximum."
+			},
+			"booking_min_notice_minutes": {
+				"label": "Minimum notice (minutes)",
+				"hint": "A booking must be made at least this many minutes before it starts; earlier slots are hidden from members. 0 = no notice."
+			},
+			"booking_overrun_grace_minutes": {
+				"label": "Overrun grace (minutes)",
+				"hint": "Extra time allowed after a booking ends before it counts as an overrun. Not used by the system yet."
+			},
+			"booking_slot_granularity_minutes": {
+				"label": "Time slot length (minutes)",
+				"hint": "Bookings start and grow in steps of this many minutes — the time slots shown for booking. A space can set its own value."
+			},
+			"booking_vat_percent": {
+				"label": "VAT (%)",
+				"hint": "Value-added tax added to a booking's price. 0 = none."
+			},
+			"guest_host_approval_timeout_seconds": {
+				"label": "Guest approval timeout (seconds)",
+				"hint": "How long a host has to approve a guest's arrival. Not used by the system yet."
+			},
+			"kiosk_app_store_url": {
+				"label": "App Store link",
+				"hint": "Shown at the kiosk to download the member app on iPhone."
+			},
+			"kiosk_arrival_qr_value": {
+				"label": "Arrival QR code value",
+				"hint": "The value encoded in the QR code the kiosk shows for members to register their arrival."
+			},
+			"kiosk_arrival_request_expiry_minutes": {
+				"label": "Arrival request expiry (minutes)",
+				"hint": "A pending arrival request made at the kiosk expires after this many minutes."
+			},
+			"kiosk_google_play_url": {
+				"label": "Google Play link",
+				"hint": "Shown at the kiosk to download the member app on Android."
+			},
+			"module_cafe_is_enabled": {
+				"label": "Café module enabled",
+				"hint": "Turns the café module on or off. Not used by the system yet."
+			},
+			"point_rate_usd": {
+				"label": "Point rate (USD per point)",
+				"hint": "The cash value of one point. Every price and wallet balance is in points, so changing it reprices everything."
+			},
+			"profile_completion_threshold": {
+				"label": "Profile completion threshold (%)",
+				"hint": "The completion score a member's profile needs to reach to count as complete."
+			}
 		}
 	},
 	"announcements": {

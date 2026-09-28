@@ -96,9 +96,8 @@ export interface SlotCounts {
 export interface AvailabilityRules {
 	granularity_minutes: number
 	min_duration_minutes: number
-	max_duration_minutes: number | null
-	min_advance_minutes: number
-	max_advance_days: number | null
+	min_notice_minutes: number
+	max_days_ahead: number | null
 	/** The lengths this space accepts, ascending — the duration chips. */
 	duration_options_minutes: number[]
 }

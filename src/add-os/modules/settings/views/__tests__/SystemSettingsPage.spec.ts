@@ -22,4 +22,13 @@ describe("systemSettingsPage wiring", () => {
 		expect(source).toContain('t("systemSettings.description")')
 		expect(source).toContain('t("systemSettings.refresh")')
 	})
+
+	it("shows each setting by its translated name and hint, and translates types and on/off", () => {
+		expect(source).toContain('from "@/add-os/modules/settings/utils/settingText"')
+		expect(source).toContain("labelOf(row.key)")
+		expect(source).toContain("hintOf(row.key)")
+		expect(source).toContain("typeLabel(row.type)")
+		expect(source).toContain('t("systemSettings.on")')
+		expect(source).not.toContain('"True"')
+	})
 })
