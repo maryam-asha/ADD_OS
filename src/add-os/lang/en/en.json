@@ -1096,6 +1096,7 @@
 		},
 		"validation": {
 			"amountFormat": "Enter an amount of at least 0.01, using at most two decimals.",
+			"amountFormatSyp": "Enter a whole amount in Syrian pounds, at least 1, with no decimals.",
 			"userRequired": "Select a member.",
 			"companyRequired": "Select a company."
 		},

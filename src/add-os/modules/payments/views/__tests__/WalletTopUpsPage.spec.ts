@@ -285,6 +285,38 @@ describe("walletTopUpsPage", () => {
 		wrapper.unmount()
 	})
 
+	// The new pound has no piastre coins in circulation, so SYP is whole pounds only.
+	it("does not post a fractional or sub-one SYP amount", async () => {
+		const wrapper = mountPage()
+		await flushPromises()
+		wrapper.vm.selectedCurrency = "SYP"
+
+		for (const amount of ["0.5", "1.50", "250.25"]) {
+			wrapper.vm.form.user_id = 5
+			wrapper.vm.form.amount = amount
+			await wrapper.vm.submit()
+			await flushPromises()
+		}
+
+		expect(createWalletTopUpMock).not.toHaveBeenCalled()
+		wrapper.unmount()
+	})
+
+	it("still accepts a fractional amount in a non-SYP currency", async () => {
+		const wrapper = mountPage()
+		await flushPromises()
+		wrapper.vm.selectedCurrency = "USD"
+		await flushPromises()
+
+		wrapper.vm.form.user_id = 5
+		wrapper.vm.form.amount = "12.50"
+		await wrapper.vm.submit()
+		await flushPromises()
+
+		expect(createWalletTopUpMock).toHaveBeenCalledWith(expect.objectContaining({ amount: "12.50", currency: "USD" }))
+		wrapper.unmount()
+	})
+
 	it("posts a company top-up when an affiliated member selects company balance scope", async () => {
 		const memberWithCompany = {
 			...sampleUser,

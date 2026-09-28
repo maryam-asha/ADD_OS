@@ -432,8 +432,18 @@ const AMOUNT_PLACEHOLDER = "Enter amount"
 const AMOUNT_PATTERN = /^\d+(?:\.\d{1,2})?$/
 const MINIMUM_AMOUNT = 0.01
 
-function isValidAmount(value: string): boolean {
+/**
+ * SYP is the new pound (two zeros removed, 100 old = 1 new, in circulation
+ * since 2026-01-01; old notes withdrawn after 2026-07-30). Only banknotes are
+ * issued — no piastre coins — so cash is tendered in whole pounds. A trailing
+ * ".00" is still accepted: it names the same whole amount.
+ */
+const SYP_AMOUNT_PATTERN = /^\d+(?:\.0{1,2})?$/
+const SYP_MINIMUM_AMOUNT = 1
+
+function isValidAmount(value: string, currency: string): boolean {
 	const trimmed = value.trim()
+	if (currency === "SYP") return SYP_AMOUNT_PATTERN.test(trimmed) && Number(trimmed) >= SYP_MINIMUM_AMOUNT
 	return AMOUNT_PATTERN.test(trimmed) && Number(trimmed) >= MINIMUM_AMOUNT
 }
 
@@ -482,7 +492,8 @@ const isSubmitting = ref(false)
 
 const amountPresets = computed(() => {
 	if (selectedCurrency.value === "SYP") {
-		return [50000, 100000, 250000, 500000]
+		// New-pound values: the old 50,000 / 100,000 / 250,000 / 500,000 presets with two zeros removed.
+		return [500, 1000, 2500, 5000]
 	}
 	return [10, 25, 50, 100]
 })
@@ -579,7 +590,7 @@ function schedulePreview() {
 
 	// Nothing to quote yet — stay silent rather than asking the server to
 	// reject a half-typed box, or quoting before a recipient is chosen.
-	if (!isValidAmount(amount) || buildRecipient() === null) {
+	if (!isValidAmount(amount, selectedCurrency.value) || buildRecipient() === null) {
 		previewPoints.value = null
 		previewError.value = null
 		return
@@ -832,7 +843,10 @@ const rules = computed<FormRules>(() => ({
 	amount: {
 		required: true,
 		trigger: ["blur", "input"],
-		validator: (_rule, value: string) => (isValidAmount(value ?? "") ? true : new Error(t("walletTopUps.validation.amountFormat")))
+		validator: (_rule, value: string) => {
+			if (isValidAmount(value ?? "", selectedCurrency.value)) return true
+			return new Error(t(selectedCurrency.value === "SYP" ? "walletTopUps.validation.amountFormatSyp" : "walletTopUps.validation.amountFormat"))
+		}
 	},
 	...(recipientType.value === "user"
 		? { user_id: { required: true, type: "number" as const, message: t("walletTopUps.validation.userRequired"), trigger: ["change"] } }
@@ -864,7 +878,7 @@ async function submit() {
 
 	const amount = form.value.amount.trim()
 	const recipient = buildRecipient()
-	if (!isValidAmount(amount) || recipient === null) return
+	if (!isValidAmount(amount, selectedCurrency.value) || recipient === null) return
 
 	const description = form.value.description.trim()
 		|| (recipientType.value === "user" && userBalanceScope.value === "company" && selectedUser.value
