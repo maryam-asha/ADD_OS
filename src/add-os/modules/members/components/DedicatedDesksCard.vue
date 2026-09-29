@@ -166,12 +166,9 @@ async function openAssign(row: Membership): Promise<void> {
 	if (row.branch_id === null) return
 	desksLoading.value = true
 	try {
-		// Its own desks are held — by it — so the free list leaves them out.
-		const free = await listSeatsDesks({ branch_id: row.branch_id, free: 1 })
-		deskOptions.value = [
-			...own.map(desk => ({ value: desk.id, label: desk.code })),
-			...free.map(desk => ({ value: desk.id, label: desk.label && desk.label !== desk.code ? `${desk.code} — ${desk.label}` : desk.code }))
-		]
+		// Free during its own hours and dates — its own desks included.
+		const free = await listSeatsDesks({ branch_id: row.branch_id, free_for_membership: row.id })
+		deskOptions.value = free.map(desk => ({ value: desk.id, label: desk.label && desk.label !== desk.code ? `${desk.code} — ${desk.label}` : desk.code }))
 	} catch (caught) {
 		if (!(caught instanceof ApiError)) throw caught
 	} finally {

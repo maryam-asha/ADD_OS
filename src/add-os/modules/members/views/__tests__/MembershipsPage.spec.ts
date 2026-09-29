@@ -86,7 +86,7 @@ describe("membershipsPage — dedicated desks", () => {
 		vm.form.plan_id = 2
 		await flushPromises()
 		expect(vm.isDedicatedPlan).toBe(true)
-		expect(listDesksMock).toHaveBeenCalledWith({ branch_id: 2, free: 1 })
+		expect(listDesksMock).toHaveBeenCalledWith({ branch_id: 2, free_for_plan: 2 })
 		expect(vm.deskOptions.map(option => option.label)).toEqual(["D-04 — Window", "D-05"])
 	})
 

@@ -13,11 +13,18 @@ export interface SeatDesk {
 	membership_id?: number | null
 }
 
-/** `GET seats-desks` filters; `free` leaves only desks no subscription holds. */
+/**
+ * `GET seats-desks` filters. `free` leaves only desks nobody holds;
+ * `free_for_plan` / `free_for_membership` leave the desks free during that
+ * plan's (sold now) or subscription's hours and dates — a desk is held only
+ * inside its plan's hours, so a morning and an evening plan may share one.
+ */
 export interface SeatDeskFilter {
 	space_id?: number
 	branch_id?: number
 	free?: 1
+	free_for_plan?: number
+	free_for_membership?: number
 }
 
 /**

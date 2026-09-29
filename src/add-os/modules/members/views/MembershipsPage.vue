@@ -364,7 +364,7 @@ async function loadFreeDesks(): Promise<void> {
 
 	desksLoading.value = true
 	try {
-		const desks = await listSeatsDesks({ branch_id: branchId, free: 1 })
+		const desks = await listSeatsDesks({ branch_id: branchId, free_for_plan: form.value.plan_id! })
 		if (request === desksRequest) freeDesks.value = desks
 	} catch (caught) {
 		if (!(caught instanceof ApiError)) throw caught
@@ -470,7 +470,7 @@ async function handleSubmit() {
 // After every computed it reads is declared: a watch evaluates its sources
 // at once.
 watch([previewBranchId, previewDays], loadPoolPreview)
-watch([previewBranchId, isDedicatedPlan], loadFreeDesks)
+watch([previewBranchId, isDedicatedPlan, () => form.value.plan_id], loadFreeDesks)
 
 onMounted(() => {
 	if (!canActivate.value) return

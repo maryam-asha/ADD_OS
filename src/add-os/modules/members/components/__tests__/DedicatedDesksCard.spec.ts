@@ -78,8 +78,8 @@ describe("dedicatedDesksCard", () => {
 		expect(listMembershipsMock).toHaveBeenLastCalledWith({ dedicated: 1, live: 1, page: 1 })
 	})
 
-	/** Its own desks are held by it, so they are offered alongside the branch's free ones. */
-	it("offers the subscription's own desks and the branch's free ones", async () => {
+	/** Desks free during its own hours and dates — its own desks included. */
+	it("offers the desks free for the subscription's hours", async () => {
 		const wrapper = mountCard()
 		await flushPromises()
 		const vm = wrapper.vm as unknown as CardVm
@@ -87,9 +87,9 @@ describe("dedicatedDesksCard", () => {
 		await vm.openAssign(membership({ desks: [{ id: 2, code: "D-02", label: "D-02" }] }))
 		await flushPromises()
 
-		expect(listDesksMock).toHaveBeenCalledWith({ branch_id: 1, free: 1 })
+		expect(listDesksMock).toHaveBeenCalledWith({ branch_id: 1, free_for_membership: 11 })
 		expect(vm.selected).toEqual([2])
-		expect(vm.deskOptions.map(option => option.label)).toEqual(["D-02", "D-04 — Window"])
+		expect(vm.deskOptions.map(option => option.label)).toEqual(["D-04 — Window"])
 	})
 
 	it("assigns the chosen desks and reloads", async () => {
