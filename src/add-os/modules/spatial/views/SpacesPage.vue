@@ -165,6 +165,8 @@ function openEdit(row: Space) {
 }
 
 async function submit(payload: Record<string, unknown>) {
+	// The server refuses a co_space capacity: it counts the space's desks.
+	if (payload.space_type === "co_space") delete payload.capacity
 	if (mode.value === "create") {
 		await mutations.create(payload as unknown as SpacePayload)
 	} else if (editingId.value !== null) {

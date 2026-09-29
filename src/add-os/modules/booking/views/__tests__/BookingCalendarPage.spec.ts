@@ -20,6 +20,12 @@ vi.mock("@/add-os/services/booking-calendar", () => ({
 vi.mock("@/add-os/services/reception", () => ({ createReceptionBooking: createBookingMock }))
 vi.mock("@/add-os/services/members", () => ({ listMembers: listMembersMock }))
 
+// The co-working seats panel has its own spec (CoworkingPoolPanel.spec.ts);
+// here it is only a child the page mounts.
+vi.mock("@/add-os/modules/booking/components/CoworkingPoolPanel.vue", () => ({
+	default: { name: "CoworkingPoolPanel", render: () => null }
+}))
+
 // Same pitfall ApprovalQueuePage.spec.ts documents: the page calls useMessage()
 // directly, which needs a provider it has no reason to mount.
 vi.mock("naive-ui", async () => {
@@ -59,55 +65,39 @@ vi.mock("@fullcalendar/timegrid", () => ({ default: {} }))
 vi.mock("@fullcalendar/list", () => ({ default: {} }))
 vi.mock("@fullcalendar/interaction", () => ({ default: {} }))
 
+/** "14:00" → "02:00 PM": the server's 12-hour form. */
+function twelveHour(hour: number): string {
+	return `${String(hour % 12 || 12).padStart(2, "0")}:00 ${hour < 12 ? "AM" : "PM"}`
+}
+
 /**
- * A slot as the server sends it for a requested duration: the whole booking
- * window, priced. `start_time` is the value sent back; `label` is only for
- * display, and the two are deliberately different here so a test can catch the
- * label being submitted by mistake.
+ * One hour-long cell as the server sends it: `start_time` / `end_time` in
+ * 12-hour "02:00 PM", the one format that is both shown and sent back. Called
+ * with the 24-hour hour ("14:00") only so the tests read easily.
  */
-function slot(startTime: string, overrides: Record<string, unknown> = {}, hours = 1) {
+function slot(startTime: string, overrides: Record<string, unknown> = {}) {
 	const hour = Number(startTime.slice(0, 2))
-	const end = String(hour + hours).padStart(2, "0")
 	return {
-		start_at: `2026-09-24T${startTime}:00+03:00`,
-		end_at: `2026-09-24T${end}:00:00+03:00`,
-		label: `${String(hour % 12 || 12).padStart(2, "0")}:00 ${hour < 12 ? "AM" : "PM"}`,
-		start_time: startTime,
-		end_time: `${end}:00`,
+		start_time: twelveHour(hour),
+		end_time: twelveHour(hour + 1),
 		state: "available",
 		is_available: true,
-		reason: null,
-		duration_minutes: hours * 60,
-		points: hours * 120,
-		amount_usd: "12.00",
 		...overrides
 	}
 }
 
-function slotsPayload(rows = [slot("14:00"), slot("15:00")], overrides: Record<string, unknown> = {}) {
+function slotsPayload(rows = [slot("14:00"), slot("15:00"), slot("16:00")], overrides: Record<string, unknown> = {}) {
 	return {
+		date: "2026-09-24",
 		state: "available",
 		closed_banner: null,
-		data: rows,
+		slots: rows,
 		counts: {
 			available: rows.filter(row => row.is_available).length,
-			booked: 0,
-			outside_hours: 0,
-			buffer: 0,
-			at_capacity: 0,
-			past: 0,
-			too_soon: 0,
-			too_far_ahead: 0,
+			booked: rows.filter(row => !row.is_available).length,
 			total: rows.length
 		},
-		rules: {
-			granularity_minutes: 60,
-			min_duration_minutes: 60,
-			min_notice_minutes: 0,
-			max_days_ahead: null,
-			duration_options_minutes: [60, 120]
-		},
-		meta: { granularity_minutes: 60, timezone: "Asia/Damascus", duration_minutes: 60 },
+		meta: { granularity_minutes: 60, timezone: "Asia/Damascus" },
 		...overrides
 	}
 }
@@ -151,13 +141,16 @@ function response(overrides: Record<string, unknown> = {}) {
 			open_time: "08:00",
 			close_time: "20:00",
 			periods: [{ open_time: "08:00", close_time: "20:00" }],
-			days_label: "Sunday – Thursday",
-			open_weekdays: ["sunday", "monday"],
+			days_label: "Saturday – Friday",
+			// Every day, so a test's date is only refused for the reason it
+			// sets up; the closed-weekday test narrows this.
+			open_weekdays: ["saturday", "sunday", "monday", "tuesday", "wednesday", "thursday", "friday"],
 			upcoming_closures: [] as { date: string, reason: string | null }[],
 			timezone: "Asia/Damascus",
 			timezone_label: "GMT+3",
 			timezone_note: "All times shown in your local time (GMT+3)"
 		},
+		booking_window: { min_duration_minutes: 60, min_notice_minutes: 0, max_days_ahead: null as number | null },
 		resources: [
 			{
 				space: {
@@ -194,7 +187,7 @@ const i18n = createI18n({
 				description: "Which spaces are booked.",
 				loadError: "Couldn't load the calendar.",
 				empty: "No active spaces match these filters.",
-				filters: { spaceType: "Space type", space: "Space", allSpaceTypes: "All space types", allSpaces: "All spaces" },
+				filters: { spaceType: "Space type", space: "Space", allSpaceTypes: "All space types", allSpaces: "All spaces", reset: "Reset filters" },
 				totals: { spaces: "Spaces", bookings: "Bookings", occupancy: "Average occupancy" },
 				legend: { title: "Occupancy", closed: "Closed" },
 				hours: { closedToday: "Closed on this date" },
@@ -219,14 +212,16 @@ const i18n = createI18n({
 					space: "Space",
 					spacePlaceholder: "Choose a space",
 					date: "Date",
-					start: "Start",
-					duration: "Duration",
+					time: "Time",
+					pickHint: "Tap the first time, then the last.",
+					selected: "{from} – {to} · {hours}",
+					selectedRange: "{from} – {to}",
+					selectedDuration: "Duration: {hours}",
+					tooShort: "This space takes at least {minimum} — pick a later last time.",
 					noSlots: "No bookable times on this date.",
 					slotsError: "Couldn't load times for this space.",
 					slotCounts: "{available} of {total} times free",
-					endsAt: "Ends {time}",
 					durationHours: "{hours}h",
-					points: "points",
 					note: "Note (optional)",
 					notePlaceholder: "e.g. booked at the desk",
 					submit: "Create booking",
@@ -255,10 +250,11 @@ function formVm(wrapper: ReturnType<typeof mountPage>) {
 			user_id: number | null
 			space_id: number | null
 			date: string
-			start: string
-			durationMinutes: number | null
+			from: string
+			to: string
 			note: string
 		}
+		canSubmit: boolean
 		selectSlot: (row: ReturnType<typeof slot>) => void
 		submitCreate: () => Promise<void>
 	}
@@ -274,13 +270,14 @@ async function openCreateForm() {
 }
 
 /**
- * A slot or duration chip, found by the reason it carries.
+ * A slot chip, found by the start time it shows.
  *
  * Queried on `document` rather than the wrapper because `n-modal` teleports
  * to body — the same pitfall the detail tests document.
  */
-function chipTitled(title: string): HTMLElement | null {
-	return document.querySelector<HTMLElement>(`.add-slot[title="${title}"]`)
+function chipStarting(startTime: string): HTMLElement | null {
+	return [...document.querySelectorAll<HTMLElement>(".add-slot")]
+		.find(chip => chip.textContent?.includes(startTime)) ?? null
 }
 
 /** Drive navigation the way FullCalendar would, through the captured callback. */
@@ -434,7 +431,7 @@ describe("bookingCalendarPage", () => {
 		await flushPromises()
 
 		expect(wrapper.text()).toContain("Main Branch Hours")
-		expect(wrapper.text()).toContain("Sunday – Thursday")
+		expect(wrapper.text()).toContain("Saturday – Friday")
 		expect(wrapper.text()).toContain("GMT+3")
 	})
 
@@ -500,9 +497,9 @@ describe("bookingCalendarPage", () => {
 	})
 
 	/**
-	 * The start is the slot's `start_time` and the end is that same slot's
-	 * `end_time` — both the server's own values, never a label and never
-	 * arithmetic done here.
+	 * The start is the first cell's `start_time` and the end is the last cell's
+	 * `end_time` — both the server's own values, never arithmetic done here.
+	 * One tap is a run of one cell.
 	 */
 	it("sends a reception booking as district wall-clock, not an ISO instant", async () => {
 		const wrapper = await openCreateForm()
@@ -513,7 +510,6 @@ describe("bookingCalendarPage", () => {
 		vm.createForm.date = "2026-09-24"
 		await flushPromises()
 
-		expect(vm.createForm.durationMinutes).toBe(60)
 		vm.selectSlot(slot("14:00"))
 		await flushPromises()
 
@@ -523,38 +519,38 @@ describe("bookingCalendarPage", () => {
 			expect.objectContaining({
 				user_id: 3,
 				space_id: 1,
-				start_at: "2026-09-24 14:00",
-				end_at: "2026-09-24 15:00"
+				start_at: "2026-09-24 02:00 PM",
+				end_at: "2026-09-24 03:00 PM"
 			})
 		)
 	})
 
-	/** A slot the server refused cannot become a booking, even by a click. */
+	/** A cell the server refused cannot become part of a booking, even by a click. */
 	it("ignores a click on an unavailable slot", async () => {
 		const wrapper = await openCreateForm()
 		const vm = formVm(wrapper)
 
-		vm.selectSlot(slot("14:00", { is_available: false, state: "booked", reason: "Already booked." }))
+		vm.selectSlot(slot("14:00", { is_available: false, state: "booked" }))
 		await flushPromises()
 
-		expect(vm.createForm.start).toBe("")
+		expect(vm.createForm.from).toBe("")
 	})
 
 	/**
-	 * A taken slot stays on screen, struck through, carrying the server's
-	 * reason. Removing it would leave "2pm is booked" and "2pm is not a slot
-	 * here" looking identical to an operator explaining the refusal.
+	 * A taken cell stays on screen, struck through. Removing it would leave
+	 * "2pm is booked" and "2pm is not a slot here" looking identical to an
+	 * operator explaining the refusal.
 	 */
-	it("shows a taken slot disabled with its reason rather than hiding it", async () => {
+	it("shows a taken slot disabled rather than hiding it", async () => {
 		getSlotsMock.mockResolvedValue(
-			slotsPayload([slot("14:00", { is_available: false, state: "booked", reason: "Already booked." }), slot("15:00")])
+			slotsPayload([slot("14:00", { is_available: false, state: "booked" }), slot("15:00")])
 		)
 
 		const wrapper = await openCreateForm()
 
 		// n-modal teleports to body, so the wrapper's own subtree never holds
 		// the chips — query the document, as the detail tests above do.
-		const taken = chipTitled("Already booked.")
+		const taken = chipStarting("02:00 PM")
 		expect(taken, "expected the booked slot to still be rendered").toBeTruthy()
 		expect(taken!.hasAttribute("disabled")).toBe(true)
 		expect(taken!.classList.contains("add-slot--taken")).toBe(true)
@@ -563,9 +559,9 @@ describe("bookingCalendarPage", () => {
 	})
 
 	/**
-	 * The whole point of the change: the form offers the windows the server
-	 * will accept, rather than a free-form clock that learns the granularity
-	 * one 422 at a time.
+	 * The form offers the cells the server will accept, rather than a free-form
+	 * clock that learns the granularity one 422 at a time — for the space and
+	 * date alone: there is no duration to ask with.
 	 */
 	it("loads the slots for the chosen space and date", async () => {
 		const wrapper = await openCreateForm()
@@ -575,10 +571,10 @@ describe("bookingCalendarPage", () => {
 		vm.createForm.date = "2026-09-24"
 		await flushPromises()
 
-		expect(getSlotsMock).toHaveBeenLastCalledWith(1, "2026-09-24", 60)
+		expect(getSlotsMock).toHaveBeenLastCalledWith(1, "2026-09-24")
 	})
 
-	/** Changing the date cannot leave a time chosen for the previous one. */
+	/** Changing the date cannot leave a run chosen for the previous one. */
 	it("clears a chosen time when the date changes", async () => {
 		const wrapper = await openCreateForm()
 		const vm = formVm(wrapper)
@@ -588,93 +584,121 @@ describe("bookingCalendarPage", () => {
 		await flushPromises()
 		vm.selectSlot(slot("14:00"))
 		await flushPromises()
-		expect(vm.createForm.start).toBe("14:00")
+		expect(vm.createForm.from).toBe("02:00 PM")
 
 		vm.createForm.date = "2026-09-25"
 		await flushPromises()
 
-		expect(vm.createForm.start).toBe("")
-		// The length the operator chose is not about any one date, so it stays.
-		expect(vm.createForm.durationMinutes).toBe(60)
-		expect(getSlotsMock).toHaveBeenLastCalledWith(1, "2026-09-25", 60)
+		expect(vm.createForm.from).toBe("")
+		expect(vm.createForm.to).toBe("")
+		expect(getSlotsMock).toHaveBeenLastCalledWith(1, "2026-09-25")
 	})
 
 	/**
-	 * Duration first, then the time: the server lists only starts that can hold
-	 * the whole booking, so an operator never picks 19:00 and then discovers no
-	 * length fits before closing. The lengths offered are exactly the ones this
-	 * space accepts (`rules.duration_options_minutes`) — none invented here.
+	 * A booking is a run of cells, first to last — the same as the member
+	 * app. The first tap starts it, a later tap ends it, and it is booked
+	 * whole: from the first cell's start to the last cell's end.
 	 */
-	it("asks for the duration first, offering only the lengths this space accepts", async () => {
-		const wrapper = await openCreateForm()
-		const vm = formVm(wrapper)
-		vm.createForm.space_id = 1
-		vm.createForm.date = "2026-09-24"
-		await flushPromises()
-
-		// Earlier tests leave their teleported modals in the document; read
-		// this form's grid, the last one mounted.
-		const grids = document.querySelectorAll<HTMLElement>(".add-duration-grid")
-		const chips = Array.from(grids[grids.length - 1].querySelectorAll<HTMLElement>(".add-slot")).map(chip => chip.textContent?.trim())
-		expect(chips).toEqual(["1h", "2h"])
-		// The shortest accepted length is preselected, and the slots follow it.
-		expect(vm.createForm.durationMinutes).toBe(60)
-		expect(getSlotsMock).toHaveBeenLastCalledWith(1, "2026-09-24", 60)
-
-		wrapper.unmount()
-	})
-
-	it("reloads the times for a new duration and ends the booking where that slot ends", async () => {
+	it("picks a run from its first to its last cell and books it whole", async () => {
 		const wrapper = await openCreateForm()
 		const vm = formVm(wrapper)
 		vm.createForm.user_id = 3
 		vm.createForm.space_id = 1
 		vm.createForm.date = "2026-09-24"
 		await flushPromises()
+
 		vm.selectSlot(slot("14:00"))
+		vm.selectSlot(slot("16:00"))
 		await flushPromises()
 
-		getSlotsMock.mockResolvedValue(
-			slotsPayload([slot("14:00", {}, 2), slot("15:00", {}, 2)], {
-				meta: { granularity_minutes: 60, timezone: "Asia/Damascus", duration_minutes: 120 }
-			})
-		)
-		vm.createForm.durationMinutes = 120
-		await flushPromises()
+		expect(vm.createForm.from).toBe("02:00 PM")
+		expect(vm.createForm.to).toBe("04:00 PM")
+		// Every cell of the run reads as chosen, the middle one included.
+		const chosen = Array.from(document.querySelectorAll<HTMLElement>(".add-slot--active")).map(chip => chip.textContent?.trim())
+		// Each chip shows its start and end as the server sent them, `HH:mm`.
+		expect(chosen.slice(-3)).toEqual(["02:00 PM03:00 PM", "03:00 PM04:00 PM", "04:00 PM05:00 PM"])
 
-		// A new length invalidates the chosen time: 14:00 may not hold two hours.
-		expect(vm.createForm.start).toBe("")
-		expect(getSlotsMock).toHaveBeenLastCalledWith(1, "2026-09-24", 120)
-
-		vm.selectSlot(slot("14:00", {}, 2))
-		await flushPromises()
 		await vm.submitCreate()
-
 		expect(createBookingMock).toHaveBeenCalledWith(
-			expect.objectContaining({ start_at: "2026-09-24 14:00", end_at: "2026-09-24 16:00" })
+			expect.objectContaining({ start_at: "2026-09-24 02:00 PM", end_at: "2026-09-24 05:00 PM" })
 		)
 	})
 
 	/**
-	 * A length the space refuses comes back as a 422 carrying the POST's own
-	 * sentence; it is shown as-is instead of an empty grid that would read as
-	 * "fully booked".
+	 * Across noon: 12-hour times sort wrongly as text ("01:00 PM" before
+	 * "11:00 AM"), so the run is ordered by the cells' positions, and its
+	 * length comes from the instants.
 	 */
-	it("shows the server's refusal of a duration instead of an empty grid", async () => {
+	it("picks a run across noon", async () => {
+		getSlotsMock.mockResolvedValue(slotsPayload([slot("11:00"), slot("12:00"), slot("13:00")]))
+		const wrapper = await openCreateForm()
+		const vm = formVm(wrapper)
+		vm.createForm.user_id = 3
+		vm.createForm.space_id = 1
+		vm.createForm.date = "2026-09-24"
+		await flushPromises()
+
+		vm.selectSlot(slot("11:00"))
+		vm.selectSlot(slot("13:00"))
+		await flushPromises()
+
+		expect(vm.createForm.from).toBe("11:00 AM")
+		expect(vm.createForm.to).toBe("01:00 PM")
+		expect(document.body.textContent ?? "").toContain("11:00 AM – 02:00 PM · 3h")
+
+		await vm.submitCreate()
+		expect(createBookingMock).toHaveBeenCalledWith(
+			expect.objectContaining({ start_at: "2026-09-24 11:00 AM", end_at: "2026-09-24 02:00 PM" })
+		)
+	})
+
+	/**
+	 * A run cannot span a taken cell: tapping past one starts a new run at the
+	 * tapped cell rather than booking across someone else's hour.
+	 */
+	it("starts over when a taken cell lies between the two taps", async () => {
+		getSlotsMock.mockResolvedValue(
+			slotsPayload([slot("14:00"), slot("15:00", { is_available: false, state: "booked" }), slot("16:00")])
+		)
 		const wrapper = await openCreateForm()
 		const vm = formVm(wrapper)
 		vm.createForm.space_id = 1
 		vm.createForm.date = "2026-09-24"
 		await flushPromises()
 
-		getSlotsMock.mockRejectedValue(
-			new ApiError(422, JSON.stringify({ message: "The booking duration is longer than the maximum allowed." }))
-		)
-		vm.createForm.durationMinutes = 120
+		vm.selectSlot(slot("14:00"))
+		vm.selectSlot(slot("16:00"))
 		await flushPromises()
 
-		expect(document.body.textContent ?? "").toContain("The booking duration is longer than the maximum allowed.")
-		expect(vm.createForm.start).toBe("")
+		expect(vm.createForm.from).toBe("04:00 PM")
+		expect(vm.createForm.to).toBe("04:00 PM")
+	})
+
+	/**
+	 * The one rule the form applies itself is the run's length, since the run
+	 * is the form's own making: shorter than the space's minimum, it says so
+	 * and cannot be sent. The server still checks it on the POST.
+	 */
+	it("will not send a run shorter than the space's minimum", async () => {
+		// Read from the calendar's setup, not from the day's slots.
+		getCalendarMock.mockResolvedValue(
+			response({ booking_window: { min_duration_minutes: 120, min_notice_minutes: 0, max_days_ahead: null } })
+		)
+		const wrapper = await openCreateForm()
+		const vm = formVm(wrapper)
+		vm.createForm.user_id = 3
+		vm.createForm.space_id = 1
+		vm.createForm.date = "2026-09-24"
+		await flushPromises()
+
+		vm.selectSlot(slot("14:00"))
+		await flushPromises()
+		expect(vm.canSubmit).toBe(false)
+		expect(document.body.textContent ?? "").toContain("This space takes at least 2h")
+
+		vm.selectSlot(slot("15:00"))
+		await flushPromises()
+		expect(vm.canSubmit).toBe(true)
 
 		wrapper.unmount()
 	})
@@ -699,7 +723,7 @@ describe("bookingCalendarPage", () => {
 		await flushPromises()
 
 		expect(formVm(wrapper).createForm.date).toBe("2026-09-24")
-		expect(getSlotsMock).toHaveBeenLastCalledWith(expect.any(Number), "2026-09-24", 60)
+		expect(getSlotsMock).toHaveBeenLastCalledWith(expect.any(Number), "2026-09-24")
 	})
 
 	/**
@@ -850,7 +874,66 @@ describe("bookingCalendarPage", () => {
 			// Today still opens it.
 			dateClick({ dateStr: "2026-09-24" })
 			await flushPromises()
-			expect(getSlotsMock).toHaveBeenCalledWith(expect.any(Number), "2026-09-24", null)
+			expect(getSlotsMock).toHaveBeenCalledWith(expect.any(Number), "2026-09-24")
+		})
+	})
+
+	/**
+	 * The calendar's setup, as the member app builds it from the space details:
+	 * a weekday the branch never opens and a date beyond the booking window are
+	 * refused by the picker and on the grid alike, before any slots are asked
+	 * for.
+	 */
+	describe("dates outside the setup", () => {
+		function localNoon(date: string): number {
+			return new Date(`${date}T12:00:00`).getTime()
+		}
+
+		it("refuses a weekday the branch never opens, and strikes it through on the grid", async () => {
+			vi.useFakeTimers({ toFake: ["Date"] })
+			vi.setSystemTime(new Date("2026-09-24T09:00:00+03:00"))
+			const base = response()
+			// Friday off.
+			getCalendarMock.mockResolvedValue(
+				response({
+					branch_hours: {
+						...base.branch_hours,
+						open_weekdays: ["saturday", "sunday", "monday", "tuesday", "wednesday", "thursday"]
+					}
+				})
+			)
+
+			const wrapper = await openCreateForm()
+			const vm = wrapper.vm as unknown as { isDateDisabled: (timestamp: number) => boolean }
+			getSlotsMock.mockClear()
+
+			// 2026-09-25 is a Friday.
+			expect(vm.isDateDisabled(localNoon("2026-09-25"))).toBe(true)
+			expect(vm.isDateDisabled(localNoon("2026-09-26"))).toBe(false)
+
+			const cellClasses = lastOptions!.dayCellClassNames as (arg: { date: Date }) => string[]
+			expect(cellClasses({ date: new Date("2026-09-25T00:00:00") })).toContain("add-day--closed")
+
+			const dateClick = lastOptions!.dateClick as (info: { dateStr: string }) => void
+			dateClick({ dateStr: "2026-09-25" })
+			await flushPromises()
+			expect(getSlotsMock).not.toHaveBeenCalled()
+		})
+
+		it("refuses a date beyond the booking window, and dims it on the grid", async () => {
+			vi.useFakeTimers({ toFake: ["Date"] })
+			vi.setSystemTime(new Date("2026-09-24T09:00:00+03:00"))
+			getCalendarMock.mockResolvedValue(response({ booking_window: { min_duration_minutes: 60, min_notice_minutes: 0, max_days_ahead: 7 } }))
+
+			const wrapper = await openCreateForm()
+			const vm = wrapper.vm as unknown as { isDateDisabled: (timestamp: number) => boolean }
+
+			expect(vm.isDateDisabled(localNoon("2026-10-01"))).toBe(false)
+			expect(vm.isDateDisabled(localNoon("2026-10-02"))).toBe(true)
+
+			const cellClasses = lastOptions!.dayCellClassNames as (arg: { date: Date }) => string[]
+			expect(cellClasses({ date: new Date("2026-10-02T00:00:00") })).toContain("add-day--out-of-window")
+			expect(cellClasses({ date: new Date("2026-10-02T00:00:00") })).not.toContain("add-day--closed")
 		})
 	})
 
@@ -889,5 +972,34 @@ describe("bookingCalendarPage", () => {
 
 		// Must not throw: an ApiError is an expected outcome here, not a crash.
 		await expect(vm.submitCreate()).resolves.toBeUndefined()
+	})
+
+	it("resets space and space-type filters when the reset button is clicked", async () => {
+		const wrapper = mountPage()
+		await flushPromises()
+
+		const vm = wrapper.vm as unknown as {
+			spaceType: string | null
+			spaceId: number | null
+			hasFilters: boolean
+			resetFilters: () => void
+		}
+
+		expect(vm.hasFilters).toBe(false)
+		expect(wrapper.find(".add-filters-reset-btn").exists()).toBe(false)
+
+		vm.spaceType = "room"
+		vm.spaceId = 1
+		await flushPromises()
+
+		expect(vm.hasFilters).toBe(true)
+		expect(wrapper.find(".add-filters-reset-btn").exists()).toBe(true)
+
+		await wrapper.find(".add-filters-reset-btn").trigger("click")
+		await flushPromises()
+
+		expect(vm.spaceType).toBeNull()
+		expect(vm.spaceId).toBeNull()
+		expect(vm.hasFilters).toBe(false)
 	})
 })

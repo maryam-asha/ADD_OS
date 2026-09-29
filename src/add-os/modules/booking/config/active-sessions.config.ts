@@ -38,7 +38,22 @@ export function buildSessionColumns(t: ComposerTranslation, handlers: SessionHan
 		{
 			title: t("activeSessions.columns.type"),
 			key: "type",
-			render: row => t(`activeSessions.type.${row.type}`)
+			render: (row) => {
+				const label = t(`activeSessions.type.${row.type}`)
+				// A walk-in says which seat it took: the one its subscription
+				// holds, or a free one from the branch's co-working pool.
+				if (row.type !== "walkin" || row.seat_covered === null) return label
+
+				const covered = row.seat_covered
+				return h("div", { class: "flex items-center gap-2" }, [
+					h("span", label),
+					h(
+						NTag,
+						{ size: "small", round: true, type: covered ? "info" : "default", title: t(covered ? "activeSessions.seat.coveredHint" : "activeSessions.seat.poolHint") },
+						{ default: () => t(covered ? "activeSessions.seat.covered" : "activeSessions.seat.pool") }
+					)
+				])
+			}
 		},
 		{
 			title: t("activeSessions.columns.checkedInAt"),

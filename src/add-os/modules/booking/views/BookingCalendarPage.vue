@@ -51,37 +51,67 @@
 					</label>
 				</div>
 
-				<div class="flex flex-wrap items-center gap-6">
-					<div v-for="total in totalsSummary" :key="total.key" class="flex flex-col">
-						<span class="text-xs">{{ t(`bookingCalendar.totals.${total.key}`) }}</span>
-						<span class="text-lg font-semibold">{{ total.value }}</span>
+				<div class="add-totals-group flex flex-wrap items-center gap-3">
+					<div v-for="total in totalsSummary" :key="total.key" class="add-total-chip flex flex-col">
+						<span class="text-xs opacity-75">{{ t(`bookingCalendar.totals.${total.key}`) }}</span>
+						<span class="text-base font-bold">{{ total.value }}</span>
 					</div>
 				</div>
 			</div>
 
-			<div v-if="branchHours" class="mt-4 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
-				<span class="font-medium">{{ branchHours.title }}</span>
-				<span>{{ branchHours.hours ?? t("bookingCalendar.hours.closedToday") }}</span>
-				<span v-if="branchHours.days_label">{{ branchHours.days_label }}</span>
-				<span>{{ branchHours.timezone_note }}</span>
+			<div v-if="branchHours" class="add-branch-hours-bar mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+				<span class="inline-flex items-center gap-1.5 font-semibold text-primary">
+					<Icon name="carbon:time" :size="16" />
+					{{ branchHours.title }}
+				</span>
+				<span class="font-medium">{{ branchHours.hours ?? t("bookingCalendar.hours.closedToday") }}</span>
+				<span v-if="branchHours.days_label" class="opacity-75">· {{ branchHours.days_label }}</span>
+				<span class="text-xs opacity-60">({{ branchHours.timezone_note }})</span>
+			</div>
+
+			<div v-if="hasFilters" class="add-filters-reset-row mt-3 flex" :class="locale === 'ar' ? 'justify-end' : 'justify-start'">
+				<n-button
+					quaternary
+					size="small"
+					class="add-filters-reset-btn"
+					@click="resetFilters"
+				>
+					<template #icon>
+						<Icon name="carbon:filter-reset" :size="16" />
+					</template>
+					{{ t("bookingCalendar.filters.reset") }}
+				</n-button>
 			</div>
 		</n-card>
 
-		<n-card>
+		<!--
+			The branch's co-working seats, and lending a room to co-working when
+			they run out. After lending or taking a room back the calendar
+			reloads: the room's cells and the co_space's occupancy both changed.
+		-->
+		<CoworkingPoolPanel
+			v-if="poolBranchId !== null"
+			:branch-id="poolBranchId"
+			:rooms="lendableRooms"
+			:today="districtToday()"
+			@changed="load"
+		/>
+
+		<n-card class="add-calendar-card">
 			<n-spin :show="isLoading">
 				<div class="add-calendar-wrap">
 					<FullCalendar ref="refCalendar" :options="calendarOptions" />
 				</div>
 
 				<div class="mt-4 flex flex-wrap items-center gap-4 text-xs">
-					<span class="font-medium">{{ t("bookingCalendar.legend.title") }}</span>
+					<span class="font-semibold opacity-80">{{ t("bookingCalendar.legend.title") }}:</span>
 					<span v-for="status in LEGEND_STATUSES" :key="status" class="flex items-center gap-2">
 						<span class="add-legend-swatch" :class="`c-${status}`" />
-						{{ t(`allBookings.status.${status}`) }}
+						<span class="font-medium">{{ t(`allBookings.status.${status}`) }}</span>
 					</span>
 					<span class="flex items-center gap-2">
 						<span class="add-legend-swatch c-closed" />
-						{{ t("bookingCalendar.legend.closed") }}
+						<span class="font-medium">{{ t("bookingCalendar.legend.closed") }}</span>
 					</span>
 				</div>
 			</n-spin>
@@ -91,9 +121,14 @@
 		<n-modal
 			v-model:show="detailVisible"
 			preset="card"
-			class="max-w-md"
+			class="max-w-md add-detail-modal"
 			:title="t('bookingCalendar.detail.title')"
 		>
+			<template #header-extra>
+				<n-tag v-if="selected" :type="STATUS_TAG_TYPE[selected.status]" size="small" :bordered="false" class="font-semibold">
+					{{ selected.statusLabel }}
+				</n-tag>
+			</template>
 			<n-descriptions v-if="selected" :column="1" label-placement="left" bordered size="small">
 				<n-descriptions-item :label="t('bookingCalendar.detail.member')">
 					<div class="flex flex-col">
@@ -173,77 +208,79 @@
 				</n-form-item>
 
 				<!--
-					Duration first, then the time. The server lists only starts that
-					can hold the whole booking, so an operator never picks a time and
-					then finds no length fits before the next booking or closing.
-					The lengths are the ones this space accepts, as the server
-					resolved them — none are invented here.
+					A booking is a run of the space's own cells, picked by its first
+					and last cell — the same as the member app. No duration comes
+					first: the cells are the server's, each judged on its own, and
+					the run's length follows from the two taps. A free-form clock
+					would let an operator enter 14:07 on a 30-minute grid and learn
+					it was wrong only from the 422.
 				-->
-				<n-form-item v-if="durationOptions.length > 0" :label="t('bookingCalendar.create.duration')">
-					<div class="add-slot-grid add-duration-grid">
-						<button
-							v-for="minutes in durationOptions"
-							:key="minutes"
-							type="button"
-							class="add-slot"
-							:class="{ 'add-slot--active': createForm.durationMinutes === minutes }"
-							:aria-pressed="createForm.durationMinutes === minutes"
-							@click="createForm.durationMinutes = minutes"
-						>
-							{{ durationLabel(minutes) }}
-						</button>
-					</div>
-				</n-form-item>
-
-				<!--
-					The start time is chosen from the slots the server says exist,
-					never typed. A free-form clock lets an operator enter 14:07 on
-					a space with 30-minute slots and learn it was wrong only from
-					the 422 — and it cannot show that 14:00 is already taken.
-				-->
-				<n-form-item :label="t('bookingCalendar.create.start')">
+				<n-form-item :label="t('bookingCalendar.create.time')">
 					<div class="flex w-full flex-col gap-2">
 						<n-spin :show="isLoadingSlots" :size="14">
 							<div v-if="slotsBanner" class="add-slot-note">{{ slotsBanner }}</div>
 
-							<div v-else-if="slots.length > 0" class="add-slot-grid">
-								<!--
-									A taken slot stays visible and disabled rather than
-									being dropped: "2pm is booked" and "2pm does not
-									exist here" are different facts, and an operator
-									needs to tell them apart.
-								-->
-								<button
-									v-for="slot in slots"
-									:key="slot.start_time"
-									type="button"
-									class="add-slot"
-									:class="{
-										'add-slot--active': createForm.start === slot.start_time,
-										'add-slot--taken': !slot.is_available
-									}"
-									:disabled="!slot.is_available"
-									:title="slot.reason ?? undefined"
-									:aria-pressed="createForm.start === slot.start_time"
-									@click="selectSlot(slot)"
-								>
-									<span>{{ slot.label }}</span>
-									<span class="add-slot__meta">{{ slot.end_time }}</span>
-								</button>
-							</div>
+							<template v-else-if="slots.length > 0">
+								<p class="add-slot-counts">{{ t("bookingCalendar.create.pickHint") }}</p>
+								<div class="add-slot-grid">
+									<!--
+										A taken cell stays visible and disabled rather than
+										being dropped: "2pm is booked" and "2pm does not
+										exist here" are different facts, and an operator
+										needs to tell them apart. Cells whose time has gone
+										— started, or inside the minimum notice — are not
+										shown at all: nothing can be done with them.
+									-->
+									<button
+										v-for="slot in slots"
+										:key="slot.start_time"
+										type="button"
+										class="add-slot"
+										:class="{
+											'add-slot--active': isInRun(slot),
+											'add-slot--taken': !slot.is_available
+										}"
+										:disabled="!slot.is_available"
+										:aria-pressed="isInRun(slot)"
+										@click="selectSlot(slot)"
+									>
+										<!--
+											The server's own "01:00 PM", shown as sent and sent as
+											shown — one format for the start, the end and the
+											selected run, with nothing converted on either side.
+										-->
+										<span>{{ slot.start_time }}</span>
+										<span class="add-slot__meta">{{ slot.end_time }}</span>
+									</button>
+								</div>
+							</template>
 
 							<div v-else-if="!isLoadingSlots" class="add-slot-note">
 								{{ t("bookingCalendar.create.noSlots") }}
 							</div>
 						</n-spin>
 
-						<p v-if="slotCountsNote" class="add-slot-counts">{{ slotCountsNote }}</p>
+						<p v-if="slotCountsNote" class="add-slot-counts add-slot-counts--hint">{{ slotCountsNote }}</p>
 
-						<p v-if="selectedSlot" class="add-slot-counts">
-							{{ t("bookingCalendar.create.endsAt", { time: selectedSlot.end_time }) }}
-							<template v-if="selectedSlot.points !== undefined">
-								· {{ formatNumber(selectedSlot.points) }} {{ t("bookingCalendar.create.points") }}
-							</template>
+						<div v-if="selectedRun" class="add-slot-counts add-slot-counts--selected">
+							<Icon name="carbon:checkmark" :size="18" class="shrink-0 mt-0.5" />
+							<div class="flex flex-col gap-0.5 grow">
+								<span class="font-semibold text-sm leading-tight">
+									<template v-if="locale === 'ar'">
+										من <bdi dir="ltr">{{ selectedRun.startTime }}</bdi> إلى <bdi dir="ltr">{{ selectedRun.endTime }}</bdi>
+									</template>
+									<template v-else>{{ selectedRun.startTime }} – {{ selectedRun.endTime }}</template>
+								</span>
+								<span class="text-xs opacity-85 font-medium leading-tight">
+									· {{ hoursLabel(selectedRun.minutes) }}
+								</span>
+							</div>
+						</div>
+						<p v-if="runTooShort" class="add-slot-warning">
+							<Icon name="carbon:warning" :size="16" class="shrink-0" />
+							<span>
+								{{ t("bookingCalendar.create.tooShort", { minimum: hoursLabel(minimumMinutes) }) }}
+							</span>
 						</p>
 					</div>
 				</n-form-item>
@@ -302,6 +339,7 @@ import {
 } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import CoworkingPoolPanel from "@/add-os/modules/booking/components/CoworkingPoolPanel.vue"
 import { spaceTypeLabel } from "@/add-os/modules/booking/config/space-type-label"
 import { SPACE_TYPES } from "@/add-os/modules/spatial/types/space"
 import { ApiError } from "@/add-os/services/api"
@@ -390,6 +428,13 @@ const error = ref<ApiError | null>(null)
 const spaceType = ref<SpaceType | null>(null)
 const spaceId = ref<number | null>(null)
 
+const hasFilters = computed(() => spaceType.value !== null || spaceId.value !== null)
+
+function resetFilters(): void {
+	spaceType.value = null
+	spaceId.value = null
+}
+
 /**
  * What the calendar is currently showing.
  *
@@ -416,17 +461,6 @@ function districtToday(): string {
 const closures = computed(
 	() => new Map((response.value?.branch_hours?.upcoming_closures ?? []).map(closure => [closure.date, closure.reason]))
 )
-
-/** The next date, from the district's today, that is not an upcoming closure. */
-function nextOpenDate(): string {
-	const date = new Date(`${districtToday()}T12:00:00`)
-	// Bounded: a year of consecutive closures is not a real schedule, and an
-	// unbounded loop over server data is not worth the risk.
-	for (let i = 0; i < 366 && closures.value.has(toIsoDate(date)); i++) {
-		date.setDate(date.getDate() + 1)
-	}
-	return toIsoDate(date)
-}
 
 const totalsSummary = computed(() => {
 	const totals = response.value?.totals
@@ -456,6 +490,20 @@ const spaceOptions = computed<SelectOption[]>(() =>
 
 /** The create form offers the same spaces, minus any the filter narrowed away. */
 const creatableSpaceOptions = spaceOptions
+
+/** The branch whose co-working pool the panel shows: the calendar's. */
+const poolBranchId = computed(() => response.value?.meta.branch_id ?? null)
+
+/** Rooms in view, which staff may lend to co-working when it overflows. */
+const lendableRooms = computed(() =>
+	(response.value?.resources ?? [])
+		.filter(resource => resource.space.space_type === "room")
+		.map(resource => ({
+			id: resource.space.id,
+			title: resource.space.title ?? spaceTypeLabel(t, resource.space.space_type),
+			capacity: resource.space.capacity
+		}))
+)
 
 // ---------------------------------------------------------------
 // Detail — declared before the calendar options that populate it
@@ -560,6 +608,7 @@ const calendarOptions = computed<CalendarOptions>(() => ({
 	direction: locale.value === "ar" ? "rtl" : "ltr",
 	height: "auto",
 	dayMaxEvents: 3,
+	moreLinkText: (n: number) => `+${n}`,
 	navLinks: true,
 	events: events.value,
 	eventTimeFormat: { hour: "2-digit", minute: "2-digit", meridiem: "short" },
@@ -571,18 +620,22 @@ const calendarOptions = computed<CalendarOptions>(() => ({
 	// moving a booking is an approval-bearing action that lives on the
 	// reception screens.
 	//
-	// A past day or an upcoming closure opens nothing: neither can be booked —
-	// the server refuses a past start and a closed day has no open period — so
-	// a form opened on one could only fail.
+	// A day that cannot take a booking opens nothing — past, an upcoming
+	// closure, a weekday the branch never opens, or beyond the booking window —
+	// because a form opened on one could only fail.
 	dateClick(info) {
 		const date = info.dateStr.slice(0, 10)
-		if (date < districtToday() || closures.value.has(date)) return
+		if (!isBookableDate(date)) return
 		openCreate({ date })
 	},
-	// Marks a closed day's cell so its number is struck through and it reads
-	// as unclickable, matching the struck-through date in the picker.
+	// A closed day — an upcoming closure or a weekday the branch never opens —
+	// has its number struck through, matching the struck-through date in the
+	// picker. A day beyond the booking window is only dimmed: it is open, just
+	// not bookable yet.
 	dayCellClassNames(arg) {
-		return closures.value.has(toIsoDate(arg.date)) ? ["add-day--closed"] : []
+		const date = toIsoDate(arg.date)
+		if (closures.value.has(date) || isClosedWeekday(date)) return ["add-day--closed"]
+		return isBeyondWindow(date) ? ["add-day--out-of-window"] : []
 	},
 	eventClick(info) {
 		const props = info.event.extendedProps as Record<string, unknown>
@@ -639,35 +692,89 @@ const createForm = ref({
 	user_id: null as number | null,
 	space_id: null as number | null,
 	date: toIsoDate(new Date()),
-	/** A `start_time` from the server's own slot list, never typed. */
-	start: "" as string,
-	/** One of the server's `duration_options_minutes`, chosen before the time. */
-	durationMinutes: null as number | null,
+	/** The first cell of the run — a `start_time` from the server's list, never typed. */
+	from: "" as string,
+	/** The last cell of the run, by its `start_time`; the booking ends at its `end_time`. */
+	to: "" as string,
 	note: ""
 })
 
+/**
+ * The cells, exactly as the server sent them. A cell whose time to be booked
+ * has gone — started, or inside the minimum notice — is not among them: the
+ * server leaves it out, for the desk as for the member app. Every other
+ * refusal is sent, and stays on screen with its reason.
+ */
 const slots = ref<AvailabilitySlot[]>([])
 const isLoadingSlots = ref(false)
 const slotsBanner = ref<string | null>(null)
 
-/** The lengths this space accepts, from the server's own rules block. */
-const durationOptions = ref<number[]>([])
-
-/**
- * The chosen slot, which is the whole booking: requested for a duration, its
- * `end_time` is where the booking ends and it carries the price.
- */
-const selectedSlot = computed(
-	() => slots.value.find(slot => slot.start_time === createForm.value.start) ?? null
-)
+/** Each cell's length, from the last slots asked for: a run is its cells × this. */
+const granularityMinutes = ref(0)
 
 /** "1.5h" — the number through the shared formatter, the unit through i18n. */
-function durationLabel(minutes: number): string {
+function hoursLabel(minutes: number): string {
 	return t("bookingCalendar.create.durationHours", { hours: formatNumber(minutes / 60) })
 }
 
 /**
- * How many of the day's slots are free, so an operator can see at a glance
+ * Where a cell sits in the day, by its `start_time`.
+ *
+ * Cells are ordered by position, never by comparing their times: the times
+ * are 12-hour ("01:00 PM"), which sort wrongly as text — "01:00 PM" comes
+ * before "11:00 AM".
+ */
+function indexOf(startTime: string): number {
+	return slots.value.findIndex(slot => slot.start_time === startTime)
+}
+
+/**
+ * The chosen run: the cells from the first to the last, in order.
+ *
+ * `null` unless every cell between is free and each starts where the one
+ * before it ends — a taken cell or the gap of a closed hour breaks a run, and
+ * a broken run is not a booking.
+ */
+const selectedRun = computed(() => {
+	const first = indexOf(createForm.value.from)
+	const last = indexOf(createForm.value.to)
+	if (first === -1 || last === -1 || last < first) return null
+
+	const cells = slots.value.slice(first, last + 1)
+	const unbroken = cells.every(
+		(cell, index) => cell.is_available && (index === 0 || cell.start_time === cells[index - 1].end_time)
+	)
+	if (!unbroken) return null
+
+	return {
+		first,
+		last,
+		// Shown and posted exactly as the server wrote them.
+		startTime: cells[0].start_time,
+		endTime: cells[cells.length - 1].end_time,
+		// Unbroken, so every cell is one step of the grid — not parsed from
+		// the 12-hour text.
+		minutes: cells.length * granularityMinutes.value
+	}
+})
+
+/**
+ * The shortest booking, from the calendar's setup — read once, as the member
+ * app reads it once from the space details. One cell until it arrives.
+ */
+const minimumMinutes = computed(() => response.value?.booking_window?.min_duration_minutes ?? 0)
+
+/** A picked run shorter than the minimum: said on screen, and not submittable. */
+const runTooShort = computed(() => selectedRun.value !== null && selectedRun.value.minutes < minimumMinutes.value)
+
+function isInRun(slot: AvailabilitySlot): boolean {
+	const run = selectedRun.value
+	const index = indexOf(slot.start_time)
+	return run !== null && index >= run.first && index <= run.last
+}
+
+/**
+ * How many of the day's cells are free, so an operator can see at a glance
  * that a day is busy rather than inferring it from greyed chips.
  */
 const slotCountsNote = computed(() => {
@@ -676,21 +783,68 @@ const slotCountsNote = computed(() => {
 	return t("bookingCalendar.create.slotCounts", { available, total: slots.value.length })
 })
 
+// ---------------------------------------------------------------
+// Which dates can be booked — the calendar's setup, as the member app has it
+// ---------------------------------------------------------------
+
+const WEEKDAYS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"] as const
+
+function addDays(isoDate: string, days: number): string {
+	const date = new Date(`${isoDate}T12:00:00`)
+	date.setDate(date.getDate() + days)
+	return toIsoDate(date)
+}
+
+/** A weekday the branch does not open on at all, from its ordinary week. */
+function isClosedWeekday(isoDate: string): boolean {
+	const open = response.value?.branch_hours?.open_weekdays
+	if (!open || open.length === 0) return false
+	return !open.includes(WEEKDAYS[new Date(`${isoDate}T12:00:00`).getDay()])
+}
+
+/** Further ahead than `max_days_ahead` allows; `null` is no limit. */
+function isBeyondWindow(isoDate: string): boolean {
+	const maxDaysAhead = response.value?.booking_window?.max_days_ahead ?? null
+	return maxDaysAhead !== null && isoDate > addDays(districtToday(), maxDaysAhead)
+}
+
 /**
- * Days before the district's today, upcoming closures, and days the calendar
- * itself reports closed for every space, are not offerable.
+ * Whether a date can take a booking at all, from the setup alone: not past,
+ * not an upcoming closure, not a weekday the branch never opens, not beyond the
+ * booking window. The same checks the member app makes from the space details,
+ * and the reason the grid and the picker refuse the same dates.
  *
- * A past day is refused by the server (`start_in_the_past`) and every slot on
- * it comes back `past`, so offering it is only a trap. Closures come from the
- * server's `upcoming_closures` rather than the days in view, because the
- * picker navigates to months the calendar has not loaded. The last check
- * mirrors the closed-day shading for the range in view, which also covers a
- * weekday with no schedule at all.
+ * It says nothing about a date being full — that depends on other bookings,
+ * and the slots for the date answer it.
+ */
+function isBookableDate(isoDate: string): boolean {
+	return !(
+		isoDate < districtToday()
+		|| closures.value.has(isoDate)
+		|| isClosedWeekday(isoDate)
+		|| isBeyondWindow(isoDate)
+	)
+}
+
+/** The next date, from the district's today, that can take a booking. */
+function nextOpenDate(): string {
+	let date = districtToday()
+	// Bounded: a year with no bookable day is not a real schedule, and an
+	// unbounded loop over server data is not worth the risk.
+	for (let i = 0; i < 366 && !isBookableDate(date); i++) {
+		date = addDays(date, 1)
+	}
+	return isBookableDate(date) ? date : districtToday()
+}
+
+/**
+ * The picker refuses what the grid refuses, plus a day the calendar reports
+ * closed for every space in view — which also covers a space-level closure the
+ * branch's week does not show.
  */
 function isDateDisabled(timestamp: number): boolean {
 	const date = toIsoDate(new Date(timestamp))
-	if (date < districtToday()) return true
-	if (closures.value.has(date)) return true
+	if (!isBookableDate(date)) return true
 
 	const resources = response.value?.resources ?? []
 	if (resources.length === 0) return false
@@ -702,23 +856,21 @@ const memberOptions = computed<SelectOption[]>(() =>
 )
 
 /**
- * Nothing about availability is judged here any more.
+ * Nothing about availability is judged here beyond the run itself.
  *
- * The form can only submit a start the server listed as available and a
- * duration it marked bookable, so the client no longer needs an opinion about
- * granularity, minimum duration, overlap, buffer or back-dating — it renders
- * the server's verdict instead of forming its own. That verdict can still go
- * stale between load and submit, which is why the POST re-checks under a row
- * lock and its 422 is still shown verbatim.
+ * The form can only submit an unbroken run of cells the server listed as free,
+ * at least the space's minimum long, so the client needs no opinion about
+ * granularity, overlap, buffer or back-dating — it renders the server's
+ * verdict. That verdict can still go stale between load and submit, which is
+ * why the POST re-checks the whole run under a row lock and its 422 is shown
+ * verbatim.
  */
 const canSubmit = computed(
 	() =>
 		createForm.value.user_id !== null
 		&& createForm.value.space_id !== null
-		&& createForm.value.start !== ""
-		&& createForm.value.durationMinutes !== null
-		&& selectedSlot.value !== null
-		&& selectedSlot.value.is_available
+		&& selectedRun.value !== null
+		&& !runTooShort.value
 )
 
 /**
@@ -733,7 +885,8 @@ function openCreate(prefill?: { date?: string, spaceId?: number }): void {
 	// Without a clicked day, the next one that can actually be booked: on a
 	// holiday, today would open the form on a date the picker already refuses.
 	createForm.value.date = prefill?.date ?? nextOpenDate()
-	createForm.value.start = ""
+	createForm.value.from = ""
+	createForm.value.to = ""
 
 	if (prefill?.spaceId !== undefined) {
 		createForm.value.space_id = prefill.spaceId
@@ -753,21 +906,16 @@ function openCreate(prefill?: { date?: string, spaceId?: number }): void {
 }
 
 /**
- * The slots for the chosen space, date and duration.
+ * The cells for the chosen space and date.
  *
- * Re-fetched on every change of any of the three, because a slot list is only
- * true for one space, one day and one length — reusing yesterday's would offer
- * windows that are already gone, and a 1h list says nothing about 3h.
- *
- * Until a duration is chosen the call returns the plain grid, whose only use
- * here is the space's `duration_options_minutes`: the shortest is preselected
- * (or the current choice kept, if this space accepts it too), and that change
- * re-runs this with the duration.
+ * Re-fetched on every change of either, because a cell list is only true for
+ * one space and one day — reusing yesterday's would offer windows that are
+ * already gone.
  */
 let slotsRequest = 0
 
 async function loadSlots(): Promise<void> {
-	const { space_id: spaceId, date, durationMinutes } = createForm.value
+	const { space_id: spaceId, date } = createForm.value
 	if (spaceId === null || !date) {
 		slots.value = []
 		slotsBanner.value = null
@@ -778,47 +926,59 @@ async function loadSlots(): Promise<void> {
 	isLoadingSlots.value = true
 	slotsBanner.value = null
 	try {
-		const response_ = await getSpaceSlots(spaceId, date, durationMinutes)
-		// A slower answer for a space, date or length the operator has since
-		// moved off must not overwrite the current one.
+		const response_ = await getSpaceSlots(spaceId, date)
+		// A slower answer for a space or date the operator has since moved off
+		// must not overwrite the current one.
 		if (request !== slotsRequest) return
 
-		durationOptions.value = response_.rules.duration_options_minutes
-		if (durationMinutes === null || !durationOptions.value.includes(durationMinutes)) {
-			slots.value = []
-			createForm.value.durationMinutes = durationOptions.value[0] ?? null
-			// Closed or not, the banner belongs on screen now rather than
-			// after the follow-up call.
-			slotsBanner.value = response_.closed_banner?.text ?? null
-			return
-		}
-
-		slots.value = response_.data
+		granularityMinutes.value = response_.meta.granularity_minutes
+		slots.value = response_.slots
 		// A closed day carries the server's own banner, reason included.
 		slotsBanner.value = response_.closed_banner?.text ?? null
 	} catch (caught) {
 		if (!(caught instanceof ApiError)) throw caught
 		if (request !== slotsRequest) return
 		slots.value = []
-		// Including a length this space refuses: the POST's own sentence.
 		slotsBanner.value = caught.data?.message ?? t("bookingCalendar.create.slotsError")
 	} finally {
 		if (request === slotsRequest) isLoadingSlots.value = false
 	}
 }
 
+/**
+ * Picks the run, first cell then last.
+ *
+ * The first tap starts a run of one cell. A later tap on a free cell after it
+ * ends the run there, if every cell between is free and unbroken; anything
+ * else — an earlier cell, a run already made, a gap in between — starts a new
+ * run at the tapped cell. A taken cell cannot be picked at all.
+ */
 function selectSlot(slot: AvailabilitySlot): void {
 	if (!slot.is_available) return
-	createForm.value.start = slot.start_time
+
+	const { from, to } = createForm.value
+	const startingNew = from === "" || from !== to || indexOf(slot.start_time) <= indexOf(from)
+	if (startingNew) {
+		createForm.value.from = slot.start_time
+		createForm.value.to = slot.start_time
+		return
+	}
+
+	createForm.value.to = slot.start_time
+	// A broken stretch between the two taps is not a run: start over here.
+	if (selectedRun.value === null) {
+		createForm.value.from = slot.start_time
+		createForm.value.to = slot.start_time
+	}
 }
 
-// A new space, date or length invalidates any chosen time: the window that was
-// free on Tuesday says nothing about Wednesday, and one that holds 1h may not
-// hold 3h. The length itself is kept — it is not about any one date.
+// A new space or date invalidates the chosen run: the cells free on Tuesday
+// say nothing about Wednesday.
 watch(
-	() => [createForm.value.space_id, createForm.value.date, createForm.value.durationMinutes],
+	() => [createForm.value.space_id, createForm.value.date],
 	() => {
-		createForm.value.start = ""
+		createForm.value.from = ""
+		createForm.value.to = ""
 		if (createVisible.value) void loadSlots()
 	}
 )
@@ -849,10 +1009,10 @@ async function submitCreate(): Promise<void> {
 			// Wall-clock in the district's own timezone, which is what the
 			// endpoint expects — an offset here would be re-interpreted.
 			//
-			// The end is the chosen slot's own end — the server built that
-			// window for the chosen length — not minutes added here.
-			start_at: `${createForm.value.date} ${createForm.value.start}`,
-			end_at: `${createForm.value.date} ${(selectedSlot.value as AvailabilitySlot).end_time}`,
+			// The run's own first start and last end, both the server's values
+			// — not minutes added here.
+			start_at: `${createForm.value.date} ${selectedRun.value!.startTime}`,
+			end_at: `${createForm.value.date} ${selectedRun.value!.endTime}`,
 			...(createForm.value.note ? { note: createForm.value.note } : {})
 		})
 		message.success(t("bookingCalendar.create.success"))
@@ -902,119 +1062,609 @@ defineExpose({
 
 <style scoped lang="scss">
 /**
- * Only what FullCalendar itself needs to sit inside a Naive card and to colour
- * a booking by status. Every value is a theme variable the theme store injects
- * onto <html>, so this follows the brand without a second palette.
+ * ADD OS Operations Calendar styling:
+ * Fully styled for theme compatibility, RTL/LTR support, crisp readable slots,
+ * opaque elevated popover dialogs, and accessible contrast.
  */
 .add-booking-calendar {
+	position: relative;
+	z-index: 2;
+
+	.add-total-chip {
+		padding: var(--add-space-2, 0.5rem) var(--add-space-4, 1rem);
+		border-radius: var(--border-radius, 8px);
+		background-color: var(--bg-secondary-color);
+		border: 1px solid var(--border-color);
+		min-inline-size: 5.5rem;
+		transition: border-color 0.15s ease;
+	}
+
+	.add-branch-hours-bar {
+		padding: var(--add-space-2, 0.5rem) var(--add-space-3, 0.75rem);
+		background-color: var(--bg-secondary-color);
+		border-radius: var(--border-radius, 8px);
+		border: 1px solid var(--border-color);
+	}
+
+	.add-calendar-card {
+		position: relative;
+		z-index: 2;
+		overflow: visible;
+
+		:deep(.n-card__content) {
+			overflow: visible;
+		}
+	}
+
 	.add-calendar-wrap {
-		min-height: 30rem;
+		min-height: 34rem;
 	}
 
 	:deep(.fc) {
 		--fc-border-color: var(--border-color);
-		--fc-page-bg-color: transparent;
-		--fc-neutral-bg-color: var(--bg-secondary-color);
-		--fc-today-bg-color: rgba(var(--primary-color-rgb) / 0.08);
+		--fc-page-bg-color: var(--bg-default-color, #ffffff);
+		--fc-neutral-bg-color: var(--bg-secondary-color, #f7f5f2);
+		--fc-today-bg-color: rgba(var(--primary-color-rgb) / 0.06);
+		--fc-event-text-color: var(--fg-default-color, #333333);
+		--fc-event-border-color: var(--border-color);
+		--fc-event-bg-color: var(--bg-secondary-color);
+		--fc-now-indicator-color: var(--primary-color);
 
-		.fc-toolbar-title {
-			font-size: 1.125rem;
-			font-weight: 600;
-		}
+		font-family: inherit;
 
-		.fc-button {
-			background-color: var(--bg-secondary-color);
-			border-color: var(--border-color);
-			color: var(--fg-default-color);
-			box-shadow: none !important;
-			text-transform: capitalize;
+		// ── Toolbar ──────────────────────────────────────────────
+		.fc-toolbar {
+			margin-bottom: 1.25rem !important;
+			gap: 0.75rem;
+			flex-wrap: wrap;
 
-			&:hover,
-			&.fc-button-active {
-				background-color: rgba(var(--primary-color-rgb) / 0.15);
-				border-color: var(--primary-color);
-				color: var(--primary-color);
+			.fc-toolbar-title {
+				font-size: 1.25rem;
+				font-weight: 700;
+				color: var(--fg-default-color);
+				letter-spacing: -0.01em;
+			}
+
+			.fc-button {
+				background-color: var(--bg-secondary-color);
+				border-color: var(--border-color);
+				color: var(--fg-default-color);
+				box-shadow: none !important;
+				text-transform: capitalize;
+				font-weight: 500;
+				font-size: 0.8125rem;
+				padding: 0.45rem 0.9rem;
+				border-radius: 6px;
+				transition: all 0.15s ease;
+
+				&:hover {
+					background-color: rgba(var(--primary-color-rgb) / 0.12);
+					border-color: var(--primary-color);
+					color: var(--primary-color);
+				}
+
+				&.fc-button-active {
+					background-color: var(--primary-color) !important;
+					border-color: var(--primary-color) !important;
+					color: #ffffff !important;
+					font-weight: 600;
+				}
+
+				&:disabled {
+					opacity: 0.45;
+					cursor: not-allowed;
+				}
+			}
+
+			.fc-button-group {
+				gap: 1px;
+				border-radius: 7px;
+				overflow: hidden;
+
+				.fc-button {
+					border-radius: 0;
+					&:first-child {
+						border-start-start-radius: 6px;
+						border-end-start-radius: 6px;
+					}
+					&:last-child {
+						border-start-end-radius: 6px;
+						border-end-end-radius: 6px;
+					}
+				}
 			}
 		}
 
-		.fc-daygrid-day-number,
-		.fc-col-header-cell-cushion {
+		// ── Table & Headers ──────────────────────────────────────
+		.fc-scrollgrid {
+			border-radius: 8px;
+			overflow: hidden;
+		}
+
+		.fc-scrollgrid-section-sticky > * {
+			background: var(--bg-default-color, #ffffff) !important;
+		}
+
+		.fc-col-header-cell {
+			background-color: var(--bg-secondary-color);
+			padding: 8px 0;
+			border-color: var(--border-color);
+
+			.fc-col-header-cell-cushion {
+				color: var(--fg-secondary-color);
+				font-size: 0.8125rem;
+				font-weight: 600;
+				text-decoration: none;
+			}
+		}
+
+		// ── Day Grid & Days ──────────────────────────────────────
+		.fc-daygrid-day-number {
+			color: var(--fg-secondary-color);
+			font-size: 0.8125rem;
+			font-weight: 600;
+			padding: 6px 8px;
 			text-decoration: none;
 		}
 
-		// Status carries a border as well as a fill: colour alone is not a
-		// signal anyone can rely on, and `warning` against `danger` is the
-		// tightest pair in this palette.
+		.fc-day-today {
+			background-color: rgba(var(--primary-color-rgb) / 0.05) !important;
+
+			.fc-daygrid-day-number {
+				color: var(--primary-color);
+				font-weight: 700;
+			}
+		}
+
+		// ── Event Styling (Common, High-contrast, Accessible) ───
+		.fc-event {
+			font-family: inherit;
+			font-size: 0.8125rem;
+
+			.fc-event-main {
+				color: var(--fg-default-color) !important;
+			}
+			.fc-event-title {
+				color: var(--fg-default-color) !important;
+			}
+			.fc-event-time {
+				color: var(--fg-secondary-color) !important;
+			}
+		}
+
 		.fc-event.styled {
-			border-inline-start-width: 3px;
-			border-inline-start-style: solid;
-			padding-inline: 2px;
+			border-radius: 6px !important;
+			border-width: 1px !important;
+			border-style: solid !important;
+			border-inline-start-width: 4px !important;
+			border-inline-start-style: solid !important;
+			padding: 2px 4px !important;
 			cursor: pointer;
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+			transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+
+			&:hover {
+				box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12) !important;
+				z-index: 6 !important;
+			}
 
 			&.c-confirmed {
-				background-color: rgba(var(--success-color-rgb) / 0.12);
-				border-color: var(--success-color);
-				color: var(--fg-default-color);
+				background-color: rgba(var(--success-color-rgb) / 0.16) !important;
+				border-color: rgba(var(--success-color-rgb) / 0.35) !important;
+				border-inline-start-color: var(--success-color) !important;
+				color: var(--fg-default-color) !important;
+
+				&:hover {
+					background-color: rgba(var(--success-color-rgb) / 0.24) !important;
+				}
+				.fc-event-main,
+				.fc-event-title {
+					color: var(--fg-default-color) !important;
+				}
+				.fc-event-time {
+					color: var(--fg-secondary-color) !important;
+				}
 			}
 
 			&.c-pending {
-				background-color: rgba(var(--warning-color-rgb) / 0.14);
-				border-color: var(--warning-color);
-				color: var(--fg-default-color);
+				background-color: rgba(var(--warning-color-rgb) / 0.18) !important;
+				border-color: rgba(var(--warning-color-rgb) / 0.4) !important;
+				border-inline-start-color: var(--warning-color) !important;
+				color: var(--fg-default-color) !important;
+
+				&:hover {
+					background-color: rgba(var(--warning-color-rgb) / 0.26) !important;
+				}
+				.fc-event-main,
+				.fc-event-title {
+					color: var(--fg-default-color) !important;
+				}
+				.fc-event-time {
+					color: var(--fg-secondary-color) !important;
+				}
 			}
 
 			&.c-cancelled {
-				background-color: var(--bg-secondary-color);
-				border-color: var(--border-color);
-				color: var(--fg-secondary-color);
-				text-decoration: line-through;
+				background-color: var(--bg-secondary-color) !important;
+				border-color: var(--border-color) !important;
+				border-inline-start-color: var(--border-color) !important;
+				color: var(--fg-secondary-color) !important;
+				opacity: 0.7;
+
+				.fc-event-main,
+				.fc-event-title,
+				.fc-event-time {
+					color: var(--fg-secondary-color) !important;
+					text-decoration: line-through;
+				}
 			}
 
 			&.c-rejected {
-				background-color: rgba(var(--error-color-rgb) / 0.12);
-				border-color: var(--error-color);
-				color: var(--fg-default-color);
+				background-color: rgba(var(--error-color-rgb) / 0.16) !important;
+				border-color: rgba(var(--error-color-rgb) / 0.35) !important;
+				border-inline-start-color: var(--error-color) !important;
+				color: var(--fg-default-color) !important;
+
+				&:hover {
+					background-color: rgba(var(--error-color-rgb) / 0.24) !important;
+				}
+				.fc-event-main,
+				.fc-event-title {
+					color: var(--fg-default-color) !important;
+				}
+				.fc-event-time {
+					color: var(--fg-secondary-color) !important;
+				}
 			}
 		}
 
+		// ── TimeGrid (Week & Day Views) ─────────────────────────
+		.fc-timegrid-slot {
+			height: 2.25rem !important;
+			border-bottom: 0 !important;
+		}
+
+		.fc-timegrid-slot-minor {
+			border-top-style: dashed !important;
+			border-top-color: rgba(var(--border-color-rgb, 120, 120, 120) / 0.25) !important;
+		}
+
+		.fc-timegrid-slot-label {
+			vertical-align: middle;
+			font-size: 0.75rem;
+			font-weight: 600;
+			color: var(--fg-secondary-color);
+		}
+
+		.fc-timegrid-axis-cushion {
+			padding: 0 8px !important;
+		}
+
+		.fc-timegrid-now-indicator-line {
+			border-color: var(--primary-color) !important;
+			border-width: 2px 0 0 !important;
+		}
+
+		.fc-timegrid-now-indicator-arrow {
+			border-color: var(--primary-color) !important;
+		}
+
+		.fc-timegrid-event {
+			margin-bottom: 2px !important;
+
+			.fc-event-main {
+				padding: 6px 8px !important;
+				display: flex !important;
+				flex-direction: column !important;
+				gap: 3px !important;
+				color: var(--fg-default-color) !important;
+			}
+
+			.fc-event-time {
+				font-size: 0.75rem !important;
+				font-weight: 700 !important;
+				color: var(--fg-secondary-color) !important;
+				line-height: 1.2 !important;
+				margin: 0 !important;
+			}
+
+			.fc-event-title {
+				font-size: 0.8125rem !important;
+				font-weight: 600 !important;
+				color: var(--fg-default-color) !important;
+				line-height: 1.35 !important;
+				white-space: normal !important;
+				margin: 0 !important;
+			}
+		}
+
+		// ── DayGrid Events (Month View) ─────────────────────────
+		.fc-daygrid-event {
+			border-radius: 4px !important;
+			padding: 2px 6px !important;
+			margin: 2px 0 !important;
+			display: flex !important;
+			align-items: center !important;
+			gap: 4px !important;
+
+			// Clean modern appearance: hide the conflicting default dot
+			.fc-daygrid-event-dot {
+				display: none !important;
+			}
+
+			.fc-event-time {
+				font-size: 0.72rem !important;
+				font-weight: 700 !important;
+				color: var(--fg-secondary-color) !important;
+				flex-shrink: 0 !important;
+			}
+
+			.fc-event-title {
+				font-size: 0.75rem !important;
+				font-weight: 500 !important;
+				color: var(--fg-default-color) !important;
+				overflow: hidden !important;
+				text-overflow: ellipsis !important;
+				white-space: nowrap !important;
+			}
+		}
+
+		// ── Month "+more" link ──────────────────────────────────
+		.fc-more-link {
+			display: inline-flex !important;
+			align-items: center !important;
+			padding: 2px 7px !important;
+			font-size: 0.72rem !important;
+			font-weight: 700 !important;
+			color: var(--primary-color) !important;
+			background-color: rgba(var(--primary-color-rgb) / 0.1) !important;
+			border-radius: 6px !important;
+			margin: 2px 3px !important;
+			text-decoration: none !important;
+			cursor: pointer;
+			transition: all 0.15s ease;
+
+			&:hover {
+				background-color: var(--primary-color) !important;
+				color: #ffffff !important;
+				transform: translateY(-1px);
+				box-shadow: 0 2px 6px rgba(var(--primary-color-rgb) / 0.3);
+			}
+		}
+
+		// ── More Popover Dialog ─────────────────────────────────
+		.fc-popover {
+			background: var(--add-surface-raised, #ffffff) !important;
+			border: 1px solid var(--border-color) !important;
+			border-radius: 14px !important;
+			box-shadow: 0 20px 48px -8px rgba(0, 0, 0, 0.22), 0 8px 18px -4px rgba(0, 0, 0, 0.08) !important;
+			z-index: 9999 !important;
+			overflow: hidden !important;
+			min-width: 330px !important;
+			max-width: min(420px, 92vw) !important;
+			width: 360px !important;
+			max-height: min(420px, calc(100vh - 140px)) !important;
+			display: flex !important;
+			flex-direction: column !important;
+			backdrop-filter: blur(12px) !important;
+
+			.fc-popover-header {
+				background: var(--bg-secondary-color) !important;
+				border-bottom: 1px solid var(--border-color) !important;
+				padding: 12px 16px !important;
+				display: flex !important;
+				align-items: center !important;
+				justify-content: space-between !important;
+				flex-shrink: 0 !important;
+
+				.fc-popover-title {
+					font-size: 0.9375rem !important;
+					font-weight: 700 !important;
+					color: var(--fg-default-color) !important;
+					margin: 0 !important;
+					display: flex !important;
+					align-items: center !important;
+					gap: 6px !important;
+					letter-spacing: -0.01em;
+				}
+
+				.fc-popover-close {
+					cursor: pointer !important;
+					width: 26px !important;
+					height: 26px !important;
+					border-radius: 50% !important;
+					display: flex !important;
+					align-items: center !important;
+					justify-content: center !important;
+					opacity: 0.65;
+					font-size: 1.25rem !important;
+					font-weight: 300 !important;
+					font-family: inherit !important;
+					line-height: 1 !important;
+					color: var(--fg-default-color) !important;
+					background: rgba(var(--fg-secondary-color-rgb, 120, 120, 120) / 0.08) !important;
+					transition: all 0.15s ease !important;
+
+					&:hover {
+						opacity: 1 !important;
+						background-color: rgba(var(--error-color-rgb, 239, 68, 68) / 0.15) !important;
+						color: var(--error-color, #dc2626) !important;
+						transform: scale(1.08);
+					}
+				}
+			}
+
+			.fc-popover-body {
+				padding: 10px 12px !important;
+				display: flex !important;
+				flex-direction: column !important;
+				gap: 8px !important;
+				background: var(--add-surface-raised, #ffffff) !important;
+				max-height: min(320px, calc(100vh - 220px)) !important;
+				overflow-y: auto !important;
+				overscroll-behavior: contain;
+				scrollbar-width: thin !important;
+				scrollbar-color: rgba(var(--primary-color-rgb, 14, 165, 233) / 0.3) transparent !important;
+
+				&::-webkit-scrollbar {
+					width: 5px !important;
+				}
+
+				&::-webkit-scrollbar-track {
+					background: transparent !important;
+				}
+
+				&::-webkit-scrollbar-thumb {
+					background: rgba(var(--primary-color-rgb, 14, 165, 233) / 0.25) !important;
+					border-radius: 10px !important;
+
+					&:hover {
+						background: rgba(var(--primary-color-rgb, 14, 165, 233) / 0.5) !important;
+					}
+				}
+
+				.fc-daygrid-event {
+					padding: 8px 12px !important;
+					margin: 0 !important;
+					border-radius: 8px !important;
+					display: flex !important;
+					align-items: center !important;
+					gap: 10px !important;
+					border-width: 1px !important;
+					border-style: solid !important;
+					border-inline-start-width: 4px !important;
+					border-inline-start-style: solid !important;
+					box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+					cursor: pointer !important;
+					transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease !important;
+
+					&:hover {
+						transform: translateY(-1px) !important;
+						box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+						z-index: 2 !important;
+					}
+
+					.fc-event-time {
+						font-size: 0.75rem !important;
+						font-weight: 700 !important;
+						padding: 3px 8px !important;
+						border-radius: 6px !important;
+						flex-shrink: 0 !important;
+						line-height: 1.3 !important;
+						background-color: rgba(255, 255, 255, 0.7) !important;
+						box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+					}
+
+					.fc-event-title {
+						font-size: 0.8125rem !important;
+						font-weight: 600 !important;
+						color: var(--fg-default-color) !important;
+						overflow: hidden !important;
+						text-overflow: ellipsis !important;
+						white-space: nowrap !important;
+						flex-grow: 1 !important;
+						line-height: 1.4 !important;
+					}
+
+					&.c-confirmed {
+						background-color: rgba(var(--success-color-rgb, 22, 163, 74) / 0.12) !important;
+						border-color: rgba(var(--success-color-rgb, 22, 163, 74) / 0.28) !important;
+						border-inline-start-color: var(--success-color, #16a34a) !important;
+
+						.fc-event-time {
+							background-color: rgba(var(--success-color-rgb, 22, 163, 74) / 0.18) !important;
+							color: var(--success-color, #16a34a) !important;
+						}
+
+						&:hover {
+							background-color: rgba(var(--success-color-rgb, 22, 163, 74) / 0.2) !important;
+						}
+					}
+
+					&.c-pending {
+						background-color: rgba(var(--warning-color-rgb, 202, 138, 4) / 0.12) !important;
+						border-color: rgba(var(--warning-color-rgb, 202, 138, 4) / 0.28) !important;
+						border-inline-start-color: var(--warning-color, #ca8a04) !important;
+
+						.fc-event-time {
+							background-color: rgba(var(--warning-color-rgb, 202, 138, 4) / 0.18) !important;
+							color: var(--warning-color, #ca8a04) !important;
+						}
+
+						&:hover {
+							background-color: rgba(var(--warning-color-rgb, 202, 138, 4) / 0.2) !important;
+						}
+					}
+
+					&.c-rejected {
+						background-color: rgba(var(--error-color-rgb, 220, 38, 38) / 0.12) !important;
+						border-color: rgba(var(--error-color-rgb, 220, 38, 38) / 0.28) !important;
+						border-inline-start-color: var(--error-color, #dc2626) !important;
+
+						.fc-event-time {
+							background-color: rgba(var(--error-color-rgb, 220, 38, 38) / 0.18) !important;
+							color: var(--error-color, #dc2626) !important;
+						}
+
+						&:hover {
+							background-color: rgba(var(--error-color-rgb, 220, 38, 38) / 0.2) !important;
+						}
+					}
+
+					&.c-cancelled {
+						background-color: var(--bg-secondary-color) !important;
+						border-color: var(--border-color) !important;
+						border-inline-start-color: var(--border-color) !important;
+						opacity: 0.75 !important;
+
+						.fc-event-time {
+							background-color: rgba(0, 0, 0, 0.05) !important;
+							color: var(--fg-secondary-color) !important;
+						}
+					}
+				}
+			}
+		}
+
+		// ── Closed Day Background Events ─────────────────────────
 		.fc-bg-event.c-closed {
 			background-color: var(--bg-secondary-color);
-			opacity: 0.65;
+			opacity: 0.7;
 
-			// The closure's reason ("Labour Day"), written in the cell so the
-			// day explains itself before anyone clicks it.
 			.fc-event-title {
-				font-size: var(--add-font-size-caption);
+				font-size: var(--add-font-size-caption, 0.75rem);
 				font-style: normal;
-				font-weight: var(--add-font-weight-medium);
-				color: var(--add-text-muted);
+				font-weight: var(--add-font-weight-medium, 500);
+				color: var(--add-text-muted, var(--fg-secondary-color));
 			}
 		}
 
-		// A closed day: its number struck through, like the refused date in
-		// the picker, and the cell reads as unclickable — clicking it opens
-		// nothing. Struck AND dimmed, never colour alone.
+		.fc-daygrid-day.add-day--out-of-window {
+			cursor: var(--add-disabled-cursor, not-allowed);
+
+			.fc-daygrid-day-number {
+				opacity: var(--add-disabled-opacity, 0.4);
+			}
+		}
+
 		.fc-daygrid-day.add-day--closed {
-			cursor: var(--add-disabled-cursor);
+			cursor: var(--add-disabled-cursor, not-allowed);
 
 			.fc-daygrid-day-number {
 				text-decoration: line-through;
-				opacity: var(--add-disabled-opacity);
+				opacity: var(--add-disabled-opacity, 0.4);
 			}
 		}
 	}
 }
 
 /**
- * A filter's label + select. Sized here because a width on the select itself
- * loses to Naive's runtime `width: 100%`. Same approach and floor as the
- * all-bookings filter bar's `.add-field`; the space filter is wider because
- * space names run longer than space types.
+ * Filter fields.
  */
 .add-filter-field {
 	display: flex;
 	flex-direction: column;
-	gap: var(--add-space-1);
+	gap: var(--add-space-1, 0.25rem);
 	inline-size: 13rem;
 	max-inline-size: 100%;
 
@@ -1023,20 +1673,36 @@ defineExpose({
 	}
 }
 
+.add-filters-reset-row {
+	display: flex;
+	align-items: center;
+}
+
+.add-filters-reset-btn {
+	font-size: 0.8125rem;
+	font-weight: 500;
+	color: var(--fg-secondary-color);
+	transition: color 0.15s ease, background-color 0.15s ease;
+
+	&:hover {
+		color: var(--primary-color);
+	}
+}
+
 .add-legend-swatch {
 	display: inline-block;
-	inline-size: 0.75rem;
-	block-size: 0.75rem;
+	inline-size: 0.85rem;
+	block-size: 0.85rem;
 	border-radius: 0.25rem;
 	border-inline-start-width: 3px;
 	border-inline-start-style: solid;
 
 	&.c-confirmed {
-		background-color: rgba(var(--success-color-rgb) / 0.12);
+		background-color: rgba(var(--success-color-rgb) / 0.2);
 		border-color: var(--success-color);
 	}
 	&.c-pending {
-		background-color: rgba(var(--warning-color-rgb) / 0.14);
+		background-color: rgba(var(--warning-color-rgb) / 0.2);
 		border-color: var(--warning-color);
 	}
 	&.c-cancelled {
@@ -1044,86 +1710,345 @@ defineExpose({
 		border-color: var(--border-color);
 	}
 	&.c-rejected {
-		background-color: rgba(var(--error-color-rgb) / 0.12);
+		background-color: rgba(var(--error-color-rgb) / 0.2);
 		border-color: var(--error-color);
 	}
 	&.c-closed {
 		background-color: var(--bg-secondary-color);
 		border-color: var(--border-color);
-		opacity: 0.65;
+		opacity: 0.7;
 	}
 }
 
 /**
- * The slot and duration chips.
- *
- * A chip is a real button, not a styled div: it must be reachable by keyboard
- * and announce its pressed state, since choosing a time is the whole task of
- * this form.
- *
- * A taken slot stays visible and disabled rather than being removed. "2pm is
- * booked" and "2pm is not a slot here" are different facts, and an operator
- * telling a member why they cannot have 2pm needs the first one.
+ * The slot grid and chips in the Create Booking modal.
  */
 .add-slot-grid {
-	display: flex;
-	flex-wrap: wrap;
-	gap: var(--add-space-3);
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+	gap: 8px;
+	max-height: 260px;
+	overflow-y: auto;
+	padding: 2px;
 }
 
 .add-slot {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	gap: var(--add-space-1);
-	padding: var(--add-space-3) var(--add-space-5);
-	border-radius: var(--add-radius-default);
-	border: var(--add-border-width-hairline) solid var(--add-border);
-	background: var(--add-surface-raised);
-	color: var(--add-text-primary);
-	font-size: var(--add-font-size-caption);
-	font-weight: var(--add-font-weight-medium);
+	justify-content: center;
+	gap: 2px;
+	padding: 8px 10px;
+	border-radius: var(--border-radius, 8px);
+	border: 1.5px solid var(--border-color);
+	background: var(--add-surface-raised, #ffffff);
+	color: var(--fg-default-color);
+	font-size: 0.8125rem;
+	font-weight: 600;
 	cursor: pointer;
-	transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+	transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
 
 	&:hover:not(:disabled):not(.add-slot--active) {
-		border-color: var(--add-primary);
-		color: var(--add-primary-text);
+		border-color: var(--primary-color);
+		background-color: rgba(var(--primary-color-rgb) / 0.06);
+		color: var(--primary-color);
+		transform: translateY(-1px);
 	}
 
 	&:focus-visible {
-		outline: var(--add-border-width-emphasis) solid var(--add-focus-ring-inner);
-		outline-offset: var(--add-space-1);
+		outline: 2px solid var(--primary-color);
+		outline-offset: 2px;
 	}
 
-	// Fill AND weight, never fill alone — colour is the one signal a
-	// deuteranopic viewer loses.
 	&--active {
-		background: var(--add-primary);
-		border-color: var(--add-primary);
-		color: var(--add-primary-on);
-		font-weight: var(--add-font-weight-bold);
+		background: var(--primary-color) !important;
+		border-color: var(--primary-color) !important;
+		color: #ffffff !important;
+		font-weight: 700;
+		box-shadow: 0 2px 8px rgba(var(--primary-color-rgb) / 0.35);
+
+		.add-slot__meta {
+			color: rgba(255, 255, 255, 0.85) !important;
+		}
 	}
 
-	// Struck through as well as dimmed, so "unavailable" survives being read
-	// in greyscale or by someone who cannot separate the two greys.
-	&--taken {
-		opacity: var(--add-disabled-opacity);
-		cursor: var(--add-disabled-cursor);
+	&--taken,
+	&:disabled {
+		opacity: 0.4 !important;
+		cursor: not-allowed !important;
+		background: var(--bg-secondary-color) !important;
+		border-color: var(--border-color) !important;
+		color: var(--fg-secondary-color) !important;
 		text-decoration: line-through;
+
+		.add-slot__meta {
+			text-decoration: line-through;
+		}
 	}
 
 	&__meta {
-		font-size: var(--add-font-size-caption);
-		font-weight: var(--add-font-weight-regular);
-		opacity: 0.8;
+		font-size: 0.72rem;
+		font-weight: 400;
+		color: var(--fg-secondary-color);
+		transition: color 0.15s ease;
 	}
 }
 
-.add-slot-note,
+.add-slot-note {
+	font-size: 0.8125rem;
+	color: var(--fg-secondary-color);
+	margin: 0;
+	padding: 8px 12px;
+	background: var(--bg-secondary-color);
+	border-radius: 6px;
+}
+
 .add-slot-counts {
-	font-size: var(--add-font-size-caption);
-	color: var(--add-text-muted);
-	margin: var(--add-space-0);
+	font-size: 0.8125rem;
+	color: var(--fg-secondary-color);
+	margin: 0;
+
+	&--hint {
+		font-size: 0.75rem;
+		opacity: 0.8;
+	}
+
+	&--selected {
+		display: flex;
+		align-items: flex-start;
+		gap: 10px;
+		padding: 10px 14px;
+		border-radius: 8px;
+		background-color: rgba(var(--primary-color-rgb) / 0.1);
+		border: 1px solid rgba(var(--primary-color-rgb) / 0.25);
+		color: var(--primary-color);
+	}
+}
+
+.add-slot-warning {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	border-radius: 8px;
+	background-color: rgba(var(--warning-color-rgb) / 0.12);
+	border: 1px solid rgba(var(--warning-color-rgb) / 0.3);
+	color: var(--warning-color);
+	font-weight: 600;
+	font-size: 0.8125rem;
+	margin: 0;
+}
+</style>
+
+<style lang="scss">
+/* Global styles for FullCalendar Popover Dialog (in case portaled to body) */
+.fc-popover {
+	background: var(--add-surface-raised, #ffffff) !important;
+	border: 1px solid var(--border-color) !important;
+	border-radius: 14px !important;
+	box-shadow: 0 20px 48px -8px rgba(0, 0, 0, 0.22), 0 8px 18px -4px rgba(0, 0, 0, 0.08) !important;
+	z-index: 9999 !important;
+	overflow: hidden !important;
+	min-width: 330px !important;
+	max-width: min(420px, 92vw) !important;
+	width: 360px !important;
+	max-height: min(420px, calc(100vh - 140px)) !important;
+	display: flex !important;
+	flex-direction: column !important;
+	backdrop-filter: blur(12px) !important;
+
+	.fc-popover-header {
+		background: var(--bg-secondary-color) !important;
+		border-bottom: 1px solid var(--border-color) !important;
+		padding: 12px 16px !important;
+		display: flex !important;
+		align-items: center !important;
+		justify-content: space-between !important;
+		flex-shrink: 0 !important;
+
+		.fc-popover-title {
+			font-size: 0.9375rem !important;
+			font-weight: 700 !important;
+			color: var(--fg-default-color) !important;
+			margin: 0 !important;
+			display: flex !important;
+			align-items: center !important;
+			gap: 6px !important;
+			letter-spacing: -0.01em;
+		}
+
+		.fc-popover-close {
+			cursor: pointer !important;
+			width: 26px !important;
+			height: 26px !important;
+			border-radius: 50% !important;
+			display: flex !important;
+			align-items: center !important;
+			justify-content: center !important;
+			opacity: 0.65;
+			font-size: 1.25rem !important;
+			font-weight: 300 !important;
+			font-family: inherit !important;
+			line-height: 1 !important;
+			color: var(--fg-default-color) !important;
+			background: rgba(var(--fg-secondary-color-rgb, 120, 120, 120) / 0.08) !important;
+			transition: all 0.15s ease !important;
+
+			&:hover {
+				opacity: 1 !important;
+				background-color: rgba(var(--error-color-rgb, 239, 68, 68) / 0.15) !important;
+				color: var(--error-color, #dc2626) !important;
+				transform: scale(1.08);
+			}
+		}
+	}
+
+	.fc-popover-body {
+		padding: 10px 12px !important;
+		display: flex !important;
+		flex-direction: column !important;
+		gap: 8px !important;
+		background: var(--add-surface-raised, #ffffff) !important;
+		max-height: min(320px, calc(100vh - 220px)) !important;
+		overflow-y: auto !important;
+		overscroll-behavior: contain;
+		scrollbar-width: thin !important;
+		scrollbar-color: rgba(var(--primary-color-rgb, 14, 165, 233) / 0.3) transparent !important;
+
+		&::-webkit-scrollbar {
+			width: 5px !important;
+		}
+
+		&::-webkit-scrollbar-track {
+			background: transparent !important;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: rgba(var(--primary-color-rgb, 14, 165, 233) / 0.25) !important;
+			border-radius: 10px !important;
+
+			&:hover {
+				background: rgba(var(--primary-color-rgb, 14, 165, 233) / 0.5) !important;
+			}
+		}
+
+		.fc-daygrid-event {
+			padding: 8px 12px !important;
+			margin: 0 !important;
+			border-radius: 8px !important;
+			display: flex !important;
+			align-items: center !important;
+			gap: 10px !important;
+			border-width: 1px !important;
+			border-style: solid !important;
+			border-inline-start-width: 4px !important;
+			border-inline-start-style: solid !important;
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+			cursor: pointer !important;
+			transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease !important;
+
+			&:hover {
+				transform: translateY(-1px) !important;
+				box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+				z-index: 2 !important;
+			}
+
+			.fc-event-time {
+				font-size: 0.75rem !important;
+				font-weight: 700 !important;
+				padding: 3px 8px !important;
+				border-radius: 6px !important;
+				flex-shrink: 0 !important;
+				line-height: 1.3 !important;
+				background-color: rgba(255, 255, 255, 0.7) !important;
+				box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+			}
+
+			.fc-event-title {
+				font-size: 0.8125rem !important;
+				font-weight: 600 !important;
+				color: var(--fg-default-color) !important;
+				overflow: hidden !important;
+				text-overflow: ellipsis !important;
+				white-space: nowrap !important;
+				flex-grow: 1 !important;
+				line-height: 1.4 !important;
+			}
+
+			&.c-confirmed {
+				background-color: rgba(var(--success-color-rgb, 22, 163, 74) / 0.12) !important;
+				border-color: rgba(var(--success-color-rgb, 22, 163, 74) / 0.28) !important;
+				border-inline-start-color: var(--success-color, #16a34a) !important;
+
+				.fc-event-time {
+					background-color: rgba(var(--success-color-rgb, 22, 163, 74) / 0.18) !important;
+					color: var(--success-color, #16a34a) !important;
+				}
+
+				&:hover {
+					background-color: rgba(var(--success-color-rgb, 22, 163, 74) / 0.2) !important;
+				}
+			}
+
+			&.c-pending {
+				background-color: rgba(var(--warning-color-rgb, 202, 138, 4) / 0.12) !important;
+				border-color: rgba(var(--warning-color-rgb, 202, 138, 4) / 0.28) !important;
+				border-inline-start-color: var(--warning-color, #ca8a04) !important;
+
+				.fc-event-time {
+					background-color: rgba(var(--warning-color-rgb, 202, 138, 4) / 0.18) !important;
+					color: var(--warning-color, #ca8a04) !important;
+				}
+
+				&:hover {
+					background-color: rgba(var(--warning-color-rgb, 202, 138, 4) / 0.2) !important;
+				}
+			}
+
+			&.c-rejected {
+				background-color: rgba(var(--error-color-rgb, 220, 38, 38) / 0.12) !important;
+				border-color: rgba(var(--error-color-rgb, 220, 38, 38) / 0.28) !important;
+				border-inline-start-color: var(--error-color, #dc2626) !important;
+
+				.fc-event-time {
+					background-color: rgba(var(--error-color-rgb, 220, 38, 38) / 0.18) !important;
+					color: var(--error-color, #dc2626) !important;
+				}
+
+				&:hover {
+					background-color: rgba(var(--error-color-rgb, 220, 38, 38) / 0.2) !important;
+				}
+			}
+
+			&.c-cancelled {
+				background-color: var(--bg-secondary-color) !important;
+				border-color: var(--border-color) !important;
+				border-inline-start-color: var(--border-color) !important;
+				opacity: 0.75 !important;
+
+				.fc-event-time {
+					background-color: rgba(0, 0, 0, 0.05) !important;
+					color: var(--fg-secondary-color) !important;
+				}
+			}
+		}
+	}
+}
+
+.theme-dark .fc-popover {
+	background: var(--bg-default-color, #1e1e24) !important;
+	box-shadow: 0 20px 48px -8px rgba(0, 0, 0, 0.55), 0 8px 24px -4px rgba(0, 0, 0, 0.35) !important;
+
+	.fc-popover-header {
+		background: var(--bg-secondary-color, #26262e) !important;
+	}
+
+	.fc-popover-body {
+		background: var(--bg-default-color, #1e1e24) !important;
+
+		.fc-daygrid-event .fc-event-time {
+			background-color: rgba(0, 0, 0, 0.25) !important;
+		}
+	}
 }
 </style>

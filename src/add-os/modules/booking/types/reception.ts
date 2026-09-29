@@ -71,6 +71,13 @@ export interface ActiveSession {
 	user_name: string
 	checked_in_at: string
 	is_overdue: boolean
+	/**
+	 * A walk-in only: whether it sits in the seat its subscription holds
+	 * (`true`) or took a free seat from the branch's co-working pool
+	 * (`false`). `null` for a booking, whose seat is the booking.
+	 */
+	seat_covered: boolean | null
+	membership_id: number | null
 }
 
 export interface RejectBookingPayload {

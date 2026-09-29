@@ -18,6 +18,14 @@ export interface Membership {
 	plan?: Plan | null
 	owner_type: MembershipOwnerType
 	owner_id: number
+	/** The branch whose co-working pool it holds its seats in. */
+	branch_id: number | null
+	/** Seats it holds while its plan is open — 1 for a member, as sold for a company. */
+	seats: number
+	/** A Dedicated Desk subscription's desks, by the code its member is told. */
+	desks?: { id: number, code: string, label: string }[]
+	/** Only on the staff list, which names owners in bulk. */
+	owner?: { type: MembershipOwnerType, id: number, name: string | null }
 	status: MembershipStatus
 	current_period_start: string
 	current_period_end: string
@@ -39,4 +47,40 @@ export interface MembershipActivationPayload extends Record<string, unknown> {
 	plan_id: number
 	user_id?: number
 	company_id?: number
+	/**
+	 * The branch whose co-working seats it holds. Left out, the server picks
+	 * the company's branch, else the member's home branch, else the default.
+	 */
+	branch_id?: number
+	/** A company only; a member's own subscription is always one seat. */
+	seats?: number
+	/**
+	 * Sell even though the branch's co-working seats are all held for part
+	 * of the plan's period — by arrangement, and recorded in the audit log.
+	 */
+	override_capacity?: boolean
+	/**
+	 * A Dedicated Desk plan's desks, at most one per seat, each free and in a
+	 * co_space of the subscription's branch — the server refuses otherwise.
+	 */
+	seat_desk_ids?: number[]
+}
+
+/** `GET /api/v1/admin/memberships` filters. */
+export interface MembershipListFilter {
+	dedicated?: 1
+	live?: 1
+	without_desk?: 1
+	branch_id?: number
+	page?: number
+	per_page?: number
+}
+
+/**
+ * The 422 when the branch has no seat left for the subscription: the
+ * server's sentence and the first moment it no longer fits.
+ */
+export interface SeatPoolFullError {
+	message: string
+	first_shortfall_at: string
 }

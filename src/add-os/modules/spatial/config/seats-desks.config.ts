@@ -13,8 +13,14 @@ import { formatNumber } from "@/add-os/utils/format"
 
 export function buildSeatDeskColumns(t: ComposerTranslation): DataTableColumns<SeatDesk> {
 	return [
+		{ title: t("seatsDesks.columns.code"), key: "code" },
 		{ title: t("seatsDesks.columns.space"), key: "space_id", render: row => `#${row.space_id}` },
 		{ title: t("seatsDesks.columns.label"), key: "label" },
+		{
+			title: t("seatsDesks.columns.holder"),
+			key: "membership_id",
+			render: row => (row.membership_id ? t("seatsDesks.heldBy", { id: row.membership_id }) : t("seatsDesks.free"))
+		},
 		{
 			title: t("seatsDesks.columns.qrPointId"),
 			key: "qr_point_id",
@@ -101,11 +107,12 @@ export function buildSeatDeskFields(t: ComposerTranslation, branches: Branch[], 
 					.map(space => ({ label: `${t(`spaces.spaceType.${space.space_type}`)} #${space.id}`, value: space.id }))
 			}
 		},
+		{ key: "code", labelKey: "seatsDesks.form.code", type: "text", required: true },
 		{ key: "label", labelKey: "seatsDesks.form.label", type: "text", required: true },
 		{ key: "qr_point_id", labelKey: "seatsDesks.form.qrPointId", type: "number" }
 	]
 }
 
 export function emptySeatDeskPayload(): SeatDeskFormModel {
-	return { branch_id: null, building_id: null, zone_id: null, space_id: null, label: "", qr_point_id: null }
+	return { branch_id: null, building_id: null, zone_id: null, space_id: null, code: "", label: "", qr_point_id: null }
 }

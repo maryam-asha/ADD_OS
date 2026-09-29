@@ -86,6 +86,7 @@ function openEdit(row: SeatDesk) {
 		building_id: null,
 		zone_id: null,
 		space_id: row.space_id,
+		code: row.code,
 		label: row.label,
 		qr_point_id: row.qr_point_id
 	}

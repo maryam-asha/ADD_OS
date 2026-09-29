@@ -1,8 +1,23 @@
+/**
+ * One seat of a co_space: its space's capacity is the number of its desks.
+ * `code` is what its QR carries and a Dedicated Desk member is told, unique
+ * within the branch; `label` is only for display.
+ */
 export interface SeatDesk {
 	id: number
 	space_id: number
+	code: string
 	label: string
 	qr_point_id: number | null
+	/** The live Dedicated Desk subscription holding it, or null when free. */
+	membership_id?: number | null
+}
+
+/** `GET seats-desks` filters; `free` leaves only desks no subscription holds. */
+export interface SeatDeskFilter {
+	space_id?: number
+	branch_id?: number
+	free?: 1
 }
 
 /**
@@ -37,6 +52,7 @@ export interface SeatDeskPayload extends Record<string, unknown> {
 	 * `ResourceFormDrawer`'s model generic.
 	 */
 	space_id: number | null
+	code: string
 	label: string
 	qr_point_id: number | null
 }

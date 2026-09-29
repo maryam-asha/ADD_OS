@@ -1,5 +1,5 @@
 import type { Paginated, RawPaginatedResponse } from "./pagination"
-import type { SlotsResponse } from "@/add-os/modules/booking/types/availability"
+import type { DaySlots } from "@/add-os/modules/booking/types/availability"
 import type {
 	AdminBooking,
 	AdminBookingFilters,
@@ -81,32 +81,23 @@ export async function getBooking(id: number): Promise<{ data: AdminBooking & Rec
 }
 
 /**
- * The bookable slots for one space on one date.
+ * The cells of one space on one date.
  *
- * This is the same payload the member app's time picker reads — the backend
- * serves both from one `AvailabilityBrowseService`, and asserts in its own
- * test that the two responses are identical. That sameness is the point: the
- * desk offers exactly the windows `BookingCreationService` will accept, so an
- * operator stops discovering the rules one rejection at a time.
+ * The member app's very response — the backend serves both from one
+ * `AvailabilityBrowseService` call, and asserts in its own test that the two
+ * bodies are identical. That sameness is the point: the desk offers exactly the windows
+ * `BookingCreationService` will accept, so an operator stops discovering the
+ * rules one rejection at a time.
  *
  * `date` is a district-local calendar date (`YYYY-MM-DD`), not an instant.
  *
- * `durationMinutes` is the booking length the operator picked. With it, each
- * slot is a whole window of that length — its `end_time` is where the booking
- * ends and it carries the price — and only starts that can hold the full
- * length before closing are listed. Without it (`null`, e.g. before the
- * space's duration options are known) the grid is plain cells; the response's
- * `rules.duration_options_minutes` is what the duration picker offers. A length
- * the space refuses is a 422 carrying the same sentence `POST` would return.
- *
- * This replaced the start-first `availability/quote` call: picking the time
- * first let an operator choose a start that no length could fill.
+ * There is no duration: each cell is one step of the space's granularity,
+ * judged on its own, and a booking is a run of them picked first to last. The
+ * duration-first flow and its `availability/quote` call are gone from the API.
  */
-export async function getSpaceSlots(spaceId: number, date: string, durationMinutes: number | null = null): Promise<SlotsResponse> {
-	return get<SlotsResponse>(`${BASE}/spaces/${spaceId}/availability/slots`, {
-		date,
-		...(durationMinutes !== null ? { duration: durationMinutes } : {})
-	})
+export async function getSpaceSlots(spaceId: number, date: string): Promise<DaySlots> {
+	const response = await get<{ data: DaySlots }>(`${BASE}/spaces/${spaceId}/availability/slots`, { date })
+	return response.data
 }
 
 /** Re-exported so `AdminBookingFilters` has one import site alongside the calls. */

@@ -558,10 +558,14 @@
 	},
 	"seatsDesks": {
 		"columns": {
+			"code": "Code",
 			"space": "Space",
 			"label": "Label",
+			"holder": "Dedicated to",
 			"qrPointId": "QR point"
 		},
+		"heldBy": "Subscription #{id}",
+		"free": "Free",
 		"create": {
 			"button": "New seat/desk",
 			"title": "New seat/desk",
@@ -579,6 +583,7 @@
 			"building": "Building",
 			"zone": "Zone (optional)",
 			"space": "Space",
+			"code": "Code (unique in the branch)",
 			"label": "Label",
 			"qrPointId": "QR point ID (optional)"
 		},
@@ -1212,6 +1217,12 @@
 			"booking": "Booking",
 			"walkin": "Walk-in"
 		},
+		"seat": {
+			"covered": "Subscription seat",
+			"pool": "Pool seat",
+			"coveredHint": "Sits in the seat their subscription holds.",
+			"poolHint": "Took a free seat from the co-working pool."
+		},
 		"checkOut": {
 			"button": "Check out",
 			"title": "Check out session",
@@ -1238,6 +1249,43 @@
 			"success": "Booking cancelled."
 		}
 	},
+	"coworkingPool": {
+		"title": "Co-working seats",
+		"refresh": "Refresh",
+		"loadError": "Couldn't load the co-working seats.",
+		"hint": "Counted across the branch: co-working spaces and lent rooms open seats; subscriptions, bookings and walk-ins take them.",
+		"full": "Every co-working seat is taken right now. Walk-ins without a subscription seat will be refused — lend a room to open more.",
+		"overbooked": "Later today more seats are taken than are open.",
+		"untilClosing": "Until closing",
+		"segmentTaken": "{taken} of {seats} taken",
+		"stats": {
+			"capacity": "Seats",
+			"taken": "Taken now",
+			"free": "Free now",
+			"busiest": "Most taken until closing",
+			"fewestToday": "Fewest free until closing"
+		},
+		"lend": {
+			"button": "Lend a room",
+			"title": "Lend a room to co-working",
+			"hint": "For the stretch you choose, the room's seats join the co-working seats and the room takes no room bookings. A room with bookings in that stretch cannot be lent.",
+			"room": "Room",
+			"selectRoom": "Select a room",
+			"date": "Date",
+			"from": "From",
+			"to": "To",
+			"seats": "Seats",
+			"seatsCount": "{seats} seats",
+			"existing": "Already lent",
+			"none": "Not lent for any coming stretch.",
+			"takeBack": "Take back",
+			"overrideTitle": "Take the room back anyway?",
+			"overrideConfirm": "Take it back",
+			"submit": "Lend",
+			"success": "The room is lent to co-working.",
+			"error": "Couldn't change the room's co-working stretch."
+		}
+	},
 	"bookingCalendar": {
 		"description": "Which spaces are booked, and how full each day is. Read-only — act on a booking from the reception desk.",
 		"loadError": "Couldn't load the calendar. You may not have permission to view this page.",
@@ -1246,7 +1294,8 @@
 			"spaceType": "Space type",
 			"allSpaceTypes": "All space types",
 			"allSpaces": "All spaces",
-			"space": "Space"
+			"space": "Space",
+			"reset": "Reset filters"
 		},
 		"totals": {
 			"spaces": "Spaces",
@@ -1281,19 +1330,21 @@
 			"space": "Space",
 			"spacePlaceholder": "Choose a space",
 			"date": "Date",
-			"start": "Start",
 			"note": "Note (optional)",
 			"notePlaceholder": "e.g. booked at the desk",
 			"submit": "Create booking",
 			"success": "Booking created.",
 			"rulesNote": "Only times this space can actually take are offered. A time can still be taken while this form is open, so the booking is confirmed on submit.",
-			"duration": "Duration",
 			"noSlots": "No bookable times on this date.",
 			"slotsError": "Couldn't load times for this space.",
 			"slotCounts": "{available} of {total} times free",
-			"endsAt": "Ends {time}",
 			"durationHours": "{hours}h",
-			"points": "points"
+			"time": "Time",
+			"pickHint": "Tap the first time, then the last. The booking runs from the start of the first to the end of the last.",
+			"selected": "{from} – {to} · {hours}",
+			"selectedRange": "{from} – {to}",
+			"selectedDuration": "Duration: {hours}",
+			"tooShort": "This space takes at least {minimum} — pick a later last time."
 		}
 	},
 	"allBookings": {
@@ -1625,10 +1676,6 @@
 			"booking_cancellation_window_minutes": {
 				"label": "Cancellation window (minutes)",
 				"hint": "A member can cancel a booking up to this many minutes before it starts. A space can set its own value."
-			},
-			"booking_duration_options_minutes": {
-				"label": "Duration options (minutes)",
-				"hint": "The lengths offered when adding a booking from the dashboard, e.g. [60, 90, 120, 180]. A length a space can't take is shown disabled."
 			},
 			"booking_max_days_ahead": {
 				"label": "Maximum days ahead",
@@ -2199,6 +2246,26 @@
 		"description": "Activate a plan for a member or a company without charging their wallet.",
 		"adminOnly": "Only an admin can activate memberships.",
 		"loadError": "Couldn't load plans or members. You may not have permission to view this page.",
+		"desks": {
+			"title": "Dedicated desks",
+			"hint": "Live Dedicated Desk subscriptions. One bought in the app arrives without a desk — tie it here.",
+			"onlyWithout": "Only those without a desk",
+			"none": "No live Dedicated Desk subscriptions.",
+			"noneWithout": "Every live Dedicated Desk subscription has its desk.",
+			"notAssigned": "No desk yet",
+			"until": "until {date}",
+			"seats": "{seats} seats",
+			"assign": "Assign desk",
+			"change": "Change",
+			"assignTitle": "Assign desks",
+			"pick": "Pick from the branch's free desks",
+			"max": "Up to {seats} desk(s) — one per seat. Leave empty to untie.",
+			"save": "Save",
+			"cancel": "Cancel",
+			"saved": "Desks assigned.",
+			"error": "Couldn't assign the desks.",
+			"loadError": "Couldn't load the Dedicated Desk subscriptions."
+		},
 		"activate": {
 			"title": "Activate a membership",
 			"hint": "Use this for plans arranged outside the app — including private plans, which members cannot see or buy themselves.",
@@ -2212,6 +2279,20 @@
 			"durationDays": "{days} days",
 			"windowLabel": "Plan hours:",
 			"noCharge": "No points are deducted. The plan is granted directly and its balances are credited.",
+			"branch": "Branch",
+			"branchDefault": "The owner's branch",
+			"seats": "Seats",
+			"poolTitle": "Co-working seats in this branch",
+			"poolNow": "{free} of {seats} free now",
+			"poolFewest": "fewest free over the next {days} days: {free}",
+			"poolShort": "Not enough free seats for {seats} throughout the plan's period — the activation will be refused unless you override.",
+			"poolHomeBranch": "The seat is held in the member's home branch; choose a branch to see its free seats.",
+			"override": "Activate even if the branch has no free seat",
+			"overrideHint": "By arrangement only. Recorded in the audit log.",
+			"desks": "Dedicated desks",
+			"desksPlaceholder": "Pick free desks (optional — can be tied later)",
+			"desksPickBranch": "Choose a branch to see its free desks",
+			"desksTooMany": "No more desks than the {seats} seat(s) it holds.",
 			"submit": "Activate",
 			"success": "Membership activated.",
 			"error": "Couldn't activate the membership."

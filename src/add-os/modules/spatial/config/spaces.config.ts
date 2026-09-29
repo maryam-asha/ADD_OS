@@ -166,7 +166,9 @@ export function buildSpaceFields(t: ComposerTranslation, branches: Branch[], loc
 		{ key: "space_type", labelKey: "spaces.form.spaceType", type: "select", required: true, options: spaceTypeOptions },
 		{ key: "allocation_model", labelKey: "spaces.form.allocationModel", type: "text" },
 		{ key: "is_lockable", labelKey: "spaces.form.isLockable", type: "switch" },
-		{ key: "capacity", labelKey: "spaces.form.capacity", type: "number", required: true },
+		// A co_space's capacity is the number of its desks, kept by the server
+		// and never sent (docs/decisions/coworking-seat-pool.md).
+		{ key: "capacity", labelKey: "spaces.form.capacity", type: "number", required: true, hiddenWhen: model => model.space_type === "co_space" },
 		{
 			key: "hourly_rate_points",
 			labelKey: "spaces.form.hourlyRatePoints",

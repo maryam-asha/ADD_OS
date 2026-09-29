@@ -13,7 +13,6 @@ const BACKEND_KEYS = [
 	"booking.allow_past_bookings",
 	"booking.buffer_minutes",
 	"booking.cancellation_window_minutes",
-	"booking.duration_options_minutes",
 	"booking.max_days_ahead",
 	"booking.min_duration_minutes",
 	"booking.min_notice_minutes",

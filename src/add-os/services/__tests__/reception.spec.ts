@@ -49,7 +49,9 @@ const sessionRow = {
 	user_id: 12,
 	user_name: "Sara",
 	checked_in_at: "2026-08-25T09:00:00+03:00",
-	is_overdue: false
+	is_overdue: false,
+	seat_covered: null,
+	membership_id: null
 }
 
 describe("reception service", () => {

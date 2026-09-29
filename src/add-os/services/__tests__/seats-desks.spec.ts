@@ -6,7 +6,7 @@ vi.mock("@/add-os/config/env", () => ({
 	apiUrl: () => "http://api.test"
 }))
 
-const sampleSeatDesk = { id: 1, space_id: 1, label: "D-12", qr_point_id: null }
+const sampleSeatDesk = { id: 1, space_id: 1, code: "D-12", label: "Window desk", qr_point_id: null, membership_id: null }
 
 function jsonResponse(body: unknown, status = 200) {
 	return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } })
@@ -37,10 +37,22 @@ describe("seats-desks service", () => {
 		)
 	})
 
+	/** What the memberships page offers when tying a Dedicated Desk: the branch's free desks. */
+	it("listSeatsDesks({branch_id, free}) asks for the branch's free desks", async () => {
+		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: [sampleSeatDesk] }))
+
+		await listSeatsDesks({ branch_id: 2, free: 1 })
+
+		expect(fetch).toHaveBeenCalledWith(
+			"http://api.test/api/v1/admin/seats-desks?branch_id=2&free=1",
+			expect.objectContaining({ method: "GET" })
+		)
+	})
+
 	it("createSeatDesk POSTs the payload and unwraps the created resource", async () => {
 		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: sampleSeatDesk }, 201))
 
-		const payload = { space_id: 1, label: "D-12", qr_point_id: null }
+		const payload = { space_id: 1, code: "D-12", label: "Window desk", qr_point_id: null }
 		const seatDesk = await createSeatDesk(payload)
 
 		expect(fetch).toHaveBeenCalledWith(
@@ -62,7 +74,7 @@ describe("seats-desks service", () => {
 	it("updateSeatDesk PUTs the payload and returns the message body only", async () => {
 		vi.mocked(fetch).mockResolvedValue(jsonResponse({ message: "Updated." }))
 
-		const payload = { space_id: 1, label: "D-99", qr_point_id: 4 }
+		const payload = { space_id: 1, code: "D-99", label: "D-99", qr_point_id: 4 }
 		const result = await updateSeatDesk(1, payload)
 
 		expect(fetch).toHaveBeenCalledWith(

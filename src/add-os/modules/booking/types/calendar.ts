@@ -193,16 +193,34 @@ export interface CalendarMeta {
 }
 
 /**
+ * How far ahead, and how soon, a booking may start. Global settings, so one
+ * block per response rather than one per space.
+ */
+export interface BookingWindow {
+	/**
+	 * The shortest booking, in minutes; there is no longest. Read here once,
+	 * as the member app reads it once from the space details — the day's slots
+	 * carry no rules.
+	 */
+	min_duration_minutes: number
+	/** A booking must be made at least this long before it starts; 0 = none. */
+	min_notice_minutes: number
+	/** At most this many days from today; `null` = no limit. */
+	max_days_ahead: number | null
+}
+
+/**
  * `GET /api/v1/admin/calendar`.
  *
- * `branch_hours` is `null` when no space matched the filters — there is no
- * branch to state hours for. The grid shows its own empty state in that case
- * rather than an hours card describing nothing.
+ * `branch_hours` and `booking_window` are `null` when no space matched the
+ * filters — there is no branch to state hours for. The grid shows its own
+ * empty state in that case rather than an hours card describing nothing.
  */
 export interface CalendarResponse {
 	view: CalendarView
 	range: CalendarRange
 	branch_hours: CalendarBranchHours | null
+	booking_window: BookingWindow | null
 	resources: CalendarResource[]
 	totals: CalendarTotals
 	meta: CalendarMeta

@@ -38,7 +38,10 @@ const bookingSession = {
 	user_id: 12,
 	user_name: "Sara Haddad",
 	checked_in_at: "2026-08-25T09:00:00+03:00",
-	is_overdue: false
+	is_overdue: false,
+	// A booking's seat is its booking: neither field applies.
+	seat_covered: null,
+	membership_id: null
 }
 
 const walkinSession = {
@@ -49,7 +52,10 @@ const walkinSession = {
 	user_id: 13,
 	user_name: "Omar Nasri",
 	checked_in_at: "2026-08-25T10:00:00+03:00",
-	is_overdue: false
+	is_overdue: false,
+	// Sits in the seat his subscription holds.
+	seat_covered: true,
+	membership_id: 4
 }
 
 const i18n = createI18n({
@@ -69,6 +75,7 @@ const i18n = createI18n({
 				onTime: "On time",
 				columns: { occupant: "Occupant", space: "Space", type: "Type", checkedInAt: "Checked in", status: "Status", actions: "Actions" },
 				type: { booking: "Booking", walkin: "Walk-in" },
+				seat: { covered: "Subscription seat", pool: "Pool seat", coveredHint: "", poolHint: "" },
 				checkOut: {
 					button: "Check out",
 					title: "Check out session",
@@ -109,6 +116,27 @@ describe("activeSessionsPage", () => {
 		settleSessionPaymentMock.mockResolvedValue({ message: "Payment settled." })
 		cancelBookingMock.mockResolvedValue({ message: "Cancelled." })
 		extendBookingMock.mockResolvedValue({ message: "Extended." })
+	})
+
+	/**
+	 * A walk-in says which seat it took — the one its subscription holds, or a
+	 * free one from the co-working pool — as the server recorded it at
+	 * check-in. A booking says neither.
+	 */
+	it("tags a walk-in with the seat it took", async () => {
+		listActiveSessionsMock.mockResolvedValue([
+			bookingSession,
+			walkinSession,
+			{ ...walkinSession, id: 3, seat_covered: false, membership_id: null }
+		])
+		const wrapper = mountPage()
+		await flushPromises()
+
+		const text = document.body.textContent ?? ""
+		expect(text).toContain("Subscription seat")
+		expect(text).toContain("Pool seat")
+		expect(text.match(/Subscription seat|Pool seat/g)).toHaveLength(2)
+		wrapper.unmount()
 	})
 
 	it("fetches the live list once on mount, unpaginated", async () => {
