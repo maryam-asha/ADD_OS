@@ -115,7 +115,8 @@ function redirectToLoginIfProtected(): void {
 	const current = router.currentRoute.value
 	if (current.name === undefined) return
 	if (!current.meta?.auth) return
-	router.push("/login")
+	// Carry the page along so signing in again lands back on it.
+	router.push({ path: "/login", query: { redirect: current.fullPath } })
 }
 
 async function request<T>(

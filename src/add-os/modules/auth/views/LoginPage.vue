@@ -79,8 +79,9 @@ import { NAlert, NButton, NForm, NFormItem, NInput } from "naive-ui"
 import isEmail from "validator/es/lib/isEmail"
 import { computed, onBeforeMount, ref } from "vue"
 import { useI18n } from "vue-i18n"
-import { useRouter } from "vue-router"
+import { useRoute, useRouter } from "vue-router"
 import AuthShell from "@/add-os/modules/auth/components/AuthShell.vue"
+import { REDIRECT_QUERY, safeRedirect } from "@/add-os/navigation/authGuard"
 import { ApiError } from "@/add-os/services/api"
 import { getCsrfCookie, getMe, login, twoFactorChallenge } from "@/add-os/services/auth"
 import { useAuthStore } from "@/stores/auth"
@@ -88,6 +89,7 @@ import { useAuthStore } from "@/stores/auth"
 type Step = "signin" | "twofactor"
 
 const { t } = useI18n()
+const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 
@@ -138,10 +140,25 @@ function backToSignIn() {
 	pageError.value = null
 }
 
-/** Both steps end the same way: the session exists, so read the user and land. */
+/**
+ * Both steps end the same way: the session exists, so read the user and land
+ * on the page the caller was sent away from (`?redirect=`), or home.
+ */
 async function completeSession() {
 	authStore.setLogged(await getMe())
-	router.push({ path: "/", replace: true })
+	router.push({ path: safeRedirect(route.query[REDIRECT_QUERY]), replace: true })
+}
+
+/**
+ * The server already holds a session this tab did not know about — signed in
+ * from another tab, or the persisted store was cleared. Fortify answers 409
+ * for that; an older ADDCore answers with a redirect the browser blocks as a
+ * CORS error, which reaches us as a network failure rather than an ApiError.
+ * Either way the caller is signed in, so there is nothing to tell them: probe
+ * `/me`, and if it answers, finish exactly as a fresh sign-in would.
+ */
+function mayAlreadyBeSignedIn(err: unknown): boolean {
+	return err instanceof ApiError ? err.status === 409 : err instanceof TypeError
 }
 
 function messageFrom(err: unknown, fallback: string): string {
@@ -170,6 +187,14 @@ async function submitSignIn() {
 
 		await completeSession()
 	} catch (err: unknown) {
+		if (mayAlreadyBeSignedIn(err)) {
+			try {
+				await completeSession()
+				return
+			} catch {
+				/* no usable session after all — fall through to the original error */
+			}
+		}
 		pageError.value = messageFrom(err, t("auth.signIn.genericError"))
 	} finally {
 		submitting.value = false

@@ -1,11 +1,11 @@
 import { watch } from "vue"
 import { createRouter, createWebHistory } from "vue-router"
 import { currentLocale } from "@/add-os/lang/currentLocale"
+import { authGuard } from "@/add-os/navigation/authGuard"
 import { createAddOsRoutes } from "@/add-os/navigation/routes"
 import { HOME_REDIRECT } from "@/add-os/navigation/sections"
 import { i18nGlobal } from "@/lang"
 import { Layout } from "@/types/theme.d"
-import { authCheck } from "@/utils/auth"
 
 /**
  * ADD OS route table.
@@ -133,7 +133,7 @@ export function updateDocumentTitle(route = router.currentRoute.value): void {
 }
 
 router.beforeEach(route => {
-	return authCheck(route)
+	return authGuard(route)
 })
 
 router.afterEach(to => {

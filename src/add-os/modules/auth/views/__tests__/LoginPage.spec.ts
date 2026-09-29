@@ -7,12 +7,14 @@ import { ApiError } from "@/add-os/services/api"
 import { useAuthStore } from "@/stores/auth"
 import LoginPage from "../LoginPage.vue"
 
-const { loginMock, twoFactorChallengeMock, getMeMock, getCsrfCookieMock, pushMock } = vi.hoisted(() => ({
+const { loginMock, twoFactorChallengeMock, getMeMock, getCsrfCookieMock, pushMock, currentQuery } = vi.hoisted(() => ({
 	loginMock: vi.fn(),
 	twoFactorChallengeMock: vi.fn(),
 	getMeMock: vi.fn(),
 	getCsrfCookieMock: vi.fn(),
-	pushMock: vi.fn()
+	pushMock: vi.fn(),
+	// The `/login` route's query, writable so a test can arrive with `?redirect=`.
+	currentQuery: { value: {} as Record<string, string> }
 }))
 
 vi.mock("@/add-os/services/auth", () => ({
@@ -27,7 +29,7 @@ vi.mock("@/add-os/services/auth", () => ({
 // export and the suite fails to collect before a single test runs.
 vi.mock("vue-router", async importOriginal => {
 	const actual = await importOriginal<typeof import("vue-router")>()
-	return { ...actual, useRouter: () => ({ push: pushMock }) }
+	return { ...actual, useRouter: () => ({ push: pushMock }), useRoute: () => ({ query: currentQuery.value }) }
 })
 
 const adminUser = { id: 1, name: "Maryam", email: "m@add.sy", roles: ["admin"] }
@@ -107,6 +109,7 @@ describe("loginPage", () => {
 		// rehydrates into the next pinia and every later "is NOT logged in"
 		// assertion passes vacuously. A fresh pinia is not enough on its own.
 		localStorage.clear()
+		currentQuery.value = {}
 		getCsrfCookieMock.mockResolvedValue(undefined)
 		getMeMock.mockResolvedValue(adminUser)
 	})
@@ -128,6 +131,72 @@ describe("loginPage", () => {
 		expect(loginMock).toHaveBeenCalledWith("m@add.sy", "correct-horse")
 		expect(useAuthStore().isLogged).toBe(true)
 		expect(pushMock).toHaveBeenCalledWith({ path: "/", replace: true })
+	})
+
+	it("lands on the page it was sent away from", async () => {
+		loginMock.mockResolvedValue({ two_factor: false })
+		currentQuery.value = { redirect: "/bookings/calendar?day=2026-09-28" }
+
+		const wrapper = mountPage()
+		await flushPromises()
+		await fillCredentials(wrapper)
+		await clickSubmit(wrapper, "Sign in")
+
+		expect(pushMock).toHaveBeenCalledWith({ path: "/bookings/calendar?day=2026-09-28", replace: true })
+	})
+
+	it("refuses an off-site redirect and lands home instead", async () => {
+		loginMock.mockResolvedValue({ two_factor: false })
+		currentQuery.value = { redirect: "//elsewhere/steal" }
+
+		const wrapper = mountPage()
+		await flushPromises()
+		await fillCredentials(wrapper)
+		await clickSubmit(wrapper, "Sign in")
+
+		expect(pushMock).toHaveBeenCalledWith({ path: "/", replace: true })
+	})
+
+	describe("already signed in", () => {
+		it("on a 409, completes the session silently and lands on the requested page", async () => {
+			loginMock.mockRejectedValue(new ApiError(409, JSON.stringify({ message: "You are already logged in." })))
+			currentQuery.value = { redirect: "/members" }
+
+			const wrapper = mountPage()
+			await flushPromises()
+			await fillCredentials(wrapper)
+			await clickSubmit(wrapper, "Sign in")
+
+			expect(wrapper.text()).not.toContain("already logged in")
+			expect(useAuthStore().isLogged).toBe(true)
+			expect(pushMock).toHaveBeenCalledWith({ path: "/members", replace: true })
+		})
+
+		it("on the older backend's blocked redirect (a network TypeError), does the same", async () => {
+			loginMock.mockRejectedValue(new TypeError("Failed to fetch"))
+
+			const wrapper = mountPage()
+			await flushPromises()
+			await fillCredentials(wrapper)
+			await clickSubmit(wrapper, "Sign in")
+
+			expect(useAuthStore().isLogged).toBe(true)
+			expect(pushMock).toHaveBeenCalledWith({ path: "/", replace: true })
+		})
+
+		it("shows the original error when /me does not confirm a session", async () => {
+			loginMock.mockRejectedValue(new ApiError(409, JSON.stringify({ message: "You are already logged in." })))
+			getMeMock.mockRejectedValue(new ApiError(403, JSON.stringify({ message: "Forbidden." })))
+
+			const wrapper = mountPage()
+			await flushPromises()
+			await fillCredentials(wrapper)
+			await clickSubmit(wrapper, "Sign in")
+
+			expect(wrapper.text()).toContain("You are already logged in.")
+			expect(useAuthStore().isLogged).toBe(false)
+			expect(pushMock).not.toHaveBeenCalled()
+		})
 	})
 
 	it("does not submit when the email is not an email", async () => {

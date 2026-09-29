@@ -14,7 +14,7 @@ const { setLogoutMock, pushMock, currentRoute } = vi.hoisted(() => ({
 	pushMock: vi.fn(),
 	// Mirrors vue-router's `router.currentRoute`. Writable so a test can put the
 	// router where the bug actually happened — see "401 handling" below.
-	currentRoute: { value: { name: "Branches" as string | undefined, meta: {} as { auth?: boolean } } }
+	currentRoute: { value: { name: "Branches" as string | undefined, fullPath: "/branches", meta: {} as { auth?: boolean } } }
 }))
 
 vi.mock("@/stores/auth", () => ({
@@ -32,7 +32,7 @@ vi.mock("@/router", () => ({
 
 /** The router as it is on a protected page: navigation finished, session required. */
 function onProtectedRoute() {
-	currentRoute.value = { name: "Branches", meta: { auth: true } }
+	currentRoute.value = { name: "Branches", fullPath: "/branches?page=2", meta: { auth: true } }
 }
 
 describe("patch", () => {
@@ -94,13 +94,13 @@ describe("401 handling", () => {
 			})
 		)
 
-	it("logs out and redirects to /login on a 401, before throwing", async () => {
+	it("logs out and redirects to /login on a 401, carrying the page to return to", async () => {
 		unauthenticated()
 
 		await expect(get("/api/v1/admin/branches")).rejects.toMatchObject({ status: 401 })
 
 		expect(setLogoutMock).toHaveBeenCalledOnce()
-		expect(pushMock).toHaveBeenCalledWith("/login")
+		expect(pushMock).toHaveBeenCalledWith({ path: "/login", query: { redirect: "/branches?page=2" } })
 	})
 
 	/**
@@ -116,7 +116,7 @@ describe("401 handling", () => {
 	 * on `/login` cancels nothing.
 	 */
 	it("does not navigate when the router has not finished its first navigation", async () => {
-		currentRoute.value = { name: undefined, meta: {} }
+		currentRoute.value = { name: undefined, fullPath: "/", meta: {} }
 		unauthenticated()
 
 		await expect(get("/api/v1/admin/me")).rejects.toMatchObject({ status: 401 })
@@ -126,7 +126,7 @@ describe("401 handling", () => {
 	})
 
 	it("does not navigate away from a page that never required a session", async () => {
-		currentRoute.value = { name: "ForgotPassword", meta: {} }
+		currentRoute.value = { name: "ForgotPassword", fullPath: "/forgot-password", meta: {} }
 		unauthenticated()
 
 		await expect(get("/api/v1/admin/me")).rejects.toMatchObject({ status: 401 })
