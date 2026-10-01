@@ -63,7 +63,7 @@ const i18n = createI18n({
 			},
 			users: { form: { cancel: "Cancel" } },
 			walletTopUps: {
-				paymentMethod: { cash: "Cash", sham: "Sham Cash", mtn: "MTN Cash", syriatel: "Syriatel Cash" },
+				paymentMethod: { cash: "Cash" },
 				validation: { amountFormat: "Enter a valid positive amount" }
 			},
 			resourceCrud: { mutations: { genericError: "Something went wrong." } }

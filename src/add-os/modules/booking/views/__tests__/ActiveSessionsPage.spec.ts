@@ -65,7 +65,7 @@ const i18n = createI18n({
 		en: {
 			nav: { pages: { activeSessions: "Active sessions" } },
 			spaces: { spaceType: { co_space: "Co-working space", room: "Room", business: "Business", event_hall: "Event hall" } },
-			walletTopUps: { paymentMethod: { cash: "Cash", sham: "Sham Cash", mtn: "MTN Cash", syriatel: "Syriatel Cash" } },
+			walletTopUps: { paymentMethod: { cash: "Cash" } },
 			activeSessions: {
 				description: "Everyone currently checked in.",
 				loadError: "Couldn't load active sessions.",
@@ -329,12 +329,12 @@ describe("activeSessionsPage", () => {
 			await flushPromises()
 
 			wrapper.vm.openCheckOut(walkinSession)
-			wrapper.vm.checkOutForm.payment_method = "mtn"
+			wrapper.vm.checkOutForm.payment_method = "cash"
 			await wrapper.vm.submitCheckOut()
 			await flushPromises()
 
 			expect(checkOutSessionMock).toHaveBeenCalledWith("walkin", 2, expect.any(Date))
-			expect(settleSessionPaymentMock).toHaveBeenCalledWith("walkin", 2, "mtn")
+			expect(settleSessionPaymentMock).toHaveBeenCalledWith("walkin", 2, "cash")
 			wrapper.unmount()
 		})
 

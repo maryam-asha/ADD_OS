@@ -44,12 +44,12 @@ describe("wallet-top-ups service", () => {
 	 * filled in the missing one with `null` would turn a valid request into a 422.
 	 */
 	it("createWalletTopUp POSTs a company top-up with company_id and never adds a user_id key", async () => {
-		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: { ...createdTransaction, payment_method: "syriatel" } }, 201))
+		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: { ...createdTransaction, payment_method: "cash" } }, 201))
 
-		await createWalletTopUp({ amount: "50.00", payment_method: "syriatel", company_id: 45, description: null })
+		await createWalletTopUp({ amount: "50.00", payment_method: "cash", company_id: 45, description: null })
 
 		const body = JSON.parse(String(vi.mocked(fetch).mock.calls[0][1]?.body))
-		expect(body).toEqual({ amount: "50.00", payment_method: "syriatel", company_id: 45, description: null })
+		expect(body).toEqual({ amount: "50.00", payment_method: "cash", company_id: 45, description: null })
 		expect(body).not.toHaveProperty("user_id")
 	})
 

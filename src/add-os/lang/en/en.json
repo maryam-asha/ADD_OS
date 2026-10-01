@@ -1086,10 +1086,7 @@
 			"company": "Company wallet"
 		},
 		"paymentMethod": {
-			"cash": "Cash",
-			"sham": "Sham Cash",
-			"mtn": "MTN Cash",
-			"syriatel": "Syriatel Cash"
+			"cash": "Cash"
 		},
 		"form": {
 			"recipientType": "Top up",

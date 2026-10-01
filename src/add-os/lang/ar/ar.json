@@ -1090,10 +1090,7 @@
 			"company": "محفظة شركة"
 		},
 		"paymentMethod": {
-			"cash": "نقداً",
-			"sham": "شام كاش",
-			"mtn": "إم تي إن كاش",
-			"syriatel": "سيرياتيل كاش"
+			"cash": "نقداً"
 		},
 		"form": {
 			"recipientType": "شحن لـ",

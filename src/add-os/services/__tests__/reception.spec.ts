@@ -162,19 +162,19 @@ describe("reception service", () => {
 		it("settleSessionPayment routes a booking row to bookings/{id}/settle-payment", async () => {
 			vi.mocked(fetch).mockResolvedValue(jsonResponse({ message: "Payment settled." }))
 
-			await settleSessionPayment("booking", 7, "sham")
+			await settleSessionPayment("booking", 7, "cash")
 
 			expect(calledUrl()).toBe(`${BASE}/bookings/7/settle-payment`)
-			expect(calledInit().body).toBe(JSON.stringify({ payment_method: "sham" }))
+			expect(calledInit().body).toBe(JSON.stringify({ payment_method: "cash" }))
 		})
 
 		it("settleSessionPayment routes a walkin row to walk-ins/{id}/settle-payment", async () => {
 			vi.mocked(fetch).mockResolvedValue(jsonResponse({ message: "Payment settled." }))
 
-			await settleSessionPayment("walkin", 7, "mtn")
+			await settleSessionPayment("walkin", 7, "cash")
 
 			expect(calledUrl()).toBe(`${BASE}/walk-ins/7/settle-payment`)
-			expect(calledInit().body).toBe(JSON.stringify({ payment_method: "mtn" }))
+			expect(calledInit().body).toBe(JSON.stringify({ payment_method: "cash" }))
 		})
 
 		it("sends the check-out time under checked_out_at and nothing else", async () => {

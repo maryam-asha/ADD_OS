@@ -14,9 +14,9 @@
  */
 
 /** `App\Domain\Finance\Enums\PaymentMethod` — exact wire strings, not labels. */
-export type PaymentMethod = "cash" | "sham" | "mtn" | "syriatel"
+export type PaymentMethod = "cash"
 
-export const PAYMENT_METHODS: readonly PaymentMethod[] = ["cash", "sham", "mtn", "syriatel"]
+export const PAYMENT_METHODS: readonly PaymentMethod[] = ["cash"]
 
 export interface WalletTopUp {
 	id: number

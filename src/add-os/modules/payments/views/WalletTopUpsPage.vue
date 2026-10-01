@@ -717,27 +717,6 @@ const paymentMethodList = computed(() => [
 		desc: "Collect cash at reception desk",
 		icon: "carbon:money",
 		iconBg: "bg-emerald-50 text-emerald-700"
-	},
-	{
-		id: "syriatel" as PaymentMethod,
-		label: t("walletTopUps.paymentMethod.syriatel"),
-		desc: "Receive via Syriatel Cash wallet",
-		icon: "carbon:wallet",
-		iconBg: "bg-sky-50 text-sky-700"
-	},
-	{
-		id: "sham" as PaymentMethod,
-		label: t("walletTopUps.paymentMethod.sham"),
-		desc: "Receive via Sham Cash wallet",
-		icon: "carbon:wallet",
-		iconBg: "bg-amber-50 text-amber-700"
-	},
-	{
-		id: "mtn" as PaymentMethod,
-		label: t("walletTopUps.paymentMethod.mtn"),
-		desc: "Receive via MTN Cash wallet",
-		icon: "carbon:wallet",
-		iconBg: "bg-yellow-50 text-yellow-700"
 	}
 ])
 

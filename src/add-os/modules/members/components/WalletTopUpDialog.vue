@@ -227,10 +227,7 @@ const currencyOptions = computed<SelectOption[]>(() => {
 })
 
 const paymentMethodOptions = computed<SelectOption[]>(() => [
-	{ label: t("walletTopUps.paymentMethod.cash") || "Cash", value: "cash" },
-	{ label: t("walletTopUps.paymentMethod.syriatel") || "Syriatel Cash", value: "syriatel" },
-	{ label: t("walletTopUps.paymentMethod.sham") || "Sham Cash", value: "sham" },
-	{ label: t("walletTopUps.paymentMethod.mtn") || "MTN Cash", value: "mtn" }
+	{ label: t("walletTopUps.paymentMethod.cash") || "Cash", value: "cash" }
 ])
 
 const rules = computed<FormRules>(() => ({

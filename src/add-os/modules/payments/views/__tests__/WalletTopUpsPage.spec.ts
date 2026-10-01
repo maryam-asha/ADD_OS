@@ -59,7 +59,7 @@ const i18n = createI18n({
 			walletTopUps: {
 				description: "Record a manual wallet top-up.",
 				recipientType: { user: "Member wallet", company: "Company wallet" },
-				paymentMethod: { cash: "Cash", sham: "Sham Cash", mtn: "MTN Cash", syriatel: "Syriatel Cash" },
+				paymentMethod: { cash: "Cash" },
 				form: {
 					recipientType: "Top up",
 					user: "Member",
@@ -170,14 +170,14 @@ describe("walletTopUpsPage", () => {
 		await flushPromises()
 		wrapper.vm.form.company_id = 45
 		wrapper.vm.form.amount = "50.00"
-		wrapper.vm.form.payment_method = "syriatel"
+		wrapper.vm.form.payment_method = "cash"
 		await wrapper.vm.submit()
 		await flushPromises()
 
 		expect(createWalletTopUpMock).toHaveBeenCalledWith({
 			amount: "50.00",
 			currency: "SYP",
-			payment_method: "syriatel",
+			payment_method: "cash",
 			company_id: 45,
 			description: null
 		})
