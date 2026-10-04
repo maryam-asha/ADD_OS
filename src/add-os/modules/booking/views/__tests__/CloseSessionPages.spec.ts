@@ -77,7 +77,9 @@ function report(method: string | null, walletPoints = 500) {
 			amounts: [{ currency: "USD", value: "20.00" }],
 			end_request: endRequest(11, method)
 		},
-		wallet_points: walletPoints
+		wallet_points: walletPoints,
+		totals: null,
+		payments: [] as unknown[]
 	}
 }
 
@@ -167,6 +169,35 @@ describe("session timer", () => {
 
 		wrapper.unmount()
 		vi.useRealTimers()
+	})
+})
+
+describe("session payment", () => {
+	it("says how a closed session was paid: the points, their worth, and the cash and its currency", async () => {
+		vi.clearAllMocks()
+		getSessionReportMock.mockResolvedValue({
+			...report(null),
+			session: { ...report(null).session, checked_out_at: "2026-08-17T10:00:00+03:00" },
+			closing: null,
+			totals: { payment_state: "paid", payment_method: "cash", paid_at: "2026-08-17T10:01:00+03:00" },
+			payments: [
+				{ id: 1, status: "accepted", method: "wallet", method_label: "Wallet points", points: 80, points_value: [{ currency: "USD", value: "8.00" }, { currency: "SYP", value: "117601" }], wallet: { owner_type: "user" }, cash: null, card: null, at: "2026-08-17T10:00:00+03:00" },
+				{ id: 2, status: "accepted", method: "cash", method_label: "Cash at reception", points: 120, points_value: [{ currency: "USD", value: "12.00" }], wallet: null, cash: { amount: "176400.00", currency: "SYP", received_by: "Desk Operator" }, card: null, at: "2026-08-17T10:01:00+03:00" }
+			]
+		})
+		const wrapper = mountWith(CloseSessionDetailPage)
+		await flushPromises()
+
+		expect(wrapper.findAll("[data-test='session-payment']")).toHaveLength(2)
+		const text = document.body.textContent ?? ""
+		expect(text).toContain("Wallet points")
+		expect(text).toContain("80 points")
+		expect(text).toContain("117,601")
+		expect(text).toContain("Cash at reception")
+		expect(text).toContain("176,400")
+		expect(text).toContain("Received by Desk Operator")
+
+		wrapper.unmount()
 	})
 })
 

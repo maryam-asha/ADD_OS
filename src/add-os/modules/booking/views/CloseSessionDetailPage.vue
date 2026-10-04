@@ -92,6 +92,58 @@
 						</div>
 					</n-card>
 
+					<!-- How it was paid: the method, the points and their worth, the money and its currency -->
+					<n-card v-if="report.payments.length || (!isOpen && report.totals)" size="small" class="shadow-sm border border-stone-200">
+						<div class="flex flex-col gap-3 text-sm">
+							<div class="flex items-center justify-between">
+								<span class="font-bold text-stone-900">{{ t("closeSession.detail.payment.title") }}</span>
+								<n-tag v-if="report.totals?.payment_state" :type="report.totals.payment_state === 'paid' ? 'success' : 'warning'" size="small" round>
+									{{ t(`closeSession.detail.payment.state.${report.totals.payment_state}`) }}
+								</n-tag>
+							</div>
+
+							<div v-for="payment in report.payments" :key="payment.id" class="flex flex-col gap-1.5 p-3 rounded-xl bg-stone-50 border border-stone-100" data-test="session-payment">
+								<div class="flex items-center justify-between gap-2">
+									<span class="flex items-center gap-2 font-semibold text-stone-900">
+										<Icon :name="payment.method === 'wallet' ? 'carbon:wallet' : payment.method === 'cash' ? 'carbon:money' : 'carbon:currency'" :size="16" class="text-emerald-700" />
+										{{ payment.method_label }}
+									</span>
+									<n-tag size="small" round :bordered="false" :type="payment.status === 'accepted' ? 'success' : 'warning'">
+										{{ te(`memberProfile.paymentStatus.${payment.status}`) ? t(`memberProfile.paymentStatus.${payment.status}`) : payment.status }}
+									</n-tag>
+								</div>
+								<div v-if="payment.points" class="flex justify-between text-stone-700">
+									<span>{{ t("closeSession.detail.payment.points") }}</span>
+									<span class="text-end">
+										<span class="font-bold">{{ t("closeSession.detail.points", { points: formatNumber(payment.points) }) }}</span>
+										<span v-if="payment.points_value.length" class="block text-xs text-stone-500">
+											≈ <bdi v-for="(value, index) in payment.points_value" :key="value.currency" dir="ltr">{{ index ? " · " : "" }}{{ formatAmount(value) }}</bdi>
+										</span>
+									</span>
+								</div>
+								<div v-if="payment.cash" class="flex justify-between text-stone-700">
+									<span>{{ t("closeSession.detail.payment.cashReceived") }}</span>
+									<span class="text-end">
+										<bdi dir="ltr" class="font-bold">{{ formatAmount({ value: payment.cash.amount, currency: payment.cash.currency ?? "" }) }}</bdi>
+										<span v-if="payment.cash.received_by" class="block text-xs text-stone-500">{{ t("closeSession.detail.payment.receivedBy", { name: payment.cash.received_by }) }}</span>
+									</span>
+								</div>
+								<div v-if="payment.card" class="flex justify-between text-stone-700">
+									<span>{{ t("closeSession.detail.payment.cardCharged") }}</span>
+									<span class="text-end">
+										<bdi dir="ltr" class="font-bold">{{ formatAmount({ value: payment.card.amount, currency: payment.card.currency ?? "" }) }}</bdi>
+										<span v-if="payment.card.reference" class="block text-xs text-stone-500">{{ t("closeSession.detail.payment.reference", { reference: payment.card.reference }) }}</span>
+									</span>
+								</div>
+								<span v-if="payment.at" class="text-xs text-stone-400">{{ formatDateTime(payment.at) }}</span>
+							</div>
+
+							<span v-if="!report.payments.length" class="text-stone-500">
+								{{ t(report.totals?.payment_state === "paid" ? "closeSession.detail.payment.coveredByPlan" : "closeSession.detail.payment.none") }}
+							</span>
+						</div>
+					</n-card>
+
 					<template v-if="!endRequest">
 						<n-alert v-if="!isOpen" type="default" :bordered="false">{{ t("closeSession.detail.closedNote") }}</n-alert>
 						<template v-else>
@@ -171,10 +223,10 @@ import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
 import { ApiError } from "@/add-os/services/api"
 import { confirmSessionEnd, getSessionReport } from "@/add-os/services/reception"
-import { formatCurrency, formatNumber, formatTime, isCurrencyCode } from "@/add-os/utils/format"
+import { formatCurrency, formatDateTime, formatNumber, formatTime, isCurrencyCode } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
-const { t } = useI18n()
+const { t, te } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const message = useMessage()

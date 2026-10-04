@@ -155,6 +155,27 @@ export interface ReceptionSessionReport {
 		end_request: SessionEndRequestSummary | null
 	} | null
 	wallet_points: number
+	/** The session's state once closed: paid or still owed. */
+	totals: { payment_state: string | null, payment_method: string | null, paid_at: string | null } | null
+	/** How it was paid, oldest first. */
+	payments: SessionPayment[]
+}
+
+/** One payment of a session, as the desk explains it. */
+export interface SessionPayment {
+	id: number
+	status: string
+	method: string
+	method_label: string
+	/** The points it paid, and what they are worth in each currency. */
+	points: number
+	points_value: { currency: string, value: string }[]
+	wallet: { owner_type: string } | null
+	/** Cash handed over at the desk. */
+	cash: { amount: string, currency: string | null, received_by: string | null } | null
+	/** What a card was charged. */
+	card: { amount: string, currency: string | null, reference: string | null } | null
+	at: string | null
 }
 
 export interface ConfirmSessionEndResponse {
