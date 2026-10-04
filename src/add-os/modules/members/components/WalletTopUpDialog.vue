@@ -5,79 +5,143 @@
 		preset="card"
 		:title="t('members.topUp.title')"
 		closable
-		style="max-width: 28rem"
+		class="rounded-2xl"
+		style="max-width: 40rem"
 	>
-		<div v-if="member" class="flex flex-col gap-4">
-			<div class="p-3 bg-neutral-50 dark:bg-neutral-800/40 rounded-lg flex items-center justify-between border border-black/5">
-				<div class="flex flex-col">
-					<span class="font-bold text-sm">{{ member.name }}</span>
-					<span class="text-xs text-secondary font-mono">{{ member.phone }}</span>
+		<!--
+			The same cards as the Wallet Top-up page — recipient and balance, one
+			amount box with its currency and quick amounts, payment methods, and
+			the balance before and after — so the desk sees one top-up form,
+			wherever it opens it.
+		-->
+		<n-form v-if="member" ref="formRef" :model="form" :rules label-placement="top" class="flex flex-col gap-4">
+			<!-- Recipient and current balance -->
+			<div class="flex items-center justify-between p-3.5 rounded-xl border border-stone-200 bg-stone-50/50">
+				<div class="flex items-center gap-3">
+					<n-avatar round :size="44" class="bg-emerald-700 text-white font-bold">{{ initials }}</n-avatar>
+					<div class="flex flex-col gap-0.5">
+						<span class="font-bold text-stone-900">{{ member.name }}</span>
+						<bdi dir="ltr" class="text-xs text-stone-500 font-medium">{{ member.phone }}</bdi>
+						<n-tag size="small" round :type="member.status === 'active' ? 'success' : 'error'" class="w-fit text-[10px] font-semibold">
+							{{ member.status === "active" ? t("walletTopUps.active") : t("walletTopUps.inactive") }}
+						</n-tag>
+					</div>
 				</div>
-				<n-tag size="small" round type="info">
-					{{ t("members.topUp.recipientMember") }}
-				</n-tag>
+				<div class="flex flex-col items-end gap-1 text-xs">
+					<span class="text-stone-500">{{ t("walletTopUps.generalBalance") }}</span>
+					<span v-if="isLoadingBalance" class="text-stone-400 italic">{{ t("walletTopUps.loadingBalance") }}</span>
+					<span v-else class="font-bold text-teal-700 text-base">{{ currentBalancePoints === null ? "—" : formatPoints(currentBalancePoints) }}</span>
+				</div>
 			</div>
 
-			<n-form ref="formRef" :model="form" :rules label-placement="top">
-				<n-form-item path="amount" :label="t('members.topUp.amount')">
-					<div class="flex flex-col w-full gap-1">
-						<div class="flex items-center w-full gap-2">
-							<n-input
-								v-model:value="form.amount"
-								:placeholder="t('members.topUp.amountPlaceholder')"
-								inputmode="decimal"
-								class="flex-1 font-bold"
-							/>
-							<n-select
+			<!-- Amount: currency and digits in one box, the quote under it, quick amounts -->
+			<div class="flex flex-col gap-3 p-3.5 rounded-xl border border-stone-200">
+				<span class="text-sm font-bold text-stone-900">{{ t("members.topUp.amount") }}</span>
+				<n-form-item path="amount" class="m-0 w-full" :show-label="false">
+					<div class="flex items-center w-full border border-stone-200 rounded-xl bg-white shadow-2xs overflow-hidden focus-within:border-teal-600 focus-within:ring-1 focus-within:ring-teal-600 transition-all">
+						<div class="w-32 shrink-0 bg-stone-50/70 border-e border-stone-200">
+							<FormIsolatedSelect
 								v-model:value="form.currency"
 								:options="currencyOptions"
-								class="w-28 shrink-0"
+								:bordered="false"
+								:consistent-menu-width="false"
+								class="font-bold text-stone-700"
 							/>
 						</div>
-
-						<!--
-							The point value is always the server's answer, never computed
-							here: the rate and its ceil-once rounding live in one place on
-							the backend.
-						-->
-						<div class="min-h-5 text-xs">
-							<span v-if="isPreviewLoading" class="text-secondary flex items-center gap-1">
-								<n-spin :size="12" />
-								{{ t("points.previewLoading") }}
-							</span>
-							<span v-else-if="previewError" class="text-error">{{ previewError }}</span>
-							<span v-else-if="previewPoints !== null" class="font-semibold add-numeric">
-								≈ {{ formatPoints(previewPoints) }}
-							</span>
-						</div>
+						<n-input
+							v-model:value="form.amount"
+							:placeholder="t('members.topUp.amountPlaceholder')"
+							inputmode="decimal"
+							:bordered="false"
+							class="flex-1 text-base font-bold min-w-0"
+						/>
+						<span class="text-xs font-bold text-stone-400 shrink-0 px-3 whitespace-nowrap">{{ formattedInputAmount }}</span>
 					</div>
 				</n-form-item>
 
-				<n-form-item path="payment_method" :label="t('members.topUp.paymentMethod')">
-					<n-select
-						v-model:value="form.payment_method"
-						:options="paymentMethodOptions"
-					/>
-				</n-form-item>
+				<!--
+					The point value is always the server's answer, never computed
+					here: the rate and its ceil-once rounding live in one place on
+					the backend.
+				-->
+				<div class="min-h-5 text-xs">
+					<span v-if="isPreviewLoading" class="text-stone-400 flex items-center gap-1">
+						<n-spin :size="12" />
+						{{ t("points.previewLoading") }}
+					</span>
+					<span v-else-if="previewError" class="text-red-600">{{ previewError }}</span>
+					<span v-else-if="previewPoints !== null" class="font-bold text-teal-700 add-numeric">≈ {{ formatPoints(previewPoints) }}</span>
+				</div>
 
-				<n-form-item path="description" :label="t('members.topUp.description')">
-					<n-input
-						v-model:value="form.description"
-						type="text"
-						:placeholder="t('members.topUp.descriptionPlaceholder')"
-						maxlength="255"
-					/>
-				</n-form-item>
-			</n-form>
+				<div class="grid grid-cols-4 gap-2">
+					<button
+						v-for="preset in amountPresets"
+						:key="preset"
+						type="button"
+						class="py-2.5 px-2 rounded-xl text-xs font-bold border transition-all text-teal-700 border-teal-200 bg-teal-50/50 hover:bg-teal-100 shadow-2xs cursor-pointer"
+						@click="addPresetAmount(preset)"
+					>
+						+ {{ formatNumber(preset) }}
+					</button>
+				</div>
+			</div>
 
-			<div class="flex justify-end gap-2 pt-2">
-				<n-button @click="show = false">{{ t("users.form.cancel") }}</n-button>
-				<n-button type="primary" :loading="isSubmitting" @click="submitTopUp">
-					<template #icon><Icon name="carbon:checkmark" :size="16" /></template>
+			<!-- Payment method -->
+			<div class="flex flex-col gap-2">
+				<span class="text-sm font-bold text-stone-900">{{ t("members.topUp.paymentMethod") }}</span>
+				<div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+					<div
+						v-for="method in paymentMethodList"
+						:key="method.id"
+						class="flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer"
+						:class="form.payment_method === method.id ? 'border-teal-700 bg-teal-50/40 shadow-sm ring-1 ring-teal-600' : 'border-stone-200 bg-white hover:border-stone-300'"
+						@click="form.payment_method = method.id"
+					>
+						<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" :class="method.iconBg">
+							<Icon :name="method.icon" :size="20" />
+						</div>
+						<span class="font-bold text-stone-900 text-sm">{{ method.label }}</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- The balance before and after -->
+			<div class="flex flex-col gap-2 p-3.5 rounded-xl border border-emerald-200 bg-emerald-50/30">
+				<span class="text-xs font-bold text-stone-700 uppercase tracking-wider">{{ t("walletTopUps.walletPreview") }}</span>
+				<div class="grid grid-cols-3 gap-2 items-center text-center text-xs">
+					<div class="flex flex-col p-2 bg-white rounded-lg border border-emerald-100">
+						<span class="text-stone-400 text-[11px]">{{ t("walletTopUps.currentGeneralBalance") }}</span>
+						<span class="font-bold text-stone-800 text-sm mt-0.5">{{ currentBalancePoints === null ? "—" : formatPoints(currentBalancePoints) }}</span>
+					</div>
+					<div class="flex flex-col p-2 bg-emerald-100/50 rounded-lg border border-emerald-200">
+						<span class="text-emerald-700 text-[11px] font-medium">{{ t("walletTopUps.topUpAmount") }}</span>
+						<span class="font-extrabold text-emerald-800 text-sm mt-0.5">{{ previewPoints === null ? "—" : `+ ${formatPoints(previewPoints)}` }}</span>
+						<span class="text-emerald-700/70 text-[10px] add-numeric">{{ formattedInputAmount }}</span>
+					</div>
+					<div class="flex flex-col p-2 bg-white rounded-lg border border-emerald-100">
+						<span class="text-stone-400 text-[11px]">{{ t("walletTopUps.newGeneralBalance") }}</span>
+						<span class="font-bold text-teal-800 text-sm mt-0.5">{{ newBalancePoints === null ? "—" : formatPoints(newBalancePoints) }}</span>
+					</div>
+				</div>
+			</div>
+
+			<n-form-item path="description" :label="t('members.topUp.description')" class="m-0">
+				<n-input
+					v-model:value="form.description"
+					type="text"
+					:placeholder="t('members.topUp.descriptionPlaceholder')"
+					maxlength="255"
+				/>
+			</n-form-item>
+
+			<div class="flex gap-2">
+				<n-button class="h-12 rounded-xl" @click="show = false">{{ t("users.form.cancel") }}</n-button>
+				<n-button type="primary" size="large" class="flex-1 h-12 rounded-xl text-base font-bold shadow-md" :loading="isSubmitting" @click="submitTopUp">
+					<template #icon><Icon name="carbon:checkmark" :size="18" /></template>
 					{{ t("members.topUp.submit") }}
 				</n-button>
 			</div>
-		</div>
+		</n-form>
 	</n-modal>
 </template>
 
@@ -85,20 +149,20 @@
 import type { FormInst, FormRules, SelectOption } from "naive-ui"
 import type { Member } from "@/add-os/modules/members/types/member"
 import type { PaymentMethod, WalletTopUpPayload } from "@/add-os/modules/payments/types/wallet-top-up"
-import { NButton, NForm, NFormItem, NInput, NModal, NSelect, NSpin, NTag, useMessage } from "naive-ui"
-import { computed, onBeforeUnmount, ref, watch } from "vue"
+import { NAvatar, NButton, NForm, NFormItem, NInput, NModal, NSelect, NSpin, NTag, useMessage } from "naive-ui"
+import { getActivePinia } from "pinia"
+import { computed, defineComponent, h, onBeforeUnmount, provide, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { usePoints } from "@/add-os/modules/payments/composables/usePoints"
-import { createWalletTopUp, previewWalletTopUp } from "@/add-os/services/wallet-top-ups"
 import { ApiError } from "@/add-os/services/api"
-import { useCurrencyStore } from "@/stores/currency"
-import { getActivePinia } from "pinia"
+import { createWalletTopUp, getWalletBalance, previewWalletTopUp } from "@/add-os/services/wallet-top-ups"
+import { formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
+import { useCurrencyStore } from "@/stores/currency"
 
 const props = defineProps<{ member: Member | null }>()
-const show = defineModel<boolean>("show", { required: true })
 const emit = defineEmits<{ (e: "success"): void }>()
-
+const show = defineModel<boolean>("show", { required: true })
 const { t } = useI18n()
 const message = useMessage()
 const { formatPoints } = usePoints()
@@ -226,9 +290,62 @@ const currencyOptions = computed<SelectOption[]>(() => {
 	return DEFAULT_CURRENCIES
 })
 
-const paymentMethodOptions = computed<SelectOption[]>(() => [
-	{ label: t("walletTopUps.paymentMethod.cash") || "Cash", value: "cash" }
+/** The methods the desk takes, as the Wallet Top-up page shows them. */
+const paymentMethodList = computed(() => [
+	{ id: "cash" as PaymentMethod, label: t("walletTopUps.paymentMethod.cash"), icon: "carbon:money", iconBg: "bg-emerald-50 text-emerald-700" }
 ])
+
+/**
+ * A select that does not register with the surrounding form item, so the
+ * currency inside the amount box is not validated as the amount — the same
+ * isolation the Wallet Top-up page uses.
+ */
+const FormIsolatedSelect = defineComponent({
+	name: "FormIsolatedSelect",
+	setup(_props, { attrs, slots }) {
+		provide("n-form-item", null)
+		return () => h(NSelect, attrs, slots)
+	}
+})
+
+const initials = computed(() =>
+	(props.member?.name ?? "?").split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join("").toUpperCase()
+)
+
+/** Quick amounts in the chosen currency — the page's own presets. */
+const amountPresets = computed(() => (form.value.currency === "SYP" ? [500, 1000, 2500, 5000] : [10, 25, 50, 100]))
+
+function addPresetAmount(value: number) {
+	form.value.amount = String((Number(form.value.amount) || 0) + value)
+}
+
+const formattedInputAmount = computed(() => {
+	const amount = Number(form.value.amount)
+	return Number.isNaN(amount) || amount === 0 ? `0 ${form.value.currency}` : `${formatNumber(amount)} ${form.value.currency}`
+})
+
+/** The member's general balance in points, as the server reported it. */
+const currentBalancePoints = ref<number | null>(null)
+const isLoadingBalance = ref(false)
+
+async function loadBalance() {
+	if (!props.member) return
+	isLoadingBalance.value = true
+	try {
+		currentBalancePoints.value = (await getWalletBalance({ user_id: props.member.id })).balance_points
+	} catch (e) {
+		if (!(e instanceof ApiError)) throw e
+		currentBalancePoints.value = null
+	} finally {
+		isLoadingBalance.value = false
+	}
+}
+
+/** Two whole point counts the server produced, added — not a conversion. */
+const newBalancePoints = computed(() => {
+	if (currentBalancePoints.value === null) return null
+	return previewPoints.value === null ? currentBalancePoints.value : currentBalancePoints.value + previewPoints.value
+})
 
 const rules = computed<FormRules>(() => ({
 	amount: [
@@ -236,7 +353,7 @@ const rules = computed<FormRules>(() => ({
 		{
 			validator: (_rule, value: string) => {
 				const num = Number(value)
-				return !isNaN(num) && num > 0
+				return !Number.isNaN(num) && num > 0
 			},
 			message: t("walletTopUps.validation.amountFormat") || "Enter a valid positive amount",
 			trigger: ["blur", "input"]
@@ -246,6 +363,12 @@ const rules = computed<FormRules>(() => ({
 		{ required: true, message: "Payment method required", trigger: "change" }
 	]
 }))
+
+// Whenever the dialog is shown, for whichever member: also when it mounts
+// already open.
+watch(() => [show.value, props.member?.id], () => {
+	if (show.value) void loadBalance()
+}, { immediate: true })
 
 watch(show, visible => {
 	if (visible) {

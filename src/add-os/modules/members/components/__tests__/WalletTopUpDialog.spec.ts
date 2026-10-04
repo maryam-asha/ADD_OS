@@ -5,14 +5,16 @@ import { createI18n } from "vue-i18n"
 import { ApiError } from "@/add-os/services/api"
 import WalletTopUpDialog from "../WalletTopUpDialog.vue"
 
-const { createWalletTopUpMock, previewWalletTopUpMock } = vi.hoisted(() => ({
+const { createWalletTopUpMock, previewWalletTopUpMock, getWalletBalanceMock } = vi.hoisted(() => ({
 	createWalletTopUpMock: vi.fn(),
-	previewWalletTopUpMock: vi.fn()
+	previewWalletTopUpMock: vi.fn(),
+	getWalletBalanceMock: vi.fn().mockResolvedValue({ balance_points: 200 })
 }))
 
 vi.mock("@/add-os/services/wallet-top-ups", () => ({
 	createWalletTopUp: createWalletTopUpMock,
-	previewWalletTopUp: previewWalletTopUpMock
+	previewWalletTopUp: previewWalletTopUpMock,
+	getWalletBalance: getWalletBalanceMock
 }))
 
 // Same pitfall the neighbouring dialog spec documents: the component calls
@@ -122,6 +124,24 @@ afterEach(() => {
 })
 
 describe("walletTopUpDialog point preview", () => {
+	/** Like the Wallet Top-up page: the balance now, what the cash buys, and the balance after. */
+	it("shows the member's balance before and after the top-up", async () => {
+		previewWalletTopUpMock.mockResolvedValue({ points: 340, usd: "34.00", payment_amount: "500000", payment_currency: "SYP", point_rate_usd: "0.1000" })
+
+		mountDialog()
+		await flushPromises()
+		expect(getWalletBalanceMock).toHaveBeenCalledWith({ user_id: 5 })
+
+		await typeAmount("500000")
+		await vi.advanceTimersByTimeAsync(300)
+		await flushPromises()
+
+		const text = dialogText()
+		expect(text).toContain("200 points")
+		expect(text).toContain("+ 340 points")
+		expect(text).toContain("540 points")
+	})
+
 	it("asks the server for the point value rather than computing one", async () => {
 		previewWalletTopUpMock.mockResolvedValue({
 			points: 340,
