@@ -474,6 +474,9 @@
 			"isLockable": "قابلة للإغلاق",
 			"capacity": "السعة",
 			"hourlyRatePoints": "السعر بالساعة بالنقاط (اختياري)",
+			"allowsExtension": "يمكن تمديد الحجوزات",
+			"cancellationWindowMinutes": "مهلة الإلغاء بالدقائق قبل البدء (اختياري)",
+			"cancellationWindowHint": "اتركه فارغاً لاستخدام الإعداد العام.",
 			"image": "الصورة (اختياري)",
 			"images": "الصور (اختياري)"
 		},
@@ -854,8 +857,19 @@
 			"isFree": "حدث مجاني",
 			"pricePoints": "سعر التذكرة (نقاط)",
 			"requiresApproval": "يحتاج موافقة قبل القبول",
+			"registrationSource": "فورم التسجيل",
+			"registrationSourceInternal": "داخلي — يسجّل الأعضاء من التطبيق",
+			"registrationSourceExternal": "خارجي — يسجّل الأعضاء عبر رابط",
 			"externalFormUrl": "فورم تسجيل خارجية (رابط)",
+			"registrationOpensAt": "بداية التسجيل (فارغ = عند النشر)",
+			"registrationClosesAt": "إغلاق فورم التسجيل (فارغ = عند بدء الفعالية)",
+			"isMarkedFull": "تحديد كممتلئ (يوقف التسجيل)",
 			"schedule": "الجدول"
+		},
+		"markedFull": "ممتلئ",
+		"validation": {
+			"externalFormUrlRequired": "أدخل رابط الفورم الخارجي، أو اختر فورماً داخلياً.",
+			"externalFormUrlInvalid": "أدخل رابطاً كاملاً يبدأ بـ http:// أو https://."
 		},
 		"loadError": "تعذر تحميل الفعاليات. قد لا تملك الصلاحية الكافية لعرض هذه الصفحة.",
 		"stats": {
@@ -1222,7 +1236,9 @@
 			"covered": "مقعد الاشتراك",
 			"pool": "مقعد من المساحة",
 			"coveredHint": "يجلس في المقعد الذي يحجزه اشتراكه.",
-			"poolHint": "أخذ مقعداً شاغراً من مساحة العمل المشتركة."
+			"poolHint": "أخذ مقعداً شاغراً من مساحة العمل المشتركة.",
+			"desk": "مقعد {code}",
+			"deskHint": "مقعد اشتراكه في المكتب المخصص."
 		},
 		"checkOut": {
 			"button": "تسجيل الخروج",
@@ -1237,8 +1253,13 @@
 		"extend": {
 			"button": "تمديد",
 			"title": "تمديد الحجز",
-			"minutesLabel": "دقائق إضافية",
-			"minutesInvalid": "أدخل عدداً صحيحاً من الدقائق، واحدة أو أكثر.",
+			"optionLabel": "التمديد لمدة",
+			"optionPlaceholder": "اختر المدة",
+			"option": "{duration} — حتى {time} · {price}",
+			"optionFree": "{duration} — حتى {time}",
+			"latestDeparture": "آخر وقت للمغادرة: {time}",
+			"chooseOption": "اختر أحد خيارات التمديد المعروضة.",
+			"loadError": "تعذّر تحميل خيارات التمديد.",
 			"success": "تم تمديد الحجز."
 		},
 		"cancel": {
@@ -1248,10 +1269,13 @@
 			"confirmOk": "إلغاء الحجز",
 			"confirmCancel": "الإبقاء عليه",
 			"success": "تم إلغاء الحجز."
-		}
+		},
+		"details": "التفاصيل"
 	},
 	"coworkingPool": {
 		"title": "مقاعد العمل المشترك",
+		"expand": "توسيع",
+		"collapse": "طي",
 		"refresh": "تحديث",
 		"loadError": "تعذّر تحميل مقاعد العمل المشترك.",
 		"hint": "تُحسب على مستوى الفرع: مساحات العمل المشترك والغرف المُعارة توفّر المقاعد، والاشتراكات والحجوزات والزيارات المباشرة تشغلها.",
@@ -1292,9 +1316,14 @@
 		"loadError": "تعذّر تحميل التقويم. قد لا تملك صلاحية عرض هذه الصفحة.",
 		"empty": "لا توجد مساحات فعّالة تطابق هذه الفلاتر.",
 		"filters": {
+			"title": "الفلاتر والإحصائيات",
+			"expand": "توسيع",
+			"collapse": "طي",
 			"spaceType": "نوع المساحة",
 			"allSpaceTypes": "كل الأنواع",
 			"allSpaces": "كل المساحات",
+			"member": "العضو",
+			"allMembers": "كل الأعضاء",
 			"space": "المساحة",
 			"reset": "إعادة تعيين"
 		},
@@ -1305,10 +1334,14 @@
 		},
 		"legend": {
 			"title": "الإشغال",
-			"closed": "مغلق"
+			"closed": "مغلق",
+			"ended": "انتهى وقته"
 		},
 		"hours": {
 			"closedToday": "مغلق في هذا التاريخ"
+		},
+		"dayList": {
+			"count": "الحجوزات: {count}"
 		},
 		"detail": {
 			"title": "تفاصيل الحجز",
@@ -1321,7 +1354,9 @@
 			"checkedIn": "تم تسجيل الدخول",
 			"notCheckedIn": "لم يسجّل الدخول بعد",
 			"noPhone": "لا يوجد رقم هاتف",
-			"openInBookings": "افتحه في كل الحجوزات"
+			"openInBookings": "افتحه في كل الحجوزات",
+			"checkedOut": "تسجيل الخروج",
+			"notCheckedOut": "ما زال في الداخل"
 		},
 		"create": {
 			"button": "إضافة حجز",
@@ -1333,6 +1368,15 @@
 			"date": "التاريخ",
 			"note": "ملاحظة (اختياري)",
 			"notePlaceholder": "مثال: حُجز من مكتب الاستقبال",
+			"payment": "الدفع",
+			"paymentWallet": "من محفظة العضو (نقاط، الآن)",
+			"paymentCashNow": "كاش — تم استلامه الآن (مدفوع)",
+			"paymentCashLater": "كاش — يُحصَّل عند الوصول (غير مدفوع)",
+			"quoteTitle": "المبلغ المطلوب",
+			"quoteLine": "{hours} × {rate} نقطة للساعة",
+			"quotePoints": "{points} نقطة",
+			"walletBalance": "الرصيد {points} نقطة",
+			"walletShort": "الرصيد {points} نقطة فقط، لا يكفي",
 			"submit": "إنشاء الحجز",
 			"success": "تم إنشاء الحجز.",
 			"rulesNote": "لا تُعرض إلا الأوقات التي تقبلها هذه المساحة فعلاً. وقد يُحجز وقت والنموذج مفتوح، لذا يُؤكّد الحجز عند الإرسال.",
@@ -1376,6 +1420,8 @@
 		"status": {
 			"confirmed": "مؤكد",
 			"pending": "قيد المراجعة",
+			"completed": "مكتمل",
+			"no_show": "لم يتم الحضور",
 			"cancelled": "ملغى",
 			"rejected": "مرفوض"
 		},
@@ -1462,7 +1508,9 @@
 			"walletCredited": "تم شحن المحفظة",
 			"eventCancellation": "إلغاء الفعالية",
 			"operationsRequests": "طلبات التشغيل",
-			"eventAttendees": "التسجيلات"
+			"eventAttendees": "التسجيلات",
+			"closeSessionDetail": "إنهاء الجلسة",
+			"activeSessionDetail": "تفاصيل الجلسة"
 		}
 	},
 	"resourceCrud": {
@@ -2030,26 +2078,54 @@
 		}
 	},
 	"closeSession": {
-		"title": "إنهاء الجلسة والدفع",
-		"activeMember": "عضو نشط",
-		"workspace": "مساحة العمل",
-		"branch": "الفرع",
-		"checkIn": "وقت الدخول",
-		"checkOut": "وقت الخروج",
-		"duration": "المدة",
-		"subtotal": "المجموع الفرعي",
-		"total": "الإجمالي",
-		"paymentStatusPartially": "مدفوع جزئياً",
-		"availableBalance": "الرصيد المتاح",
-		"remainingCashDue": "المبلغ المتبقي للدفع نقداً",
-		"useWalletBalance": "استخدام رصيد المحفظة",
-		"payCashAtReception": "دفع نقدي في الاستقبال",
-		"sessionID": "معرف الجلسة",
-		"paymentMethod": "طريقة الدفع",
-		"receiptNote": "ملاحظة الإيصال",
-		"infoNotice": "سيتم تحصيل المبلغ المتبقي نقداً وتحديث حالة الجلسة إلى منتهية فور التأكيد.",
-		"submitButton": "تأكيد الدفع وإنهاء الجلسة",
-		"successMessage": "تم إنهاء الجلسة وتسوية الحساب بنجاح."
+		"title": "طلبات الإنهاء",
+		"subtitle": "أعضاء ضغطوا «إنهاء الجلسة» من التطبيق، بانتظار الاستقبال.",
+		"refresh": "تحديث",
+		"empty": "لا توجد طلبات إنهاء بالانتظار.",
+		"requestedAt": "طلب الساعة {time}",
+		"details": "التفاصيل",
+		"overdue": "بعد وقت الإغلاق",
+		"paymentMethods": {
+			"wallet": "نقاط",
+			"cash": "كاش",
+			"paymera": "بطاقة (بارميرا)",
+			"none": "لم يحدد"
+		},
+		"detail": {
+			"title": "إنهاء الجلسة",
+			"back": "العودة إلى الطلبات",
+			"notFound": "تعذر تحميل هذه الجلسة.",
+			"noRequest": "لا يوجد طلب إنهاء بالانتظار لهذه الجلسة — ربما أُغلقت أو سُحب الطلب.",
+			"space": "المساحة",
+			"checkIn": "الدخول",
+			"endAt": "الإنهاء عند",
+			"duration": "المدة",
+			"statement": "كشف الحساب",
+			"planCovered": "مغطى من الباقة: {duration}",
+			"total": "المبلغ المستحق",
+			"points": "{points} نقطة",
+			"alreadyPaid": "مدفوع عند الحجز — لا يوجد مبلغ إضافي.",
+			"chosenMethod": "اختار العضو الدفع عبر",
+			"walletBalance": "رصيد المحفظة",
+			"walletCovers": "ستُخصم {points} نقطة من محفظة العضو عند التأكيد.",
+			"walletShort": "الرصيد {points} نقطة فقط. ستُنهى الجلسة وتبقى مستحقة.",
+			"cashCollect": "المبلغ المطلوب من العضو",
+			"cashCollected": "استلمت المبلغ — إنهاء الجلسة",
+			"cashLater": "إنهاء بدون استلام",
+			"cardNote": "سيدفع العضو بالبطاقة من التطبيق بعد إنهاء الجلسة.",
+			"noMethodNote": "لم يحدد العضو طريقة الدفع. ستُنهى الجلسة وتبقى مستحقة، للتحصيل في الاستقبال.",
+			"confirm": "تأكيد الإنهاء",
+			"confirmTitle": "إنهاء هذه الجلسة؟",
+			"confirmBody": "تُغلق الجلسة عند {time}. لا يمكن التراجع عن ذلك.",
+			"sessionTitle": "تفاصيل الجلسة",
+			"backToSessions": "العودة إلى الجلسات النشطة",
+			"timer": "وقت الجلسة",
+			"closedTimer": "مدة الجلسة",
+			"costSoFar": "التكلفة حتى الآن",
+			"costSoFarNote": "محسوبة كأنها انتهت الآن، مع ساعات الباقة. تُحدَّث كل دقيقة.",
+			"noRequestActive": "لم يطلب العضو إنهاء هذه الجلسة.",
+			"closedNote": "هذه الجلسة مغلقة."
+		}
 	},
 	"walletCredited": {
 		"transactionID": "معرف المعاملة",
@@ -2083,11 +2159,19 @@
 		"upNextTitle": "القادم تالياً",
 		"stats": {
 			"activeSessions": "الجلسات النشطة",
-			"expectedBookings": "الحجوزات المتوقعة",
-			"pendingGuests": "الضيوف المعلقين",
-			"pendingPayments": "مدفوعات معلقة"
+			"expectedBookings": "حجوزات اليوم المتوقعة",
+			"pendingGuests": "وصول بانتظار التأكيد",
+			"pendingPayments": "مدفوعات معلقة",
+			"pendingEndRequests": "طلبات الإنهاء"
 		},
-		"vsYesterday": "مقارنة بالأمس"
+		"today": "اليوم",
+		"loadFailed": "تعذر تحميل بيانات اليوم.",
+		"upNextEmpty": "لا يوجد ما ينتظر الاستقبال.",
+		"upNextKinds": {
+			"end_request": "يريد إنهاء الجلسة",
+			"arrival": "وصل — بانتظار تسجيل الدخول",
+			"booking": "حجز"
+		}
 	},
 	"eventCancellation": {
 		"title": "تفاصيل إلغاء الفعالية",
@@ -2251,6 +2335,7 @@
 		"desks": {
 			"title": "المكاتب المخصصة",
 			"hint": "اشتراكات المكتب المخصص الفعّالة. الاشتراك المشترى من التطبيق يصل بلا مقعد — اربطه من هنا.",
+			"waiting": "{count} بانتظار مقعد",
 			"onlyWithout": "فقط التي بلا مقعد",
 			"none": "لا توجد اشتراكات مكتب مخصص فعّالة.",
 			"noneWithout": "كل اشتراكات المكتب المخصص الفعّالة لها مقاعدها.",

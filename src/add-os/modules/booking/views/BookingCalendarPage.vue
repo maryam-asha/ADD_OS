@@ -16,72 +16,126 @@
 
 		<n-alert v-if="error" type="error" :title="t('bookingCalendar.loadError')" />
 
-		<n-card>
-			<div class="flex flex-wrap items-end justify-between gap-4">
-				<div class="flex flex-wrap items-end gap-4">
-					<!--
-						Each select carries a visible label, not just a placeholder. A
-						placeholder disappears the moment a value is chosen, which left
-						two unlabelled pills on screen with nothing to say what they
-						filtered.
-					-->
-					<!--
-						The width sits on the label, not the select: Naive injects
-						`.n-select { width: 100% }` after Tailwind, so a width class
-						on the select loses and it fills a label that has shrunk to
-						nothing in this wrapping row.
-					-->
-					<label class="add-filter-field">
-						<span class="text-xs">{{ t("bookingCalendar.filters.spaceType") }}</span>
-						<n-select
-							v-model:value="spaceType"
-							clearable
-							:options="spaceTypeOptions"
-							:placeholder="t('bookingCalendar.filters.allSpaceTypes')"
-						/>
-					</label>
-					<label class="add-filter-field add-filter-field--wide">
-						<span class="text-xs">{{ t("bookingCalendar.filters.space") }}</span>
-						<n-select
-							v-model:value="spaceId"
-							clearable
-							:options="spaceOptions"
-							:placeholder="t('bookingCalendar.filters.allSpaces')"
-						/>
-					</label>
+		<n-card class="add-filters-card">
+			<div
+				class="flex items-center justify-between cursor-pointer select-none py-1"
+				@click="isFiltersExpanded = !isFiltersExpanded"
+			>
+				<div class="flex items-center gap-2 font-semibold text-sm sm:text-base">
+					<Icon name="carbon:calendar-settings" :size="18" class="text-primary" />
+					<span>{{ t("bookingCalendar.filters.title") }}</span>
+					<n-tag v-if="hasFilters" size="small" type="primary" :bordered="false" round class="ms-1">
+						{{ activeFiltersCount }}
+					</n-tag>
 				</div>
+				<div class="flex items-center gap-2">
+					<n-button
+						quaternary
+						size="small"
+						circle
+						:aria-label="isFiltersExpanded ? t('bookingCalendar.filters.collapse') : t('bookingCalendar.filters.expand')"
+						@click.stop="isFiltersExpanded = !isFiltersExpanded"
+					>
+						<template #icon>
+							<Icon
+								name="carbon:chevron-down"
+								:size="16"
+								class="transition-transform duration-200"
+								:class="{ 'rotate-180': isFiltersExpanded }"
+							/>
+						</template>
+					</n-button>
+				</div>
+			</div>
 
-				<div class="add-totals-group flex flex-wrap items-center gap-3">
-					<div v-for="total in totalsSummary" :key="total.key" class="add-total-chip flex flex-col">
-						<span class="text-xs opacity-75">{{ t(`bookingCalendar.totals.${total.key}`) }}</span>
-						<span class="text-base font-bold">{{ total.value }}</span>
+			<n-collapse-transition :show="isFiltersExpanded">
+				<div class="pt-4 border-t border-border mt-3">
+					<div class="flex flex-wrap items-end justify-between gap-4">
+						<div class="flex flex-wrap items-end gap-4">
+							<!--
+								Each select carries a visible label, not just a placeholder. A
+								placeholder disappears the moment a value is chosen, which left
+								two unlabelled pills on screen with nothing to say what they
+								filtered.
+							-->
+							<!--
+								The width sits on the label, not the select: Naive injects
+								`.n-select { width: 100% }` after Tailwind, so a width class
+								on the select loses and it fills a label that has shrunk to
+								nothing in this wrapping row.
+							-->
+							<label class="add-filter-field">
+								<span class="text-xs">{{ t("bookingCalendar.filters.spaceType") }}</span>
+								<n-select
+									v-model:value="spaceType"
+									clearable
+									:options="spaceTypeOptions"
+									:placeholder="t('bookingCalendar.filters.allSpaceTypes')"
+								/>
+							</label>
+							<label class="add-filter-field add-filter-field--wide">
+								<span class="text-xs">{{ t("bookingCalendar.filters.space") }}</span>
+								<n-select
+									v-model:value="spaceId"
+									clearable
+									:options="spaceOptions"
+									:placeholder="t('bookingCalendar.filters.allSpaces')"
+								/>
+							</label>
+							<!--
+								One member's bookings only. The occupancy each day shows stays
+								the space's own, so a room others filled never reads as free.
+							-->
+							<label class="add-filter-field add-filter-field--wide">
+								<span class="text-xs">{{ t("bookingCalendar.filters.member") }}</span>
+								<n-select
+									v-model:value="memberId"
+									clearable
+									filterable
+									:options="memberOptions"
+									:loading="isLoadingMembers"
+									:placeholder="t('bookingCalendar.filters.allMembers')"
+									@focus="ensureMembers"
+								/>
+							</label>
+						</div>
+
+						<div class="add-totals-group flex flex-wrap items-center gap-3">
+							<div v-for="total in totalsSummary" :key="total.key" class="add-total-chip flex flex-col">
+								<span class="text-xs opacity-75">{{ t(`bookingCalendar.totals.${total.key}`) }}</span>
+								<span class="text-base font-bold">{{ total.value }}</span>
+							</div>
+						</div>
+					</div>
+
+					<div v-if="branchHours" class="add-branch-hours-bar mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+						<span class="inline-flex items-center gap-1.5 font-semibold text-primary">
+							<Icon name="carbon:time" :size="16" />
+							{{ branchHours.title }}
+						</span>
+						<span class="font-medium">{{ branchHours.hours ?? t("bookingCalendar.hours.closedToday") }}</span>
+						<span v-if="branchHours.days_label" class="opacity-75">· {{ branchHours.days_label }}</span>
+						<span class="text-xs opacity-60">({{ branchHours.timezone_note }})</span>
+					</div>
+
+					<!-- `justify-start` is logical: right in Arabic, left in English. The
+					     old `ar ? justify-end : justify-start` flipped it twice and left
+					     it on the left in both. -->
+					<div v-if="hasFilters" class="add-filters-reset-row mt-3 flex justify-start">
+						<n-button
+							quaternary
+							size="small"
+							class="add-filters-reset-btn"
+							@click="resetFilters"
+						>
+							<template #icon>
+								<Icon name="carbon:filter-reset" :size="16" />
+							</template>
+							{{ t("bookingCalendar.filters.reset") }}
+						</n-button>
 					</div>
 				</div>
-			</div>
-
-			<div v-if="branchHours" class="add-branch-hours-bar mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-				<span class="inline-flex items-center gap-1.5 font-semibold text-primary">
-					<Icon name="carbon:time" :size="16" />
-					{{ branchHours.title }}
-				</span>
-				<span class="font-medium">{{ branchHours.hours ?? t("bookingCalendar.hours.closedToday") }}</span>
-				<span v-if="branchHours.days_label" class="opacity-75">· {{ branchHours.days_label }}</span>
-				<span class="text-xs opacity-60">({{ branchHours.timezone_note }})</span>
-			</div>
-
-			<div v-if="hasFilters" class="add-filters-reset-row mt-3 flex" :class="locale === 'ar' ? 'justify-end' : 'justify-start'">
-				<n-button
-					quaternary
-					size="small"
-					class="add-filters-reset-btn"
-					@click="resetFilters"
-				>
-					<template #icon>
-						<Icon name="carbon:filter-reset" :size="16" />
-					</template>
-					{{ t("bookingCalendar.filters.reset") }}
-				</n-button>
-			</div>
+			</n-collapse-transition>
 		</n-card>
 
 		<!--
@@ -107,7 +161,7 @@
 					<span class="font-semibold opacity-80">{{ t("bookingCalendar.legend.title") }}:</span>
 					<span v-for="status in LEGEND_STATUSES" :key="status" class="flex items-center gap-2">
 						<span class="add-legend-swatch" :class="`c-${status}`" />
-						<span class="font-medium">{{ t(`allBookings.status.${status}`) }}</span>
+						<span class="font-medium">{{ status === "ended" ? t("bookingCalendar.legend.ended") : t(`allBookings.status.${status}`) }}</span>
 					</span>
 					<span class="flex items-center gap-2">
 						<span class="add-legend-swatch c-closed" />
@@ -123,10 +177,11 @@
 			preset="card"
 			class="max-w-md add-detail-modal"
 			:title="t('bookingCalendar.detail.title')"
+			content-style="max-height: calc(88vh - 130px); overflow-y: auto; overflow-x: hidden;"
 		>
 			<template #header-extra>
-				<n-tag v-if="selected" :type="STATUS_TAG_TYPE[selected.status]" size="small" :bordered="false" class="font-semibold">
-					{{ selected.statusLabel }}
+				<n-tag v-if="selected" :type="STATUS_TAG_TYPE[selected.displayStatus]" size="small" :bordered="false" class="font-semibold">
+					{{ selected.displayLabel }}
 				</n-tag>
 			</template>
 			<n-descriptions v-if="selected" :column="1" label-placement="left" bordered size="small">
@@ -156,42 +211,83 @@
 				<n-descriptions-item :label="t('bookingCalendar.detail.checkedIn')">
 					{{ selected.checkedInAt ? formatDateTime(selected.checkedInAt) : t("bookingCalendar.detail.notCheckedIn") }}
 				</n-descriptions-item>
+				<n-descriptions-item v-if="selected.checkedInAt" :label="t('bookingCalendar.detail.checkedOut')">
+					{{ selected.checkedOutAt ? formatDateTime(selected.checkedOutAt) : t("bookingCalendar.detail.notCheckedOut") }}
+				</n-descriptions-item>
 			</n-descriptions>
+		</n-modal>
+
+		<!-- A day's bookings — what "+N" opens -->
+		<n-modal
+			v-model:show="dayListVisible"
+			preset="card"
+			class="max-w-md add-day-list-modal"
+			:title="dayList?.dateLabel"
+			content-style="max-height: calc(88vh - 130px); overflow-y: auto; overflow-x: hidden;"
+		>
+			<template #header-extra>
+				<n-tag v-if="dayList" size="small" :bordered="false" class="font-semibold">
+					{{ t("bookingCalendar.dayList.count", { count: formatNumber(dayList.items.length) }) }}
+				</n-tag>
+			</template>
+			<ul v-if="dayList" class="add-day-list">
+				<li v-for="item in dayList.items" :key="item.id">
+					<button type="button" class="add-day-list__item" :class="`c-${item.displayStatus}`" @click="openFromDayList(item)">
+						<span class="add-day-list__time"><bdi>{{ item.timeLabel }}</bdi></span>
+						<span class="add-day-list__body">
+							<span class="add-day-list__space">{{ item.spaceName }}</span>
+							<span class="add-day-list__member"><bdi>{{ item.memberName || "—" }}</bdi></span>
+						</span>
+						<n-tag :type="STATUS_TAG_TYPE[item.displayStatus]" size="small" :bordered="false" class="shrink-0">
+							{{ item.displayLabel }}
+						</n-tag>
+					</button>
+				</li>
+			</ul>
 		</n-modal>
 
 		<!-- Create booking -->
 		<n-modal
 			v-model:show="createVisible"
 			preset="card"
-			class="max-w-lg"
+			class="max-w-lg md:max-w-xl add-create-booking-modal"
 			:title="t('bookingCalendar.create.title')"
+			content-style="max-height: calc(88vh - 130px); overflow-y: auto; overflow-x: hidden;"
 		>
-			<n-form :model="createForm">
-				<n-form-item
-					:label="t('bookingCalendar.create.member')"
-					:feedback="createErrors.user_id?.[0]"
-					:validation-status="createErrors.user_id ? 'error' : undefined"
-				>
-					<n-select
-						v-model:value="createForm.user_id"
-						filterable
-						:options="memberOptions"
-						:loading="isLoadingMembers"
-						:placeholder="t('bookingCalendar.create.memberPlaceholder')"
-					/>
-				</n-form-item>
+			<template #header-extra>
+				<div class="add-modal-badge">
+					<Icon name="carbon:calendar-add" :size="18" class="text-[var(--primary-color)]" />
+				</div>
+			</template>
 
-				<n-form-item
-					:label="t('bookingCalendar.create.space')"
-					:feedback="createErrors.space_id?.[0]"
-					:validation-status="createErrors.space_id ? 'error' : undefined"
-				>
-					<n-select
-						v-model:value="createForm.space_id"
-						:options="creatableSpaceOptions"
-						:placeholder="t('bookingCalendar.create.spacePlaceholder')"
-					/>
-				</n-form-item>
+			<n-form :model="createForm" class="flex flex-col gap-1">
+				<div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
+					<n-form-item
+						:label="t('bookingCalendar.create.member')"
+						:feedback="createErrors.user_id?.[0]"
+						:validation-status="createErrors.user_id ? 'error' : undefined"
+					>
+						<n-select
+							v-model:value="createForm.user_id"
+							filterable
+							:options="memberOptions"
+							:loading="isLoadingMembers"
+							:placeholder="t('bookingCalendar.create.memberPlaceholder')"
+						/>
+					</n-form-item>
+
+					<n-form-item
+						:label="t('bookingCalendar.create.space')"
+						:feedback="createErrors.space_id?.[0]"
+						:validation-status="createErrors.space_id ? 'error' : undefined"
+					>
+						<n-select
+							v-model:value="createForm.space_id"
+							:options="creatableSpaceOptions"
+							:placeholder="t('bookingCalendar.create.spacePlaceholder')"
+						/>
+					</n-form-item>
+				</div>
 
 				<n-form-item
 					:label="t('bookingCalendar.create.date')"
@@ -216,13 +312,24 @@
 					it was wrong only from the 422.
 				-->
 				<n-form-item :label="t('bookingCalendar.create.time')">
-					<div class="flex w-full flex-col gap-2">
-						<n-spin :show="isLoadingSlots" :size="14">
+					<div class="flex w-full flex-col gap-2.5">
+						<n-spin :show="isLoadingSlots" :size="16">
 							<div v-if="slotsBanner" class="add-slot-note">{{ slotsBanner }}</div>
 
 							<template v-else-if="slots.length > 0">
-								<p class="add-slot-counts">{{ t("bookingCalendar.create.pickHint") }}</p>
-								<div class="add-slot-grid">
+								<div class="flex items-center justify-between gap-2 mb-1.5 px-0.5">
+									<p class="add-slot-counts">{{ t("bookingCalendar.create.pickHint") }}</p>
+									<span v-if="slotCountsNote" class="add-slot-count-badge shrink-0">
+										{{ slotCountsNote }}
+									</span>
+								</div>
+								<div
+									ref="slotsGridRef"
+									class="add-slot-grid"
+									tabindex="0"
+									role="region"
+									:aria-label="t('bookingCalendar.create.time')"
+								>
 									<!--
 										A taken cell stays visible and disabled rather than
 										being dropped: "2pm is booked" and "2pm does not
@@ -238,6 +345,8 @@
 										class="add-slot"
 										:class="{
 											'add-slot--active': isInRun(slot),
+											'add-slot--endpoint': isRunStart(slot) || isRunEnd(slot),
+											'add-slot--middle': isRunMiddle(slot),
 											'add-slot--taken': !slot.is_available
 										}"
 										:disabled="!slot.is_available"
@@ -249,8 +358,8 @@
 											shown — one format for the start, the end and the
 											selected run, with nothing converted on either side.
 										-->
-										<span>{{ slot.start_time }}</span>
-										<span class="add-slot__meta">{{ slot.end_time }}</span>
+										<span class="add-slot__start"><bdi dir="ltr">{{ slot.start_time }}</bdi></span>
+										<span class="add-slot__meta"><bdi dir="ltr">{{ slot.end_time }}</bdi></span>
 									</button>
 								</div>
 							</template>
@@ -260,21 +369,19 @@
 							</div>
 						</n-spin>
 
-						<p v-if="slotCountsNote" class="add-slot-counts add-slot-counts--hint">{{ slotCountsNote }}</p>
-
 						<div v-if="selectedRun" class="add-slot-counts add-slot-counts--selected">
-							<Icon name="carbon:checkmark" :size="18" class="shrink-0 mt-0.5" />
-							<div class="flex flex-col gap-0.5 grow">
-								<span class="font-semibold text-sm leading-tight">
+							<div class="add-slot-summary-range">
+								<Icon name="carbon:time" :size="18" class="shrink-0 add-slot-summary-icon" />
+								<span>
 									<template v-if="locale === 'ar'">
-										من <bdi dir="ltr">{{ selectedRun.startTime }}</bdi> إلى <bdi dir="ltr">{{ selectedRun.endTime }}</bdi>
+										من <bdi>{{ formatClockTime(selectedRun.startTime) }}</bdi> إلى <bdi>{{ formatClockTime(selectedRun.endTime) }}</bdi>
 									</template>
-									<template v-else>{{ selectedRun.startTime }} – {{ selectedRun.endTime }}</template>
-								</span>
-								<span class="text-xs opacity-85 font-medium leading-tight">
-									· {{ hoursLabel(selectedRun.minutes) }}
+									<template v-else>
+										{{ formatClockTime(selectedRun.startTime) }} – {{ formatClockTime(selectedRun.endTime) }}
+									</template>
 								</span>
 							</div>
+							<span class="add-slot-duration-badge">{{ " " }}· {{ hoursLabel(selectedRun.minutes) }}</span>
 						</div>
 						<p v-if="runTooShort" class="add-slot-warning">
 							<Icon name="carbon:warning" :size="16" class="shrink-0" />
@@ -283,6 +390,80 @@
 							</span>
 						</p>
 					</div>
+				</n-form-item>
+
+				<!--
+					What the member owes for the chosen run — the server's own
+					arithmetic (hours × hourly rate, less any plan discount), in
+					points and in each currency the desk takes cash in.
+				-->
+				<n-form-item v-if="selectedRun && createForm.user_id !== null" :label="t('bookingCalendar.create.quoteTitle')">
+					<n-spin :show="isQuoting" class="w-full">
+						<div v-if="quote" class="add-quote-card">
+							<div class="flex items-center justify-between gap-2 border-b border-[var(--border-color)] pb-2 mb-2">
+								<span class="text-xs opacity-75">
+									{{ t("bookingCalendar.create.quoteLine", { hours: hoursLabel(quote.minutes), rate: formatNumber(quote.hourly_rate_points) }) }}
+								</span>
+								<strong class="text-base text-[var(--primary-color)]">
+									{{ t("bookingCalendar.create.quotePoints", { points: formatNumber(quote.total_points) }) }}
+								</strong>
+							</div>
+							<div v-if="quote.breakdown.lines.filter(row => row.key !== 'base').length" class="flex flex-col gap-1 text-xs opacity-75 mb-2">
+								<span v-for="line in quote.breakdown.lines.filter(row => row.key !== 'base')" :key="line.key">
+									{{ line.label }}: {{ formatNumber(line.points) }}
+								</span>
+							</div>
+							<div v-if="quote.amounts.length" class="flex flex-wrap gap-2 pt-1">
+								<span v-for="amount in quote.amounts" :key="amount.currency" class="add-quote-currency-pill">
+									<bdi dir="ltr">{{ formatQuoteAmount(amount) }}</bdi>
+								</span>
+							</div>
+						</div>
+					</n-spin>
+				</n-form-item>
+
+				<n-form-item :label="t('bookingCalendar.create.payment')" :feedback="createErrors.payment_method?.[0]" :validation-status="createErrors.payment_method ? 'error' : undefined">
+					<n-radio-group v-model:value="createForm.payment" name="receptionBookingPayment" class="w-full">
+						<div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 w-full">
+							<div
+								class="add-payment-tile"
+								:class="{
+									'add-payment-tile--active': createForm.payment === 'wallet',
+									'add-payment-tile--disabled': walletCannotPay
+								}"
+								@click="!walletCannotPay && (createForm.payment = 'wallet')"
+							>
+								<n-radio value="wallet" :disabled="walletCannotPay">
+									<div class="flex flex-col gap-0.5">
+										<span class="font-semibold text-xs">{{ t("bookingCalendar.create.paymentWallet") }}</span>
+										<span v-if="walletBalance !== null" class="text-[0.7rem] opacity-75">
+											{{ t(walletCannotPay ? "bookingCalendar.create.walletShort" : "bookingCalendar.create.walletBalance", { points: formatNumber(walletBalance) }) }}
+										</span>
+									</div>
+								</n-radio>
+							</div>
+
+							<div
+								class="add-payment-tile"
+								:class="{ 'add-payment-tile--active': createForm.payment === 'cash_now' }"
+								@click="createForm.payment = 'cash_now'"
+							>
+								<n-radio value="cash_now">
+									<span class="font-semibold text-xs">{{ t("bookingCalendar.create.paymentCashNow") }}</span>
+								</n-radio>
+							</div>
+
+							<div
+								class="add-payment-tile"
+								:class="{ 'add-payment-tile--active': createForm.payment === 'cash_later' }"
+								@click="createForm.payment = 'cash_later'"
+							>
+								<n-radio value="cash_later">
+									<span class="font-semibold text-xs">{{ t("bookingCalendar.create.paymentCashLater") }}</span>
+								</n-radio>
+							</div>
+						</div>
+					</n-radio-group>
 				</n-form-item>
 
 				<n-form-item :label="t('bookingCalendar.create.note')">
@@ -294,13 +475,13 @@
 					/>
 				</n-form-item>
 
-				<n-alert type="info" :bordered="false">{{ t("bookingCalendar.create.rulesNote") }}</n-alert>
+				<n-alert type="info" :bordered="false" class="add-create-rules-alert">{{ t("bookingCalendar.create.rulesNote") }}</n-alert>
 			</n-form>
 
 			<template #footer>
-				<div class="flex justify-end gap-2">
-					<n-button @click="createVisible = false">{{ t("resourceCrud.form.cancel") }}</n-button>
-					<n-button type="primary" :loading="isCreating" :disabled="!canSubmit" @click="submitCreate">
+				<div class="flex items-center justify-end gap-3">
+					<n-button class="add-dialog-cancel-btn" @click="createVisible = false">{{ t("resourceCrud.form.cancel") }}</n-button>
+					<n-button type="primary" :loading="isCreating" :disabled="!canSubmit" class="add-dialog-submit-btn font-semibold" @click="submitCreate">
 						{{ t("bookingCalendar.create.submit") }}
 					</n-button>
 				</div>
@@ -314,6 +495,7 @@ import type { CalendarApi, CalendarOptions, EventInput } from "@fullcalendar/cor
 import type { SelectOption } from "naive-ui"
 import type { AvailabilitySlot } from "@/add-os/modules/booking/types/availability"
 import type { BookingPaymentState, BookingStatus, CalendarResponse, CalendarView } from "@/add-os/modules/booking/types/calendar"
+import type { ReceptionBookingPayment, ReceptionBookingQuote } from "@/add-os/modules/booking/types/reception"
 import type { Member } from "@/add-os/modules/members/types/member"
 import type { SpaceType } from "@/add-os/modules/spatial/types/space"
 import dayGridPlugin from "@fullcalendar/daygrid"
@@ -325,6 +507,7 @@ import {
 	NAlert,
 	NButton,
 	NCard,
+	NCollapseTransition,
 	NDatePicker,
 	NDescriptions,
 	NDescriptionsItem,
@@ -332,12 +515,14 @@ import {
 	NFormItem,
 	NInput,
 	NModal,
+	NRadio,
+	NRadioGroup,
 	NSelect,
 	NSpin,
 	NTag,
 	useMessage
 } from "naive-ui"
-import { computed, ref, watch } from "vue"
+import { computed, onBeforeUnmount, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import CoworkingPoolPanel from "@/add-os/modules/booking/components/CoworkingPoolPanel.vue"
 import { spaceTypeLabel } from "@/add-os/modules/booking/config/space-type-label"
@@ -345,8 +530,8 @@ import { SPACE_TYPES } from "@/add-os/modules/spatial/types/space"
 import { ApiError } from "@/add-os/services/api"
 import { getCalendar, getSpaceSlots } from "@/add-os/services/booking-calendar"
 import { listMembers } from "@/add-os/services/members"
-import { createReceptionBooking } from "@/add-os/services/reception"
-import { formatDate, formatDateTime, formatNumber, formatTime } from "@/add-os/utils/format"
+import { createReceptionBooking, quoteReceptionBooking } from "@/add-os/services/reception"
+import { formatClockTime, formatCurrency, formatDate, formatDateTime, formatNumber, formatTime, isCurrencyCode } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
 /**
@@ -379,14 +564,66 @@ defineProps<{ titleKey?: string }>()
 const { t, locale } = useI18n()
 const message = useMessage()
 
-/** The statuses the legend explains, in the order it lists them. */
-const LEGEND_STATUSES: readonly BookingStatus[] = ["confirmed", "pending", "cancelled", "rejected"]
+/**
+ * What the calendar shows for a booking: its server status, or `ended` once a
+ * still-live booking's end time has gone by.
+ *
+ * `ended` is drawn here, not sent by the server — the backend enum has no such
+ * value. It is a fact of the clock, not a decision about the booking, so it
+ * only ever replaces `confirmed` or `pending`; a cancelled or rejected booking
+ * keeps its own, more informative status. The server's status stays readable
+ * in the detail's status row.
+ *
+ * **Narrowed 2026-10-03, not removed.** The backend now writes outcomes of its
+ * own — `completed` at checkout, `no_show` once a booking ends with nobody
+ * checked in, and an undecided `pending` lapses to `rejected` when it starts
+ * (ADDCore `docs/decisions/booking-outcomes-and-extension.md`). Those are drawn
+ * as the server sent them; `ended` never replaces them, because only
+ * `confirmed`/`pending` are live. What `ended` still covers: the minutes before
+ * the server's five-minute job reaches a booking, and a checked-in booking
+ * running past its end until it is checked out (it stays `confirmed` on the
+ * server). Dropping `ended` was weighed and given up: the board would then
+ * show a finished booking as `confirmed` until the next reload, which is the
+ * live flip this clock exists to give the desk.
+ */
+type CalendarDisplayStatus = BookingStatus | "ended"
 
-const STATUS_TAG_TYPE: Readonly<Record<BookingStatus, "success" | "warning" | "default" | "error">> = {
+/** The statuses the legend explains, in the order it lists them. */
+const LEGEND_STATUSES: readonly CalendarDisplayStatus[] = ["confirmed", "pending", "ended", "completed", "no_show", "cancelled", "rejected"]
+
+/** Same colours as the bookings index (`all-bookings.config.ts`), plus `ended`. */
+const STATUS_TAG_TYPE: Readonly<Record<CalendarDisplayStatus, "success" | "warning" | "default" | "error" | "info">> = {
 	confirmed: "success",
 	pending: "warning",
+	ended: "default",
+	completed: "info",
+	no_show: "error",
 	cancelled: "default",
 	rejected: "error"
+}
+
+/**
+ * The current instant, refreshed each minute so a booking turns `ended` while
+ * the page is left open at the desk, without a reload.
+ */
+const now = ref(Date.now())
+const clock = setInterval(() => {
+	now.value = Date.now()
+}, 60_000)
+onBeforeUnmount(() => clearInterval(clock))
+
+/**
+ * Compared as instants, so the district's offset in `end_at` and the browser's
+ * own zone cannot disagree about whether a booking is over.
+ */
+function displayStatusOf(status: BookingStatus, endAt: string): CalendarDisplayStatus {
+	const live = status === "confirmed" || status === "pending"
+	return live && Date.parse(endAt) <= now.value ? "ended" : status
+}
+
+/** The tag's wording: the server's own label, unless the calendar marked it ended. */
+function displayLabelOf(displayStatus: CalendarDisplayStatus, statusLabel: string): string {
+	return displayStatus === "ended" ? t("bookingCalendar.legend.ended") : statusLabel
 }
 
 /**
@@ -427,12 +664,24 @@ const error = ref<ApiError | null>(null)
 
 const spaceType = ref<SpaceType | null>(null)
 const spaceId = ref<number | null>(null)
+const memberId = ref<number | null>(null)
 
-const hasFilters = computed(() => spaceType.value !== null || spaceId.value !== null)
+const isFiltersExpanded = ref(false)
+
+const hasFilters = computed(() => spaceType.value !== null || spaceId.value !== null || memberId.value !== null)
+
+const activeFiltersCount = computed(() => {
+	let count = 0
+	if (spaceType.value !== null) count++
+	if (spaceId.value !== null) count++
+	if (memberId.value !== null) count++
+	return count
+})
 
 function resetFilters(): void {
 	spaceType.value = null
 	spaceId.value = null
+	memberId.value = null
 }
 
 /**
@@ -513,16 +762,92 @@ interface SelectedBooking {
 	id: number
 	status: BookingStatus
 	statusLabel: string
+	displayStatus: CalendarDisplayStatus
+	displayLabel: string
 	spaceName: string
 	memberName: string | null
 	memberPhone: string | null
 	paymentState: BookingPaymentState
 	checkedInAt: string | null
+	checkedOutAt: string | null
 	dateLabel: string
 	timeLabel: string
 }
 
 const selected = ref<SelectedBooking | null>(null)
+
+/** Opens the detail for one booking, from the grid or from the day list. */
+function openDetail(props: Record<string, unknown>): void {
+	// A closed-day background event carries no booking; clicking it opens
+	// nothing rather than an empty detail.
+	if (!props.bookingId) return
+	const displayStatus = displayStatusOf(props.status as BookingStatus, props.endAt as string)
+	selected.value = {
+		id: props.bookingId as number,
+		status: props.status as BookingStatus,
+		statusLabel: props.statusLabel as string,
+		displayStatus,
+		displayLabel: displayLabelOf(displayStatus, props.statusLabel as string),
+		spaceName: props.spaceName as string,
+		memberName: props.memberName as string | null,
+		memberPhone: props.memberPhone as string | null,
+		paymentState: props.paymentState as BookingPaymentState,
+		checkedInAt: props.checkedInAt as string | null,
+		checkedOutAt: (props.checkedOutAt as string | null | undefined) ?? null,
+		dateLabel: formatDate(props.startAt as string),
+		timeLabel: `${formatTime(props.startAt as string)} – ${formatTime(props.endAt as string)}`
+	}
+}
+
+// ---------------------------------------------------------------
+// Day list — what "+N" opens
+// ---------------------------------------------------------------
+
+interface DayListItem {
+	id: number
+	displayStatus: CalendarDisplayStatus
+	displayLabel: string
+	spaceName: string
+	memberName: string | null
+	timeLabel: string
+	/** Kept whole so a row opens the same detail a grid event does. */
+	props: Record<string, unknown>
+}
+
+const dayList = ref<{ dateLabel: string; items: DayListItem[] } | null>(null)
+
+const dayListVisible = computed({
+	get: () => dayList.value !== null,
+	set: (value: boolean) => {
+		if (!value) dayList.value = null
+	}
+})
+
+/** Every booking on the day, in start order — not only the hidden ones. */
+function openDayList(date: Date, events: Record<string, unknown>[]): void {
+	const items = events
+		.filter(props => Boolean(props.bookingId))
+		.sort((a, b) => String(a.startAt).localeCompare(String(b.startAt)))
+		.map(props => {
+			const displayStatus = displayStatusOf(props.status as BookingStatus, props.endAt as string)
+			return {
+				id: props.bookingId as number,
+				displayStatus,
+				displayLabel: displayLabelOf(displayStatus, props.statusLabel as string),
+				spaceName: props.spaceName as string,
+				memberName: props.memberName as string | null,
+				timeLabel: `${formatTime(props.startAt as string)} – ${formatTime(props.endAt as string)}`,
+				props
+			}
+		})
+	dayList.value = { dateLabel: formatDate(date, { style: "long" }), items }
+}
+
+/** A row closes the list and opens that booking's detail in its place. */
+function openFromDayList(item: DayListItem): void {
+	dayList.value = null
+	openDetail(item.props)
+}
 
 // ---------------------------------------------------------------
 // Events
@@ -546,7 +871,7 @@ const events = computed<EventInput[]>(() => {
 					title: `${spaceName} · ${booking.member.name ?? ""}`.trim().replace(/ ·\s*$/, ""),
 					start: booking.start_at,
 					end: booking.end_at,
-					classNames: [`c-${booking.status}`, "styled"],
+					classNames: [`c-${displayStatusOf(booking.status, booking.end_at)}`, "styled"],
 					extendedProps: {
 						bookingId: booking.id,
 						statusLabel: booking.status_label,
@@ -556,6 +881,7 @@ const events = computed<EventInput[]>(() => {
 						memberPhone: booking.member.phone,
 						paymentState: booking.payment_state,
 						checkedInAt: booking.checked_in_at,
+						checkedOutAt: booking.checked_out_at,
 						startAt: booking.start_at,
 						endAt: booking.end_at
 					}
@@ -594,6 +920,22 @@ const events = computed<EventInput[]>(() => {
 	return out
 })
 
+/**
+ * The wall-clock fields FullCalendar hands a function formatter — local time,
+ * since the calendar runs in the browser's zone. Typed structurally because
+ * FullCalendar only exports the full type from its internal entry point.
+ */
+interface FcClockFields {
+	hour: number
+	minute: number
+}
+
+/** A FullCalendar formatter that prints a time, or a time range, through `formatClockTime`. */
+function fcClockRange(arg: { start: FcClockFields; end?: FcClockFields }): string {
+	const clock = ({ hour, minute }: FcClockFields) => formatClockTime(`${hour}:${String(minute).padStart(2, "0")}`)
+	return arg.end ? `${clock(arg.start)} – ${clock(arg.end)}` : clock(arg.start)
+}
+
 const calendarOptions = computed<CalendarOptions>(() => ({
 	plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin],
 	initialView: "dayGridMonth",
@@ -609,9 +951,30 @@ const calendarOptions = computed<CalendarOptions>(() => ({
 	height: "auto",
 	dayMaxEvents: 3,
 	moreLinkText: (n: number) => `+${n}`,
+	// A week column is a seventh of the grid: left to itself FullCalendar
+	// cascades every concurrent booking into it until each is a few pixels
+	// wide and its title wraps one letter per line. Concurrent bookings sit
+	// side by side instead of overlapping, and past a small stack the rest
+	// collapse into the same "+N" link the month grid uses. The day view has
+	// the full width, so it stacks further before collapsing.
+	slotEventOverlap: false,
+	views: {
+		timeGridWeek: { eventMaxStack: 2 },
+		timeGridDay: { eventMaxStack: 6 }
+	},
+	// The grid truncates a title to one line; the full "space · member"
+	// stays reachable on hover.
+	eventDidMount(info) {
+		if (info.event.title) info.el.title = info.event.title
+	},
 	navLinks: true,
 	events: events.value,
-	eventTimeFormat: { hour: "2-digit", minute: "2-digit", meridiem: "short" },
+	// Event times and the week/day hour axis go through the dashboard's own
+	// clock formatter rather than FullCalendar's `Intl`-based one, so the grid
+	// reads "02:00 م" exactly like the detail panel, the tables and the slot
+	// list — `Intl` would also switch the digits in Arabic.
+	eventTimeFormat: fcClockRange,
+	slotLabelFormat: fcClockRange,
 	// Read-only on the grid itself: no editable, no drag, no resize. Clicking
 	// opens a detail; creating goes through the form, where the member and the
 	// space are stated explicitly.
@@ -638,22 +1001,23 @@ const calendarOptions = computed<CalendarOptions>(() => ({
 		return isBeyondWindow(date) ? ["add-day--out-of-window"] : []
 	},
 	eventClick(info) {
-		const props = info.event.extendedProps as Record<string, unknown>
-		// A closed-day background event carries no booking; clicking it opens
-		// nothing rather than an empty detail.
-		if (!props.bookingId) return
-		selected.value = {
-			id: props.bookingId as number,
-			status: props.status as BookingStatus,
-			statusLabel: props.statusLabel as string,
-			spaceName: props.spaceName as string,
-			memberName: props.memberName as string | null,
-			memberPhone: props.memberPhone as string | null,
-			paymentState: props.paymentState as BookingPaymentState,
-			checkedInAt: props.checkedInAt as string | null,
-			dateLabel: formatDate(props.startAt as string),
-			timeLabel: `${formatTime(props.startAt as string)} – ${formatTime(props.endAt as string)}`
-		}
+		openDetail(info.event.extendedProps as Record<string, unknown>)
+	},
+	// "+N" opens the day's bookings in our own modal instead of FullCalendar's
+	// popover. The popover is anchored to the clicked cell, so on a lower row
+	// it ran off the bottom of the screen; its close glyph needs FullCalendar's
+	// icon font, which the theme's font stack replaced with an empty box; and
+	// a one-line "space · member" in a narrow box was cut from the wrong end
+	// in RTL. A centred modal has none of those problems.
+	//
+	// FullCalendar opens its popover whenever this returns nothing, so it
+	// returns the view already on screen: "zoom" to where we are, a no-op.
+	moreLinkClick(info) {
+		openDayList(
+			info.date,
+			info.allSegs.map(seg => seg.event.extendedProps as Record<string, unknown>)
+		)
+		return info.view.type
 	},
 	datesSet(info) {
 		const view = VIEW_BY_FC_TYPE[info.view.type] ?? "month"
@@ -696,6 +1060,8 @@ const createForm = ref({
 	from: "" as string,
 	/** The last cell of the run, by its `start_time`; the booking ends at its `end_time`. */
 	to: "" as string,
+	/** How it is paid — chosen every time, never defaulted. */
+	payment: null as ReceptionBookingPayment | null,
 	note: ""
 })
 
@@ -767,10 +1133,101 @@ const minimumMinutes = computed(() => response.value?.booking_window?.min_durati
 /** A picked run shorter than the minimum: said on screen, and not submittable. */
 const runTooShort = computed(() => selectedRun.value !== null && selectedRun.value.minutes < minimumMinutes.value)
 
+// ---------------------------------------------------------------
+// What the chosen run costs (POST reception/bookings/quote)
+// ---------------------------------------------------------------
+
+const quote = ref<ReceptionBookingQuote | null>(null)
+const isQuoting = ref(false)
+/** Only the newest request may land: an older answer is for a run no longer chosen. */
+let quoteRequest = 0
+
+/** The richest wallet the member can spend from, or null before a quote. */
+const walletBalance = computed(() => {
+	const wallets = quote.value?.wallets ?? []
+	return wallets.length ? Math.max(...wallets.map(wallet => wallet.usable_balance)) : null
+})
+
+/** No wallet covers the total: the wallet choice would come straight back as a 422. */
+const walletCannotPay = computed(() => quote.value !== null && !quote.value.wallets.some(wallet => wallet.sufficient))
+
+watch(walletCannotPay, cannot => {
+	if (cannot && createForm.value.payment === "wallet") createForm.value.payment = null
+})
+
+/**
+ * The server's decimal string, at the decimals it was sent with ("2.40", not
+ * "2.4"): the ledger's own precision for that currency.
+ */
+function formatQuoteAmount(amount: { currency: string, value: string }): string {
+	const [whole, fraction] = amount.value.split(".")
+	const formattedWhole = formatNumber(whole)
+	const valueWithFraction = fraction !== undefined ? `${formattedWhole}.${fraction}` : formattedWhole
+	const symbol = amount.currency === "USD"
+		? "$"
+		: amount.currency === "EUR"
+			? "€"
+			: amount.currency === "SYP"
+				? (locale.value === "ar" ? "ل.س." : "SYP")
+				: amount.currency
+	return `${valueWithFraction} ${symbol}`
+}
+
+async function loadQuote(): Promise<void> {
+	const { user_id: userId, space_id: spaceId, date } = createForm.value
+	const run = selectedRun.value
+	const request = ++quoteRequest
+
+	if (userId === null || spaceId === null || run === null || runTooShort.value) {
+		quote.value = null
+		return
+	}
+
+	isQuoting.value = true
+	try {
+		const result = await quoteReceptionBooking({
+			user_id: userId,
+			space_id: spaceId,
+			start_at: `${date} ${run.startTime}`,
+			end_at: `${date} ${run.endTime}`
+		})
+		if (request === quoteRequest) quote.value = result
+	} catch (caught) {
+		if (!(caught instanceof ApiError)) throw caught
+		if (request === quoteRequest) quote.value = null
+	} finally {
+		if (request === quoteRequest) isQuoting.value = false
+	}
+}
+
+watch(
+	() => [createForm.value.user_id, createForm.value.space_id, createForm.value.date, selectedRun.value?.startTime, selectedRun.value?.endTime],
+	() => void loadQuote()
+)
+
 function isInRun(slot: AvailabilitySlot): boolean {
 	const run = selectedRun.value
 	const index = indexOf(slot.start_time)
 	return run !== null && index >= run.first && index <= run.last
+}
+
+function isRunStart(slot: AvailabilitySlot): boolean {
+	const run = selectedRun.value
+	if (!run) return false
+	return indexOf(slot.start_time) === run.first
+}
+
+function isRunEnd(slot: AvailabilitySlot): boolean {
+	const run = selectedRun.value
+	if (!run) return false
+	return indexOf(slot.start_time) === run.last
+}
+
+function isRunMiddle(slot: AvailabilitySlot): boolean {
+	const run = selectedRun.value
+	if (!run) return false
+	const index = indexOf(slot.start_time)
+	return index > run.first && index < run.last
 }
 
 /**
@@ -871,7 +1328,34 @@ const canSubmit = computed(
 		&& createForm.value.space_id !== null
 		&& selectedRun.value !== null
 		&& !runTooShort.value
+		&& createForm.value.payment !== null
 )
+
+/**
+ * Resets the create form state cleanly when the dialog is closed,
+ * ensuring no stale member, space, time range, note, or errors linger.
+ */
+function resetCreateForm(): void {
+	createErrors.value = {}
+	createForm.value.user_id = null
+	createForm.value.space_id = null
+	createForm.value.date = nextOpenDate()
+	createForm.value.from = ""
+	createForm.value.to = ""
+	createForm.value.payment = null
+	createForm.value.note = ""
+	slots.value = []
+	slotsBanner.value = null
+	if (slotsGridRef.value) {
+		slotsGridRef.value.scrollTop = 0
+	}
+}
+
+watch(createVisible, visible => {
+	if (!visible) {
+		resetCreateForm()
+	}
+})
 
 /**
  * Opens the form, optionally on a date and space the operator already clicked.
@@ -881,7 +1365,7 @@ const canSubmit = computed(
  * is how the form felt disconnected from the calendar it sits on.
  */
 function openCreate(prefill?: { date?: string, spaceId?: number }): void {
-	createErrors.value = {}
+	resetCreateForm()
 	// Without a clicked day, the next one that can actually be booked: on a
 	// holiday, today would open the form on a date the picker already refuses.
 	createForm.value.date = prefill?.date ?? nextOpenDate()
@@ -899,10 +1383,15 @@ function openCreate(prefill?: { date?: string, spaceId?: number }): void {
 
 	createVisible.value = true
 
+	ensureMembers()
+	void loadSlots()
+}
+
+/** The member list is fetched once, when the filter or the create form first needs it. */
+function ensureMembers(): void {
 	if (members.value.length === 0 && !isLoadingMembers.value) {
 		void loadMembers()
 	}
-	void loadSlots()
 }
 
 /**
@@ -972,6 +1461,8 @@ function selectSlot(slot: AvailabilitySlot): void {
 	}
 }
 
+const slotsGridRef = ref<HTMLElement | null>(null)
+
 // A new space or date invalidates the chosen run: the cells free on Tuesday
 // say nothing about Wednesday.
 watch(
@@ -1013,6 +1504,8 @@ async function submitCreate(): Promise<void> {
 			// — not minutes added here.
 			start_at: `${createForm.value.date} ${selectedRun.value!.startTime}`,
 			end_at: `${createForm.value.date} ${selectedRun.value!.endTime}`,
+			payment_method: createForm.value.payment === "wallet" ? "wallet" : "cash",
+			...(createForm.value.payment === "wallet" ? {} : { cash_collected: createForm.value.payment === "cash_now" }),
 			...(createForm.value.note ? { note: createForm.value.note } : {})
 		})
 		message.success(t("bookingCalendar.create.success"))
@@ -1041,7 +1534,8 @@ async function load(): Promise<void> {
 			view: activeView.value,
 			date: activeDate.value,
 			...(spaceType.value ? { space_type: spaceType.value } : {}),
-			...(spaceId.value ? { space_id: spaceId.value } : {})
+			...(spaceId.value ? { space_id: spaceId.value } : {}),
+			...(memberId.value ? { member_id: memberId.value } : {})
 		})
 	} catch (caught) {
 		if (!(caught instanceof ApiError)) throw caught
@@ -1052,7 +1546,7 @@ async function load(): Promise<void> {
 	}
 }
 
-watch([activeView, activeDate, spaceType, spaceId], load, { immediate: true })
+watch([activeView, activeDate, spaceType, spaceId, memberId], load, { immediate: true })
 
 /** Exposed for the calendar API in tests and for a future refresh control. */
 defineExpose({
@@ -1284,7 +1778,29 @@ defineExpose({
 				}
 			}
 
-			&.c-cancelled {
+			// Over, not void: muted like a cancelled booking, but without the
+			// strike-through, because it happened. A `completed` booking is the
+			// server saying the same thing, so it wears the same look.
+			&.c-ended,
+			&.c-completed {
+				background-color: var(--bg-secondary-color) !important;
+				border-color: var(--border-color) !important;
+				border-inline-start-color: var(--fg-secondary-color) !important;
+				color: var(--fg-secondary-color) !important;
+				opacity: 0.8;
+
+				.fc-event-main,
+				.fc-event-title,
+				.fc-event-time {
+					color: var(--fg-secondary-color) !important;
+				}
+			}
+
+			// A no-show is void like a cancellation — the room was not used —
+			// but it held the slot to the end, so its edge stays coloured: the
+			// one an operator may need to follow up.
+			&.c-cancelled,
+			&.c-no_show {
 				background-color: var(--bg-secondary-color) !important;
 				border-color: var(--border-color) !important;
 				border-inline-start-color: var(--border-color) !important;
@@ -1297,6 +1813,10 @@ defineExpose({
 					color: var(--fg-secondary-color) !important;
 					text-decoration: line-through;
 				}
+			}
+
+			&.c-no_show {
+				border-inline-start-color: var(--error-color) !important;
 			}
 
 			&.c-rejected {
@@ -1351,13 +1871,33 @@ defineExpose({
 
 		.fc-timegrid-event {
 			margin-bottom: 2px !important;
+			// The card's own 4px padding plus this would leave a narrow column no
+			// room for text; the card padding alone is enough.
+			padding: 0 !important;
+			overflow: hidden;
 
 			.fc-event-main {
-				padding: 6px 8px !important;
+				padding: 4px 6px !important;
 				display: flex !important;
 				flex-direction: column !important;
-				gap: 3px !important;
+				gap: 2px !important;
+				min-width: 0;
+				overflow: hidden;
 				color: var(--fg-default-color) !important;
+			}
+
+			.fc-event-main-frame {
+				min-width: 0;
+			}
+
+			// One line each, cut with an ellipsis: a title wrapped inside a narrow
+			// column breaks letter by letter and reads as nothing.
+			.fc-event-time,
+			.fc-event-title {
+				white-space: nowrap !important;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				max-width: 100%;
 			}
 
 			.fc-event-time {
@@ -1373,9 +1913,18 @@ defineExpose({
 				font-weight: 600 !important;
 				color: var(--fg-default-color) !important;
 				line-height: 1.35 !important;
-				white-space: normal !important;
 				margin: 0 !important;
 			}
+		}
+
+		.fc-timegrid-more-link {
+			border-radius: 6px;
+			padding: 2px 4px;
+			font-size: 0.75rem;
+			font-weight: 700;
+			background-color: var(--bg-secondary-color);
+			border: 1px solid var(--border-color);
+			color: var(--fg-default-color);
 		}
 
 		// ── DayGrid Events (Month View) ─────────────────────────
@@ -1429,200 +1978,6 @@ defineExpose({
 				color: #ffffff !important;
 				transform: translateY(-1px);
 				box-shadow: 0 2px 6px rgba(var(--primary-color-rgb) / 0.3);
-			}
-		}
-
-		// ── More Popover Dialog ─────────────────────────────────
-		.fc-popover {
-			background: var(--add-surface-raised, #ffffff) !important;
-			border: 1px solid var(--border-color) !important;
-			border-radius: 14px !important;
-			box-shadow: 0 20px 48px -8px rgba(0, 0, 0, 0.22), 0 8px 18px -4px rgba(0, 0, 0, 0.08) !important;
-			z-index: 9999 !important;
-			overflow: hidden !important;
-			min-width: 330px !important;
-			max-width: min(420px, 92vw) !important;
-			width: 360px !important;
-			max-height: min(420px, calc(100vh - 140px)) !important;
-			display: flex !important;
-			flex-direction: column !important;
-			backdrop-filter: blur(12px) !important;
-
-			.fc-popover-header {
-				background: var(--bg-secondary-color) !important;
-				border-bottom: 1px solid var(--border-color) !important;
-				padding: 12px 16px !important;
-				display: flex !important;
-				align-items: center !important;
-				justify-content: space-between !important;
-				flex-shrink: 0 !important;
-
-				.fc-popover-title {
-					font-size: 0.9375rem !important;
-					font-weight: 700 !important;
-					color: var(--fg-default-color) !important;
-					margin: 0 !important;
-					display: flex !important;
-					align-items: center !important;
-					gap: 6px !important;
-					letter-spacing: -0.01em;
-				}
-
-				.fc-popover-close {
-					cursor: pointer !important;
-					width: 26px !important;
-					height: 26px !important;
-					border-radius: 50% !important;
-					display: flex !important;
-					align-items: center !important;
-					justify-content: center !important;
-					opacity: 0.65;
-					font-size: 1.25rem !important;
-					font-weight: 300 !important;
-					font-family: inherit !important;
-					line-height: 1 !important;
-					color: var(--fg-default-color) !important;
-					background: rgba(var(--fg-secondary-color-rgb, 120, 120, 120) / 0.08) !important;
-					transition: all 0.15s ease !important;
-
-					&:hover {
-						opacity: 1 !important;
-						background-color: rgba(var(--error-color-rgb, 239, 68, 68) / 0.15) !important;
-						color: var(--error-color, #dc2626) !important;
-						transform: scale(1.08);
-					}
-				}
-			}
-
-			.fc-popover-body {
-				padding: 10px 12px !important;
-				display: flex !important;
-				flex-direction: column !important;
-				gap: 8px !important;
-				background: var(--add-surface-raised, #ffffff) !important;
-				max-height: min(320px, calc(100vh - 220px)) !important;
-				overflow-y: auto !important;
-				overscroll-behavior: contain;
-				scrollbar-width: thin !important;
-				scrollbar-color: rgba(var(--primary-color-rgb, 14, 165, 233) / 0.3) transparent !important;
-
-				&::-webkit-scrollbar {
-					width: 5px !important;
-				}
-
-				&::-webkit-scrollbar-track {
-					background: transparent !important;
-				}
-
-				&::-webkit-scrollbar-thumb {
-					background: rgba(var(--primary-color-rgb, 14, 165, 233) / 0.25) !important;
-					border-radius: 10px !important;
-
-					&:hover {
-						background: rgba(var(--primary-color-rgb, 14, 165, 233) / 0.5) !important;
-					}
-				}
-
-				.fc-daygrid-event {
-					padding: 8px 12px !important;
-					margin: 0 !important;
-					border-radius: 8px !important;
-					display: flex !important;
-					align-items: center !important;
-					gap: 10px !important;
-					border-width: 1px !important;
-					border-style: solid !important;
-					border-inline-start-width: 4px !important;
-					border-inline-start-style: solid !important;
-					box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
-					cursor: pointer !important;
-					transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease !important;
-
-					&:hover {
-						transform: translateY(-1px) !important;
-						box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
-						z-index: 2 !important;
-					}
-
-					.fc-event-time {
-						font-size: 0.75rem !important;
-						font-weight: 700 !important;
-						padding: 3px 8px !important;
-						border-radius: 6px !important;
-						flex-shrink: 0 !important;
-						line-height: 1.3 !important;
-						background-color: rgba(255, 255, 255, 0.7) !important;
-						box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
-					}
-
-					.fc-event-title {
-						font-size: 0.8125rem !important;
-						font-weight: 600 !important;
-						color: var(--fg-default-color) !important;
-						overflow: hidden !important;
-						text-overflow: ellipsis !important;
-						white-space: nowrap !important;
-						flex-grow: 1 !important;
-						line-height: 1.4 !important;
-					}
-
-					&.c-confirmed {
-						background-color: rgba(var(--success-color-rgb, 22, 163, 74) / 0.12) !important;
-						border-color: rgba(var(--success-color-rgb, 22, 163, 74) / 0.28) !important;
-						border-inline-start-color: var(--success-color, #16a34a) !important;
-
-						.fc-event-time {
-							background-color: rgba(var(--success-color-rgb, 22, 163, 74) / 0.18) !important;
-							color: var(--success-color, #16a34a) !important;
-						}
-
-						&:hover {
-							background-color: rgba(var(--success-color-rgb, 22, 163, 74) / 0.2) !important;
-						}
-					}
-
-					&.c-pending {
-						background-color: rgba(var(--warning-color-rgb, 202, 138, 4) / 0.12) !important;
-						border-color: rgba(var(--warning-color-rgb, 202, 138, 4) / 0.28) !important;
-						border-inline-start-color: var(--warning-color, #ca8a04) !important;
-
-						.fc-event-time {
-							background-color: rgba(var(--warning-color-rgb, 202, 138, 4) / 0.18) !important;
-							color: var(--warning-color, #ca8a04) !important;
-						}
-
-						&:hover {
-							background-color: rgba(var(--warning-color-rgb, 202, 138, 4) / 0.2) !important;
-						}
-					}
-
-					&.c-rejected {
-						background-color: rgba(var(--error-color-rgb, 220, 38, 38) / 0.12) !important;
-						border-color: rgba(var(--error-color-rgb, 220, 38, 38) / 0.28) !important;
-						border-inline-start-color: var(--error-color, #dc2626) !important;
-
-						.fc-event-time {
-							background-color: rgba(var(--error-color-rgb, 220, 38, 38) / 0.18) !important;
-							color: var(--error-color, #dc2626) !important;
-						}
-
-						&:hover {
-							background-color: rgba(var(--error-color-rgb, 220, 38, 38) / 0.2) !important;
-						}
-					}
-
-					&.c-cancelled {
-						background-color: var(--bg-secondary-color) !important;
-						border-color: var(--border-color) !important;
-						border-inline-start-color: var(--border-color) !important;
-						opacity: 0.75 !important;
-
-						.fc-event-time {
-							background-color: rgba(0, 0, 0, 0.05) !important;
-							color: var(--fg-secondary-color) !important;
-						}
-					}
-				}
 			}
 		}
 
@@ -1705,9 +2060,18 @@ defineExpose({
 		background-color: rgba(var(--warning-color-rgb) / 0.2);
 		border-color: var(--warning-color);
 	}
+	&.c-ended,
+	&.c-completed {
+		background-color: var(--bg-secondary-color);
+		border-color: var(--fg-secondary-color);
+	}
 	&.c-cancelled {
 		background-color: var(--bg-secondary-color);
 		border-color: var(--border-color);
+	}
+	&.c-no_show {
+		background-color: var(--bg-secondary-color);
+		border-color: var(--error-color);
 	}
 	&.c-rejected {
 		background-color: rgba(var(--error-color-rgb) / 0.2);
@@ -1722,14 +2086,137 @@ defineExpose({
 
 /**
  * The slot grid and chips in the Create Booking modal.
+ * Modern responsive 3-column layout with smooth vertical scrolling.
  */
 .add-slot-grid {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
-	gap: 8px;
-	max-height: 260px;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 10px;
+	max-height: 250px;
 	overflow-y: auto;
-	padding: 2px;
+	overflow-x: hidden;
+	padding: 4px;
+	scrollbar-width: thin;
+	scrollbar-color: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.45) rgba(0, 0, 0, 0.04);
+	overscroll-behavior-y: contain;
+	scroll-behavior: smooth;
+
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+	&::-webkit-scrollbar-track {
+		background: rgba(0, 0, 0, 0.04);
+		border-radius: 9999px;
+	}
+	&::-webkit-scrollbar-thumb {
+		background: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.35);
+		border-radius: 9999px;
+
+		&:hover {
+			background: var(--primary-color, #638356);
+		}
+	}
+
+	@media (max-width: 440px) {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+.add-modal-badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 34px;
+	height: 34px;
+	border-radius: 10px;
+	background: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.12);
+	border: 1px solid rgba(var(--primary-color-rgb, 99, 131, 86) / 0.2);
+}
+
+.add-slot-count-badge {
+	font-size: 0.72rem;
+	font-weight: 600;
+	padding: 2px 8px;
+	border-radius: 6px;
+	background: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.1);
+	color: var(--primary-color, #638356);
+}
+
+.add-quote-card {
+	padding: 12px 16px;
+	border-radius: 12px;
+	background: linear-gradient(135deg, rgba(var(--primary-color-rgb, 99, 131, 86) / 0.08) 0%, rgba(var(--primary-color-rgb, 99, 131, 86) / 0.02) 100%);
+	border: 1px solid rgba(var(--primary-color-rgb, 99, 131, 86) / 0.22);
+}
+
+.add-quote-currency-pill {
+	display: inline-flex;
+	align-items: center;
+	padding: 3px 10px;
+	border-radius: 6px;
+	font-size: 0.75rem;
+	font-weight: 600;
+	background: var(--add-surface-raised, #ffffff);
+	border: 1px solid var(--border-color);
+	color: var(--fg-default-color);
+}
+
+.add-payment-tile {
+	padding: 10px 12px;
+	border-radius: 12px;
+	border: 1.5px solid var(--border-color);
+	background: var(--bg-secondary-color, #f9fafb);
+	cursor: pointer;
+	transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+	display: flex;
+	align-items: center;
+
+	:deep(.n-radio) {
+		width: 100%;
+		align-items: center;
+	}
+
+	&:hover:not(&--disabled):not(&--active) {
+		border-color: var(--primary-color);
+		background: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.04);
+		transform: translateY(-1px);
+	}
+
+	&--active {
+		border-color: var(--primary-color) !important;
+		background: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.1) !important;
+		box-shadow: 0 2px 8px rgba(var(--primary-color-rgb, 99, 131, 86) / 0.15);
+	}
+
+	&--disabled {
+		opacity: 0.45;
+		cursor: not-allowed;
+	}
+}
+
+.add-create-rules-alert {
+	border-radius: 10px !important;
+	border: 1px solid rgba(var(--primary-color-rgb, 99, 131, 86) / 0.15) !important;
+	background: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.05) !important;
+}
+
+.add-dialog-cancel-btn {
+	border-radius: 10px !important;
+	padding-inline: 16px !important;
+	font-weight: 600;
+	transition: all 0.15s ease;
+}
+
+.add-dialog-submit-btn {
+	border-radius: 10px !important;
+	padding-inline: 20px !important;
+	box-shadow: 0 2px 8px rgba(var(--primary-color-rgb, 99, 131, 86) / 0.3) !important;
+	transition: all 0.18s ease;
+
+	&:hover:not(:disabled) {
+		transform: translateY(-1px);
+		box-shadow: 0 4px 14px rgba(var(--primary-color-rgb, 99, 131, 86) / 0.4) !important;
+	}
 }
 
 .add-slot {
@@ -1737,22 +2224,39 @@ defineExpose({
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	gap: 2px;
-	padding: 8px 10px;
-	border-radius: var(--border-radius, 8px);
+	gap: 3px;
+	padding: 10px 6px;
+	min-height: 58px;
+	border-radius: 14px;
 	border: 1.5px solid var(--border-color);
 	background: var(--add-surface-raised, #ffffff);
 	color: var(--fg-default-color);
-	font-size: 0.8125rem;
-	font-weight: 600;
 	cursor: pointer;
-	transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+	direction: ltr;
+	transition: all 0.15s ease;
+
+	.add-slot__start,
+	> span:first-child {
+		font-size: 0.8125rem;
+		font-weight: 700;
+		line-height: 1.25;
+		color: var(--fg-default-color);
+		transition: color 0.15s ease;
+	}
+
+	&__meta {
+		font-size: 0.72rem;
+		font-weight: 500;
+		line-height: 1.25;
+		color: var(--fg-secondary-color);
+		transition: color 0.15s ease;
+	}
 
 	&:hover:not(:disabled):not(.add-slot--active) {
 		border-color: var(--primary-color);
-		background-color: rgba(var(--primary-color-rgb) / 0.06);
-		color: var(--primary-color);
-		transform: translateY(-1px);
+		background-color: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.05);
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 	}
 
 	&:focus-visible {
@@ -1760,37 +2264,64 @@ defineExpose({
 		outline-offset: 2px;
 	}
 
-	&--active {
-		background: var(--primary-color) !important;
-		border-color: var(--primary-color) !important;
+	// ── Endpoint (Start or End of range, or single slot): Solid olive green like mobile app ──
+	&--endpoint,
+	&--active:not(&--middle) {
+		background: #638356 !important;
+		background: var(--primary-color, #638356) !important;
+		border-color: var(--primary-color, #638356) !important;
 		color: #ffffff !important;
-		font-weight: 700;
-		box-shadow: 0 2px 8px rgba(var(--primary-color-rgb) / 0.35);
+		box-shadow: 0 4px 12px rgba(99, 131, 86, 0.35) !important;
+
+		.add-slot__start,
+		> span:first-child {
+			color: #ffffff !important;
+			font-weight: 700 !important;
+		}
 
 		.add-slot__meta {
-			color: rgba(255, 255, 255, 0.85) !important;
+			color: rgba(255, 255, 255, 0.9) !important;
+			font-weight: 500 !important;
 		}
 	}
 
+	// ── Middle of selected range: Soft mint/sage green tint like mobile app ──
+	&--middle {
+		background: #ebf3e7 !important;
+		background: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.15) !important;
+		border-color: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.4) !important;
+		box-shadow: none !important;
+
+		.add-slot__start,
+		> span:first-child {
+			color: #3b5a2a !important;
+			color: var(--primary-color, #3b5a2a) !important;
+			font-weight: 700 !important;
+		}
+
+		.add-slot__meta {
+			color: #4b7038 !important;
+			color: var(--primary-color, #4b7038) !important;
+			opacity: 0.85;
+			font-weight: 600 !important;
+		}
+	}
+
+	// ── Unavailable / Booked slot: Soft muted gray with strikethrough ──
 	&--taken,
 	&:disabled {
-		opacity: 0.4 !important;
+		opacity: 0.45 !important;
 		cursor: not-allowed !important;
-		background: var(--bg-secondary-color) !important;
-		border-color: var(--border-color) !important;
-		color: var(--fg-secondary-color) !important;
-		text-decoration: line-through;
+		background: var(--bg-secondary-color, #f9fafb) !important;
+		border-color: transparent !important;
+		box-shadow: none !important;
 
+		.add-slot__start,
+		> span:first-child,
 		.add-slot__meta {
+			color: var(--fg-secondary-color) !important;
 			text-decoration: line-through;
 		}
-	}
-
-	&__meta {
-		font-size: 0.72rem;
-		font-weight: 400;
-		color: var(--fg-secondary-color);
-		transition: color 0.15s ease;
 	}
 }
 
@@ -1800,7 +2331,7 @@ defineExpose({
 	margin: 0;
 	padding: 8px 12px;
 	background: var(--bg-secondary-color);
-	border-radius: 6px;
+	border-radius: 8px;
 }
 
 .add-slot-counts {
@@ -1809,19 +2340,48 @@ defineExpose({
 	margin: 0;
 
 	&--hint {
-		font-size: 0.75rem;
-		opacity: 0.8;
+		font-size: 0.78rem;
+		opacity: 0.85;
 	}
 
+	// ── Selected Summary Bar matching mobile reference design ──
 	&--selected {
 		display: flex;
-		align-items: flex-start;
-		gap: 10px;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
 		padding: 10px 14px;
-		border-radius: 8px;
-		background-color: rgba(var(--primary-color-rgb) / 0.1);
-		border: 1px solid rgba(var(--primary-color-rgb) / 0.25);
-		color: var(--primary-color);
+		border-radius: 12px;
+		background-color: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.08);
+		border: 1px solid rgba(var(--primary-color-rgb, 99, 131, 86) / 0.22);
+		color: var(--fg-default-color);
+
+		.add-slot-summary-range {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 0.9375rem;
+			font-weight: 700;
+			color: var(--fg-default-color);
+			letter-spacing: -0.01em;
+
+			.add-slot-summary-icon {
+				color: var(--primary-color);
+			}
+		}
+
+		.add-slot-duration-badge {
+			display: inline-flex;
+			align-items: center;
+			padding: 4px 12px;
+			border-radius: 8px;
+			background: #f3e8dc;
+			color: #8c532b;
+			font-weight: 700;
+			font-size: 0.8125rem;
+			white-space: nowrap;
+			box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+		}
 	}
 }
 
@@ -1838,216 +2398,254 @@ defineExpose({
 	font-size: 0.8125rem;
 	margin: 0;
 }
-</style>
 
-<style lang="scss">
-/* Global styles for FullCalendar Popover Dialog (in case portaled to body) */
-.fc-popover {
-	background: var(--add-surface-raised, #ffffff) !important;
-	border: 1px solid var(--border-color) !important;
-	border-radius: 14px !important;
-	box-shadow: 0 20px 48px -8px rgba(0, 0, 0, 0.22), 0 8px 18px -4px rgba(0, 0, 0, 0.08) !important;
-	z-index: 9999 !important;
-	overflow: hidden !important;
-	min-width: 330px !important;
-	max-width: min(420px, 92vw) !important;
-	width: 360px !important;
-	max-height: min(420px, calc(100vh - 140px)) !important;
-	display: flex !important;
-	flex-direction: column !important;
-	backdrop-filter: blur(12px) !important;
+:global(.theme-dark) {
+	.add-slot {
+		background: var(--bg-default-color, #1e1e24);
+		border-color: var(--border-color);
 
-	.fc-popover-header {
-		background: var(--bg-secondary-color) !important;
-		border-bottom: 1px solid var(--border-color) !important;
-		padding: 12px 16px !important;
-		display: flex !important;
-		align-items: center !important;
-		justify-content: space-between !important;
-		flex-shrink: 0 !important;
-
-		.fc-popover-title {
-			font-size: 0.9375rem !important;
-			font-weight: 700 !important;
-			color: var(--fg-default-color) !important;
-			margin: 0 !important;
-			display: flex !important;
-			align-items: center !important;
-			gap: 6px !important;
-			letter-spacing: -0.01em;
+		&--middle {
+			background: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.2) !important;
 		}
 
-		.fc-popover-close {
-			cursor: pointer !important;
-			width: 26px !important;
-			height: 26px !important;
-			border-radius: 50% !important;
-			display: flex !important;
-			align-items: center !important;
-			justify-content: center !important;
-			opacity: 0.65;
-			font-size: 1.25rem !important;
-			font-weight: 300 !important;
-			font-family: inherit !important;
-			line-height: 1 !important;
-			color: var(--fg-default-color) !important;
-			background: rgba(var(--fg-secondary-color-rgb, 120, 120, 120) / 0.08) !important;
-			transition: all 0.15s ease !important;
-
-			&:hover {
-				opacity: 1 !important;
-				background-color: rgba(var(--error-color-rgb, 239, 68, 68) / 0.15) !important;
-				color: var(--error-color, #dc2626) !important;
-				transform: scale(1.08);
-			}
+		&--taken,
+		&:disabled {
+			background: var(--bg-secondary-color, #26262e) !important;
 		}
 	}
 
-	.fc-popover-body {
-		padding: 10px 12px !important;
-		display: flex !important;
-		flex-direction: column !important;
-		gap: 8px !important;
-		background: var(--add-surface-raised, #ffffff) !important;
-		max-height: min(320px, calc(100vh - 220px)) !important;
-		overflow-y: auto !important;
-		overscroll-behavior: contain;
-		scrollbar-width: thin !important;
-		scrollbar-color: rgba(var(--primary-color-rgb, 14, 165, 233) / 0.3) transparent !important;
+	.add-slot-counts--selected {
+		background-color: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.12);
+		border-color: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.3);
 
-		&::-webkit-scrollbar {
-			width: 5px !important;
+		.add-slot-duration-badge {
+			background: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.25);
+			color: #e2c09f;
 		}
+	}
+
+	.add-slot-grid {
+		scrollbar-color: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.5) rgba(255, 255, 255, 0.05);
 
 		&::-webkit-scrollbar-track {
-			background: transparent !important;
+			background: rgba(255, 255, 255, 0.05);
 		}
-
 		&::-webkit-scrollbar-thumb {
-			background: rgba(var(--primary-color-rgb, 14, 165, 233) / 0.25) !important;
-			border-radius: 10px !important;
-
-			&:hover {
-				background: rgba(var(--primary-color-rgb, 14, 165, 233) / 0.5) !important;
-			}
+			background: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.45);
 		}
+	}
 
-		.fc-daygrid-event {
-			padding: 8px 12px !important;
-			margin: 0 !important;
-			border-radius: 8px !important;
-			display: flex !important;
-			align-items: center !important;
-			gap: 10px !important;
-			border-width: 1px !important;
-			border-style: solid !important;
-			border-inline-start-width: 4px !important;
-			border-inline-start-style: solid !important;
-			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
-			cursor: pointer !important;
-			transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease !important;
+	.add-quote-card {
+		background: linear-gradient(135deg, rgba(var(--primary-color-rgb, 99, 131, 86) / 0.14) 0%, rgba(var(--primary-color-rgb, 99, 131, 86) / 0.04) 100%);
+		border-color: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.3);
+	}
 
-			&:hover {
-				transform: translateY(-1px) !important;
-				box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
-				z-index: 2 !important;
-			}
+	.add-quote-currency-pill {
+		background: var(--bg-secondary-color, #26262e);
+	}
 
-			.fc-event-time {
-				font-size: 0.75rem !important;
-				font-weight: 700 !important;
-				padding: 3px 8px !important;
-				border-radius: 6px !important;
-				flex-shrink: 0 !important;
-				line-height: 1.3 !important;
-				background-color: rgba(255, 255, 255, 0.7) !important;
-				box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
-			}
+	.add-payment-tile {
+		background: var(--bg-secondary-color, #26262e);
 
-			.fc-event-title {
-				font-size: 0.8125rem !important;
-				font-weight: 600 !important;
-				color: var(--fg-default-color) !important;
-				overflow: hidden !important;
-				text-overflow: ellipsis !important;
-				white-space: nowrap !important;
-				flex-grow: 1 !important;
-				line-height: 1.4 !important;
-			}
-
-			&.c-confirmed {
-				background-color: rgba(var(--success-color-rgb, 22, 163, 74) / 0.12) !important;
-				border-color: rgba(var(--success-color-rgb, 22, 163, 74) / 0.28) !important;
-				border-inline-start-color: var(--success-color, #16a34a) !important;
-
-				.fc-event-time {
-					background-color: rgba(var(--success-color-rgb, 22, 163, 74) / 0.18) !important;
-					color: var(--success-color, #16a34a) !important;
-				}
-
-				&:hover {
-					background-color: rgba(var(--success-color-rgb, 22, 163, 74) / 0.2) !important;
-				}
-			}
-
-			&.c-pending {
-				background-color: rgba(var(--warning-color-rgb, 202, 138, 4) / 0.12) !important;
-				border-color: rgba(var(--warning-color-rgb, 202, 138, 4) / 0.28) !important;
-				border-inline-start-color: var(--warning-color, #ca8a04) !important;
-
-				.fc-event-time {
-					background-color: rgba(var(--warning-color-rgb, 202, 138, 4) / 0.18) !important;
-					color: var(--warning-color, #ca8a04) !important;
-				}
-
-				&:hover {
-					background-color: rgba(var(--warning-color-rgb, 202, 138, 4) / 0.2) !important;
-				}
-			}
-
-			&.c-rejected {
-				background-color: rgba(var(--error-color-rgb, 220, 38, 38) / 0.12) !important;
-				border-color: rgba(var(--error-color-rgb, 220, 38, 38) / 0.28) !important;
-				border-inline-start-color: var(--error-color, #dc2626) !important;
-
-				.fc-event-time {
-					background-color: rgba(var(--error-color-rgb, 220, 38, 38) / 0.18) !important;
-					color: var(--error-color, #dc2626) !important;
-				}
-
-				&:hover {
-					background-color: rgba(var(--error-color-rgb, 220, 38, 38) / 0.2) !important;
-				}
-			}
-
-			&.c-cancelled {
-				background-color: var(--bg-secondary-color) !important;
-				border-color: var(--border-color) !important;
-				border-inline-start-color: var(--border-color) !important;
-				opacity: 0.75 !important;
-
-				.fc-event-time {
-					background-color: rgba(0, 0, 0, 0.05) !important;
-					color: var(--fg-secondary-color) !important;
-				}
-			}
+		&--active {
+			background: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.18) !important;
 		}
 	}
 }
 
-.theme-dark .fc-popover {
-	background: var(--bg-default-color, #1e1e24) !important;
-	box-shadow: 0 20px 48px -8px rgba(0, 0, 0, 0.55), 0 8px 24px -4px rgba(0, 0, 0, 0.35) !important;
+.add-create-booking-modal,
+.add-detail-modal,
+.add-day-list-modal {
+	max-height: calc(100vh - 48px);
+	display: flex;
+	flex-direction: column;
 
-	.fc-popover-header {
-		background: var(--bg-secondary-color, #26262e) !important;
+	:deep(.n-card-header) {
+		flex-shrink: 0;
 	}
 
-	.fc-popover-body {
-		background: var(--bg-default-color, #1e1e24) !important;
+	:deep(.n-card__content) {
+		flex: 1 1 auto;
+		overflow-y: auto !important;
+		overflow-x: hidden !important;
+		max-height: calc(88vh - 130px);
+		scrollbar-width: thin;
+		scrollbar-color: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.45) rgba(0, 0, 0, 0.04);
+		overscroll-behavior-y: contain;
+		padding-inline-end: 14px;
 
-		.fc-daygrid-event .fc-event-time {
-			background-color: rgba(0, 0, 0, 0.25) !important;
+		&::-webkit-scrollbar {
+			width: 6px;
+		}
+		&::-webkit-scrollbar-track {
+			background: rgba(0, 0, 0, 0.04);
+			border-radius: 9999px;
+		}
+		&::-webkit-scrollbar-thumb {
+			background: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.35);
+			border-radius: 9999px;
+
+			&:hover {
+				background: var(--primary-color, #638356);
+			}
+		}
+	}
+
+	:deep(.n-card__footer),
+	:deep(.n-card__action) {
+		flex-shrink: 0;
+		border-top: 1px solid var(--border-color);
+	}
+}
+
+// ── Day list (what "+N" opens) ─────────────────────────────
+.add-day-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.add-day-list__item {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.625rem 0.75rem;
+	border: 1px solid var(--border-color);
+	border-inline-start-width: 4px;
+	border-radius: 0.5rem;
+	background: var(--bg-secondary-color);
+	color: var(--fg-default-color);
+	font: inherit;
+	text-align: start;
+	cursor: pointer;
+	transition: background-color 0.15s ease;
+
+	&:hover {
+		background: rgba(var(--primary-color-rgb) / 0.06);
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--primary-color);
+		outline-offset: 2px;
+	}
+
+	&.c-confirmed {
+		border-inline-start-color: var(--success-color);
+	}
+	&.c-pending {
+		border-inline-start-color: var(--warning-color);
+	}
+	&.c-rejected {
+		border-inline-start-color: var(--error-color);
+	}
+	&.c-ended,
+	&.c-completed {
+		border-inline-start-color: var(--fg-secondary-color);
+		opacity: 0.85;
+	}
+	&.c-cancelled {
+		opacity: 0.75;
+	}
+	&.c-no_show {
+		border-inline-start-color: var(--error-color);
+		opacity: 0.75;
+	}
+}
+
+.add-day-list__time {
+	flex-shrink: 0;
+	font-size: 0.75rem;
+	font-weight: 700;
+	white-space: nowrap;
+	font-variant-numeric: tabular-nums;
+	color: var(--fg-secondary-color);
+}
+
+// Space and member on their own lines, wrapping instead of truncating: a
+// one-line "space · member" in RTL was cut from the member's first letters.
+.add-day-list__body {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.125rem;
+}
+
+.add-day-list__space {
+	font-size: 0.875rem;
+	font-weight: 600;
+	overflow-wrap: anywhere;
+}
+
+.add-day-list__member {
+	font-size: 0.75rem;
+	color: var(--fg-secondary-color);
+	overflow-wrap: anywhere;
+}
+</style>
+
+<style lang="scss">
+/* Global styles for booking modal dialogs (when portaled to body by Naive UI) */
+.n-modal-container .n-modal.add-create-booking-modal,
+.n-modal-container .n-modal.add-detail-modal,
+.n-modal-container .n-modal.add-day-list-modal {
+	max-height: calc(100vh - 48px);
+	display: flex !important;
+	flex-direction: column !important;
+
+	.n-card-header {
+		flex-shrink: 0 !important;
+	}
+
+	.n-card__content {
+		flex: 1 1 auto !important;
+		overflow-y: auto !important;
+		overflow-x: hidden !important;
+		max-height: calc(88vh - 130px) !important;
+		scrollbar-width: thin !important;
+		scrollbar-color: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.45) rgba(0, 0, 0, 0.04) !important;
+		overscroll-behavior-y: contain;
+		padding-inline-end: 14px;
+
+		&::-webkit-scrollbar {
+			width: 6px !important;
+		}
+		&::-webkit-scrollbar-track {
+			background: rgba(0, 0, 0, 0.04) !important;
+			border-radius: 9999px !important;
+		}
+		&::-webkit-scrollbar-thumb {
+			background: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.35) !important;
+			border-radius: 9999px !important;
+
+			&:hover {
+				background: var(--primary-color, #638356) !important;
+			}
+		}
+	}
+
+	.n-card__footer,
+	.n-card__action {
+		flex-shrink: 0 !important;
+		border-top: 1px solid var(--border-color) !important;
+	}
+}
+
+.theme-dark .n-modal-container .n-modal.add-create-booking-modal,
+.theme-dark .n-modal-container .n-modal.add-detail-modal,
+.theme-dark .n-modal-container .n-modal.add-day-list-modal {
+	.n-card__content {
+		scrollbar-color: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.5) rgba(255, 255, 255, 0.05) !important;
+
+		&::-webkit-scrollbar-track {
+			background: rgba(255, 255, 255, 0.05) !important;
+		}
+		&::-webkit-scrollbar-thumb {
+			background: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.45) !important;
 		}
 	}
 }

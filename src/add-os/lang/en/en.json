@@ -470,6 +470,9 @@
 			"isLockable": "Lockable",
 			"capacity": "Capacity",
 			"hourlyRatePoints": "Hourly rate in points (optional)",
+			"allowsExtension": "Bookings can be extended",
+			"cancellationWindowMinutes": "Cancellation deadline, minutes before start (optional)",
+			"cancellationWindowHint": "Leave empty to use the general setting.",
 			"image": "Image (optional)",
 			"images": "Images (optional)"
 		},
@@ -850,8 +853,19 @@
 			"isFree": "Free event",
 			"pricePoints": "Ticket price (points)",
 			"requiresApproval": "Needs approval before admitting",
+			"registrationSource": "Registration form",
+			"registrationSourceInternal": "Internal — members register in the app",
+			"registrationSourceExternal": "External — members register through a link",
 			"externalFormUrl": "External registration form (link)",
+			"registrationOpensAt": "Registration opens (empty = on publish)",
+			"registrationClosesAt": "Registration closes (empty = when the event starts)",
+			"isMarkedFull": "Mark as full (stops registration)",
 			"schedule": "Schedule"
+		},
+		"markedFull": "Full",
+		"validation": {
+			"externalFormUrlRequired": "Enter the external form link, or choose an internal form.",
+			"externalFormUrlInvalid": "Enter a full link starting with http:// or https://."
 		},
 		"loadError": "Couldn't load events. You may not have permission to view this page.",
 		"stats": {
@@ -1218,7 +1232,9 @@
 			"covered": "Subscription seat",
 			"pool": "Pool seat",
 			"coveredHint": "Sits in the seat their subscription holds.",
-			"poolHint": "Took a free seat from the co-working pool."
+			"poolHint": "Took a free seat from the co-working pool.",
+			"desk": "Desk {code}",
+			"deskHint": "Their Dedicated Desk subscription's desk."
 		},
 		"checkOut": {
 			"button": "Check out",
@@ -1233,8 +1249,13 @@
 		"extend": {
 			"button": "Extend",
 			"title": "Extend booking",
-			"minutesLabel": "Additional minutes",
-			"minutesInvalid": "Enter a whole number of minutes, 1 or more.",
+			"optionLabel": "Extend by",
+			"optionPlaceholder": "Choose how long",
+			"option": "{duration} — until {time} · {price}",
+			"optionFree": "{duration} — until {time}",
+			"latestDeparture": "Latest possible departure: {time}",
+			"chooseOption": "Choose one of the offered extensions.",
+			"loadError": "Couldn't load the extension options.",
 			"success": "Booking extended."
 		},
 		"cancel": {
@@ -1244,10 +1265,13 @@
 			"confirmOk": "Cancel booking",
 			"confirmCancel": "Keep it",
 			"success": "Booking cancelled."
-		}
+		},
+		"details": "Details"
 	},
 	"coworkingPool": {
 		"title": "Co-working seats",
+		"expand": "Expand",
+		"collapse": "Collapse",
 		"refresh": "Refresh",
 		"loadError": "Couldn't load the co-working seats.",
 		"hint": "Counted across the branch: co-working spaces and lent rooms open seats; subscriptions, bookings and walk-ins take them.",
@@ -1288,9 +1312,14 @@
 		"loadError": "Couldn't load the calendar. You may not have permission to view this page.",
 		"empty": "No active spaces match these filters.",
 		"filters": {
+			"title": "Filters & Statistics",
+			"expand": "Expand",
+			"collapse": "Collapse",
 			"spaceType": "Space type",
 			"allSpaceTypes": "All space types",
 			"allSpaces": "All spaces",
+			"member": "Member",
+			"allMembers": "All members",
 			"space": "Space",
 			"reset": "Reset filters"
 		},
@@ -1301,10 +1330,14 @@
 		},
 		"legend": {
 			"title": "Occupancy",
-			"closed": "Closed"
+			"closed": "Closed",
+			"ended": "Ended"
 		},
 		"hours": {
 			"closedToday": "Closed on this date"
+		},
+		"dayList": {
+			"count": "Bookings: {count}"
 		},
 		"detail": {
 			"title": "Booking details",
@@ -1317,7 +1350,9 @@
 			"checkedIn": "Checked in",
 			"notCheckedIn": "Not checked in yet",
 			"noPhone": "No phone on file",
-			"openInBookings": "Open in all bookings"
+			"openInBookings": "Open in all bookings",
+			"checkedOut": "Checked out",
+			"notCheckedOut": "Still inside"
 		},
 		"create": {
 			"button": "Add booking",
@@ -1329,6 +1364,15 @@
 			"date": "Date",
 			"note": "Note (optional)",
 			"notePlaceholder": "e.g. booked at the desk",
+			"payment": "Payment",
+			"paymentWallet": "From the member's wallet (points, now)",
+			"paymentCashNow": "Cash — collected now (paid)",
+			"paymentCashLater": "Cash — collect on arrival (unpaid)",
+			"quoteTitle": "Amount due",
+			"quoteLine": "{hours} × {rate} points an hour",
+			"quotePoints": "{points} points",
+			"walletBalance": "{points} points available",
+			"walletShort": "only {points} points, not enough",
 			"submit": "Create booking",
 			"success": "Booking created.",
 			"rulesNote": "Only times this space can actually take are offered. A time can still be taken while this form is open, so the booking is confirmed on submit.",
@@ -1372,6 +1416,8 @@
 		"status": {
 			"confirmed": "Confirmed",
 			"pending": "Under review",
+			"completed": "Completed",
+			"no_show": "Not attended",
 			"cancelled": "Cancelled",
 			"rejected": "Rejected"
 		},
@@ -1458,7 +1504,9 @@
 			"walletCredited": "Wallet Credited",
 			"eventCancellation": "Event Cancellation",
 			"operationsRequests": "Operations Requests",
-			"eventAttendees": "Registrations"
+			"eventAttendees": "Registrations",
+			"closeSessionDetail": "End session",
+			"activeSessionDetail": "Session details"
 		}
 	},
 	"resourceCrud": {
@@ -2025,26 +2073,54 @@
 		}
 	},
 	"closeSession": {
-		"title": "Close Session & Checkout",
-		"activeMember": "Active Member",
-		"workspace": "Workspace",
-		"branch": "Branch",
-		"checkIn": "Check-in",
-		"checkOut": "Check-out",
-		"duration": "Duration",
-		"subtotal": "Subtotal",
-		"total": "Total",
-		"paymentStatusPartially": "Partially Paid",
-		"availableBalance": "Available Balance",
-		"remainingCashDue": "Remaining Cash Due",
-		"useWalletBalance": "Use Wallet Balance",
-		"payCashAtReception": "Pay Cash at Reception",
-		"sessionID": "Session ID",
-		"paymentMethod": "Payment Method",
-		"receiptNote": "Receipt Note",
-		"infoNotice": "The remaining balance will be collected in cash and the session status marked as completed upon confirmation.",
-		"submitButton": "Confirm Payment & Close Session",
-		"successMessage": "Session closed and settled successfully."
+		"title": "End requests",
+		"subtitle": "Members who pressed “end session” in the app, waiting for the desk.",
+		"refresh": "Refresh",
+		"empty": "No end requests are waiting.",
+		"requestedAt": "Asked at {time}",
+		"details": "Details",
+		"overdue": "Past closing",
+		"paymentMethods": {
+			"wallet": "Points",
+			"cash": "Cash",
+			"paymera": "Card (Paymera)",
+			"none": "Not chosen"
+		},
+		"detail": {
+			"title": "End session",
+			"back": "Back to requests",
+			"notFound": "This session could not be loaded.",
+			"noRequest": "This session has no waiting end request — it may already be closed or withdrawn.",
+			"space": "Space",
+			"checkIn": "Check-in",
+			"endAt": "Ends at",
+			"duration": "Duration",
+			"statement": "Statement",
+			"planCovered": "Covered by the plan: {duration}",
+			"total": "Total due",
+			"points": "{points} points",
+			"alreadyPaid": "Paid when booked — nothing more is due.",
+			"chosenMethod": "Member chose to pay by",
+			"walletBalance": "Wallet balance",
+			"walletCovers": "{points} points will be taken from the member's wallet on confirming.",
+			"walletShort": "The wallet holds only {points} points. The session will be ended and stay owed.",
+			"cashCollect": "Collect from the member",
+			"cashCollected": "Money received — end session",
+			"cashLater": "End without collecting",
+			"cardNote": "The member pays by card in the app once the session is ended.",
+			"noMethodNote": "The member did not choose a method. The session will be ended and stay owed, to settle at the desk.",
+			"confirm": "Confirm end",
+			"confirmTitle": "End this session?",
+			"confirmBody": "The session closes at {time}. This cannot be undone.",
+			"sessionTitle": "Session details",
+			"backToSessions": "Back to active sessions",
+			"timer": "Session time",
+			"closedTimer": "Session lasted",
+			"costSoFar": "Cost so far",
+			"costSoFarNote": "Priced as if it ended now, plan hours included. Refreshed every minute.",
+			"noRequestActive": "The member has not asked to end this session.",
+			"closedNote": "This session is closed."
+		}
 	},
 	"walletCredited": {
 		"transactionID": "Transaction ID",
@@ -2077,12 +2153,20 @@
 		},
 		"upNextTitle": "Up Next",
 		"stats": {
-			"activeSessions": "Active Sessions",
-			"expectedBookings": "Expected Bookings",
-			"pendingGuests": "Pending Guests",
-			"pendingPayments": "Pending Payments"
+			"activeSessions": "Active sessions",
+			"expectedBookings": "Expected today",
+			"pendingGuests": "Arrivals waiting",
+			"pendingPayments": "Pending payments",
+			"pendingEndRequests": "End requests"
 		},
-		"vsYesterday": "vs yesterday"
+		"today": "Today",
+		"loadFailed": "Could not load the desk's day.",
+		"upNextEmpty": "Nothing waiting on the desk.",
+		"upNextKinds": {
+			"end_request": "Wants to end the session",
+			"arrival": "Arrived — waiting for check-in",
+			"booking": "Booking"
+		}
 	},
 	"eventCancellation": {
 		"title": "Event Cancellation Details",
@@ -2246,6 +2330,7 @@
 		"desks": {
 			"title": "Dedicated desks",
 			"hint": "Live Dedicated Desk subscriptions. One bought in the app arrives without a desk — tie it here.",
+			"waiting": "{count} awaiting a desk",
 			"onlyWithout": "Only those without a desk",
 			"none": "No live Dedicated Desk subscriptions.",
 			"noneWithout": "Every live Dedicated Desk subscription has its desk.",

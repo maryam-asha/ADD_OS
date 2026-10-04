@@ -3,12 +3,14 @@ import { enableAutoUnmount, flushPromises, mount } from "@vue/test-utils"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { createI18n } from "vue-i18n"
 
+import { setCurrentLocale } from "@/add-os/lang/currentLocale"
 import { ApiError } from "@/add-os/services/api"
 import BookingCalendarPage from "../BookingCalendarPage.vue"
 
-const { getCalendarMock, createBookingMock, listMembersMock, getSlotsMock } = vi.hoisted(() => ({
+const { getCalendarMock, createBookingMock, quoteBookingMock, listMembersMock, getSlotsMock } = vi.hoisted(() => ({
 	getCalendarMock: vi.fn(),
 	createBookingMock: vi.fn(),
+	quoteBookingMock: vi.fn(),
 	listMembersMock: vi.fn(),
 	getSlotsMock: vi.fn()
 }))
@@ -17,7 +19,19 @@ vi.mock("@/add-os/services/booking-calendar", () => ({
 	getCalendar: getCalendarMock,
 	getSpaceSlots: getSlotsMock
 }))
-vi.mock("@/add-os/services/reception", () => ({ createReceptionBooking: createBookingMock }))
+vi.mock("@/add-os/services/reception", () => ({ createReceptionBooking: createBookingMock, quoteReceptionBooking: quoteBookingMock }))
+
+/** Two hours at 12 points: 24 points, $2.40, and a wallet of `balance`. */
+function quotePayload(balance = 100) {
+	return {
+		minutes: 120,
+		hourly_rate_points: 12,
+		total_points: 24,
+		breakdown: { lines: [{ key: "base", label: "2h × 12", points: 24 }], total: { points: 24, amount: "2.40", formatted: "$2.40" } },
+		amounts: [{ currency: "USD", value: "2.40" }, { currency: "SYP", value: "33216.02" }],
+		wallets: [{ owner_type: "user", owner_id: 3, owner_label: null, usable_balance: balance, sufficient: balance >= 24 }]
+	}
+}
 vi.mock("@/add-os/services/members", () => ({ listMembers: listMembersMock }))
 
 // The co-working seats panel has its own spec (CoworkingPoolPanel.spec.ts);
@@ -126,6 +140,7 @@ function bookingOn(overrides: Record<string, unknown> = {}) {
 		status_label: "Confirmed",
 		payment_state: "paid" as const,
 		checked_in_at: null,
+		checked_out_at: null,
 		member: { id: 3, name: "Layla Haddad", phone: "0912345678" },
 		...overrides
 	}
@@ -171,6 +186,11 @@ function response(overrides: Record<string, unknown> = {}) {
 	}
 }
 
+// The formatter reads `currentLocale`, which the app keeps in step with
+// vue-i18n; here nothing does, so it is set to match by hand — otherwise
+// times render "02:00 م" inside an English page.
+setCurrentLocale("en")
+
 const i18n = createI18n({
 	legacy: false,
 	locale: "en",
@@ -180,16 +200,23 @@ const i18n = createI18n({
 			spaces: { spaceType: { co_space: "Co-working space", room: "Room", business: "Business", event_hall: "Event hall" } },
 			resourceCrud: { form: { cancel: "Cancel" } },
 			allBookings: {
-				status: { confirmed: "Confirmed", pending: "Under review", cancelled: "Cancelled", rejected: "Rejected" },
+				status: {
+					confirmed: "Confirmed",
+					pending: "Under review",
+					completed: "Completed",
+					no_show: "Not attended",
+					cancelled: "Cancelled",
+					rejected: "Rejected"
+				},
 				paymentState: { paid: "Paid", unpaid: "Unpaid" }
 			},
 			bookingCalendar: {
 				description: "Which spaces are booked.",
 				loadError: "Couldn't load the calendar.",
 				empty: "No active spaces match these filters.",
-				filters: { spaceType: "Space type", space: "Space", allSpaceTypes: "All space types", allSpaces: "All spaces", reset: "Reset filters" },
+				filters: { title: "Filters & Statistics", expand: "Expand", collapse: "Collapse", spaceType: "Space type", space: "Space", allSpaceTypes: "All space types", allSpaces: "All spaces", member: "Member", allMembers: "All members", reset: "Reset filters" },
 				totals: { spaces: "Spaces", bookings: "Bookings", occupancy: "Average occupancy" },
-				legend: { title: "Occupancy", closed: "Closed" },
+				legend: { title: "Occupancy", closed: "Closed", ended: "Ended" },
 				hours: { closedToday: "Closed on this date" },
 				detail: {
 					title: "Booking details",
@@ -222,8 +249,17 @@ const i18n = createI18n({
 					slotsError: "Couldn't load times for this space.",
 					slotCounts: "{available} of {total} times free",
 					durationHours: "{hours}h",
+					quoteTitle: "Amount due",
+					quoteLine: "{hours} × {rate} points an hour",
+					quotePoints: "{points} points",
+					walletBalance: "{points} points available",
+					walletShort: "only {points} points, not enough",
 					note: "Note (optional)",
 					notePlaceholder: "e.g. booked at the desk",
+					payment: "Payment",
+					paymentWallet: "From the member's wallet (points, now)",
+					paymentCashNow: "Cash — collected now (paid)",
+					paymentCashLater: "Cash — collect on arrival (unpaid)",
 					submit: "Create booking",
 					success: "Booking created.",
 					rulesNote: "Only times this space can actually take are offered."
@@ -252,9 +288,11 @@ function formVm(wrapper: ReturnType<typeof mountPage>) {
 			date: string
 			from: string
 			to: string
+			payment: "wallet" | "cash_now" | "cash_later" | null
 			note: string
 		}
 		canSubmit: boolean
+		walletCannotPay: boolean
 		selectSlot: (row: ReturnType<typeof slot>) => void
 		submitCreate: () => Promise<void>
 	}
@@ -310,6 +348,8 @@ describe("bookingCalendarPage", () => {
 		getCalendarMock.mockResolvedValue(response())
 		createBookingMock.mockReset()
 		createBookingMock.mockResolvedValue({ data: { id: 1 } })
+		quoteBookingMock.mockReset()
+		quoteBookingMock.mockResolvedValue(quotePayload())
 		listMembersMock.mockReset()
 		listMembersMock.mockResolvedValue([{ id: 3, name: "Layla Haddad", phone: "0912345678" }])
 		getSlotsMock.mockReset()
@@ -352,6 +392,9 @@ describe("bookingCalendarPage", () => {
 	})
 
 	it("maps each booking to an event carrying its space, member and status", async () => {
+		// Before the fixture booking ends, so it still reads as confirmed.
+		vi.useFakeTimers({ toFake: ["Date"] })
+		vi.setSystemTime(new Date("2026-08-17T09:00:00+03:00"))
 		mountPage()
 		await navigate("dayGridMonth", "2026-08-01", "2026-09-01")
 
@@ -366,11 +409,120 @@ describe("bookingCalendarPage", () => {
 	})
 
 	/**
+	 * The server has no "ended" status; the calendar marks a confirmed or
+	 * pending booking ended once its end time has gone by, and keeps the
+	 * server's own status in the detail's status row.
+	 */
+	describe("a booking whose time has passed", () => {
+		it.each([
+			["a minute before it ends", "2026-08-17T14:59:00+03:00", "c-confirmed"],
+			["the moment it ends", "2026-08-17T15:00:00+03:00", "c-ended"]
+		])("draws it right %s", async (_when, instant, expected) => {
+			vi.useFakeTimers({ toFake: ["Date"] })
+			vi.setSystemTime(new Date(instant))
+			mountPage()
+			await navigate("dayGridMonth", "2026-08-01", "2026-09-01")
+
+			expect((lastOptions!.events as EventInput[]).find(event => event.id === "9")!.classNames).toContain(expected)
+		})
+
+		/**
+		 * Once the server has given a booking its outcome, the calendar draws
+		 * that outcome — `ended` is only for a live booking the server has not
+		 * caught up with yet.
+		 */
+		it.each([
+			["completed", "Completed", "c-completed"],
+			["no_show", "Not attended", "c-no_show"]
+		])("draws a %s booking as its outcome, never as ended", async (status, statusLabel, expected) => {
+			getCalendarMock.mockResolvedValue(
+				response({
+					resources: [{ ...response().resources[0], days: [day({ bookings: [bookingOn({ status, status_label: statusLabel })] })] }]
+				})
+			)
+			vi.useFakeTimers({ toFake: ["Date"] })
+			vi.setSystemTime(new Date("2026-08-18T09:00:00+03:00"))
+			mountPage()
+			await navigate("dayGridMonth", "2026-08-01", "2026-09-01")
+
+			const classNames = (lastOptions!.events as EventInput[]).find(event => event.id === "9")!.classNames
+			expect(classNames).toContain(expected)
+			expect(classNames).not.toContain("c-ended")
+		})
+
+		it("marks a past pending booking ended too", async () => {
+			getCalendarMock.mockResolvedValue(
+				response({
+					resources: [{ ...response().resources[0], days: [day({ bookings: [bookingOn({ status: "pending", status_label: "Under review" })] })] }]
+				})
+			)
+			vi.useFakeTimers({ toFake: ["Date"] })
+			vi.setSystemTime(new Date("2026-08-18T09:00:00+03:00"))
+			mountPage()
+			await navigate("dayGridMonth", "2026-08-01", "2026-09-01")
+
+			expect((lastOptions!.events as EventInput[]).find(event => event.id === "9")!.classNames).toContain("c-ended")
+		})
+
+		it("leaves a past cancelled booking cancelled", async () => {
+			getCalendarMock.mockResolvedValue(
+				response({
+					resources: [{ ...response().resources[0], days: [day({ bookings: [bookingOn({ status: "cancelled", status_label: "Cancelled" })] })] }]
+				})
+			)
+			vi.useFakeTimers({ toFake: ["Date"] })
+			vi.setSystemTime(new Date("2026-08-18T09:00:00+03:00"))
+			mountPage()
+			await navigate("dayGridMonth", "2026-08-01", "2026-09-01")
+
+			expect((lastOptions!.events as EventInput[]).find(event => event.id === "9")!.classNames).toContain("c-cancelled")
+		})
+
+		it("shows Ended in the detail and the legend, keeping the server's status in the status row", async () => {
+			vi.useFakeTimers({ toFake: ["Date"] })
+			vi.setSystemTime(new Date("2026-08-18T09:00:00+03:00"))
+			const wrapper = mountPage()
+			await navigate("dayGridMonth", "2026-08-01", "2026-09-01")
+			expect(wrapper.text()).toContain("Ended")
+
+			const event = (lastOptions!.events as EventInput[]).find(item => item.id === "9")!
+			lastOptions!.eventClick?.({ event: { extendedProps: event.extendedProps } } as never)
+			await flushPromises()
+
+			const tags = [...document.body.querySelectorAll(".add-detail-modal .n-tag")].map(tag => tag.textContent?.trim())
+			expect(tags).toContain("Ended")
+			expect(tags).toContain("Confirmed")
+
+			wrapper.unmount()
+		})
+	})
+
+	/**
 	 * The range follows whatever the user navigated to, so the visible window
 	 * and the data behind it cannot drift apart. The anchor is the midpoint of
 	 * the visible range: a month grid's first cell often sits in the previous
 	 * month, and sending that would fetch the wrong month.
 	 */
+	/** One member's bookings: the server narrows the list, the page only asks. */
+	it("narrows the calendar to one member's bookings", async () => {
+		const wrapper = mountPage()
+		await flushPromises()
+		const vm = wrapper.vm as unknown as { memberId: number | null, ensureMembers: () => void, hasFilters: boolean }
+
+		vm.ensureMembers()
+		await flushPromises()
+		expect(listMembersMock).toHaveBeenCalledOnce()
+
+		vm.memberId = 3
+		await flushPromises()
+		expect(getCalendarMock).toHaveBeenLastCalledWith(expect.objectContaining({ member_id: 3 }))
+		expect(vm.hasFilters).toBe(true)
+
+		vm.memberId = null
+		await flushPromises()
+		expect(getCalendarMock.mock.lastCall![0]).not.toHaveProperty("member_id")
+	})
+
 	it("refetches for the period the user navigated to", async () => {
 		mountPage()
 		await flushPromises()
@@ -483,6 +635,44 @@ describe("bookingCalendarPage", () => {
 		wrapper.unmount()
 	})
 
+	/**
+	 * "+N" opens our own modal, not FullCalendar's popover: the popover is
+	 * anchored to the cell and ran off-screen on a lower row. FullCalendar
+	 * opens its popover whenever the handler returns nothing, so the handler
+	 * must return the current view.
+	 */
+	it("opens the day's bookings in a modal from +N, in start order, and suppresses the popover", async () => {
+		const wrapper = mountPage()
+		await navigate("dayGridMonth", "2026-08-01", "2026-09-01")
+
+		const event = (lastOptions!.events as EventInput[]).find(item => item.id === "9")!
+		const later = event.extendedProps as Record<string, unknown>
+		const earlier = { ...later, bookingId: 10, memberName: "Omar Early", startAt: "2000-01-01T08:00:00+03:00", endAt: "2000-01-01T09:00:00+03:00" }
+		const moreLinkClick = lastOptions!.moreLinkClick as (info: unknown) => unknown
+
+		const action = moreLinkClick({
+			date: new Date(2026, 7, 15),
+			allSegs: [{ event: { extendedProps: later } }, { event: { extendedProps: earlier } }, { event: { extendedProps: {} } }],
+			view: { type: "dayGridMonth" }
+		})
+		await flushPromises()
+
+		expect(action).toBe("dayGridMonth")
+		const rows = [...document.body.querySelectorAll(".add-day-list__item")]
+		// The background (closed-day) segment carries no booking and is left out.
+		expect(rows).toHaveLength(2)
+		expect(rows[0].textContent).toContain("Omar Early")
+		expect(rows[1].textContent).toContain("Layla Haddad")
+
+		// A row swaps the list for that booking's detail.
+		;(rows[1] as HTMLButtonElement).click()
+		await flushPromises()
+		expect(document.body.textContent ?? "").toContain("Booking details")
+		expect(document.body.querySelectorAll(".add-day-list__item")).toHaveLength(0)
+
+		wrapper.unmount()
+	})
+
 	it("ignores a click on a background (closed-day) event", async () => {
 		const wrapper = mountPage()
 		await navigate("dayGridMonth", "2026-08-01", "2026-09-01")
@@ -506,6 +696,7 @@ describe("bookingCalendarPage", () => {
 
 		const vm = formVm(wrapper)
 		vm.createForm.user_id = 3
+		vm.createForm.payment = "cash_later"
 		vm.createForm.space_id = 1
 		vm.createForm.date = "2026-09-24"
 		await flushPromises()
@@ -603,6 +794,7 @@ describe("bookingCalendarPage", () => {
 		const wrapper = await openCreateForm()
 		const vm = formVm(wrapper)
 		vm.createForm.user_id = 3
+		vm.createForm.payment = "cash_later"
 		vm.createForm.space_id = 1
 		vm.createForm.date = "2026-09-24"
 		await flushPromises()
@@ -634,6 +826,7 @@ describe("bookingCalendarPage", () => {
 		const wrapper = await openCreateForm()
 		const vm = formVm(wrapper)
 		vm.createForm.user_id = 3
+		vm.createForm.payment = "cash_later"
 		vm.createForm.space_id = 1
 		vm.createForm.date = "2026-09-24"
 		await flushPromises()
@@ -687,6 +880,7 @@ describe("bookingCalendarPage", () => {
 		const wrapper = await openCreateForm()
 		const vm = formVm(wrapper)
 		vm.createForm.user_id = 3
+		vm.createForm.payment = "cash_later"
 		vm.createForm.space_id = 1
 		vm.createForm.date = "2026-09-24"
 		await flushPromises()
@@ -937,12 +1131,97 @@ describe("bookingCalendarPage", () => {
 		})
 	})
 
+	/** The desk always names how a booking is paid: nothing goes out without it. */
+	it("will not send a booking until a payment is chosen", async () => {
+		const wrapper = await openCreateForm()
+		const vm = formVm(wrapper)
+		vm.createForm.user_id = 3
+		vm.createForm.space_id = 1
+		vm.createForm.date = "2026-09-24"
+		await flushPromises()
+		vm.selectSlot(slot("14:00"))
+		await flushPromises()
+
+		vm.createForm.payment = null
+		expect(vm.canSubmit).toBe(false)
+		vm.createForm.payment = "wallet"
+		expect(vm.canSubmit).toBe(true)
+
+		wrapper.unmount()
+	})
+
+	it.each([
+		["wallet", { payment_method: "wallet" }],
+		["cash_now", { payment_method: "cash", cash_collected: true }],
+		["cash_later", { payment_method: "cash", cash_collected: false }]
+	] as const)("sends the %s choice as the server expects it", async (choice, expected) => {
+		const wrapper = await openCreateForm()
+		const vm = formVm(wrapper)
+		vm.createForm.user_id = 3
+		vm.createForm.space_id = 1
+		vm.createForm.date = "2026-09-24"
+		await flushPromises()
+		vm.selectSlot(slot("14:00"))
+		vm.createForm.payment = choice
+		await flushPromises()
+
+		await vm.submitCreate()
+
+		expect(createBookingMock).toHaveBeenLastCalledWith(expect.objectContaining(expected))
+		if (choice === "wallet") {
+			expect(createBookingMock.mock.lastCall?.[0]).not.toHaveProperty("cash_collected")
+		}
+
+		wrapper.unmount()
+	})
+
+	/** The desk sees what the member owes — points and money — for the run it picked. */
+	it("quotes the chosen run in points and money", async () => {
+		const wrapper = await openCreateForm()
+		const vm = formVm(wrapper)
+		vm.createForm.user_id = 3
+		vm.createForm.space_id = 1
+		vm.createForm.date = "2026-09-24"
+		await flushPromises()
+		vm.selectSlot(slot("14:00"))
+		vm.selectSlot(slot("15:00"))
+		await flushPromises()
+
+		expect(quoteBookingMock).toHaveBeenLastCalledWith({ user_id: 3, space_id: 1, start_at: "2026-09-24 02:00 PM", end_at: "2026-09-24 04:00 PM" })
+		const text = document.body.textContent ?? ""
+		expect(text).toContain("24 points")
+		expect(text).toContain("2.40")
+		expect(text).toContain("33,216.02")
+
+		wrapper.unmount()
+	})
+
+	/** A wallet that cannot cover the total is not offered: it would come back as a 422. */
+	it("will not offer the wallet when no wallet covers the total", async () => {
+		quoteBookingMock.mockResolvedValue(quotePayload(10))
+		const wrapper = await openCreateForm()
+		const vm = formVm(wrapper)
+		vm.createForm.user_id = 3
+		vm.createForm.space_id = 1
+		vm.createForm.date = "2026-09-24"
+		vm.createForm.payment = "wallet"
+		await flushPromises()
+		vm.selectSlot(slot("14:00"))
+		await flushPromises()
+
+		expect(vm.walletCannotPay).toBe(true)
+		expect(vm.createForm.payment).toBeNull()
+
+		wrapper.unmount()
+	})
+
 	it("refetches the calendar after a successful booking", async () => {
 		const wrapper = await openCreateForm()
 		const before = getCalendarMock.mock.calls.length
 
 		const vm = formVm(wrapper)
 		vm.createForm.user_id = 3
+		vm.createForm.payment = "cash_later"
 		vm.createForm.space_id = 1
 		vm.selectSlot(slot("14:00"))
 		await flushPromises()
@@ -966,6 +1245,7 @@ describe("bookingCalendarPage", () => {
 		const wrapper = await openCreateForm()
 		const vm = formVm(wrapper)
 		vm.createForm.user_id = 3
+		vm.createForm.payment = "cash_later"
 		vm.createForm.space_id = 1
 		vm.selectSlot(slot("14:00"))
 		await flushPromises()
@@ -1001,5 +1281,29 @@ describe("bookingCalendarPage", () => {
 		expect(vm.spaceType).toBeNull()
 		expect(vm.spaceId).toBeNull()
 		expect(vm.hasFilters).toBe(false)
+	})
+
+	it("resets the create booking form when the dialog is closed", async () => {
+		const wrapper = await openCreateForm()
+		const vm = formVm(wrapper)
+
+		vm.createForm.user_id = 5
+		vm.createForm.space_id = 2
+		vm.createForm.date = "2026-09-24"
+		vm.createForm.from = "02:00 PM"
+		vm.createForm.to = "04:00 PM"
+		vm.createForm.note = "Previous note"
+		await flushPromises()
+
+		// Close dialog
+		const createVm = wrapper.vm as unknown as { createVisible: boolean }
+		createVm.createVisible = false
+		await flushPromises()
+
+		expect(vm.createForm.user_id).toBeNull()
+		expect(vm.createForm.space_id).toBeNull()
+		expect(vm.createForm.from).toBe("")
+		expect(vm.createForm.to).toBe("")
+		expect(vm.createForm.note).toBe("")
 	})
 })

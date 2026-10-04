@@ -34,8 +34,18 @@ export type CalendarDayState = "open" | "closed"
 /** Which period the calendar spans. `week` runs Sunday–Saturday. */
 export type CalendarView = "day" | "week" | "month"
 
-/** The four states a booking can hold. Mirrors the backend `BookingStatus` enum. */
-export type BookingStatus = "confirmed" | "pending" | "cancelled" | "rejected"
+/**
+ * The six states a booking can hold. Mirrors the backend `BookingStatus` enum.
+ *
+ * **Changed 2026-10-03** — was four (`confirmed | pending | cancelled |
+ * rejected`). The backend now writes a booking's outcome once its time has
+ * passed (ADDCore `docs/decisions/booking-outcomes-and-extension.md`):
+ * `completed` at checkout, `no_show` when it ended with nobody checked in. An
+ * undecided `pending` request lapses to `rejected` when it starts, so no new
+ * value covers that. `completed` may still be unpaid; a `no_show` owes
+ * nothing that was not already paid.
+ */
+export type BookingStatus = "confirmed" | "pending" | "completed" | "no_show" | "cancelled" | "rejected"
 
 /** Whether a booking has been settled. */
 export type BookingPaymentState = "paid" | "unpaid"
@@ -44,7 +54,7 @@ export type BookingPaymentState = "paid" | "unpaid"
 export type BookingPaymentSource = "wallet" | "cash"
 
 /** The same values at runtime, for filter controls that enumerate them. */
-export const BOOKING_STATUSES: readonly BookingStatus[] = ["confirmed", "pending", "cancelled", "rejected"]
+export const BOOKING_STATUSES: readonly BookingStatus[] = ["confirmed", "pending", "completed", "no_show", "cancelled", "rejected"]
 export const BOOKING_PAYMENT_STATES: readonly BookingPaymentState[] = ["paid", "unpaid"]
 export const CALENDAR_VIEWS: readonly CalendarView[] = ["day", "week", "month"]
 
@@ -81,6 +91,8 @@ export interface CalendarBooking {
 	status_label: string
 	payment_state: BookingPaymentState
 	checked_in_at: string | null
+	/** When the member left; null while still inside, or never arrived. */
+	checked_out_at: string | null
 	member: BookingMember
 }
 
@@ -279,4 +291,9 @@ export interface CalendarFilters {
 	branch_id?: number
 	space_id?: number
 	space_type?: SpaceType
+	/**
+	 * Only this member's bookings are listed and counted; each cell's
+	 * occupancy stays the space's own, from every booking.
+	 */
+	member_id?: number
 }
