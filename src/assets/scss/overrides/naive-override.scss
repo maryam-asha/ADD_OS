@@ -325,6 +325,24 @@
 		.n-tabs-nav {
 			direction: ltr;
 		}
+
+		// ADD OS: the nav stays LTR — naive-ui places the active-tab bar from
+		// `offsetLeft` and scrolls with LTR `scrollLeft` — so in Arabic the
+		// tabs used to read left to right, first tab on the left. Reversing
+		// only the visual order puts the first tab on the right, where an RTL
+		// reader starts, while every measurement stays the LTR one naive-ui
+		// expects: the bar still lands under the active tab, because
+		// `offsetLeft` is physical whichever way the row runs. Each tab after the
+		// first carries its gap (`.n-tabs-tab-pad`) inside its own wrapper,
+		// before the tab; that wrapper is reversed too, so the gap stays between
+		// a tab and the one before it instead of moving to its far side.
+		&:not(.n-tabs--left):not(.n-tabs--right) {
+			.n-tabs-nav-scroll-content,
+			.n-tabs-wrapper,
+			.n-tabs-tab-wrapper {
+				flex-direction: row-reverse;
+			}
+		}
 	}
 
 	.n-timeline {

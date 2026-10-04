@@ -8,16 +8,16 @@
 <template>
 	<div class="flex flex-col gap-4">
 		<div v-if="filters.length || dateRange" class="flex flex-wrap items-center gap-3">
-			<n-select
-				v-for="filter in filters"
-				:key="filter.key"
-				v-model:value="values[filter.key]"
-				:options="filter.options"
-				:placeholder="filter.placeholder"
-				clearable
-				size="small"
-				class="w-44"
-			/>
+			<div v-for="filter in filters" :key="filter.key" class="w-44 shrink-0">
+				<n-select
+					v-model:value="values[filter.key]"
+					:options="filter.options"
+					:placeholder="filter.placeholder"
+					clearable
+					size="small"
+					class="w-full"
+				/>
+			</div>
 			<n-date-picker
 				v-if="dateRange"
 				v-model:formatted-value="range"
@@ -25,7 +25,7 @@
 				value-format="yyyy-MM-dd"
 				clearable
 				size="small"
-				class="w-64"
+				class="w-64 shrink-0"
 			/>
 			<span class="text-xs text-stone-500 ms-auto">{{ t("memberProfile.resultCount", { count: formatNumber(total) }) }}</span>
 		</div>
