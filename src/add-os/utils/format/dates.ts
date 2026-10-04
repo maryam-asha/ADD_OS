@@ -25,9 +25,9 @@ export type DateStyle =
 	| "long"
 	/** آب 2026 · August 2026 */
 	| "monthYear"
-	/** 14:35 */
+	/** 02:35 م · 02:35 PM */
 	| "time"
-	/** 2 آب 2026، 14:35 · 2 August 2026, 14:35 */
+	/** 2 آب 2026، 02:35 م · 2 August 2026, 02:35 PM */
 	| "dateTime"
 
 export interface DateFormatOptions {
@@ -51,6 +51,28 @@ function toDate(value: DateInput): Date {
 	return date
 }
 
+/**
+ * The meridiem marker, per language: ص/م in Arabic, AM/PM in English.
+ * Written out here rather than taken from `Intl` for the reason the module
+ * header gives — `Intl` would also switch the digits.
+ */
+const MERIDIEM: Record<SupportedLocale, { am: string; pm: string }> = {
+	ar: { am: "ص", pm: "م" },
+	en: { am: "AM", pm: "PM" }
+}
+
+/**
+ * Every time of day shown to a user is 12-hour, zero-padded, with the
+ * meridiem after it: `09:05 ص` · `09:05 AM`, `12:00 م` for noon, `12:00 ص`
+ * for midnight. The one clock format for the whole dashboard — the calendar
+ * grid, tables, detail panels and the pickers all read the same.
+ */
+function clock(hours: number, minutes: number, locale: SupportedLocale): string {
+	const marker = hours < 12 ? MERIDIEM[locale].am : MERIDIEM[locale].pm
+	const hour12 = hours % 12 === 0 ? 12 : hours % 12
+	return `${pad(hour12)}:${pad(minutes)} ${marker}`
+}
+
 /** Comma-space in English, Arabic comma in Arabic. */
 function separator(locale: SupportedLocale): string {
 	return locale === "ar" ? "، " : ", "
@@ -65,7 +87,7 @@ export function formatDate(value: DateInput, options: DateFormatOptions = {}): s
 	const day = date.getDate()
 	const month = MONTHS[locale][monthIndex]
 	const weekday = WEEKDAYS[locale][date.getDay()]
-	const time = `${pad(date.getHours())}:${pad(date.getMinutes())}`
+	const time = clock(date.getHours(), date.getMinutes(), locale)
 
 	switch (style) {
 		case "iso":
@@ -93,6 +115,35 @@ export function formatDateTime(value: DateInput, options: Omit<DateFormatOptions
 /** Shorthand for `formatDate(value, { style: "time" })`. */
 export function formatTime(value: DateInput, options: Omit<DateFormatOptions, "style"> = {}): string {
 	return formatDate(value, { ...options, style: "time" })
+}
+
+/**
+ * A bare wall-clock time the API sends without a date, in the same 12-hour
+ * form as `formatTime`. Two shapes arrive: 24-hour `"14:30"` / `"14:30:00"`
+ * (business hours, plan access windows) and the booking endpoints' own
+ * 12-hour `"02:30 PM"`, whose English meridiem would otherwise show inside
+ * the Arabic interface. These are district wall clock already, so no
+ * timezone conversion happens. Anything else is returned unchanged rather
+ * than thrown on, since it is display-only.
+ */
+export function formatClockTime(value: string, options: Omit<DateFormatOptions, "style"> = {}): string {
+	const { locale = currentLocale.value } = options
+	const match = /^(\d{1,2}):(\d{2})(?::\d{2})?(?:\s*(AM|PM))?$/i.exec(value.trim())
+	if (!match) return value
+
+	let hours = Number(match[1])
+	const minutes = Number(match[2])
+	const meridiem = match[3]?.toUpperCase()
+
+	if (meridiem) {
+		if (hours < 1 || hours > 12 || minutes > 59) return value
+		hours = (hours % 12) + (meridiem === "PM" ? 12 : 0)
+	} else if (hours > 24 || minutes > 59) {
+		return value
+	}
+
+	// "24:00" is how some schedules write end of day; it is midnight.
+	return clock(hours % 24, minutes, locale)
 }
 
 /**

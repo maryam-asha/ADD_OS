@@ -101,6 +101,7 @@
 import type { ServiceRequest, ServiceRequestStatus } from "../types/service"
 import { NButton, NModal, NTag } from "naive-ui"
 import { useI18n } from "vue-i18n"
+import { formatDateTime } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
 defineProps<{
@@ -137,8 +138,7 @@ function statusLabel(status: ServiceRequestStatus): string {
 function formatDate(dateStr: string): string {
 	if (!dateStr) return "—"
 	try {
-		const d = new Date(dateStr)
-		return d.toLocaleString()
+		return formatDateTime(dateStr)
 	} catch {
 		return dateStr
 	}

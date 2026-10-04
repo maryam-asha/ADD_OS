@@ -27,6 +27,8 @@ const year = ref(new Date().getFullYear())
 
 <style lang="scss" scoped>
 .footer {
+	position: relative;
+	z-index: 1;
 	width: 100%;
 	max-width: 100%;
 	overflow: hidden;

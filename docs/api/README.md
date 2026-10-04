@@ -22,6 +22,253 @@ snapshot is unverified until someone re-reads the canonical file and re-pins it.
 
 | | |
 |---|---|
+| Pinned | 2026-10-04 (second pin that day) |
+| Source | the canonical path above, read directly, copied byte-for-byte (`cp`, not a JSON re-serialize — key order and formatting are exactly the source's) |
+| Verified identical | `sha256` match between source and this copy at pin time, plus a `cmp` byte comparison |
+| Size | 1,445,667 bytes / 22,532 lines |
+| Leaf endpoints (parsed) | 356 — `GET` 154, `POST` 109, `DELETE` 35, `PATCH` 29, `PUT` 29 |
+| Distinct `METHOD + URL` | 353 |
+
+### What changed since the earlier 2026-10-04 pin
+
+**One description, no endpoint.** `Member (App) / … / Get Booking Detail — With Status
+Stepper` now describes the trimmed detail: the booking number `reference`
+(`BK-2026-00041`), `date_label`/`time_label`, `total`, `checked_in_at`/`checked_out_at`,
+`payment_state` with `payment_id`/`awaiting_payment`, and a `cancellation` block (deadline,
+refund amount and wallet) — ADDCore `docs/decisions/booking-outcomes-and-extension.md`.
+Member-app only; nothing in this dashboard cites it.
+
+### Credential scan at this pin
+
+Both halves repeated against the canonical file. **Nothing new:** the same 49
+variables with the four credential-shaped ones empty, 74 `auth` blocks and five
+`Authorization` headers all on placeholders, zero `Cookie` headers, no literal host,
+zero pattern matches, and the same nine populated password/token body fields in the
+same five requests. Named as fields and requests only, never values.
+
+### Encoding at this pin
+
+Strict, valid UTF-8. The double-encoded em dash (`â€”`) still appears **19** times;
+the correct em dash (`—`) **316** times.
+
+## Re-pinning
+
+1. Run `pnpm api:collection:check`. If it reports `MATCH`, nothing to do.
+2. If it reports `MISMATCH`: read the canonical file fresh and repeat **both** halves of
+   the scan above — the structural checks (variables, `auth` blocks, `Authorization` and
+   `Cookie` headers, literal `base_url`), *and* the pattern and password-field checks.
+   Stop and report instead of copying if anything credential-shaped now holds a
+   populated value that is not a `{{placeholder}}`. Report findings the same way: name
+   the field and the request, never the value.
+3. Copy the canonical file over this one byte-for-byte (no hand edits, no reformatting).
+   Verify with `sha256` **and** `cmp`.
+4. Update "Current pin" above with the new date, size, endpoint count, and scan
+   results — **append**, don't overwrite the prior pin's record, so a future reader can
+   see when a given claim's citation stopped being current. Move the outgoing record
+   into "Superseded pins" below, verbatim.
+5. Check `CLAUDE.md`'s "API contract" section still reads correctly. **It deliberately
+   carries no pin date** — it points here instead ("see `docs/api/README.md` for the pin
+   date"), so there is normally nothing to change in step 5. This step used to say
+   "update the pin date in `CLAUDE.md`", which described an edit that file has no place
+   for; corrected at the 2026-08-25 re-pin. Keep it that way: a date in two files is a
+   date that can disagree with itself, and the table above is the one that must win.
+
+---
+
+## Superseded pins
+
+Kept verbatim. A claim written while one of these was current cites *that* pin, and a
+future reader needs to see what it actually said.
+
+### Pin of 2026-10-04 — superseded later on 2026-10-04
+
+#### Record as it stood
+
+| | |
+|---|---|
+| Pinned | 2026-10-04 |
+| Source | the canonical path above, read directly, copied byte-for-byte (`cp`, not a JSON re-serialize — key order and formatting are exactly the source's) |
+| Verified identical | `sha256` match between source and this copy at pin time, plus a `cmp` byte comparison |
+| Size | 1,445,020 bytes / 22,532 lines |
+| Leaf endpoints (parsed) | 356 — `GET` 154, `POST` 109, `DELETE` 35, `PATCH` 29, `PUT` 29 |
+| Distinct `METHOD + URL` | 353 |
+
+### What changed since the third 2026-10-03 pin
+
+**No endpoint added or removed**; two member-app requests reworded (ADDCore
+`docs/decisions/booking-outcomes-and-extension.md`):
+
+- `List My Bookings` filters on `status` instead of `filter`: the sample URL is now
+  `…/member/bookings?status=pending,confirmed&per_page=15`, the `filter` query param
+  became `status` (one key or several comma-separated), and the description adds
+  `is_upcoming` on each card and the order (not yet started first).
+- `Booking Statuses & Tabs` is renamed `Booking Statuses`: its response is
+  `{statuses}` only, the `filters` tabs having gone with the `filter` key.
+
+Neither is called from this dashboard. Anyone citing the old request name should cite
+`GET /api/v1/member/bookings/statuses` instead, which did not change.
+
+### Credential scan at this pin
+
+Both halves repeated against the canonical file. **Nothing new:** the same 49
+variables with the four credential-shaped ones empty, 74 `auth` blocks and five
+`Authorization` headers all on placeholders, zero `Cookie` headers, no literal host,
+zero pattern matches, and the same nine populated password/token body fields in the
+same five requests. Named as fields and requests only, never values.
+
+### Encoding at this pin
+
+Strict, valid UTF-8. The double-encoded em dash (`â€”`) still appears **19** times;
+the correct em dash (`—`) **316** times.
+
+### Pin of 2026-10-03 (third that day) — superseded 2026-10-04
+
+#### Record as it stood
+
+| | |
+|---|---|
+| Pinned | 2026-10-03 (third pin that day) |
+| Source | the canonical path above, read directly, copied byte-for-byte (`cp`, not a JSON re-serialize — key order and formatting are exactly the source's) |
+| Verified identical | `sha256` match between source and this copy at pin time, plus a `cmp` byte comparison |
+| Size | 1,444,744 bytes / 22,532 lines |
+| Leaf endpoints (parsed) | 356 — `GET` 154, `POST` 109, `DELETE` 35, `PATCH` 29, `PUT` 29 |
+| Distinct `METHOD + URL` | 353 |
+
+### What changed since the second 2026-10-03 pin
+
+**One description again, no endpoint.** Zero added, zero removed. `List My Bookings`
+now says the response is `{data, meta}` with no per-tab `counts`, and that the card's
+`space` is `{title, main_image}` — `space_type` gone, `title` falling back to the space
+browser's per-type title for an unnamed space (ADDCore
+`docs/decisions/booking-outcomes-and-extension.md`). Member-app only; nothing in this
+dashboard cites that request.
+
+### Credential scan at this pin
+
+Both halves repeated against the canonical file. **Nothing new:** the same 49
+variables with the four credential-shaped ones empty, 74 `auth` blocks and five
+`Authorization` headers all on placeholders, zero `Cookie` headers, no literal host,
+zero pattern matches, and the same nine populated password/token body fields in the
+same five requests. Named as fields and requests only, never values.
+
+### Encoding at this pin
+
+Strict, valid UTF-8. The double-encoded em dash (`â€”`) still appears **19** times;
+the correct em dash (`—`) **315** times.
+
+### Pin of 2026-10-03 — superseded again later on 2026-10-03
+
+#### Record as it stood
+
+| | |
+|---|---|
+| Pinned | 2026-10-03 (second pin that day) |
+| Source | the canonical path above, read directly, copied byte-for-byte (`cp`, not a JSON re-serialize — key order and formatting are exactly the source's) |
+| Verified identical | `sha256` match between source and this copy at pin time, plus a `cmp` byte comparison |
+| Size | 1,444,689 bytes / 22,532 lines |
+| Leaf endpoints (parsed) | 356 — `GET` 154, `POST` 109, `DELETE` 35, `PATCH` 29, `PUT` 29 |
+| Distinct `METHOD + URL` | 353 |
+
+### What changed since the earlier 2026-10-03 pin
+
+**One description, no endpoint.** Zero added, zero removed (same request-path sets),
++28 bytes. `Member (App) / … / List My Bookings` now describes the trimmed list card:
+`id`, `space {title, space_type, main_image}`, `date_label`, `time_label`, `status`,
+`status_label`, `payment_state` — with `status_note`, the payment block and the
+`can_cancel`/`can_extend` actions on the booking detail only (ADDCore
+`docs/decisions/booking-outcomes-and-extension.md`). The member app reads that list;
+this dashboard does not, so no code here cites it.
+
+### Credential scan at this pin
+
+Both halves repeated against the canonical file. **Nothing new:** the same 49
+variables with the four credential-shaped ones empty, 74 `auth` blocks and five
+`Authorization` headers all on placeholders, zero `Cookie` headers, no literal host,
+zero pattern matches, and the same nine populated password/token body fields in the
+same five requests. Named as fields and requests only, never values.
+
+### Encoding at this pin
+
+Strict, valid UTF-8. The double-encoded em dash (`â€”`) still appears **19** times;
+the correct em dash (`—`) **314** times — one fewer than the earlier pin, because the
+rewritten description has one fewer.
+
+### Pin of 2026-10-03 — superseded later on 2026-10-03
+
+#### Record as it stood
+
+| | |
+|---|---|
+| Pinned | 2026-10-03 |
+| Source | the canonical path above, read directly, copied byte-for-byte (`cp`, not a JSON re-serialize — key order and formatting are exactly the source's) |
+| Verified identical | `sha256` match between source and this copy at pin time, plus a `cmp` byte comparison |
+| Size | 1,444,661 bytes / 22,532 lines |
+| Leaf endpoints (parsed) | 356 — `GET` 154, `POST` 109, `DELETE` 35, `PATCH` 29, `PUT` 29 |
+| Distinct `METHOD + URL` | 353 |
+
+### What changed since the 2026-09-21 pin
+
+A **large** delta again: 336 → 356 leaf endpoints, 300 → 353 distinct `METHOD + URL`
+pairs. Several backend phases landed between the two pins (the member wallet and
+unified payments, the co-working seat pool and self-service sessions, kiosks, resource
+types, memberships, event check-in) plus booking outcomes and extension. Measured by
+parsing both files and diffing the request-path sets: **60 added, 7 removed.**
+
+The part this dashboard consumes in this change (ADDCore
+`docs/decisions/booking-outcomes-and-extension.md`):
+
+- `GET /api/v1/admin/reception/bookings/{booking}/extension-options` — what the
+  reception extend dialog now offers instead of a free number of minutes
+  (`services/reception.ts` → `getExtensionOptions`).
+- `POST /api/v1/admin/spaces` and `PUT /api/v1/admin/spaces/{space}` bodies gained
+  `allows_extension` and `cancellation_window_minutes` (the space form).
+- `GET /api/v1/admin/bookings`'s `status` filter gained `completed` and `no_show`, the
+  backend's new outcome statuses (the bookings index and the calendar).
+
+**7 removed:** `GET /member/wallet/options`, `GET /member/spaces/{space}/availability`,
+`GET /member/spaces/{space}/availability/quote`,
+`GET /admin/spaces/{space}/availability/quote`, `GET /admin/roles/{role}`, and the two
+`/member/services/{{slug}}/…` requests (now keyed by `service_type_id`). None is called
+from `src/add-os/` — verified by grep at pin time; the admin `availability/quote` had
+already been dropped from `services/booking-calendar.ts`.
+
+Line endings: the canonical file was read with CRLF line endings (22,532 of them), and
+the byte count above includes them. Copied as read.
+
+### Credential scan at this pin
+
+Both halves of the scan were repeated against the canonical file. **Nothing new.**
+
+Structural: 49 collection-level variables; every credential-shaped one
+(`member_token`, `member_refresh_token`, `callback_token`, `kiosk_secret`) is
+**empty**. No collection-level `auth` block. 74 per-request `auth` blocks, every value
+a `{{placeholder}}`; the five `Authorization` headers each interpolate a placeholder;
+zero `Cookie` headers; no literal host in any `url.raw` (all interpolate `base_url`).
+
+Pattern: zero matches for AWS-style keys, PEM private keys, Stripe-style `sk_`/`pk_`
+secrets, JWT-shaped strings, GitHub and Slack tokens, Google API keys, Sanctum-style
+`id|hash` tokens and long hex blobs.
+
+Password-field: the same nine credential-shaped body fields hold populated literals —
+`token` in the two Notifications device-token requests, and `password` /
+`password_confirmation` / `token` across `Password/Update Password`,
+`Password/Reset Password` and `Users/Create User`. **Same set, same requests, as the
+2026-09-21 pin.** None of the 60 added requests carries a populated credential-shaped
+field. Named here as fields and requests only, never values.
+
+### Encoding at this pin
+
+The raw bytes decode as strict, valid UTF-8. The double-encoded em dash (`â€”`) still
+appears **19** times, unchanged; the correct em dash (`—`) now appears **315** times,
+up from 72, all of the growth in new `description` fields. Still present in the
+canonical source and still not corrected here.
+
+### Pin of 2026-09-21 — superseded 2026-10-03
+
+#### Record as it stood
+
+| | |
+|---|---|
 | Pinned | 2026-09-21 |
 | Source | the canonical path above, read directly, copied byte-for-byte (`cp`, not a JSON re-serialize — key order and formatting are exactly the source's) |
 | Verified identical | `sha256` match between source and this copy at pin time, plus a `cmp` byte comparison |
@@ -74,35 +321,6 @@ Unchanged from the 2026-09-20 pin and re-measured against this copy: the raw byt
 decode as strict, valid UTF-8; the double-encoded em dash (`â€”`) still appears 19
 times and the correct em dash (`—`) 72 times, all in `description` fields, still
 present in the canonical source and still not corrected here.
-
-## Re-pinning
-
-1. Run `pnpm api:collection:check`. If it reports `MATCH`, nothing to do.
-2. If it reports `MISMATCH`: read the canonical file fresh and repeat **both** halves of
-   the scan above — the structural checks (variables, `auth` blocks, `Authorization` and
-   `Cookie` headers, literal `base_url`), *and* the pattern and password-field checks.
-   Stop and report instead of copying if anything credential-shaped now holds a
-   populated value that is not a `{{placeholder}}`. Report findings the same way: name
-   the field and the request, never the value.
-3. Copy the canonical file over this one byte-for-byte (no hand edits, no reformatting).
-   Verify with `sha256` **and** `cmp`.
-4. Update "Current pin" above with the new date, size, endpoint count, and scan
-   results — **append**, don't overwrite the prior pin's record, so a future reader can
-   see when a given claim's citation stopped being current. Move the outgoing record
-   into "Superseded pins" below, verbatim.
-5. Check `CLAUDE.md`'s "API contract" section still reads correctly. **It deliberately
-   carries no pin date** — it points here instead ("see `docs/api/README.md` for the pin
-   date"), so there is normally nothing to change in step 5. This step used to say
-   "update the pin date in `CLAUDE.md`", which described an edit that file has no place
-   for; corrected at the 2026-08-25 re-pin. Keep it that way: a date in two files is a
-   date that can disagree with itself, and the table above is the one that must win.
-
----
-
-## Superseded pins
-
-Kept verbatim. A claim written while one of these was current cites *that* pin, and a
-future reader needs to see what it actually said.
 
 ### Pin of 2026-09-20 — superseded 2026-09-21
 

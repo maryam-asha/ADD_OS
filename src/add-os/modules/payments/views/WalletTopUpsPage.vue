@@ -408,7 +408,7 @@ import { ApiError } from "@/add-os/services/api"
 import { listCompanies } from "@/add-os/services/companies"
 import { listUsers } from "@/add-os/services/users"
 import { createWalletTopUp, getWalletBalance, previewWalletTopUp } from "@/add-os/services/wallet-top-ups"
-import { formatCurrency, isCurrencyCode } from "@/add-os/utils/format"
+import { formatCurrency, formatDateTime, isCurrencyCode } from "@/add-os/utils/format"
 import { useCurrencyStore } from "@/stores/currency"
 import { useLocalesStore } from "@/stores/i18n"
 import { useThemeStore } from "@/stores/theme"
@@ -911,9 +911,9 @@ function handlePrintReceipt() {
 }
 
 function formatReceiptDate(iso?: string): string {
-	if (!iso) return new Date().toLocaleString()
+	if (!iso) return formatDateTime(new Date())
 	try {
-		return new Date(iso).toLocaleString()
+		return formatDateTime(iso)
 	} catch {
 		return iso
 	}

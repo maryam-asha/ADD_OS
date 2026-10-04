@@ -6,7 +6,7 @@ import { NTag } from "naive-ui"
 import { h } from "vue"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import { STATUS_ICONS } from "@/add-os/theme/tokens"
-import { formatCurrency, formatNumber, isCurrencyCode } from "@/add-os/utils/format"
+import { formatClockTime, formatCurrency, formatNumber, isCurrencyCode } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
 export function buildPlanColumns(t: ComposerTranslation, locale: SupportedLocale): DataTableColumns<Plan> {
@@ -144,7 +144,14 @@ export function buildPlanColumns(t: ComposerTranslation, locale: SupportedLocale
 							// reformatted: they are not instants, so a locale-aware
 							// time formatter would be the wrong tool and a timezone
 							// conversion would be actively wrong.
-							{ default: () => `${row.access_window_start} – ${row.access_window_end}` }
+							//
+							// Changed 2026-09-30: every time in the dashboard is now
+							// 12-hour, and `formatClockTime` exists for exactly this
+							// case — it re-spells the wall clock ("20:00" → "08:00 م")
+							// with no Date and no timezone involved, so the reason
+							// above still holds. Given up: the raw server string on
+							// screen, which made a mismatch with the API easy to spot.
+							{ default: () => `${formatClockTime(row.access_window_start ?? "")} – ${formatClockTime(row.access_window_end ?? "")}` }
 						)
 					: h("span", { class: "text-xs text-secondary" }, `— ${t("packages.anyTime")} —`)
 		},

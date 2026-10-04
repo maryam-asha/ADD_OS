@@ -123,7 +123,7 @@ import {
 	listCashRegisterSessions,
 	openCashRegisterSession
 } from "@/add-os/services/cash-register"
-import { formatNumber } from "@/add-os/utils/format"
+import { formatDateTime, formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
 defineProps<{ titleKey?: string }>()
@@ -155,7 +155,7 @@ const closeForm = ref<{ closing_balance: string; notes: string }>({
 
 function formatIsoDate(iso: string | null | undefined): string {
 	if (!iso) return "—"
-	return iso.replace("T", " ").substring(0, 16)
+	return formatDateTime(iso)
 }
 
 function formatAmount(val: string | null | undefined): string {

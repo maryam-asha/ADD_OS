@@ -261,7 +261,7 @@
 									<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.accessWindowStart') }} *</span>
 									<n-time-picker
 										:formatted-value="toPickerTimeValue(model.access_window_start)"
-										format="HH:mm"
+										format="hh:mm a" use-12-hours
 										value-format="HH:mm"
 										class="w-full"
 										size="small"
@@ -273,7 +273,7 @@
 									<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.accessWindowEnd') }} *</span>
 									<n-time-picker
 										:formatted-value="toPickerTimeValue(model.access_window_end)"
-										format="HH:mm"
+										format="hh:mm a" use-12-hours
 										value-format="HH:mm"
 										class="w-full"
 										size="small"

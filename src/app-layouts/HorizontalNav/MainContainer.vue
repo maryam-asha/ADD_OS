@@ -87,6 +87,8 @@ onMounted(() => {
 	transition: all var(--sidebar-anim-ease) var(--sidebar-anim-duration);
 
 	.view {
+		position: relative;
+		z-index: 2;
 		padding: 0 var(--view-padding);
 		flex-grow: 1;
 		width: 100%;
