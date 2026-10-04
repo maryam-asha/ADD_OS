@@ -10,6 +10,8 @@ import { spaceTypeLabel } from "./space-type-label"
 
 interface SessionHandlers {
 	onCheckOut: (row: ActiveSession) => void
+	/** Opens the session's own page: its live timer, its bill so far. */
+	onDetails: (row: ActiveSession) => void
 	onExtend: (row: ActiveSession) => void
 	onCancel: (row: ActiveSession) => void
 }
@@ -40,19 +42,28 @@ export function buildSessionColumns(t: ComposerTranslation, handlers: SessionHan
 			key: "type",
 			render: (row) => {
 				const label = t(`activeSessions.type.${row.type}`)
+				const tags = []
 				// A walk-in says which seat it took: the one its subscription
 				// holds, or a free one from the branch's co-working pool.
-				if (row.type !== "walkin" || row.seat_covered === null) return label
-
-				const covered = row.seat_covered
-				return h("div", { class: "flex items-center gap-2" }, [
-					h("span", label),
-					h(
+				if (row.type === "walkin" && row.seat_covered !== null) {
+					const covered = row.seat_covered
+					tags.push(h(
 						NTag,
 						{ size: "small", round: true, type: covered ? "info" : "default", title: t(covered ? "activeSessions.seat.coveredHint" : "activeSessions.seat.poolHint") },
 						{ default: () => t(covered ? "activeSessions.seat.covered" : "activeSessions.seat.pool") }
-					)
-				])
+					))
+				}
+				// A Dedicated Desk member's own desk, to send them to it.
+				for (const code of row.desk_codes ?? []) {
+					tags.push(h(
+						NTag,
+						{ size: "small", round: true, type: "success", title: t("activeSessions.seat.deskHint") },
+						{ default: () => t("activeSessions.seat.desk", { code }) }
+					))
+				}
+				if (tags.length === 0) return label
+
+				return h("div", { class: "flex flex-wrap items-center gap-2" }, [h("span", label), ...tags])
 			}
 		},
 		{
@@ -82,7 +93,13 @@ export function buildSessionColumns(t: ComposerTranslation, handlers: SessionHan
 			key: "actions",
 			render: row => {
 				const checkOutLabel = t("activeSessions.checkOut.button")
+				const detailsLabel = t("activeSessions.details")
 				const buttons = [
+					h(
+						NButton,
+						{ size: "small", secondary: true, "aria-label": detailsLabel, onClick: () => handlers.onDetails(row) },
+						{ icon: () => h(Icon, { name: "carbon:view", size: 16 }), default: () => detailsLabel }
+					),
 					h(
 						NButton,
 						{ size: "small", type: "primary", "aria-label": checkOutLabel, onClick: () => handlers.onCheckOut(row) },

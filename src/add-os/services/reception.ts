@@ -2,10 +2,16 @@ import type { Paginated, RawPaginatedResponse } from "./pagination"
 import type { MessageResponse } from "./resource-factory"
 import type {
 	ActiveSession,
+	BookingExtensionOptions,
 	CheckOutSessionPayload,
+	ConfirmSessionEndResponse,
 	CreateReceptionBookingPayload,
 	ExtendBookingPayload,
 	PendingApprovalBooking,
+	QuoteReceptionBookingPayload,
+	ReceptionBookingQuote,
+	ReceptionSessionReport,
+	ReceptionSummary,
 	RejectBookingPayload,
 	SessionType,
 	SettlePaymentPayload
@@ -34,6 +40,10 @@ import { rowsOf, toPaginated } from "./pagination"
  * and no walk-in `extend` in the collection, so this file exposes neither.
  * `cancelBooking`/`extendBooking` take a bare id rather than a `SessionType`,
  * which makes calling them for a walk-in a type error rather than a 404.
+ *
+ * `getExtensionOptions` is verified against the snapshot pinned 2026-10-03
+ * (`GET .../reception/bookings/{booking}/extension-options`); booking-only for
+ * the same reason as `extendBooking`.
  */
 
 const BASE = "/api/v1/admin/reception"
@@ -65,6 +75,12 @@ function sessionPrefix(type: SessionType): string {
  */
 export async function createReceptionBooking(payload: CreateReceptionBookingPayload): Promise<{ data: { id: number } }> {
 	return post<{ data: { id: number } }>(`${BASE}/bookings`, payload)
+}
+
+/** What that booking would cost, in points and money, before it is made. Books nothing. */
+export async function quoteReceptionBooking(payload: QuoteReceptionBookingPayload): Promise<ReceptionBookingQuote> {
+	const res = await post<{ data: ReceptionBookingQuote }>(`${BASE}/bookings/quote`, payload)
+	return res.data
 }
 
 /**
@@ -99,6 +115,16 @@ export async function cancelBooking(id: number): Promise<MessageResponse> {
 	return post<MessageResponse>(`${BASE}/bookings/${id}/cancel`)
 }
 
+/**
+ * How far the booking can be extended and at what price — or why it cannot
+ * (`can_extend: false`, `reason_label` translated by the server). A read; the
+ * extend POST re-checks the same rules under its own lock.
+ */
+export async function getExtensionOptions(id: number): Promise<BookingExtensionOptions> {
+	const raw = await get<{ data: BookingExtensionOptions }>(`${BASE}/bookings/${id}/extension-options`)
+	return raw.data
+}
+
 /** 422 `{message}` naming the latest possible end time when the extension won't fit. */
 export async function extendBooking(id: number, additionalMinutes: number): Promise<MessageResponse> {
 	const payload: ExtendBookingPayload = { additional_minutes: additionalMinutes }
@@ -126,4 +152,25 @@ export async function checkOutSession(type: SessionType, id: number, checkedOutA
 export async function settleSessionPayment(type: SessionType, id: number, paymentMethod: PaymentMethod): Promise<MessageResponse> {
 	const payload: SettlePaymentPayload = { payment_method: paymentMethod }
 	return post<MessageResponse>(`${sessionPrefix(type)}/${id}/settle-payment`, payload)
+}
+
+/** The desk's day: counts, and what needs it next. */
+export async function getReceptionSummary(): Promise<ReceptionSummary> {
+	const res = await get<{ data: ReceptionSummary }>(`${BASE}/summary`)
+	return res.data
+}
+
+/** A session's statement and, while open, what ending it would charge. */
+export async function getSessionReport(type: SessionType, id: number): Promise<ReceptionSessionReport> {
+	const res = await get<{ data: ReceptionSessionReport }>(`${BASE}/sessions/${type}/${id}/report`)
+	return res.data
+}
+
+/**
+ * Ends the session the member asked to end, settling it as they chose:
+ * points are spent, and cash is recorded when `cashCollected` says the desk
+ * has the money. The message says whether anything is still owed.
+ */
+export async function confirmSessionEnd(endRequestId: number, cashCollected = false): Promise<ConfirmSessionEndResponse> {
+	return post<ConfirmSessionEndResponse>(`${BASE}/session-end-requests/${endRequestId}/confirm`, { cash_collected: cashCollected })
 }

@@ -28,7 +28,14 @@
 					:feedback="checkOutFieldErrors.checked_out_at?.[0]"
 					:validation-status="checkOutFieldErrors.checked_out_at ? 'error' : undefined"
 				>
-					<n-date-picker v-model:value="checkOutForm.checked_out_at" type="datetime" :is-date-disabled="isFutureDate" class="w-full" />
+					<n-date-picker
+						v-model:value="checkOutForm.checked_out_at"
+						type="datetime"
+						format="yyyy-MM-dd hh:mm a"
+						:time-picker-props="{ use12Hours: true }"
+						:is-date-disabled="isFutureDate"
+						class="w-full"
+					/>
 				</n-form-item>
 
 				<n-form-item path="payment_method" :label="t('activeSessions.checkOut.settleLabel')">
@@ -51,20 +58,36 @@
 		</n-modal>
 
 		<n-modal v-model:show="extendModalVisible" preset="card" :title="t('activeSessions.extend.title')" class="max-w-md">
-			<n-form :model="extendForm" label-placement="top">
-				<n-form-item
-					path="additional_minutes"
-					:label="t('activeSessions.extend.minutesLabel')"
-					:feedback="extendFieldErrors.additional_minutes?.[0]"
-					:validation-status="extendFieldErrors.additional_minutes ? 'error' : undefined"
-				>
-					<n-input-number v-model:value="extendForm.additional_minutes" :min="1" :precision="0" class="w-full" />
-				</n-form-item>
-			</n-form>
+			<n-spin :show="extendOptionsLoading">
+				<n-alert v-if="extendOptionsError" type="error" :title="t('activeSessions.extend.loadError')" />
+				<n-alert v-else-if="extendOptions && !extendOptions.can_extend" type="warning" :title="extendOptions.reason_label ?? ''" />
+				<n-form v-else-if="extendOptions" :model="extendForm" label-placement="top">
+					<n-form-item
+						path="additional_minutes"
+						:label="t('activeSessions.extend.optionLabel')"
+						:feedback="extendFieldErrors.additional_minutes?.[0]"
+						:validation-status="extendFieldErrors.additional_minutes ? 'error' : undefined"
+					>
+						<n-radio-group v-model:value="extendForm.additional_minutes" :aria-label="t('activeSessions.extend.optionPlaceholder')">
+							<div class="flex flex-col gap-2">
+								<n-radio v-for="option in extendOptions.options" :key="option.minutes" :value="option.minutes">
+									{{ optionLabel(option) }}
+								</n-radio>
+							</div>
+						</n-radio-group>
+					</n-form-item>
+					<p class="text-xs">{{ t("activeSessions.extend.latestDeparture", { time: formatTime(extendOptions.latest_end_at) }) }}</p>
+				</n-form>
+			</n-spin>
 			<template #footer>
 				<div class="flex justify-end gap-2">
 					<n-button @click="extendModalVisible = false">{{ t("resourceCrud.form.cancel") }}</n-button>
-					<n-button type="primary" :loading="action.isSubmitting.value" @click="submitExtend">
+					<n-button
+						type="primary"
+						:disabled="!extendOptions?.can_extend"
+						:loading="action.isSubmitting.value"
+						@click="submitExtend"
+					>
 						{{ t("activeSessions.extend.button") }}
 					</n-button>
 				</div>
@@ -76,7 +99,7 @@
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
 import type { FieldErrors } from "@/add-os/modules/booking/composables/useReceptionAction"
-import type { ActiveSession } from "@/add-os/modules/booking/types/reception"
+import type { ActiveSession, BookingExtensionOptions, ExtensionOption } from "@/add-os/modules/booking/types/reception"
 import type { PaymentMethod } from "@/add-os/modules/payments/types/wallet-top-up"
 import {
 	NAlert,
@@ -86,18 +109,29 @@ import {
 	NDatePicker,
 	NForm,
 	NFormItem,
-	NInputNumber,
 	NModal,
+	NRadio,
+	NRadioGroup,
 	NSelect,
+	NSpin,
 	useDialog
 } from "naive-ui"
 import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import { useRouter } from "vue-router"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useReceptionAction } from "@/add-os/modules/booking/composables/useReceptionAction"
 import { buildSessionColumns } from "@/add-os/modules/booking/config/active-sessions.config"
 import { PAYMENT_METHODS } from "@/add-os/modules/payments/types/wallet-top-up"
-import { cancelBooking, checkOutSession, extendBooking, listActiveSessions, settleSessionPayment } from "@/add-os/services/reception"
+import {
+	cancelBooking,
+	checkOutSession,
+	extendBooking,
+	getExtensionOptions,
+	listActiveSessions,
+	settleSessionPayment
+} from "@/add-os/services/reception"
+import { formatTime } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
 /**
@@ -125,19 +159,16 @@ defineProps<{ titleKey?: string }>()
 
 const { t } = useI18n()
 const dialog = useDialog()
-
-/**
- * What the extend dialog opens on. A starting value, not a rule — the server
- * accepts any integer >= 1 that still fits before closing time, and the
- * operator types over it. Half an hour is the shortest extension anyone asks
- * for in practice; opening on an empty field would make the common case slower
- * for no gain.
- */
-const DEFAULT_EXTENSION_MINUTES = 30
+const router = useRouter()
 
 const { data: rows, isLoading, error, refetch } = useResourceList<ActiveSession>(listActiveSessions)
 
 const action = useReceptionAction(refetch)
+
+/** The session's own page: live timer, bill so far, and its end request if any. */
+function openDetails(row: ActiveSession): void {
+	router.push({ name: "bookings.activeSessionDetail", params: { type: row.type, id: row.id } })
+}
 
 function rowKey(row: ActiveSession) {
 	// Ids are unique per table, so a booking and a walk-in can share one.
@@ -214,25 +245,68 @@ async function submitCheckOut() {
 
 /* ── Extend ────────────────────────────────────────────────────────────────── */
 
+/*
+ * The dialog offers the lengths the server says fit — `GET .../extension-options`
+ * — instead of a free number of minutes.
+ *
+ * Changed 2026-10-03. It used to open on a typed field preset to 30 minutes, on
+ * the reasoning that the server took any integer >= 1 that fitted before
+ * closing. That stopped being true: an extension is now at least the minimum
+ * booking length in steps of the space's granularity, stops at the next
+ * booking's buffer and the branch's closing, and is refused outright on a
+ * space that does not allow it or a booking that is not running (ADDCore
+ * `docs/decisions/booking-outcomes-and-extension.md`). The 30-minute preset
+ * would have been a 422 on every space. What was given up: an operator can no
+ * longer type an arbitrary length — only pick one the server will accept, with
+ * its price in view.
+ */
 const extendModalVisible = ref(false)
 const extendTargetId = ref<number | null>(null)
-const extendForm = ref<{ additional_minutes: number | null }>({ additional_minutes: DEFAULT_EXTENSION_MINUTES })
+const extendForm = ref<{ additional_minutes: number | null }>({ additional_minutes: null })
 const extendFieldErrors = ref<FieldErrors>({})
+const extendOptions = ref<BookingExtensionOptions | null>(null)
+const extendOptionsLoading = ref(false)
+const extendOptionsError = ref(false)
 
-function openExtend(row: ActiveSession) {
+/** "2h — until 01:00 PM · 20 $": every part rendered by the server. */
+function optionLabel(option: ExtensionOption): string {
+	const price = option.price ?? option.price_point
+	return price
+		? t("activeSessions.extend.option", { duration: option.label, time: option.end_time, price })
+		: t("activeSessions.extend.optionFree", { duration: option.label, time: option.end_time })
+}
+
+async function openExtend(row: ActiveSession) {
 	extendTargetId.value = row.id
-	extendForm.value = { additional_minutes: DEFAULT_EXTENSION_MINUTES }
+	extendForm.value = { additional_minutes: null }
 	extendFieldErrors.value = {}
+	extendOptions.value = null
+	extendOptionsError.value = false
 	extendModalVisible.value = true
+	extendOptionsLoading.value = true
+
+	try {
+		const options = await getExtensionOptions(row.id)
+		// An answer for a booking the operator has since left is dropped.
+		if (extendTargetId.value !== row.id) return
+		extendOptions.value = options
+		// The shortest offered length, the commonest ask; the operator can pick another.
+		extendForm.value.additional_minutes = options.options[0]?.minutes ?? null
+	} catch {
+		extendOptionsError.value = true
+	} finally {
+		extendOptionsLoading.value = false
+	}
 }
 
 async function submitExtend() {
 	const id = extendTargetId.value
 	const minutes = extendForm.value.additional_minutes
-	if (id === null) return
+	const offered = extendOptions.value
+	if (id === null || !offered?.can_extend) return
 
-	if (minutes === null || !Number.isInteger(minutes) || minutes < 1) {
-		extendFieldErrors.value = { additional_minutes: [t("activeSessions.extend.minutesInvalid")] }
+	if (minutes === null || !offered.options.some(option => option.minutes === minutes)) {
+		extendFieldErrors.value = { additional_minutes: [t("activeSessions.extend.chooseOption")] }
 		return
 	}
 
@@ -261,7 +335,7 @@ async function cancelSession(row: ActiveSession) {
 }
 
 const columns = computed<DataTableColumns<ActiveSession>>(() =>
-	buildSessionColumns(t, { onCheckOut: openCheckOut, onExtend: openExtend, onCancel: confirmCancel })
+	buildSessionColumns(t, { onCheckOut: openCheckOut, onDetails: openDetails, onExtend: openExtend, onCancel: confirmCancel })
 )
 
 defineExpose({
@@ -277,6 +351,7 @@ defineExpose({
 	extendForm,
 	extendFieldErrors,
 	extendModalVisible,
+	extendOptions,
 	cancelSession
 })
 </script>

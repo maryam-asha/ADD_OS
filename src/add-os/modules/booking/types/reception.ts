@@ -78,6 +78,88 @@ export interface ActiveSession {
 	 */
 	seat_covered: boolean | null
 	membership_id: number | null
+	/**
+	 * The codes of the desks this member's Dedicated Desk subscription (their
+	 * own or their company's) ties them to — empty for everyone else.
+	 */
+	desk_codes: string[]
+	/** The member's waiting "end session" press, or null. */
+	end_request?: SessionEndRequestSummary | null
+	member?: { id: number, name: string, phone: string | null, avatar_url: string | null, company: string | null }
+}
+
+/** A member's "end session" press. `payment_method` is how they chose to pay: `wallet`, `cash`, a gateway, or null. */
+export interface SessionEndRequestSummary {
+	id: number
+	status: "pending" | "confirmed" | "cancelled" | "superseded"
+	payment_method: string | null
+	requested_at: string | null
+	resolved_at: string | null
+	checked_out_at: string | null
+}
+
+/** `GET .../reception/summary` — the desk's day at a glance. */
+export interface ReceptionSummary {
+	stats: {
+		active_sessions: number
+		expected_bookings: number
+		pending_arrivals: number
+		pending_end_requests: number
+		pending_payments: number
+	}
+	/** What needs the desk next, soonest first. `at` is district wall-clock with its offset. */
+	upcoming: {
+		kind: "end_request" | "arrival" | "booking"
+		id: number
+		at: string
+		member: { id: number | null, name: string | null }
+		space: string | null
+		session: { type: SessionType, id: number } | null
+		payment_method: string | null
+	}[]
+}
+
+/** One row of a session's statement, as the server words it. */
+export interface SessionReportLine {
+	kind: "time" | "resource_consumption"
+	label: string
+	quantity: number
+	unit: string | null
+	source: "plan" | "charge" | null
+	points: number | null
+	amount: string | null
+}
+
+/**
+ * `GET .../reception/sessions/{type}/{id}/report`: the session's statement,
+ * and — while it is open — what ending it would charge, at the moment the
+ * member asked to end.
+ */
+export interface ReceptionSessionReport {
+	session: {
+		type: SessionType
+		id: number
+		space: { id: number, name: string }
+		checked_in_at: string
+		checked_out_at: string | null
+		duration_seconds: number
+	}
+	lines: SessionReportLine[]
+	member: { id: number, name: string, phone: string | null }
+	closing: {
+		at: string
+		points: number
+		covered_seconds: number
+		already_paid: boolean
+		amounts: { currency: string, value: string }[]
+		end_request: SessionEndRequestSummary | null
+	} | null
+	wallet_points: number
+}
+
+export interface ConfirmSessionEndResponse {
+	message: string
+	data: { payment_state: string | null, price_points: number, amount_owed: string }
 }
 
 export interface RejectBookingPayload {
@@ -85,8 +167,53 @@ export interface RejectBookingPayload {
 }
 
 export interface ExtendBookingPayload {
-	/** Integer, >= 1. A 422 names the latest possible end time when it won't fit. */
+	/**
+	 * One of the `minutes` the booking's extension options offer. A 422 names
+	 * the latest possible end time when it won't fit.
+	 */
 	additional_minutes: number
+}
+
+/**
+ * Why a booking cannot be extended right now. `reason_label` carries the
+ * server's own translated sentence; this key is for logic, not for display.
+ */
+export type ExtensionBlockReason = "space_disallows" | "not_checked_in" | "outside_booking_time" | "next_slot_booked" | "branch_closing"
+
+/** One length the booking can grow by. */
+export interface ExtensionOption {
+	/** What `POST .../extend` takes as `additional_minutes`. */
+	minutes: number
+	/** Server-rendered duration, e.g. "1h". */
+	label: string
+	/** ISO-8601 with the district's offset. */
+	end_at: string
+	/** Server-rendered 12-hour time, e.g. "03:00 PM". */
+	end_time: string
+	/** What the extension charges, plan discount included. */
+	price_points: number
+	/** The same price in the member's currency, server-rendered; `null` when free. */
+	price: string | null
+	price_point: string | null
+}
+
+/**
+ * `GET /api/v1/admin/reception/bookings/{id}/extension-options` — the same
+ * answer the member app gets (ADDCore
+ * `docs/decisions/booking-outcomes-and-extension.md`). A booking extends only
+ * while it runs, its member checked in, on a space that allows it, and only as
+ * far as the next booking (and its buffer), a co-working loan, the seat pool
+ * or the branch's closing allows. The extend POST re-checks the same rules.
+ */
+export interface BookingExtensionOptions {
+	can_extend: boolean
+	reason: ExtensionBlockReason | null
+	reason_label: string | null
+	current_end_at: string
+	/** The latest the member can stay. Equals `current_end_at` when nothing fits. */
+	latest_end_at: string
+	/** Empty whenever `can_extend` is false. */
+	options: ExtensionOption[]
 }
 
 export interface CheckOutSessionPayload {
@@ -117,5 +244,38 @@ export interface CreateReceptionBookingPayload {
 	space_id: number
 	start_at: string
 	end_at: string
+	/**
+	 * Always named by the desk — no wallet is debited unasked. `wallet` pays
+	 * from the member's points now (too few is a 422); `cash` with
+	 * `cash_collected` settles the booking at once; `cash` without it leaves
+	 * it unpaid, to collect on arrival.
+	 */
+	payment_method: "wallet" | "cash"
+	cash_collected?: boolean
 	note?: string
 }
+
+/** What `POST .../reception/bookings/quote` takes: the booking, without its payment. */
+export type QuoteReceptionBookingPayload = Pick<CreateReceptionBookingPayload, "user_id" | "space_id" | "start_at" | "end_at">
+
+/**
+ * What the booking would cost: hours × the space's hourly rate in points,
+ * less the member's plan discount — the server's own breakdown — and the
+ * total in every currency the desk takes cash in.
+ */
+export interface ReceptionBookingQuote {
+	minutes: number
+	hourly_rate_points: number
+	total_points: number
+	breakdown: {
+		lines: { key: string, label: string, points: number }[]
+		total: { points: number, amount: number | string, formatted: string }
+	}
+	/** `value` is a decimal string, as the ledger keeps it. */
+	amounts: { currency: string, value: string }[]
+	/** The member's wallets, and whether each can pay the total now. */
+	wallets: { owner_type: string, owner_id: number, owner_label: string | null, usable_balance: number, sufficient: boolean }[]
+}
+
+/** The three choices the desk picks from, mapped onto `payment_method` + `cash_collected`. */
+export type ReceptionBookingPayment = "wallet" | "cash_now" | "cash_later"

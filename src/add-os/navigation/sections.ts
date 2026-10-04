@@ -124,7 +124,9 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "receptionDesk", path: "reception-desk" },
 			{ key: "approvalQueue", path: "approval-queue" },
 			{ key: "activeSessions", path: "active-sessions" },
+			{ key: "activeSessionDetail", path: "active-sessions/:type/:id", hidden: true },
 			{ key: "closeSession", path: "close-session" },
+			{ key: "closeSessionDetail", path: "close-session/:type/:id", hidden: true },
 			{ key: "allBookings", path: "all" },
 			{ key: "calendar", path: "calendar" }
 		]

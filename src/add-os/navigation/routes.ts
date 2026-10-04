@@ -48,6 +48,9 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"bookings.approvalQueue": () => import("@/add-os/modules/booking/views/ApprovalQueuePage.vue"),
 	"bookings.activeSessions": () => import("@/add-os/modules/booking/views/ActiveSessionsPage.vue"),
 	"bookings.closeSession": () => import("@/add-os/modules/booking/views/CloseSessionPage.vue"),
+	"bookings.closeSessionDetail": () => import("@/add-os/modules/booking/views/CloseSessionDetailPage.vue"),
+	// The same session page, reached from the active sessions board.
+	"bookings.activeSessionDetail": () => import("@/add-os/modules/booking/views/CloseSessionDetailPage.vue"),
 	"bookings.allBookings": () => import("@/add-os/modules/booking/views/AllBookingsPage.vue"),
 	"bookings.calendar": () => import("@/add-os/modules/booking/views/BookingCalendarPage.vue"),
 	"members.individuals": () => import("@/add-os/modules/members/views/IndividualMembersPage.vue"),
