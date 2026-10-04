@@ -93,7 +93,7 @@
 					<n-time-picker
 						v-else-if="field.type === 'time'"
 						:formatted-value="toPickerTimeValue((model as Record<string, unknown>)[field.key])"
-						format="HH:mm"
+						format="hh:mm a" use-12-hours
 						value-format="HH:mm"
 						class="w-full"
 						@update:formatted-value="(value: string | null) => setPickerValue(field.key, value)"
@@ -135,7 +135,7 @@
 						/>
 						<n-time-picker
 							:formatted-value="datetimeTimePart((model as Record<string, unknown>)[field.key])"
-							format="HH:mm"
+							format="hh:mm a" use-12-hours
 							value-format="HH:mm"
 							class="w-36"
 							@update:formatted-value="(value: string | null) => setDatetimeTimePart(field.key, value)"

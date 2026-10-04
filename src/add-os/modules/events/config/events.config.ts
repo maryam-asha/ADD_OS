@@ -1,4 +1,4 @@
-import type { DataTableColumns } from "naive-ui"
+import type { DataTableColumns, FormItemRule } from "naive-ui"
 import type { ComposerTranslation } from "vue-i18n"
 import type { FieldDescriptor } from "@/add-os/components/resource/field-types"
 import type { SupportedLocale } from "@/add-os/lang/locales"
@@ -120,23 +120,58 @@ export function buildEventColumns(t: ComposerTranslation, locale: SupportedLocal
 			title: t("events.columns.status"),
 			key: "status",
 			render: row =>
-				h(
-					NTag,
-					{ type: STATUS_TAG_TYPE[row.status] ?? "default", round: true, bordered: true },
-					{ default: () => t(`events.status.${row.status}`) }
-				)
+				h("div", { class: "flex items-center gap-1" }, [
+					h(
+						NTag,
+						{ type: STATUS_TAG_TYPE[row.status] ?? "default", round: true, bordered: true },
+						{ default: () => t(`events.status.${row.status}`) }
+					),
+					row.is_marked_full
+						? h(NTag, { type: "error", round: true, bordered: false, size: "small" }, { default: () => t("events.markedFull") })
+						: null
+				])
 		}
 	]
 }
 
+/** Whether a value is an absolute http(s) link — what the backend's `url` rule accepts. */
+function isHttpUrl(value: string): boolean {
+	try {
+		const url = new URL(value)
+		return url.protocol === "http:" || url.protocol === "https:"
+	} catch {
+		return false
+	}
+}
+
+const isExternal = (model: EventPayload) => model.registration_source === "external"
+
 export function buildEventFields(
 	categories: EventCategory[] = [],
-	locale: SupportedLocale = "en"
+	locale: SupportedLocale = "en",
+	t?: ComposerTranslation
 ): FieldDescriptor<EventPayload>[] {
+	// Option labels and rule messages are resolved here, not by the drawer;
+	// without a translator (the static `eventFields` below) keys stand in.
+	const tr = (key: string): string => (t ? t(key) : key)
+
 	const categoryOptions = categories.map(cat => ({
 		label: pickLocalized(cat.name, locale),
 		value: cat.id
 	}))
+
+	// Only ever evaluated while the field is shown — i.e. "external" is
+	// chosen — so an empty link stops the save instead of quietly saving an
+	// in-app event the admin did not pick.
+	const externalUrlRule: FormItemRule = {
+		required: true,
+		trigger: ["blur", "input"],
+		validator: (_rule, value) => {
+			const link = typeof value === "string" ? value.trim() : ""
+			if (!link) return new Error(tr("events.validation.externalFormUrlRequired"))
+			return isHttpUrl(link) || new Error(tr("events.validation.externalFormUrlInvalid"))
+		}
+	}
 
 	return [
 		{ key: "title", labelKey: "events.form.title", type: "bilingual-text", required: true },
@@ -148,19 +183,17 @@ export function buildEventFields(
 		// are not entered here at all.
 		{ key: "sessions", labelKey: "events.form.schedule", type: "sessions", required: true },
 		{ key: "location", labelKey: "events.form.location", type: "text" },
+		// Asked first, because it decides which of the fields below apply.
 		{
-			key: "capacity",
-			labelKey: "events.form.capacity",
-			type: "number",
-			hiddenWhen: model => Boolean((model as EventPayload).external_form_url)
-		},
-		// A pending registration still holds a seat, so this interacts with
-		// capacity above rather than standing on its own.
-		{
-			key: "requires_approval",
-			labelKey: "events.form.requiresApproval",
-			type: "switch",
-			hiddenWhen: model => Boolean((model as EventPayload).external_form_url)
+			key: "registration_source",
+			labelKey: "events.form.registrationSource",
+			type: "select",
+			required: true,
+			virtual: true,
+			options: [
+				{ label: tr("events.form.registrationSourceInternal"), value: "internal" },
+				{ label: tr("events.form.registrationSourceExternal"), value: "external" }
+			]
 		},
 		// Registration happens here or on someone else's form, never both —
 		// the backend refuses in-app registration once this is set, so seats,
@@ -168,8 +201,33 @@ export function buildEventFields(
 		{
 			key: "external_form_url",
 			labelKey: "events.form.externalFormUrl",
-			type: "text"
+			type: "text",
+			rule: externalUrlRule,
+			hiddenWhen: model => !isExternal(model as EventPayload)
 		},
+		{
+			key: "capacity",
+			labelKey: "events.form.capacity",
+			type: "number",
+			hiddenWhen: model => isExternal(model as EventPayload)
+		},
+		// A pending registration still holds a seat, so this interacts with
+		// capacity above rather than standing on its own.
+		{
+			key: "requires_approval",
+			labelKey: "events.form.requiresApproval",
+			type: "switch",
+			hiddenWhen: model => isExternal(model as EventPayload)
+		},
+		// The registration window. Left empty it opens on publication and
+		// closes when the event starts; the backend refuses a close after the
+		// start, and never registers anyone once the event is under way.
+		{ key: "registration_opens_at", labelKey: "events.form.registrationOpensAt", type: "datetime" },
+		{ key: "registration_closes_at", labelKey: "events.form.registrationClosesAt", type: "datetime" },
+		// For an external event this is the only way to say it is full — its
+		// seats are counted on someone else's form. It closes an in-app event
+		// too, whatever its capacity.
+		{ key: "is_marked_full", labelKey: "events.form.isMarkedFull", type: "switch" },
 		{ key: "is_free", labelKey: "events.form.isFree", type: "switch" },
 		{
 			// Points are the price. There is no currency selector any more —
@@ -209,7 +267,11 @@ export function emptyEventPayload(): EventPayload {
 		location: "",
 		capacity: null,
 		requires_approval: false,
+		registration_source: "internal",
 		external_form_url: "",
+		registration_opens_at: "",
+		registration_closes_at: "",
+		is_marked_full: false,
 		is_free: true,
 		price_points: 0,
 		image_url: "",

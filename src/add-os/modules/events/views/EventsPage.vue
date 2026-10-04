@@ -88,7 +88,7 @@ const router = useRouter()
 const { data, isLoading, error, refetch } = useResourceList<Event>(listEvents)
 const { data: categories } = useResourceList<EventCategory>(listEventCategories)
 const columns = computed(() => buildEventColumns(t, currentLocale.value))
-const fields = computed(() => buildEventFields(categories.value, currentLocale.value))
+const fields = computed(() => buildEventFields(categories.value, currentLocale.value, t))
 
 const statCards = computed<StatCard[]>(() => {
 	const total = data.value.length
@@ -200,6 +200,13 @@ async function openEdit(row: Event) {
 		location: row.location || "",
 		capacity: row.capacity ?? null,
 		requires_approval: row.requires_approval ?? false,
+		// Carried over so saving an external event does not show it as
+		// in-app, and so the window is edited rather than silently kept.
+		registration_source: row.external_form_url ? "external" : "internal",
+		external_form_url: row.external_form_url || "",
+		registration_opens_at: row.registration_opens_at || "",
+		registration_closes_at: row.registration_closes_at || "",
+		is_marked_full: row.is_marked_full ?? false,
 		is_free: row.is_free ?? true,
 		price_points: row.price_points ?? 0,
 		image_url: row.image_url || "",
@@ -211,6 +218,12 @@ async function openEdit(row: Event) {
 
 async function submit(payload: Record<string, unknown>) {
 	const cleaned: EventPayload = { ...(payload as EventPayload) }
+	// The source is the editor's choice; the API reads it off the link. An
+	// in-app event drops any link left over from before it was switched, and
+	// an external one is already guaranteed a valid link by the form's rule.
+	cleaned.external_form_url = form.value.registration_source === "external"
+		? String(cleaned.external_form_url ?? "").trim()
+		: null
 	// Points are the only stored price; a free event carries zero of them.
 	if (cleaned.is_free) {
 		cleaned.price_points = 0

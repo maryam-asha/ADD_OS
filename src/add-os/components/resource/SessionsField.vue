@@ -30,7 +30,7 @@
 			/>
 			<n-time-picker
 				:formatted-value="row.start"
-				format="HH:mm"
+				format="hh:mm a" use-12-hours
 				value-format="HH:mm"
 				class="flex-1 min-w-28"
 				:placeholder="t('sessionsField.from')"
@@ -38,7 +38,7 @@
 			/>
 			<n-time-picker
 				:formatted-value="row.end"
-				format="HH:mm"
+				format="hh:mm a" use-12-hours
 				value-format="HH:mm"
 				class="flex-1 min-w-28"
 				:placeholder="t('sessionsField.to')"

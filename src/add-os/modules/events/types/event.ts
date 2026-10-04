@@ -84,6 +84,18 @@ export interface Event {
 	 * attendee roster — the backend refuses in-app registration outright.
 	 */
 	external_form_url?: string | null
+	/**
+	 * When members may register. Null opens it on publication / closes it
+	 * when the event starts — the backend never takes a registration once
+	 * the event is under way, and refuses a close set after the start.
+	 */
+	registration_opens_at?: string | null
+	registration_closes_at?: string | null
+	/**
+	 * The admin's word that no places are left — the only "full" an external
+	 * event can have. Members see "full" and the external link is withheld.
+	 */
+	is_marked_full?: boolean
 	is_free: boolean
 	/** Authoritative price. Whole points — everything below is derived from it. */
 	price_points: number
@@ -109,7 +121,15 @@ export interface Event {
 	schedule?: Array<{ date: string; start_time: string; end_time: string }>
 }
 
+/** Where members register: on our own form, or on someone else's link. */
+export type EventRegistrationSource = "internal" | "external"
+
 export interface EventPayload extends Record<string, unknown> {
+	/**
+	 * Editor-only: chosen explicitly so "external" can insist on a link. Not
+	 * sent — the API reads the source from whether external_form_url is set.
+	 */
+	registration_source?: EventRegistrationSource
 	branch_id?: number | null
 	category_id?: number | null
 	title: Bilingual
@@ -121,6 +141,9 @@ export interface EventPayload extends Record<string, unknown> {
 	capacity?: number | null
 	requires_approval?: boolean
 	external_form_url?: string | null
+	registration_opens_at?: string | null
+	registration_closes_at?: string | null
+	is_marked_full?: boolean
 	is_free?: boolean
 	/** Whole points. The backend rejects a fractional value with a 422. */
 	price_points?: number | null
