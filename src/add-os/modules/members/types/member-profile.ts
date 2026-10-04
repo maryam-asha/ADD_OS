@@ -11,6 +11,7 @@ export interface MemberProfileSummary {
 	member: Member
 	joined_at: string | null
 	last_visit_at: string | null
+	profile: MemberFullProfile
 	wallet: {
 		/** The general pool — what pays for anything. */
 		points: number
@@ -28,6 +29,27 @@ export interface MemberProfileSummary {
 		service_requests: number
 		event_registrations: number
 	}
+}
+
+/** Everything the member told us, and everything their account holds. */
+export interface MemberFullProfile {
+	account: {
+		phone: string
+		email: string | null
+		preferred_language: string | null
+		preferred_currency: string | null
+		status: string
+		roles: string[]
+		joined_at: string | null
+		updated_at: string | null
+	}
+	personal: { bio: string | null, city: string | null, gender: "male" | "female" | null, avatar_url: string | null }
+	professional: { job_title: string | null, company_name: string | null, industry: string | null }
+	links: { linkedin_url: string | null, instagram_url: string | null, behance_url: string | null, website_url: string | null }
+	companies: { id: number, legal_name: string, status: string, is_admin: boolean, door_access_enabled: boolean, joined_at: string | null }[]
+	branches: { id: number, name: string | null, is_home_branch: boolean }[]
+	privacy_policy_agreed_at: string | null
+	devices: { platform: string | null, last_used_at: string | null }[]
 }
 
 /** `…/sessions` — walk-ins and checked-in bookings, newest first. */

@@ -52,6 +52,9 @@ const ICON_PATTERN = /["'`]([a-z][a-z0-9-]{1,20}):([a-z0-9][a-z0-9-]*)["'`]/g
 //     listed, not just `lg`, because the next wrap will land on a different
 //     breakpoint and this trap should be sprung once. `xs` and `mobile` are the
 //     project's own custom breakpoints (`src/tailwind.css`).
+//   `show`      — Naive UI's `display-directive="show:lazy"` on a tab pane,
+//     a whole attribute value too. Added 2026-10-04 with the member profile
+//     tabs.
 // Left unlisted, the scanner demands an `@iconify-json/<prefix>` that does not
 // exist and `npm run icons` aborts. That silently froze the bundle: every icon
 // added afterwards was never bundled, and rendered blank on offline builds.
@@ -60,6 +63,7 @@ const NOT_ICON_PREFIXES = new Set([
 	"rtl",
 	"ltr",
 	"update",
+	"show",
 	"xs",
 	"sm",
 	"md",

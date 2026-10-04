@@ -98,13 +98,92 @@
 								<span class="font-semibold">{{ line.value }}</span>
 							</div>
 						</div>
-						<div v-if="member?.personal_profile || member?.professional_profile" class="flex flex-col gap-2 lg:col-span-2">
-							<h3 class="font-bold text-stone-800">{{ t("memberProfile.about") }}</h3>
-							<div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-								<div v-for="field in aboutFields" :key="field.label">
-									<span class="block text-xs text-stone-400">{{ field.label }}</span>
-									<span class="text-stone-800">{{ field.value }}</span>
-								</div>
+					</div>
+				</n-tab-pane>
+
+				<!-- Everything the member told us, and everything their account holds -->
+				<n-tab-pane name="profile" :tab="t('memberProfile.tabs.profile')">
+					<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+						<!-- Personal -->
+						<div class="flex flex-col gap-3 p-4 rounded-xl border border-stone-200">
+							<h3 class="flex items-center gap-2 font-bold text-stone-800">
+								<Icon name="carbon:user-avatar" :size="18" class="text-emerald-700" />{{ t("memberProfile.profile.personal") }}
+							</h3>
+							<div class="flex items-start gap-4">
+								<n-avatar round :size="72" :src="profile.personal.avatar_url ?? undefined" class="bg-emerald-700 text-white text-2xl font-bold shrink-0">
+									{{ initials(member?.name) }}
+								</n-avatar>
+								<p class="text-sm text-stone-700 whitespace-pre-line">{{ profile.personal.bio || t("memberProfile.profile.noBio") }}</p>
+							</div>
+							<ProfileFields :fields="personalFields" />
+						</div>
+
+						<!-- Account -->
+						<div class="flex flex-col gap-3 p-4 rounded-xl border border-stone-200">
+							<h3 class="flex items-center gap-2 font-bold text-stone-800">
+								<Icon name="carbon:user" :size="18" class="text-emerald-700" />{{ t("memberProfile.profile.account") }}
+							</h3>
+							<ProfileFields :fields="accountFields" />
+						</div>
+
+						<!-- Professional -->
+						<div class="flex flex-col gap-3 p-4 rounded-xl border border-stone-200">
+							<h3 class="flex items-center gap-2 font-bold text-stone-800">
+								<Icon name="carbon:enterprise" :size="18" class="text-emerald-700" />{{ t("memberProfile.profile.professional") }}
+							</h3>
+							<ProfileFields :fields="professionalFields" />
+							<div class="flex flex-wrap gap-2 pt-1">
+								<a
+									v-for="link in links"
+									:key="link.key"
+									:href="link.url"
+									target="_blank"
+									rel="noopener noreferrer"
+									class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-200 text-sm text-stone-700 hover:border-emerald-600 hover:text-emerald-700 transition-colors"
+								>
+									<Icon :name="link.icon" :size="16" />{{ link.label }}
+								</a>
+								<span v-if="!links.length" class="text-sm text-stone-400">{{ t("memberProfile.profile.noLinks") }}</span>
+							</div>
+						</div>
+
+						<!-- Companies and branches -->
+						<div class="flex flex-col gap-3 p-4 rounded-xl border border-stone-200">
+							<h3 class="flex items-center gap-2 font-bold text-stone-800">
+								<Icon name="carbon:building" :size="18" class="text-emerald-700" />{{ t("memberProfile.profile.companies") }}
+							</h3>
+							<div v-for="company in profile.companies" :key="company.id" class="flex flex-wrap items-center justify-between gap-2 text-sm border-b border-stone-100 pb-2">
+								<span class="font-semibold text-stone-800">{{ company.legal_name }}</span>
+								<span class="flex flex-wrap gap-1.5">
+									<n-tag v-if="company.is_admin" size="small" round :bordered="false" type="info">{{ t("memberProfile.companyAdmin") }}</n-tag>
+									<n-tag size="small" round :bordered="false" :type="company.door_access_enabled ? 'success' : 'default'">
+										{{ t(company.door_access_enabled ? "memberProfile.profile.doorAccess" : "memberProfile.profile.noDoorAccess") }}
+									</n-tag>
+									<n-tag v-if="company.status !== 'active'" size="small" round :bordered="false" type="warning">{{ company.status }}</n-tag>
+								</span>
+							</div>
+							<span v-if="!profile.companies.length" class="text-sm text-stone-400">{{ t("memberProfile.profile.noCompanies") }}</span>
+
+							<h4 class="text-xs font-bold text-stone-500 pt-2">{{ t("memberProfile.profile.branches") }}</h4>
+							<div class="flex flex-wrap gap-2">
+								<n-tag v-for="branch in profile.branches" :key="branch.id" size="small" round :type="branch.is_home_branch ? 'success' : 'default'">
+									{{ branch.name ?? `#${branch.id}` }}<template v-if="branch.is_home_branch"> · {{ t("memberProfile.profile.homeBranch") }}</template>
+								</n-tag>
+								<span v-if="!profile.branches.length" class="text-sm text-stone-400">—</span>
+							</div>
+						</div>
+
+						<!-- Consent and devices -->
+						<div class="flex flex-col gap-3 p-4 rounded-xl border border-stone-200 lg:col-span-2">
+							<h3 class="flex items-center gap-2 font-bold text-stone-800">
+								<Icon name="carbon:phone" :size="18" class="text-emerald-700" />{{ t("memberProfile.profile.appAndConsent") }}
+							</h3>
+							<ProfileFields :fields="consentFields" />
+							<div class="flex flex-wrap gap-2">
+								<n-tag v-for="(device, index) in profile.devices" :key="index" size="small" round :bordered="false">
+									{{ device.platform ?? "—" }}<template v-if="device.last_used_at"> · {{ formatDateTime(device.last_used_at) }}</template>
+								</n-tag>
+								<span v-if="!profile.devices.length" class="text-sm text-stone-400">{{ t("memberProfile.profile.noDevices") }}</span>
 							</div>
 						</div>
 					</div>
@@ -140,6 +219,7 @@
 
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
+import type { PropType } from "vue"
 import type { AdminBooking } from "@/add-os/modules/booking/types/calendar"
 import type { SessionType } from "@/add-os/modules/booking/types/reception"
 import type { ProfileFilter } from "@/add-os/modules/members/components/profile/ProfileTable.vue"
@@ -153,7 +233,7 @@ import type {
 	MemberWalletTransaction
 } from "@/add-os/modules/members/types/member-profile"
 import { NAlert, NAvatar, NButton, NCard, NSpin, NTabPane, NTabs, NTag } from "naive-ui"
-import { computed, h, onMounted, ref } from "vue"
+import { computed, defineComponent, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
 import ProfileTable from "@/add-os/modules/members/components/profile/ProfileTable.vue"
@@ -243,7 +323,7 @@ const cards = computed(() => {
 		},
 		{ key: "bookings", icon: "carbon:calendar", label: t("memberProfile.cards.bookings"), value: formatNumber(s.counts.bookings), hint: t("memberProfile.cards.upcoming", { count: s.counts.upcoming_bookings }), tone: "" },
 		{ key: "sessions", icon: "carbon:time", label: t("memberProfile.cards.sessions"), value: formatNumber(s.counts.sessions), hint: null, tone: "" },
-		{ key: "lastVisit", icon: "carbon:login", label: t("memberProfile.cards.lastVisit"), value: s.last_visit_at ? formatDate(s.last_visit_at) : "—", hint: s.last_visit_at ? formatTime(s.last_visit_at) : null, tone: "text-base" }
+		{ key: "lastVisit", icon: "carbon:calendar", label: t("memberProfile.cards.lastVisit"), value: s.last_visit_at ? formatDate(s.last_visit_at) : "—", hint: s.last_visit_at ? formatTime(s.last_visit_at) : null, tone: "text-base" }
 	]
 })
 
@@ -257,16 +337,62 @@ const activity = computed(() => {
 	]
 })
 
-const aboutFields = computed(() => {
-	const personal = member.value?.personal_profile
-	const professional = member.value?.professional_profile
-	return [
-		{ label: t("memberProfile.about_.city"), value: personal?.city },
-		{ label: t("memberProfile.about_.jobTitle"), value: professional?.job_title },
-		{ label: t("memberProfile.about_.company"), value: professional?.company_name },
-		{ label: t("memberProfile.about_.industry"), value: professional?.industry }
-	].filter(field => field.value)
+/* ── Profile tab ──────────────────────────────────────────────────────────── */
+
+const profile = computed(() => summary.value!.profile)
+
+/** Label/value rows; a value the member left empty reads as a dash, not a gap. */
+const ProfileFields = defineComponent({
+	name: "ProfileFields",
+	props: { fields: { type: Array as PropType<{ label: string, value: string | null | undefined, ltr?: boolean }[]>, required: true } },
+	setup(props) {
+		return () => h("dl", { class: "grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm" }, props.fields.map(field => h("div", { class: "flex flex-col" }, [
+			h("dt", { class: "text-xs text-stone-400" }, field.label),
+			h("dd", { class: "text-stone-800 font-medium" }, field.value ? (field.ltr ? h("bdi", { dir: "ltr" }, field.value) : field.value) : "—")
+		])))
+	}
 })
+
+const personalFields = computed(() => [
+	{ label: t("memberProfile.profile.city"), value: profile.value.personal.city },
+	{ label: t("memberProfile.profile.gender"), value: profile.value.personal.gender ? t(`memberProfile.profile.genders.${profile.value.personal.gender}`) : null }
+])
+
+const accountFields = computed(() => {
+	const account = profile.value.account
+	return [
+		{ label: t("memberProfile.profile.phone"), value: account.phone, ltr: true },
+		{ label: t("memberProfile.profile.email"), value: account.email, ltr: true },
+		{ label: t("memberProfile.profile.status"), value: t(`members.status.${account.status}`) },
+		{ label: t("memberProfile.profile.roles"), value: account.roles.join(", ") },
+		{ label: t("memberProfile.profile.language"), value: account.preferred_language ? t(`memberProfile.profile.languages.${account.preferred_language}`) : null },
+		{ label: t("memberProfile.profile.currency"), value: account.preferred_currency },
+		{ label: t("memberProfile.profile.joined"), value: account.joined_at ? formatDateTime(account.joined_at) : null },
+		{ label: t("memberProfile.profile.updated"), value: account.updated_at ? formatDateTime(account.updated_at) : null }
+	]
+})
+
+const professionalFields = computed(() => [
+	{ label: t("memberProfile.profile.jobTitle"), value: profile.value.professional.job_title },
+	{ label: t("memberProfile.profile.companyName"), value: profile.value.professional.company_name },
+	{ label: t("memberProfile.profile.industry"), value: profile.value.professional.industry }
+])
+
+/** Only the links the member filled in, each opening in a new tab. */
+const links = computed(() => {
+	const l = profile.value.links
+	return [
+		{ key: "linkedin", label: "LinkedIn", url: l.linkedin_url, icon: "carbon:logo-linkedin" },
+		{ key: "instagram", label: "Instagram", url: l.instagram_url, icon: "carbon:logo-instagram" },
+		{ key: "behance", label: "Behance", url: l.behance_url, icon: "carbon:link" },
+		{ key: "website", label: t("memberProfile.profile.website"), url: l.website_url, icon: "carbon:earth" }
+	].filter((link): link is typeof link & { url: string } => !!link.url)
+})
+
+const consentFields = computed(() => [
+	{ label: t("memberProfile.profile.privacyAgreed"), value: profile.value.privacy_policy_agreed_at ? formatDateTime(profile.value.privacy_policy_agreed_at) : t("memberProfile.profile.notAgreed") },
+	{ label: t("memberProfile.profile.devices"), value: String(profile.value.devices.length) }
+])
 
 /* ── Filters ──────────────────────────────────────────────────────────────── */
 

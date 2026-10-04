@@ -36,6 +36,16 @@ function summary() {
 		member: { id: 8, name: "Reem Halabi", phone: "0990000108", email: null, status: "active", companies: [], personal_profile: null, professional_profile: null },
 		joined_at: "2026-09-01T10:00:00+03:00",
 		last_visit_at: "2026-10-04T05:51:00+03:00",
+		profile: {
+			account: { phone: "0990000108", email: "reem@example.com", preferred_language: "ar", preferred_currency: "SYP", status: "active", roles: ["member"], joined_at: "2026-09-01T10:00:00+03:00", updated_at: null },
+			personal: { bio: "Architect working on reuse projects", city: "Aleppo", gender: "female", avatar_url: null },
+			professional: { job_title: "Architect", company_name: "Studio R", industry: "Design" },
+			links: { linkedin_url: "https://linkedin.com/in/reem", instagram_url: null, behance_url: null, website_url: null },
+			companies: [{ id: 2, legal_name: "Studio R LLC", status: "active", is_admin: true, door_access_enabled: true, joined_at: null }],
+			branches: [{ id: 1, name: "Main", is_home_branch: true }],
+			privacy_policy_agreed_at: "2026-09-01T10:05:00+03:00",
+			devices: [{ platform: "android", last_used_at: "2026-10-04T09:00:00+03:00" }]
+		},
 		wallet: { points: 500, categories: [{ category: "general", label: "General", points: 500 }] },
 		outstanding: { points: 120, amount: { value: "12.00", currency: "USD" }, items: 1 },
 		membership: null,
@@ -69,6 +79,25 @@ describe("memberProfilePage", () => {
 		expect(text).toContain("500 pts")
 		expect(text).toContain("120 pts")
 		expect(text).toContain("Inside now — Open Space")
+
+		wrapper.unmount()
+	})
+
+	it("shows the member's whole profile in its own tab", async () => {
+		const wrapper = mountPage()
+		await flushPromises()
+
+		;(wrapper.vm as unknown as { tab: string }).tab = "profile"
+		await flushPromises()
+
+		const text = document.body.textContent ?? ""
+		expect(text).toContain("Architect working on reuse projects")
+		expect(text).toContain("reem@example.com")
+		expect(text).toContain("Studio R LLC")
+		expect(text).toContain("Door access")
+		expect(text).toContain("Main · home")
+		expect(text).toContain("android")
+		expect(document.querySelector("a[href='https://linkedin.com/in/reem']")).not.toBeNull()
 
 		wrapper.unmount()
 	})
