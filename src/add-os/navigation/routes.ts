@@ -60,6 +60,8 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"plans.packages": () => import("@/add-os/modules/plans/views/PlansPage.vue"),
 	"plans.modules": () => import("@/add-os/modules/plans/views/PlanModulesPage.vue"),
 	"plans.resourceTypes": () => import("@/add-os/modules/plans/views/ResourceTypesPage.vue"),
+	"payments.transactions": () => import("@/add-os/modules/payments/views/PaymentTransactionsPage.vue"),
+	"payments.paymentMethods": () => import("@/add-os/modules/payments/views/PaymentMethodsPage.vue"),
 	"payments.currencies": () => import("@/add-os/modules/payments/views/CurrenciesPage.vue"),
 	"payments.exchangeRates": () => import("@/add-os/modules/payments/views/ExchangeRatesPage.vue"),
 	"payments.walletTopUps": () => import("@/add-os/modules/payments/views/WalletTopUpsPage.vue"),

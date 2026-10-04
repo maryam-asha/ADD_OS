@@ -373,6 +373,9 @@
 			"trash-can": {
 				"body": "<path fill=\"currentColor\" d=\"M12 12h2v12h-2zm6 0h2v12h-2z\"/><path fill=\"currentColor\" d=\"M4 6v2h2v20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8h2V6Zm4 22V8h16v20Zm4-26h8v2h-8z\"/>"
 			},
+			"undo": {
+				"body": "<path fill=\"currentColor\" d=\"M20 10H7.815l3.587-3.586L10 5l-6 6l6 6l1.402-1.415L7.818 12H20a6 6 0 0 1 0 12h-8v2h8a8 8 0 0 0 0-16\"/>"
+			},
 			"user": {
 				"body": "<path fill=\"currentColor\" d=\"M16 4a5 5 0 1 1-5 5a5 5 0 0 1 5-5m0-2a7 7 0 1 0 7 7a7 7 0 0 0-7-7m10 28h-2v-5a5 5 0 0 0-5-5h-6a5 5 0 0 0-5 5v5H6v-5a7 7 0 0 1 7-7h6a7 7 0 0 1 7 7Z\"/>"
 			},
@@ -405,6 +408,9 @@
 			},
 			"warning": {
 				"body": "<path fill=\"currentColor\" d=\"M16 2a14 14 0 1 0 14 14A14 14 0 0 0 16 2m0 26a12 12 0 1 1 12-12a12 12 0 0 1-12 12\"/><path fill=\"currentColor\" d=\"M15 8h2v11h-2zm1 14a1.5 1.5 0 1 0 1.5 1.5A1.5 1.5 0 0 0 16 22\"/>"
+			},
+			"warning-alt": {
+				"body": "<path fill=\"currentColor\" d=\"M16 23a1.5 1.5 0 1 0 1.5 1.5A1.5 1.5 0 0 0 16 23m-1-11h2v9h-2z\"/><path fill=\"currentColor\" d=\"M29 30H3a1 1 0 0 1-.887-1.461l13-25a1 1 0 0 1 1.774 0l13 25A1 1 0 0 1 29 30M4.65 28h22.7l.001-.003L16.002 6.17h-.004L4.648 27.997Z\"/>"
 			},
 			"warning-alt-filled": {
 				"body": "<path fill=\"none\" d=\"M16 26a1.5 1.5 0 1 1 1.5-1.5A1.5 1.5 0 0 1 16 26m-1.125-5h2.25v-9h-2.25Z\"/><path fill=\"currentColor\" d=\"M16.002 6.171h-.004L4.648 27.997l.003.003h22.698l.002-.003ZM14.875 12h2.25v9h-2.25ZM16 26a1.5 1.5 0 1 1 1.5-1.5A1.5 1.5 0 0 1 16 26\"/><path fill=\"currentColor\" d=\"M29 30H3a1 1 0 0 1-.887-1.461l13-25a1 1 0 0 1 1.774 0l13 25A1 1 0 0 1 29 30M4.65 28h22.7l.001-.003L16.002 6.17h-.004L4.648 27.997Z\"/>"

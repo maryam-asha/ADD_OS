@@ -2125,7 +2125,21 @@
 			"costSoFar": "التكلفة حتى الآن",
 			"costSoFarNote": "محسوبة كأنها انتهت الآن، مع ساعات الباقة. تُحدَّث كل دقيقة.",
 			"noRequestActive": "لم يطلب العضو إنهاء هذه الجلسة.",
-			"closedNote": "هذه الجلسة مغلقة."
+			"closedNote": "هذه الجلسة مغلقة.",
+			"payment": {
+				"title": "الدفع",
+				"state": {
+					"paid": "مدفوع",
+					"unpaid": "غير مدفوع"
+				},
+				"points": "النقاط المدفوعة",
+				"cashReceived": "المبلغ المستلم كاش",
+				"receivedBy": "استلمه {name}",
+				"cardCharged": "المبلغ المدفوع بالبطاقة",
+				"reference": "المرجع {reference}",
+				"coveredByPlan": "مغطاة من باقة العضو — لم يُخصم شيء.",
+				"none": "لم تُدفع بعد."
+			}
 		}
 	},
 	"walletCredited": {
@@ -2403,13 +2417,6 @@
 		"resultCount": "{count} نتيجة",
 		"walletPools": "المحفظة حسب الفئة",
 		"activity": "النشاط",
-		"about": "معلومات",
-		"about_": {
-			"city": "المدينة",
-			"jobTitle": "المسمى الوظيفي",
-			"company": "الشركة",
-			"industry": "المجال"
-		},
 		"cards": {
 			"wallet": "المحفظة",
 			"owed": "المستحق",
@@ -2426,6 +2433,7 @@
 		},
 		"tabs": {
 			"overview": "نظرة عامة",
+			"profile": "الملف الشخصي",
 			"bookings": "الحجوزات",
 			"sessions": "الجلسات",
 			"memberships": "الباقات",
@@ -2506,6 +2514,139 @@
 			"pending": "قيد الانتظار",
 			"approved": "مقبول",
 			"rejected": "مرفوض"
+		},
+		"profile": {
+			"personal": "شخصي",
+			"account": "الحساب",
+			"professional": "مهني",
+			"companies": "الشركات",
+			"branches": "الفروع",
+			"appAndConsent": "التطبيق والموافقات",
+			"noBio": "لا توجد نبذة.",
+			"noLinks": "لا توجد روابط.",
+			"noCompanies": "غير منتسب لشركة.",
+			"noDevices": "لا توجد أجهزة مسجلة.",
+			"doorAccess": "صلاحية الباب",
+			"noDoorAccess": "بدون صلاحية باب",
+			"homeBranch": "الأساسي",
+			"city": "المدينة",
+			"gender": "الجنس",
+			"genders": {
+				"male": "ذكر",
+				"female": "أنثى"
+			},
+			"phone": "الهاتف",
+			"email": "البريد",
+			"status": "الحالة",
+			"roles": "الأدوار",
+			"language": "اللغة",
+			"languages": {
+				"ar": "العربية",
+				"en": "الإنجليزية"
+			},
+			"currency": "العملة",
+			"joined": "تاريخ التسجيل",
+			"updated": "آخر تحديث",
+			"jobTitle": "المسمى الوظيفي",
+			"companyName": "الشركة",
+			"industry": "المجال",
+			"website": "الموقع",
+			"privacyAgreed": "الموافقة على سياسة الخصوصية",
+			"notAgreed": "لم يوافق",
+			"devices": "الأجهزة"
+		}
+	},
+	"payments": {
+		"refresh": "تحديث",
+		"cancel": "إلغاء",
+		"loadError": "تعذّر تحميل المدفوعات. حاول مجدداً.",
+		"resultCount": "{count} نتيجة",
+		"pointsValue": "{points} نقطة",
+		"status": {
+			"pending": "قيد الانتظار",
+			"accepted": "مقبول",
+			"failed": "فشل",
+			"canceled": "ملغى",
+			"reversed": "مسترجع",
+			"expired": "منتهي الصلاحية",
+			"needs_review": "بحاجة لمراجعة"
+		},
+		"purpose": {
+			"booking": "حجز",
+			"booking_extension": "تمديد حجز",
+			"coworking_session": "جلسة عمل مشترك",
+			"wallet_top_up": "شحن محفظة",
+			"plan_purchase": "شراء باقة",
+			"event_registration": "تسجيل فعالية"
+		},
+		"filters": {
+			"status": "الحالة",
+			"method": "الطريقة",
+			"purpose": "الغرض"
+		},
+		"columns": {
+			"date": "التاريخ",
+			"member": "العضو",
+			"purpose": "مقابل",
+			"method": "الطريقة",
+			"points": "النقاط",
+			"amount": "المبلغ",
+			"status": "الحالة"
+		},
+		"transactions": {
+			"description": "كل الدفعات بأي طريقة — نقاط المحفظة، كاش في الاستقبال، بطاقة — مع إجماليات ما تمت تصفيته.",
+			"searchPlaceholder": "اسم العضو أو هاتفه، #الرقم، المرجع",
+			"cards": {
+				"total": "الدفعات",
+				"acceptedHint": "{count} مقبولة",
+				"points": "النقاط المقبولة",
+				"cash": "الكاش المستلم",
+				"card": "المدفوع بالبطاقة",
+				"open": "بالانتظار",
+				"openHint": "{review} بحاجة لمراجعة — اضغط للعرض"
+			},
+			"detailTitle": "الدفعة #{id}",
+			"reviewReason": "سبب المراجعة",
+			"cashReceived": "الكاش المستلم",
+			"receivedBy": "استلمه",
+			"receivedAt": "وقت الاستلام",
+			"cardCharged": "المبلغ المدفوع بالبطاقة",
+			"reference": "مرجع البنك",
+			"gatewayId": "رقم الدفعة لدى البوابة",
+			"paysFor": "مقابل",
+			"expiresAt": "تنتهي في",
+			"reversedAt": "استُرجعت في",
+			"refundedAt": "رُدّت في",
+			"openMember": "ملف العضو",
+			"reverse": "استرجاع من البنك",
+			"reverseTitle": "استرجاع هذه الدفعة؟",
+			"reverseConfirm": "ستُعاد الدفعة #{id} ({amount}) إلى البطاقة وتُسحب نقاطها من المحفظة. لا يمكن التراجع عن ذلك.",
+			"reverseForbidden": "ليست لديك صلاحية استرجاع الدفعات.",
+			"reverseFailed": "تعذّر استرجاع الدفعة."
+		},
+		"methods": {
+			"description": "طرق الدفع المتاحة للأعضاء بالترتيب الذي تُعرض به — وكيف استُخدمت كل منها.",
+			"order": "الترتيب {order}",
+			"enabled": "مفعّلة",
+			"disabled": "معطّلة",
+			"gateway": "بوابة بطاقات",
+			"internal": "داخلية",
+			"about": {
+				"wallet": "تُدفع من نقاط محفظة العضو أو محفظة شركته — وتُسوّى فوراً.",
+				"cash": "تُدفع في الاستقبال؛ يسجّل الموظف المبلغ ومن استلمه.",
+				"paymera": "تُدفع ببطاقة بنكية عبر صفحة بيميرا؛ يؤكد البنك النتيجة ويمكن استرجاعها.",
+				"other": "طريقة دفع معرّفة في إعدادات الخادم."
+			},
+			"stats": {
+				"accepted": "مقبولة",
+				"points": "النقاط",
+				"open": "بالانتظار"
+			},
+			"lastUsed": "آخر استخدام {date}",
+			"neverUsed": "لم تُستخدم بعد",
+			"viewTransactions": "عرض دفعاتها",
+			"purposes": "يمكن الدفع بها مقابل",
+			"configNote": "تُفعَّل الطرق أو تُعطَّل من إعدادات الخادم (config/payments.php). تعطيل طريقة يوقف الدفعات الجديدة فقط — وتبقى الدفعات المفتوحة قابلة للتسوية."
 		}
 	}
 }

@@ -2120,7 +2120,21 @@
 			"costSoFar": "Cost so far",
 			"costSoFarNote": "Priced as if it ended now, plan hours included. Refreshed every minute.",
 			"noRequestActive": "The member has not asked to end this session.",
-			"closedNote": "This session is closed."
+			"closedNote": "This session is closed.",
+			"payment": {
+				"title": "Payment",
+				"state": {
+					"paid": "Paid",
+					"unpaid": "Unpaid"
+				},
+				"points": "Points paid",
+				"cashReceived": "Cash received",
+				"receivedBy": "Received by {name}",
+				"cardCharged": "Card charged",
+				"reference": "Reference {reference}",
+				"coveredByPlan": "Covered by the member's plan — nothing was charged.",
+				"none": "Not paid yet."
+			}
 		}
 	},
 	"walletCredited": {
@@ -2398,13 +2412,6 @@
 		"resultCount": "{count} results",
 		"walletPools": "Wallet by category",
 		"activity": "Activity",
-		"about": "About",
-		"about_": {
-			"city": "City",
-			"jobTitle": "Job title",
-			"company": "Company",
-			"industry": "Industry"
-		},
 		"cards": {
 			"wallet": "Wallet",
 			"owed": "Owed",
@@ -2421,6 +2428,7 @@
 		},
 		"tabs": {
 			"overview": "Overview",
+			"profile": "Profile",
 			"bookings": "Bookings",
 			"sessions": "Sessions",
 			"memberships": "Plans",
@@ -2501,6 +2509,139 @@
 			"pending": "Pending",
 			"approved": "Approved",
 			"rejected": "Rejected"
+		},
+		"profile": {
+			"personal": "Personal",
+			"account": "Account",
+			"professional": "Professional",
+			"companies": "Companies",
+			"branches": "Branches",
+			"appAndConsent": "App and consent",
+			"noBio": "No bio yet.",
+			"noLinks": "No links.",
+			"noCompanies": "Not in a company.",
+			"noDevices": "No devices registered.",
+			"doorAccess": "Door access",
+			"noDoorAccess": "No door access",
+			"homeBranch": "home",
+			"city": "City",
+			"gender": "Gender",
+			"genders": {
+				"male": "Male",
+				"female": "Female"
+			},
+			"phone": "Phone",
+			"email": "Email",
+			"status": "Status",
+			"roles": "Roles",
+			"language": "Language",
+			"languages": {
+				"ar": "Arabic",
+				"en": "English"
+			},
+			"currency": "Currency",
+			"joined": "Joined",
+			"updated": "Last updated",
+			"jobTitle": "Job title",
+			"companyName": "Company",
+			"industry": "Industry",
+			"website": "Website",
+			"privacyAgreed": "Privacy policy accepted",
+			"notAgreed": "Not accepted",
+			"devices": "Devices"
+		}
+	},
+	"payments": {
+		"refresh": "Refresh",
+		"cancel": "Cancel",
+		"loadError": "Could not load payments. Try again.",
+		"resultCount": "{count} results",
+		"pointsValue": "{points} points",
+		"status": {
+			"pending": "Pending",
+			"accepted": "Accepted",
+			"failed": "Failed",
+			"canceled": "Canceled",
+			"reversed": "Reversed",
+			"expired": "Expired",
+			"needs_review": "Needs review"
+		},
+		"purpose": {
+			"booking": "Booking",
+			"booking_extension": "Booking extension",
+			"coworking_session": "Coworking session",
+			"wallet_top_up": "Wallet top-up",
+			"plan_purchase": "Plan purchase",
+			"event_registration": "Event registration"
+		},
+		"filters": {
+			"status": "Status",
+			"method": "Method",
+			"purpose": "Purpose"
+		},
+		"columns": {
+			"date": "Date",
+			"member": "Member",
+			"purpose": "For",
+			"method": "Method",
+			"points": "Points",
+			"amount": "Amount",
+			"status": "Status"
+		},
+		"transactions": {
+			"description": "Every payment by any method — wallet points, cash at the desk, card — with totals over what is filtered.",
+			"searchPlaceholder": "Member name or phone, #number, reference",
+			"cards": {
+				"total": "Payments",
+				"acceptedHint": "{count} accepted",
+				"points": "Points accepted",
+				"cash": "Cash received",
+				"card": "Charged by card",
+				"open": "Awaiting",
+				"openHint": "{review} need review — tap to show"
+			},
+			"detailTitle": "Payment #{id}",
+			"reviewReason": "Why it needs review",
+			"cashReceived": "Cash received",
+			"receivedBy": "Received by",
+			"receivedAt": "Received at",
+			"cardCharged": "Card charged",
+			"reference": "Bank reference",
+			"gatewayId": "Gateway payment",
+			"paysFor": "Pays for",
+			"expiresAt": "Expires at",
+			"reversedAt": "Reversed at",
+			"refundedAt": "Refunded at",
+			"openMember": "Member's file",
+			"reverse": "Reverse at the bank",
+			"reverseTitle": "Reverse this payment?",
+			"reverseConfirm": "Payment #{id} ({amount}) will be returned to the card and its points taken back out of the wallet. This cannot be undone.",
+			"reverseForbidden": "You do not have permission to reverse payments.",
+			"reverseFailed": "The payment could not be reversed."
+		},
+		"methods": {
+			"description": "The ways members can pay, in the order they are offered — and how each has been used.",
+			"order": "Shown #{order}",
+			"enabled": "Enabled",
+			"disabled": "Disabled",
+			"gateway": "Card gateway",
+			"internal": "Handled in-house",
+			"about": {
+				"wallet": "Pays from the member's wallet points, or their company's — settled on the spot.",
+				"cash": "Paid at the reception desk; the desk records the money and who took it.",
+				"paymera": "Paid by bank card on Paymera's page; the outcome is confirmed by the bank and can be reversed.",
+				"other": "A payment method configured on the server."
+			},
+			"stats": {
+				"accepted": "Accepted",
+				"points": "Points",
+				"open": "Awaiting"
+			},
+			"lastUsed": "Last used {date}",
+			"neverUsed": "Not used yet",
+			"viewTransactions": "View its payments",
+			"purposes": "Can pay for",
+			"configNote": "Methods are switched on or off in the server configuration (config/payments.php). A disabled method stops new payments only — those already open are still settled."
 		}
 	}
 }
