@@ -76,9 +76,14 @@
 						:end-placeholder="t('allBookings.filters.to')"
 					/>
 				</label>
+			</div>
 
-				<n-button v-if="hasFilters" quaternary class="add-bookings__clear" @click="clearFilters">
-					<template #icon><Icon name="carbon:close" :size="16" /></template>
+			<!-- Its own row on the start side, as on the calendar: inline with the
+			     fields it jumped between lines as they wrapped. `justify-start` is
+			     logical, so it sits right in Arabic and left in English. -->
+			<div v-if="hasFilters" class="add-bookings__reset-row">
+				<n-button quaternary size="small" class="add-bookings__clear" @click="clearFilters">
+					<template #icon><Icon name="carbon:filter-reset" :size="16" /></template>
 					{{ t("allBookings.filters.clear") }}
 				</n-button>
 			</div>
@@ -262,10 +267,19 @@ function clearFilters(): void {
 		gap: var(--add-space-5);
 	}
 
+	&__reset-row {
+		display: flex;
+		justify-content: flex-start;
+	}
+
 	&__clear {
-		// Sits on the field baseline rather than the row's, so it lines up with
-		// the inputs beside it and not with their labels.
-		margin-bottom: var(--add-space-1);
+		font-size: var(--add-font-size-caption);
+		font-weight: var(--add-font-weight-medium);
+		color: var(--add-text-secondary);
+
+		&:hover {
+			color: var(--add-primary);
+		}
 	}
 
 	&__empty {

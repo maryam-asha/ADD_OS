@@ -70,11 +70,14 @@ describe("spaces service", () => {
 		const payload = {
 			building_id: 1,
 			zone_id: 1,
+			name: { ar: "مساحة العمل", en: "Co-Space" },
 			space_type: "co_space" as const,
 			allocation_model: "open",
 			is_lockable: false,
 			capacity: 20,
-			hourly_rate_points: null
+			hourly_rate_points: null,
+			allows_extension: true,
+			cancellation_window_minutes: null
 		}
 		const space = await createSpace(payload)
 
@@ -100,11 +103,14 @@ describe("spaces service", () => {
 		const payload = {
 			building_id: 1,
 			zone_id: null,
+			name: { ar: "غرفة الاجتماعات", en: "Meeting Room" },
 			space_type: "room" as const,
 			allocation_model: null,
 			is_lockable: true,
 			capacity: 4,
-			hourly_rate_points: 50
+			hourly_rate_points: 50,
+			allows_extension: false,
+			cancellation_window_minutes: 120
 		}
 		const result = await updateSpace(1, payload)
 

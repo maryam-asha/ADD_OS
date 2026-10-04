@@ -49,6 +49,17 @@ export interface Space {
 	currency: string
 	status: OperationalStatus
 	status_reason: string | null
+	/**
+	 * Whether a booking on this space may be extended at all. True for every
+	 * space that existed before the switch (ADDCore
+	 * `docs/decisions/booking-outcomes-and-extension.md`).
+	 */
+	allows_extension: boolean
+	/**
+	 * How many minutes before its start a booking here can still be cancelled.
+	 * `null` = the general `booking.cancellation_window_minutes` setting applies.
+	 */
+	cancellation_window_minutes: number | null
 	image_url?: string | null
 	main_image?: string | null
 	images?: string[] | null
@@ -103,6 +114,9 @@ export interface SpacePayload extends Record<string, unknown> {
 	 * a rate in points does not carry one.
 	 */
 	hourly_rate_points: number | null
+	allows_extension: boolean
+	/** Whole minutes, `>= 0`; `null` sends the space back to the general setting. */
+	cancellation_window_minutes: number | null
 	image_url?: string | null
 	main_image?: string | null
 	images?: string[] | null

@@ -159,6 +159,8 @@ function openEdit(row: Space) {
 		// Read-only: the server's own USD rendering, quoted under the input.
 		// Never recomputed here — the point rate is server state.
 		hourly_rate_usd_hint: row.hourly_rate_usd,
+		allows_extension: row.allows_extension,
+		cancellation_window_minutes: row.cancellation_window_minutes,
 		images: resolvedImages
 	}
 	drawerVisible.value = true

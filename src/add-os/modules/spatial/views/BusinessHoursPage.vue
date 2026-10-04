@@ -107,7 +107,7 @@
 								<n-time-picker
 									:formatted-value="toPickerTime(bulkForm.open_time)"
 									value-format="HH:mm"
-									format="HH:mm"
+									format="hh:mm a" use-12-hours
 									class="w-full"
 									@update:formatted-value="v => { bulkForm.open_time = v ?? ''; bulkOpenTimeError = null }"
 								/>
@@ -120,7 +120,7 @@
 								<n-time-picker
 									:formatted-value="toPickerTime(bulkForm.close_time)"
 									value-format="HH:mm"
-									format="HH:mm"
+									format="hh:mm a" use-12-hours
 									class="w-full"
 									@update:formatted-value="v => { bulkForm.close_time = v ?? ''; bulkCloseTimeError = null }"
 								/>
@@ -209,7 +209,7 @@
 								<n-time-picker
 									:formatted-value="toPickerTime(exceptionForm.open_time ?? '')"
 									value-format="HH:mm"
-									format="HH:mm"
+									format="hh:mm a" use-12-hours
 									class="w-full"
 									@update:formatted-value="v => { exceptionForm.open_time = v; exceptionOpenTimeError = null }"
 								/>
@@ -222,7 +222,7 @@
 								<n-time-picker
 									:formatted-value="toPickerTime(exceptionForm.close_time ?? '')"
 									value-format="HH:mm"
-									format="HH:mm"
+									format="hh:mm a" use-12-hours
 									class="w-full"
 									@update:formatted-value="v => { exceptionForm.close_time = v; exceptionCloseTimeError = null }"
 								/>
@@ -292,6 +292,7 @@ import {
 	removeBusinessHourException,
 	updateBusinessHourException
 } from "@/add-os/services/business-hour-exceptions"
+import { formatClockTime } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
 defineProps<{ titleKey?: string }>()
@@ -480,12 +481,12 @@ const groupedHourColumns = computed<DataTableColumns<GroupedBusinessHour>>(() =>
 	{
 		title: t("businessHours.columns.openTime"),
 		key: "open_time",
-		render: row => h("span", { class: "font-mono font-medium" }, row.open_time),
+		render: row => h("span", { class: "font-mono font-medium" }, row.open_time ? formatClockTime(row.open_time) : "—")
 	},
 	{
 		title: t("businessHours.columns.closeTime"),
 		key: "close_time",
-		render: row => h("span", { class: "font-mono font-medium" }, row.close_time),
+		render: row => h("span", { class: "font-mono font-medium" }, row.close_time ? formatClockTime(row.close_time) : "—")
 	},
 ])
 

@@ -180,6 +180,20 @@ export function buildSpaceFields(t: ComposerTranslation, branches: Branch[], loc
 			// Arabic value fails the repo's ar/en script guard.
 			hint: model => (model.hourly_rate_usd_hint ? `≈ $${model.hourly_rate_usd_hint}` : "")
 		},
+		// The space's own booking rules (ADDCore
+		// docs/decisions/booking-outcomes-and-extension.md). Not required: an
+		// empty window sends `null`, and the server falls back to the general
+		// setting rather than to zero.
+		{ key: "allows_extension", labelKey: "spaces.form.allowsExtension", type: "switch" },
+		{
+			key: "cancellation_window_minutes",
+			labelKey: "spaces.form.cancellationWindowMinutes",
+			type: "number",
+			step: 15,
+			min: 0,
+			integer: true,
+			hint: () => t("spaces.form.cancellationWindowHint")
+		},
 		{ key: "images", labelKey: "spaces.form.images", type: "multi-image", folder: "spaces" }
 	]
 }
@@ -196,6 +210,8 @@ export function emptySpacePayload(): SpaceFormModel {
 		capacity: 1,
 		hourly_rate_points: null,
 		hourly_rate_usd_hint: null,
+		allows_extension: true,
+		cancellation_window_minutes: null,
 		images: []
 	}
 }

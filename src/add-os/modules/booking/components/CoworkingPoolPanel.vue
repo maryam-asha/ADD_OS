@@ -2,9 +2,15 @@
 <template>
 	<n-card class="add-coworking-pool">
 		<div class="flex flex-wrap items-center justify-between gap-4">
-			<div class="flex items-center gap-2 font-semibold">
+			<div
+				class="flex items-center gap-2 font-semibold cursor-pointer select-none"
+				@click="isExpanded = !isExpanded"
+			>
 				<Icon name="carbon:group" :size="18" />
 				<span>{{ t("coworkingPool.title") }}</span>
+				<span v-if="!isExpanded && pool" class="text-xs font-normal opacity-75 ms-1">
+					({{ t("coworkingPool.stats.free") }}: {{ formatNumber(pool.free_now) }} / {{ formatNumber(pool.capacity_now) }})
+				</span>
 			</div>
 
 			<div class="flex items-center gap-2">
@@ -19,46 +25,66 @@
 					</template>
 					{{ t("coworkingPool.lend.button") }}
 				</n-button>
+				<n-button
+					quaternary
+					size="small"
+					circle
+					:aria-label="isExpanded ? t('coworkingPool.collapse') : t('coworkingPool.expand')"
+					@click="isExpanded = !isExpanded"
+				>
+					<template #icon>
+						<Icon
+							name="carbon:chevron-down"
+							:size="16"
+							class="transition-transform duration-200"
+							:class="{ 'rotate-180': isExpanded }"
+						/>
+					</template>
+				</n-button>
 			</div>
 		</div>
 
-		<n-alert v-if="loadError" type="error" class="mt-3" :title="loadError" />
+		<n-collapse-transition :show="isExpanded">
+			<div>
+				<n-alert v-if="loadError" type="error" class="mt-3" :title="loadError" />
 
-		<!--
-			The server's own counts, shown as they came. Nothing here recounts
-			seats: which subscription covers whom, and whether a plan is open,
-			are decided once on the server for every booking, walk-in and sale.
-		-->
-		<div v-else-if="pool" class="mt-3 flex flex-wrap items-center gap-3">
-			<div v-for="stat in stats" :key="stat.key" class="add-pool-chip flex flex-col" :class="stat.tone && `add-pool-chip--${stat.tone}`">
-				<span class="text-xs opacity-75">{{ t(`coworkingPool.stats.${stat.key}`) }}</span>
-				<span class="text-base font-bold add-numeric">{{ formatNumber(stat.value) }}</span>
+				<!--
+					The server's own counts, shown as they came. Nothing here recounts
+					seats: which subscription covers whom, and whether a plan is open,
+					are decided once on the server for every booking, walk-in and sale.
+				-->
+				<div v-else-if="pool" class="mt-3 flex flex-wrap items-center gap-3">
+					<div v-for="stat in stats" :key="stat.key" class="add-pool-chip flex flex-col" :class="stat.tone && `add-pool-chip--${stat.tone}`">
+						<span class="text-xs opacity-75">{{ t(`coworkingPool.stats.${stat.key}`) }}</span>
+						<span class="text-base font-bold add-numeric">{{ formatNumber(stat.value) }}</span>
+					</div>
+					<p class="text-xs opacity-70">{{ t("coworkingPool.hint") }}</p>
+				</div>
+
+				<!--
+					The rest of the day, stretch by stretch: "taken now" is this moment
+					only, and a booking at 19:00 is not taken at 17:00 — so the seats
+					already promised later today are listed here rather than hidden.
+				-->
+				<div v-if="busySegments.length > 0" class="mt-3 flex flex-col gap-1">
+					<span class="text-xs font-semibold">{{ t("coworkingPool.untilClosing") }}</span>
+					<div
+						v-for="segment in busySegments"
+						:key="segment.start"
+						class="add-segment-row flex items-center justify-between gap-3 text-sm"
+						:class="{ 'add-segment-row--short': segment.free < 0 }"
+					>
+						<span class="add-numeric">{{ formatTime(segment.start) }} – {{ formatTime(segment.end) }}</span>
+						<span class="add-numeric">
+							{{ t("coworkingPool.segmentTaken", { taken: formatNumber(segment.usage), seats: formatNumber(segment.capacity) }) }}
+						</span>
+					</div>
+				</div>
+
+				<n-alert v-if="pool && pool.min_free < 0" type="warning" class="mt-3" :title="t('coworkingPool.overbooked')" />
+				<n-alert v-else-if="pool && pool.free_now <= 0" type="warning" class="mt-3" :title="t('coworkingPool.full')" />
 			</div>
-			<p class="text-xs opacity-70">{{ t("coworkingPool.hint") }}</p>
-		</div>
-
-		<!--
-			The rest of the day, stretch by stretch: "taken now" is this moment
-			only, and a booking at 19:00 is not taken at 17:00 — so the seats
-			already promised later today are listed here rather than hidden.
-		-->
-		<div v-if="busySegments.length > 0" class="mt-3 flex flex-col gap-1">
-			<span class="text-xs font-semibold">{{ t("coworkingPool.untilClosing") }}</span>
-			<div
-				v-for="segment in busySegments"
-				:key="segment.start"
-				class="add-segment-row flex items-center justify-between gap-3 text-sm"
-				:class="{ 'add-segment-row--short': segment.free < 0 }"
-			>
-				<span class="add-numeric">{{ formatTime(segment.start) }} – {{ formatTime(segment.end) }}</span>
-				<span class="add-numeric">
-					{{ t("coworkingPool.segmentTaken", { taken: formatNumber(segment.usage), seats: formatNumber(segment.capacity) }) }}
-				</span>
-			</div>
-		</div>
-
-		<n-alert v-if="pool && pool.min_free < 0" type="warning" class="mt-3" :title="t('coworkingPool.overbooked')" />
-		<n-alert v-else-if="pool && pool.free_now <= 0" type="warning" class="mt-3" :title="t('coworkingPool.full')" />
+		</n-collapse-transition>
 
 		<!-- Lend a room to co-working, or take it back -->
 		<n-modal v-model:show="lendVisible" preset="card" class="max-w-lg" :title="t('coworkingPool.lend.title')">
@@ -74,10 +100,10 @@
 						<n-date-picker v-model:formatted-value="lendForm.date" type="date" value-format="yyyy-MM-dd" :is-date-disabled="isPastDate" class="w-full" />
 					</n-form-item>
 					<n-form-item :label="t('coworkingPool.lend.from')">
-						<n-time-picker v-model:formatted-value="lendForm.from" format="HH:mm" value-format="HH:mm" :minutes="30" class="w-full" />
+						<n-time-picker v-model:formatted-value="lendForm.from" format="hh:mm a" use-12-hours value-format="HH:mm" :minutes="30" class="w-full" />
 					</n-form-item>
 					<n-form-item :label="t('coworkingPool.lend.to')" :feedback="fieldErrors.ends_at?.[0]" :validation-status="fieldErrors.ends_at ? 'error' : undefined">
-						<n-time-picker v-model:formatted-value="lendForm.to" format="HH:mm" value-format="HH:mm" :minutes="30" class="w-full" />
+						<n-time-picker v-model:formatted-value="lendForm.to" format="hh:mm a" use-12-hours value-format="HH:mm" :minutes="30" class="w-full" />
 					</n-form-item>
 				</div>
 
@@ -125,6 +151,7 @@ import {
 	NAlert,
 	NButton,
 	NCard,
+	NCollapseTransition,
 	NDatePicker,
 	NForm,
 	NFormItem,
@@ -172,6 +199,7 @@ const dialog = useDialog()
 
 const pool = ref<CoworkingPool | null>(null)
 const isLoading = ref(false)
+const isExpanded = ref(false)
 const loadError = ref<string | null>(null)
 
 /** The stretches until closing in which any seat is taken, as the server cut them. */

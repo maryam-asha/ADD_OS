@@ -144,7 +144,7 @@
 							</span>
 							<span v-if="selectedPlan.access_window_start && selectedPlan.access_window_end" class="add-numeric">
 								{{ t("memberships.activate.windowLabel") }}
-								{{ selectedPlan.access_window_start }} – {{ selectedPlan.access_window_end }}
+								{{ formatClockTime(selectedPlan.access_window_start) }} – {{ formatClockTime(selectedPlan.access_window_end) }}
 							</span>
 							<span v-else>{{ t("memberships.activate.windowLabel") }} {{ t("packages.anyTime") }}</span>
 						</div>
@@ -195,7 +195,7 @@ import { listMembers } from "@/add-os/services/members"
 import { activateMembership } from "@/add-os/services/memberships"
 import { listPlans } from "@/add-os/services/plans"
 import { listSeatsDesks } from "@/add-os/services/seats-desks"
-import { formatDateTime, formatNumber } from "@/add-os/utils/format"
+import { formatClockTime, formatDateTime, formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
 defineProps<{ titleKey?: string }>()

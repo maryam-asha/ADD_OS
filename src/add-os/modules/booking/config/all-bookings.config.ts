@@ -22,10 +22,18 @@ import { formatDate, formatTime } from "@/add-os/utils/format"
  * member's own decision and unremarkable, while rejected is an operations
  * decision that someone may need to explain. Painting both grey would hide the
  * one worth noticing.
+ *
+ * Added 2026-10-03 with the backend's outcome statuses: `completed` is the
+ * quiet good ending, so it gets `info` — told apart from a live `confirmed`
+ * booking, never mistaken for an alarm. `no_show` wears `error` for the same
+ * reason `rejected` does: a slot was held and nobody came, which someone may
+ * need to follow up.
  */
-const STATUS_TAG_TYPE: Readonly<Record<BookingStatus, "success" | "warning" | "default" | "error">> = {
+const STATUS_TAG_TYPE: Readonly<Record<BookingStatus, "success" | "warning" | "default" | "error" | "info">> = {
 	confirmed: "success",
 	pending: "warning",
+	completed: "info",
+	no_show: "error",
 	cancelled: "default",
 	rejected: "error"
 }

@@ -254,6 +254,7 @@ import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { getMember, getMemberActiveSessions, getMemberWalletBalance } from "@/add-os/services/members"
 import { STATUS_ICONS } from "@/add-os/theme/tokens"
+import { formatDateTime } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 import { ApiError } from "@/add-os/services/api"
 
@@ -380,7 +381,7 @@ watch(
 
 function formatTime(iso: string): string {
 	try {
-		return new Date(iso).toLocaleString()
+		return formatDateTime(iso)
 	} catch {
 		return iso
 	}

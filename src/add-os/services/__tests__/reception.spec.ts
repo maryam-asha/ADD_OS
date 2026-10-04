@@ -5,6 +5,7 @@ import {
 	cancelBooking,
 	checkOutSession,
 	extendBooking,
+	getExtensionOptions,
 	listActiveSessions,
 	listPendingApprovals,
 	rejectBooking,
@@ -51,7 +52,8 @@ const sessionRow = {
 	checked_in_at: "2026-08-25T09:00:00+03:00",
 	is_overdue: false,
 	seat_covered: null,
-	membership_id: null
+	membership_id: null,
+	desk_codes: []
 }
 
 describe("reception service", () => {
@@ -132,6 +134,24 @@ describe("reception service", () => {
 
 			expect(calledUrl()).toBe(`${BASE}/bookings/7/extend`)
 			expect(calledInit().body).toBe(JSON.stringify({ additional_minutes: 60 }))
+		})
+
+		it("getExtensionOptions GETs the booking's options and unwraps them", async () => {
+			const options = {
+				can_extend: true,
+				reason: null,
+				reason_label: null,
+				current_end_at: "2026-10-03T14:00:00+03:00",
+				latest_end_at: "2026-10-03T15:00:00+03:00",
+				options: [{ minutes: 60, label: "1h", end_at: "2026-10-03T15:00:00+03:00", end_time: "03:00 PM", price_points: 100, price: "10 $", price_point: "100 pts" }]
+			}
+			vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: options }))
+
+			const result = await getExtensionOptions(7)
+
+			expect(calledUrl()).toBe(`${BASE}/bookings/7/extension-options`)
+			expect(calledInit().method ?? "GET").toBe("GET")
+			expect(result).toEqual(options)
 		})
 	})
 

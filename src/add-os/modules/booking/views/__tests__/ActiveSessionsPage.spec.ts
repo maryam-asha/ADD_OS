@@ -5,12 +5,13 @@ import { createI18n } from "vue-i18n"
 import { ApiError } from "@/add-os/services/api"
 import ActiveSessionsPage from "../ActiveSessionsPage.vue"
 
-const { listActiveSessionsMock, checkOutSessionMock, settleSessionPaymentMock, cancelBookingMock, extendBookingMock } = vi.hoisted(() => ({
+const { listActiveSessionsMock, checkOutSessionMock, settleSessionPaymentMock, cancelBookingMock, extendBookingMock, getExtensionOptionsMock } = vi.hoisted(() => ({
 	listActiveSessionsMock: vi.fn(),
 	checkOutSessionMock: vi.fn(),
 	settleSessionPaymentMock: vi.fn(),
 	cancelBookingMock: vi.fn(),
-	extendBookingMock: vi.fn()
+	extendBookingMock: vi.fn(),
+	getExtensionOptionsMock: vi.fn()
 }))
 
 vi.mock("@/add-os/services/reception", () => ({
@@ -18,8 +19,25 @@ vi.mock("@/add-os/services/reception", () => ({
 	checkOutSession: checkOutSessionMock,
 	settleSessionPayment: settleSessionPaymentMock,
 	cancelBooking: cancelBookingMock,
-	extendBooking: extendBookingMock
+	extendBooking: extendBookingMock,
+	getExtensionOptions: getExtensionOptionsMock
 }))
+
+/** What `GET .../extension-options` answers for a booking with two hours free after it. */
+function extensionOptions(overrides: Record<string, unknown> = {}) {
+	return {
+		can_extend: true,
+		reason: null,
+		reason_label: null,
+		current_end_at: "2026-08-25T11:00:00+03:00",
+		latest_end_at: "2026-08-25T13:00:00+03:00",
+		options: [
+			{ minutes: 60, label: "1h", end_at: "2026-08-25T12:00:00+03:00", end_time: "12:00 PM", price_points: 100, price: "10 $", price_point: "100 pts" },
+			{ minutes: 120, label: "2h", end_at: "2026-08-25T13:00:00+03:00", end_time: "01:00 PM", price_points: 200, price: "20 $", price_point: "200 pts" }
+		],
+		...overrides
+	}
+}
 
 vi.mock("naive-ui", async () => {
 	const actual = await vi.importActual<typeof import("naive-ui")>("naive-ui")
@@ -41,7 +59,8 @@ const bookingSession = {
 	is_overdue: false,
 	// A booking's seat is its booking: neither field applies.
 	seat_covered: null,
-	membership_id: null
+	membership_id: null,
+	desk_codes: [] as string[]
 }
 
 const walkinSession = {
@@ -53,9 +72,10 @@ const walkinSession = {
 	user_name: "Omar Nasri",
 	checked_in_at: "2026-08-25T10:00:00+03:00",
 	is_overdue: false,
-	// Sits in the seat his subscription holds.
+	// Sits in the seat their subscription holds.
 	seat_covered: true,
-	membership_id: 4
+	membership_id: 4,
+	desk_codes: [] as string[]
 }
 
 const i18n = createI18n({
@@ -75,7 +95,7 @@ const i18n = createI18n({
 				onTime: "On time",
 				columns: { occupant: "Occupant", space: "Space", type: "Type", checkedInAt: "Checked in", status: "Status", actions: "Actions" },
 				type: { booking: "Booking", walkin: "Walk-in" },
-				seat: { covered: "Subscription seat", pool: "Pool seat", coveredHint: "", poolHint: "" },
+				seat: { covered: "Subscription seat", pool: "Pool seat", coveredHint: "", poolHint: "", desk: "Desk {code}", deskHint: "" },
 				checkOut: {
 					button: "Check out",
 					title: "Check out session",
@@ -89,8 +109,13 @@ const i18n = createI18n({
 				extend: {
 					button: "Extend",
 					title: "Extend booking",
-					minutesLabel: "Additional minutes",
-					minutesInvalid: "Enter a whole number of minutes, 1 or more.",
+					optionLabel: "Extend by",
+					optionPlaceholder: "Choose how long",
+					option: "{duration} — until {time} · {price}",
+					optionFree: "{duration} — until {time}",
+					latestDeparture: "Latest possible departure: {time}",
+					chooseOption: "Choose one of the offered extensions.",
+					loadError: "Couldn't load the extension options.",
 					success: "Booking extended."
 				},
 				cancel: { button: "Cancel booking", confirmTitle: "Cancel this booking?", confirmText: "Cancel booking", success: "Booking cancelled." }
@@ -116,6 +141,7 @@ describe("activeSessionsPage", () => {
 		settleSessionPaymentMock.mockResolvedValue({ message: "Payment settled." })
 		cancelBookingMock.mockResolvedValue({ message: "Cancelled." })
 		extendBookingMock.mockResolvedValue({ message: "Extended." })
+		getExtensionOptionsMock.mockResolvedValue(extensionOptions())
 	})
 
 	/**
@@ -136,6 +162,16 @@ describe("activeSessionsPage", () => {
 		expect(text).toContain("Subscription seat")
 		expect(text).toContain("Pool seat")
 		expect(text.match(/Subscription seat|Pool seat/g)).toHaveLength(2)
+		wrapper.unmount()
+	})
+
+	/** A Dedicated Desk member's own desk, so reception can send them to it. */
+	it("tags a dedicated desk member with their desk", async () => {
+		listActiveSessionsMock.mockResolvedValue([{ ...bookingSession, desk_codes: ["D-04"] }, walkinSession])
+		const wrapper = mountPage()
+		await flushPromises()
+
+		expect(document.body.textContent ?? "").toContain("Desk D-04")
 		wrapper.unmount()
 	})
 
@@ -404,44 +440,106 @@ describe("activeSessionsPage", () => {
 		})
 	})
 
+	/**
+	 * The dialog offers what the server says fits — the lengths
+	 * `GET .../extension-options` lists, up to the next booking or closing —
+	 * rather than a free number the server would refuse with a 422.
+	 */
 	describe("extend", () => {
-		it("extends a booking by whole minutes and refetches", async () => {
+		it("loads the booking's extension options when the dialog opens", async () => {
 			const wrapper = mountPage()
 			await flushPromises()
 
 			wrapper.vm.openExtend(bookingSession)
-			wrapper.vm.extendForm.additional_minutes = 45
+			await flushPromises()
+
+			expect(getExtensionOptionsMock).toHaveBeenCalledWith(1)
+			expect(wrapper.vm.extendOptions).toEqual(extensionOptions())
+			expect(document.body.textContent).toContain("2h — until 01:00 PM · 20 $")
+			wrapper.unmount()
+		})
+
+		it("extends by the chosen option and refetches", async () => {
+			const wrapper = mountPage()
+			await flushPromises()
+
+			wrapper.vm.openExtend(bookingSession)
+			await flushPromises()
+			wrapper.vm.extendForm.additional_minutes = 120
 			await wrapper.vm.submitExtend()
 			await flushPromises()
 
-			expect(extendBookingMock).toHaveBeenCalledWith(1, 45)
+			expect(extendBookingMock).toHaveBeenCalledWith(1, 120)
 			expect(listActiveSessionsMock).toHaveBeenCalledTimes(2)
 			expect(wrapper.vm.extendModalVisible).toBe(false)
 			wrapper.unmount()
 		})
 
-		it("refuses zero, negative and fractional minutes without calling the API", async () => {
+		it("refuses a length the server did not offer, without calling the API", async () => {
 			const wrapper = mountPage()
 			await flushPromises()
 
-			for (const minutes of [0, -30, 1.5, null]) {
+			for (const minutes of [null, 45, 0]) {
 				wrapper.vm.openExtend(bookingSession)
+				await flushPromises()
 				wrapper.vm.extendForm.additional_minutes = minutes
 				await wrapper.vm.submitExtend()
 				await flushPromises()
 			}
 
 			expect(extendBookingMock).not.toHaveBeenCalled()
+			expect(wrapper.vm.extendFieldErrors.additional_minutes).toEqual(["Choose one of the offered extensions."])
 			wrapper.unmount()
 		})
 
-		it("surfaces the server's 422 message when the extension will not fit", async () => {
+		it("shows the server's reason and offers nothing when the booking cannot be extended", async () => {
+			getExtensionOptionsMock.mockResolvedValue(
+				extensionOptions({
+					can_extend: false,
+					reason: "next_slot_booked",
+					reason_label: "The next time slot is already booked.",
+					latest_end_at: "2026-08-25T11:00:00+03:00",
+					options: []
+				})
+			)
+			const wrapper = mountPage()
+			await flushPromises()
+
+			wrapper.vm.openExtend(bookingSession)
+			await flushPromises()
+			wrapper.vm.extendForm.additional_minutes = 60
+			await wrapper.vm.submitExtend()
+			await flushPromises()
+
+			expect(document.body.textContent).toContain("The next time slot is already booked.")
+			expect(extendBookingMock).not.toHaveBeenCalled()
+			wrapper.unmount()
+		})
+
+		it("reports options it could not load and extends nothing", async () => {
+			getExtensionOptionsMock.mockRejectedValue(new ApiError(500, "{}"))
+			const wrapper = mountPage()
+			await flushPromises()
+
+			wrapper.vm.openExtend(bookingSession)
+			await flushPromises()
+			wrapper.vm.extendForm.additional_minutes = 60
+			await wrapper.vm.submitExtend()
+			await flushPromises()
+
+			expect(document.body.textContent).toContain("Couldn't load the extension options.")
+			expect(extendBookingMock).not.toHaveBeenCalled()
+			wrapper.unmount()
+		})
+
+		it("surfaces the server's 422 message when the extension no longer fits", async () => {
 			extendBookingMock.mockRejectedValue(new ApiError(422, JSON.stringify({ message: "The booking cannot run past 18:00." })))
 			const wrapper = mountPage()
 			await flushPromises()
 
 			wrapper.vm.openExtend(bookingSession)
-			wrapper.vm.extendForm.additional_minutes = 180
+			await flushPromises()
+			wrapper.vm.extendForm.additional_minutes = 60
 			await wrapper.vm.submitExtend()
 			await flushPromises()
 

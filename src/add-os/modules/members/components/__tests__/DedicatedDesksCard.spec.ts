@@ -72,10 +72,14 @@ describe("dedicatedDesksCard", () => {
 		expect(listMembershipsMock).toHaveBeenCalledWith({ dedicated: 1, live: 1, without_desk: 1, page: 1 })
 		expect(wrapper.findAll(".add-desk-row")).toHaveLength(1)
 		expect(wrapper.text()).toContain("Sara")
+		// How many still wait, shown beside the title.
+		expect(wrapper.find(".add-desks-waiting").exists()).toBe(true)
 
 		;(wrapper.vm as unknown as CardVm).onlyWithoutDesk = false
 		await flushPromises()
-		expect(listMembershipsMock).toHaveBeenLastCalledWith({ dedicated: 1, live: 1, page: 1 })
+		expect(listMembershipsMock).toHaveBeenCalledWith({ dedicated: 1, live: 1, page: 1 })
+		// The waiting count is still asked for on its own.
+		expect(listMembershipsMock).toHaveBeenLastCalledWith({ dedicated: 1, live: 1, without_desk: 1, per_page: 1 })
 	})
 
 	/** Desks free during its own hours and dates — its own desks included. */

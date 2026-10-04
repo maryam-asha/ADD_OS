@@ -6,6 +6,9 @@
 				<div class="flex items-center gap-2 text-sm font-bold">
 					<Icon name="carbon:workspace" :size="18" />
 					<span>{{ t("memberships.desks.title") }}</span>
+					<n-tag v-if="waitingCount > 0" size="small" round type="warning" class="add-desks-waiting">
+						{{ t("memberships.desks.waiting", { count: formatNumber(waitingCount) }) }}
+					</n-tag>
 				</div>
 				<div class="flex items-center gap-2">
 					<n-switch v-model:value="onlyWithoutDesk" size="small" />
@@ -113,6 +116,8 @@ const loadError = ref(false)
 const onlyWithoutDesk = ref(true)
 const page = ref(1)
 const lastPage = ref(1)
+/** How many live Dedicated Desk subscriptions still wait for a desk, whatever the list shows. */
+const waitingCount = ref(0)
 
 let listRequest = 0
 
@@ -130,6 +135,9 @@ async function load(): Promise<void> {
 		if (request !== listRequest) return
 		rows.value = result.data
 		lastPage.value = result.meta.last_page
+		waitingCount.value = onlyWithoutDesk.value
+			? result.meta.total
+			: (await listMemberships({ dedicated: 1, live: 1, without_desk: 1, per_page: 1 })).meta.total
 	} catch (caught) {
 		if (!(caught instanceof ApiError)) throw caught
 		if (request === listRequest) loadError.value = true

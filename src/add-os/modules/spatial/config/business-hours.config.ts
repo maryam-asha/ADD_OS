@@ -3,6 +3,7 @@ import type { ComposerTranslation } from "vue-i18n"
 import type { FieldDescriptor } from "@/add-os/components/resource/field-types"
 import type { BusinessHour, BusinessHourPayload, DayOfWeek } from "@/add-os/modules/spatial/types/business-hour"
 import type { BusinessHourException, BusinessHourExceptionPayload } from "@/add-os/modules/spatial/types/business-hour-exception"
+import { formatClockTime } from "@/add-os/utils/format"
 
 /** Confirmed live: lowercase full English names only — "Sunday" (capitalized) is rejected. */
 const DAYS_OF_WEEK: DayOfWeek[] = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
@@ -32,8 +33,8 @@ function timeRule(t: ComposerTranslation, required = true): FormItemRule {
 export function buildBusinessHourColumns(t: ComposerTranslation): DataTableColumns<BusinessHour> {
 	return [
 		{ title: t("businessHours.columns.dayOfWeek"), key: "day_of_week", render: row => t(`businessHours.days.${row.day_of_week}`) },
-		{ title: t("businessHours.columns.openTime"), key: "open_time" },
-		{ title: t("businessHours.columns.closeTime"), key: "close_time" }
+		{ title: t("businessHours.columns.openTime"), key: "open_time", render: row => (row.open_time ? formatClockTime(row.open_time) : "—") },
+		{ title: t("businessHours.columns.closeTime"), key: "close_time", render: row => (row.close_time ? formatClockTime(row.close_time) : "—") }
 	]
 }
 
@@ -91,7 +92,7 @@ export function buildBusinessHourExceptionColumns(t: ComposerTranslation): DataT
 		{
 			title: t("businessHours.exceptions.columns.hours"),
 			key: "hours",
-			render: row => (row.is_closed ? "—" : `${row.open_time} – ${row.close_time}`)
+			render: row => (row.is_closed ? "—" : `${formatClockTime(row.open_time ?? "")} – ${formatClockTime(row.close_time ?? "")}`)
 		},
 		{ title: t("businessHours.exceptions.columns.reason"), key: "reason", render: row => row.reason ?? "—" }
 	]

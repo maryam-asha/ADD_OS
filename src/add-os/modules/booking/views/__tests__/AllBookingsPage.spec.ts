@@ -60,7 +60,14 @@ const i18n = createI18n({
 					legend: "Filter bookings"
 				},
 				columns: { member: "Member", space: "Space", when: "Booked for", status: "Status", payment: "Payment", amount: "Amount" },
-				status: { confirmed: "Confirmed", pending: "Under review", cancelled: "Cancelled", rejected: "Rejected" },
+				status: {
+					confirmed: "Confirmed",
+					pending: "Under review",
+					completed: "Completed",
+					no_show: "Not attended",
+					cancelled: "Cancelled",
+					rejected: "Rejected"
+				},
 				paymentState: { paid: "Paid", unpaid: "Unpaid" },
 				paymentSource: { wallet: "Wallet", cash: "Cash" },
 				notSettled: "Not settled yet",
@@ -221,7 +228,7 @@ describe("allBookingsPage", () => {
 
 		const chips = wrapper.findAll(".add-chip").map(chip => chip.text())
 
-		expect(chips).toEqual(["Any status", "Confirmed", "Under review", "Cancelled", "Rejected"])
+		expect(chips).toEqual(["Any status", "Confirmed", "Under review", "Completed", "Not attended", "Cancelled", "Rejected"])
 	})
 
 	it("sends the status to the server when its chip is clicked", async () => {
@@ -234,6 +241,24 @@ describe("allBookingsPage", () => {
 		await flushPromises()
 
 		expect(listBookingsMock).toHaveBeenLastCalledWith(expect.objectContaining({ status: "cancelled" }))
+	})
+
+	/**
+	 * The server writes a booking's outcome once its time has passed —
+	 * `completed` at checkout, `no_show` when nobody checked in — so both are
+	 * statuses an operator can filter on, like any other.
+	 */
+	it.each([
+		["Completed", "completed"],
+		["Not attended", "no_show"]
+	])("filters on the %s outcome", async (chipLabel, status) => {
+		const wrapper = mountPage()
+		await flushPromises()
+
+		await wrapper.findAll(".add-chip").find(chip => chip.text() === chipLabel)!.trigger("click")
+		await flushPromises()
+
+		expect(listBookingsMock).toHaveBeenLastCalledWith(expect.objectContaining({ status }))
 	})
 
 	/**
