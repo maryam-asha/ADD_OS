@@ -96,6 +96,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		status: "active",
 		pages: [
 			{ key: "individuals", path: "individuals" },
+			{ key: "memberProfile", path: "individuals/:id", hidden: true },
 			{ key: "companies", path: "companies" },
 			{ key: "memberships", path: "memberships" }
 		]

@@ -54,6 +54,7 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"bookings.allBookings": () => import("@/add-os/modules/booking/views/AllBookingsPage.vue"),
 	"bookings.calendar": () => import("@/add-os/modules/booking/views/BookingCalendarPage.vue"),
 	"members.individuals": () => import("@/add-os/modules/members/views/IndividualMembersPage.vue"),
+	"members.memberProfile": () => import("@/add-os/modules/members/views/MemberProfilePage.vue"),
 	"members.companies": () => import("@/add-os/modules/members/views/CompaniesPage.vue"),
 	"members.memberships": () => import("@/add-os/modules/members/views/MembershipsPage.vue"),
 	"plans.packages": () => import("@/add-os/modules/plans/views/PlansPage.vue"),

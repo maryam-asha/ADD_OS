@@ -1510,7 +1510,8 @@
 			"operationsRequests": "طلبات التشغيل",
 			"eventAttendees": "التسجيلات",
 			"closeSessionDetail": "إنهاء الجلسة",
-			"activeSessionDetail": "تفاصيل الجلسة"
+			"activeSessionDetail": "تفاصيل الجلسة",
+			"memberProfile": "ملف العضو"
 		}
 	},
 	"resourceCrud": {
@@ -2383,6 +2384,128 @@
 			"submit": "تفعيل",
 			"success": "تم تفعيل الاشتراك.",
 			"error": "تعذّر تفعيل الاشتراك."
+		}
+	},
+	"memberProfile": {
+		"back": "العودة إلى الأعضاء",
+		"refresh": "تحديث",
+		"loadError": "تعذر تحميل ملف هذا العضو.",
+		"joined": "عضو منذ {date}",
+		"companyAdmin": "مسؤول",
+		"topUp": "شحن المحفظة",
+		"insideNow": "في الداخل الآن — {space}، منذ {time}",
+		"viewSession": "فتح الجلسة",
+		"details": "التفاصيل",
+		"points": "{points} نقطة",
+		"free": "مجاني",
+		"yes": "نعم",
+		"no": "لا",
+		"resultCount": "{count} نتيجة",
+		"walletPools": "المحفظة حسب الفئة",
+		"activity": "النشاط",
+		"about": "معلومات",
+		"about_": {
+			"city": "المدينة",
+			"jobTitle": "المسمى الوظيفي",
+			"company": "الشركة",
+			"industry": "المجال"
+		},
+		"cards": {
+			"wallet": "المحفظة",
+			"owed": "المستحق",
+			"items": "{count} عناصر",
+			"plan": "الباقة",
+			"noPlan": "لا يوجد",
+			"hoursLeft": "متبقٍ {hours} ساعة",
+			"until": "حتى {date}",
+			"bookings": "الحجوزات",
+			"upcoming": "{count} قادمة",
+			"sessions": "الجلسات",
+			"lastVisit": "آخر زيارة",
+			"pointsSpent": "النقاط المصروفة"
+		},
+		"tabs": {
+			"overview": "نظرة عامة",
+			"bookings": "الحجوزات",
+			"sessions": "الجلسات",
+			"memberships": "الباقات",
+			"wallet": "المحفظة",
+			"payments": "المدفوعات",
+			"serviceRequests": "طلبات الخدمات",
+			"events": "الفعاليات"
+		},
+		"filters": {
+			"status": "الحالة",
+			"paymentState": "الدفع",
+			"type": "النوع",
+			"state": "مفتوحة / مغلقة",
+			"direction": "وارد / صادر",
+			"category": "الفئة",
+			"purpose": "الغرض"
+		},
+		"columns": {
+			"space": "المساحة",
+			"when": "الموعد",
+			"status": "الحالة",
+			"payment": "الدفع",
+			"checkedIn": "الدخول",
+			"checkedOut": "الخروج",
+			"type": "النوع",
+			"duration": "المدة",
+			"fromPlan": "من الباقة",
+			"price": "السعر",
+			"plan": "الباقة",
+			"via": "الصفة",
+			"period": "الفترة",
+			"desks": "المكاتب",
+			"date": "التاريخ",
+			"description": "الوصف",
+			"category": "الفئة",
+			"method": "الطريقة",
+			"points": "النقاط",
+			"purpose": "الغرض",
+			"reference": "المرجع",
+			"service": "الخدمة",
+			"note": "ملاحظة",
+			"event": "الفعالية",
+			"attended": "الحضور"
+		},
+		"sessionOpen": "مفتوحة",
+		"sessionClosed": "مغلقة",
+		"viaPersonal": "شخصي",
+		"viaCompany": "عبر الشركة",
+		"membershipActive": "فعّال",
+		"membershipEnded": "منتهٍ",
+		"direction": {
+			"credit": "وارد",
+			"debit": "صادر"
+		},
+		"paymentStatus": {
+			"pending": "قيد الانتظار",
+			"accepted": "مقبول",
+			"failed": "فشل",
+			"canceled": "ملغى",
+			"reversed": "مسترجع",
+			"expired": "منتهي الصلاحية",
+			"needs_review": "بحاجة لمراجعة"
+		},
+		"purpose": {
+			"booking": "حجز",
+			"booking_extension": "تمديد حجز",
+			"coworking_session": "جلسة عمل مشترك",
+			"wallet_top_up": "شحن محفظة",
+			"plan_purchase": "شراء باقة",
+			"event_registration": "تسجيل فعالية"
+		},
+		"method": {
+			"wallet": "نقاط",
+			"cash": "كاش",
+			"paymera": "بطاقة (بارميرا)"
+		},
+		"registrationStatus": {
+			"pending": "قيد الانتظار",
+			"approved": "مقبول",
+			"rejected": "مرفوض"
 		}
 	}
 }

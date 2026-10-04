@@ -99,18 +99,20 @@ import type { Member, MemberStatus, UpdateMemberStatusPayload } from "@/add-os/m
 import { NAlert, NAvatar, NButton, NCard, NDataTable, NForm, NFormItem, NInput, NModal, NSelect, NTag, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import { useRouter } from "vue-router"
 import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import MemberDetailPanel from "@/add-os/modules/members/components/MemberDetailPanel.vue"
 import WalletTopUpDialog from "@/add-os/modules/members/components/WalletTopUpDialog.vue"
+import { ApiError } from "@/add-os/services/api"
 import { listMembers, updateMemberStatus } from "@/add-os/services/members"
 import { STATUS_ICONS } from "@/add-os/theme/tokens"
-import { ApiError } from "@/add-os/services/api"
 import Icon from "@/components/common/Icon.vue"
 
 defineProps<{ titleKey?: string }>()
 
 const { t } = useI18n()
 const message = useMessage()
+const router = useRouter()
 
 // ── Data ────────────────────────────────────────────────────────────────────
 const members = ref<Member[]>([])
@@ -208,9 +210,9 @@ watch(detailPanelVisible, visible => {
 	if (!visible) detailMember.value = null
 })
 
+/** The member's whole file, on its own page. */
 function openDetail(row: Member) {
-	detailMember.value = row
-	detailPanelVisible.value = true
+	router.push({ name: "members.memberProfile", params: { id: row.id } })
 }
 
 // ── Quick Wallet Top-up ──────────────────────────────────────────────────────

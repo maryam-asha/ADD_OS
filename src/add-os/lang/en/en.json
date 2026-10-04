@@ -1506,7 +1506,8 @@
 			"operationsRequests": "Operations Requests",
 			"eventAttendees": "Registrations",
 			"closeSessionDetail": "End session",
-			"activeSessionDetail": "Session details"
+			"activeSessionDetail": "Session details",
+			"memberProfile": "Member profile"
 		}
 	},
 	"resourceCrud": {
@@ -2378,6 +2379,128 @@
 			"submit": "Activate",
 			"success": "Membership activated.",
 			"error": "Couldn't activate the membership."
+		}
+	},
+	"memberProfile": {
+		"back": "Back to members",
+		"refresh": "Refresh",
+		"loadError": "Could not load this member's file.",
+		"joined": "Member since {date}",
+		"companyAdmin": "admin",
+		"topUp": "Top up wallet",
+		"insideNow": "Inside now — {space}, since {time}",
+		"viewSession": "Open session",
+		"details": "Details",
+		"points": "{points} pts",
+		"free": "Free",
+		"yes": "Yes",
+		"no": "No",
+		"resultCount": "{count} results",
+		"walletPools": "Wallet by category",
+		"activity": "Activity",
+		"about": "About",
+		"about_": {
+			"city": "City",
+			"jobTitle": "Job title",
+			"company": "Company",
+			"industry": "Industry"
+		},
+		"cards": {
+			"wallet": "Wallet",
+			"owed": "Owed",
+			"items": "{count} items",
+			"plan": "Plan",
+			"noPlan": "None",
+			"hoursLeft": "{hours} h left",
+			"until": "until {date}",
+			"bookings": "Bookings",
+			"upcoming": "{count} upcoming",
+			"sessions": "Sessions",
+			"lastVisit": "Last visit",
+			"pointsSpent": "Points spent"
+		},
+		"tabs": {
+			"overview": "Overview",
+			"bookings": "Bookings",
+			"sessions": "Sessions",
+			"memberships": "Plans",
+			"wallet": "Wallet",
+			"payments": "Payments",
+			"serviceRequests": "Service requests",
+			"events": "Events"
+		},
+		"filters": {
+			"status": "Status",
+			"paymentState": "Payment",
+			"type": "Type",
+			"state": "Open / closed",
+			"direction": "In / out",
+			"category": "Category",
+			"purpose": "For"
+		},
+		"columns": {
+			"space": "Space",
+			"when": "When",
+			"status": "Status",
+			"payment": "Payment",
+			"checkedIn": "Checked in",
+			"checkedOut": "Checked out",
+			"type": "Type",
+			"duration": "Duration",
+			"fromPlan": "From plan",
+			"price": "Price",
+			"plan": "Plan",
+			"via": "Held",
+			"period": "Period",
+			"desks": "Desks",
+			"date": "Date",
+			"description": "Description",
+			"category": "Category",
+			"method": "Method",
+			"points": "Points",
+			"purpose": "For",
+			"reference": "Reference",
+			"service": "Service",
+			"note": "Note",
+			"event": "Event",
+			"attended": "Attended"
+		},
+		"sessionOpen": "Open",
+		"sessionClosed": "Closed",
+		"viaPersonal": "Personal",
+		"viaCompany": "Through company",
+		"membershipActive": "Active",
+		"membershipEnded": "Ended",
+		"direction": {
+			"credit": "Credit",
+			"debit": "Debit"
+		},
+		"paymentStatus": {
+			"pending": "Pending",
+			"accepted": "Accepted",
+			"failed": "Failed",
+			"canceled": "Canceled",
+			"reversed": "Reversed",
+			"expired": "Expired",
+			"needs_review": "Needs review"
+		},
+		"purpose": {
+			"booking": "Booking",
+			"booking_extension": "Booking extension",
+			"coworking_session": "Co-working session",
+			"wallet_top_up": "Wallet top-up",
+			"plan_purchase": "Plan purchase",
+			"event_registration": "Event registration"
+		},
+		"method": {
+			"wallet": "Points",
+			"cash": "Cash",
+			"paymera": "Card (Paymera)"
+		},
+		"registrationStatus": {
+			"pending": "Pending",
+			"approved": "Approved",
+			"rejected": "Rejected"
 		}
 	}
 }
