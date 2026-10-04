@@ -7,9 +7,13 @@ import { formatNumber, hasFraction } from "./numbers"
  * ADD OS — currency formatting.
  *
  * Prices are whole numbers and are shown without decimals (approved decision).
- * But "no decimals" is a DISPLAY rule, and the formatter must never turn it
- * into silent data loss when a value does carry a fraction — see the
- * `fractionDigits` note below.
+ * For a currency with decimals, "no decimals" stays a DISPLAY rule that never
+ * silently drops a fraction — see the `fractionDigits` note below.
+ *
+ * The Syrian pound is the exception: it has no fractional unit in use, so it
+ * is always shown whole, everywhere (product owner, 2026-10-04). The backend
+ * rounds every SYP amount it asks for up to a whole pound (currencies.
+ * decimal_places = 0), so this only ever rounds an older stored value.
  */
 
 export type CurrencyCode = "SYP" | "USD" | "EUR"
@@ -17,6 +21,8 @@ export type CurrencyCode = "SYP" | "USD" | "EUR"
 interface CurrencyDefinition {
 	/** Decimals shown when the amount is whole. */
 	defaultFractionDigits: number
+	/** Always shown whole, whatever the value or the caller asks for. */
+	wholeOnly?: boolean
 	symbol: Record<SupportedLocale, string>
 }
 
@@ -27,7 +33,7 @@ interface CurrencyDefinition {
  * ⚠️ Not visually verified — see I18N-REPORT.md.
  */
 const CURRENCIES: Record<CurrencyCode, CurrencyDefinition> = {
-	SYP: { defaultFractionDigits: 0, symbol: { ar: "ل.س.", en: "SYP" } },
+	SYP: { defaultFractionDigits: 0, wholeOnly: true, symbol: { ar: "ل.س.", en: "SYP" } },
 	USD: { defaultFractionDigits: 2, symbol: { ar: "$", en: "$" } },
 	EUR: { defaultFractionDigits: 2, symbol: { ar: "€", en: "€" } }
 }
@@ -78,8 +84,9 @@ export function formatCurrency(value: number | string | bigint, options: Currenc
 
 	const definition = CURRENCIES[currency]
 
-	// Only round when told to, or when there is nothing to lose by rounding.
-	const digits = fractionDigits ?? (hasFraction(value) ? undefined : definition.defaultFractionDigits)
+	// A whole-only currency is always whole. Otherwise round only when told
+	// to, or when there is nothing to lose by rounding.
+	const digits = definition.wholeOnly ? 0 : fractionDigits ?? (hasFraction(value) ? undefined : definition.defaultFractionDigits)
 
 	const amount = formatNumber(value, { fractionDigits: digits, grouping })
 

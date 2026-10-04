@@ -2,7 +2,7 @@ import { dateArDZ } from "naive-ui"
 import { describe, expect, it } from "vitest"
 import { MONTHS } from "../calendar"
 import { formatCurrency } from "../currency"
-import { formatDate, formatDateTime, formatTime, toOffsetIso } from "../dates"
+import { formatClockTime, formatDate, formatDateTime, formatTime, toOffsetIso } from "../dates"
 import { dateArLevantine } from "../naiveDateLocale"
 import { formatNumber, hasFraction } from "../numbers"
 
@@ -67,26 +67,28 @@ describe("formatNumber — Latin digits, always", () => {
 	})
 })
 
-describe("formatCurrency — SYP without silent rounding", () => {
+describe("formatCurrency — SYP is always whole", () => {
 	it("shows whole amounts with no decimals", () => {
 		expect(formatCurrency(85000, AR)).toBe("85,000 ل.س.")
 		expect(formatCurrency(85000, EN)).toBe("85,000 SYP")
 	})
 
-	it("preserves a fraction instead of dropping it", () => {
-		// Intl.NumberFormat("ar-SY", {style:"currency",currency:"SYP"}) yields
-		// "١٬٢٣٤٬٥٦٨ ل.س." — wrong numerals AND .89 discarded without a word.
-		expect(formatCurrency("1234567.89", AR)).toBe("1,234,567.89 ل.س.")
-		expect(formatCurrency("0.01", EN)).toBe("0.01 SYP")
+	it("never shows piasters, even when the value carries them", () => {
+		// The pound has no fractional unit in use (product owner, 2026-10-04).
+		expect(formatCurrency("1234567.89", AR)).toBe("1,234,568 ل.س.")
+		expect(formatCurrency("33216.02", EN)).toBe("33,216 SYP")
 	})
 
-	it("rounds only when rounding is explicitly requested", () => {
-		expect(formatCurrency("1234.56", { ...AR, fractionDigits: 0 })).toBe("1,235 ل.س.")
-		expect(formatCurrency("1234.56", { ...AR, fractionDigits: 2 })).toBe("1,234.56 ل.س.")
+	it("stays whole even when a caller asks for decimals", () => {
+		expect(formatCurrency("1234.56", { ...AR, fractionDigits: 2 })).toBe("1,235 ل.س.")
 	})
 
-	it("keeps full precision for DECIMAL values passed as strings", () => {
-		expect(formatCurrency("99999999999999999999.05", EN)).toBe("99,999,999,999,999,999,999.05 SYP")
+	it("keeps full precision for huge DECIMAL values passed as strings", () => {
+		expect(formatCurrency("99999999999999999999.05", EN)).toBe("99,999,999,999,999,999,999 SYP")
+	})
+
+	it("still keeps a fraction for a currency that has one", () => {
+		expect(formatCurrency("12.345", { ...EN, currency: "USD" })).toBe("12.345 $")
 	})
 
 	it("can omit the symbol, for inputs and exports", () => {
@@ -124,8 +126,8 @@ describe("formatDate — Levantine months, Latin digits", () => {
 		expect(formatDate(sunday, { ...AR, style: "monthYear" })).toBe("آب 2026")
 		expect(formatDate(sunday, { ...AR, style: "long" })).toBe("الأحد، 2 آب 2026")
 		expect(formatDate(sunday, { ...EN, style: "long" })).toBe("Sunday, 2 August 2026")
-		expect(formatDate(sunday, { ...AR, style: "dateTime" })).toBe("2 آب 2026، 14:35")
-		expect(formatDate(sunday, { ...EN, style: "dateTime" })).toBe("2 August 2026, 14:35")
+		expect(formatDate(sunday, { ...AR, style: "dateTime" })).toBe("2 آب 2026، 02:35 م")
+		expect(formatDate(sunday, { ...EN, style: "dateTime" })).toBe("2 August 2026, 02:35 PM")
 	})
 
 	it("keeps digits Latin in Arabic output", () => {
@@ -137,9 +139,30 @@ describe("formatDate — Levantine months, Latin digits", () => {
 		expect(digits.every(digit => digit >= "0" && digit <= "9")).toBe(true)
 	})
 
-	it("formats time as 24-hour, zero-padded", () => {
-		expect(formatTime(new Date(2026, 7, 2, 9, 5), AR)).toBe("09:05")
-		expect(formatDateTime(sunday, EN)).toBe("2 August 2026, 14:35")
+	it("formats time as 12-hour, zero-padded, with the meridiem after it", () => {
+		expect(formatTime(new Date(2026, 7, 2, 9, 5), AR)).toBe("09:05 ص")
+		expect(formatTime(new Date(2026, 7, 2, 9, 5), EN)).toBe("09:05 AM")
+		expect(formatDateTime(sunday, EN)).toBe("2 August 2026, 02:35 PM")
+	})
+
+	it("writes noon as 12 PM and midnight as 12 AM, never 00", () => {
+		expect(formatTime(new Date(2026, 7, 2, 12, 0), EN)).toBe("12:00 PM")
+		expect(formatTime(new Date(2026, 7, 2, 0, 0), EN)).toBe("12:00 AM")
+		expect(formatTime(new Date(2026, 7, 2, 0, 30), AR)).toBe("12:30 ص")
+	})
+
+	it("formats a bare HH:mm wall-clock string the same way", () => {
+		expect(formatClockTime("14:30", AR)).toBe("02:30 م")
+		expect(formatClockTime("08:00:00", EN)).toBe("08:00 AM")
+		expect(formatClockTime("00:00", EN)).toBe("12:00 AM")
+		expect(formatClockTime("24:00", EN)).toBe("12:00 AM")
+		// The booking endpoints already send 12-hour; only the meridiem is localised.
+		expect(formatClockTime("02:00 PM", AR)).toBe("02:00 م")
+		expect(formatClockTime("12:00 AM", AR)).toBe("12:00 ص")
+		expect(formatClockTime("12:30 PM", EN)).toBe("12:30 PM")
+		// Display-only: anything that is not a clock time passes through untouched.
+		expect(formatClockTime("", EN)).toBe("")
+		expect(formatClockTime("soon", EN)).toBe("soon")
 	})
 
 	it("names all twelve Levantine months", () => {
