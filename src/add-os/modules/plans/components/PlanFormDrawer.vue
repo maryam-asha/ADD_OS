@@ -229,7 +229,7 @@
 								</div>
 							</div>
 							<span class="text-xs text-neutral-400">{{ t('sale.hint') }}</span>
-							<span v-for="key in saleErrorKeys" :key="key" class="text-xs text-red-500" data-test="plan-sale-error">{{ errors[key][0] }}</span>
+							<span v-for="key in saleErrorKeys" :key class="text-xs text-red-500" data-test="plan-sale-error">{{ errors[key][0] }}</span>
 						</div>
 					</div>
 

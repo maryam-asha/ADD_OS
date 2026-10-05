@@ -34,7 +34,7 @@ function mountDrawer() {
 	return mount(CouponFormDrawer, { props: { "show": true, "couponId": null, "onUpdate:show": () => {} }, global: { plugins: [i18n] } })
 }
 
-type DrawerVm = { form: { code: string, targets: unknown[] }, submit: () => Promise<void> }
+interface DrawerVm { form: { code: string, targets: unknown[] }, submit: () => Promise<void> }
 
 describe("couponFormDrawer", () => {
 	// A block body: a function returned from beforeEach runs as teardown,

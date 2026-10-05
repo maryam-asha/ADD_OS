@@ -127,7 +127,7 @@
 					<!-- An empty pair is stored as "", as it always was here. -->
 					<DateTimeInput
 						v-else-if="field.type === 'datetime'"
-						:model-value="(model as Record<string, unknown>)[field.key] as string | null"
+						:model-value="(model as Record<string, unknown>)[field.key] as string"
 						:disabled="field.disabledWhen?.(model) ?? false"
 						@update:model-value="value => writeField(field.key, value ?? '')"
 					/>

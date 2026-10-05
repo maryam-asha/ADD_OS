@@ -19,7 +19,7 @@
 						<n-input :value="form.code" :maxlength="40" dir="ltr" @update:value="(value: string) => (form.code = value.toUpperCase())" />
 					</n-form-item>
 					<n-text depth="3" class="text-xs -mt-2 mb-2">{{ t("coupons.form.codeHint") }}</n-text>
-					<n-form-item v-for="key in BILINGUAL" :key="key" :label="t(`coupons.form.${key}`)">
+					<n-form-item v-for="key in BILINGUAL" :key :label="t(`coupons.form.${key}`)">
 						<div class="flex w-full flex-col gap-1">
 							<div class="flex w-full gap-2">
 								<n-input v-model:value="form[key]!.ar" :placeholder="t('resourceCrud.form.arabicPlaceholder')" :status="grouped.fields[`${key}.ar`] ? 'error' : undefined" :type="key === 'description' ? 'textarea' : 'text'" dir="rtl" />
