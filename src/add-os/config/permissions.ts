@@ -175,3 +175,19 @@ export const MEMBERSHIP_ACTIVATION_ROLE: Role = "admin"
 export function canActivateMemberships(): boolean {
 	return useAuthStore().isRoleGranted(MEMBERSHIP_ACTIVATION_ROLE)
 }
+
+/**
+ * Creating, changing and deleting a discount coupon
+ * (`POST`/`PUT|PATCH`/`DELETE /api/v1/admin/coupons`).
+ *
+ * Role-gated: ADDCore puts those three routes in `admin.php`'s `role:admin`
+ * group ("a code is money off"), while the list, detail and redemption log
+ * stay in the shared `admin|operations` block — so operations reads the page
+ * and sees no write control. Like every gate here, this only decides what is
+ * shown; the server's 403 is the boundary.
+ */
+export const COUPON_MANAGEMENT_ROLE: Role = "admin"
+
+export function canManageCoupons(): boolean {
+	return useAuthStore().isRoleGranted(COUPON_MANAGEMENT_ROLE)
+}

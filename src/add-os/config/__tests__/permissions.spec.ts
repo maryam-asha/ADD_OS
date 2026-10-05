@@ -17,7 +17,7 @@ vi.mock("@/stores/auth", () => ({
 	})
 }))
 
-const { canDeleteSpatialResource, canDeleteBusinessHours, can, canManageRoles, CASCADING_SPATIAL_RESOURCES, SPATIAL_RESOURCE_DELETE_ROLE, BUSINESS_HOURS_DELETE_ROLE } = await import("../permissions")
+const { canDeleteSpatialResource, canDeleteBusinessHours, can, canManageCoupons, canManageRoles, COUPON_MANAGEMENT_ROLE, CASCADING_SPATIAL_RESOURCES, SPATIAL_RESOURCE_DELETE_ROLE, BUSINESS_HOURS_DELETE_ROLE } = await import("../permissions")
 
 describe("permissions", () => {
 	it("maps every spatial resource to admin, per the collection's Admin-only annotation", () => {
@@ -135,5 +135,21 @@ describe("business hours permissions", () => {
 	it("denies delete when there is no role", () => {
 		state.role = null
 		expect(canDeleteBusinessHours()).toBe(false)
+	})
+})
+
+describe("canManageCoupons", () => {
+	it("is admin-only, per the role:admin group around the coupon writes", () => {
+		expect(COUPON_MANAGEMENT_ROLE).toBe("admin")
+	})
+
+	it("grants admin", () => {
+		state.role = "admin"
+		expect(canManageCoupons()).toBe(true)
+	})
+
+	it("denies operations, who may still read", () => {
+		state.role = "operations"
+		expect(canManageCoupons()).toBe(false)
 	})
 })
