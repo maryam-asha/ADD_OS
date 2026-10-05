@@ -22,34 +22,42 @@ snapshot is unverified until someone re-reads the canonical file and re-pins it.
 
 | | |
 |---|---|
-| Pinned | 2026-10-04 (second pin that day) |
+| Pinned | 2026-10-05 |
 | Source | the canonical path above, read directly, copied byte-for-byte (`cp`, not a JSON re-serialize — key order and formatting are exactly the source's) |
 | Verified identical | `sha256` match between source and this copy at pin time, plus a `cmp` byte comparison |
-| Size | 1,445,667 bytes / 22,532 lines |
-| Leaf endpoints (parsed) | 356 — `GET` 154, `POST` 109, `DELETE` 35, `PATCH` 29, `PUT` 29 |
-| Distinct `METHOD + URL` | 353 |
+| Size | 1,449,951 bytes / 22,845 lines |
+| Leaf endpoints (parsed) | 363 — `GET` 157, `POST` 111, `DELETE` 36, `PATCH` 29, `PUT` 30 |
+| Distinct `METHOD + URL` | 360 |
 
-### What changed since the earlier 2026-10-04 pin
+### What changed since the second 2026-10-04 pin
 
-**One description, no endpoint.** `Member (App) / … / Get Booking Detail — With Status
-Stepper` now describes the trimmed detail: the booking number `reference`
-(`BK-2026-00041`), `date_label`/`time_label`, `total`, `checked_in_at`/`checked_out_at`,
-`payment_state` with `payment_id`/`awaiting_payment`, and a `cancellation` block (deadline,
-refund amount and wallet) — ADDCore `docs/decisions/booking-outcomes-and-extension.md`.
-Member-app only; nothing in this dashboard cites it.
+**Seven endpoints added, none removed — sales and coupons.** A new `Admin (Dashboard) /
+Coupons` folder: `GET admin/coupons` (filters `search`, `is_active`, `state`,
+`per_page`), `POST admin/coupons`, `GET`/`PUT`/`DELETE admin/coupons/{{coupon_id}}`, and
+`GET admin/coupons/{{coupon_id}}/redemptions`. There is no `PATCH` request for a coupon in
+the collection; `PUT` is the documented update. On the member side, `POST
+member/coupons/preview`. Two new variables, `coupon_id` and `coupon_code`, both empty.
+
+Fifteen existing requests changed body or description, none of them path or method:
+`Create Plan`/`Update Plan` and `Create Space`/`Update Space` (the three `sale_*` fields),
+and eleven member-app requests (space and package browse/detail, booking
+preview/create/batch, membership create, payment methods, start payment, event register)
+that gained the `sale` block or `coupon_code`. The member-app ones are cited by nothing in
+this dashboard.
 
 ### Credential scan at this pin
 
-Both halves repeated against the canonical file. **Nothing new:** the same 49
-variables with the four credential-shaped ones empty, 74 `auth` blocks and five
-`Authorization` headers all on placeholders, zero `Cookie` headers, no literal host,
-zero pattern matches, and the same nine populated password/token body fields in the
-same five requests. Named as fields and requests only, never values.
+Both halves repeated against the canonical file. **Nothing credential-shaped is new:**
+51 variables (the two additions above, both empty; the four credential-shaped ones still
+empty), 75 `auth` blocks (one more, from the new folder) and five `Authorization`
+headers all on placeholders, zero `Cookie` headers, no literal host, zero pattern
+matches, and the same nine populated password/token body fields in the same five
+requests. Named as fields and requests only, never values.
 
 ### Encoding at this pin
 
 Strict, valid UTF-8. The double-encoded em dash (`â€”`) still appears **19** times;
-the correct em dash (`—`) **316** times.
+the correct em dash (`—`) **345** times.
 
 ## Re-pinning
 
@@ -79,6 +87,41 @@ the correct em dash (`—`) **316** times.
 
 Kept verbatim. A claim written while one of these was current cites *that* pin, and a
 future reader needs to see what it actually said.
+
+### Pin of 2026-10-04 (second that day) — superseded 2026-10-05
+
+#### Record as it stood
+
+| | |
+|---|---|
+| Pinned | 2026-10-04 (second pin that day) |
+| Source | the canonical path above, read directly, copied byte-for-byte (`cp`, not a JSON re-serialize — key order and formatting are exactly the source's) |
+| Verified identical | `sha256` match between source and this copy at pin time, plus a `cmp` byte comparison |
+| Size | 1,445,667 bytes / 22,532 lines |
+| Leaf endpoints (parsed) | 356 — `GET` 154, `POST` 109, `DELETE` 35, `PATCH` 29, `PUT` 29 |
+| Distinct `METHOD + URL` | 353 |
+
+### What changed since the earlier 2026-10-04 pin
+
+**One description, no endpoint.** `Member (App) / … / Get Booking Detail — With Status
+Stepper` now describes the trimmed detail: the booking number `reference`
+(`BK-2026-00041`), `date_label`/`time_label`, `total`, `checked_in_at`/`checked_out_at`,
+`payment_state` with `payment_id`/`awaiting_payment`, and a `cancellation` block (deadline,
+refund amount and wallet) — ADDCore `docs/decisions/booking-outcomes-and-extension.md`.
+Member-app only; nothing in this dashboard cites it.
+
+### Credential scan at this pin
+
+Both halves repeated against the canonical file. **Nothing new:** the same 49
+variables with the four credential-shaped ones empty, 74 `auth` blocks and five
+`Authorization` headers all on placeholders, zero `Cookie` headers, no literal host,
+zero pattern matches, and the same nine populated password/token body fields in the
+same five requests. Named as fields and requests only, never values.
+
+### Encoding at this pin
+
+Strict, valid UTF-8. The double-encoded em dash (`â€”`) still appears **19** times;
+the correct em dash (`—`) **316** times.
 
 ### Pin of 2026-10-04 — superseded later on 2026-10-04
 
