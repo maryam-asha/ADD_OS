@@ -89,6 +89,14 @@ export interface Plan {
 	 */
 	price_points: number
 	/**
+	 * A sale on the price — all three set, or all three `null`. Sent and
+	 * returned only on `admin/*` (collection pinned 2026-10-05, Create/Update
+	 * Plan); read as ISO UTC, sent with an explicit offset.
+	 */
+	sale_price_points: number | null
+	sale_starts_at: string | null
+	sale_ends_at: string | null
+	/**
 	 * `price_points` rendered in the base currency (USD) by the server, as a
 	 * decimal string, e.g. "50.00". Display only — never parse it back into a
 	 * point count, and never divide by the rate client-side.
@@ -149,6 +157,14 @@ export interface PlanPayload extends Record<string, unknown> {
 	 * views of this number and are never sent back.
 	 */
 	price_points: number
+	/**
+	 * A sale on the price — all three set, or all three `null`. Sent and
+	 * returned only on `admin/*` (collection pinned 2026-10-05, Create/Update
+	 * Plan); sent with an explicit offset. Left out, the server keeps the sale.
+	 */
+	sale_price_points?: number | null
+	sale_starts_at?: string | null
+	sale_ends_at?: string | null
 	duration_days: number
 	/**
 	 * `H:i` strings, or both `null` for a plan with no window. The backend
