@@ -2660,5 +2660,65 @@
 		"end": "إنهاء العرض",
 		"badgeRunning": "عرض {points} نقطة · حتى {date}",
 		"badgeScheduled": "عرض {points} نقطة · من {date}"
+	},
+	"pricing": {
+		"purpose": {
+			"booking": "حجز",
+			"coworking_session": "جلسة عمل مشترك",
+			"plan_purchase": "شراء باقة",
+			"event_registration": "تسجيل في فعالية"
+		},
+		"item": {
+			"any": "أي عنصر",
+			"plan_id": "باقة",
+			"space_id": "مساحة",
+			"space_type": "نوع المساحة",
+			"event_id": "فعالية"
+		}
+	},
+	"coupons": {
+		"form": {
+			"createTitle": "كوبون جديد",
+			"editTitle": "تعديل الكوبون {code}",
+			"basics": "الأساسيات",
+			"code": "الكود",
+			"codeHint": "أحرف وأرقام و- و_ فقط، ويُحفظ بأحرف كبيرة.",
+			"name": "الاسم",
+			"description": "الوصف",
+			"isActive": "مفعّل",
+			"discount": "الخصم",
+			"discountType": "النوع",
+			"percentage": "نسبة مئوية",
+			"amountOff": "نقاط مخصومة",
+			"discountValue": "القيمة",
+			"maxDiscount": "سقف الخصم (نقاط)",
+			"conditions": "الشروط",
+			"minAmount": "الحد الأدنى للسعر (نقاط)",
+			"minAmountHint": "يُقارن بالسعر بعد العروض.",
+			"combinable": "يُجمع مع العروض",
+			"limits": "الحدود",
+			"usageLimit": "عدد الاستخدامات الكلي",
+			"perUserLimit": "الاستخدامات لكل عضو",
+			"unlimited": "بلا حد",
+			"eligibility": "من يحق له استخدامه",
+			"newMembersOnly": "للأعضاء الجدد فقط",
+			"company": "لأعضاء شركة معينة",
+			"users": "أعضاء محددون",
+			"usersHint": "اتركه فارغاً ليكون للجميع.",
+			"validity": "الصلاحية",
+			"startsAt": "يبدأ",
+			"endsAt": "ينتهي",
+			"targets": "يُطبَّق على",
+			"targetsEmpty": "كل المشتريات عدا شحن المحفظة.",
+			"addTarget": "إضافة شرط",
+			"removeTarget": "حذف هذا الشرط",
+			"purpose": "نوع الشراء",
+			"itemKind": "مقيّد بـ",
+			"item": "العنصر",
+			"save": "حفظ",
+			"cancel": "إلغاء",
+			"saved": "تم حفظ الكوبون.",
+			"loadError": "تعذّر تحميل الكوبون."
+		}
 	}
 }

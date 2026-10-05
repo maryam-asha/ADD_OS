@@ -2655,5 +2655,65 @@
 		"end": "End sale",
 		"badgeRunning": "Sale {points} points · until {date}",
 		"badgeScheduled": "Sale {points} points · from {date}"
+	},
+	"pricing": {
+		"purpose": {
+			"booking": "Booking",
+			"coworking_session": "Coworking session",
+			"plan_purchase": "Package purchase",
+			"event_registration": "Event registration"
+		},
+		"item": {
+			"any": "Any",
+			"plan_id": "Package",
+			"space_id": "Space",
+			"space_type": "Space type",
+			"event_id": "Event"
+		}
+	},
+	"coupons": {
+		"form": {
+			"createTitle": "New coupon",
+			"editTitle": "Edit coupon {code}",
+			"basics": "Basics",
+			"code": "Code",
+			"codeHint": "Letters, numbers, - and _ only. Saved in capitals.",
+			"name": "Name",
+			"description": "Description",
+			"isActive": "Active",
+			"discount": "Discount",
+			"discountType": "Type",
+			"percentage": "Percentage",
+			"amountOff": "Points off",
+			"discountValue": "Value",
+			"maxDiscount": "Cap (points)",
+			"conditions": "Conditions",
+			"minAmount": "Minimum price (points)",
+			"minAmountHint": "Compared with the price after any sale.",
+			"combinable": "Combines with sales",
+			"limits": "Limits",
+			"usageLimit": "Total uses",
+			"perUserLimit": "Uses per member",
+			"unlimited": "Unlimited",
+			"eligibility": "Who can use it",
+			"newMembersOnly": "New members only",
+			"company": "Company members only",
+			"users": "Specific members",
+			"usersHint": "Leave empty for everyone.",
+			"validity": "Validity",
+			"startsAt": "Starts",
+			"endsAt": "Ends",
+			"targets": "Applies to",
+			"targetsEmpty": "All purchases except wallet top-ups.",
+			"addTarget": "Add a rule",
+			"removeTarget": "Remove this rule",
+			"purpose": "Purchase",
+			"itemKind": "Limited to",
+			"item": "Item",
+			"save": "Save",
+			"cancel": "Cancel",
+			"saved": "Coupon saved.",
+			"loadError": "Could not load the coupon."
+		}
 	}
 }
