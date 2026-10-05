@@ -2714,6 +2714,30 @@
 			"cancel": "Cancel",
 			"saved": "Coupon saved.",
 			"loadError": "Could not load the coupon."
+		},
+		"detail": {
+			"title": "Coupon {code}",
+			"allPurchases": "All purchases except wallet top-ups",
+			"everyone": "Everyone",
+			"discountPercent": "{value}%",
+			"discountPoints": "{value} points",
+			"cap": "up to {value} points",
+			"yes": "Yes",
+			"no": "No",
+			"createdAt": "Created",
+			"redemptions": "Uses",
+			"loadError": "Could not load this coupon."
+		},
+		"redemption": {
+			"member": "Member",
+			"purpose": "Purchase",
+			"record": "Record",
+			"base": "Price",
+			"discounted": "Discount",
+			"date": "Date",
+			"state": "State",
+			"used": "Used",
+			"refunded": "Refunded"
 		}
 	}
 }

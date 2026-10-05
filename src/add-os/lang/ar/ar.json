@@ -2719,6 +2719,30 @@
 			"cancel": "إلغاء",
 			"saved": "تم حفظ الكوبون.",
 			"loadError": "تعذّر تحميل الكوبون."
+		},
+		"detail": {
+			"title": "الكوبون {code}",
+			"allPurchases": "كل المشتريات عدا شحن المحفظة",
+			"everyone": "الجميع",
+			"discountPercent": "خصم {value}٪",
+			"discountPoints": "خصم {value} نقطة",
+			"cap": "حتى {value} نقطة",
+			"yes": "نعم",
+			"no": "لا",
+			"createdAt": "أُنشئ في",
+			"redemptions": "الاستخدامات",
+			"loadError": "تعذّر تحميل هذا الكوبون."
+		},
+		"redemption": {
+			"member": "العضو",
+			"purpose": "نوع الشراء",
+			"record": "السجل",
+			"base": "السعر",
+			"discounted": "الخصم",
+			"date": "التاريخ",
+			"state": "الحالة",
+			"used": "مُستخدَم",
+			"refunded": "مُستردّ"
 		}
 	}
 }
