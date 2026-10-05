@@ -2,7 +2,7 @@ import type { FormItemRule } from "naive-ui"
 import type { Bilingual, FieldDescriptor } from "../field-types"
 // src/add-os/components/resource/__tests__/ResourceFormDrawer.spec.ts
 import { flushPromises, mount } from "@vue/test-utils"
-import { NDatePicker, NTimePicker } from "naive-ui"
+import { NDatePicker, NInputNumber, NTimePicker } from "naive-ui"
 import { describe, expect, it, vi } from "vitest"
 import { nextTick, reactive } from "vue"
 
@@ -668,6 +668,34 @@ describe("datetime fields are entered as a date and a time", () => {
 		await controls(wrapper).pickDate(null)
 
 		expect(model.start_at).toBe("")
+		wrapper.unmount()
+	})
+})
+
+describe("disabledWhen reaches number and datetime fields", () => {
+	interface SaleModel extends Record<string, unknown> {
+		rate: number | null
+		sale: number | null
+		sale_at: string
+	}
+
+	it("disables them while the condition holds, and enables them after", async () => {
+		const fields: FieldDescriptor<SaleModel>[] = [
+			{ key: "rate", labelKey: "x.label", type: "number" },
+			{ key: "sale", labelKey: "x.label", type: "number", disabledWhen: m => m.rate === null },
+			{ key: "sale_at", labelKey: "x.label", type: "datetime", disabledWhen: m => m.rate === null }
+		]
+		const model = reactive<SaleModel>({ rate: null, sale: null, sale_at: "" })
+		const wrapper = mountDrawer(fields, model)
+
+		const numbers = () => wrapper.findAllComponents(NInputNumber)
+		expect(numbers()[1].props("disabled")).toBe(true)
+		expect(wrapper.findComponent(DateTimeInput).props("disabled")).toBe(true)
+
+		model.rate = 100
+		await nextTick()
+		expect(numbers()[1].props("disabled")).toBe(false)
+		expect(wrapper.findComponent(DateTimeInput).props("disabled")).toBe(false)
 		wrapper.unmount()
 	})
 })

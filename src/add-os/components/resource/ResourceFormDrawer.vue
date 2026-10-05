@@ -58,6 +58,7 @@
 							:step="field.step"
 							:min="field.min"
 							:precision="field.integer ? 0 : undefined"
+							:disabled="field.disabledWhen?.(model) ?? false"
 							class="w-full"
 						/>
 						<!--
@@ -127,6 +128,7 @@
 					<DateTimeInput
 						v-else-if="field.type === 'datetime'"
 						:model-value="(model as Record<string, unknown>)[field.key] as string | null"
+						:disabled="field.disabledWhen?.(model) ?? false"
 						@update:model-value="value => writeField(field.key, value ?? '')"
 					/>
 					<div v-else-if="field.type === 'color'" class="flex items-center gap-3 w-full">

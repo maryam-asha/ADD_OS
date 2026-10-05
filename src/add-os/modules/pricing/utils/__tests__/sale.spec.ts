@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { normalizeSale, saleState } from "../sale"
+import { normalizeSale, saleState, spaceSubmitPayload } from "../sale"
 
 describe("normalizeSale", () => {
 	it("turns empty values into null and keeps all three keys", () => {
@@ -25,4 +25,16 @@ describe("saleState", () => {
 	it("is scheduled before the start", () => expect(saleState("2026-10-07T00:00:00Z", "2026-10-08T00:00:00Z", now)).toBe("scheduled"))
 	it("is running inside the window, start inclusive", () => expect(saleState("2026-10-06T00:00:00Z", "2026-10-08T00:00:00Z", now)).toBe("running"))
 	it("is ended at the end, end exclusive", () => expect(saleState("2026-10-01T00:00:00Z", "2026-10-06T00:00:00Z", now)).toBe("ended"))
+})
+
+describe("spaceSubmitPayload", () => {
+	it("ends a sale when the hourly rate is cleared, instead of sending a sale the server must refuse", () => {
+		const out = spaceSubmitPayload({ hourly_rate_points: null, sale_hourly_rate_points: 80, sale_starts_at: "2026-10-05T09:00:00+03:00", sale_ends_at: "2026-10-12T09:00:00+03:00" })
+		expect(out).toMatchObject({ sale_hourly_rate_points: null, sale_starts_at: null, sale_ends_at: null })
+	})
+
+	it("otherwise only normalises", () => {
+		const out = spaceSubmitPayload({ hourly_rate_points: 100, sale_hourly_rate_points: 80, sale_starts_at: "", sale_ends_at: "" })
+		expect(out).toMatchObject({ sale_hourly_rate_points: 80, sale_starts_at: null, sale_ends_at: null })
+	})
 })

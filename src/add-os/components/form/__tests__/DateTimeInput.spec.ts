@@ -42,4 +42,10 @@ describe("dateTimeInput", () => {
 		wrapper.findComponent(NDatePicker).vm.$emit("update:formatted-value", null)
 		expect(updates).toEqual([null])
 	})
+
+	it("disables both controls when disabled", () => {
+		const wrapper = mount(DateTimeInput, { props: { modelValue: null, disabled: true } })
+		expect(wrapper.findComponent(NDatePicker).props("disabled")).toBe(true)
+		expect(wrapper.findComponent(NTimePicker).props("disabled")).toBe(true)
+	})
 })

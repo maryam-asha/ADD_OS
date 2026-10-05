@@ -73,6 +73,7 @@ import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
 import { canDeleteSpatialResource } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
+import { spaceSubmitPayload } from "@/add-os/modules/pricing/utils/sale"
 import {
 	buildSpaceAmenitiesFields,
 	buildSpaceColumns,
@@ -159,6 +160,9 @@ function openEdit(row: Space) {
 		// Read-only: the server's own USD rendering, quoted under the input.
 		// Never recomputed here — the point rate is server state.
 		hourly_rate_usd_hint: row.hourly_rate_usd,
+		sale_hourly_rate_points: row.sale_hourly_rate_points ?? null,
+		sale_starts_at: row.sale_starts_at ?? null,
+		sale_ends_at: row.sale_ends_at ?? null,
 		allows_extension: row.allows_extension,
 		cancellation_window_minutes: row.cancellation_window_minutes,
 		images: resolvedImages
@@ -166,7 +170,9 @@ function openEdit(row: Space) {
 	drawerVisible.value = true
 }
 
-async function submit(payload: Record<string, unknown>) {
+async function submit(formPayload: Record<string, unknown>) {
+	// Empty sale inputs go as null; a cleared hourly rate ends the sale.
+	const payload = spaceSubmitPayload(formPayload)
 	// The server refuses a co_space capacity: it counts the space's desks.
 	if (payload.space_type === "co_space") delete payload.capacity
 	if (mode.value === "create") {

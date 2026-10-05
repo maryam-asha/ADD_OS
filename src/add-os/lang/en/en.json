@@ -2643,5 +2643,17 @@
 			"purposes": "Can pay for",
 			"configNote": "Methods are switched on or off in the server configuration (config/payments.php). A disabled method stops new payments only — those already open are still settled."
 		}
+	},
+	"sale": {
+		"hourlyRate": "Sale rate (points / hour)",
+		"price": "Sale price (points)",
+		"startsAt": "Sale starts",
+		"endsAt": "Sale ends",
+		"section": "Sale",
+		"hint": "All three together. Clear all three to end the sale.",
+		"needsRate": "A space without an hourly rate cannot have a sale.",
+		"end": "End sale",
+		"badgeRunning": "Sale {points} points · until {date}",
+		"badgeScheduled": "Sale {points} points · from {date}"
 	}
 }

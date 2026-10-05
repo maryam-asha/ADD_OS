@@ -13,6 +13,7 @@
 			format="yyyy-MM-dd"
 			value-format="yyyy-MM-dd"
 			clearable
+			:disabled
 			class="flex-1"
 			@update:formatted-value="setDate"
 		/>
@@ -21,6 +22,7 @@
 			format="hh:mm a"
 			use-12-hours
 			value-format="HH:mm"
+			:disabled
 			class="w-36"
 			@update:formatted-value="setTime"
 		/>
@@ -32,6 +34,7 @@ import { NDatePicker, NTimePicker } from "naive-ui"
 import { computed } from "vue"
 import { toOffsetIso } from "@/add-os/utils/format"
 
+defineProps<{ disabled?: boolean }>()
 const model = defineModel<string | null>({ default: null })
 
 function asDate(value: unknown): Date | null {
