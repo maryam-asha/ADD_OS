@@ -125,7 +125,7 @@ import DateTimeInput from "@/add-os/components/form/DateTimeInput.vue"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import { usePricingPickers } from "@/add-os/modules/pricing/composables/usePricingPickers"
 import { ITEM_KEYS_BY_PURPOSE, PRICING_PURPOSES } from "@/add-os/modules/pricing/types/coupon"
-import { couponToForm, emptyCouponForm, formToPayload, groupErrors } from "@/add-os/modules/pricing/utils/coupon-form"
+import { couponToForm, emptyCouponForm, formToPayload, groupErrors, missingLimits } from "@/add-os/modules/pricing/utils/coupon-form"
 import { ApiError } from "@/add-os/services/api"
 import { createCoupon, getCoupon, updateCoupon } from "@/add-os/services/coupons"
 import Icon from "@/components/common/Icon.vue"
@@ -192,6 +192,11 @@ watch(show, (visible) => {
 
 async function submit(): Promise<void> {
 	errors.value = {}
+	const missing = missingLimits(form.value)
+	if (missing.length) {
+		errors.value = Object.fromEntries(missing.map(key => [key, [t("coupons.form.limitRequired")]]))
+		return
+	}
 	saving.value = true
 	try {
 		const payload = formToPayload(form.value)

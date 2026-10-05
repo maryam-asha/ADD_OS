@@ -2714,7 +2714,8 @@
 			"save": "Save",
 			"cancel": "Cancel",
 			"saved": "Coupon saved.",
-			"loadError": "Could not load the coupon."
+			"loadError": "Could not load the coupon.",
+			"limitRequired": "Enter a number, or tick Unlimited."
 		},
 		"detail": {
 			"title": "Coupon {code}",

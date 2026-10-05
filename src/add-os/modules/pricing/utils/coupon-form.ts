@@ -132,3 +132,16 @@ export function groupErrors(errors: Record<string, string[]>, known: string[]) {
 	}
 	return { fields, targets, other }
 }
+
+/**
+ * Limit boxes left empty without "Unlimited" ticked. An emptied number input
+ * is `null`, and `null` is what the server reads as no limit — so sending it
+ * would turn "I cleared the box" into "unlimited", the one confusion the
+ * flags exist to prevent. The form asks instead.
+ */
+export function missingLimits(form: CouponForm): ("usage_limit" | "per_user_limit")[] {
+	const missing: ("usage_limit" | "per_user_limit")[] = []
+	if (!form.usage_unlimited && (form.usage_limit === null || form.usage_limit === undefined)) missing.push("usage_limit")
+	if (!form.per_user_unlimited && (form.per_user_limit === null || form.per_user_limit === undefined)) missing.push("per_user_limit")
+	return missing
+}

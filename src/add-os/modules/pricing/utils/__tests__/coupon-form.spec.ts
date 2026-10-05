@@ -1,6 +1,6 @@
 import type { Coupon } from "@/add-os/modules/pricing/types/coupon"
 import { describe, expect, it } from "vitest"
-import { couponToForm, emptyCouponForm, formToPayload, groupErrors } from "../coupon-form"
+import { couponToForm, emptyCouponForm, formToPayload, groupErrors, missingLimits } from "../coupon-form"
 
 describe("coupon form mapping", () => {
 	it("starts per_user_limit at 1 and usage_limit unlimited", () => {
@@ -90,5 +90,17 @@ describe("groupErrors", () => {
 		expect(grouped.fields).toEqual({ "code": ["taken"], "name.ar": ["required"], "user_ids": ["no user"] })
 		expect(grouped.targets).toEqual({ 1: ["bad target", "no plan"] })
 		expect(grouped.other).toEqual(["?"])
+	})
+})
+
+describe("missingLimits", () => {
+	it("flags an emptied limit box that is not marked unlimited — empty must never read as unlimited", () => {
+		expect(missingLimits({ ...emptyCouponForm(), per_user_limit: null })).toEqual(["per_user_limit"])
+		expect(missingLimits({ ...emptyCouponForm(), usage_unlimited: false, usage_limit: null })).toEqual(["usage_limit"])
+	})
+
+	it("accepts a number, or an explicit unlimited", () => {
+		expect(missingLimits(emptyCouponForm())).toEqual([])
+		expect(missingLimits({ ...emptyCouponForm(), per_user_unlimited: true, per_user_limit: null })).toEqual([])
 	})
 })

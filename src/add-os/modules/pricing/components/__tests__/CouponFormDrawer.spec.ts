@@ -65,4 +65,16 @@ describe("couponFormDrawer", () => {
 		await vm.submit()
 		expect(createMock.mock.calls[0][0]).toMatchObject({ code: "X", per_user_limit: 1, targets: [], user_ids: [] })
 	})
+
+	it("refuses to send an emptied per-member limit as unlimited", async () => {
+		const wrapper = mountDrawer()
+		await flushPromises()
+		const vm = wrapper.vm as unknown as DrawerVm & { form: { per_user_limit: number | null } }
+		vm.form.code = "X"
+		vm.form.per_user_limit = null
+		await vm.submit()
+		await flushPromises()
+		expect(createMock).not.toHaveBeenCalled()
+		expect(wrapper.text()).toContain(en.coupons.form.limitRequired)
+	})
 })
