@@ -20,12 +20,12 @@ vi.mock("@/add-os/modules/pricing/composables/usePricingPickers", () => ({
 		nameOf: (_key: string, id: number) => `#${id}`
 	})
 }))
-// The drawer calls useMessage() directly; NDrawer renders in place so its body is reachable.
+// The form calls useMessage() directly; NModal renders in place so its body is reachable.
 vi.mock("naive-ui", async () => {
 	const actual = await vi.importActual<typeof import("naive-ui")>("naive-ui")
 	const { defineComponent, h } = await vi.importActual<typeof import("vue")>("vue")
-	const InPlace = defineComponent((_props, { slots }) => () => h("div", [slots.default?.(), slots.footer?.()]))
-	return { ...actual, NDrawer: InPlace, NDrawerContent: InPlace, useMessage: () => ({ success: vi.fn(), error: vi.fn() }) }
+	const InPlace = defineComponent({ name: "ModalInPlace", inheritAttrs: false, setup: (_props, { slots }) => () => h("div", [slots.default?.(), slots.footer?.()]) })
+	return { ...actual, NModal: InPlace, useMessage: () => ({ success: vi.fn(), error: vi.fn() }) }
 })
 
 const i18n = createI18n({ legacy: false, locale: "en", messages: { en } })
@@ -76,5 +76,13 @@ describe("couponFormDrawer", () => {
 		await flushPromises()
 		expect(createMock).not.toHaveBeenCalled()
 		expect(wrapper.text()).toContain(en.coupons.form.limitRequired)
+	})
+
+	it("opens as a card dialog, like the other pages' forms", async () => {
+		const wrapper = mountDrawer()
+		await flushPromises()
+		const modal = wrapper.findComponent({ name: "ModalInPlace" })
+		expect(modal.exists()).toBe(true)
+		expect(modal.vm.$attrs.preset).toBe("card")
 	})
 })

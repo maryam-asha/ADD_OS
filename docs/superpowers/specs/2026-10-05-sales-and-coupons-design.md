@@ -195,6 +195,8 @@ these sections:
 
 **Pickers** load once, the first time the drawer opens, and are reused by the detail drawer.
 
+**Shell — changed 2026-10-05 after review:** the form opens in a card dialog (`n-modal preset="card"`, the shell `ResourceFormDrawer` gives every other create/edit form), not the side drawer first designed. Asked for by the product owner for consistency across pages. What was given up: the drawer's full-height room for the rule rows; the dialog compensates with a wider `max-width: 40rem` and a scrolling body. The details view (§5.4) stays a drawer.
+
 **Submitting** always sends the full `CouponPayload`, including `targets` and `user_ids`.
 In edit mode the form is seeded from `getCoupon(id)`, so `user_ids` are the real ones.
 Create returns the coupon; update returns `{ message }`, which is shown as a success toast.
