@@ -1507,7 +1507,8 @@
 			"eventAttendees": "Registrations",
 			"closeSessionDetail": "End session",
 			"activeSessionDetail": "Session details",
-			"memberProfile": "Member profile"
+			"memberProfile": "Member profile",
+			"coupons": "Coupons"
 		}
 	},
 	"resourceCrud": {
@@ -2738,6 +2739,49 @@
 			"state": "State",
 			"used": "Used",
 			"refunded": "Refunded"
-		}
+		},
+		"page": {
+			"description": "Discount codes members type at checkout, and who has used them.",
+			"new": "New coupon",
+			"refresh": "Refresh",
+			"loadError": "Could not load the coupons.",
+			"count": "{count} coupons",
+			"searchPlaceholder": "Search by code"
+		},
+		"filters": {
+			"state": "Window",
+			"active": "Status",
+			"activeYes": "Active",
+			"activeNo": "Inactive"
+		},
+		"state": {
+			"running": "Running",
+			"scheduled": "Scheduled",
+			"ended": "Ended"
+		},
+		"columns": {
+			"code": "Code",
+			"name": "Name",
+			"discount": "Discount",
+			"targets": "Applies to",
+			"usage": "Used",
+			"window": "Valid",
+			"active": "Active",
+			"actions": "Actions"
+		},
+		"delete": {
+			"action": "Delete",
+			"confirmTitle": "Delete coupon {code}?",
+			"confirmBody": "This cannot be undone.",
+			"confirm": "Delete",
+			"cancel": "Cancel",
+			"deleted": "Coupon deleted.",
+			"conflictTitle": "This coupon cannot be deleted",
+			"deactivateInstead": "Deactivate instead",
+			"deactivateTitle": "Deactivate {code}?",
+			"deactivateBody": "Members will no longer be able to use it. Its history is kept.",
+			"deactivate": "Deactivate"
+		},
+		"edit": "Edit"
 	}
 }

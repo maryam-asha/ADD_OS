@@ -1511,7 +1511,8 @@
 			"eventAttendees": "التسجيلات",
 			"closeSessionDetail": "إنهاء الجلسة",
 			"activeSessionDetail": "تفاصيل الجلسة",
-			"memberProfile": "ملف العضو"
+			"memberProfile": "ملف العضو",
+			"coupons": "الكوبونات"
 		}
 	},
 	"resourceCrud": {
@@ -2743,6 +2744,49 @@
 			"state": "الحالة",
 			"used": "مُستخدَم",
 			"refunded": "مُستردّ"
-		}
+		},
+		"page": {
+			"description": "أكواد الخصم التي يكتبها الأعضاء عند الدفع، ومن استخدمها.",
+			"new": "كوبون جديد",
+			"refresh": "تحديث",
+			"loadError": "تعذّر تحميل الكوبونات.",
+			"count": "{count} كوبون",
+			"searchPlaceholder": "ابحث بالكود"
+		},
+		"filters": {
+			"state": "الفترة",
+			"active": "الحالة",
+			"activeYes": "مفعّل",
+			"activeNo": "معطّل"
+		},
+		"state": {
+			"running": "سارٍ",
+			"scheduled": "مجدول",
+			"ended": "منتهٍ"
+		},
+		"columns": {
+			"code": "الكود",
+			"name": "الاسم",
+			"discount": "الخصم",
+			"targets": "يُطبَّق على",
+			"usage": "الاستخدام",
+			"window": "الصلاحية",
+			"active": "مفعّل",
+			"actions": "إجراءات"
+		},
+		"delete": {
+			"action": "حذف",
+			"confirmTitle": "حذف الكوبون {code}؟",
+			"confirmBody": "لا يمكن التراجع عن ذلك.",
+			"confirm": "حذف",
+			"cancel": "إلغاء",
+			"deleted": "تم حذف الكوبون.",
+			"conflictTitle": "لا يمكن حذف هذا الكوبون",
+			"deactivateInstead": "تعطيل بدلاً من الحذف",
+			"deactivateTitle": "تعطيل {code}؟",
+			"deactivateBody": "لن يتمكن الأعضاء من استخدامه بعد الآن، ويبقى سجله محفوظاً.",
+			"deactivate": "تعطيل"
+		},
+		"edit": "تعديل"
 	}
 }
