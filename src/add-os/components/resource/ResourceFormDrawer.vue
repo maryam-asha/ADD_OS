@@ -123,24 +123,12 @@
 						@update:model-value="value => writeField(field.key, value)"
 					/>
 
-					<div v-else-if="field.type === 'datetime'" class="flex w-full gap-2">
-						<n-date-picker
-							:formatted-value="datetimeDatePart((model as Record<string, unknown>)[field.key])"
-							type="date"
-							format="yyyy-MM-dd"
-							value-format="yyyy-MM-dd"
-							clearable
-							class="flex-1"
-							@update:formatted-value="(value: string | null) => setDatetimeDatePart(field.key, value)"
-						/>
-						<n-time-picker
-							:formatted-value="datetimeTimePart((model as Record<string, unknown>)[field.key])"
-							format="hh:mm a" use-12-hours
-							value-format="HH:mm"
-							class="w-36"
-							@update:formatted-value="(value: string | null) => setDatetimeTimePart(field.key, value)"
-						/>
-					</div>
+					<!-- An empty pair is stored as "", as it always was here. -->
+					<DateTimeInput
+						v-else-if="field.type === 'datetime'"
+						:model-value="(model as Record<string, unknown>)[field.key] as string | null"
+						@update:model-value="value => writeField(field.key, value ?? '')"
+					/>
 					<div v-else-if="field.type === 'color'" class="flex items-center gap-3 w-full">
 						<input
 							type="color"
@@ -339,10 +327,10 @@ import type { SessionValue } from "@/add-os/components/resource/SessionsField.vu
 import { NButton, NDatePicker, NForm, NFormItem, NInput, NInputNumber, NModal, NSelect, NSpin, NSwitch, NText, NTimePicker, NUpload, NUploadDragger } from "naive-ui"
 import { computed, reactive, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import DateTimeInput from "@/add-os/components/form/DateTimeInput.vue"
 import SessionsField from "@/add-os/components/resource/SessionsField.vue"
 import { ApiError } from "@/add-os/services/api"
 import { uploadMedia } from "@/add-os/services/media"
-import { toOffsetIso } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 import { buildPayload } from "./field-types"
 
@@ -498,34 +486,6 @@ function setPickerValue(key: string, value: string | null) {
 	target[key] = value ?? ""
 }
 
-/**
- * The two halves of one stored instant.
- *
- * The model still holds a single value carrying an explicit offset — the
- * pickers are only two ways into it, so nothing downstream has to know the
- * field was split.
- */
-function datetimeAsDate(value: unknown): Date | null {
-	if (typeof value === "number" && !Number.isNaN(value)) return new Date(value)
-	if (typeof value !== "string") return null
-	const str = value.trim()
-	if (!str) return null
-	const ts = Date.parse(str.includes("T") ? str : str.replace(" ", "T"))
-	return Number.isNaN(ts) ? null : new Date(ts)
-}
-
-function datetimeDatePart(value: unknown): string | null {
-	const date = datetimeAsDate(value)
-	if (!date) return null
-	return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`
-}
-
-function datetimeTimePart(value: unknown): string | null {
-	const date = datetimeAsDate(value)
-	if (!date) return null
-	return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`
-}
-
 /** Write a value the field owns outright, such as a schedule. */
 function writeField(key: string, value: unknown) {
 	const target = model.value as Record<string, unknown>
@@ -543,34 +503,6 @@ function toggleSwitchGroupValue(key: string, value: string | number, checked: bo
 		current.splice(index, 1)
 	}
 	target[key] = current
-}
-
-/** Written back with an explicit offset, so the API never has to guess. */
-function writeDatetime(key: string, date: Date) {
-	const target = model.value as Record<string, unknown>
-	target[key] = toOffsetIso(date)
-}
-
-function setDatetimeDatePart(key: string, value: string | null) {
-	const target = model.value as Record<string, unknown>
-	if (!value) {
-		target[key] = ""
-		return
-	}
-	const [year, month, day] = value.split("-").map(Number)
-	// Keep the time already chosen; fall back to 09:00 rather than midnight,
-	// which would read as a deliberate start nobody picked.
-	const existing = datetimeAsDate(target[key])
-	writeDatetime(key, new Date(year, month - 1, day, existing?.getHours() ?? 9, existing?.getMinutes() ?? 0, 0))
-}
-
-function setDatetimeTimePart(key: string, value: string | null) {
-	const target = model.value as Record<string, unknown>
-	if (!value) return
-	const [hours, minutes] = value.split(":").map(Number)
-	// A time cannot invent a day, so an untouched date field means today.
-	const base = datetimeAsDate(target[key]) ?? new Date()
-	writeDatetime(key, new Date(base.getFullYear(), base.getMonth(), base.getDate(), hours, minutes, 0))
 }
 
 function removeImage(fieldKey: string) {

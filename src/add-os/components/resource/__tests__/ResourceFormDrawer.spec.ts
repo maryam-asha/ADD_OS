@@ -2,10 +2,12 @@ import type { FormItemRule } from "naive-ui"
 import type { Bilingual, FieldDescriptor } from "../field-types"
 // src/add-os/components/resource/__tests__/ResourceFormDrawer.spec.ts
 import { flushPromises, mount } from "@vue/test-utils"
+import { NDatePicker, NTimePicker } from "naive-ui"
 import { describe, expect, it, vi } from "vitest"
 import { nextTick, reactive } from "vue"
 
 import { createI18n } from "vue-i18n"
+import DateTimeInput from "@/add-os/components/form/DateTimeInput.vue"
 import { ApiError } from "@/add-os/services/api"
 import ResourceFormDrawer from "../ResourceFormDrawer.vue"
 
@@ -576,32 +578,38 @@ describe("datetime fields are entered as a date and a time", () => {
 		wrapper.unmount()
 	})
 
+	/** The drawer's date and time controls, as a person reaches them. */
+	function controls(wrapper: ReturnType<typeof drawerFor>) {
+		const input = wrapper.findComponent(DateTimeInput)
+		return {
+			pickDate: async (value: string | null) => {
+				input.findComponent(NDatePicker).vm.$emit("update:formatted-value", value)
+				await nextTick()
+			},
+			pickTime: async (value: string) => {
+				input.findComponent(NTimePicker).vm.$emit("update:formatted-value", value)
+				await nextTick()
+			},
+			shownDate: () => input.findComponent(NDatePicker).props("formattedValue") as string | null,
+			shownTime: () => input.findComponent(NTimePicker).props("formattedValue") as string | null
+		}
+	}
+
 	it("splits a stored instant into the two halves a person reads", () => {
 		const wrapper = drawerFor("2026-10-01T19:30:00+03:00")
-		const vm = wrapper.vm as unknown as {
-			datetimeDatePart: (v: unknown) => string | null
-			datetimeTimePart: (v: unknown) => string | null
-		}
-
 		const local = new Date("2026-10-01T19:30:00+03:00")
 		const pad = (n: number) => String(n).padStart(2, "0")
 
-		expect(vm.datetimeDatePart("2026-10-01T19:30:00+03:00"))
-			.toBe(`${local.getFullYear()}-${pad(local.getMonth() + 1)}-${pad(local.getDate())}`)
-		expect(vm.datetimeTimePart("2026-10-01T19:30:00+03:00"))
-			.toBe(`${pad(local.getHours())}:${pad(local.getMinutes())}`)
+		expect(controls(wrapper).shownDate()).toBe(`${local.getFullYear()}-${pad(local.getMonth() + 1)}-${pad(local.getDate())}`)
+		expect(controls(wrapper).shownTime()).toBe(`${pad(local.getHours())}:${pad(local.getMinutes())}`)
 		wrapper.unmount()
 	})
 
 	it("shows nothing rather than a default when the field is empty", () => {
 		const wrapper = drawerFor("")
-		const vm = wrapper.vm as unknown as {
-			datetimeDatePart: (v: unknown) => string | null
-			datetimeTimePart: (v: unknown) => string | null
-		}
 
-		expect(vm.datetimeDatePart("")).toBeNull()
-		expect(vm.datetimeTimePart("")).toBeNull()
+		expect(controls(wrapper).shownDate()).toBeNull()
+		expect(controls(wrapper).shownTime()).toBeNull()
 		wrapper.unmount()
 	})
 
@@ -609,74 +617,57 @@ describe("datetime fields are entered as a date and a time", () => {
 	 * The reason the field was split: a combined picker saves 00:00 for a day
 	 * chosen without opening the clock, and midnight reads as a real start.
 	 */
-	it("defaults a newly picked date to 09:00, never midnight", () => {
-		const wrapper = drawerFor("")
-		const vm = wrapper.vm as unknown as {
-			setDatetimeDatePart: (key: string, value: string) => void
-			model: DatetimeModel
-		}
+	it("defaults a newly picked date to 09:00, never midnight", async () => {
+		const model = reactive<DatetimeModel>({ start_at: "" })
+		const wrapper = mountDrawer(fields, model)
 
-		vm.setDatetimeDatePart("start_at", "2026-10-01")
+		await controls(wrapper).pickDate("2026-10-01")
 
-		expect(vm.model.start_at).toContain("T09:00:00")
+		expect(model.start_at).toContain("T09:00:00")
 		wrapper.unmount()
 	})
 
-	it("keeps the chosen time when only the date moves", () => {
-		const wrapper = drawerFor("2026-10-01T19:30:00+03:00")
-		const vm = wrapper.vm as unknown as {
-			setDatetimeDatePart: (key: string, value: string) => void
-			datetimeTimePart: (v: unknown) => string | null
-			model: DatetimeModel
-		}
+	it("keeps the chosen time when only the date moves", async () => {
+		const model = reactive<DatetimeModel>({ start_at: "2026-10-01T19:30:00+03:00" })
+		const wrapper = mountDrawer(fields, model)
 
-		const timeBefore = vm.datetimeTimePart(vm.model.start_at)
-		vm.setDatetimeDatePart("start_at", "2026-11-20")
+		const timeBefore = controls(wrapper).shownTime()
+		await controls(wrapper).pickDate("2026-11-20")
 
-		expect(vm.model.start_at).toContain("2026-11-20")
-		expect(vm.datetimeTimePart(vm.model.start_at)).toBe(timeBefore)
+		expect(model.start_at).toContain("2026-11-20")
+		expect(controls(wrapper).shownTime()).toBe(timeBefore)
 		wrapper.unmount()
 	})
 
-	it("keeps the chosen date when only the time moves", () => {
-		const wrapper = drawerFor("2026-10-01T19:30:00+03:00")
-		const vm = wrapper.vm as unknown as {
-			setDatetimeTimePart: (key: string, value: string) => void
-			datetimeDatePart: (v: unknown) => string | null
-			model: DatetimeModel
-		}
+	it("keeps the chosen date when only the time moves", async () => {
+		const model = reactive<DatetimeModel>({ start_at: "2026-10-01T19:30:00+03:00" })
+		const wrapper = mountDrawer(fields, model)
 
-		const dateBefore = vm.datetimeDatePart(vm.model.start_at)
-		vm.setDatetimeTimePart("start_at", "07:15")
+		const dateBefore = controls(wrapper).shownDate()
+		await controls(wrapper).pickTime("07:15")
 
-		expect(vm.datetimeDatePart(vm.model.start_at)).toBe(dateBefore)
-		expect(vm.model.start_at).toContain("T07:15:00")
+		expect(controls(wrapper).shownDate()).toBe(dateBefore)
+		expect(model.start_at).toContain("T07:15:00")
 		wrapper.unmount()
 	})
 
-	it("writes back with an explicit offset, so the API never guesses", () => {
-		const wrapper = drawerFor("")
-		const vm = wrapper.vm as unknown as {
-			setDatetimeDatePart: (key: string, value: string) => void
-			model: DatetimeModel
-		}
+	it("writes back with an explicit offset, so the API never guesses", async () => {
+		const model = reactive<DatetimeModel>({ start_at: "" })
+		const wrapper = mountDrawer(fields, model)
 
-		vm.setDatetimeDatePart("start_at", "2026-10-01")
+		await controls(wrapper).pickDate("2026-10-01")
 
-		expect(vm.model.start_at).toMatch(/^2026-10-01T09:00:00[+-]\d{2}:\d{2}$/)
+		expect(model.start_at).toMatch(/^2026-10-01T09:00:00[+-]\d{2}:\d{2}$/)
 		wrapper.unmount()
 	})
 
-	it("clears the value when the date is cleared", () => {
-		const wrapper = drawerFor("2026-10-01T19:30:00+03:00")
-		const vm = wrapper.vm as unknown as {
-			setDatetimeDatePart: (key: string, value: string | null) => void
-			model: DatetimeModel
-		}
+	it("clears the value when the date is cleared", async () => {
+		const model = reactive<DatetimeModel>({ start_at: "2026-10-01T19:30:00+03:00" })
+		const wrapper = mountDrawer(fields, model)
 
-		vm.setDatetimeDatePart("start_at", null)
+		await controls(wrapper).pickDate(null)
 
-		expect(vm.model.start_at).toBe("")
+		expect(model.start_at).toBe("")
 		wrapper.unmount()
 	})
 })
