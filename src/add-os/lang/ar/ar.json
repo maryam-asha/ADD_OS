@@ -2720,7 +2720,8 @@
 			"cancel": "إلغاء",
 			"saved": "تم حفظ الكوبون.",
 			"loadError": "تعذّر تحميل الكوبون.",
-			"limitRequired": "أدخل رقماً، أو اختر «بلا حد»."
+			"limitRequired": "أدخل رقماً، أو اختر «بلا حد».",
+			"generateCode": "توليد"
 		},
 		"detail": {
 			"title": "الكوبون {code}",

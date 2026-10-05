@@ -23,7 +23,14 @@
 			<n-form label-placement="top" class="flex flex-col gap-2">
 				<h3 class="font-semibold">{{ t("coupons.form.basics") }}</h3>
 				<n-form-item :label="t('coupons.form.code')" v-bind="fieldState('code')">
-					<n-input :value="form.code" :maxlength="40" dir="ltr" @update:value="(value: string) => (form.code = value.toUpperCase())" />
+					<!-- Typed by hand, or generated: either way the server judges it. -->
+					<n-input-group>
+						<n-input :value="form.code" :maxlength="40" dir="ltr" @update:value="(value: string) => (form.code = value.toUpperCase())" />
+						<n-button data-test="coupon-code-generate" @click="form.code = generateCouponCode()">
+							<template #icon><Icon name="carbon:shuffle" :size="16" /></template>
+							{{ t("coupons.form.generateCode") }}
+						</n-button>
+					</n-input-group>
 				</n-form-item>
 				<n-text depth="3" class="text-xs -mt-2 mb-2">{{ t("coupons.form.codeHint") }}</n-text>
 				<n-form-item v-for="key in BILINGUAL" :key :label="t(`coupons.form.${key}`)">
@@ -124,12 +131,13 @@
 import type { SelectOption } from "naive-ui"
 import type { PricingPurpose, TargetItemKey } from "@/add-os/modules/pricing/types/coupon"
 import type { CouponForm, TargetRow } from "@/add-os/modules/pricing/utils/coupon-form"
-import { NAlert, NButton, NCheckbox, NForm, NFormItem, NInput, NInputNumber, NModal, NRadio, NRadioGroup, NSelect, NSpin, NSwitch, NText, useMessage } from "naive-ui"
+import { NAlert, NButton, NCheckbox, NForm, NFormItem, NInput, NInputGroup, NInputNumber, NModal, NRadio, NRadioGroup, NSelect, NSpin, NSwitch, NText, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import DateTimeInput from "@/add-os/components/form/DateTimeInput.vue"
 import { usePricingPickers } from "@/add-os/modules/pricing/composables/usePricingPickers"
 import { ITEM_KEYS_BY_PURPOSE, PRICING_PURPOSES } from "@/add-os/modules/pricing/types/coupon"
+import { generateCouponCode } from "@/add-os/modules/pricing/utils/coupon-code"
 import { couponToForm, emptyCouponForm, formToPayload, groupErrors, missingLimits } from "@/add-os/modules/pricing/utils/coupon-form"
 import { ApiError } from "@/add-os/services/api"
 import { createCoupon, getCoupon, updateCoupon } from "@/add-os/services/coupons"

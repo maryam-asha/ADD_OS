@@ -85,4 +85,14 @@ describe("couponFormDrawer", () => {
 		expect(modal.exists()).toBe(true)
 		expect(modal.vm.$attrs.preset).toBe("card")
 	})
+
+	it("fills the code with a random one on request, still editable by hand", async () => {
+		const wrapper = mountDrawer()
+		await flushPromises()
+		const vm = wrapper.vm as unknown as DrawerVm
+		await wrapper.get("[data-test='coupon-code-generate']").trigger("click")
+		expect(vm.form.code).toMatch(/^[A-Z2-9]{8}$/)
+		vm.form.code = "SUMMER"
+		expect(vm.form.code).toBe("SUMMER")
+	})
 })

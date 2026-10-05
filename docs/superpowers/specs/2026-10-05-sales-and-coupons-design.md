@@ -166,7 +166,7 @@ client-side member search don't fit the field descriptors. It's a Naive `n-drawe
 these sections:
 
 1. **Basics:** `code` (uppercased as you type, `maxlength=40`, hint about allowed
-   characters), `name` ar/en, `description` ar/en, `is_active` (default `true`).
+   characters) — typed by hand, or filled by a **Generate** button (added 2026-10-05 at the product owner's request): 8 characters from `crypto.getRandomValues` over capitals and digits without O/0/I/1, so it reads unambiguously off a poster. A clash with an existing code is the server's 422 on `code`; nothing is checked client-side, `name` ar/en, `description` ar/en, `is_active` (default `true`).
 2. **Discount:** `discount_type` radio; `discount_value` integer ≥ 1 (max 100 for a
    percentage); `max_discount_points`, shown for a percentage only, and sent as `null`
    when the type is `amount_off`.
