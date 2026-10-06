@@ -22,12 +22,33 @@ snapshot is unverified until someone re-reads the canonical file and re-pins it.
 
 | | |
 |---|---|
-| Pinned | 2026-10-05 |
+| Pinned | 2026-10-06 |
 | Source | the canonical path above, read directly, copied byte-for-byte (`cp`, not a JSON re-serialize — key order and formatting are exactly the source's) |
 | Verified identical | `sha256` match between source and this copy at pin time, plus a `cmp` byte comparison |
-| Size | 1,449,951 bytes / 22,845 lines |
-| Leaf endpoints (parsed) | 363 — `GET` 157, `POST` 111, `DELETE` 36, `PATCH` 29, `PUT` 30 |
-| Distinct `METHOD + URL` | 360 |
+| Size | 1,456,487 bytes / 22,958 lines |
+| Leaf endpoints (parsed) | 366 — `GET` 159, `POST` 112, `DELETE` 36, `PATCH` 29, `PUT` 30 |
+| Distinct `METHOD + URL` | 363 |
+
+### What changed since the 2026-10-05 pin
+
+**Three requests added, none removed — automatic offers and the discount report**
+(ADDCore `docs/decisions/automatic-offers-savings-discount-ledger.md`). A new
+`Admin (Dashboard) / Offers (automatic)` folder: `List Offers` (`GET admin/coupons?is_automatic=1`)
+and `Create Offer` (`POST admin/coupons` with `is_automatic: true`, no `code`,
+`discount_type: fixed_price`); a new `Admin (Dashboard) / Reports` folder:
+`GET admin/reports/discounts` (filters `from`, `to`, `kind`, `purpose`, `status`,
+`per_page`). Update and delete of an offer use the existing Coupons requests.
+
+Changed, none of them path or method: `Create Plan`/`Update Plan` lose the three `sale_*`
+fields and gain `reference_plan_id`, `reference_space_id`, `reference_units`;
+`Create Space`/`Update Space` lose `sale_hourly_rate_points`, `sale_starts_at`,
+`sale_ends_at`. Their descriptions now say sales moved to automatic offers.
+
+Credential scan repeated against the canonical file: the same 51 variables, the same
+150 `auth` keys and five `Authorization` headers on placeholders, zero `Cookie` headers,
+the same nine literal hosts, the same 13 populated password/token-shaped body fields —
+named as fields only, never values. Encoding: strict UTF-8; the double-encoded em dash
+(`â€”`) still appears 19 times, the correct one 343 times.
 
 ### What changed since the second 2026-10-04 pin
 
