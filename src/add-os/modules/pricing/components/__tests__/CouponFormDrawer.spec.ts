@@ -109,4 +109,30 @@ describe("couponFormDrawer", () => {
 		expect(payload.is_automatic).toBe(true)
 		expect(payload.per_user_limit).toBeNull()
 	})
+
+	// An offer is usually just a window: its limits wait behind "Usage limits (optional)".
+	it("keeps a new offer's limits folded away until asked for", async () => {
+		const wrapper = mount(CouponFormDrawer, { props: { "show": true, "couponId": null, "automatic": true, "onUpdate:show": () => {} }, global: { plugins: [i18n] } })
+		await flushPromises()
+		expect(wrapper.text()).not.toContain(en.coupons.form.usageLimit)
+		await wrapper.get("[data-test='coupon-limits-toggle']").trigger("click")
+		expect(wrapper.text()).toContain(en.coupons.form.usageLimit)
+		expect(wrapper.text()).toContain(en.coupons.form.perUserLimit)
+	})
+
+	it("opens an offer that has a limit with its limits shown", async () => {
+		const { getCoupon } = await import("@/add-os/services/coupons")
+		vi.mocked(getCoupon).mockResolvedValue({ id: 3, code: null, is_automatic: true, name: { ar: "عرض", en: "Offer" }, description: null, source: "admin", discount_type: "percentage", discount_value: 20, max_discount_points: null, min_amount_points: null, combinable_with_offers: true, usage_limit: 50, per_user_limit: null, new_members_only: false, company_id: null, starts_at: null, ends_at: null, is_active: true, targets: [], user_ids: [], created_by: 1, created_at: "2026-10-06T00:00:00Z" })
+		const wrapper = mount(CouponFormDrawer, { props: { "show": true, "couponId": 3, "onUpdate:show": () => {} }, global: { plugins: [i18n] } })
+		await flushPromises()
+		expect(wrapper.text()).toContain(en.coupons.form.usageLimit)
+		expect(wrapper.find("[data-test='coupon-limits-toggle']").exists()).toBe(false)
+	})
+
+	it("always shows a typed coupon's limits", async () => {
+		const wrapper = mountDrawer()
+		await flushPromises()
+		expect(wrapper.text()).toContain(en.coupons.form.usageLimit)
+		expect(wrapper.find("[data-test='coupon-limits-toggle']").exists()).toBe(false)
+	})
 })

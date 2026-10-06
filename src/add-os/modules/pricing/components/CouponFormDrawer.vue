@@ -73,7 +73,12 @@
 				<n-form-item v-if="!form.is_automatic" :label="t('coupons.form.combinable')"><n-switch v-model:value="form.combinable_with_offers" /></n-form-item>
 
 				<h3 class="font-semibold">{{ t("coupons.form.limits") }}</h3>
-				<div class="grid grid-cols-2 gap-3">
+				<!-- An offer is usually just a window: its limits wait behind a toggle. -->
+				<n-button v-if="!limitsShown" text type="primary" class="self-start" data-test="coupon-limits-toggle" @click="limitsShown = true">
+					<template #icon><Icon name="carbon:add" :size="16" /></template>
+					{{ t("coupons.form.limitsToggle") }}
+				</n-button>
+				<div v-else class="grid grid-cols-2 gap-3">
 					<n-form-item :label="t('coupons.form.usageLimit')" v-bind="fieldState('usage_limit')">
 						<div class="flex w-full flex-col gap-1">
 							<n-input-number v-model:value="form.usage_limit" :min="1" :precision="0" :disabled="form.usage_unlimited" class="w-full" />
@@ -145,7 +150,7 @@ import { currentLocale } from "@/add-os/lang/currentLocale"
 import { usePricingPickers } from "@/add-os/modules/pricing/composables/usePricingPickers"
 import { ITEM_KEYS_BY_PURPOSE, PRICING_PURPOSES } from "@/add-os/modules/pricing/types/coupon"
 import { generateCouponCode } from "@/add-os/modules/pricing/utils/coupon-code"
-import { couponToForm, emptyCouponForm, formToPayload, groupErrors, missingLimits } from "@/add-os/modules/pricing/utils/coupon-form"
+import { couponToForm, emptyCouponForm, formToPayload, groupErrors, hasLimits, missingLimits } from "@/add-os/modules/pricing/utils/coupon-form"
 import { ApiError } from "@/add-os/services/api"
 import { createCoupon, getCoupon, updateCoupon } from "@/add-os/services/coupons"
 import Icon from "@/components/common/Icon.vue"
@@ -167,6 +172,12 @@ const form = ref<CouponForm>(emptyCouponForm())
 const errors = ref<Record<string, string[]>>({})
 const grouped = computed(() => groupErrors(errors.value, KNOWN))
 const loading = ref(false)
+/**
+ * Whether the limits are on screen. An offer is usually just a window, so a
+ * new one keeps them folded behind a toggle; one already limited shows them.
+ * A typed coupon always shows them.
+ */
+const limitsShown = ref(true)
 const loadFailed = ref(false)
 const saving = ref(false)
 
@@ -204,6 +215,7 @@ async function open(): Promise<void> {
 	try {
 		await pickers.load()
 		if (props.couponId !== null) form.value = couponToForm(await getCoupon(props.couponId))
+		limitsShown.value = !form.value.is_automatic || hasLimits(form.value)
 	} catch (caught) {
 		if (!(caught instanceof ApiError)) throw caught
 		loadFailed.value = true

@@ -2721,7 +2721,8 @@
 			"fixedPrice": "Fixed price",
 			"fixedPriceHint": "The price itself: points per hour for time in a space, points for a package or an event. Needs targets of one kind.",
 			"createOfferTitle": "New offer",
-			"editOfferTitle": "Edit offer: {name}"
+			"editOfferTitle": "Edit offer: {name}",
+			"limitsToggle": "Usage limits (optional) — leave closed for an offer that runs for its dates only"
 		},
 		"detail": {
 			"title": "Coupon {code}",

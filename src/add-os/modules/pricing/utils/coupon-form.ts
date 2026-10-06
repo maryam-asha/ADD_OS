@@ -145,6 +145,11 @@ export function groupErrors(errors: Record<string, string[]>, known: string[]) {
 	return { fields, targets, other }
 }
 
+/** Whether a total or a per-member limit is set — an offer with none runs for its window only. */
+export function hasLimits(form: CouponForm): boolean {
+	return !form.usage_unlimited || !form.per_user_unlimited
+}
+
 /**
  * Limit boxes left empty without "Unlimited" ticked. An emptied number input
  * is `null`, and `null` is what the server reads as no limit — so sending it

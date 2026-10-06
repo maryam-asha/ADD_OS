@@ -1,6 +1,6 @@
 import type { Coupon } from "@/add-os/modules/pricing/types/coupon"
 import { describe, expect, it } from "vitest"
-import { couponToForm, discountLabel, emptyCouponForm, formToPayload, groupErrors, missingLimits } from "../coupon-form"
+import { couponToForm, discountLabel, emptyCouponForm, formToPayload, groupErrors, hasLimits, missingLimits } from "../coupon-form"
 
 describe("coupon form mapping", () => {
 	it("starts per_user_limit at 1 and usage_limit unlimited", () => {
@@ -133,5 +133,11 @@ describe("offers", () => {
 	it("labels a fixed price as the price, not an amount off", () => {
 		const t = (key: string, params?: Record<string, unknown>) => `${key}:${params?.value ?? ""}`
 		expect(discountLabel(t as never, { discount_type: "fixed_price", discount_value: 80 })).toBe("coupons.detail.discountFixed:80")
+	})
+
+	it("says whether a limit is set: total or per member", () => {
+		expect(hasLimits(emptyCouponForm(true))).toBe(false)
+		expect(hasLimits({ ...emptyCouponForm(true), usage_unlimited: false, usage_limit: 50 })).toBe(true)
+		expect(hasLimits({ ...emptyCouponForm(true), per_user_unlimited: false, per_user_limit: 1 })).toBe(true)
 	})
 })
