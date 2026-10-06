@@ -207,30 +207,6 @@
 								<PlanStepper v-model="model.duration_days" :min="1" :step="1" />
 							</div>
 						</div>
-
-						<!-- Sale: all three or none; the server judges sale against price. -->
-						<div class="flex flex-col gap-2 border-t border-neutral-100 pt-3">
-							<div class="flex items-center justify-between">
-								<span class="text-xs font-semibold text-neutral-600">{{ t('sale.section') }}</span>
-								<n-button v-if="hasSale" text size="tiny" type="error" data-test="plan-sale-end" @click="endSale">
-									{{ t('sale.end') }}
-								</n-button>
-							</div>
-							<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-								<div class="flex flex-col gap-1">
-									<span class="text-xs text-neutral-500">{{ t('sale.price') }}</span>
-									<n-input-number v-model:value="model.sale_price_points" :min="0" :precision="0" clearable size="small" />
-								</div>
-								<div class="flex flex-col gap-1 md:col-span-2">
-									<span class="text-xs text-neutral-500">{{ t('sale.startsAt') }}</span>
-									<DateTimeInput v-model="model.sale_starts_at" />
-									<span class="text-xs text-neutral-500">{{ t('sale.endsAt') }}</span>
-									<DateTimeInput v-model="model.sale_ends_at" />
-								</div>
-							</div>
-							<span class="text-xs text-neutral-400">{{ t('sale.hint') }}</span>
-							<span v-for="key in saleErrorKeys" :key class="text-xs text-red-500" data-test="plan-sale-error">{{ errors[key][0] }}</span>
-						</div>
 					</div>
 
 					<!-- Card 3: إعدادات العرض -->
@@ -795,15 +771,13 @@
 import type { SelectOption } from "naive-ui"
 import type { PlanBalanceItem, PlanDiscountItem, PlanFeatureItem, PlanPayload, PlanResourceGrantItem } from "@/add-os/modules/plans/types/plan"
 import type { SpaceType } from "@/add-os/modules/spatial/types/space"
-import { NButton, NInputNumber, NModal, NSelect, NSwitch, NTimePicker, useMessage } from "naive-ui"
+import { NModal, NSelect, NSwitch, NTimePicker, useMessage } from "naive-ui"
 import { computed, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
-import DateTimeInput from "@/add-os/components/form/DateTimeInput.vue"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import { usePoints } from "@/add-os/modules/payments/composables/usePoints"
 import PlanStepper from "@/add-os/modules/plans/components/PlanStepper.vue"
-import { normalizeSale } from "@/add-os/modules/pricing/utils/sale"
 import { SPACE_TYPES } from "@/add-os/modules/spatial/types/space"
 import { ApiError } from "@/add-os/services/api"
 import { listPlanModules } from "@/add-os/services/plan-modules"
@@ -852,17 +826,6 @@ const { formatPoints } = usePoints()
  * Arabic value fails the repo's ar/en script guard.
  */
 const serverPriceUsdHint = computed(() => (props.priceUsd ? `$${props.priceUsd}` : ""))
-
-/** Shown only while a sale is set, so "end" never reads as a dead control. */
-const hasSale = computed(() => model.value.sale_price_points != null || !!model.value.sale_starts_at || !!model.value.sale_ends_at)
-const saleErrorKeys = computed(() => ["sale_price_points", "sale_starts_at", "sale_ends_at"].filter(key => errors.value[key]?.length))
-
-/** Ends the sale: all three `null` is how the server is told. */
-function endSale(): void {
-	model.value.sale_price_points = null
-	model.value.sale_starts_at = null
-	model.value.sale_ends_at = null
-}
 
 const railStyle = ({ checked }: { checked: boolean }) => ({
 	background: checked ? "#557e46" : "#d1d5db"
@@ -1331,7 +1294,7 @@ async function handleSubmit() {
 	}
 
 	// Clean payload before submitting
-	const payload: PlanPayload = normalizeSale({
+	const payload: PlanPayload = {
 		...model.value,
 		subtitle: model.value.subtitle?.ar || model.value.subtitle?.en ? model.value.subtitle : null,
 		balances: (model.value.balances ?? []).map(b => ({
@@ -1370,7 +1333,7 @@ async function handleSubmit() {
 			description: g.description?.ar || g.description?.en ? g.description : null,
 			order: g.order ?? 0
 		}))
-	}, "sale_price_points")
+	}
 
 	try {
 		await props.onSubmit(payload)

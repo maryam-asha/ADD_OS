@@ -47,14 +47,6 @@ export interface Space {
 	hourly_rate_display: string | null
 	/** ISO code `hourly_rate_display` is denominated in, e.g. "SYP". */
 	currency: string
-	/**
-	 * A sale on the hourly rate — all three set, or all three `null`
-	 * (collection pinned 2026-10-05, Create/Update Space). Read as ISO UTC;
-	 * sent with an explicit offset, or all `null` to end the sale.
-	 */
-	sale_hourly_rate_points: number | null
-	sale_starts_at: string | null
-	sale_ends_at: string | null
 	status: OperationalStatus
 	status_reason: string | null
 	/**
@@ -122,14 +114,6 @@ export interface SpacePayload extends Record<string, unknown> {
 	 * a rate in points does not carry one.
 	 */
 	hourly_rate_points: number | null
-	/**
-	 * A sale on the hourly rate — all three set, or all three `null`
-	 * (collection pinned 2026-10-05, Create/Update Space). Read as ISO UTC;
-	 * sent with an explicit offset, all `null` to end it; left out, it stays.
-	 */
-	sale_hourly_rate_points?: number | null
-	sale_starts_at?: string | null
-	sale_ends_at?: string | null
 	allows_extension: boolean
 	/** Whole minutes, `>= 0`; `null` sends the space back to the general setting. */
 	cancellation_window_minutes: number | null

@@ -5,7 +5,6 @@ import type { Plan, PlanPayload } from "@/add-os/modules/plans/types/plan"
 import { NTag } from "naive-ui"
 import { h } from "vue"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
-import { renderSaleBadge } from "@/add-os/modules/pricing/utils/sale"
 import { STATUS_ICONS } from "@/add-os/theme/tokens"
 import { formatClockTime, formatCurrency, formatNumber, isCurrencyCode } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
@@ -58,8 +57,7 @@ export function buildPlanColumns(t: ComposerTranslation, locale: SupportedLocale
 					h("div", { class: "font-medium" }, `${formatNumber(row.price_points)} ${t("points.unit")}`),
 					row.price_display && isCurrencyCode(row.currency)
 						? h("div", { class: "text-secondary text-xs" }, `≈ ${formatCurrency(row.price_display, { currency: row.currency })}`)
-						: null,
-					renderSaleBadge(t, row.sale_price_points ?? null, row.sale_starts_at ?? null, row.sale_ends_at ?? null)
+						: null
 				])
 		},
 		{
@@ -198,9 +196,6 @@ export function emptyPlanPayload(): PlanPayload {
 		subtitle: { ar: "", en: "" },
 		is_subscription: false,
 		price_points: 0,
-		sale_price_points: null,
-		sale_starts_at: null,
-		sale_ends_at: null,
 		duration_days: 30,
 		access_window_start: null,
 		access_window_end: null,

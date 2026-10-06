@@ -113,9 +113,6 @@ function openEdit(row: Plan) {
 		// Points in, points out: the form edits the same integer the backend
 		// stores.
 		price_points: row.price_points,
-		sale_price_points: row.sale_price_points ?? null,
-		sale_starts_at: row.sale_starts_at ?? null,
-		sale_ends_at: row.sale_ends_at ?? null,
 		duration_days: row.duration_days,
 		// Wall-clock strings, copied across untouched — they are not instants,
 		// so there is nothing here to parse, format or convert.

@@ -10,7 +10,6 @@ import type { Zone } from "@/add-os/modules/spatial/types/zone"
 import { NImage } from "naive-ui"
 import { h } from "vue"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
-import { renderSaleBadge } from "@/add-os/modules/pricing/utils/sale"
 import { buildOperationalStatusOptions, renderOperationalStatusTag } from "@/add-os/modules/spatial/types/operational-status"
 import { SPACE_TYPES } from "@/add-os/modules/spatial/types/space"
 import { listBuildings } from "@/add-os/services/buildings"
@@ -86,8 +85,7 @@ export function buildSpaceColumns(
 										{ class: "text-secondary text-xs" },
 										`≈ ${formatCurrency(row.hourly_rate_display, { currency: row.currency })}`
 									)
-								: null,
-							renderSaleBadge(t, row.sale_hourly_rate_points, row.sale_starts_at, row.sale_ends_at)
+								: null
 						])
 		},
 		{ title: t("spaces.columns.status"), key: "status", render: row => renderOperationalStatusTag(row.status, t) }
@@ -182,21 +180,6 @@ export function buildSpaceFields(t: ComposerTranslation, branches: Branch[], loc
 			// Arabic value fails the repo's ar/en script guard.
 			hint: model => (model.hourly_rate_usd_hint ? `≈ ${model.hourly_rate_usd_hint}` : "")
 		},
-		// A sale on the hourly rate (collection pinned 2026-10-05, Create/Update
-		// Space). All three or none; the server refuses a sale on a space with
-		// no rate, so the inputs wait for one.
-		{
-			key: "sale_hourly_rate_points",
-			labelKey: "sale.hourlyRate",
-			type: "number",
-			step: 1,
-			min: 0,
-			integer: true,
-			disabledWhen: model => model.hourly_rate_points === null,
-			hint: model => (model.hourly_rate_points === null ? t("sale.needsRate") : t("sale.hint"))
-		},
-		{ key: "sale_starts_at", labelKey: "sale.startsAt", type: "datetime", disabledWhen: model => model.hourly_rate_points === null },
-		{ key: "sale_ends_at", labelKey: "sale.endsAt", type: "datetime", disabledWhen: model => model.hourly_rate_points === null },
 		// The space's own booking rules (ADDCore
 		// docs/decisions/booking-outcomes-and-extension.md). Not required: an
 		// empty window sends `null`, and the server falls back to the general
@@ -227,9 +210,6 @@ export function emptySpacePayload(): SpaceFormModel {
 		capacity: 1,
 		hourly_rate_points: null,
 		hourly_rate_usd_hint: null,
-		sale_hourly_rate_points: null,
-		sale_starts_at: null,
-		sale_ends_at: null,
 		allows_extension: true,
 		cancellation_window_minutes: null,
 		images: []
