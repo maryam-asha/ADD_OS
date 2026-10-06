@@ -207,6 +207,32 @@
 								<PlanStepper v-model="model.duration_days" :min="1" :step="1" />
 							</div>
 						</div>
+
+						<!-- Saving reference: a plan or a space's hourly rate, times units — one or neither. -->
+						<div class="flex flex-col gap-2 border-t border-neutral-100 pt-3" data-test="plan-reference">
+							<span class="text-xs font-semibold text-neutral-600">{{ t('packages.reference.section') }}</span>
+							<n-radio-group :value="referenceKind" size="small" @update:value="setReferenceKind">
+								<n-radio value="none">{{ t('packages.reference.none') }}</n-radio>
+								<n-radio value="plan">{{ t('packages.reference.plan') }}</n-radio>
+								<n-radio value="space">{{ t('packages.reference.space') }}</n-radio>
+							</n-radio-group>
+							<div v-if="referenceKind !== 'none'" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+								<div class="flex flex-col gap-1">
+									<span class="text-xs text-neutral-500">{{ t(referenceKind === 'plan' ? 'packages.reference.planLabel' : 'packages.reference.spaceLabel') }}</span>
+									<n-select v-if="referenceKind === 'plan'" v-model:value="model.reference_plan_id" :options="referencePlanOptions" filterable size="small" />
+									<n-select v-else v-model:value="model.reference_space_id" :options="spaceOptions" filterable size="small" />
+								</div>
+								<div class="flex flex-col gap-1">
+									<span class="text-xs text-neutral-500">{{ t(referenceKind === 'plan' ? 'packages.reference.unitsPlan' : 'packages.reference.unitsHours') }}</span>
+									<n-input-number v-model:value="model.reference_units" :min="1" :precision="0" clearable size="small" />
+								</div>
+							</div>
+							<span class="text-xs text-neutral-400">{{ t('packages.reference.hint') }}</span>
+							<span v-for="key in referenceErrorKeys" :key class="text-xs text-red-500" data-test="plan-reference-error">{{ errors[key][0] }}</span>
+							<span v-if="saving" class="text-xs font-semibold text-neutral-700" data-test="plan-saving">
+								{{ t('packages.reference.saving', { percent: formatNumber(saving.saving_percent), points: formatNumber(saving.saving_points), name: saving.reference_name ?? '—', units: formatNumber(saving.units) }) }}
+							</span>
+						</div>
 					</div>
 
 					<!-- Card 3: إعدادات العرض -->
@@ -769,9 +795,9 @@
 
 <script setup lang="ts">
 import type { SelectOption } from "naive-ui"
-import type { PlanBalanceItem, PlanDiscountItem, PlanFeatureItem, PlanPayload, PlanResourceGrantItem } from "@/add-os/modules/plans/types/plan"
+import type { PlanBalanceItem, PlanDiscountItem, PlanFeatureItem, PlanPayload, PlanResourceGrantItem, PlanSaving } from "@/add-os/modules/plans/types/plan"
 import type { SpaceType } from "@/add-os/modules/spatial/types/space"
-import { NModal, NSelect, NSwitch, NTimePicker, useMessage } from "naive-ui"
+import { NInputNumber, NModal, NRadio, NRadioGroup, NSelect, NSwitch, NTimePicker, useMessage } from "naive-ui"
 import { computed, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
@@ -783,6 +809,7 @@ import { ApiError } from "@/add-os/services/api"
 import { listPlanModules } from "@/add-os/services/plan-modules"
 import { listResourceTypes } from "@/add-os/services/resource-types"
 import { listSpaces } from "@/add-os/services/spaces"
+import { formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
 const props = defineProps<{
@@ -801,6 +828,12 @@ const props = defineProps<{
 	 * refreshes when the list reloads after a save.
 	 */
 	priceUsd?: string | null
+	/** The plan being edited (`null` on create) — never offered as its own reference. */
+	planId?: number | null
+	/** Plans that may serve as this one's reference. */
+	referencePlans?: { id: number, name: { ar: string, en: string } }[]
+	/** The server's saving for this plan, shown as it computed it. */
+	saving?: PlanSaving | null
 }>()
 
 const show = defineModel<boolean>("show", { required: true })
@@ -826,6 +859,30 @@ const { formatPoints } = usePoints()
  * Arabic value fails the repo's ar/en script guard.
  */
 const serverPriceUsdHint = computed(() => (props.priceUsd ? `$${props.priceUsd}` : ""))
+
+type ReferenceKind = "none" | "plan" | "space"
+
+/** Which reference the plan has, read off the model — never both. */
+const referenceKind = computed<ReferenceKind>(() => {
+	if (model.value.reference_plan_id != null) return "plan"
+	if (model.value.reference_space_id != null) return "space"
+	return pickedReferenceKind.value
+})
+/** A kind chosen before its item is picked. */
+const pickedReferenceKind = ref<ReferenceKind>("none")
+
+/** Switching kind drops the other reference; none drops all three. */
+function setReferenceKind(kind: ReferenceKind): void {
+	pickedReferenceKind.value = kind
+	if (kind !== "plan") model.value.reference_plan_id = null
+	if (kind !== "space") model.value.reference_space_id = null
+	if (kind === "none") model.value.reference_units = null
+}
+
+const referencePlanOptions = computed<SelectOption[]>(() => (props.referencePlans ?? [])
+	.filter(plan => plan.id !== props.planId)
+	.map(plan => ({ label: pickLocalized(plan.name, currentLocale.value), value: plan.id })))
+const referenceErrorKeys = computed(() => ["reference_plan_id", "reference_space_id", "reference_units"].filter(key => errors.value[key]?.length))
 
 const railStyle = ({ checked }: { checked: boolean }) => ({
 	background: checked ? "#557e46" : "#d1d5db"
@@ -1296,6 +1353,10 @@ async function handleSubmit() {
 	// Clean payload before submitting
 	const payload: PlanPayload = {
 		...model.value,
+		// One reference or neither, every key sent: null clears it.
+		reference_plan_id: model.value.reference_plan_id ?? null,
+		reference_space_id: model.value.reference_space_id ?? null,
+		reference_units: model.value.reference_units ?? null,
 		subtitle: model.value.subtitle?.ar || model.value.subtitle?.en ? model.value.subtitle : null,
 		balances: (model.value.balances ?? []).map(b => ({
 			category: b.category,

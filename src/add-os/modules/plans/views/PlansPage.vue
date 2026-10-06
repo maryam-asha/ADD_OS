@@ -35,6 +35,9 @@
 			v-model:show="drawerVisible"
 			v-model:model="form"
 			:price-usd="editingPriceUsd"
+			:plan-id="editingId"
+			:reference-plans="data ?? []"
+			:saving="editingSaving"
 			:title="mode === 'create' ? t('packages.create.title') : t('packages.edit.title')"
 			:submitting="mutations.isSubmitting.value"
 			:on-submit="submit"
@@ -44,7 +47,7 @@
 
 <script setup lang="ts">
 import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vue"
-import type { Plan, PlanPayload } from "@/add-os/modules/plans/types/plan"
+import type { Plan, PlanPayload, PlanSaving } from "@/add-os/modules/plans/types/plan"
 import { NAlert, NButton } from "naive-ui"
 import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
@@ -91,12 +94,15 @@ const editingId = ref<number | null>(null)
  * yet, and this client must not derive one — the point rate is server state.
  */
 const editingPriceUsd = ref<string | null>(null)
+/** The server's saving for the plan being edited — shown, never recomputed here. */
+const editingSaving = ref<PlanSaving | null>(null)
 const form = ref<PlanPayload>(emptyPlanPayload())
 
 function openCreate() {
 	mode.value = "create"
 	editingId.value = null
 	editingPriceUsd.value = null
+	editingSaving.value = null
 	form.value = emptyPlanPayload()
 	drawerVisible.value = true
 }
@@ -105,6 +111,7 @@ function openEdit(row: Plan) {
 	mode.value = "edit"
 	editingId.value = row.id
 	editingPriceUsd.value = row.price_usd ?? null
+	editingSaving.value = row.saving ?? null
 	form.value = {
 		plan_module_id: row.plan_module_id ?? null,
 		name: { ...row.name },
@@ -113,6 +120,9 @@ function openEdit(row: Plan) {
 		// Points in, points out: the form edits the same integer the backend
 		// stores.
 		price_points: row.price_points,
+		reference_plan_id: row.reference_plan_id ?? null,
+		reference_space_id: row.reference_space_id ?? null,
+		reference_units: row.reference_units ?? null,
 		duration_days: row.duration_days,
 		// Wall-clock strings, copied across untouched — they are not instants,
 		// so there is nothing here to parse, format or convert.

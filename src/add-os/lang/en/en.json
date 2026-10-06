@@ -810,7 +810,19 @@
 			"public": "Public",
 			"private": "Private"
 		},
-		"anyTime": "Any time"
+		"anyTime": "Any time",
+		"reference": {
+			"section": "Saving reference (optional)",
+			"none": "None",
+			"plan": "Another package",
+			"space": "A space's hourly rate",
+			"planLabel": "Reference package",
+			"spaceLabel": "Reference space",
+			"unitsPlan": "How many of it (e.g. 12 months)",
+			"unitsHours": "How many hours",
+			"hint": "Shown to members as what this package saves: the reference's price × units against this package's price. It changes no price.",
+			"saving": "Saves {percent}% ({points} points) against {name} × {units}"
+		}
 	},
 	"events": {
 		"columns": {

@@ -75,7 +75,33 @@ export interface PlanResourceGrantItem {
 	order?: number
 }
 
-export interface Plan {
+/**
+ * What a plan saves against its reference, as the server computed it
+ * (ADDCore `PlanSaving`, pinned collection 2026-10-06; admin routes only).
+ * Its own price, not a discount — shown, never applied.
+ */
+export interface PlanSaving {
+	compared_to: "plan" | "space"
+	reference_id: number
+	reference_name: string | null
+	units: number
+	reference_points: number
+	saving_points: number
+	/** Rounded down by the server. */
+	saving_percent: number
+	/** Exact, a decimal string — e.g. "75.00". */
+	per_unit_points: string
+}
+
+/** A plan's saving reference: another plan, or a space's hourly rate — one, or neither. */
+export interface PlanReference {
+	reference_plan_id: number | null
+	reference_space_id: number | null
+	/** Required with a reference: the 12 in "12 × the monthly plan". */
+	reference_units: number | null
+}
+
+export interface Plan extends PlanReference {
 	id: number
 	plan_module_id?: number | null
 	plan_module?: PlanModule | null
@@ -88,6 +114,8 @@ export interface Plan {
 	 * the only one that is exact. Everything below is derived for display.
 	 */
 	price_points: number
+	/** Admin routes only; `null` with no reference or no saving. */
+	saving?: PlanSaving | null
 	/**
 	 * `price_points` rendered in the base currency (USD) by the server, as a
 	 * decimal string, e.g. "50.00". Display only — never parse it back into a
@@ -134,7 +162,7 @@ export interface Plan {
 	created_at: string
 }
 
-export interface PlanPayload extends Record<string, unknown> {
+export interface PlanPayload extends Record<string, unknown>, Partial<PlanReference> {
 	plan_module_id?: number | null
 	name: { ar: string; en: string }
 	subtitle?: { ar: string; en: string } | null
