@@ -862,14 +862,14 @@ const serverPriceUsdHint = computed(() => (props.priceUsd ? `$${props.priceUsd}`
 
 type ReferenceKind = "none" | "plan" | "space"
 
+/** A kind chosen before its item is picked. */
+const pickedReferenceKind = ref<ReferenceKind>("none")
 /** Which reference the plan has, read off the model — never both. */
 const referenceKind = computed<ReferenceKind>(() => {
 	if (model.value.reference_plan_id != null) return "plan"
 	if (model.value.reference_space_id != null) return "space"
 	return pickedReferenceKind.value
 })
-/** A kind chosen before its item is picked. */
-const pickedReferenceKind = ref<ReferenceKind>("none")
 
 /** Switching kind drops the other reference; none drops all three. */
 function setReferenceKind(kind: ReferenceKind): void {

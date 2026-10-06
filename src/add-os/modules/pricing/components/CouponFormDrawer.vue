@@ -9,7 +9,7 @@
 	<n-modal
 		v-model:show="show"
 		preset="card"
-		:title="title"
+		:title
 		closable
 		style="max-width: 40rem"
 		content-style="max-height: 60vh; overflow-y: auto"
@@ -102,7 +102,7 @@
 				<n-form-item :label="t('coupons.form.endsAt')" v-bind="fieldState('ends_at')"><DateTimeInput v-model="form.ends_at" /></n-form-item>
 
 				<h3 class="font-semibold">{{ t("coupons.form.targets") }}</h3>
-				<n-text v-if="grouped.fields['targets']" type="error" class="text-xs" data-test="coupon-targets-error">{{ grouped.fields["targets"][0] }}</n-text>
+				<n-text v-if="grouped.fields.targets" type="error" class="text-xs" data-test="coupon-targets-error">{{ grouped.fields.targets[0] }}</n-text>
 				<n-text v-if="!form.targets.length" depth="3" class="text-sm">{{ t("coupons.form.targetsEmpty") }}</n-text>
 				<div v-for="(row, index) in form.targets" :key="index" class="flex flex-col gap-1 rounded-lg border border-[var(--border-color)] p-2">
 					<div class="grid grid-cols-[1fr_1fr_1fr_auto] items-end gap-2">
