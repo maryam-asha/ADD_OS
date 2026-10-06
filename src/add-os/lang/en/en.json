@@ -1520,7 +1520,8 @@
 			"closeSessionDetail": "End session",
 			"activeSessionDetail": "Session details",
 			"memberProfile": "Member profile",
-			"coupons": "Coupons"
+			"coupons": "Coupons",
+			"discountReport": "Discount report"
 		}
 	},
 	"resourceCrud": {
@@ -2798,5 +2799,54 @@
 			"couponsHint": "Codes a member types when paying.",
 			"offersHint": "Automatic offers: no code; the best one for the member applies by itself."
 		}
+	},
+	"discountReport": {
+		"description": "Every operation with an offer, a plan discount, a coupon or a package saving in the period, and its status. Cancelled, rejected, failed or reversed ones are listed but not counted.",
+		"refresh": "Refresh",
+		"loadError": "Could not load the report.",
+		"filters": {
+			"kind": "Kind",
+			"purpose": "Purchase",
+			"status": "Status"
+		},
+		"kind": {
+			"offer": "Offer",
+			"plan_discount": "Plan discount",
+			"coupon": "Coupon",
+			"duration_saving": "Package saving"
+		},
+		"status": {
+			"counted": "Counted",
+			"void": "Not counted"
+		},
+		"counted": {
+			"yes": "Counted",
+			"no": "Not counted"
+		},
+		"record": {
+			"booking": "Booking",
+			"walkin_session": "Walk-in",
+			"event_attendee": "Registration",
+			"payment": "Payment"
+		},
+		"columns": {
+			"record": "Operation",
+			"member": "Member",
+			"purpose": "Purchase",
+			"at": "Priced at",
+			"status": "Status",
+			"price": "List / paid",
+			"discounts": "Discounts",
+			"saving": "Saving"
+		},
+		"totals": {
+			"operations": "Operations",
+			"list": "List price (points)",
+			"final": "Paid (points)",
+			"effective": "Effective discount",
+			"savings": "Package savings (points)",
+			"note": "Totals count only operations that still count. Package savings are shown apart and never taken off the list price."
+		},
+		"saving": "{points} points ({percent}%) against {name}"
 	}
 }

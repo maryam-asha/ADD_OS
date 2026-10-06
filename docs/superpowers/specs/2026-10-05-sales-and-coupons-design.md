@@ -331,3 +331,22 @@ another, never in parallel (forks-pool timeouts).
 - Restyling `PlanFormDrawer`'s existing hex.
 - Leave the uncommitted `members/` edits (WalletTopUpDialog, ProfileTable,
   MemberProfilePage) untouched and out of every commit.
+
+## Reversal, 2026-10-06 — sales become automatic offers
+
+The backend replaced the per-item sale with automatic offers on the coupon
+engine (ADDCore `docs/decisions/automatic-offers-savings-discount-ledger.md`,
+pinned collection 2026-10-06). A sale here was three fields on one space or
+one plan; it had no history, could not reach a set of items, had no audience
+and no limits. The dashboard follows:
+
+- **Given up:** the sale section on the space and plan forms, its list badges
+  and `pricing/utils/sale.ts`. An operator who wants "this plan at 100 for two
+  days" now creates an offer instead of editing the plan.
+- **Offers** live on the coupons page as a second tab (`is_automatic=1`), on
+  the same endpoints: no code, an optional `fixed_price` (offers only, targets
+  of one kind), no "combinable with offers" switch.
+- **Plans** gain a saving reference (`reference_plan_id` or
+  `reference_space_id`, with `reference_units`); the form shows the saving the
+  server computed and never derives one.
+- **A discount report** page (`GET admin/reports/discounts`) under Plans.
