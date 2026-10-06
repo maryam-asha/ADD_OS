@@ -8,14 +8,16 @@ import type { Coupon, CouponPayload } from "@/add-os/modules/pricing/types/coupo
  * Throws without `user_ids`: only the detail endpoint carries them, and a
  * body built from a list row would send `[]` and silently lift the coupon's
  * member restriction. Times go back exactly as read — they end in `Z`, which
- * the server takes at its word.
+ * the server takes at its word. An offer goes back without a code: it has
+ * none, and the server refuses one.
  */
 export function couponToPayload(coupon: Coupon): CouponPayload {
 	if (!Array.isArray(coupon.user_ids)) {
 		throw new TypeError("couponToPayload needs the coupon detail: user_ids is missing")
 	}
 	return {
-		code: coupon.code,
+		...(coupon.is_automatic ? {} : { code: coupon.code ?? "" }),
+		is_automatic: coupon.is_automatic,
 		name: coupon.name,
 		description: coupon.description,
 		discount_type: coupon.discount_type,

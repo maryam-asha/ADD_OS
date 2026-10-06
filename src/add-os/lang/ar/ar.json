@@ -2709,7 +2709,11 @@
 			"saved": "تم حفظ الكوبون.",
 			"loadError": "تعذّر تحميل الكوبون.",
 			"limitRequired": "أدخل رقماً، أو اختر «بلا حد».",
-			"generateCode": "توليد"
+			"generateCode": "توليد",
+			"fixedPrice": "سعر ثابت",
+			"fixedPriceHint": "السعر نفسه: نقاط للساعة في المساحات، ونقاط للباقة أو الفعالية. يحتاج أهدافاً من نوع واحد.",
+			"createOfferTitle": "عرض جديد",
+			"editOfferTitle": "تعديل العرض: {name}"
 		},
 		"detail": {
 			"title": "الكوبون {code}",
@@ -2722,7 +2726,9 @@
 			"no": "لا",
 			"createdAt": "أُنشئ في",
 			"redemptions": "الاستخدامات",
-			"loadError": "تعذّر تحميل هذا الكوبون."
+			"loadError": "تعذّر تحميل هذا الكوبون.",
+			"discountFixed": "{value} نقطة (سعر ثابت)",
+			"offerTitle": "عرض: {name}"
 		},
 		"redemption": {
 			"member": "العضو",
@@ -2741,7 +2747,8 @@
 			"refresh": "تحديث",
 			"loadError": "تعذّر تحميل الكوبونات.",
 			"count": "{count} كوبون",
-			"searchPlaceholder": "ابحث بالكود"
+			"searchPlaceholder": "ابحث بالكود",
+			"newOffer": "عرض جديد"
 		},
 		"filters": {
 			"state": "الفترة",
@@ -2777,6 +2784,12 @@
 			"deactivateBody": "لن يتمكن الأعضاء من استخدامه بعد الآن، ويبقى سجله محفوظاً.",
 			"deactivate": "تعطيل"
 		},
-		"edit": "تعديل"
+		"edit": "تعديل",
+		"tabs": {
+			"coupons": "الكوبونات",
+			"offers": "العروض",
+			"couponsHint": "أكواد يكتبها العضو عند الدفع.",
+			"offersHint": "عروض تلقائية بلا كود: يُطبَّق أفضلها للعضو من تلقاء نفسه."
+		}
 	}
 }

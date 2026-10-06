@@ -6,7 +6,7 @@
 -->
 <template>
 	<n-drawer v-model:show="show" :width="620" :placement="isRtl ? 'left' : 'right'">
-		<n-drawer-content :title="coupon ? t('coupons.detail.title', { code: coupon.code }) : ''" closable>
+		<n-drawer-content :title="drawerTitle" closable>
 			<n-spin :show="loading">
 				<n-alert v-if="failed" type="error" :bordered="false">{{ t("coupons.detail.loadError") }}</n-alert>
 				<div v-if="coupon" class="flex flex-col gap-4 text-sm">
@@ -76,6 +76,13 @@ function targetLabel(target: CouponTarget): string {
 	return purpose
 }
 
+/** A coupon by its code; an offer, which has none, by its name. */
+const drawerTitle = computed(() => {
+	const c = coupon.value
+	if (!c) return ""
+	return c.code !== null ? t("coupons.detail.title", { code: c.code }) : t("coupons.detail.offerTitle", { name: c.name ? pickLocalized(c.name, currentLocale.value) : "" })
+})
+
 const fields = computed(() => {
 	const c = coupon.value
 	if (!c) return []
@@ -84,7 +91,8 @@ const fields = computed(() => {
 		{ label: t("coupons.form.name"), value: c.name ? pickLocalized(c.name, currentLocale.value) || dash : dash },
 		{ label: t("coupons.form.discount"), value: discountLabel(t, c) + (c.max_discount_points ? ` · ${t("coupons.detail.cap", { value: formatNumber(c.max_discount_points) })}` : "") },
 		{ label: t("coupons.form.minAmount"), value: c.min_amount_points === null ? dash : formatNumber(c.min_amount_points) },
-		{ label: t("coupons.form.combinable"), value: yesNo(c.combinable_with_offers) },
+		// Whether it stacks on an offer means nothing for an offer itself.
+		...(c.is_automatic ? [] : [{ label: t("coupons.form.combinable"), value: yesNo(c.combinable_with_offers) }]),
 		{ label: t("coupons.form.usageLimit"), value: usage(c), ltr: true },
 		{ label: t("coupons.form.perUserLimit"), value: c.per_user_limit === null ? t("coupons.form.unlimited") : formatNumber(c.per_user_limit) },
 		{ label: t("coupons.form.newMembersOnly"), value: yesNo(c.new_members_only) },
@@ -112,7 +120,7 @@ const columns = computed<DataTableColumns<CouponRedemption>>(() => [
 	{ title: t("coupons.redemption.purpose"), key: "purpose", render: row => t(`pricing.purpose.${row.purpose}`) },
 	{ title: t("coupons.redemption.record"), key: "record", render: row => h("bdi", { dir: "ltr" }, recordOf(row)) },
 	{ title: t("coupons.redemption.base"), key: "base_points", render: row => formatNumber(row.base_points) },
-	{ title: t("coupons.redemption.discounted"), key: "points_discounted", render: row => formatNumber(row.points_discounted) },
+	{ title: t("coupons.redemption.discounted"), key: "points", render: row => `${formatNumber(row.points)} (${formatNumber(row.percent)}%)` },
 	{ title: t("coupons.redemption.date"), key: "created_at", render: row => formatDateTime(row.created_at) },
 	{
 		title: t("coupons.redemption.state"),

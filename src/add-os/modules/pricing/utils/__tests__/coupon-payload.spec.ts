@@ -5,6 +5,7 @@ import { couponToPayload } from "../coupon-payload"
 const detail: Coupon = {
 	id: 7,
 	code: "WELCOME20",
+	is_automatic: false,
 	name: { ar: "عرض الترحيب", en: "Welcome offer" },
 	description: null,
 	source: "admin",
@@ -32,6 +33,7 @@ describe("couponToPayload", () => {
 		const payload = couponToPayload(detail)
 		expect(payload).toEqual({
 			code: "WELCOME20",
+			is_automatic: false,
 			name: { ar: "عرض الترحيب", en: "Welcome offer" },
 			description: null,
 			discount_type: "percentage",
@@ -58,5 +60,11 @@ describe("couponToPayload", () => {
 	it("refuses a list row, which carries no user_ids", () => {
 		const { user_ids: _omit, ...row } = detail
 		expect(() => couponToPayload(row)).toThrow(/user_ids/)
+	})
+
+	it("sends an offer back without a code, still automatic", () => {
+		const payload = couponToPayload({ ...detail, code: null, is_automatic: true } as never)
+		expect(payload).not.toHaveProperty("code")
+		expect(payload.is_automatic).toBe(true)
 	})
 })

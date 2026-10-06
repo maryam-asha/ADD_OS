@@ -114,4 +114,18 @@ describe("couponsPage", () => {
 		expect(wrapper.text()).toContain("NEW")
 		expect(wrapper.text()).not.toContain("OLD")
 	})
+
+	it("lists typed coupons on the first tab and offers on the second", async () => {
+		const wrapper = await mountPage()
+		expect(listMock).toHaveBeenLastCalledWith(expect.objectContaining({ is_automatic: 0 }))
+		expect(wrapper.text()).toContain("VIP")
+
+		listMock.mockResolvedValue(page([row({ id: 9, code: null, is_automatic: true, name: { ar: "عرض", en: "Week offer" } })]))
+		await wrapper.get("[data-test='coupons-tab-offers']").trigger("click")
+		await flushPromises()
+
+		expect(listMock).toHaveBeenLastCalledWith(expect.objectContaining({ is_automatic: 1, page: 1 }))
+		expect(wrapper.text()).toContain("عرض")
+		expect(wrapper.text()).not.toContain(en.coupons.columns.code)
+	})
 })

@@ -9,7 +9,7 @@
 	<n-modal
 		v-model:show="show"
 		preset="card"
-		:title="couponId ? t('coupons.form.editTitle', { code: form.code }) : t('coupons.form.createTitle')"
+		:title="title"
 		closable
 		style="max-width: 40rem"
 		content-style="max-height: 60vh; overflow-y: auto"
@@ -22,7 +22,8 @@
 
 			<n-form label-placement="top" class="flex flex-col gap-2">
 				<h3 class="font-semibold">{{ t("coupons.form.basics") }}</h3>
-				<n-form-item :label="t('coupons.form.code')" v-bind="fieldState('code')">
+				<!-- An offer has no code: it applies itself. -->
+				<n-form-item v-if="!form.is_automatic" :label="t('coupons.form.code')" v-bind="fieldState('code')">
 					<!-- Typed by hand, or generated: either way the server judges it. -->
 					<n-input-group>
 						<n-input :value="form.code" :maxlength="40" dir="ltr" @update:value="(value: string) => (form.code = value.toUpperCase())" />
@@ -32,7 +33,7 @@
 						</n-button>
 					</n-input-group>
 				</n-form-item>
-				<n-text depth="3" class="text-xs -mt-2 mb-2">{{ t("coupons.form.codeHint") }}</n-text>
+				<n-text v-if="!form.is_automatic" depth="3" class="text-xs -mt-2 mb-2">{{ t("coupons.form.codeHint") }}</n-text>
 				<n-form-item v-for="key in BILINGUAL" :key :label="t(`coupons.form.${key}`)">
 					<div class="flex w-full flex-col gap-1">
 						<div class="flex w-full gap-2">
@@ -51,8 +52,10 @@
 					<n-radio-group v-model:value="form.discount_type">
 						<n-radio value="percentage">{{ t("coupons.form.percentage") }}</n-radio>
 						<n-radio value="amount_off">{{ t("coupons.form.amountOff") }}</n-radio>
+						<n-radio v-if="form.is_automatic" value="fixed_price" data-test="coupon-fixed-price">{{ t("coupons.form.fixedPrice") }}</n-radio>
 					</n-radio-group>
 				</n-form-item>
+				<n-text v-if="form.discount_type === 'fixed_price'" depth="3" class="text-xs -mt-2 mb-2">{{ t("coupons.form.fixedPriceHint") }}</n-text>
 				<div class="grid grid-cols-2 gap-3">
 					<n-form-item :label="t('coupons.form.discountValue')" v-bind="fieldState('discount_value')">
 						<n-input-number v-model:value="form.discount_value" :min="1" :max="form.discount_type === 'percentage' ? 100 : undefined" :precision="0" class="w-full" />
@@ -66,7 +69,8 @@
 				<n-form-item :label="t('coupons.form.minAmount')" :feedback="fieldState('min_amount_points').feedback ?? t('coupons.form.minAmountHint')" :validation-status="fieldState('min_amount_points')['validation-status']">
 					<n-input-number v-model:value="form.min_amount_points" :min="0" :precision="0" clearable class="w-full" />
 				</n-form-item>
-				<n-form-item :label="t('coupons.form.combinable')"><n-switch v-model:value="form.combinable_with_offers" /></n-form-item>
+				<!-- Whether it stacks on an offer means nothing for an offer itself. -->
+				<n-form-item v-if="!form.is_automatic" :label="t('coupons.form.combinable')"><n-switch v-model:value="form.combinable_with_offers" /></n-form-item>
 
 				<h3 class="font-semibold">{{ t("coupons.form.limits") }}</h3>
 				<div class="grid grid-cols-2 gap-3">
@@ -98,6 +102,7 @@
 				<n-form-item :label="t('coupons.form.endsAt')" v-bind="fieldState('ends_at')"><DateTimeInput v-model="form.ends_at" /></n-form-item>
 
 				<h3 class="font-semibold">{{ t("coupons.form.targets") }}</h3>
+				<n-text v-if="grouped.fields['targets']" type="error" class="text-xs" data-test="coupon-targets-error">{{ grouped.fields["targets"][0] }}</n-text>
 				<n-text v-if="!form.targets.length" depth="3" class="text-sm">{{ t("coupons.form.targetsEmpty") }}</n-text>
 				<div v-for="(row, index) in form.targets" :key="index" class="flex flex-col gap-1 rounded-lg border border-[var(--border-color)] p-2">
 					<div class="grid grid-cols-[1fr_1fr_1fr_auto] items-end gap-2">
@@ -135,6 +140,8 @@ import { NAlert, NButton, NCheckbox, NForm, NFormItem, NInput, NInputGroup, NInp
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import DateTimeInput from "@/add-os/components/form/DateTimeInput.vue"
+import { pickLocalized } from "@/add-os/components/resource/field-types"
+import { currentLocale } from "@/add-os/lang/currentLocale"
 import { usePricingPickers } from "@/add-os/modules/pricing/composables/usePricingPickers"
 import { ITEM_KEYS_BY_PURPOSE, PRICING_PURPOSES } from "@/add-os/modules/pricing/types/coupon"
 import { generateCouponCode } from "@/add-os/modules/pricing/utils/coupon-code"
@@ -143,7 +150,8 @@ import { ApiError } from "@/add-os/services/api"
 import { createCoupon, getCoupon, updateCoupon } from "@/add-os/services/coupons"
 import Icon from "@/components/common/Icon.vue"
 
-const props = defineProps<{ couponId: number | null }>()
+/** `automatic`: a new one is an offer. Editing reads it from the coupon itself. */
+const props = withDefaults(defineProps<{ couponId: number | null, automatic?: boolean }>(), { automatic: false })
 const emit = defineEmits<{ saved: [] }>()
 const show = defineModel<boolean>("show", { required: true })
 
@@ -153,7 +161,7 @@ const pickers = usePricingPickers()
 
 const BILINGUAL = ["name", "description"] as const
 /** Error keys this form has a place for; anything else goes to the top alert. */
-const KNOWN = ["code", "name.ar", "name.en", "description.ar", "description.en", "discount_type", "discount_value", "max_discount_points", "min_amount_points", "usage_limit", "per_user_limit", "company_id", "user_ids", "starts_at", "ends_at"]
+const KNOWN = ["code", "name.ar", "name.en", "description.ar", "description.en", "discount_type", "discount_value", "max_discount_points", "min_amount_points", "usage_limit", "per_user_limit", "company_id", "user_ids", "starts_at", "ends_at", "targets"]
 
 const form = ref<CouponForm>(emptyCouponForm())
 const errors = ref<Record<string, string[]>>({})
@@ -166,6 +174,12 @@ function fieldState(key: string): { "feedback"?: string, "validation-status"?: "
 	const list = grouped.value.fields[key]
 	return list?.length ? { "feedback": list[0], "validation-status": "error" } : {}
 }
+
+/** A coupon is titled by its code; an offer, which has none, by its name. */
+const title = computed(() => {
+	if (!form.value.is_automatic) return props.couponId ? t("coupons.form.editTitle", { code: form.value.code }) : t("coupons.form.createTitle")
+	return props.couponId ? t("coupons.form.editOfferTitle", { name: pickLocalized(form.value.name ?? { ar: "", en: "" }, currentLocale.value) }) : t("coupons.form.createOfferTitle")
+})
 
 const purposeOptions = computed<SelectOption[]>(() => PRICING_PURPOSES.map(value => ({ label: t(`pricing.purpose.${value}`), value })))
 function itemKindOptions(row: TargetRow): SelectOption[] {
@@ -185,7 +199,7 @@ function setItemKey(row: TargetRow, key: TargetItemKey | null): void {
 async function open(): Promise<void> {
 	errors.value = {}
 	loadFailed.value = false
-	form.value = emptyCouponForm()
+	form.value = emptyCouponForm(props.automatic)
 	loading.value = true
 	try {
 		await pickers.load()

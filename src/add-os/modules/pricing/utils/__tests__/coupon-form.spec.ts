@@ -1,6 +1,6 @@
 import type { Coupon } from "@/add-os/modules/pricing/types/coupon"
 import { describe, expect, it } from "vitest"
-import { couponToForm, emptyCouponForm, formToPayload, groupErrors, missingLimits } from "../coupon-form"
+import { couponToForm, discountLabel, emptyCouponForm, formToPayload, groupErrors, missingLimits } from "../coupon-form"
 
 describe("coupon form mapping", () => {
 	it("starts per_user_limit at 1 and usage_limit unlimited", () => {
@@ -102,5 +102,36 @@ describe("missingLimits", () => {
 	it("accepts a number, or an explicit unlimited", () => {
 		expect(missingLimits(emptyCouponForm())).toEqual([])
 		expect(missingLimits({ ...emptyCouponForm(), per_user_unlimited: true, per_user_limit: null })).toEqual([])
+	})
+})
+
+// Offers: coupons with is_automatic, no code (ADDCore pinned collection 2026-10-06, Create Offer).
+describe("offers", () => {
+	it("starts an offer with no code and no per-member limit", () => {
+		const form = emptyCouponForm(true)
+		expect(form.is_automatic).toBe(true)
+		expect(form.per_user_unlimited).toBe(true)
+		const payload = formToPayload({ ...form, code: "IGNORED", discount_value: 20 })
+		expect(payload).not.toHaveProperty("code")
+		expect(payload.is_automatic).toBe(true)
+		expect(payload.per_user_limit).toBeNull()
+	})
+
+	it("sends a typed coupon as not automatic, with its code", () => {
+		const payload = formToPayload({ ...emptyCouponForm(), code: "x1", discount_value: 10 })
+		expect(payload.is_automatic).toBe(false)
+		expect(payload.code).toBe("X1")
+	})
+
+	it("keeps a fixed price's value and sends no cap with it", () => {
+		const payload = formToPayload({ ...emptyCouponForm(true), discount_type: "fixed_price", discount_value: 80, max_discount_points: 30 })
+		expect(payload.discount_type).toBe("fixed_price")
+		expect(payload.discount_value).toBe(80)
+		expect(payload.max_discount_points).toBeNull()
+	})
+
+	it("labels a fixed price as the price, not an amount off", () => {
+		const t = (key: string, params?: Record<string, unknown>) => `${key}:${params?.value ?? ""}`
+		expect(discountLabel(t as never, { discount_type: "fixed_price", discount_value: 80 })).toBe("coupons.detail.discountFixed:80")
 	})
 })

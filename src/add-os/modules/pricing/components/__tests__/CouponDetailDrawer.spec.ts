@@ -5,11 +5,11 @@ import en from "@/add-os/lang/en/en.json"
 import CouponDetailDrawer from "../CouponDetailDrawer.vue"
 
 function use(id: number, counts: boolean) {
-	return { id, user: { id, name: `Member ${id}`, phone: "0990" }, purpose: "booking", booking_id: 10 + id, walkin_session_id: null, event_attendee_id: null, payment_id: null, discount_type: "percentage", discount_value: 20, max_discount_points: 50, base_points: 120, points_discounted: 24, counts, created_at: "2026-10-05T07:00:00Z" }
+	return { id, user: { id, name: `Member ${id}`, phone: "0990" }, purpose: "booking", booking_id: 10 + id, walkin_session_id: null, event_attendee_id: null, payment_id: null, discount_type: "percentage", discount_value: 20, max_discount_points: 50, kind: "coupon", base_points: 120, points: 24, percent: 20, counts, created_at: "2026-10-05T07:00:00Z" }
 }
 
 vi.mock("@/add-os/services/coupons", () => ({
-	getCoupon: vi.fn().mockResolvedValue({ id: 7, code: "VIP", name: null, description: null, source: null, discount_type: "percentage", discount_value: 20, max_discount_points: 50, min_amount_points: null, combinable_with_offers: true, usage_limit: 10, per_user_limit: 1, new_members_only: false, company_id: null, starts_at: null, ends_at: null, is_active: true, used: 1, targets: [], user_ids: [], created_by: 1, created_at: "2026-10-05T05:00:00Z" }),
+	getCoupon: vi.fn().mockResolvedValue({ id: 7, code: "VIP", is_automatic: false, name: null, description: null, source: null, discount_type: "percentage", discount_value: 20, max_discount_points: 50, min_amount_points: null, combinable_with_offers: true, usage_limit: 10, per_user_limit: 1, new_members_only: false, company_id: null, starts_at: null, ends_at: null, is_active: true, used: 1, targets: [], user_ids: [], created_by: 1, created_at: "2026-10-05T05:00:00Z" }),
 	listCouponRedemptions: vi.fn().mockResolvedValue({ data: [use(1, true), use(2, false)], meta: { current_page: 1, last_page: 1, per_page: 10, total: 2 } })
 }))
 vi.mock("@/add-os/modules/pricing/composables/usePricingPickers", () => ({

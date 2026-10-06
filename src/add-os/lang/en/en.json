@@ -2704,7 +2704,11 @@
 			"saved": "Coupon saved.",
 			"loadError": "Could not load the coupon.",
 			"limitRequired": "Enter a number, or tick Unlimited.",
-			"generateCode": "Generate"
+			"generateCode": "Generate",
+			"fixedPrice": "Fixed price",
+			"fixedPriceHint": "The price itself: points per hour for time in a space, points for a package or an event. Needs targets of one kind.",
+			"createOfferTitle": "New offer",
+			"editOfferTitle": "Edit offer: {name}"
 		},
 		"detail": {
 			"title": "Coupon {code}",
@@ -2717,7 +2721,9 @@
 			"no": "No",
 			"createdAt": "Created",
 			"redemptions": "Uses",
-			"loadError": "Could not load this coupon."
+			"loadError": "Could not load this coupon.",
+			"discountFixed": "{value} points (fixed price)",
+			"offerTitle": "Offer: {name}"
 		},
 		"redemption": {
 			"member": "Member",
@@ -2736,7 +2742,8 @@
 			"refresh": "Refresh",
 			"loadError": "Could not load the coupons.",
 			"count": "{count} coupons",
-			"searchPlaceholder": "Search by code"
+			"searchPlaceholder": "Search by code",
+			"newOffer": "New offer"
 		},
 		"filters": {
 			"state": "Window",
@@ -2772,6 +2779,12 @@
 			"deactivateBody": "Members will no longer be able to use it. Its history is kept.",
 			"deactivate": "Deactivate"
 		},
-		"edit": "Edit"
+		"edit": "Edit",
+		"tabs": {
+			"coupons": "Coupons",
+			"offers": "Offers",
+			"couponsHint": "Codes a member types when paying.",
+			"offersHint": "Automatic offers: no code; the best one for the member applies by itself."
+		}
 	}
 }

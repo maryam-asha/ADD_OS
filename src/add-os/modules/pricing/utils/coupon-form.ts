@@ -5,11 +5,12 @@ import type { SpaceType } from "@/add-os/modules/spatial/types/space"
 import { formatNumber } from "@/add-os/utils/format"
 import { couponToPayload } from "./coupon-payload"
 
-/** `20%` or `50 points` — the coupon's own terms, never a computed saving. */
+/** `20%`, `50 points off` or `80 points (fixed price)` — the terms, never a computed saving. */
 export function discountLabel(t: ComposerTranslation, coupon: Pick<Coupon, "discount_type" | "discount_value">): string {
-	return coupon.discount_type === "percentage"
-		? t("coupons.detail.discountPercent", { value: formatNumber(coupon.discount_value) })
-		: t("coupons.detail.discountPoints", { value: formatNumber(coupon.discount_value) })
+	const value = formatNumber(coupon.discount_value)
+	if (coupon.discount_type === "percentage") return t("coupons.detail.discountPercent", { value })
+	if (coupon.discount_type === "fixed_price") return t("coupons.detail.discountFixed", { value })
+	return t("coupons.detail.discountPoints", { value })
 }
 
 export interface TargetRow {
@@ -23,15 +24,21 @@ export interface TargetRow {
  * (`null`) is a deliberate choice and never the same thing as an empty box —
  * `per_user_limit` left out would fall back to 1 on the server.
  */
-export interface CouponForm extends Omit<CouponPayload, "targets"> {
+export interface CouponForm extends Omit<CouponPayload, "targets" | "code"> {
+	code: string
 	usage_unlimited: boolean
 	per_user_unlimited: boolean
 	targets: TargetRow[]
 }
 
-export function emptyCouponForm(): CouponForm {
+/**
+ * A new coupon — or, `automatic`, a new offer: no code, and no per-member
+ * limit unless the admin sets one (the server's default for an offer).
+ */
+export function emptyCouponForm(automatic = false): CouponForm {
 	return {
 		code: "",
+		is_automatic: automatic,
 		name: { ar: "", en: "" },
 		description: { ar: "", en: "" },
 		discount_type: "percentage",
@@ -41,8 +48,8 @@ export function emptyCouponForm(): CouponForm {
 		combinable_with_offers: true,
 		usage_limit: null,
 		usage_unlimited: true,
-		per_user_limit: 1,
-		per_user_unlimited: false,
+		per_user_limit: automatic ? null : 1,
+		per_user_unlimited: automatic,
 		new_members_only: false,
 		company_id: null,
 		starts_at: null,
@@ -59,6 +66,7 @@ export function couponToForm(coupon: Coupon): CouponForm {
 	const payload = couponToPayload(coupon)
 	return {
 		...payload,
+		code: payload.code ?? "",
 		name: payload.name ?? { ar: "", en: "" },
 		description: payload.description ?? { ar: "", en: "" },
 		usage_unlimited: payload.usage_limit === null,
@@ -78,10 +86,14 @@ function emptyToNull<T>(value: T | "" | undefined): T | null {
 	return value === "" || value === undefined ? null : value
 }
 
-/** The full body every write sends — nothing left out, nothing derived. */
+/**
+ * The full body every write sends — nothing left out, nothing derived,
+ * except an offer's code: it has none, and the server refuses one.
+ */
 export function formToPayload(form: CouponForm): CouponPayload {
 	return {
-		code: form.code.trim().toUpperCase(),
+		...(form.is_automatic ? {} : { code: form.code.trim().toUpperCase() }),
+		is_automatic: form.is_automatic,
 		name: bilingualOrNull(form.name),
 		description: bilingualOrNull(form.description),
 		discount_type: form.discount_type,

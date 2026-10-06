@@ -3,6 +3,10 @@
 	Every discount code, paged by the server. Operations reads; only an admin
 	sees the controls that change one. Deleting a used code is refused by the
 	server (409) — the admin is offered deactivation, and decides.
+
+	Two tabs on the same endpoint: typed coupons (`is_automatic=0`) and
+	automatic offers (`is_automatic=1`), which have no code and apply
+	themselves (ADDCore pinned collection 2026-10-06, `Offers (automatic)`).
 -->
 <template>
 	<div class="flex flex-col gap-6">
@@ -18,13 +22,19 @@
 				</n-button>
 				<n-button v-if="canWrite" type="primary" size="small" data-test="coupon-new" @click="openForm(null)">
 					<template #icon><Icon name="carbon:add" :size="16" /></template>
-					{{ t("coupons.page.new") }}
+					{{ t(automatic ? "coupons.page.newOffer" : "coupons.page.new") }}
 				</n-button>
 			</div>
 		</div>
 
 		<n-card size="small">
 			<div class="flex flex-col gap-4">
+				<div class="flex gap-2">
+					<n-button v-for="name in TABS" :key="name" size="small" :type="tab === name ? 'primary' : 'default'" :secondary="tab !== name" :data-test="`coupons-tab-${name}`" @click="tab = name">
+						{{ t(`coupons.tabs.${name}`) }}
+					</n-button>
+				</div>
+				<p class="text-xs text-secondary">{{ t(`coupons.tabs.${tab}Hint`) }}</p>
 				<div class="flex flex-wrap items-center gap-3">
 					<div class="w-64 shrink-0">
 						<n-input v-model:value="search" clearable size="small" :placeholder="t('coupons.page.searchPlaceholder')">
@@ -40,7 +50,7 @@
 			</div>
 		</n-card>
 
-		<CouponFormDrawer v-model:show="formVisible" :coupon-id="formId" @saved="fetchPage" />
+		<CouponFormDrawer v-model:show="formVisible" :coupon-id="formId" :automatic @saved="fetchPage" />
 		<CouponDetailDrawer v-model:show="detailVisible" :coupon-id="detailId" />
 	</div>
 </template>
@@ -71,6 +81,10 @@ const dialog = useDialog()
 const canWrite = canManageCoupons()
 
 const PAGE_SIZE = 20
+const TABS = ["coupons", "offers"] as const
+/** Typed coupons, or automatic offers — one endpoint, filtered by `is_automatic`. */
+const tab = ref<(typeof TABS)[number]>("coupons")
+const automatic = computed(() => tab.value === "offers")
 const filters = reactive<{ state: string | null, is_active: number | null }>({ state: null, is_active: null })
 const search = ref("")
 /** What is actually sent: `search` once typing has paused. */
@@ -105,8 +119,14 @@ function only(handler: () => void) {
 	}
 }
 
+/** How a dialog names it: its code, or — an offer has none — its name. */
+function labelOf(row: Coupon): string {
+	return row.code ?? (row.name ? pickLocalized(row.name, currentLocale.value) : "") ?? ""
+}
+
 const columns = computed<DataTableColumns<Coupon>>(() => [
-	{ title: t("coupons.columns.code"), key: "code", render: row => h("bdi", { dir: "ltr", class: "font-mono font-semibold" }, row.code) },
+	// An offer has no code to show.
+	...(automatic.value ? [] : [{ title: t("coupons.columns.code"), key: "code", render: (row: Coupon) => h("bdi", { dir: "ltr", class: "font-mono font-semibold" }, row.code ?? "") }]),
 	{ title: t("coupons.columns.name"), key: "name", render: row => (row.name ? pickLocalized(row.name, currentLocale.value) || "—" : "—") },
 	{ title: t("coupons.columns.discount"), key: "discount", render: row => discountLabel(t, row) },
 	{
@@ -156,7 +176,7 @@ function rowProps(row: Coupon) {
 }
 
 function query(): Record<string, unknown> {
-	const q: Record<string, unknown> = { page: page.value, per_page: PAGE_SIZE }
+	const q: Record<string, unknown> = { page: page.value, per_page: PAGE_SIZE, is_automatic: automatic.value ? 1 : 0 }
 	if (filters.state) q.state = filters.state
 	if (filters.is_active !== null) q.is_active = filters.is_active
 	if (searchTerm.value.trim()) q.search = searchTerm.value.trim()
@@ -186,7 +206,7 @@ function onPage(next: number): void {
 }
 
 // A new filter starts again from the first page.
-watch([filters, searchTerm], () => {
+watch([filters, searchTerm, tab], () => {
 	page.value = 1
 	void fetchPage()
 }, { deep: true })
@@ -215,7 +235,7 @@ async function toggle(row: Coupon): Promise<void> {
 
 function confirmDelete(row: Coupon): void {
 	dialog.warning({
-		title: t("coupons.delete.confirmTitle", { code: row.code }),
+		title: t("coupons.delete.confirmTitle", { code: labelOf(row) }),
 		content: t("coupons.delete.confirmBody"),
 		positiveText: t("coupons.delete.confirm"),
 		negativeText: t("coupons.delete.cancel"),
@@ -247,7 +267,7 @@ async function remove(row: Coupon): Promise<void> {
 
 function confirmDeactivate(row: Coupon): void {
 	dialog.warning({
-		title: t("coupons.delete.deactivateTitle", { code: row.code }),
+		title: t("coupons.delete.deactivateTitle", { code: labelOf(row) }),
 		content: t("coupons.delete.deactivateBody"),
 		positiveText: t("coupons.delete.deactivate"),
 		negativeText: t("coupons.delete.cancel"),
