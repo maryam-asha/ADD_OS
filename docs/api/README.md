@@ -22,33 +22,36 @@ snapshot is unverified until someone re-reads the canonical file and re-pins it.
 
 | | |
 |---|---|
-| Pinned | 2026-10-06 |
+| Pinned | 2026-10-07 |
 | Source | the canonical path above, read directly, copied byte-for-byte (`cp`, not a JSON re-serialize — key order and formatting are exactly the source's) |
 | Verified identical | `sha256` match between source and this copy at pin time, plus a `cmp` byte comparison |
-| Size | 1,456,487 bytes / 22,958 lines |
-| Leaf endpoints (parsed) | 366 — `GET` 159, `POST` 112, `DELETE` 36, `PATCH` 29, `PUT` 30 |
-| Distinct `METHOD + URL` | 363 |
+| Size | 1,491,207 bytes / 23,319 lines |
+| Leaf endpoints (parsed) | 369 — `GET` 162, `POST` 112, `DELETE` 36, `PATCH` 29, `PUT` 30 |
+| Distinct `METHOD + URL` | 366 |
 
-### What changed since the 2026-10-05 pin
+### What changed since the 2026-10-06 pin
 
-**Three requests added, none removed — automatic offers and the discount report**
-(ADDCore `docs/decisions/automatic-offers-savings-discount-ledger.md`). A new
-`Admin (Dashboard) / Offers (automatic)` folder: `List Offers` (`GET admin/coupons?is_automatic=1`)
-and `Create Offer` (`POST admin/coupons` with `is_automatic: true`, no `code`,
-`discount_type: fixed_price`); a new `Admin (Dashboard) / Reports` folder:
-`GET admin/reports/discounts` (filters `from`, `to`, `kind`, `purpose`, `status`,
-`per_page`). Update and delete of an offer use the existing Coupons requests.
+**Three requests added, none removed — "my coupons", offer history and per-operation
+discounts** (ADDCore `docs/decisions/automatic-offers-savings-discount-ledger.md`):
+`Admin (Dashboard) / Coupons / Coupon Revisions` (`GET admin/coupons/{{coupon_id}}/revisions`,
+`per_page`), `Admin (Dashboard) / Reports / Offer Report` (`GET admin/reports/offers`,
+`from` and `to` required, `type=coupon` optional), and `Member (App) / 5. Wallet & Payments /
+Payments / My Coupons` (`GET member/coupons`), each with a saved example response.
 
-Changed, none of them path or method: `Create Plan`/`Update Plan` lose the three `sale_*`
-fields and gain `reference_plan_id`, `reference_space_id`, `reference_units`;
-`Create Space`/`Update Space` lose `sale_hourly_rate_points`, `sale_starts_at`,
-`sale_ends_at`. Their descriptions now say sales moved to automatic offers.
+Changed, none of them path or method: the bookings (member detail, dashboard list and
+detail), payments (member and dashboard, list and detail), event attendees (list and
+pending) and current co-working session requests now describe a `discounts` array —
+`kind`, `offer_id` / `coupon_id` / `plan_discount_id`, `name`, `code`, `discount_type`,
+`discount_value`, `max_discount_points`, `base_points`, `points`, `percent` — and their
+saved examples carry it. `Get Booking Detail` (dashboard) gained an example priced with an
+offer and a coupon.
 
-Credential scan repeated against the canonical file: the same 51 variables, the same
-150 `auth` keys and five `Authorization` headers on placeholders, zero `Cookie` headers,
-the same nine literal hosts, the same 13 populated password/token-shaped body fields —
-named as fields only, never values. Encoding: strict UTF-8; the double-encoded em dash
-(`â€”`) still appears 19 times, the correct one 343 times.
+Credential scan repeated against the canonical file: the same 51 variables (none
+credential-shaped populated), 76 `auth` blocks (one more, from the new member request)
+and the same five `Authorization` headers, all on placeholders, zero `Cookie` headers, no
+new literal host, and the same nine populated password/token-shaped body fields — named
+as fields only, never values. Encoding: strict UTF-8; the double-encoded em dash (`â€”`)
+still appears 19 times, the correct one 343 times.
 
 ### What changed since the second 2026-10-04 pin
 
@@ -108,6 +111,40 @@ the correct em dash (`—`) **345** times.
 
 Kept verbatim. A claim written while one of these was current cites *that* pin, and a
 future reader needs to see what it actually said.
+
+### Pin of 2026-10-06 — superseded 2026-10-07
+
+#### Record as it stood
+
+| | |
+|---|---|
+| Pinned | 2026-10-06 |
+| Source | the canonical path above, read directly, copied byte-for-byte (`cp`, not a JSON re-serialize — key order and formatting are exactly the source's) |
+| Verified identical | `sha256` match between source and this copy at pin time, plus a `cmp` byte comparison |
+| Size | 1,456,487 bytes / 22,958 lines |
+| Leaf endpoints (parsed) | 366 — `GET` 159, `POST` 112, `DELETE` 36, `PATCH` 29, `PUT` 30 |
+| Distinct `METHOD + URL` | 363 |
+
+#### What changed since the 2026-10-05 pin
+
+**Three requests added, none removed — automatic offers and the discount report**
+(ADDCore `docs/decisions/automatic-offers-savings-discount-ledger.md`). A new
+`Admin (Dashboard) / Offers (automatic)` folder: `List Offers` (`GET admin/coupons?is_automatic=1`)
+and `Create Offer` (`POST admin/coupons` with `is_automatic: true`, no `code`,
+`discount_type: fixed_price`); a new `Admin (Dashboard) / Reports` folder:
+`GET admin/reports/discounts` (filters `from`, `to`, `kind`, `purpose`, `status`,
+`per_page`). Update and delete of an offer use the existing Coupons requests.
+
+Changed, none of them path or method: `Create Plan`/`Update Plan` lose the three `sale_*`
+fields and gain `reference_plan_id`, `reference_space_id`, `reference_units`;
+`Create Space`/`Update Space` lose `sale_hourly_rate_points`, `sale_starts_at`,
+`sale_ends_at`. Their descriptions now say sales moved to automatic offers.
+
+Credential scan repeated against the canonical file: the same 51 variables, the same
+150 `auth` keys and five `Authorization` headers on placeholders, zero `Cookie` headers,
+the same nine literal hosts, the same 13 populated password/token-shaped body fields —
+named as fields only, never values. Encoding: strict UTF-8; the double-encoded em dash
+(`â€”`) still appears 19 times, the correct one 343 times.
 
 ### Pin of 2026-10-04 (second that day) — superseded 2026-10-05
 
