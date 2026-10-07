@@ -135,6 +135,7 @@ import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
 import { currentLocale } from "@/add-os/lang/currentLocale"
+import AppliedDiscountList from "@/add-os/modules/pricing/components/AppliedDiscountList.vue"
 import {
 	approveAttendee,
 	getEvent,
@@ -303,6 +304,11 @@ const columns = computed<DataTableColumns<EventAttendee>>(() => [
 		title: t("events.approval.columns.reason"),
 		key: "rejection_reason",
 		render: row => row.rejection_reason || "—"
+	},
+	{
+		title: t("events.approval.columns.discounts"),
+		key: "discounts",
+		render: row => h(AppliedDiscountList, { discounts: row.discounts })
 	},
 	{
 		title: t("resourceCrud.table.actionsColumn"),

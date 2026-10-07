@@ -62,6 +62,7 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"plans.resourceTypes": () => import("@/add-os/modules/plans/views/ResourceTypesPage.vue"),
 	"plans.coupons": () => import("@/add-os/modules/pricing/views/CouponsPage.vue"),
 	"plans.discountReport": () => import("@/add-os/modules/pricing/views/DiscountReportPage.vue"),
+	"plans.offerReport": () => import("@/add-os/modules/pricing/views/OfferReportPage.vue"),
 	"payments.transactions": () => import("@/add-os/modules/payments/views/PaymentTransactionsPage.vue"),
 	"payments.paymentMethods": () => import("@/add-os/modules/payments/views/PaymentMethodsPage.vue"),
 	"payments.currencies": () => import("@/add-os/modules/payments/views/CurrenciesPage.vue"),

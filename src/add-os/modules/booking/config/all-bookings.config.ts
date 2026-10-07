@@ -5,6 +5,7 @@ import type { AdminBooking, BookingStatus } from "@/add-os/modules/booking/types
 import { NTag } from "naive-ui"
 import { h } from "vue"
 import { spaceTypeLabel } from "@/add-os/modules/booking/config/space-type-label"
+import AppliedDiscountList from "@/add-os/modules/pricing/components/AppliedDiscountList.vue"
 import { formatDate, formatTime } from "@/add-os/utils/format"
 
 /**
@@ -115,6 +116,12 @@ export function buildAllBookingsColumns(t: ComposerTranslation): DataTableColumn
 				}
 				return h("span", `${row.amount_owed} ${row.currency ?? ""}`.trim())
 			}
+		},
+		{
+			title: t("allBookings.columns.discounts"),
+			key: "discounts",
+			// The offer or coupon as it was when the booking was priced.
+			render: row => h(AppliedDiscountList, { discounts: row.discounts })
 		}
 	]
 }

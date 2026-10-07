@@ -1,3 +1,5 @@
+import type { AppliedDiscount } from "@/add-os/modules/pricing/types/applied-discount"
+
 /**
  * Payments as the dashboard sees them (`GET /api/v1/admin/payments…` and
  * `GET /api/v1/admin/payment-methods`). One ledger for every method — wallet
@@ -46,6 +48,11 @@ export interface AdminPayment {
 	received_by: number | null
 	received_by_name?: string | null
 	received_at: string | null
+	/**
+	 * What was taken off it, as locked when it was priced (pinned collection
+	 * 2026-10-07). Absent only from data cached before it existed.
+	 */
+	discounts?: AppliedDiscount[]
 }
 
 /** `GET /api/v1/admin/payments/summary` — totals over the list's filters. */

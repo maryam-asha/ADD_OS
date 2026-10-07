@@ -1,4 +1,5 @@
 // src/add-os/modules/booking/types/calendar.ts
+import type { AppliedDiscount } from "@/add-os/modules/pricing/types/applied-discount"
 import type { SpaceType } from "@/add-os/modules/spatial/types/space"
 
 /**
@@ -267,6 +268,11 @@ export interface AdminBooking {
 	note: string | null
 	rejection_reason: string | null
 	created_at: string | null
+	/**
+	 * What was taken off it, as locked when it was priced (pinned collection
+	 * 2026-10-07). Absent only from data cached before it existed.
+	 */
+	discounts?: AppliedDiscount[]
 }
 
 /** Query accepted by `GET /api/v1/admin/bookings`. Every field is optional. */

@@ -88,6 +88,11 @@
 						</div>
 					</dl>
 
+					<div v-if="selected.discounts?.length" class="flex flex-col gap-2" data-test="payment-discounts">
+						<span class="text-stone-500">{{ t("payments.transactions.discounts") }}</span>
+						<AppliedDiscountList :discounts="selected.discounts" />
+					</div>
+
 					<n-alert v-if="selected.review_reason" type="warning" :bordered="false" :title="t('payments.transactions.reviewReason')">
 						{{ selected.review_reason }}
 					</n-alert>
@@ -117,6 +122,7 @@ import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import { PAYMENT_PURPOSES, PAYMENT_STATUSES } from "@/add-os/modules/payments/types/payment"
+import AppliedDiscountList from "@/add-os/modules/pricing/components/AppliedDiscountList.vue"
 import { ApiError } from "@/add-os/services/api"
 import { getPaymentsSummary, listPaymentMethods, listPayments, reversePayment } from "@/add-os/services/payments"
 import { formatCurrency, formatDateTime, formatNumber, isCurrencyCode } from "@/add-os/utils/format"
@@ -276,7 +282,8 @@ const columns = computed<DataTableColumns<AdminPayment>>(() => [
 	{ title: t("payments.columns.method"), key: "method", render: row => h("span", { class: "flex items-center gap-1.5" }, [h(Icon, { name: methodIcon(row.method), size: 14, class: "text-emerald-700" }), row.method_label]) },
 	{ title: t("payments.columns.points"), key: "amount_points", render: row => (pointsOf(row) ? h("span", { class: "font-semibold" }, formatNumber(pointsOf(row) as number)) : "—") },
 	{ title: t("payments.columns.amount"), key: "amount", render: row => (moneyOf(row) ? h("bdi", { dir: "ltr" }, moneyOf(row) as string) : "—") },
-	{ title: t("payments.columns.status"), key: "status", render: row => tag(statusLabel(row.status), statusType(row.status)) }
+	{ title: t("payments.columns.status"), key: "status", render: row => tag(statusLabel(row.status), statusType(row.status)) },
+	{ title: t("payments.columns.discounts"), key: "discounts", render: row => h(AppliedDiscountList, { discounts: row.discounts }) }
 ])
 
 function rowProps(row: AdminPayment) {

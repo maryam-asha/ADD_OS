@@ -107,6 +107,35 @@ export interface CouponPayload {
 	user_ids: number[]
 }
 
+/**
+ * One version of an offer or a coupon as an admin saved it, and from when —
+ * `GET admin/coupons/{coupon}/revisions`, pinned collection 2026-10-07. It
+ * held from `recorded_at` until the next one.
+ */
+export interface CouponRevision {
+	id: number
+	action: "created" | "updated" | "deleted"
+	/** ISO UTC. */
+	recorded_at: string
+	changed_by: number | null
+	code: string | null
+	name: Bilingual | null
+	discount_type: CouponDiscountType
+	discount_value: number
+	max_discount_points: number | null
+	min_amount_points: number | null
+	combinable_with_offers: boolean
+	usage_limit: number | null
+	per_user_limit: number | null
+	new_members_only: boolean
+	company_id: number | null
+	targets: Omit<CouponTarget, "id">[]
+	user_ids: number[]
+	starts_at: string | null
+	ends_at: string | null
+	is_active: boolean
+}
+
 export interface CouponRedemption {
 	id: number
 	user: { id: number, name: string, phone: string } | null

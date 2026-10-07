@@ -143,7 +143,8 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "resourceTypes", path: "resource-types" },
 			{ key: "wallet", path: "wallet" },
 			{ key: "coupons", path: "coupons" },
-			{ key: "discountReport", path: "discount-report" }
+			{ key: "discountReport", path: "discount-report" },
+			{ key: "offerReport", path: "offer-report" }
 		]
 	},
 	{

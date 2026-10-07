@@ -913,7 +913,8 @@
 				"phone": "Phone",
 				"status": "Status",
 				"registeredAt": "Registered",
-				"reason": "Reason"
+				"reason": "Reason",
+				"discounts": "Discounts"
 			}
 		},
 		"fields": {
@@ -1423,7 +1424,8 @@
 			"when": "Booked for",
 			"status": "Status",
 			"payment": "Payment",
-			"amount": "Amount"
+			"amount": "Amount",
+			"discounts": "Discounts"
 		},
 		"status": {
 			"confirmed": "Confirmed",
@@ -1521,7 +1523,8 @@
 			"activeSessionDetail": "Session details",
 			"memberProfile": "Member profile",
 			"coupons": "Coupons",
-			"discountReport": "Discount report"
+			"discountReport": "Discount report",
+			"offerReport": "Offers by period"
 		}
 	},
 	"resourceCrud": {
@@ -2600,7 +2603,8 @@
 			"method": "Method",
 			"points": "Points",
 			"amount": "Amount",
-			"status": "Status"
+			"status": "Status",
+			"discounts": "Discounts"
 		},
 		"transactions": {
 			"description": "Every payment by any method — wallet points, cash at the desk, card — with totals over what is filtered.",
@@ -2631,7 +2635,8 @@
 			"reverseTitle": "Reverse this payment?",
 			"reverseConfirm": "Payment #{id} ({amount}) will be returned to the card and its points taken back out of the wallet. This cannot be undone.",
 			"reverseForbidden": "You do not have permission to reverse payments.",
-			"reverseFailed": "The payment could not be reversed."
+			"reverseFailed": "The payment could not be reversed.",
+			"discounts": "Discounts applied"
 		},
 		"methods": {
 			"description": "The ways members can pay, in the order they are offered — and how each has been used.",
@@ -2799,6 +2804,27 @@
 			"offers": "Offers",
 			"couponsHint": "Codes a member types when paying.",
 			"offersHint": "Automatic offers: no code; the best one for the member applies by itself."
+		},
+		"history": {
+			"title": "Change history",
+			"description": "Every version saved on the dashboard, newest first. Each use keeps the terms it was priced on.",
+			"empty": "No changes recorded.",
+			"loadError": "Could not load the change history.",
+			"action": {
+				"created": "Created",
+				"updated": "Changed",
+				"deleted": "Deleted"
+			},
+			"columns": {
+				"at": "When",
+				"action": "Change",
+				"discount": "Discount",
+				"window": "Runs",
+				"active": "Switched on"
+			},
+			"from": "From {date}",
+			"until": "Until {date}",
+			"always": "No end date"
 		}
 	},
 	"discountReport": {
@@ -2849,5 +2875,25 @@
 			"note": "Totals count only operations that still count. Package savings are shown apart and never taken off the list price."
 		},
 		"saving": "{points} points ({percent}%) against {name}"
+	},
+	"offerReport": {
+		"description": "Which offers ran in the period: each stretch an offer was switched on and inside its dates, on the terms it had then, and what it gave. Changed or deleted offers still show where they ran.",
+		"refresh": "Refresh",
+		"loadError": "Could not load the report.",
+		"pickPeriod": "Pick a period to see which offers ran in it.",
+		"empty": "No offer ran in this period.",
+		"type": {
+			"offer": "Offers",
+			"coupon": "Coupons"
+		},
+		"columns": {
+			"offer": "Offer",
+			"periods": "Ran",
+			"operations": "Operations",
+			"points": "Points given"
+		},
+		"deleted": "Deleted",
+		"from": "From",
+		"to": "To"
 	}
 }

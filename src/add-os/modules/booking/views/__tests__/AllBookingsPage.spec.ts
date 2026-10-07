@@ -344,3 +344,17 @@ describe("allBookingsPage", () => {
 		expect(listBookingsMock).toHaveBeenLastCalledWith({ page: 1 })
 	})
 })
+
+// `discounts` — pinned collection 2026-10-07.
+describe("allBookingsPage discounts", () => {
+	it("names the offer each booking was priced with, as it was then", async () => {
+		listBookingsMock.mockReset()
+		listBookingsMock.mockResolvedValue(pageOf([booking({ discounts: [{ kind: "offer", offer_id: 12, coupon_id: null, plan_discount_id: null, name: "Rooms week", code: null, discount_type: "percentage", discount_value: 20, max_discount_points: null, base_points: 100, points: 20, percent: 20 }] })]))
+		const wrapper = mountPage()
+		await flushPromises()
+
+		const cell = wrapper.get("[data-test='applied-discount']").text()
+		expect(cell).toContain("Rooms week")
+		expect(cell).toContain("−20")
+	})
+})

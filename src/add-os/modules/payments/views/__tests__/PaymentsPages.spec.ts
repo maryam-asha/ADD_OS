@@ -201,3 +201,30 @@ describe("paymentMethodsPage", () => {
 		expect(pushMock).toHaveBeenCalledWith({ name: "payments.transactions", query: { method: "wallet" } })
 	})
 })
+
+// `discounts` — pinned collection 2026-10-07.
+describe("paymentTransactionsPage discounts", () => {
+	beforeEach(() => {
+		vi.clearAllMocks()
+		routeQuery.value = {}
+		listMock.mockResolvedValue({ data: [payment({ purpose: "plan_purchase", payable: null, discounts: [{ kind: "offer", offer_id: 12, coupon_id: null, plan_discount_id: null, name: "Rooms week", code: null, discount_type: "percentage", discount_value: 20, max_discount_points: null, base_points: 100, points: 20, percent: 20 }] })], meta: { current_page: 1, last_page: 1, per_page: 20, total: 1 } })
+		summaryMock.mockResolvedValue(summary())
+		methodsMock.mockResolvedValue(methods)
+	})
+
+	it("shows the offer a payment was priced with, in the list and in its details", async () => {
+		const wrapper = mount(PaymentTransactionsPage, { global: { plugins: [i18n], stubs: { Icon: true } }, attachTo: document.body })
+		await flushPromises()
+
+		expect(wrapper.get("[data-test='applied-discount']").text()).toContain("Rooms week")
+
+		await wrapper.get("tbody tr").trigger("click")
+		await flushPromises()
+
+		const detail = document.body.querySelector("[data-test=payment-discounts]")
+		expect(detail?.textContent).toContain(en.payments.transactions.discounts)
+		expect(detail?.textContent).toContain("Rooms week")
+		expect(detail?.textContent).toContain("−20")
+		wrapper.unmount()
+	})
+})

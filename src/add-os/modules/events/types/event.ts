@@ -1,5 +1,6 @@
 import type { EventCategory } from "./event-category"
 import type { Bilingual } from "@/add-os/components/resource/field-types"
+import type { AppliedDiscount } from "@/add-os/modules/pricing/types/applied-discount"
 
 export type EventStatus = "draft" | "published" | "cancelled"
 
@@ -175,6 +176,11 @@ export interface EventAttendee {
 	approved_at?: string | null
 	registered_at?: string | null
 	answers?: EventAttendeeAnswer[]
+	/**
+	 * What was taken off it, as locked when it was priced (pinned collection
+	 * 2026-10-07). Absent only from data cached before it existed.
+	 */
+	discounts?: AppliedDiscount[]
 }
 
 export type EventFieldType =

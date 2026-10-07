@@ -2,7 +2,9 @@
 <!--
 	One coupon's terms, and every use of it. A use whose booking was
 	cancelled, rejected or never paid was given back — it reads "Refunded",
-	and no longer counts against the limits.
+	and no longer counts against the limits. Below them, every version an
+	admin saved (its change history), so what an offer was on a given day
+	can be read back.
 -->
 <template>
 	<n-drawer v-model:show="show" :width="620" :placement="isRtl ? 'left' : 'right'">
@@ -22,6 +24,13 @@
 
 					<h3 class="font-semibold">{{ t("coupons.detail.redemptions") }}</h3>
 					<n-data-table remote size="small" :columns :data="redemptions" :loading="redemptionsLoading" :pagination :bordered="false" @update:page="loadRedemptions" />
+
+					<section class="flex flex-col gap-2" data-test="coupon-history">
+						<h3 class="font-semibold">{{ t("coupons.history.title") }}</h3>
+						<p class="text-xs text-secondary">{{ t("coupons.history.description") }}</p>
+						<n-alert v-if="historyFailed" type="error" :bordered="false">{{ t("coupons.history.loadError") }}</n-alert>
+						<n-data-table remote size="small" :columns="historyColumns" :data="revisions" :loading="historyLoading" :pagination="historyPagination" :bordered="false" @update:page="loadRevisions" />
+					</section>
 				</div>
 			</n-spin>
 		</n-drawer-content>
@@ -30,7 +39,7 @@
 
 <script setup lang="ts">
 import type { DataTableColumns } from "naive-ui"
-import type { Coupon, CouponRedemption, CouponTarget } from "@/add-os/modules/pricing/types/coupon"
+import type { Coupon, CouponRedemption, CouponRevision, CouponTarget } from "@/add-os/modules/pricing/types/coupon"
 import { NAlert, NDataTable, NDrawer, NDrawerContent, NSpin, NTag } from "naive-ui"
 import { computed, h, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
@@ -39,7 +48,7 @@ import { currentLocale } from "@/add-os/lang/currentLocale"
 import { usePricingPickers } from "@/add-os/modules/pricing/composables/usePricingPickers"
 import { discountLabel } from "@/add-os/modules/pricing/utils/coupon-form"
 import { ApiError } from "@/add-os/services/api"
-import { getCoupon, listCouponRedemptions } from "@/add-os/services/coupons"
+import { getCoupon, listCouponRedemptions, listCouponRevisions } from "@/add-os/services/coupons"
 import { formatDateTime, formatNumber } from "@/add-os/utils/format"
 
 const props = defineProps<{ couponId: number | null }>()
@@ -57,6 +66,12 @@ const redemptionsLoading = ref(false)
 const page = ref(1)
 const total = ref(0)
 const pagination = computed(() => ({ page: page.value, pageSize: PAGE_SIZE, itemCount: total.value }))
+const revisions = ref<CouponRevision[]>([])
+const historyLoading = ref(false)
+const historyFailed = ref(false)
+const historyPage = ref(1)
+const historyTotal = ref(0)
+const historyPagination = computed(() => ({ page: historyPage.value, pageSize: PAGE_SIZE, itemCount: historyTotal.value }))
 
 function yesNo(value: boolean): string {
 	return t(value ? "coupons.detail.yes" : "coupons.detail.no")
@@ -129,6 +144,50 @@ const columns = computed<DataTableColumns<CouponRedemption>>(() => [
 	}
 ])
 
+const HISTORY_TAG: Record<CouponRevision["action"], "success" | "info" | "error"> = { created: "success", updated: "info", deleted: "error" }
+
+/** When a version ran: its own dates, either open. Two lines, not an arrow: an arrow points the wrong way in RTL. */
+function windowOf(row: CouponRevision) {
+	if (!row.starts_at && !row.ends_at) return t("coupons.history.always")
+	return h("div", { class: "flex flex-col" }, [
+		row.starts_at ? h("span", t("coupons.history.from", { date: formatDateTime(row.starts_at) })) : null,
+		h("span", row.ends_at ? t("coupons.history.until", { date: formatDateTime(row.ends_at) }) : t("coupons.history.always"))
+	])
+}
+
+const historyColumns = computed<DataTableColumns<CouponRevision>>(() => [
+	{ title: t("coupons.history.columns.at"), key: "recorded_at", render: row => formatDateTime(row.recorded_at) },
+	{
+		title: t("coupons.history.columns.action"),
+		key: "action",
+		render: row => h(NTag, { size: "small", round: true, bordered: false, type: HISTORY_TAG[row.action] }, { default: () => t(`coupons.history.action.${row.action}`) })
+	},
+	{
+		title: t("coupons.history.columns.discount"),
+		key: "discount",
+		render: row => discountLabel(t, row) + (row.max_discount_points ? ` · ${t("coupons.detail.cap", { value: formatNumber(row.max_discount_points) })}` : "")
+	},
+	{ title: t("coupons.history.columns.window"), key: "window", render: windowOf },
+	{ title: t("coupons.history.columns.active"), key: "is_active", render: row => yesNo(row.is_active) }
+])
+
+async function loadRevisions(next = 1): Promise<void> {
+	if (props.couponId === null) return
+	historyPage.value = next
+	historyLoading.value = true
+	historyFailed.value = false
+	try {
+		const result = await listCouponRevisions(props.couponId, { page: next, per_page: PAGE_SIZE })
+		revisions.value = result.data
+		historyTotal.value = result.meta.total
+	} catch (caught) {
+		if (!(caught instanceof ApiError)) throw caught
+		historyFailed.value = true
+	} finally {
+		historyLoading.value = false
+	}
+}
+
 async function loadRedemptions(next = 1): Promise<void> {
 	if (props.couponId === null) return
 	page.value = next
@@ -153,7 +212,7 @@ async function open(): Promise<void> {
 	try {
 		await pickers.load()
 		coupon.value = await getCoupon(props.couponId)
-		await loadRedemptions(1)
+		await Promise.all([loadRedemptions(1), loadRevisions(1)])
 	} catch (caught) {
 		if (!(caught instanceof ApiError)) throw caught
 		failed.value = true

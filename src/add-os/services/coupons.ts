@@ -1,5 +1,5 @@
 import type { Paginated, RawPaginatedResponse } from "./pagination"
-import type { Coupon, CouponPayload, CouponRedemption } from "@/add-os/modules/pricing/types/coupon"
+import type { Coupon, CouponPayload, CouponRedemption, CouponRevision } from "@/add-os/modules/pricing/types/coupon"
 import { couponToPayload } from "@/add-os/modules/pricing/utils/coupon-payload"
 import { del, get, post, put } from "./api"
 import { toPaginated } from "./pagination"
@@ -22,6 +22,11 @@ export async function getCoupon(id: number): Promise<Coupon> {
 
 export async function listCouponRedemptions(id: number, query?: Record<string, unknown>): Promise<Paginated<CouponRedemption>> {
 	return toPaginated(await get<RawPaginatedResponse<CouponRedemption>>(`${BASE}/${id}/redemptions`, query))
+}
+
+/** Every version an admin saved, newest first — pinned collection 2026-10-07. */
+export async function listCouponRevisions(id: number, query?: Record<string, unknown>): Promise<Paginated<CouponRevision>> {
+	return toPaginated(await get<RawPaginatedResponse<CouponRevision>>(`${BASE}/${id}/revisions`, query))
 }
 
 export async function createCoupon(payload: CouponPayload): Promise<Coupon> {
