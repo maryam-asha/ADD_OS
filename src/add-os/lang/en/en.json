@@ -1524,7 +1524,8 @@
 			"memberProfile": "Member profile",
 			"coupons": "Coupons",
 			"discountReport": "Discount report",
-			"offerReport": "Offers by period"
+			"offerReport": "Offers by period",
+			"planPurchases": "Plan Purchases"
 		}
 	},
 	"resourceCrud": {
@@ -2697,7 +2698,7 @@
 			"conditions": "Conditions",
 			"minAmount": "Minimum price (points)",
 			"minAmountHint": "Compared with the price after any sale.",
-			"combinable": "Combines with sales",
+			"combinable": "Combines with offers",
 			"limits": "Limits",
 			"usageLimit": "Total uses",
 			"perUserLimit": "Uses per member",
@@ -2711,7 +2712,7 @@
 			"startsAt": "Starts",
 			"endsAt": "Ends",
 			"targets": "Applies to",
-			"targetsEmpty": "All purchases except wallet top-ups.",
+			"targetsEmpty": "All purchases except wallet top-ups and events. To apply it to events, add an \"Event registration\" target.",
 			"addTarget": "Add a rule",
 			"removeTarget": "Remove this rule",
 			"purpose": "Purchase",
@@ -2731,7 +2732,7 @@
 		},
 		"detail": {
 			"title": "Coupon {code}",
-			"allPurchases": "All purchases except wallet top-ups",
+			"allPurchases": "All purchases except wallet top-ups and events",
 			"everyone": "Everyone",
 			"discountPercent": "{value}%",
 			"discountPoints": "{value} points",

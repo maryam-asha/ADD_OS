@@ -17,6 +17,8 @@ import type {
 	SettlePaymentPayload
 } from "@/add-os/modules/booking/types/reception"
 import type { PaymentMethod } from "@/add-os/modules/payments/types/wallet-top-up"
+import type { AppliedDiscount } from "@/add-os/modules/pricing/types/applied-discount"
+import type { CouponDiscountType } from "@/add-os/modules/pricing/types/coupon"
 import { toOffsetIso } from "@/add-os/utils/format"
 import { get, post } from "./api"
 import { rowsOf, toPaginated } from "./pagination"
@@ -173,4 +175,82 @@ export async function getSessionReport(type: SessionType, id: number): Promise<R
  */
 export async function confirmSessionEnd(endRequestId: number, cashCollected = false): Promise<ConfirmSessionEndResponse> {
 	return post<ConfirmSessionEndResponse>(`${BASE}/session-end-requests/${endRequestId}/confirm`, { cash_collected: cashCollected })
+}
+
+/**
+ * How a plan sold at the desk is paid: the money handed over (`cash`), or the
+ * points the owner's wallet already holds (`wallet`) — whole, never mixed,
+ * and only when they cover the price (`wallet_covers` on the preview).
+ */
+export type PlanPurchasePaymentMethod = "cash" | "wallet"
+
+export interface PlanPurchasePreviewPayload {
+	plan_id: number
+	user_id?: number | null
+	company_id?: number | null
+	/** Cash only — ignored when paying from points. */
+	currency?: string
+	payment_method: PlanPurchasePaymentMethod
+	/** A code the member brought; a member's plan only (422 with `company_id`). */
+	coupon_code?: string
+}
+
+/** The running offer that priced the plan, as the preview names it. */
+export interface PlanPurchaseOffer {
+	name: string | null
+	discount_type: CouponDiscountType
+	/** A percentage, points off, or the fixed price in points — per `discount_type`. */
+	discount_value: number
+	saved_points: number
+	ends_at: string | null
+}
+
+/** What became of `coupon_code`: used, or not because the offer was better. */
+export interface PlanPurchaseCouponOutcome {
+	code: string
+	applied: boolean
+	points_discounted: number
+	message: string | null
+}
+
+export interface PlanPurchasePreview {
+	list_points: number
+	points: number
+	payment_amount: number
+	payment_currency: string
+	/** The owner's general points now. */
+	balance_points: number
+	/** Whether those points pay for the whole plan — offer `wallet` only then. */
+	wallet_covers: boolean
+	offer: PlanPurchaseOffer | null
+	coupon: PlanPurchaseCouponOutcome | null
+}
+
+export interface PlanPurchaseReceipt {
+	transaction_code: string
+	plan_name: string
+	payment_method: PlanPurchasePaymentMethod
+	points_charged: number
+	/** Null when paid from points: no money changed hands. */
+	payment_amount: number | null
+	payment_currency: string | null
+	/** What priced it, as locked on the payment. */
+	discounts: AppliedDiscount[]
+	coupon: PlanPurchaseCouponOutcome | null
+	previous_balance_points: number
+	new_balance_points: number
+	recipient_name: string
+	performed_by_name: string
+	membership: unknown
+	payment: unknown
+}
+
+export async function previewPlanPurchase(payload: PlanPurchasePreviewPayload): Promise<PlanPurchasePreview> {
+	const res = await post<{ data: PlanPurchasePreview }>(`${BASE}/plan-purchases/preview`, payload)
+	return res.data
+}
+
+export async function executePlanPurchase(payload: PlanPurchasePreviewPayload): Promise<PlanPurchaseReceipt> {
+	const res = await post<{ data: PlanPurchaseReceipt }>(`${BASE}/plan-purchases`, payload)
+	return res.data
 }

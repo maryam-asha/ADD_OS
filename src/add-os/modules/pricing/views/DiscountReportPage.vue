@@ -7,41 +7,36 @@
 	(GET admin/reports/discounts, pinned collection 2026-10-06).
 -->
 <template>
-	<div class="flex flex-col gap-6">
+	<div class="flex flex-col gap-5">
 		<div class="flex flex-wrap items-start justify-between gap-3">
 			<div class="flex flex-col gap-1">
 				<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.discountReport") }}</h1>
-				<p class="text-secondary">{{ t("discountReport.description") }}</p>
+				<p>{{ t("discountReport.description") }}</p>
 			</div>
-			<n-button secondary size="small" :loading="isLoading" @click="fetchPage">
+			<n-button secondary :loading="isLoading" @click="fetchPage">
 				<template #icon><Icon name="carbon:renew" :size="16" /></template>
 				{{ t("discountReport.refresh") }}
 			</n-button>
 		</div>
 
-		<n-card size="small">
+		<n-card>
 			<div class="flex flex-wrap items-center gap-3">
-				<n-date-picker v-model:formatted-value="range" type="daterange" value-format="yyyy-MM-dd" clearable size="small" class="w-72" />
-				<n-select v-model:value="filters.kind" :options="kindOptions" :placeholder="t('discountReport.filters.kind')" clearable size="small" class="w-48" />
-				<n-select v-model:value="filters.purpose" :options="purposeOptions" :placeholder="t('discountReport.filters.purpose')" clearable size="small" class="w-48" />
-				<n-select v-model:value="filters.status" :options="statusOptions" :placeholder="t('discountReport.filters.status')" clearable size="small" class="w-40" />
+				<n-date-picker v-model:formatted-value="range" type="daterange" value-format="yyyy-MM-dd" clearable style="width: 18rem;" />
+				<n-select v-model:value="filters.kind" :options="kindOptions" :placeholder="t('discountReport.filters.kind')" clearable style="width: 12rem;" />
+				<n-select v-model:value="filters.purpose" :options="purposeOptions" :placeholder="t('discountReport.filters.purpose')" clearable style="width: 12rem;" />
+				<n-select v-model:value="filters.status" :options="statusOptions" :placeholder="t('discountReport.filters.status')" clearable style="width: 10rem;" />
 			</div>
 		</n-card>
 
 		<n-alert v-if="failed" type="error" :bordered="false">{{ t("discountReport.loadError") }}</n-alert>
 
-		<n-card v-if="totals" size="small" data-test="report-totals">
-			<div class="grid grid-cols-2 gap-4 md:grid-cols-4">
-				<div v-for="item in totalItems" :key="item.label" class="flex flex-col gap-1">
-					<span class="text-xs text-secondary">{{ item.label }}</span>
-					<bdi dir="ltr" class="text-lg font-semibold">{{ item.value }}</bdi>
-				</div>
-			</div>
-			<p class="mt-3 text-xs text-secondary">{{ t("discountReport.totals.note") }}</p>
-		</n-card>
+		<div v-if="totals" class="flex flex-col gap-2" data-test="report-totals">
+			<ResourceStatCards :cards="totalItems" />
+			<p class="text-xs text-secondary">{{ t("discountReport.totals.note") }}</p>
+		</div>
 
-		<n-card size="small">
-			<n-data-table remote :columns :data="rows" :loading="isLoading" :bordered="false" :row-key :pagination size="small" @update:page="onPage" />
+		<n-card class="add-ledger-table">
+			<n-data-table remote :columns :data="rows" :loading="isLoading" :bordered="false" :row-key :pagination @update:page="onPage" />
 		</n-card>
 	</div>
 </template>
@@ -54,6 +49,7 @@ import { computed, h, reactive, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { PRICING_PURPOSES } from "@/add-os/modules/pricing/types/coupon"
 import { DISCOUNT_KINDS, REPORT_STATUSES } from "@/add-os/modules/pricing/types/discount-report"
+import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import { ApiError } from "@/add-os/services/api"
 import { getDiscountReport } from "@/add-os/services/discount-report"
 import { formatDateTime, formatNumber } from "@/add-os/utils/format"

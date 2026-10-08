@@ -1,6 +1,6 @@
 import type { SelectOption } from "naive-ui"
-import { acceptHMRUpdate, defineStore } from "pinia"
 import type { CurrencyCode } from "@/add-os/utils/format/currency"
+import { acceptHMRUpdate, defineStore } from "pinia"
 import { DEFAULT_CURRENCY } from "@/add-os/utils/format/currency"
 
 export interface CurrencyOption {
@@ -29,10 +29,16 @@ export const useCurrencyStore = defineStore("currency", {
 			{ code: "SYP", name: "ليرة سورية (SYP)", symbol: "ل.س" },
 			{ code: "USD", name: "دولار أمريكي (USD)", symbol: "$" },
 			{ code: "EUR", name: "يورو (EUR)", symbol: "€" }
-		] as CurrencyOption[]
+		] as CurrencyOption[],
+		hasFetched: false,
+		_fetchPromise: null as Promise<void> | null
 	}),
 	actions: {
-		async fetchCurrencies(): Promise<void> {
+		fetchCurrencies(): Promise<void> {
+			if (this.hasFetched) return Promise.resolve()
+			if (this._fetchPromise) return this._fetchPromise
+
+			this._fetchPromise = (async () => {
 			try {
 				const { get } = await import("@/add-os/services/api")
 				const res = await get<{ data: Array<{ code: string; name: string; symbol: string; is_default?: boolean }> }>("/api/v1/currencies")
@@ -43,10 +49,19 @@ export const useCurrencyStore = defineStore("currency", {
 						symbol: c.symbol,
 						is_default: c.is_default
 					}))
+					const defaultCurrency = this.availableCurrencies.find(c => c.is_default)
+					if (defaultCurrency) {
+						this.currency = defaultCurrency.code
+					}
+					this.hasFetched = true
 				}
 			} catch {
 				// Fallback to initial currencies
+			} finally {
+				this._fetchPromise = null
 			}
+			})()
+			return this._fetchPromise
 		}
 	},
 	getters: {

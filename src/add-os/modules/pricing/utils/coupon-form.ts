@@ -45,7 +45,8 @@ export function emptyCouponForm(automatic = false): CouponForm {
 		discount_value: 10,
 		max_discount_points: null,
 		min_amount_points: null,
-		combinable_with_offers: true,
+		// No stacking on an offer unless the admin asks: the member gets the better of the two.
+		combinable_with_offers: false,
 		usage_limit: null,
 		usage_unlimited: true,
 		per_user_limit: automatic ? null : 1,

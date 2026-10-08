@@ -5,8 +5,9 @@
 		preset="card"
 		:title="t('members.topUp.title')"
 		closable
-		class="rounded-2xl"
-		style="max-width: 40rem"
+		class="rounded-2xl border border-[var(--add-border)]/70 shadow-lg bg-[var(--add-surface-raised)]"
+		style="width: min(34rem, 95vw)"
+		content-style="max-height: 72vh; overflow-y: auto; padding-inline-end: 6px"
 	>
 		<!--
 			The same cards as the Wallet Top-up page — recipient and balance, one
@@ -16,36 +17,36 @@
 		-->
 		<n-form v-if="member" ref="formRef" :model="form" :rules label-placement="top" class="flex flex-col gap-4">
 			<!-- Recipient and current balance -->
-			<div class="flex items-center justify-between p-3.5 rounded-xl border border-stone-200 bg-stone-50/50">
+			<div class="flex items-center justify-between p-3.5 rounded-xl border border-[var(--add-border)]/60 bg-[var(--add-surface)]/60">
 				<div class="flex items-center gap-3">
-					<n-avatar round :size="44" class="bg-emerald-700 text-white font-bold">{{ initials }}</n-avatar>
+					<n-avatar round :size="42" class="bg-[var(--add-brand-levant-deep-teal)] text-[var(--add-surface-raised)] font-bold text-sm">{{ initials }}</n-avatar>
 					<div class="flex flex-col gap-0.5">
-						<span class="font-bold text-stone-900">{{ member.name }}</span>
-						<bdi dir="ltr" class="text-xs text-stone-500 font-medium">{{ member.phone }}</bdi>
-						<n-tag size="small" round :type="member.status === 'active' ? 'success' : 'error'" class="w-fit text-[10px] font-semibold">
+						<span class="font-bold text-[var(--add-brand-charcoal-backbone)]">{{ member.name }}</span>
+						<bdi dir="ltr" class="text-xs text-[var(--add-text-muted)] font-medium">{{ member.phone }}</bdi>
+						<n-tag size="small" round :type="member.status === 'active' ? 'success' : 'error'" :bordered="false" class="w-fit text-[10px] font-semibold">
 							{{ member.status === "active" ? t("walletTopUps.active") : t("walletTopUps.inactive") }}
 						</n-tag>
 					</div>
 				</div>
 				<div class="flex flex-col items-end gap-1 text-xs">
-					<span class="text-stone-500">{{ t("walletTopUps.generalBalance") }}</span>
-					<span v-if="isLoadingBalance" class="text-stone-400 italic">{{ t("walletTopUps.loadingBalance") }}</span>
-					<span v-else class="font-bold text-teal-700 text-base">{{ currentBalancePoints === null ? "—" : formatPoints(currentBalancePoints) }}</span>
+					<span class="text-[var(--add-text-muted)]">{{ t("walletTopUps.generalBalance") }}</span>
+					<span v-if="isLoadingBalance" class="text-[var(--add-text-muted)] italic">{{ t("walletTopUps.loadingBalance") }}</span>
+					<span v-else class="font-bold font-numeric text-[var(--add-primary-text)] text-base">{{ currentBalancePoints === null ? "—" : formatPoints(currentBalancePoints) }}</span>
 				</div>
 			</div>
 
 			<!-- Amount: currency and digits in one box, the quote under it, quick amounts -->
-			<div class="flex flex-col gap-3 p-3.5 rounded-xl border border-stone-200">
-				<span class="text-sm font-bold text-stone-900">{{ t("members.topUp.amount") }}</span>
+			<div class="flex flex-col gap-3 p-3.5 rounded-xl border border-[var(--add-border)]/60 bg-[var(--add-surface-raised)]">
+				<span class="text-xs font-bold text-[var(--add-brand-charcoal-backbone)] uppercase tracking-wider">{{ t("members.topUp.amount") }}</span>
 				<n-form-item path="amount" class="m-0 w-full" :show-label="false">
-					<div class="flex items-center w-full border border-stone-200 rounded-xl bg-white shadow-2xs overflow-hidden focus-within:border-teal-600 focus-within:ring-1 focus-within:ring-teal-600 transition-all">
-						<div class="w-32 shrink-0 bg-stone-50/70 border-e border-stone-200">
+					<div class="flex items-center w-full border border-[var(--add-border)] rounded-xl bg-[var(--add-surface-raised)] shadow-2xs overflow-hidden focus-within:border-[var(--add-brand-smart-olive)] focus-within:ring-1 focus-within:ring-[var(--add-brand-smart-olive)] transition-all">
+						<div class="w-32 shrink-0 bg-[var(--add-surface-sunken)]/60 border-e border-[var(--add-border)]">
 							<FormIsolatedSelect
 								v-model:value="form.currency"
 								:options="currencyOptions"
 								:bordered="false"
 								:consistent-menu-width="false"
-								class="font-bold text-stone-700"
+								class="font-bold text-[var(--add-brand-charcoal-backbone)]"
 							/>
 						</div>
 						<n-input
@@ -53,24 +54,20 @@
 							:placeholder="t('members.topUp.amountPlaceholder')"
 							inputmode="decimal"
 							:bordered="false"
-							class="flex-1 text-base font-bold min-w-0"
+							class="flex-1 text-base font-bold font-numeric min-w-0"
 						/>
-						<span class="text-xs font-bold text-stone-400 shrink-0 px-3 whitespace-nowrap">{{ formattedInputAmount }}</span>
+						<span class="text-xs font-bold font-numeric text-[var(--add-text-muted)] shrink-0 px-3 whitespace-nowrap">{{ formattedInputAmount }}</span>
 					</div>
 				</n-form-item>
 
-				<!--
-					The point value is always the server's answer, never computed
-					here: the rate and its ceil-once rounding live in one place on
-					the backend.
-				-->
+				<!-- Point value preview quote -->
 				<div class="min-h-5 text-xs">
-					<span v-if="isPreviewLoading" class="text-stone-400 flex items-center gap-1">
+					<span v-if="isPreviewLoading" class="text-[var(--add-text-muted)] flex items-center gap-1.5">
 						<n-spin :size="12" />
 						{{ t("points.previewLoading") }}
 					</span>
-					<span v-else-if="previewError" class="text-red-600">{{ previewError }}</span>
-					<span v-else-if="previewPoints !== null" class="font-bold text-teal-700 add-numeric">≈ {{ formatPoints(previewPoints) }}</span>
+					<span v-else-if="previewError" class="text-[var(--add-danger-text)] font-medium">{{ previewError }}</span>
+					<span v-else-if="previewPoints !== null" class="font-bold font-numeric text-[var(--add-primary-text)] add-numeric">≈ {{ formatPoints(previewPoints) }}</span>
 				</div>
 
 				<div class="grid grid-cols-4 gap-2">
@@ -78,7 +75,7 @@
 						v-for="preset in amountPresets"
 						:key="preset"
 						type="button"
-						class="py-2.5 px-2 rounded-xl text-xs font-bold border transition-all text-teal-700 border-teal-200 bg-teal-50/50 hover:bg-teal-100 shadow-2xs cursor-pointer"
+						class="py-2 px-1.5 rounded-xl text-xs font-bold font-numeric border transition-all text-[var(--add-primary-text)] border-[var(--add-border)]/70 bg-[var(--add-surface-sunken)]/60 hover:bg-[var(--add-brand-smart-olive)]/15 hover:border-[var(--add-brand-smart-olive)] shadow-2xs cursor-pointer"
 						@click="addPresetAmount(preset)"
 					>
 						+ {{ formatNumber(preset) }}
@@ -88,39 +85,39 @@
 
 			<!-- Payment method -->
 			<div class="flex flex-col gap-2">
-				<span class="text-sm font-bold text-stone-900">{{ t("members.topUp.paymentMethod") }}</span>
+				<span class="text-xs font-bold text-[var(--add-brand-charcoal-backbone)] uppercase tracking-wider">{{ t("members.topUp.paymentMethod") }}</span>
 				<div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
 					<div
 						v-for="method in paymentMethodList"
 						:key="method.id"
 						class="flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer"
-						:class="form.payment_method === method.id ? 'border-teal-700 bg-teal-50/40 shadow-sm ring-1 ring-teal-600' : 'border-stone-200 bg-white hover:border-stone-300'"
+						:class="form.payment_method === method.id ? 'border-[var(--add-brand-smart-olive)] bg-[var(--add-brand-smart-olive)]/10 shadow-xs ring-1 ring-[var(--add-brand-smart-olive)]' : 'border-[var(--add-border)]/60 bg-[var(--add-surface-raised)] hover:border-[var(--add-border-strong)]'"
 						@click="form.payment_method = method.id"
 					>
-						<div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" :class="method.iconBg">
-							<Icon :name="method.icon" :size="20" />
+						<div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" :class="method.iconBg">
+							<Icon :name="method.icon" :size="18" />
 						</div>
-						<span class="font-bold text-stone-900 text-sm">{{ method.label }}</span>
+						<span class="font-bold text-[var(--add-brand-charcoal-backbone)] text-sm">{{ method.label }}</span>
 					</div>
 				</div>
 			</div>
 
-			<!-- The balance before and after -->
-			<div class="flex flex-col gap-2 p-3.5 rounded-xl border border-emerald-200 bg-emerald-50/30">
-				<span class="text-xs font-bold text-stone-700 uppercase tracking-wider">{{ t("walletTopUps.walletPreview") }}</span>
+			<!-- The balance before and after preview -->
+			<div class="flex flex-col gap-2 p-3.5 rounded-xl border border-[var(--add-border)]/60 bg-[var(--add-surface)]/60">
+				<span class="text-xs font-bold text-[var(--add-text-muted)] uppercase tracking-wider">{{ t("walletTopUps.walletPreview") }}</span>
 				<div class="grid grid-cols-3 gap-2 items-center text-center text-xs">
-					<div class="flex flex-col p-2 bg-white rounded-lg border border-emerald-100">
-						<span class="text-stone-400 text-[11px]">{{ t("walletTopUps.currentGeneralBalance") }}</span>
-						<span class="font-bold text-stone-800 text-sm mt-0.5">{{ currentBalancePoints === null ? "—" : formatPoints(currentBalancePoints) }}</span>
+					<div class="flex flex-col p-2 bg-[var(--add-surface-raised)] rounded-lg border border-[var(--add-border)]/40 shadow-2xs">
+						<span class="text-[var(--add-text-muted)] text-[11px]">{{ t("walletTopUps.currentGeneralBalance") }}</span>
+						<span class="font-bold font-numeric text-[var(--add-brand-charcoal-backbone)] text-sm mt-0.5">{{ currentBalancePoints === null ? "—" : formatPoints(currentBalancePoints) }}</span>
 					</div>
-					<div class="flex flex-col p-2 bg-emerald-100/50 rounded-lg border border-emerald-200">
-						<span class="text-emerald-700 text-[11px] font-medium">{{ t("walletTopUps.topUpAmount") }}</span>
-						<span class="font-extrabold text-emerald-800 text-sm mt-0.5">{{ previewPoints === null ? "—" : `+ ${formatPoints(previewPoints)}` }}</span>
-						<span class="text-emerald-700/70 text-[10px] add-numeric">{{ formattedInputAmount }}</span>
+					<div class="flex flex-col p-2 bg-[var(--add-brand-smart-olive)]/12 rounded-lg border border-[var(--add-brand-smart-olive)]/30 shadow-2xs">
+						<span class="text-[var(--add-primary-text)] text-[11px] font-semibold">{{ t("walletTopUps.topUpAmount") }}</span>
+						<span class="font-bold font-numeric text-[var(--add-primary-text)] text-sm mt-0.5">{{ previewPoints === null ? "—" : `+ ${formatPoints(previewPoints)}` }}</span>
+						<span class="text-[var(--add-text-muted)] text-[10px] font-numeric add-numeric">{{ formattedInputAmount }}</span>
 					</div>
-					<div class="flex flex-col p-2 bg-white rounded-lg border border-emerald-100">
-						<span class="text-stone-400 text-[11px]">{{ t("walletTopUps.newGeneralBalance") }}</span>
-						<span class="font-bold text-teal-800 text-sm mt-0.5">{{ newBalancePoints === null ? "—" : formatPoints(newBalancePoints) }}</span>
+					<div class="flex flex-col p-2 bg-[var(--add-surface-raised)] rounded-lg border border-[var(--add-border)]/40 shadow-2xs">
+						<span class="text-[var(--add-text-muted)] text-[11px]">{{ t("walletTopUps.newGeneralBalance") }}</span>
+						<span class="font-bold font-numeric text-[var(--add-brand-levant-deep-teal)] text-sm mt-0.5">{{ newBalancePoints === null ? "—" : formatPoints(newBalancePoints) }}</span>
 					</div>
 				</div>
 			</div>
@@ -134,10 +131,11 @@
 				/>
 			</n-form-item>
 
-			<div class="flex gap-2">
-				<n-button class="h-12 rounded-xl" @click="show = false">{{ t("users.form.cancel") }}</n-button>
-				<n-button type="primary" size="large" class="flex-1 h-12 rounded-xl text-base font-bold shadow-md" :loading="isSubmitting" @click="submitTopUp">
-					<template #icon><Icon name="carbon:checkmark" :size="18" /></template>
+			<!-- Action buttons -->
+			<div class="flex gap-2.5 pt-1">
+				<n-button class="h-11 px-4 rounded-xl" @click="show = false">{{ t("users.form.cancel") }}</n-button>
+				<n-button type="primary" size="large" class="flex-1 h-11 rounded-xl text-sm font-bold shadow-sm" :loading="isSubmitting" @click="submitTopUp">
+					<template #icon><Icon name="carbon:checkmark" :size="16" /></template>
 					{{ t("members.topUp.submit") }}
 				</n-button>
 			</div>
@@ -292,7 +290,7 @@ const currencyOptions = computed<SelectOption[]>(() => {
 
 /** The methods the desk takes, as the Wallet Top-up page shows them. */
 const paymentMethodList = computed(() => [
-	{ id: "cash" as PaymentMethod, label: t("walletTopUps.paymentMethod.cash"), icon: "carbon:money", iconBg: "bg-emerald-50 text-emerald-700" }
+	{ id: "cash" as PaymentMethod, label: t("walletTopUps.paymentMethod.cash"), icon: "carbon:money", iconBg: "bg-[var(--add-brand-smart-olive)]/15 text-[var(--add-primary-text)]" }
 ])
 
 /**

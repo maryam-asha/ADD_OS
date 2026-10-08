@@ -41,12 +41,10 @@
 							<template #prefix><Icon name="carbon:search" :size="16" /></template>
 						</n-input>
 					</div>
-					<n-select v-model:value="filters.state" :options="stateOptions" :placeholder="t('coupons.filters.state')" clearable size="small" class="w-44" />
-					<n-select v-model:value="filters.is_active" :options="activeOptions" :placeholder="t('coupons.filters.active')" clearable size="small" class="w-44" />
 					<span class="text-xs text-secondary ms-auto">{{ t("coupons.page.count", { count: formatNumber(total) }) }}</span>
 				</div>
 				<n-alert v-if="failed" type="error" :bordered="false">{{ t("coupons.page.loadError") }}</n-alert>
-				<n-data-table remote :columns :data="rows" :loading="isLoading" :bordered="false" :row-key="(row: Coupon) => row.id" :pagination :row-props size="small" @update:page="onPage" />
+				<n-data-table remote :columns :data="rows" :loading="isLoading" :bordered="false" :row-key="(row: Coupon) => row.id" :pagination :row-props size="small" @update:page="onPage" @update:filters="handleFiltersChange" />
 			</div>
 		</n-card>
 
@@ -58,7 +56,7 @@
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
 import type { Coupon } from "@/add-os/modules/pricing/types/coupon"
-import { NAlert, NButton, NCard, NDataTable, NInput, NSelect, NSwitch, NTag, useDialog, useMessage } from "naive-ui"
+import { NAlert, NButton, NCard, NDataTable, NInput, NSwitch, NTag, useDialog, useMessage } from "naive-ui"
 import { computed, h, reactive, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
@@ -139,7 +137,10 @@ const columns = computed<DataTableColumns<Coupon>>(() => [
 	{ title: t("coupons.columns.usage"), key: "used", render: row => h("bdi", { dir: "ltr" }, usage(row)) },
 	{
 		title: t("coupons.columns.window"),
-		key: "window",
+		key: "state", // changed key to state for filter
+		filterMultiple: false,
+		filterOptionValue: filters.state,
+		filterOptions: stateOptions.value,
 		// Two lines, not "start → end": a fixed arrow points the wrong way in RTL.
 		render: row => h("div", { class: "flex flex-col text-xs" }, [
 			h("span", row.starts_at ? formatDateTime(row.starts_at) : "—"),
@@ -149,6 +150,9 @@ const columns = computed<DataTableColumns<Coupon>>(() => [
 	{
 		title: t("coupons.columns.active"),
 		key: "is_active",
+		filterMultiple: false,
+		filterOptionValue: filters.is_active,
+		filterOptions: activeOptions.value,
 		render: row => (canWrite
 			? h("span", { "data-test": "coupon-active-switch", "onClick": only(() => void toggle(row)) }, [h(NSwitch, { value: row.is_active, loading: toggling.value === row.id, size: "small" })])
 			: h(NTag, { size: "small", round: true, bordered: false, type: row.is_active ? "success" : "default" }, { default: () => t(row.is_active ? "coupons.filters.activeYes" : "coupons.filters.activeNo") }))
@@ -157,13 +161,22 @@ const columns = computed<DataTableColumns<Coupon>>(() => [
 		? [{
 				title: t("coupons.columns.actions"),
 				key: "actions",
-				render: (row: Coupon) => h("div", { class: "flex gap-1" }, [
-					h(NButton, { size: "tiny", quaternary: true, onClick: only(() => openForm(row.id)) }, { default: () => t("coupons.edit") }),
-					h(NButton, { "size": "tiny", "quaternary": true, "type": "error", "data-test": "coupon-delete", "onClick": only(() => confirmDelete(row)) }, { default: () => t("coupons.delete.action") })
+				render: (row: Coupon) => h("div", { class: "flex gap-3" }, [
+					h(NButton, { text: true, type: "primary", "aria-label": t("coupons.edit"), title: t("coupons.edit"), onClick: only(() => openForm(row.id)) }, { icon: () => h(Icon, { name: "carbon:edit", size: 18 }) }),
+					h(NButton, { text: true, type: "error", "data-test": "coupon-delete", "aria-label": t("coupons.delete.action"), title: t("coupons.delete.action"), onClick: only(() => confirmDelete(row)) }, { icon: () => h(Icon, { name: "carbon:trash-can", size: 18 }) })
 				])
 			}]
 		: [])
 ])
+
+function handleFiltersChange(newFilters: Record<string, any>) {
+	if (newFilters.state !== undefined) {
+		filters.state = newFilters.state === null ? null : String(newFilters.state)
+	}
+	if (newFilters.is_active !== undefined) {
+		filters.is_active = newFilters.is_active === null ? null : Number(newFilters.is_active)
+	}
+}
 
 function rowProps(row: Coupon) {
 	return {

@@ -1502,8 +1502,8 @@
 			"events": "الفعاليات",
 			"community": "المجتمع",
 			"cafe": "الكافيه",
-			"incubate": "برنامج Incubate",
-			"accelerate": "برنامج Accelerate",
+			"incubate": "برنامج الاحتضان",
+			"accelerate": "برنامج تسريع الأعمال",
 			"mentors": "المرشدون",
 			"privateOfficeRequests": "طلبات المكاتب الخاصة",
 			"content": "المحتوى",
@@ -1528,7 +1528,8 @@
 			"memberProfile": "ملف العضو",
 			"coupons": "الكوبونات",
 			"discountReport": "تقرير الخصومات",
-			"offerReport": "العروض حسب الفترة"
+			"offerReport": "العروض حسب الفترة",
+			"planPurchases": "شحن الخطط"
 		}
 	},
 	"resourceCrud": {
@@ -2716,7 +2717,7 @@
 			"startsAt": "يبدأ",
 			"endsAt": "ينتهي",
 			"targets": "يُطبَّق على",
-			"targetsEmpty": "كل المشتريات عدا شحن المحفظة.",
+			"targetsEmpty": "كل المشتريات عدا شحن المحفظة والفعاليات. لتطبيقه على الفعاليات أضف هدف \"تسجيل فعالية\".",
 			"addTarget": "إضافة شرط",
 			"removeTarget": "حذف هذا الشرط",
 			"purpose": "نوع الشراء",
@@ -2736,7 +2737,7 @@
 		},
 		"detail": {
 			"title": "الكوبون {code}",
-			"allPurchases": "كل المشتريات عدا شحن المحفظة",
+			"allPurchases": "كل المشتريات عدا شحن المحفظة والفعاليات",
 			"everyone": "الجميع",
 			"discountPercent": "خصم {value}٪",
 			"discountPoints": "خصم {value} نقطة",

@@ -7,7 +7,7 @@
 -->
 <template>
 	<div class="flex flex-col gap-4">
-		<div v-if="filters.length || dateRange" class="flex flex-wrap items-center gap-3">
+		<div v-if="filters.length || dateRange" class="flex flex-wrap items-center gap-3 p-3 bg-[var(--add-surface-sunken)]/40 rounded-xl border border-[var(--add-border)]/40">
 			<div v-for="filter in filters" :key="filter.key" class="w-44 shrink-0">
 				<n-select
 					v-model:value="values[filter.key]"
@@ -27,22 +27,24 @@
 				size="small"
 				class="w-64 shrink-0"
 			/>
-			<span class="text-xs text-stone-500 ms-auto">{{ t("memberProfile.resultCount", { count: formatNumber(total) }) }}</span>
+			<span class="text-xs text-[var(--add-text-muted)] font-medium ms-auto">{{ t("memberProfile.resultCount", { count: formatNumber(total) }) }}</span>
 		</div>
 
 		<n-alert v-if="failed" type="error" :bordered="false">{{ t("memberProfile.loadError") }}</n-alert>
 
-		<n-data-table
-			remote
-			:columns
-			:data="rows"
-			:loading="isLoading"
-			:bordered="false"
-			:row-key
-			:pagination
-			size="small"
-			@update:page="onPage"
-		/>
+		<div class="add-ledger-table w-full overflow-x-auto">
+			<n-data-table
+				remote
+				:columns
+				:data="rows"
+				:loading="isLoading"
+				:bordered="false"
+				:row-key
+				:pagination
+				size="small"
+				@update:page="onPage"
+			/>
+		</div>
 	</div>
 </template>
 

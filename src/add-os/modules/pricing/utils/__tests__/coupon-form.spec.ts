@@ -93,6 +93,13 @@ describe("groupErrors", () => {
 	})
 })
 
+describe("emptyCouponForm", () => {
+	it("does not combine with offers unless the admin turns it on — the server's default too", () => {
+		expect(emptyCouponForm().combinable_with_offers).toBe(false)
+		expect(formToPayload({ ...emptyCouponForm(), code: "X" }).combinable_with_offers).toBe(false)
+	})
+})
+
 describe("missingLimits", () => {
 	it("flags an emptied limit box that is not marked unlimited — empty must never read as unlimited", () => {
 		expect(missingLimits({ ...emptyCouponForm(), per_user_limit: null })).toEqual(["per_user_limit"])

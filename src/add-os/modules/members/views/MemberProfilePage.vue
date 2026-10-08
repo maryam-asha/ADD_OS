@@ -3,192 +3,369 @@
 	A member's whole file: who they are, what they hold and owe, whether they
 	are inside now — then a tab for each part of their history, every one
 	filtered and paged by the server. Reached from the members list.
+	Refreshed with the ADD OS architectural design system and brand palette.
 -->
 <template>
-	<div class="flex flex-col gap-6 max-w-7xl mx-auto p-4 sm:p-6">
-		<div class="flex items-center justify-between">
-			<n-button text @click="router.push({ name: 'members.individuals' })">
-				<template #icon><Icon name="carbon:arrow-left" :size="18" class="rtl:rotate-180" /></template>
-				{{ t("memberProfile.back") }}
+	<div class="flex flex-col gap-5 max-w-7xl mx-auto p-4 sm:p-6 text-[var(--add-text-primary)]">
+		<!-- Top action & breadcrumb bar -->
+		<div class="flex items-center justify-between gap-4">
+			<n-button text class="group flex items-center gap-1.5 text-[var(--add-text-secondary)] hover:text-[var(--add-brand-levant-deep-teal)]" @click="router.push({ name: 'members.individuals' })">
+				<template #icon>
+					<Icon name="carbon:arrow-left" :size="16" class="rtl:rotate-180 transition-transform group-hover:-translate-x-0.5 rtl:group-hover:translate-x-0.5" />
+				</template>
+				<span class="font-medium text-sm">{{ t("memberProfile.back") }}</span>
 			</n-button>
-			<n-button secondary size="small" :loading="isLoading" @click="loadSummary">
-				<template #icon><Icon name="carbon:renew" :size="16" /></template>
-				{{ t("memberProfile.refresh") }}
-			</n-button>
+			<div class="flex items-center gap-2">
+				<n-button secondary size="small" :loading="isLoading" class="border-[var(--add-border)]" @click="loadSummary">
+					<template #icon><Icon name="carbon:renew" :size="14" class="text-[var(--add-brand-levant-deep-teal)]" /></template>
+					{{ t("memberProfile.refresh") }}
+				</n-button>
+			</div>
 		</div>
 
-		<n-alert v-if="loadFailed" type="error" :bordered="false">{{ t("memberProfile.loadError") }}</n-alert>
+		<!-- Error alert -->
+		<n-alert v-if="loadFailed" type="error" :bordered="false" class="rounded-xl">{{ t("memberProfile.loadError") }}</n-alert>
 
 		<n-spin :show="isLoading && !summary">
-			<template v-if="summary">
-				<!-- Who they are -->
-				<n-card size="small" class="shadow-sm border border-stone-200">
-					<div class="flex flex-wrap items-start justify-between gap-4">
-						<div class="flex items-center gap-4">
-							<n-avatar round :size="64" :src="member?.personal_profile?.avatar_url ?? undefined" class="bg-emerald-700 text-white text-xl font-bold">
-								{{ initials(member?.name) }}
-							</n-avatar>
-							<div class="flex flex-col gap-1">
-								<div class="flex items-center gap-2 flex-wrap">
-									<span class="text-xl font-bold text-stone-900">{{ member?.name }}</span>
-									<n-tag :type="member?.status === 'active' ? 'success' : 'error'" size="small" round>
+			<div v-if="summary" class="flex flex-col gap-5">
+				<!-- Member Identity Card -->
+				<div class="rounded-xl border border-[var(--add-border)]/70 bg-[var(--add-surface-raised)] p-5 sm:p-6 shadow-xs">
+					<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+						<!-- Left: Avatar + Core Details -->
+						<div class="flex items-center gap-4 sm:gap-5 min-w-0">
+							<!-- Avatar with active presence dot -->
+							<div class="relative shrink-0">
+								<n-avatar
+									round
+									:size="64"
+									:src="member?.personal_profile?.avatar_url ?? undefined"
+									class="bg-[var(--add-brand-levant-deep-teal)] text-[var(--add-surface-raised)] text-xl font-bold ring-2 ring-[var(--add-border)]/40 shadow-xs"
+								>
+									{{ initials(member?.name) }}
+								</n-avatar>
+								<span
+									v-if="member?.status === 'active'"
+									class="absolute -bottom-0.5 -end-0.5 w-3.5 h-3.5 rounded-full bg-[var(--add-brand-smart-olive)] ring-2 ring-[var(--add-surface-raised)]"
+									:title="t(`members.status.${member?.status}`)"
+								></span>
+							</div>
+
+							<!-- Identity and Meta Details -->
+							<div class="flex flex-col gap-1.5 min-w-0">
+								<div class="flex items-center gap-2.5 flex-wrap">
+									<h1 class="text-xl sm:text-2xl font-bold text-[var(--add-brand-charcoal-backbone)] tracking-tight">
+										{{ member?.name }}
+									</h1>
+									<span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-[var(--add-surface-sunken)] text-[var(--add-text-secondary)] font-numeric border border-[var(--add-border)]/50">
+										#{{ member?.id }}
+									</span>
+									<n-tag :type="member?.status === 'active' ? 'success' : 'error'" size="small" round :bordered="false">
 										{{ t(`members.status.${member?.status}`) }}
 									</n-tag>
 								</div>
-								<div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-stone-500">
-									<bdi dir="ltr">{{ member?.phone }}</bdi>
-									<span v-if="member?.email">{{ member.email }}</span>
-									<span v-if="summary.joined_at">{{ t("memberProfile.joined", { date: formatDate(summary.joined_at) }) }}</span>
+
+								<div v-if="profile?.professional?.job_title || profile?.professional?.company_name" class="text-xs sm:text-sm font-medium text-[var(--add-brand-antique-copper)] flex items-center gap-1.5">
+									<Icon name="carbon:badge" :size="14" />
+									<span class="truncate">
+										{{ [profile?.professional?.job_title, profile?.professional?.company_name].filter(Boolean).join(" · ") }}
+									</span>
 								</div>
-								<div v-if="member?.companies?.length" class="flex flex-wrap gap-2 mt-1">
-									<n-tag v-for="company in member.companies" :key="company.id" size="small" :bordered="false">
-										{{ company.legal_name }}<template v-if="company.is_admin"> · {{ t("memberProfile.companyAdmin") }}</template>
-									</n-tag>
+
+								<!-- Contact & Affiliate chips -->
+								<div class="flex flex-wrap items-center gap-2 pt-0.5">
+									<span class="inline-flex items-center gap-1.5 bg-[var(--add-surface-sunken)] px-2.5 py-1 rounded-md border border-[var(--add-border)]/50 text-xs font-numeric text-[var(--add-text-secondary)]">
+										<Icon name="carbon:phone" :size="13" class="text-[var(--add-brand-smart-olive)] shrink-0" />
+										<bdi dir="ltr">{{ member?.phone }}</bdi>
+									</span>
+									<span v-if="member?.email" class="inline-flex items-center gap-1.5 bg-[var(--add-surface-sunken)] px-2.5 py-1 rounded-md border border-[var(--add-border)]/50 text-xs font-numeric text-[var(--add-text-secondary)]">
+										<Icon name="carbon:email" :size="13" class="text-[var(--add-brand-deep-teal)] shrink-0" />
+										<span class="truncate max-w-[220px]">{{ member.email }}</span>
+									</span>
+									<span v-if="summary.joined_at" class="inline-flex items-center gap-1.5 bg-[var(--add-surface-sunken)] px-2.5 py-1 rounded-md border border-[var(--add-border)]/50 text-xs text-[var(--add-text-secondary)]">
+										<Icon name="carbon:calendar" :size="13" class="text-[var(--add-brand-charcoal-backbone)] shrink-0" />
+										{{ t("memberProfile.joined", { date: formatDate(summary.joined_at) }) }}
+									</span>
+									<!-- Companies tags in the same clean flow -->
+									<template v-if="member?.companies?.length">
+										<n-tag v-for="company in member.companies" :key="company.id" size="small" :bordered="false" class="bg-[var(--add-surface-sunken)] text-[var(--add-text-primary)]">
+											<template #icon><Icon name="carbon:enterprise" :size="12" class="text-[var(--add-brand-levant-deep-teal)]" /></template>
+											{{ company.legal_name }}<template v-if="company.is_admin"> · {{ t("memberProfile.companyAdmin") }}</template>
+										</n-tag>
+									</template>
 								</div>
 							</div>
 						</div>
-						<n-button type="primary" @click="topUpVisible = true">
-							<template #icon><Icon name="carbon:wallet" :size="18" /></template>
-							{{ t("memberProfile.topUp") }}
-						</n-button>
-					</div>
-				</n-card>
 
-				<!-- Inside right now -->
-				<n-alert v-if="summary.open_session" type="success" :bordered="false" class="mt-4">
-					<div class="flex flex-wrap items-center justify-between gap-2">
-						<span>{{ t("memberProfile.insideNow", { space: summary.open_session.space ?? "—", time: formatTime(summary.open_session.checked_in_at) }) }}</span>
-						<n-button size="small" type="primary" secondary @click="openSession(summary.open_session.type, summary.open_session.id)">
-							{{ t("memberProfile.viewSession") }}
-						</n-button>
-					</div>
-				</n-alert>
-
-				<!-- At a glance -->
-				<div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mt-4">
-					<n-card v-for="card in cards" :key="card.key" size="small" class="border border-stone-200">
-						<div class="flex flex-col gap-1">
-							<span class="flex items-center gap-2 text-xs text-stone-500">
-								<Icon :name="card.icon" :size="16" class="text-emerald-700" />{{ card.label }}
-							</span>
-							<span class="text-2xl font-extrabold text-stone-900" :class="card.tone">{{ card.value }}</span>
-							<span v-if="card.hint" class="text-xs text-stone-500">{{ card.hint }}</span>
+						<!-- Right: Primary Action Button -->
+						<div class="shrink-0 flex items-center md:self-center">
+							<n-button type="primary" size="medium" @click="topUpVisible = true">
+								<template #icon><Icon name="carbon:wallet" :size="16" /></template>
+								{{ t("memberProfile.topUp") }}
+							</n-button>
 						</div>
-					</n-card>
+					</div>
 				</div>
-			</template>
+
+				<!-- Live Presence Card: Inside right now -->
+				<div
+					v-if="summary.open_session"
+					class="rounded-xl border border-[var(--add-brand-smart-olive)]/40 bg-[var(--add-brand-smart-olive)]/8 px-4 py-3 flex flex-wrap items-center justify-between gap-3 shadow-xs"
+				>
+					<div class="flex items-center gap-2.5">
+						<span class="relative flex h-2.5 w-2.5">
+							<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--add-brand-smart-olive)] opacity-75"></span>
+							<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-[var(--add-brand-smart-olive)]"></span>
+						</span>
+						<span class="font-semibold text-[var(--add-brand-levant-deep-teal)] text-sm">
+							{{ t("memberProfile.insideNow", { space: summary.open_session.space ?? "—", time: formatTime(summary.open_session.checked_in_at) }) }}
+						</span>
+					</div>
+					<n-button size="small" type="primary" secondary @click="openSession(summary.open_session.type, summary.open_session.id)">
+						<template #icon><Icon name="carbon:arrow-right" :size="14" class="rtl:rotate-180" /></template>
+						{{ t("memberProfile.viewSession") }}
+					</n-button>
+				</div>
+
+				<!-- At a glance KPI Grid (6 metrics with balanced proportions) -->
+				<div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+					<div
+						v-for="card in cards"
+						:key="card.key"
+						class="bg-[var(--add-surface-raised)] border border-[var(--add-border)]/60 rounded-xl p-3.5 shadow-xs hover:border-[var(--add-border-strong)] transition-colors flex flex-col justify-between gap-2 min-h-[96px]"
+					>
+						<div class="flex items-center justify-between gap-2">
+							<span class="text-xs font-medium text-[var(--add-text-muted)] truncate">{{ card.label }}</span>
+							<div :class="['w-6 h-6 rounded-md flex items-center justify-center shrink-0', card.iconBg, card.iconColor]">
+								<Icon :name="card.icon" :size="14" />
+							</div>
+						</div>
+						<div class="flex flex-col">
+							<span class="text-lg sm:text-xl font-bold font-numeric tracking-tight truncate leading-tight" :class="card.tone || 'text-[var(--add-brand-charcoal-backbone)]'">
+								{{ card.value }}
+							</span>
+							<span class="text-xs text-[var(--add-text-muted)] truncate mt-0.5 h-4 flex items-center">
+								{{ card.hint || "" }}
+							</span>
+						</div>
+					</div>
+				</div>
+			</div>
 		</n-spin>
 
-		<!-- History, a tab for each part -->
-		<n-card v-if="summary" size="small" class="shadow-sm border border-stone-200">
+		<!-- Member History & Tabs Container -->
+		<div v-if="summary" class="rounded-xl border border-[var(--add-border)]/70 bg-[var(--add-surface-raised)] p-5 sm:p-6 shadow-xs">
 			<n-tabs v-model:value="tab" type="line" animated>
+				<!-- Overview Tab -->
 				<n-tab-pane name="overview" :tab="t('memberProfile.tabs.overview')">
-					<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-						<div class="flex flex-col gap-2">
-							<h3 class="font-bold text-stone-800">{{ t("memberProfile.walletPools") }}</h3>
-							<div v-for="pool in summary.wallet.categories" :key="pool.category" class="flex justify-between text-sm border-b border-stone-100 py-1.5">
-								<span>{{ pool.label }}</span>
-								<span class="font-semibold">{{ t("memberProfile.points", { points: formatNumber(pool.points) }) }}</span>
+					<div class="grid grid-cols-1 lg:grid-cols-2 gap-5 pt-2">
+						<!-- Wallet Categories Card -->
+						<div class="bg-[var(--add-surface)]/50 border border-[var(--add-border)]/60 rounded-xl p-4 sm:p-5 flex flex-col gap-4">
+							<div class="flex items-center justify-between border-b border-[var(--add-border)]/40 pb-3">
+								<div class="flex items-center gap-2">
+									<div class="w-7 h-7 rounded-md bg-[var(--add-brand-smart-olive)]/15 flex items-center justify-center text-[var(--add-primary-text)]">
+										<Icon name="carbon:wallet" :size="16" />
+									</div>
+									<h3 class="font-bold text-[var(--add-brand-levant-deep-teal)] text-sm sm:text-base">{{ t("memberProfile.walletPools") }}</h3>
+								</div>
+								<n-button size="tiny" type="primary" secondary @click="topUpVisible = true">
+									{{ t("memberProfile.topUp") }}
+								</n-button>
+							</div>
+							<div class="flex flex-col gap-2.5">
+								<div
+									v-for="pool in summary.wallet.categories"
+									:key="pool.category"
+									class="flex flex-col gap-1.5 p-3 rounded-lg bg-[var(--add-surface-raised)] border border-[var(--add-border)]/40 shadow-xs"
+								>
+									<div class="flex items-center justify-between text-xs sm:text-sm">
+										<span class="font-semibold text-[var(--add-brand-charcoal-backbone)]">{{ pool.label }}</span>
+										<span class="font-bold font-numeric text-[var(--add-primary-text)]">{{ t("memberProfile.points", { points: formatNumber(pool.points) }) }}</span>
+									</div>
+									<div class="w-full bg-[var(--add-surface-sunken)] rounded-full h-1.5 overflow-hidden">
+										<div
+											class="bg-[var(--add-brand-smart-olive)] h-full rounded-full transition-all duration-500"
+											:style="{ width: poolShare(pool.points) }"
+										></div>
+									</div>
+								</div>
 							</div>
 						</div>
-						<div class="flex flex-col gap-2">
-							<h3 class="font-bold text-stone-800">{{ t("memberProfile.activity") }}</h3>
-							<div v-for="line in activity" :key="line.label" class="flex justify-between text-sm border-b border-stone-100 py-1.5">
-								<span>{{ line.label }}</span>
-								<span class="font-semibold">{{ line.value }}</span>
+
+						<!-- Activity & Usage Pulse -->
+						<div class="bg-[var(--add-surface)]/50 border border-[var(--add-border)]/60 rounded-xl p-4 sm:p-5 flex flex-col gap-4">
+							<div class="flex items-center gap-2 border-b border-[var(--add-border)]/40 pb-3">
+								<div class="w-7 h-7 rounded-md bg-[var(--add-brand-levant-deep-teal)]/15 flex items-center justify-center text-[var(--add-brand-levant-deep-teal)]">
+									<Icon name="carbon:activity" :size="16" />
+								</div>
+								<h3 class="font-bold text-[var(--add-brand-levant-deep-teal)] text-sm sm:text-base">{{ t("memberProfile.activity") }}</h3>
+							</div>
+							<div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+								<div
+									v-for="line in activity"
+									:key="line.label"
+									class="flex flex-col gap-1 p-3.5 rounded-lg bg-[var(--add-surface-raised)] border border-[var(--add-border)]/40 shadow-xs"
+								>
+									<span class="text-xs font-medium text-[var(--add-text-muted)]">{{ line.label }}</span>
+									<span class="text-lg font-bold font-numeric text-[var(--add-brand-charcoal-backbone)]">{{ line.value }}</span>
+								</div>
+							</div>
+
+							<!-- Quick Membership Status if available -->
+							<div v-if="summary.membership" class="p-3.5 rounded-lg bg-[var(--add-surface-raised)] border border-[var(--add-border)]/40 flex items-center justify-between gap-3 mt-auto">
+								<div class="flex items-center gap-2.5">
+									<div class="w-8 h-8 rounded-md bg-[var(--add-brand-antique-copper)]/15 flex items-center justify-center text-[var(--add-brand-antique-copper)]">
+										<Icon name="carbon:badge" :size="18" />
+									</div>
+									<div class="flex flex-col">
+										<span class="text-xs text-[var(--add-text-muted)]">{{ t("memberProfile.cards.plan") }}</span>
+										<span class="font-bold text-sm text-[var(--add-brand-charcoal-backbone)]">{{ summary.membership.plan }}</span>
+									</div>
+								</div>
+								<div v-if="summary.membership.hours_remaining !== null" class="text-end">
+									<span class="text-xs text-[var(--add-text-muted)] block">{{ t("memberProfile.cards.hoursLeft", { hours: formatNumber(summary.membership.hours_remaining) }) }}</span>
+									<span v-if="summary.membership.period_end" class="text-xs font-numeric text-[var(--add-text-secondary)]">
+										{{ t("memberProfile.cards.until", { date: formatDate(summary.membership.period_end) }) }}
+									</span>
+								</div>
 							</div>
 						</div>
 					</div>
 				</n-tab-pane>
 
-				<!-- Everything the member told us, and everything their account holds -->
+				<!-- Profile Tab (Bento Grid) -->
 				<n-tab-pane name="profile" :tab="t('memberProfile.tabs.profile')">
-					<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-						<!-- Personal -->
-						<div class="flex flex-col gap-3 p-4 rounded-xl border border-stone-200">
-							<h3 class="flex items-center gap-2 font-bold text-stone-800">
-								<Icon name="carbon:user-avatar" :size="18" class="text-emerald-700" />{{ t("memberProfile.profile.personal") }}
-							</h3>
-							<div class="flex items-start gap-4">
-								<n-avatar round :size="72" :src="profile.personal.avatar_url ?? undefined" class="bg-emerald-700 text-white text-2xl font-bold shrink-0">
+					<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-2">
+						<!-- Personal Details Bento Card -->
+						<div class="flex flex-col gap-3.5 p-4 sm:p-5 rounded-xl border border-[var(--add-border)]/60 bg-[var(--add-surface)]/30">
+							<div class="flex items-center gap-2">
+								<div class="w-6 h-6 rounded-md bg-[var(--add-brand-smart-olive)]/15 text-[var(--add-primary-text)] flex items-center justify-center">
+									<Icon name="carbon:user-avatar" :size="14" />
+								</div>
+								<h3 class="font-bold text-[var(--add-brand-levant-deep-teal)] text-sm sm:text-base">{{ t("memberProfile.profile.personal") }}</h3>
+							</div>
+							<div class="flex items-start gap-3.5 p-3 rounded-lg bg-[var(--add-surface-raised)] border border-[var(--add-border)]/40">
+								<n-avatar round :size="52" :src="profile.personal.avatar_url ?? undefined" class="bg-[var(--add-brand-smart-olive)] text-[var(--add-surface-raised)] text-lg font-bold shrink-0">
 									{{ initials(member?.name) }}
 								</n-avatar>
-								<p class="text-sm text-stone-700 whitespace-pre-line">{{ profile.personal.bio || t("memberProfile.profile.noBio") }}</p>
+								<div class="flex flex-col gap-0.5">
+									<span class="text-xs font-medium text-[var(--add-text-muted)]">Bio</span>
+									<p class="text-xs sm:text-sm text-[var(--add-text-secondary)] whitespace-pre-line leading-relaxed">
+										{{ profile.personal.bio || t("memberProfile.profile.noBio") }}
+									</p>
+								</div>
 							</div>
 							<ProfileFields :fields="personalFields" />
 						</div>
 
-						<!-- Account -->
-						<div class="flex flex-col gap-3 p-4 rounded-xl border border-stone-200">
-							<h3 class="flex items-center gap-2 font-bold text-stone-800">
-								<Icon name="carbon:user" :size="18" class="text-emerald-700" />{{ t("memberProfile.profile.account") }}
-							</h3>
+						<!-- Account & Security Bento Card -->
+						<div class="flex flex-col gap-3.5 p-4 sm:p-5 rounded-xl border border-[var(--add-border)]/60 bg-[var(--add-surface)]/30">
+							<div class="flex items-center gap-2">
+								<div class="w-6 h-6 rounded-md bg-[var(--add-brand-levant-deep-teal)]/15 text-[var(--add-brand-levant-deep-teal)] flex items-center justify-center">
+									<Icon name="carbon:user" :size="14" />
+								</div>
+								<h3 class="font-bold text-[var(--add-brand-levant-deep-teal)] text-sm sm:text-base">{{ t("memberProfile.profile.account") }}</h3>
+							</div>
 							<ProfileFields :fields="accountFields" />
 						</div>
 
-						<!-- Professional -->
-						<div class="flex flex-col gap-3 p-4 rounded-xl border border-stone-200">
-							<h3 class="flex items-center gap-2 font-bold text-stone-800">
-								<Icon name="carbon:enterprise" :size="18" class="text-emerald-700" />{{ t("memberProfile.profile.professional") }}
-							</h3>
+						<!-- Professional & Online Presence Bento Card -->
+						<div class="flex flex-col gap-3.5 p-4 sm:p-5 rounded-xl border border-[var(--add-border)]/60 bg-[var(--add-surface)]/30">
+							<div class="flex items-center gap-2">
+								<div class="w-6 h-6 rounded-md bg-[var(--add-brand-antique-copper)]/15 text-[var(--add-brand-antique-copper)] flex items-center justify-center">
+									<Icon name="carbon:enterprise" :size="14" />
+								</div>
+								<h3 class="font-bold text-[var(--add-brand-levant-deep-teal)] text-sm sm:text-base">{{ t("memberProfile.profile.professional") }}</h3>
+							</div>
 							<ProfileFields :fields="professionalFields" />
-							<div class="flex flex-wrap gap-2 pt-1">
+							<div class="flex flex-wrap gap-2 pt-2 border-t border-[var(--add-border)]/30">
 								<a
 									v-for="link in links"
 									:key="link.key"
 									:href="link.url"
 									target="_blank"
 									rel="noopener noreferrer"
-									class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-200 text-sm text-stone-700 hover:border-emerald-600 hover:text-emerald-700 transition-colors"
+									class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--add-border)]/60 bg-[var(--add-surface-raised)] text-xs font-medium text-[var(--add-brand-charcoal-backbone)] hover:border-[var(--add-brand-smart-olive)] hover:text-[var(--add-primary-text)] transition-colors"
 								>
-									<Icon :name="link.icon" :size="16" />{{ link.label }}
+									<Icon :name="link.icon" :size="14" />
+									<span>{{ link.label }}</span>
 								</a>
-								<span v-if="!links.length" class="text-sm text-stone-400">{{ t("memberProfile.profile.noLinks") }}</span>
+								<span v-if="!links.length" class="text-xs text-[var(--add-text-muted)]">{{ t("memberProfile.profile.noLinks") }}</span>
 							</div>
 						</div>
 
-						<!-- Companies and branches -->
-						<div class="flex flex-col gap-3 p-4 rounded-xl border border-stone-200">
-							<h3 class="flex items-center gap-2 font-bold text-stone-800">
-								<Icon name="carbon:building" :size="18" class="text-emerald-700" />{{ t("memberProfile.profile.companies") }}
-							</h3>
-							<div v-for="company in profile.companies" :key="company.id" class="flex flex-wrap items-center justify-between gap-2 text-sm border-b border-stone-100 pb-2">
-								<span class="font-semibold text-stone-800">{{ company.legal_name }}</span>
-								<span class="flex flex-wrap gap-1.5">
-									<n-tag v-if="company.is_admin" size="small" round :bordered="false" type="info">{{ t("memberProfile.companyAdmin") }}</n-tag>
-									<n-tag size="small" round :bordered="false" :type="company.door_access_enabled ? 'success' : 'default'">
-										{{ t(company.door_access_enabled ? "memberProfile.profile.doorAccess" : "memberProfile.profile.noDoorAccess") }}
+						<!-- Companies & Branches Bento Card -->
+						<div class="flex flex-col gap-3.5 p-4 sm:p-5 rounded-xl border border-[var(--add-border)]/60 bg-[var(--add-surface)]/30">
+							<div class="flex items-center gap-2">
+								<div class="w-6 h-6 rounded-md bg-[var(--add-brand-deep-teal)]/15 text-[var(--add-brand-deep-teal)] flex items-center justify-center">
+									<Icon name="carbon:building" :size="14" />
+								</div>
+								<h3 class="font-bold text-[var(--add-brand-levant-deep-teal)] text-sm sm:text-base">{{ t("memberProfile.profile.companies") }}</h3>
+							</div>
+							<div class="flex flex-col gap-2">
+								<div
+									v-for="company in profile.companies"
+									:key="company.id"
+									class="flex flex-wrap items-center justify-between gap-2.5 text-xs sm:text-sm p-2.5 rounded-lg bg-[var(--add-surface-raised)] border border-[var(--add-border)]/40 shadow-xs"
+								>
+									<div class="flex items-center gap-2">
+										<Icon name="carbon:enterprise" :size="14" class="text-[var(--add-brand-levant-deep-teal)]" />
+										<span class="font-semibold text-[var(--add-brand-charcoal-backbone)]">{{ company.legal_name }}</span>
+									</div>
+									<div class="flex flex-wrap items-center gap-1.5">
+										<n-tag v-if="company.is_admin" size="small" round :bordered="false" type="info">{{ t("memberProfile.companyAdmin") }}</n-tag>
+										<n-tag size="small" round :bordered="false" :type="company.door_access_enabled ? 'success' : 'default'">
+											{{ t(company.door_access_enabled ? "memberProfile.profile.doorAccess" : "memberProfile.profile.noDoorAccess") }}
+										</n-tag>
+										<n-tag v-if="company.status !== 'active'" size="small" round :bordered="false" type="warning">{{ company.status }}</n-tag>
+									</div>
+								</div>
+								<span v-if="!profile.companies.length" class="text-xs text-[var(--add-text-muted)]">{{ t("memberProfile.profile.noCompanies") }}</span>
+							</div>
+
+							<div class="pt-2 border-t border-[var(--add-border)]/30 flex flex-col gap-2">
+								<h4 class="text-xs font-bold text-[var(--add-text-muted)] uppercase tracking-wider">{{ t("memberProfile.profile.branches") }}</h4>
+								<div class="flex flex-wrap gap-2">
+									<n-tag v-for="branch in profile.branches" :key="branch.id" size="small" round :type="branch.is_home_branch ? 'success' : 'default'">
+										<template #icon><Icon name="carbon:location" :size="12" /></template>
+										{{ branch.name ?? `#${branch.id}` }}<template v-if="branch.is_home_branch"> · {{ t("memberProfile.profile.homeBranch") }}</template>
 									</n-tag>
-									<n-tag v-if="company.status !== 'active'" size="small" round :bordered="false" type="warning">{{ company.status }}</n-tag>
-								</span>
-							</div>
-							<span v-if="!profile.companies.length" class="text-sm text-stone-400">{{ t("memberProfile.profile.noCompanies") }}</span>
-
-							<h4 class="text-xs font-bold text-stone-500 pt-2">{{ t("memberProfile.profile.branches") }}</h4>
-							<div class="flex flex-wrap gap-2">
-								<n-tag v-for="branch in profile.branches" :key="branch.id" size="small" round :type="branch.is_home_branch ? 'success' : 'default'">
-									{{ branch.name ?? `#${branch.id}` }}<template v-if="branch.is_home_branch"> · {{ t("memberProfile.profile.homeBranch") }}</template>
-								</n-tag>
-								<span v-if="!profile.branches.length" class="text-sm text-stone-400">—</span>
+									<span v-if="!profile.branches.length" class="text-xs text-[var(--add-text-muted)]">—</span>
+								</div>
 							</div>
 						</div>
 
-						<!-- Consent and devices -->
-						<div class="flex flex-col gap-3 p-4 rounded-xl border border-stone-200 lg:col-span-2">
-							<h3 class="flex items-center gap-2 font-bold text-stone-800">
-								<Icon name="carbon:phone" :size="18" class="text-emerald-700" />{{ t("memberProfile.profile.appAndConsent") }}
-							</h3>
+						<!-- App, Devices & Consent Bento Card -->
+						<div class="flex flex-col gap-3.5 p-4 sm:p-5 rounded-xl border border-[var(--add-border)]/60 bg-[var(--add-surface)]/30 lg:col-span-2">
+							<div class="flex items-center gap-2">
+								<div class="w-6 h-6 rounded-md bg-[var(--add-brand-charcoal-backbone)]/10 text-[var(--add-brand-charcoal-backbone)] flex items-center justify-center">
+									<Icon name="carbon:phone" :size="14" />
+								</div>
+								<h3 class="font-bold text-[var(--add-brand-levant-deep-teal)] text-sm sm:text-base">{{ t("memberProfile.profile.appAndConsent") }}</h3>
+							</div>
 							<ProfileFields :fields="consentFields" />
-							<div class="flex flex-wrap gap-2">
-								<n-tag v-for="(device, index) in profile.devices" :key="index" size="small" round :bordered="false">
-									{{ device.platform ?? "—" }}<template v-if="device.last_used_at"> · {{ formatDateTime(device.last_used_at) }}</template>
-								</n-tag>
-								<span v-if="!profile.devices.length" class="text-sm text-stone-400">{{ t("memberProfile.profile.noDevices") }}</span>
+							<div class="flex flex-col gap-2 pt-2 border-t border-[var(--add-border)]/30">
+								<span class="text-xs font-bold text-[var(--add-text-muted)] uppercase tracking-wider">{{ t("memberProfile.profile.devices") }}</span>
+								<div class="flex flex-wrap gap-2">
+									<div
+										v-for="(device, index) in profile.devices"
+										:key="index"
+										class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--add-surface-raised)] border border-[var(--add-border)]/50 text-xs font-medium text-[var(--add-text-secondary)] font-numeric shadow-xs"
+									>
+										<Icon name="carbon:screen" :size="13" class="text-[var(--add-brand-levant-deep-teal)]" />
+										<span>{{ device.platform ?? "—" }}</span>
+										<template v-if="device.last_used_at">
+											<span class="text-[var(--add-border)]">·</span>
+											<span class="text-[var(--add-text-muted)]">{{ formatDateTime(device.last_used_at) }}</span>
+										</template>
+									</div>
+									<span v-if="!profile.devices.length" class="text-xs text-[var(--add-text-muted)]">{{ t("memberProfile.profile.noDevices") }}</span>
+								</div>
 							</div>
 						</div>
 					</div>
 				</n-tab-pane>
 
+				<!-- History & Ledger Tabs -->
 				<n-tab-pane name="bookings" :tab="t('memberProfile.tabs.bookings')" display-directive="show:lazy">
 					<ProfileTable :load="loadBookings" :columns="bookingColumns" :row-key="byId" :filters="bookingFilters" date-range />
 				</n-tab-pane>
@@ -211,7 +388,7 @@
 					<ProfileTable :load="query => listMemberEventRegistrations(userId, query)" :columns="eventColumns" :row-key="byId" :filters="eventFilters" />
 				</n-tab-pane>
 			</n-tabs>
-		</n-card>
+		</div>
 
 		<WalletTopUpDialog v-model:show="topUpVisible" :member @success="loadSummary" />
 	</div>
@@ -232,7 +409,7 @@ import type {
 	MemberSession,
 	MemberWalletTransaction
 } from "@/add-os/modules/members/types/member-profile"
-import { NAlert, NAvatar, NButton, NCard, NSpin, NTabPane, NTabs, NTag } from "naive-ui"
+import { NAlert, NAvatar, NButton, NSpin, NTabPane, NTabs, NTag } from "naive-ui"
 import { computed, defineComponent, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
@@ -296,20 +473,38 @@ function openSession(type: SessionType, id: number): void {
 	router.push({ name: "bookings.activeSessionDetail", params: { type, id } })
 }
 
-/* ── Header cards ─────────────────────────────────────────────────────────── */
+function poolShare(poolPoints: number): string {
+	const total = summary.value?.wallet.points ?? 0
+	if (total <= 0) return "100%"
+	const pct = Math.min(100, Math.max(8, Math.round((poolPoints / total) * 100)))
+	return `${pct}%`
+}
+
+/* ── Header KPI cards ─────────────────────────────────────────────────────── */
 
 const cards = computed(() => {
 	const s = summary.value
 	if (!s) return []
 	return [
-		{ key: "wallet", icon: "carbon:wallet", label: t("memberProfile.cards.wallet"), value: points(s.wallet.points), hint: null, tone: "" },
+		{
+			key: "wallet",
+			icon: "carbon:wallet",
+			label: t("memberProfile.cards.wallet"),
+			value: points(s.wallet.points),
+			hint: null,
+			tone: "text-[var(--add-primary-text)]",
+			iconBg: "bg-[var(--add-brand-smart-olive)]/15",
+			iconColor: "text-[var(--add-primary-text)]"
+		},
 		{
 			key: "owed",
 			icon: "carbon:warning",
 			label: t("memberProfile.cards.owed"),
 			value: points(s.outstanding.points),
 			hint: s.outstanding.points > 0 ? `${money(s.outstanding.amount)} · ${t("memberProfile.cards.items", { count: s.outstanding.items })}` : null,
-			tone: s.outstanding.points > 0 ? "text-rose-700" : ""
+			tone: s.outstanding.points > 0 ? "text-[var(--add-danger-text)]" : "text-[var(--add-brand-charcoal-backbone)]",
+			iconBg: s.outstanding.points > 0 ? "bg-[var(--add-danger)]/15" : "bg-[var(--add-brand-warm-mist)]/50",
+			iconColor: s.outstanding.points > 0 ? "text-[var(--add-danger-text)]" : "text-[var(--add-brand-charcoal-backbone)]"
 		},
 		{
 			key: "plan",
@@ -319,11 +514,40 @@ const cards = computed(() => {
 			hint: s.membership
 				? [s.membership.hours_remaining !== null ? t("memberProfile.cards.hoursLeft", { hours: formatNumber(s.membership.hours_remaining) }) : null, s.membership.period_end ? t("memberProfile.cards.until", { date: formatDate(s.membership.period_end) }) : null].filter(Boolean).join(" · ")
 				: null,
-			tone: "text-base"
+			tone: "text-[var(--add-brand-levant-deep-teal)]",
+			iconBg: "bg-[var(--add-brand-antique-copper)]/15",
+			iconColor: "text-[var(--add-brand-antique-copper)]"
 		},
-		{ key: "bookings", icon: "carbon:calendar", label: t("memberProfile.cards.bookings"), value: formatNumber(s.counts.bookings), hint: t("memberProfile.cards.upcoming", { count: s.counts.upcoming_bookings }), tone: "" },
-		{ key: "sessions", icon: "carbon:time", label: t("memberProfile.cards.sessions"), value: formatNumber(s.counts.sessions), hint: null, tone: "" },
-		{ key: "lastVisit", icon: "carbon:calendar", label: t("memberProfile.cards.lastVisit"), value: s.last_visit_at ? formatDate(s.last_visit_at) : "—", hint: s.last_visit_at ? formatTime(s.last_visit_at) : null, tone: "text-base" }
+		{
+			key: "bookings",
+			icon: "carbon:calendar",
+			label: t("memberProfile.cards.bookings"),
+			value: formatNumber(s.counts.bookings),
+			hint: t("memberProfile.cards.upcoming", { count: s.counts.upcoming_bookings }),
+			tone: "text-[var(--add-brand-charcoal-backbone)]",
+			iconBg: "bg-[var(--add-brand-levant-deep-teal)]/15",
+			iconColor: "text-[var(--add-brand-levant-deep-teal)]"
+		},
+		{
+			key: "sessions",
+			icon: "carbon:time",
+			label: t("memberProfile.cards.sessions"),
+			value: formatNumber(s.counts.sessions),
+			hint: null,
+			tone: "text-[var(--add-brand-charcoal-backbone)]",
+			iconBg: "bg-[var(--add-brand-deep-teal)]/15",
+			iconColor: "text-[var(--add-brand-deep-teal)]"
+		},
+		{
+			key: "lastVisit",
+			icon: "carbon:calendar",
+			label: t("memberProfile.cards.lastVisit"),
+			value: s.last_visit_at ? formatDate(s.last_visit_at) : "—",
+			hint: s.last_visit_at ? formatTime(s.last_visit_at) : null,
+			tone: "text-[var(--add-brand-charcoal-backbone)]",
+			iconBg: "bg-[var(--add-brand-charcoal-backbone)]/10",
+			iconColor: "text-[var(--add-brand-charcoal-backbone)]"
+		}
 	]
 })
 
@@ -337,7 +561,7 @@ const activity = computed(() => {
 	]
 })
 
-/* ── Profile tab ──────────────────────────────────────────────────────────── */
+/* ── Profile tab ──────────────────────────────────────────────────── */
 
 const profile = computed(() => summary.value!.profile)
 
@@ -346,9 +570,9 @@ const ProfileFields = defineComponent({
 	name: "ProfileFields",
 	props: { fields: { type: Array as PropType<{ label: string, value: string | null | undefined, ltr?: boolean }[]>, required: true } },
 	setup(props) {
-		return () => h("dl", { class: "grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm" }, props.fields.map(field => h("div", { class: "flex flex-col" }, [
-			h("dt", { class: "text-xs text-stone-400" }, field.label),
-			h("dd", { class: "text-stone-800 font-medium" }, field.value ? (field.ltr ? h("bdi", { dir: "ltr" }, field.value) : field.value) : "—")
+		return () => h("dl", { class: "grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2.5 text-xs sm:text-sm" }, props.fields.map(field => h("div", { class: "flex flex-col gap-0.5" }, [
+			h("dt", { class: "text-xs font-medium text-[var(--add-text-muted)]" }, field.label),
+			h("dd", { class: "text-[var(--add-text-primary)] font-semibold" }, field.value ? (field.ltr ? h("bdi", { dir: "ltr" }, field.value) : field.value) : "—")
 		])))
 	}
 })
@@ -394,7 +618,7 @@ const consentFields = computed(() => [
 	{ label: t("memberProfile.profile.devices"), value: String(profile.value.devices.length) }
 ])
 
-/* ── Filters ──────────────────────────────────────────────────────────────── */
+/* ── Filters ──────────────────────────────────────────────────────── */
 
 function options(prefix: string, values: string[]): SelectOption[] {
 	return values.map(value => ({ label: t(`${prefix}.${value}`), value }))
@@ -435,7 +659,7 @@ const eventFilters = computed<ProfileFilter[]>(() => [
 	{ key: "status", placeholder: t("memberProfile.filters.status"), options: options("memberProfile.registrationStatus", ["pending", "approved", "rejected"]) }
 ])
 
-/* ── Loaders and columns ──────────────────────────────────────────────────── */
+/* ── Loaders and columns ──────────────────────────────────────────── */
 
 function loadBookings(query: Record<string, unknown>) {
 	return listBookings({ ...query, user_id: userId })
@@ -474,7 +698,6 @@ const membershipColumns = computed<DataTableColumns<MemberMembership>>(() => [
 	{
 		title: t("memberProfile.columns.status"),
 		key: "status",
-		// Only `active` is ever stored; a period that has passed has ended.
 		render: row => (row.current_period_end && new Date(row.current_period_end) < new Date() ? tag(t("memberProfile.membershipEnded")) : tag(t("memberProfile.membershipActive"), "success"))
 	},
 	{ title: t("memberProfile.columns.desks"), key: "desks", render: row => (row.desks.length ? row.desks.map(desk => desk.code).join(", ") : "—") }
@@ -482,13 +705,13 @@ const membershipColumns = computed<DataTableColumns<MemberMembership>>(() => [
 
 const walletColumns = computed<DataTableColumns<MemberWalletTransaction>>(() => [
 	{ title: t("memberProfile.columns.date"), key: "created_at", render: row => formatDateTime(row.created_at) },
-	{ title: t("memberProfile.columns.description"), key: "title", render: row => h("div", { class: "flex flex-col" }, [h("span", row.title), h("span", { class: "text-xs text-stone-500" }, row.kind_label)]) },
+	{ title: t("memberProfile.columns.description"), key: "title", render: row => h("div", { class: "flex flex-col" }, [h("span", { class: "font-medium" }, row.title), h("span", { class: "text-xs text-[var(--add-text-muted)]" }, row.kind_label)]) },
 	{ title: t("memberProfile.columns.category"), key: "category", render: row => row.category_label },
 	{ title: t("memberProfile.columns.method"), key: "method", render: row => row.method_label ?? "—" },
 	{
 		title: t("memberProfile.columns.points"),
 		key: "points",
-		render: row => h("span", { class: row.points < 0 ? "font-semibold text-rose-700" : "font-semibold text-emerald-700" }, `${row.points > 0 ? "+" : ""}${formatNumber(row.points)}`)
+		render: row => h("span", { class: row.points < 0 ? "font-bold font-numeric text-[var(--add-danger-text)]" : "font-bold font-numeric text-[var(--add-primary-text)]" }, `${row.points > 0 ? "+" : ""}${formatNumber(row.points)}`)
 	}
 ])
 
@@ -522,7 +745,7 @@ const eventColumns = computed<DataTableColumns<MemberEventRegistration>>(() => [
 	{ title: t("memberProfile.columns.payment"), key: "payment_state", render: row => (row.payment_state && row.price_points ? tag(t(`allBookings.paymentState.${row.payment_state}`), row.payment_state === "paid" ? "success" : "warning") : "—") }
 ])
 
-/* ── Load ─────────────────────────────────────────────────────────────────── */
+/* ── Load ─────────────────────────────────────────────────────────── */
 
 async function loadSummary(): Promise<void> {
 	isLoading.value = true

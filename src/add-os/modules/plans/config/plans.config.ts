@@ -35,6 +35,12 @@ export function buildPlanColumns(t: ComposerTranslation, locale: SupportedLocale
 		{
 			title: t("packages.columns.type"),
 			key: "is_subscription",
+			filterMultiple: false,
+			filterOptions: [
+				{ label: t("packages.type.subscription"), value: 1 },
+				{ label: t("packages.type.oneTime"), value: 0 }
+			],
+			filter: (value, row) => (value === 1 ? row.is_subscription : !row.is_subscription),
 			render: row =>
 				h(
 					NTag,
@@ -158,6 +164,12 @@ export function buildPlanColumns(t: ComposerTranslation, locale: SupportedLocale
 		{
 			title: t("packages.columns.visibility"),
 			key: "is_public",
+			filterMultiple: false,
+			filterOptions: [
+				{ label: t("packages.visibility.public"), value: 1 },
+				{ label: t("packages.visibility.private"), value: 0 }
+			],
+			filter: (value, row) => (value === 1 ? row.is_public : !row.is_public),
 			render: row =>
 				h(
 					NTag,
@@ -174,6 +186,12 @@ export function buildPlanColumns(t: ComposerTranslation, locale: SupportedLocale
 		{
 			title: t("packages.columns.isActive"),
 			key: "is_active",
+			filterMultiple: false,
+			filterOptions: [
+				{ label: t("packages.isActiveYes"), value: 1 },
+				{ label: t("packages.isActiveNo"), value: 0 }
+			],
+			filter: (value, row) => (value === 1 ? row.is_active : !row.is_active),
 			render: row =>
 				h(
 					NTag,
