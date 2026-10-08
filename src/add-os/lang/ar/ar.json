@@ -694,7 +694,9 @@
 			"balances": "الأرصدة",
 			"features": "الميزات",
 			"accessWindow": "وقت الباقة",
-			"visibility": "الظهور"
+			"visibility": "الظهور",
+			"discounts": "الخصومات",
+			"resources": "الموارد"
 		},
 		"isActiveYes": "نشط",
 		"isActiveNo": "غير نشط",
@@ -861,7 +863,8 @@
 				"success": "تم إنشاء نوع المورد بنجاح."
 			},
 			"edit": {
-				"success": "تم تحديث نوع المورد بنجاح."
+				"success": "تم تحديث نوع المورد بنجاح.",
+				"title": "تعديل نوع المورد"
 			},
 			"delete": {
 				"success": "تم حذف نوع المورد بنجاح."
@@ -869,6 +872,10 @@
 			"stats": {
 				"total": "إجمالي أنواع الموارد",
 				"active": "الأنواع المفعلة"
+			},
+			"columns": {
+				"slug": "المعرّف (Slug)",
+				"unitLabel": "وحدة القياس"
 			}
 		}
 	},
@@ -2942,5 +2949,51 @@
 		"deleted": "محذوف",
 		"from": "من",
 		"to": "إلى"
+	},
+	"planPurchases": {
+		"planDetails": "تفاصيل الباقة",
+		"recipientType": "المالك",
+		"member": "عضو",
+		"company": "شركة",
+		"selectMember": "اختر العضو",
+		"selectCompany": "اختر الشركة",
+		"plan": "الباقة",
+		"selectPlan": "اختر الباقة",
+		"paymentMethod": "طريقة الدفع",
+		"cash": "كاش",
+		"fromPoints": "من رصيد النقاط",
+		"couponCode": "كود الخصم",
+		"codeTheMemberBrought": "الكود الذي أحضره العضو (اختياري)",
+		"apply": "تطبيق",
+		"remove": "إزالة",
+		"currency": "العملة",
+		"selectCurrency": "اختر العملة",
+		"summary": "ملخص الطلب",
+		"currentBalance": "الرصيد الحالي",
+		"planPrice": "سعر الباقة",
+		"offer": "عرض",
+		"ends": "ينتهي",
+		"coupon": "كوبون",
+		"finalPrice": "السعر النهائي",
+		"requiredAmountCash": "المبلغ المطلوب استلامه (كاش)",
+		"deductedFromPoints": "يُخصم من رصيد النقاط",
+		"balanceAfter": "الرصيد بعد الشراء",
+		"pointsDoNotCover": "رصيد النقاط لا يكفي لهذه الباقة — الدفع كاش فقط.",
+		"purchasePlan": "تفعيل الباقة",
+		"receipt": "إيصال",
+		"paymentReceipt": "إيصال دفع",
+		"transactionCode": "رقم الحركة",
+		"amountPaid": "المبلغ المدفوع",
+		"paidFromPoints": "مدفوع من رصيد النقاط",
+		"discounts": "الحسومات",
+		"pointsCharged": "النقاط المشحونة",
+		"recipient": "المستلم",
+		"performedBy": "تمت بواسطة",
+		"previousBalance": "الرصيد السابق",
+		"newBalance": "الرصيد الجديد",
+		"close": "إغلاق",
+		"print": "طباعة",
+		"discount": "خصم",
+		"specialPrice": "سعر خاص"
 	}
 }

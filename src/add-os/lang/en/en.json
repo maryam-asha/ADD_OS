@@ -690,7 +690,9 @@
 			"balances": "Balances",
 			"features": "Features",
 			"accessWindow": "Access window",
-			"visibility": "Visibility"
+			"visibility": "Visibility",
+			"discounts": "Discounts",
+			"resources": "Resources"
 		},
 		"isActiveYes": "Active",
 		"isActiveNo": "Inactive",
@@ -857,7 +859,8 @@
 				"success": "Resource type created successfully."
 			},
 			"edit": {
-				"success": "Resource type updated successfully."
+				"success": "Resource type updated successfully.",
+				"title": "Edit Resource Type"
 			},
 			"delete": {
 				"success": "Resource type deleted successfully."
@@ -865,6 +868,10 @@
 			"stats": {
 				"total": "Total Resource Types",
 				"active": "Active Types"
+			},
+			"columns": {
+				"slug": "Slug",
+				"unitLabel": "Unit Label"
 			}
 		}
 	},
@@ -2937,5 +2944,51 @@
 		"deleted": "Deleted",
 		"from": "From",
 		"to": "To"
+	},
+	"planPurchases": {
+		"planDetails": "Plan Details",
+		"recipientType": "Recipient Type",
+		"member": "Member",
+		"company": "Company",
+		"selectMember": "Select member",
+		"selectCompany": "Select company",
+		"plan": "Plan",
+		"selectPlan": "Select plan",
+		"paymentMethod": "Payment Method",
+		"cash": "Cash",
+		"fromPoints": "From Points",
+		"couponCode": "Coupon Code",
+		"codeTheMemberBrought": "Code the member brought (optional)",
+		"apply": "Apply",
+		"remove": "Remove",
+		"currency": "Currency",
+		"selectCurrency": "Select currency",
+		"summary": "Summary",
+		"currentBalance": "Current Balance",
+		"planPrice": "Plan Price",
+		"offer": "Offer",
+		"ends": "Ends",
+		"coupon": "Coupon",
+		"finalPrice": "Final Price",
+		"requiredAmountCash": "Required Amount (Cash)",
+		"deductedFromPoints": "Deducted from Points",
+		"balanceAfter": "Balance After",
+		"pointsDoNotCover": "Points do not cover this plan — cash only.",
+		"purchasePlan": "Purchase Plan",
+		"receipt": "Receipt",
+		"paymentReceipt": "Payment Receipt",
+		"transactionCode": "Transaction Code",
+		"amountPaid": "Amount Paid",
+		"paidFromPoints": "Paid from Points",
+		"discounts": "Discounts",
+		"pointsCharged": "Points Charged",
+		"recipient": "Recipient",
+		"performedBy": "Performed By",
+		"previousBalance": "Previous Balance",
+		"newBalance": "New Balance",
+		"close": "Close",
+		"print": "Print",
+		"discount": "Discount",
+		"specialPrice": "Special Price"
 	}
 }

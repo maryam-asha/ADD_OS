@@ -5,83 +5,83 @@
 		</div>
 
 		<div class="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
-			<n-card class="lg:col-span-8" :title="t('Plan Details', 'تفاصيل الباقة')">
+			<n-card class="lg:col-span-8" :title="t('planPurchases.planDetails')">
 				<n-form ref="formRef" :model="form" :rules size="large">
-					<n-form-item :label="t('Recipient Type', 'المالك')" path="recipientType">
+					<n-form-item :label="t('planPurchases.recipientType')" path="recipientType">
 						<n-radio-group v-model:value="recipientType" name="recipient_type">
-							<n-radio-button value="user">{{ t('Member', 'عضو') }}</n-radio-button>
-							<n-radio-button value="company">{{ t('Company', 'شركة') }}</n-radio-button>
+							<n-radio-button value="user">{{ t('planPurchases.member') }}</n-radio-button>
+							<n-radio-button value="company">{{ t('planPurchases.company') }}</n-radio-button>
 						</n-radio-group>
 					</n-form-item>
 
-					<n-form-item v-if="recipientType === 'user'" :label="t('Member', 'عضو')" path="user_id">
+					<n-form-item v-if="recipientType === 'user'" :label="t('planPurchases.member')" path="user_id">
 						<n-select
 							v-model:value="form.user_id"
 							:options="userOptions"
 							filterable
-							:placeholder="t('Select member', 'اختر العضو')"
+							:placeholder="t('planPurchases.selectMember')"
 							:loading="isLoadingUsers"
 							clearable
 						/>
 					</n-form-item>
 
-					<n-form-item v-if="recipientType === 'company'" :label="t('Company', 'شركة')" path="company_id">
+					<n-form-item v-if="recipientType === 'company'" :label="t('planPurchases.company')" path="company_id">
 						<n-select
 							v-model:value="form.company_id"
 							:options="companyOptions"
 							filterable
-							:placeholder="t('Select company', 'اختر الشركة')"
+							:placeholder="t('planPurchases.selectCompany')"
 							:loading="isLoadingCompanies"
 							clearable
 						/>
 					</n-form-item>
 
-					<n-form-item :label="t('Plan', 'الباقة')" path="plan_id">
+					<n-form-item :label="t('planPurchases.plan')" path="plan_id">
 						<n-select
 							v-model:value="form.plan_id"
 							:options="planOptions"
 							filterable
-							:placeholder="t('Select plan', 'اختر الباقة')"
+							:placeholder="t('planPurchases.selectPlan')"
 							:loading="isLoadingPlans"
 							clearable
 						/>
 					</n-form-item>
 
-					<n-form-item :label="t('Payment Method', 'طريقة الدفع')" path="payment_method">
+					<n-form-item :label="t('planPurchases.paymentMethod')" path="payment_method">
 						<n-radio-group v-model:value="form.payment_method" name="payment_method">
-							<n-radio-button value="cash">{{ t('Cash', 'كاش') }}</n-radio-button>
-							<n-radio-button value="wallet" :disabled="!walletCovers">{{ t('From Points', 'من رصيد النقاط') }}</n-radio-button>
+							<n-radio-button value="cash">{{ t('planPurchases.cash') }}</n-radio-button>
+							<n-radio-button value="wallet" :disabled="!walletCovers">{{ t('planPurchases.fromPoints') }}</n-radio-button>
 						</n-radio-group>
 					</n-form-item>
 
 					<n-form-item
 						v-if="recipientType === 'user'"
-						:label="t('Coupon Code', 'كود الخصم')"
+						:label="t('planPurchases.couponCode')"
 						:feedback="couponError ?? undefined"
 						:validation-status="couponError ? 'error' : undefined"
 					>
 						<div class="flex w-full gap-2">
 							<n-input
 								v-model:value="couponInput"
-								:placeholder="t('Code the member brought (optional)', 'الكود الذي أحضره العضو (اختياري)')"
+								:placeholder="t('planPurchases.codeTheMemberBrought')"
 								:disabled="appliedCoupon !== null"
 								data-test="coupon-input"
 								@keyup.enter="applyCoupon"
 							/>
 							<n-button v-if="appliedCoupon === null" :disabled="!couponInput.trim() || !isValid" data-test="coupon-apply" @click="applyCoupon">
-								{{ t('Apply', 'تطبيق') }}
+								{{ t('planPurchases.apply') }}
 							</n-button>
 							<n-button v-else data-test="coupon-remove" @click="removeCoupon">
-								{{ t('Remove', 'إزالة') }}
+								{{ t('planPurchases.remove') }}
 							</n-button>
 						</div>
 					</n-form-item>
 
-					<n-form-item v-if="form.payment_method === 'cash'" :label="t('Currency', 'العملة')" path="currency">
+					<n-form-item v-if="form.payment_method === 'cash'" :label="t('planPurchases.currency')" path="currency">
 						<n-select
 							v-model:value="form.currency"
 							:options="currencyOptions"
-							:placeholder="t('Select currency', 'اختر العملة')"
+							:placeholder="t('planPurchases.selectCurrency')"
 							:loading="isLoadingCurrencies"
 						/>
 					</n-form-item>
@@ -89,10 +89,10 @@
 			</n-card>
 
 			<div class="flex flex-col gap-6 lg:col-span-4">
-				<n-card :title="t('Summary', 'ملخص الطلب')">
+				<n-card :title="t('planPurchases.summary')">
 					<div class="flex flex-col gap-4">
 						<div class="flex items-center justify-between">
-							<span class="text-slate-500">{{ t('Current Balance', 'الرصيد الحالي') }}</span>
+							<span class="text-slate-500">{{ t('planPurchases.currentBalance') }}</span>
 							<span class="font-medium">
 								<template v-if="isLoadingBalance">...</template>
 								<template v-else>{{ currentBalancePoints !== null ? `${currentBalancePoints} points` : '-' }}</template>
@@ -101,52 +101,52 @@
 
 						<div v-if="previewData" class="flex flex-col gap-3 rounded-lg bg-slate-50 p-4 border border-slate-200">
 							<div class="flex items-center justify-between text-sm">
-								<span class="text-slate-500">{{ t('Plan Price', 'سعر الباقة') }}</span>
+								<span class="text-slate-500">{{ t('planPurchases.planPrice') }}</span>
 								<span class="font-medium" :class="{ 'line-through text-slate-400': previewData.points < previewData.list_points }">
 									{{ previewData.list_points }} points
 								</span>
 							</div>
 							<div v-if="previewData.offer" class="flex flex-col gap-1 rounded-md bg-emerald-50 p-2 text-sm text-emerald-700" data-test="plan-offer">
 								<div class="flex items-center justify-between gap-2">
-									<span class="font-semibold">{{ previewData.offer.name || t('Offer', 'عرض') }}</span>
+									<span class="font-semibold">{{ previewData.offer.name || t('planPurchases.offer') }}</span>
 									<span class="font-semibold" dir="ltr">−{{ previewData.offer.saved_points }} points</span>
 								</div>
 								<div class="flex items-center justify-between gap-2 text-xs">
 									<span>{{ offerTerms(previewData.offer) }}</span>
-									<span v-if="previewData.offer.ends_at">{{ t('Ends', 'ينتهي') }} {{ formatDate(previewData.offer.ends_at) }}</span>
+									<span v-if="previewData.offer.ends_at">{{ t('planPurchases.ends') }} {{ formatDate(previewData.offer.ends_at) }}</span>
 								</div>
 							</div>
 							<div v-if="previewData.coupon" data-test="plan-coupon">
 								<div v-if="previewData.coupon.applied" class="flex items-center justify-between rounded-md bg-emerald-50 p-2 text-sm text-emerald-700">
-									<span class="font-semibold">{{ t('Coupon', 'كوبون') }} {{ previewData.coupon.code }}</span>
+									<span class="font-semibold">{{ t('planPurchases.coupon') }} {{ previewData.coupon.code }}</span>
 									<span class="font-semibold" dir="ltr">−{{ previewData.coupon.points_discounted }} points</span>
 								</div>
 								<div v-else class="rounded-md bg-amber-50 p-2 text-xs text-amber-700">
-									{{ t('Coupon', 'كوبون') }} {{ previewData.coupon.code }}: {{ previewData.coupon.message }}
+									{{ t('planPurchases.coupon') }} {{ previewData.coupon.code }}: {{ previewData.coupon.message }}
 								</div>
 							</div>
 							<div v-if="previewData.points < previewData.list_points" class="flex items-center justify-between text-sm font-semibold text-emerald-600">
-								<span>{{ t('Final Price', 'السعر النهائي') }}</span>
+								<span>{{ t('planPurchases.finalPrice') }}</span>
 								<span class="font-bold">{{ previewData.points }} points</span>
 							</div>
 							<div v-if="form.payment_method === 'cash'" class="mt-2 flex items-center justify-between border-t border-slate-200 pt-2 font-semibold">
-								<span>{{ t('Required Amount (Cash)', 'المبلغ المطلوب استلامه (كاش)') }}</span>
+								<span>{{ t('planPurchases.requiredAmountCash') }}</span>
 								<span class="text-lg text-emerald-600">
 									{{ formatCurrency(previewData.payment_amount, previewData.payment_currency) }}
 								</span>
 							</div>
 							<template v-else>
 								<div class="mt-2 flex items-center justify-between border-t border-slate-200 pt-2 font-semibold">
-									<span>{{ t('Deducted from Points', 'يُخصم من رصيد النقاط') }}</span>
+									<span>{{ t('planPurchases.deductedFromPoints') }}</span>
 									<span class="text-lg text-emerald-600">{{ previewData.points }} points</span>
 								</div>
 								<div class="flex items-center justify-between text-sm">
-									<span class="text-slate-500">{{ t('Balance After', 'الرصيد بعد الشراء') }}</span>
+									<span class="text-slate-500">{{ t('planPurchases.balanceAfter') }}</span>
 									<span class="font-medium">{{ previewData.balance_points - previewData.points }} points</span>
 								</div>
 							</template>
 							<div v-if="!previewData.wallet_covers" class="text-xs text-slate-500">
-								{{ t('Points do not cover this plan — cash only.', 'رصيد النقاط لا يكفي لهذه الباقة — الدفع كاش فقط.') }}
+								{{ t('planPurchases.pointsDoNotCover') }}
 							</div>
 						</div>
 						<div v-else-if="previewError" class="rounded-lg bg-red-50 p-4 text-sm text-red-700">
@@ -161,7 +161,7 @@
 							:disabled="!isValid || !!previewError"
 							@click="submit"
 						>
-							{{ t('Purchase Plan', 'تفعيل الباقة') }}
+							{{ t('planPurchases.purchasePlan') }}
 						</n-button>
 					</div>
 				</n-card>
@@ -169,63 +169,63 @@
 		</div>
 
 		<!-- Receipt Modal -->
-		<n-modal v-model:show="receiptModalVisible" preset="card" class="max-w-md" :title="t('Receipt', 'إيصال')">
+		<n-modal v-model:show="receiptModalVisible" preset="card" class="max-w-md" :title="t('planPurchases.receipt')">
 			<div v-if="lastReceipt" class="flex flex-col gap-4 p-4">
-				<div class="text-center font-bold text-xl mb-4">{{ t('Payment Receipt', 'إيصال دفع') }}</div>
+				<div class="text-center font-bold text-xl mb-4">{{ t('planPurchases.paymentReceipt') }}</div>
 
 				<div class="flex justify-between border-b pb-2">
-					<span class="text-slate-500">{{ t('Transaction Code', 'رقم الحركة') }}</span>
+					<span class="text-slate-500">{{ t('planPurchases.transactionCode') }}</span>
 					<span class="font-medium">{{ lastReceipt.transaction_code }}</span>
 				</div>
 
 				<div class="flex justify-between border-b pb-2">
-					<span class="text-slate-500">{{ t('Plan', 'الباقة') }}</span>
+					<span class="text-slate-500">{{ t('planPurchases.plan') }}</span>
 					<span class="font-medium">{{ lastReceipt.plan_name }}</span>
 				</div>
 
 				<div class="flex justify-between border-b pb-2">
-					<span class="text-slate-500">{{ t('Amount Paid', 'المبلغ المدفوع') }}</span>
+					<span class="text-slate-500">{{ t('planPurchases.amountPaid') }}</span>
 					<span class="font-bold">
 						<template v-if="lastReceipt.payment_amount !== null && lastReceipt.payment_currency">
 							{{ formatCurrency(lastReceipt.payment_amount, lastReceipt.payment_currency) }}
 						</template>
-						<template v-else>{{ t('Paid from Points', 'مدفوع من رصيد النقاط') }}</template>
+						<template v-else>{{ t('planPurchases.paidFromPoints') }}</template>
 					</span>
 				</div>
 
 				<div v-if="lastReceipt.discounts?.length" class="flex justify-between gap-4 border-b pb-2" data-test="receipt-discounts">
-					<span class="text-slate-500">{{ t('Discounts', 'الحسومات') }}</span>
+					<span class="text-slate-500">{{ t('planPurchases.discounts') }}</span>
 					<AppliedDiscountList :discounts="lastReceipt.discounts" />
 				</div>
 
 				<div class="flex justify-between border-b pb-2">
-					<span class="text-slate-500">{{ t('Points Charged', 'النقاط المشحونة') }}</span>
+					<span class="text-slate-500">{{ t('planPurchases.pointsCharged') }}</span>
 					<span class="font-medium">{{ lastReceipt.points_charged }}</span>
 				</div>
 
 				<div class="flex justify-between border-b pb-2">
-					<span class="text-slate-500">{{ t('Recipient', 'المستلم') }}</span>
+					<span class="text-slate-500">{{ t('planPurchases.recipient') }}</span>
 					<span class="font-medium">{{ lastReceipt.recipient_name }}</span>
 				</div>
 
 				<div class="flex justify-between border-b pb-2">
-					<span class="text-slate-500">{{ t('Performed By', 'تمت بواسطة') }}</span>
+					<span class="text-slate-500">{{ t('planPurchases.performedBy') }}</span>
 					<span class="font-medium">{{ lastReceipt.performed_by_name }}</span>
 				</div>
 
 				<div class="flex justify-between border-b pb-2">
-					<span class="text-slate-500">{{ t('Previous Balance', 'الرصيد السابق') }}</span>
+					<span class="text-slate-500">{{ t('planPurchases.previousBalance') }}</span>
 					<span class="font-medium">{{ lastReceipt.previous_balance_points }}</span>
 				</div>
 
 				<div class="flex justify-between border-b pb-2">
-					<span class="text-slate-500">{{ t('New Balance', 'الرصيد الجديد') }}</span>
+					<span class="text-slate-500">{{ t('planPurchases.newBalance') }}</span>
 					<span class="font-medium">{{ lastReceipt.new_balance_points }}</span>
 				</div>
 
 				<div class="flex justify-between pt-4">
-					<n-button @click="closeReceiptModal">{{ t('Close', 'إغلاق') }}</n-button>
-					<n-button type="primary" @click="handlePrintReceipt">{{ t('Print', 'طباعة') }}</n-button>
+					<n-button @click="closeReceiptModal">{{ t('planPurchases.close') }}</n-button>
+					<n-button type="primary" @click="handlePrintReceipt">{{ t('planPurchases.print') }}</n-button>
 				</div>
 			</div>
 		</n-modal>
@@ -347,11 +347,11 @@ function removeCoupon() {
 function offerTerms(offer: PlanPurchaseOffer): string {
     switch (offer.discount_type) {
         case "percentage":
-            return `${t("Discount", "خصم")} ${offer.discount_value}%`
+            return `${t("planPurchases.discount")} ${offer.discount_value}%`
         case "amount_off":
-            return `${t("Discount", "خصم")} ${offer.discount_value} points`
+            return `${t("planPurchases.discount")} ${offer.discount_value} points`
         default:
-            return `${t("Special Price", "سعر خاص")} ${offer.discount_value} points`
+            return `${t("planPurchases.specialPrice")} ${offer.discount_value} points`
     }
 }
 
