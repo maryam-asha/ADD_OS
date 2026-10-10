@@ -45,6 +45,7 @@ const usd: Currency = {
 	name: { ar: "دولار أمريكي", en: "US Dollar" },
 	symbol: "$",
 	decimal_places: 2,
+	cash_step: "1.00",
 	is_base: true,
 	is_active: true,
 	order: 2,
@@ -56,6 +57,7 @@ const syp: Currency = {
 	name: { ar: "ليرة سورية", en: "Syrian Pound" },
 	symbol: "ل.س",
 	decimal_places: 2,
+	cash_step: "1.00",
 	is_base: false,
 	is_active: true,
 	order: 1,
@@ -254,7 +256,7 @@ describe("currenciesPage", () => {
 		await flushPromises()
 
 		wrapper.vm.openCreate()
-		await wrapper.vm.submit({ code: "EUR", name: { ar: "يورو", en: "Euro" }, symbol: "€", decimal_places: 2, order: 3 })
+		await wrapper.vm.submit({ code: "EUR", name: { ar: "يورو", en: "Euro" }, symbol: "€", decimal_places: 2, cash_step: 1, order: 3 })
 		await flushPromises()
 
 		const payload = createCurrencyMock.mock.calls[0][0]
@@ -269,7 +271,7 @@ describe("currenciesPage", () => {
 		await flushPromises()
 
 		wrapper.vm.openEdit(syp)
-		await wrapper.vm.submit({ name: { ar: "ليرة", en: "Pound" }, symbol: "ل.س", decimal_places: 2, order: 1 })
+		await wrapper.vm.submit({ name: { ar: "ليرة", en: "Pound" }, symbol: "ل.س", decimal_places: 2, cash_step: 1, order: 1 })
 		await flushPromises()
 
 		expect(updateCurrencyMock).toHaveBeenCalledWith("SYP", expect.objectContaining({ symbol: "ل.س" }))
@@ -281,7 +283,7 @@ describe("currenciesPage", () => {
 		await flushPromises()
 
 		wrapper.vm.openEdit(syp)
-		await wrapper.vm.submit({ name: { ar: "ليرة", en: "Pound" }, symbol: "ل.س", decimal_places: 2, order: 1 })
+		await wrapper.vm.submit({ name: { ar: "ليرة", en: "Pound" }, symbol: "ل.س", decimal_places: 2, cash_step: 1, order: 1 })
 		await flushPromises()
 
 		expect(updateCurrencyMock.mock.calls[0][1]).not.toHaveProperty("code")

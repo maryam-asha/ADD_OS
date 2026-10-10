@@ -1051,6 +1051,7 @@
 			"name": "Name",
 			"symbol": "Symbol",
 			"decimalPlaces": "Decimals",
+			"cashStep": "Cash step",
 			"order": "Display order",
 			"isActive": "Status"
 		},
@@ -1071,6 +1072,7 @@
 			"name": "Name",
 			"symbol": "Symbol",
 			"decimalPlaces": "Decimal places",
+			"cashStep": "Cash step",
 			"order": "Display order"
 		},
 		"validation": {
@@ -1861,6 +1863,10 @@
 			"profile_completion_threshold": {
 				"label": "Profile completion threshold (%)",
 				"hint": "The completion score a member's profile needs to reach to count as complete."
+			},
+			"wallet_top_up_min_points": {
+				"label": "Minimum top-up (points)",
+				"hint": "The fewest points reception can credit in one top-up."
 			}
 		}
 	},

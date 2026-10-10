@@ -10,9 +10,9 @@ vi.mock("@/add-os/config/env", () => ({
  * Shaped from ADD Core's `CurrencyResource` and the row `CurrencySeeder`
  * actually inserts — NOT from the Postman collection, which carries no
  * `currencies` request at all (0 occurrences in the pinned snapshot and in
- * the canonical file). The eight keys here are the complete response: the
- * resource returns exactly `code, name, symbol, decimal_places, is_base,
- * is_active, order, created_at`, with `name` cast to `array` on the model
+ * the canonical file). The nine keys here are the complete response: the
+ * resource returns exactly `code, name, symbol, decimal_places, cash_step,
+ * is_base, is_active, order, created_at`, with `name` cast to `array` on the model
  * and so serialized as the `{ar, en}` object below.
  */
 const sampleCurrency = {
@@ -20,6 +20,7 @@ const sampleCurrency = {
 	name: { ar: "دولار أمريكي", en: "US Dollar" },
 	symbol: "$",
 	decimal_places: 2,
+	cash_step: "1.00",
 	is_base: true,
 	is_active: true,
 	order: 2,
@@ -47,7 +48,7 @@ describe("currencies service", () => {
 	it("createCurrency POSTs the payload and unwraps the created resource", async () => {
 		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: sampleCurrency }, 201))
 
-		const payload = { code: "EUR", name: { ar: "يورو", en: "Euro" }, symbol: "€", decimal_places: 2, order: 3 }
+		const payload = { code: "EUR", name: { ar: "يورو", en: "Euro" }, symbol: "€", decimal_places: 2, cash_step: 1, order: 3 }
 		const currency = await createCurrency(payload)
 
 		expect(fetch).toHaveBeenCalledWith(
@@ -60,7 +61,7 @@ describe("currencies service", () => {
 	it("updateCurrency PATCHes the code-keyed path, not an id-keyed one", async () => {
 		vi.mocked(fetch).mockResolvedValue(jsonResponse({ message: "Currency updated." }))
 
-		const payload = { name: { ar: "يورو", en: "Euro" }, symbol: "€", decimal_places: 2, order: 3 }
+		const payload = { name: { ar: "يورو", en: "Euro" }, symbol: "€", decimal_places: 2, cash_step: 1, order: 3 }
 		const result = await updateCurrency("EUR", payload)
 
 		expect(fetch).toHaveBeenCalledWith(

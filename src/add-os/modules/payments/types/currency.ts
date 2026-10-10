@@ -21,6 +21,8 @@ export interface Currency {
 	name: Bilingual
 	symbol: string | null
 	decimal_places: number
+	/** The smallest amount the till takes in this currency, decimal string, e.g. "1.00". */
+	cash_step: string
 	is_base: boolean
 	is_active: boolean
 	order: number | null
@@ -47,6 +49,7 @@ export interface CurrencyCreatePayload extends Record<string, unknown> {
 	name: Bilingual
 	symbol: string
 	decimal_places: number
+	cash_step: number
 	order: number | null
 }
 
@@ -65,5 +68,6 @@ export interface CurrencyUpdatePayload extends Record<string, unknown> {
 	name: Bilingual
 	symbol: string
 	decimal_places: number
+	cash_step: number
 	order: number | null
 }

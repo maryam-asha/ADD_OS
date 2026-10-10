@@ -46,6 +46,11 @@ export function buildCurrencyColumns(t: ComposerTranslation, locale: SupportedLo
 			key: "decimal_places",
 			render: row => h("span", { class: NUMERIC_CELL_CLASS }, formatNumber(row.decimal_places))
 		},
+		{
+			title: t("currencies.columns.cashStep"),
+			key: "cash_step",
+			render: row => h("span", { class: NUMERIC_CELL_CLASS }, formatNumber(row.cash_step))
+		},
 		{ title: t("currencies.columns.order"), key: "order", render: row => optionalNumberCell(row.order) },
 		{
 			title: t("currencies.columns.isActive"),
@@ -66,16 +71,19 @@ export function buildCurrencyColumns(t: ComposerTranslation, locale: SupportedLo
 }
 
 /**
- * The four fields both forms share. `name` and `decimal_places` are required
+ * The fields both forms share. `name` and `decimal_places` are required
  * because `UpdateCurrencyRequest` declares them so — `decimal_places` is
  * `['required','integer','min:0','max:6']`, and `name` comes from
- * `TranslatableField::rules('name')`, which defaults to required. Only
- * `symbol` and `order` are genuinely nullable.
+ * `TranslatableField::rules('name')`, which defaults to required. `cash_step`
+ * (the smallest amount the till takes, used to round top-ups) is optional
+ * server-side and defaults to 1, but both forms always send it. Only `symbol`
+ * and `order` are genuinely nullable.
  */
 const sharedCurrencyFields: FieldDescriptor<CurrencyUpdatePayload>[] = [
 	{ key: "name", labelKey: "currencies.form.name", type: "bilingual-text", required: true },
 	{ key: "symbol", labelKey: "currencies.form.symbol", type: "text" },
 	{ key: "decimal_places", labelKey: "currencies.form.decimalPlaces", type: "number", required: true },
+	{ key: "cash_step", labelKey: "currencies.form.cashStep", type: "number", required: true },
 	{ key: "order", labelKey: "currencies.form.order", type: "number" }
 ]
 
@@ -102,7 +110,7 @@ export function currencyCreateFields(t: ComposerTranslation): FieldDescriptor<Cu
 export const currencyEditFields: FieldDescriptor<CurrencyUpdatePayload>[] = sharedCurrencyFields
 
 export function emptyCurrencyPayload(): CurrencyCreatePayload {
-	return { code: "", name: { ar: "", en: "" }, symbol: "", decimal_places: 2, order: null }
+	return { code: "", name: { ar: "", en: "" }, symbol: "", decimal_places: 2, cash_step: 1, order: null }
 }
 
 /**
@@ -111,5 +119,11 @@ export function emptyCurrencyPayload(): CurrencyCreatePayload {
  * the modal.
  */
 export function currencyEditPayload(row: Currency): CurrencyUpdatePayload {
-	return { name: { ...row.name }, symbol: row.symbol ?? "", decimal_places: row.decimal_places, order: row.order }
+	return {
+		name: { ...row.name },
+		symbol: row.symbol ?? "",
+		decimal_places: row.decimal_places,
+		cash_step: Number(row.cash_step),
+		order: row.order
+	}
 }

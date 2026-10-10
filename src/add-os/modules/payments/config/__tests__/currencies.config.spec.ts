@@ -22,6 +22,7 @@ const baseRow: Currency = {
 	name: { ar: "دولار أمريكي", en: "US Dollar" },
 	symbol: "$",
 	decimal_places: 2,
+	cash_step: "1.00",
 	is_base: true,
 	is_active: true,
 	order: 2,
@@ -33,6 +34,7 @@ const plainRow: Currency = {
 	name: { ar: "ليرة سورية", en: "Syrian Pound" },
 	symbol: "ل.س",
 	decimal_places: 2,
+	cash_step: "1.00",
 	is_base: false,
 	is_active: true,
 	order: 1,
@@ -82,6 +84,10 @@ describe("buildCurrencyColumns", () => {
 		expect(cellText("order", { ...plainRow, order: null })).toBe("")
 		expect(cellText("order", { ...plainRow, order: 0 })).toBe("0")
 	})
+
+	it("shows the cash step with its decimals rather than rounding it to a whole number", () => {
+		expect(cellText("cash_step", { ...plainRow, cash_step: "2.5" })).toBe("2.5")
+	})
 })
 
 describe("currency form fields", () => {
@@ -118,6 +124,11 @@ describe("currency form fields", () => {
 		expect(currencyEditFields.find(field => field.key === "symbol")?.required).toBeFalsy()
 		expect(currencyEditFields.find(field => field.key === "order")?.required).toBeFalsy()
 	})
+
+	it("offers cash_step on both forms and requires it", () => {
+		expect(currencyCreateFields(t).find(field => field.key === "cash_step")?.required).toBe(true)
+		expect(currencyEditFields.find(field => field.key === "cash_step")?.required).toBe(true)
+	})
 })
 
 describe("cURRENCY_CODE_PATTERN", () => {
@@ -151,11 +162,12 @@ describe("currency payload builders", () => {
 		expect(payload).not.toHaveProperty("is_base")
 	})
 
-	it("currencyEditPayload copies only the four updatable fields off a row", () => {
-		expect(currencyEditPayload(baseRow)).toEqual({
+	it("currencyEditPayload copies only the updatable fields off a row, cash_step as a number", () => {
+		expect(currencyEditPayload({ ...baseRow, cash_step: "0.50" })).toEqual({
 			name: { ar: "دولار أمريكي", en: "US Dollar" },
 			symbol: "$",
 			decimal_places: 2,
+			cash_step: 0.5,
 			order: 2
 		})
 	})
@@ -169,5 +181,9 @@ describe("currency payload builders", () => {
 
 	it("currencyEditPayload turns a null symbol into an empty string the text input can bind", () => {
 		expect(currencyEditPayload({ ...plainRow, symbol: null }).symbol).toBe("")
+	})
+
+	it("emptyCurrencyPayload starts a new currency at a cash step of 1", () => {
+		expect(emptyCurrencyPayload().cash_step).toBe(1)
 	})
 })
