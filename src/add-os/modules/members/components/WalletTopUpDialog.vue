@@ -74,6 +74,11 @@
 						<span class="font-bold font-numeric text-[var(--add-primary-text)] add-numeric">{{ summary }}</span>
 						<span v-if="note" class="text-[var(--add-text-muted)] add-numeric">{{ note }}</span>
 					</template>
+					<!-- The rates come with the balance read: without them nothing can be quoted, so say so and offer another try. -->
+					<div v-else-if="ratesUnavailable" class="flex items-center gap-2">
+						<span class="text-[var(--add-danger-text)] font-medium">{{ t("points.errors.ratesUnavailable") }}</span>
+						<n-button text type="primary" size="tiny" data-testid="rates-retry" :disabled="isLoadingBalance" @click="loadBalance">{{ t("points.retry") }}</n-button>
+					</div>
 				</div>
 
 				<div v-if="presets.length" class="grid grid-cols-4 gap-2">
@@ -249,6 +254,8 @@ const collectText = computed(() => `${quote.value === null ? "0" : formatNumber(
 /** The member's general balance in points, as the server reported it. */
 const currentBalancePoints = ref<number | null>(null)
 const isLoadingBalance = ref(false)
+/** The last balance read failed, so there are no rates to quote with. */
+const ratesUnavailable = ref(false)
 
 /**
  * The balance read also carries the rates the quote converts with, which is
@@ -257,6 +264,7 @@ const isLoadingBalance = ref(false)
 async function loadBalance() {
 	if (!props.member) return
 	isLoadingBalance.value = true
+	ratesUnavailable.value = false
 	try {
 		const balance = await getWalletBalance({ user_id: props.member.id })
 		currentBalancePoints.value = balance.balance_points
@@ -265,6 +273,7 @@ async function loadBalance() {
 		if (!(e instanceof ApiError)) throw e
 		currentBalancePoints.value = null
 		quoteConfig.value = null
+		ratesUnavailable.value = true
 	} finally {
 		isLoadingBalance.value = false
 	}

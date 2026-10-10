@@ -1165,13 +1165,14 @@
 		"buys": "يشتري {points}",
 		"remainder": "{amount} لا تكفي لنقطة إضافية",
 		"raisedByRounding": "ارتفعت إلى {points} بسبب تقريب المبلغ",
+		"retry": "أعد المحاولة",
 		"errors": {
 			"invalidPoints": "أدخل عدداً صحيحاً من النقاط.",
 			"invalidAmount": "أدخل مبلغاً أكبر من صفر، بخانتين عشريتين على الأكثر.",
 			"belowMinimum": "الحد الأدنى للشحن {min}.",
 			"notCashStep": "يجب أن يكون المبلغ من مضاعفات {step}.",
 			"currencyUnavailable": "لا يوجد سعر صرف لهذه العملة بعد.",
-			"quoteStale": "تغيّرت الأسعار منذ تجهيز هذا الشحن. راجع الأرقام الجديدة ثم أعد الإرسال."
+			"ratesUnavailable": "تعذّر تحميل أسعار هذه المحفظة."
 		}
 	},
 	"walletTopUps": {

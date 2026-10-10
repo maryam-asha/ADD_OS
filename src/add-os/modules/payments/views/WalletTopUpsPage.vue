@@ -185,6 +185,11 @@
 									<span class="font-bold text-teal-700 add-numeric">{{ quoteSummary }}</span>
 									<span v-if="quoteNote" class="text-stone-500 add-numeric">{{ quoteNote }}</span>
 								</template>
+								<!-- The rates come with the balance read: without them nothing can be quoted, so say so and offer another try. -->
+								<div v-else-if="ratesUnavailable" class="flex items-center gap-2">
+									<span class="text-red-600">{{ t("points.errors.ratesUnavailable") }}</span>
+									<n-button text type="primary" size="tiny" data-testid="rates-retry" :disabled="isLoadingBalance" @click="fetchBalance">{{ t("points.retry") }}</n-button>
+								</div>
 							</div>
 
 							<div v-if="presets.length" class="grid grid-cols-4 gap-2">
@@ -468,6 +473,8 @@ const currentBalance = ref<number | null>(null)
 const currentBalancePoints = ref<number | null>(null)
 const balanceData = ref<WalletBalanceResponse | null>(null)
 const isLoadingBalance = ref(false)
+/** The last balance read failed, so there are no rates to quote with. */
+const ratesUnavailable = ref(false)
 
 /**
  * Points ↔ cash, converted here as the operator types (ADDCore spec
@@ -614,10 +621,12 @@ async function fetchBalance() {
 		currentBalancePoints.value = null
 		balanceData.value = null
 		quoteConfig.value = null
+		ratesUnavailable.value = false
 		return
 	}
 
 	isLoadingBalance.value = true
+	ratesUnavailable.value = false
 	try {
 		const res = await getWalletBalance({
 			...ownerParams,
@@ -635,6 +644,7 @@ async function fetchBalance() {
 		currentBalancePoints.value = null
 		balanceData.value = null
 		quoteConfig.value = null
+		ratesUnavailable.value = true
 	} finally {
 		isLoadingBalance.value = false
 	}
@@ -665,6 +675,7 @@ watch(recipientType, type => {
 	currentBalance.value = null
 	currentBalancePoints.value = null
 	balanceData.value = null
+	ratesUnavailable.value = false
 	userBalanceScope.value = "personal"
 	resetQuote()
 	fieldErrors.value = {}

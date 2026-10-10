@@ -73,6 +73,7 @@ const BALANCE = {
 }
 
 const STALE = "Rates changed since this top-up was prepared. Review the new figures and submit again."
+const RATES_UNAVAILABLE = "Couldn't load the rates for this wallet."
 
 const i18n = createI18n({
 	legacy: false,
@@ -112,13 +113,14 @@ const i18n = createI18n({
 				buys: "Buys {points}",
 				remainder: "{amount} is not enough for another point",
 				raisedByRounding: "Raised to {points} by cash rounding",
+				retry: "Try again",
 				errors: {
 					invalidPoints: "Enter a whole number of points.",
 					invalidAmount: "Enter an amount above zero, with at most two decimals.",
 					belowMinimum: "A top-up must be at least {min}.",
 					notCashStep: "The amount must be a multiple of {step}.",
 					currencyUnavailable: "This currency has no exchange rate yet.",
-					quoteStale: STALE
+					ratesUnavailable: RATES_UNAVAILABLE
 				}
 			}
 		}
@@ -252,6 +254,28 @@ describe("walletTopUpsPage", () => {
 		expect(messageErrorMock).toHaveBeenCalledWith("The selected currency has no active exchange rate.")
 		expect(getWalletBalanceMock).toHaveBeenCalledTimes(2)
 		expect(createWalletTopUpMock).toHaveBeenCalledTimes(1)
+		wrapper.unmount()
+	})
+
+	it("says the rates could not be loaded, and re-reads them when the operator retries", async () => {
+		getWalletBalanceMock.mockRejectedValueOnce(new Error("network down"))
+		const wrapper = mountPage()
+		await flushPromises()
+
+		wrapper.vm.form.user_id = 5
+		await flushPromises()
+
+		expect(getWalletBalanceMock).toHaveBeenCalledTimes(1)
+		expect(wrapper.text()).toContain(RATES_UNAVAILABLE)
+
+		await wrapper.find("[data-testid=\"rates-retry\"]").trigger("click")
+		await flushPromises()
+
+		expect(getWalletBalanceMock).toHaveBeenCalledTimes(2)
+		expect(wrapper.text()).not.toContain(RATES_UNAVAILABLE)
+		wrapper.vm.input = "500"
+		await flushPromises()
+		expect(wrapper.text()).toContain("Collect 7,350 SYP → 500 points")
 		wrapper.unmount()
 	})
 

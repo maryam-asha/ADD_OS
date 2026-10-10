@@ -15,6 +15,7 @@ const TOP_UP_CONFIG = {
 }
 
 const STALE = "Rates changed since this top-up was prepared. Review the new figures and submit again."
+const RATES_UNAVAILABLE = "Couldn't load the rates for this wallet."
 
 const { createWalletTopUpMock, getWalletBalanceMock } = vi.hoisted(() => ({
 	createWalletTopUpMock: vi.fn(),
@@ -58,13 +59,14 @@ const i18n = createI18n({
 				buys: "Buys {points}",
 				remainder: "{amount} is not enough for another point",
 				raisedByRounding: "Raised to {points} by cash rounding",
+				retry: "Try again",
 				errors: {
 					invalidPoints: "Enter a whole number of points.",
 					invalidAmount: "Enter an amount above zero, with at most two decimals.",
 					belowMinimum: "A top-up must be at least {min}.",
 					notCashStep: "The amount must be a multiple of {step}.",
 					currencyUnavailable: "This currency has no exchange rate yet.",
-					quoteStale: STALE
+					ratesUnavailable: RATES_UNAVAILABLE
 				}
 			},
 			members: {
@@ -115,6 +117,12 @@ async function chooseMode(mode: "points" | "amount") {
 	if (!radio) throw new Error(`${mode} mode radio not rendered`)
 	radio.click()
 	await flushPromises()
+}
+
+function retryButton(): HTMLButtonElement {
+	const button = document.querySelector<HTMLButtonElement>("[data-testid=\"rates-retry\"]")
+	if (!button) throw new Error("retry button not rendered")
+	return button
 }
 
 function submitButton(): HTMLButtonElement {
@@ -200,6 +208,25 @@ describe("walletTopUpDialog", () => {
 			payment_method: "cash",
 			description: null
 		})
+	})
+
+	it("says the rates could not be loaded, and re-reads them when the operator retries", async () => {
+		getWalletBalanceMock.mockRejectedValueOnce(new ApiError(500, JSON.stringify({ message: "boom" })))
+		mountDialog()
+		await flushPromises()
+
+		expect(getWalletBalanceMock).toHaveBeenCalledTimes(1)
+		expect(dialogText()).toContain(RATES_UNAVAILABLE)
+		expect(submitButton().disabled).toBe(true)
+
+		retryButton().click()
+		await flushPromises()
+
+		expect(getWalletBalanceMock).toHaveBeenCalledTimes(2)
+		expect(dialogText()).not.toContain(RATES_UNAVAILABLE)
+		await type("340")
+		expect(dialogText()).toContain("Collect 4,998 SYP → 340 points")
+		expect(submitButton().disabled).toBe(false)
 	})
 
 	it("on a stale quote, says why and re-reads the rates without resubmitting", async () => {

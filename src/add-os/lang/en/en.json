@@ -1161,13 +1161,14 @@
 		"buys": "Buys {points}",
 		"remainder": "{amount} is not enough for another point",
 		"raisedByRounding": "Raised to {points} by cash rounding",
+		"retry": "Try again",
 		"errors": {
 			"invalidPoints": "Enter a whole number of points.",
 			"invalidAmount": "Enter an amount above zero, with at most two decimals.",
 			"belowMinimum": "A top-up must be at least {min}.",
 			"notCashStep": "The amount must be a multiple of {step}.",
 			"currencyUnavailable": "This currency has no exchange rate yet.",
-			"quoteStale": "Rates changed since this top-up was prepared. Review the new figures and submit again."
+			"ratesUnavailable": "Couldn't load the rates for this wallet."
 		}
 	},
 	"walletTopUps": {
