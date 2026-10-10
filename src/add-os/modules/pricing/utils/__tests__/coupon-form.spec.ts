@@ -130,16 +130,16 @@ describe("offers", () => {
 		expect(payload.code).toBe("X1")
 	})
 
-	it("keeps a fixed price's value and sends no cap with it", () => {
-		const payload = formToPayload({ ...emptyCouponForm(true), discount_type: "fixed_price", discount_value: 80, max_discount_points: 30 })
-		expect(payload.discount_type).toBe("fixed_price")
-		expect(payload.discount_value).toBe(80)
+	it("sends no cap with points off — a cap only bounds a percentage", () => {
+		const payload = formToPayload({ ...emptyCouponForm(true), discount_type: "amount_off", discount_value: 20, max_discount_points: 30 })
+		expect(payload.discount_type).toBe("amount_off")
+		expect(payload.discount_value).toBe(20)
 		expect(payload.max_discount_points).toBeNull()
 	})
 
-	it("labels a fixed price as the price, not an amount off", () => {
+	it("labels points off as an amount off", () => {
 		const t = (key: string, params?: Record<string, unknown>) => `${key}:${params?.value ?? ""}`
-		expect(discountLabel(t as never, { discount_type: "fixed_price", discount_value: 80 })).toBe("coupons.detail.discountFixed:80")
+		expect(discountLabel(t as never, { discount_type: "amount_off", discount_value: 20 })).toBe("coupons.detail.discountPoints:20")
 	})
 
 	it("says whether a limit is set: total or per member", () => {

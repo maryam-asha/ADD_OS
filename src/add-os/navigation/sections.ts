@@ -27,6 +27,8 @@
  * locally — run `npm run icons` after changing one, or the icon guard fails.
  */
 
+import type { Roles } from "@/types/auth.d"
+
 export type SectionStatus = "active" | "coming-soon"
 
 export interface NavPage {
@@ -52,6 +54,7 @@ export interface NavSection {
 	icon: string
 	status: SectionStatus
 	pages: NavPage[]
+	roles?: Roles
 }
 
 export const NAV_SECTIONS: readonly NavSection[] = [
@@ -100,6 +103,31 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "companies", path: "companies" },
 			{ key: "memberships", path: "memberships" }
 		]
+	},
+	{
+		key: "providers",
+		path: "/providers",
+		icon: "carbon:partnership",
+		status: "active",
+		pages: [
+			{ key: "list", path: "list" },
+			{ key: "requests", path: "requests" }
+		],
+		roles: ["admin", "operations"]
+	},
+	{
+		key: "providerPortal",
+		path: "/provider",
+		icon: "carbon:network-4",
+		status: "active",
+		pages: [
+			{ key: "summary", path: "summary" },
+			{ key: "companies", path: "companies" },
+			{ key: "requests", path: "requests" },
+			{ key: "officeRequests", path: "office-requests" },
+			{ key: "invoices", path: "invoices" }
+		],
+		roles: ["provider"]
 	},
 	{
 		key: "bookings",
@@ -169,7 +197,8 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "currencies", path: "currencies" },
 			{ key: "exchangeRates", path: "exchange-rates" },
 			{ key: "walletTopUps", path: "wallet-top-ups" },
-			{ key: "cashRegister", path: "cash-register" }
+			{ key: "cashRegister", path: "cash-register" },
+			{ key: "invoices", path: "invoices" }
 		]
 	},
 	{

@@ -8,6 +8,7 @@ import { getMe } from "@/add-os/services/auth"
 function primaryRole(roles: string[] | undefined): Role | null {
 	if (roles?.includes("admin")) return "admin"
 	if (roles?.includes("operations")) return "operations"
+	if (roles?.includes("provider")) return "provider"
 	return null
 }
 

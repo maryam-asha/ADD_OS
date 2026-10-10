@@ -21,6 +21,7 @@ export function buildRequestColumns(
 	return [
 		{ title: t("privateOfficeRequests.columns.prospectName"), key: "prospect_name" },
 		{ title: t("privateOfficeRequests.columns.contact"), key: "contact" },
+		{ title: t("privateOfficeRequests.columns.provider", "Provider"), key: "provider", render: row => row.provider?.name || "—" },
 		{
 			title: t("privateOfficeRequests.columns.status"),
 			key: "status",

@@ -9,7 +9,14 @@
 		<ResourceStatCards v-if="!error && !isLoading" :cards="statCards" />
 		<n-alert v-if="error" type="error" :title="t('companies.loadError')" />
 
-		<div class="flex justify-end">
+		<div class="flex gap-4 mb-4 flex-wrap">
+			<n-select v-model:value="query.provider_id" :options="providerOptions" clearable :placeholder="t('companies.filters.provider', 'Provider')" class="w-48" />
+			<n-select v-model:value="query.status" :options="statusOptions" clearable :placeholder="t('companies.filters.status', 'Status')" class="w-48" />
+			<n-select v-model:value="query.branch_id" :options="branchOptions" clearable :placeholder="t('companies.filters.branch', 'Branch')" class="w-48" />
+			<n-input v-model:value="query.search" clearable :placeholder="t('companies.filters.search', 'Search Name...')" class="w-48" />
+		</div>
+		
+		<div class="flex justify-end mb-4">
 			<n-button type="primary" @click="openCreate">
 				<template #icon><Icon name="carbon:add" :size="16" /></template>
 				{{ t("companies.create.button") }}
@@ -17,7 +24,7 @@
 		</div>
 
 		<n-card class="add-ledger-table">
-			<n-data-table v-if="data.length > 0 || isLoading" :columns :data :loading="isLoading" :bordered="false" :row-key />
+			<n-data-table v-if="data.length > 0 || isLoading" remote :columns="columns" :data="data" :loading="isLoading" :bordered="false" :row-key="rowKey" :pagination="{ itemCount: meta?.total, page: meta?.current_page, pageSize: meta?.per_page, onChange: (p) => page = p }" />
 			<div v-else class="py-10 text-center">{{ t("companies.empty") }}</div>
 		</n-card>
 
@@ -44,6 +51,20 @@
 			</template>
 		</n-modal>
 
+		<n-modal v-model:show="transferModalVisible" preset="card" :title="t('companies.transferProvider.title', 'Transfer Provider')" class="max-w-md">
+			<n-form>
+				<n-form-item :label="t('companies.columns.provider', 'Provider')">
+					<n-select v-model:value="transferForm.provider_id" :options="transferProviderOptions" clearable />
+				</n-form-item>
+			</n-form>
+			<template #footer>
+				<div class="flex justify-end gap-2">
+					<n-button @click="transferModalVisible = false">{{ t("resourceCrud.form.cancel") }}</n-button>
+					<n-button type="primary" :loading="isTransferring" @click="submitTransfer">{{ t("resourceCrud.form.submit") }}</n-button>
+				</div>
+			</template>
+		</n-modal>
+
 		<CompanyDetailPanel v-if="activeDetailCompanyId !== null" ref="detailPanelRef" v-model:show="detailPanelVisible" :company-id="activeDetailCompanyId" />
 
 		<AddCompanyMemberDialog v-if="quickAddCompanyId !== null" v-model:show="quickAddDialogVisible" :company-id="quickAddCompanyId" />
@@ -55,7 +76,7 @@ import type { DataTableColumns, SelectOption } from "naive-ui"
 import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vue"
 import type { Company, CompanyStatus, CompanyStatusPayload } from "@/add-os/modules/members/types/company"
 import type { PrivateOfficeRequest } from "@/add-os/modules/members/types/private-office-request"
-import { NAlert, NButton, NCard, NDataTable, NForm, NFormItem, NModal, NSelect, useDialog } from "naive-ui"
+import { NAlert, NButton, NCard, NDataTable, NForm, NFormItem, NModal, NSelect, NInput, useDialog } from "naive-ui"
 import { computed, h, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
@@ -68,7 +89,8 @@ import CompanyDetailPanel from "@/add-os/modules/members/components/CompanyDetai
 import { useCompanyCreation, useCompanyStatusChange } from "@/add-os/modules/members/composables/useCompanyMutations"
 import { buildCompanyColumns, buildCompanyFields, emptyCompanyPayload, quotedRequestOptions } from "@/add-os/modules/members/config/companies.config"
 import { listBranches } from "@/add-os/services/branches"
-import { listCompanies } from "@/add-os/services/companies"
+import { listCompanies, listCompaniesPaginated, transferCompanyProvider } from "@/add-os/services/companies"
+import { listProviders } from "@/add-os/services/providers"
 import { listPrivateOfficeRequests } from "@/add-os/services/private-office-requests"
 import Icon from "@/components/common/Icon.vue"
 
@@ -77,9 +99,16 @@ const { t } = useI18n()
 const dialog = useDialog()
 const router = useRouter()
 
-const { data, isLoading, error, refetch: refetchCompanies } = useResourceList<Company>(listCompanies)
+const query = ref<any>({})
+const page = ref(1)
+
+const { data, isLoading, error, refetch: refetchCompanies, meta } = useResourceList<Company>(listCompaniesPaginated, query, page)
 const { data: requests, refetch: refetchRequests } = useResourceList<PrivateOfficeRequest>(listPrivateOfficeRequests)
 const { data: branches } = useResourceList(listBranches)
+const { data: providers } = useResourceList(listProviders)
+
+const branchOptions = computed(() => branches.value.map(b => ({ label: b.name, value: b.id })))
+const providerOptions = computed(() => providers.value.map(p => ({ label: p.name, value: p.id })))
 
 const quotedRequests = computed(() => requests.value.filter(r => r.status === "quoted"))
 
@@ -129,6 +158,11 @@ function renderActions(row: Company) {
 			NButton,
 			{ text: true, "aria-label": t("companyMembers.add.button"), title: t("companyMembers.add.button"), onClick: () => openQuickAdd(row) },
 			{ icon: () => h(Icon, { name: "carbon:user-follow", size: 18 }) }
+		),
+		h(
+			NButton,
+			{ text: true, type: "info", "aria-label": t("companies.transferProvider.button", "Transfer"), title: t("companies.transferProvider.button", "Transfer"), onClick: () => openTransferModal(row) },
+			{ icon: () => h(Icon, { name: "carbon:arrows-horizontal", size: 18 }) }
 		),
 		h(
 			NButton,
@@ -193,6 +227,36 @@ async function submitStatusChange() {
 	statusModalVisible.value = false
 	if (activeDetailCompanyId.value === statusTargetId.value) {
 		await detailPanelRef.value?.refetchCompany()
+	}
+}
+
+const transferModalVisible = ref(false)
+const transferTargetId = ref<number | null>(null)
+const transferForm = ref<{ provider_id: number | null }>({ provider_id: null })
+const isTransferring = ref(false)
+
+const transferProviderOptions = computed(() => {
+	const opts = [{ label: t('companies.transferProvider.direct', 'Direct (No Provider)'), value: null as any }]
+	return opts.concat(providerOptions.value)
+})
+
+function openTransferModal(row: Company) {
+	transferTargetId.value = row.id
+	transferForm.value = { provider_id: row.provider?.id ?? null }
+	transferModalVisible.value = true
+}
+
+async function submitTransfer() {
+	if (transferTargetId.value === null) return
+	isTransferring.value = true
+	try {
+		await transferCompanyProvider(transferTargetId.value, transferForm.value.provider_id)
+		transferModalVisible.value = false
+		refetchCompanies()
+	} catch {
+		// error handled by api client
+	} finally {
+		isTransferring.value = false
 	}
 }
 </script>

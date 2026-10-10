@@ -15,8 +15,11 @@
 			</n-button>
 		</div>
 
+		<div class="flex mb-4">
+			<n-select v-model:value="query.provider_id" :options="providerOptions" clearable :placeholder="t('companies.filters.provider', 'Provider')" class="w-48" />
+		</div>
 		<n-card class="add-ledger-table">
-			<n-data-table v-if="data.length > 0 || isLoading" :columns :data :loading="isLoading" :bordered="false" :row-key />
+			<n-data-table v-if="data.length > 0 || isLoading" remote :columns="columns" :data="data" :loading="isLoading" :bordered="false" :row-key="rowKey" :pagination="{ itemCount: meta?.total, page: meta?.current_page, pageSize: meta?.per_page, onChange: (p) => page = p }" />
 			<div v-else class="py-10 text-center">{{ t("privateOfficeRequests.empty") }}</div>
 		</n-card>
 
@@ -49,7 +52,7 @@
 import type { DataTableColumns, FormInst, FormRules } from "naive-ui"
 import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vue"
 import type { MarkAsQuotedPayload, PrivateOfficeRequest, PrivateOfficeRequestPayload } from "@/add-os/modules/members/types/private-office-request"
-import { NAlert, NButton, NCard, NDataTable, NForm, NFormItem, NInput, NModal, useDialog, useMessage } from "naive-ui"
+import { NAlert, NButton, NCard, NDataTable, NForm, NFormItem, NInput, NModal, NSelect, useDialog, useMessage } from "naive-ui"
 import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.vue"
@@ -61,9 +64,11 @@ import { ApiError } from "@/add-os/services/api"
 import {
 	createPrivateOfficeRequest,
 	listPrivateOfficeRequests,
+	listPrivateOfficeRequestsPaginated,
 	markPrivateOfficeRequestAsQuoted,
 	removePrivateOfficeRequest
 } from "@/add-os/services/private-office-requests"
+import { listProviders } from "@/add-os/services/providers"
 import Icon from "@/components/common/Icon.vue"
 
 defineProps<{ titleKey?: string }>()
@@ -71,7 +76,12 @@ const { t } = useI18n()
 const dialog = useDialog()
 const message = useMessage()
 
-const { data, isLoading, error, refetch } = useResourceList<PrivateOfficeRequest>(listPrivateOfficeRequests)
+const query = ref<any>({})
+const page = ref(1)
+const { data, isLoading, error, refetch, meta } = useResourceList<PrivateOfficeRequest>(listPrivateOfficeRequestsPaginated, query, page)
+
+const { data: providers } = useResourceList(listProviders)
+const providerOptions = computed(() => providers.value.map(p => ({ label: p.name, value: p.id })))
 
 const mutations = useResourceMutations(
 	{ create: createPrivateOfficeRequest, update: markPrivateOfficeRequestAsQuoted, remove: removePrivateOfficeRequest },

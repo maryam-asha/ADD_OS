@@ -14,6 +14,7 @@ export interface PrivateOfficeRequest {
 	contact: string
 	status: PrivateOfficeRequestStatus
 	quote_ref: string | null
+	provider?: { id: number; name: string }
 }
 
 export interface PrivateOfficeRequestPayload extends Record<string, unknown> {

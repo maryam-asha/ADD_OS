@@ -5,11 +5,10 @@ import type { SpaceType } from "@/add-os/modules/spatial/types/space"
 import { formatNumber } from "@/add-os/utils/format"
 import { couponToPayload } from "./coupon-payload"
 
-/** `20%`, `50 points off` or `80 points (fixed price)` — the terms, never a computed saving. */
+/** `20%` or `50 points off` — the terms, never a computed saving. */
 export function discountLabel(t: ComposerTranslation, coupon: Pick<Coupon, "discount_type" | "discount_value">): string {
 	const value = formatNumber(coupon.discount_value)
 	if (coupon.discount_type === "percentage") return t("coupons.detail.discountPercent", { value })
-	if (coupon.discount_type === "fixed_price") return t("coupons.detail.discountFixed", { value })
 	return t("coupons.detail.discountPoints", { value })
 }
 

@@ -199,7 +199,7 @@ export interface PlanPurchasePreviewPayload {
 export interface PlanPurchaseOffer {
 	name: string | null
 	discount_type: CouponDiscountType
-	/** A percentage, points off, or the fixed price in points — per `discount_type`. */
+	/** A percentage, or points off — per `discount_type`. */
 	discount_value: number
 	saved_points: number
 	ends_at: string | null

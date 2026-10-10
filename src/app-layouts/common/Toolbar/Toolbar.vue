@@ -14,6 +14,7 @@
 				<PinnedPages class="grow" />
 
 				<PillWrapper bordered>
+					<ProviderHeader v-if="authStore.userRole === 'provider'" />
 					<Search />
 					<LocaleSwitch />
 					<FullscreenSwitch />
@@ -41,6 +42,10 @@ import Notifications from "./Notifications.vue"
 import PillWrapper from "./PillWrapper.vue"
 import PinnedPages from "./PinnedPagesV2.vue"
 import Search from "./Search.vue"
+import ProviderHeader from "@/add-os/modules/provider-portal/components/ProviderHeader.vue"
+import { useAuthStore } from "@/stores/auth"
+
+const authStore = useAuthStore()
 
 const { boxed, gradient } = defineProps<{
 	boxed: boolean
