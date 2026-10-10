@@ -216,6 +216,21 @@ describe("walletTopUpDialog", () => {
 		expect(createWalletTopUpMock).toHaveBeenCalledTimes(1)
 	})
 
+	it("on any other 422, shows the server's reason and re-reads the rates without resubmitting", async () => {
+		const NO_RATE = "The selected currency has no active exchange rate."
+		createWalletTopUpMock.mockRejectedValue(new ApiError(422, JSON.stringify({ message: "invalid", errors: { currency: [NO_RATE] } })))
+		mountDialog()
+		await flushPromises()
+		await type("340")
+
+		submitButton().click()
+		await flushPromises()
+
+		expect(errorMessages).toContain(NO_RATE)
+		expect(getWalletBalanceMock).toHaveBeenCalledTimes(2)
+		expect(createWalletTopUpMock).toHaveBeenCalledTimes(1)
+	})
+
 	it("reports credited points and the new balance after a successful top-up", async () => {
 		createWalletTopUpMock.mockResolvedValue({
 			id: 1,

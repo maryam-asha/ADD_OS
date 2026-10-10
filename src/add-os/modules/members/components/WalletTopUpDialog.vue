@@ -293,6 +293,15 @@ watch(show, visible => {
 	resetQuote()
 })
 
+/** The most specific reason the server gave: the points error, else the first field's, else its message. */
+function rejectionReason(e: ApiError): string {
+	const errors = e.data?.errors
+	return errors?.points?.[0]
+		?? Object.values(errors ?? {})[0]?.[0]
+		?? e.data?.message
+		?? t("resourceCrud.mutations.genericError")
+}
+
 async function submitTopUp() {
 	if (!props.member || quote.value === null) return
 	try {
@@ -323,12 +332,14 @@ async function submitTopUp() {
 		emit("success")
 	} catch (e) {
 		if (!(e instanceof ApiError)) throw e
-		const pointsError = e.status === 422 ? e.data?.errors?.points?.[0] : undefined
-		if (pointsError !== undefined) {
-			// The rates moved after this dialog read them. Re-read them so the
-			// figures update, and leave submitting to the operator: the member
-			// has to agree to the new numbers first.
-			message.error(pointsError)
+		if (e.status === 422) {
+			// The server refused what this dialog quoted — most often because the
+			// rates moved after it read them (points), but also when a currency
+			// went inactive or an amount stopped being valid. Whatever the field,
+			// the quote on screen can no longer be trusted: say why, re-read the
+			// rates so the figures update, and leave submitting to the operator,
+			// since the member has to agree to the new numbers first.
+			message.error(rejectionReason(e))
 			await loadBalance()
 			return
 		}
