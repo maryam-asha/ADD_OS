@@ -692,6 +692,9 @@ function buildRecipient(): { user_id: number } | { company_id: number } | null {
 	return form.value.company_id === null ? null : { company_id: form.value.company_id }
 }
 
+/** The fields whose 422 message the template shows next to the input. */
+const RENDERED_ERROR_FIELDS = ["points", "amount", "user_id", "company_id"]
+
 async function submit() {
 	try {
 		await formRef.value?.validate()
@@ -744,8 +747,19 @@ async function submit() {
 			// field, the figures on screen can no longer be trusted: say why,
 			// re-read the rates so they update, and leave submitting to the
 			// operator, since the member has to agree to the new numbers first.
-			if (caught.data?.errors) fieldErrors.value = caught.data.errors
-			else message.error(caught.data?.message ?? t("resourceCrud.mutations.genericError"))
+			const errors = caught.data?.errors
+			if (errors) {
+				fieldErrors.value = errors
+				// Only these fields render their error in place. Anything else (a
+				// currency with no rate, a payment method) would be set and never
+				// seen, so it is toasted instead.
+				if (!RENDERED_ERROR_FIELDS.some(field => errors[field]?.[0])) {
+					message.error(Object.values(errors)[0]?.[0] ?? caught.data?.message ?? t("resourceCrud.mutations.genericError"))
+				}
+			}
+			else {
+				message.error(caught.data?.message ?? t("resourceCrud.mutations.genericError"))
+			}
 			await fetchBalance()
 		}
 		else if (caught.status === 403) {

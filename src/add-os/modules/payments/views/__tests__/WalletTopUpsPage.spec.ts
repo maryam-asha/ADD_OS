@@ -6,11 +6,12 @@ import { createI18n } from "vue-i18n"
 import { ApiError } from "@/add-os/services/api"
 import WalletTopUpsPage from "../WalletTopUpsPage.vue"
 
-const { listUsersMock, listCompaniesMock, createWalletTopUpMock, getWalletBalanceMock } = vi.hoisted(() => ({
+const { listUsersMock, listCompaniesMock, createWalletTopUpMock, getWalletBalanceMock, messageErrorMock } = vi.hoisted(() => ({
 	listUsersMock: vi.fn(),
 	listCompaniesMock: vi.fn(),
 	createWalletTopUpMock: vi.fn(),
-	getWalletBalanceMock: vi.fn()
+	getWalletBalanceMock: vi.fn(),
+	messageErrorMock: vi.fn()
 }))
 
 vi.mock("@/add-os/services/users", () => ({ listUsers: listUsersMock }))
@@ -23,9 +24,10 @@ vi.mock("@/add-os/services/wallet-top-ups", () => ({
 // Same pitfall AddCompanyMemberDialog.spec.ts documents: the page calls
 // useMessage() directly, which needs a provider it has no reason to mount.
 // Mock only useMessage; every other naive-ui export stays real via importActual.
+// The error spy is shared so a spec can assert what the operator was toasted.
 vi.mock("naive-ui", async () => {
 	const actual = await vi.importActual<typeof import("naive-ui")>("naive-ui")
-	return { ...actual, useMessage: () => ({ success: vi.fn(), error: vi.fn() }) }
+	return { ...actual, useMessage: () => ({ success: vi.fn(), error: messageErrorMock }) }
 })
 
 const sampleUser = {
@@ -220,6 +222,8 @@ describe("walletTopUpsPage", () => {
 
 		expect(wrapper.vm.fieldErrors.points).toEqual([STALE])
 		expect(wrapper.vm.fieldErrors.payment_method).toEqual(["The selected payment method is invalid."])
+		// The points error is rendered in its field, so it is not toasted as well.
+		expect(messageErrorMock).not.toHaveBeenCalled()
 		expect(getWalletBalanceMock).toHaveBeenCalledTimes(2)
 		expect(createWalletTopUpMock).toHaveBeenCalledTimes(1)
 		expect(wrapper.vm.input).toBe("500")
@@ -244,6 +248,8 @@ describe("walletTopUpsPage", () => {
 		await flushPromises()
 
 		expect(wrapper.vm.fieldErrors.currency).toEqual(["The selected currency has no active exchange rate."])
+		// No input renders a currency error, so the operator is told by toast.
+		expect(messageErrorMock).toHaveBeenCalledWith("The selected currency has no active exchange rate.")
 		expect(getWalletBalanceMock).toHaveBeenCalledTimes(2)
 		expect(createWalletTopUpMock).toHaveBeenCalledTimes(1)
 		wrapper.unmount()
