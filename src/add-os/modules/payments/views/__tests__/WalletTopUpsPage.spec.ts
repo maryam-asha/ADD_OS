@@ -6,20 +6,18 @@ import { createI18n } from "vue-i18n"
 import { ApiError } from "@/add-os/services/api"
 import WalletTopUpsPage from "../WalletTopUpsPage.vue"
 
-const { listUsersMock, listCompaniesMock, createWalletTopUpMock, getWalletBalanceMock, previewWalletTopUpMock } = vi.hoisted(() => ({
+const { listUsersMock, listCompaniesMock, createWalletTopUpMock, getWalletBalanceMock } = vi.hoisted(() => ({
 	listUsersMock: vi.fn(),
 	listCompaniesMock: vi.fn(),
 	createWalletTopUpMock: vi.fn(),
-	getWalletBalanceMock: vi.fn(),
-	previewWalletTopUpMock: vi.fn()
+	getWalletBalanceMock: vi.fn()
 }))
 
 vi.mock("@/add-os/services/users", () => ({ listUsers: listUsersMock }))
 vi.mock("@/add-os/services/companies", () => ({ listCompanies: listCompaniesMock }))
 vi.mock("@/add-os/services/wallet-top-ups", () => ({
 	createWalletTopUp: createWalletTopUpMock,
-	getWalletBalance: getWalletBalanceMock,
-	previewWalletTopUp: previewWalletTopUpMock
+	getWalletBalance: getWalletBalanceMock
 }))
 
 // Same pitfall AddCompanyMemberDialog.spec.ts documents: the page calls
@@ -49,6 +47,30 @@ const sampleCompany = {
 	branch_id: 1,
 	status: "active"
 }
+
+const TOP_UP_CONFIG = {
+	point_rate_usd: "0.10",
+	min_points: 10,
+	currencies: [
+		{ code: "SYP", rate_to_base: "0.0068027211", cash_step: "1.00", decimal_places: 2 },
+		{ code: "USD", rate_to_base: "1", cash_step: "1.00", decimal_places: 2 }
+	]
+}
+
+const BALANCE = {
+	owner_type: "user",
+	owner_id: 5,
+	owner_name: "Sara",
+	owner_phone: "0999111222",
+	balance_points: 1000,
+	balance_usd: "100.00",
+	balance_display: "14700.00",
+	general_balance: "100.00",
+	currency: "SYP",
+	top_up: TOP_UP_CONFIG
+}
+
+const STALE = "Rates changed since this top-up was prepared. Review the new figures and submit again."
 
 const i18n = createI18n({
 	legacy: false,
@@ -82,9 +104,20 @@ const i18n = createI18n({
 			points: {
 				unit: "points",
 				credited: "Points credited",
-				previewLoading: "Calculating…",
-				belowOnePoint: "This amount is too small to buy a single point. Enter a larger amount.",
-				previewFailed: "Could not calculate the point value. Check the amount and try again."
+				entryMode: { points: "Points", amount: "Amount" },
+				pointsPlaceholder: "Number of points",
+				collect: "Collect {amount} → {points}",
+				buys: "Buys {points}",
+				remainder: "{amount} is not enough for another point",
+				raisedByRounding: "Raised to {points} by cash rounding",
+				errors: {
+					invalidPoints: "Enter a whole number of points.",
+					invalidAmount: "Enter an amount above zero, with at most two decimals.",
+					belowMinimum: "A top-up must be at least {min}.",
+					notCashStep: "The amount must be a multiple of {step}.",
+					currencyUnavailable: "This currency has no exchange rate yet.",
+					quoteStale: STALE
+				}
 			}
 		}
 	}
@@ -115,48 +148,31 @@ describe("walletTopUpsPage", () => {
 			payment_method: "cash",
 			performed_by_user_id: 12
 		})
-		getWalletBalanceMock.mockResolvedValue({
-			owner_type: "user",
-			owner_id: 5,
-			owner_name: "Sara",
-			owner_phone: "0999111222",
-			balance_points: 1000,
-			balance_usd: "100.00",
-			balance_display: "1470000.00",
-			general_balance: "100.00",
-			currency: "SYP"
-		})
-		previewWalletTopUpMock.mockResolvedValue({
-			points: 500,
-			usd: "50.00",
-			payment_amount: "50.00",
-			payment_currency: "SYP",
-			point_rate_usd: "0.1000"
-		})
+		getWalletBalanceMock.mockResolvedValue(BALANCE)
 	})
 
-	it("posts a member top-up with user_id and no company_id, then resets the form", async () => {
+	it("posts the quoted points with the cash that buys them, then resets the form", async () => {
 		const wrapper = mountPage()
 		await flushPromises()
 
 		wrapper.vm.form.user_id = 5
-		wrapper.vm.form.amount = "50.00"
-		wrapper.vm.form.payment_method = "cash"
+		await flushPromises()
+		wrapper.vm.input = "500"
 		wrapper.vm.form.description = "Front-desk cash top-up"
 		await wrapper.vm.submit()
 		await flushPromises()
 
 		expect(createWalletTopUpMock).toHaveBeenCalledWith({
-			amount: "50.00",
+			points: 500,
+			amount: "7350",
 			currency: "SYP",
 			payment_method: "cash",
 			user_id: 5,
 			description: "Front-desk cash top-up"
 		})
 
-		// A repeatable action screen: the next top-up must start blank, not
-		// pre-filled with the amount that was just charged to somebody.
-		expect(wrapper.vm.form.amount).toBe("")
+		// A repeatable action screen: the next top-up must start blank.
+		expect(wrapper.vm.input).toBe("")
 		expect(wrapper.vm.form.user_id).toBeNull()
 		expect(wrapper.vm.form.description).toBe("")
 		wrapper.unmount()
@@ -169,55 +185,67 @@ describe("walletTopUpsPage", () => {
 		wrapper.vm.recipientType = "company"
 		await flushPromises()
 		wrapper.vm.form.company_id = 45
-		wrapper.vm.form.amount = "50.00"
-		wrapper.vm.form.payment_method = "cash"
+		await flushPromises()
+		wrapper.vm.input = "500"
 		await wrapper.vm.submit()
 		await flushPromises()
 
 		expect(createWalletTopUpMock).toHaveBeenCalledWith({
-			amount: "50.00",
+			points: 500,
+			amount: "7350",
 			currency: "SYP",
 			payment_method: "cash",
 			company_id: 45,
 			description: null
 		})
-
-		const payload = createWalletTopUpMock.mock.calls[0][0]
-		expect(payload).not.toHaveProperty("user_id")
+		expect(createWalletTopUpMock.mock.calls[0][0]).not.toHaveProperty("user_id")
 		wrapper.unmount()
 	})
 
-	/**
-	 * The amount here is deliberately one the client accepts. The page owns the
-	 * shape and the 0.01 floor, so a 422 naming `amount` is by definition
-	 * something client validation did not catch — a server rule that has moved,
-	 * or one it never mirrored. Reaching for a locally-invalid amount instead
-	 * tests nothing: `submit()` returns before it posts, and there is no server
-	 * response to surface.
-	 */
-	it("surfaces 422 field errors against the fields the backend named, and keeps the form filled", async () => {
+	it("surfaces 422 field errors, re-reads the rates on a stale quote, and keeps the form filled", async () => {
 		createWalletTopUpMock.mockRejectedValue(
-			new ApiError(
-				422,
-				JSON.stringify({
-					message: "The given data was invalid.",
-					errors: { amount: ["The amount field must be a number."], payment_method: ["The selected payment method is invalid."] }
-				})
-			)
+			new ApiError(422, JSON.stringify({
+				message: "The given data was invalid.",
+				errors: { points: [STALE], payment_method: ["The selected payment method is invalid."] }
+			}))
 		)
 		const wrapper = mountPage()
 		await flushPromises()
 
 		wrapper.vm.form.user_id = 5
-		wrapper.vm.form.amount = "50.00"
+		await flushPromises()
+		wrapper.vm.input = "500"
 		await wrapper.vm.submit()
 		await flushPromises()
 
-		expect(wrapper.vm.fieldErrors.amount).toEqual(["The amount field must be a number."])
+		expect(wrapper.vm.fieldErrors.points).toEqual([STALE])
 		expect(wrapper.vm.fieldErrors.payment_method).toEqual(["The selected payment method is invalid."])
-		// A rejected submit must not wipe what the operator typed.
-		expect(wrapper.vm.form.amount).toBe("50.00")
+		expect(getWalletBalanceMock).toHaveBeenCalledTimes(2)
+		expect(createWalletTopUpMock).toHaveBeenCalledTimes(1)
+		expect(wrapper.vm.input).toBe("500")
 		expect(wrapper.vm.form.user_id).toBe(5)
+		wrapper.unmount()
+	})
+
+	it("re-reads the rates after a 422 on any field, not just points, and never resubmits", async () => {
+		createWalletTopUpMock.mockRejectedValue(
+			new ApiError(422, JSON.stringify({
+				message: "The given data was invalid.",
+				errors: { currency: ["The selected currency has no active exchange rate."] }
+			}))
+		)
+		const wrapper = mountPage()
+		await flushPromises()
+
+		wrapper.vm.form.user_id = 5
+		await flushPromises()
+		wrapper.vm.input = "500"
+		await wrapper.vm.submit()
+		await flushPromises()
+
+		expect(wrapper.vm.fieldErrors.currency).toEqual(["The selected currency has no active exchange rate."])
+		expect(getWalletBalanceMock).toHaveBeenCalledTimes(2)
+		expect(createWalletTopUpMock).toHaveBeenCalledTimes(1)
 		wrapper.unmount()
 	})
 
@@ -248,7 +276,8 @@ describe("walletTopUpsPage", () => {
 
 		wrapper.vm.form.user_id = 5
 		wrapper.vm.form.company_id = 45
-		wrapper.vm.form.amount = "10.00"
+		await flushPromises()
+		wrapper.vm.input = "100"
 		await wrapper.vm.submit()
 		await flushPromises()
 
@@ -262,7 +291,7 @@ describe("walletTopUpsPage", () => {
 		const wrapper = mountPage()
 		await flushPromises()
 
-		wrapper.vm.form.amount = "10.00"
+		wrapper.vm.input = "100"
 		await wrapper.vm.submit()
 		await flushPromises()
 
@@ -270,13 +299,14 @@ describe("walletTopUpsPage", () => {
 		wrapper.unmount()
 	})
 
-	it("does not post an amount below the 0.01 minimum, negative, or not a plain decimal", async () => {
+	it("does not post fewer points than the minimum, or a malformed entry", async () => {
 		const wrapper = mountPage()
 		await flushPromises()
+		wrapper.vm.form.user_id = 5
+		await flushPromises()
 
-		for (const amount of ["0", "0.00", "-5.00", "abc", "1.234"]) {
-			wrapper.vm.form.user_id = 5
-			wrapper.vm.form.amount = amount
+		for (const entry of ["0", "9", "12.5", "abc", "-5"]) {
+			wrapper.vm.input = entry
 			await wrapper.vm.submit()
 			await flushPromises()
 		}
@@ -285,56 +315,63 @@ describe("walletTopUpsPage", () => {
 		wrapper.unmount()
 	})
 
-	// The new pound has no piastre coins in circulation, so SYP is whole pounds only.
-	it("does not post a fractional or sub-one SYP amount", async () => {
+	it("in amount mode, posts only multiples of the currency's cash step", async () => {
+		getWalletBalanceMock.mockResolvedValue({
+			...BALANCE,
+			top_up: { ...TOP_UP_CONFIG, currencies: [{ code: "SYP", rate_to_base: "0.0068027211", cash_step: "10.00", decimal_places: 2 }] }
+		})
 		const wrapper = mountPage()
 		await flushPromises()
-		wrapper.vm.selectedCurrency = "SYP"
+		wrapper.vm.form.user_id = 5
+		await flushPromises()
 
-		for (const amount of ["0.5", "1.50", "250.25"]) {
-			wrapper.vm.form.user_id = 5
-			wrapper.vm.form.amount = amount
-			await wrapper.vm.submit()
-			await flushPromises()
-		}
-
+		wrapper.vm.mode = "amount"
+		wrapper.vm.input = "4995"
+		await wrapper.vm.submit()
+		await flushPromises()
 		expect(createWalletTopUpMock).not.toHaveBeenCalled()
+
+		wrapper.vm.input = "5000"
+		await wrapper.vm.submit()
+		await flushPromises()
+		expect(createWalletTopUpMock).toHaveBeenCalledWith(expect.objectContaining({ points: 340, amount: "5000", currency: "SYP" }))
 		wrapper.unmount()
 	})
 
-	it("still accepts a fractional amount in a non-SYP currency", async () => {
+	it("shows and posts the higher count when cash rounding raises it", async () => {
 		const wrapper = mountPage()
+		await flushPromises()
+		wrapper.vm.form.user_id = 5
 		await flushPromises()
 		wrapper.vm.selectedCurrency = "USD"
 		await flushPromises()
 
-		wrapper.vm.form.user_id = 5
-		wrapper.vm.form.amount = "12.50"
+		wrapper.vm.input = "345"
+		await flushPromises()
+		expect(wrapper.text()).toContain("Raised to 350 points by cash rounding")
+
 		await wrapper.vm.submit()
 		await flushPromises()
-
-		expect(createWalletTopUpMock).toHaveBeenCalledWith(expect.objectContaining({ amount: "12.50", currency: "USD" }))
+		expect(createWalletTopUpMock).toHaveBeenCalledWith(expect.objectContaining({ points: 350, amount: "35", currency: "USD" }))
 		wrapper.unmount()
 	})
 
 	it("posts a company top-up when an affiliated member selects company balance scope", async () => {
-		const memberWithCompany = {
-			...sampleUser,
-			companies: [{ id: 45, legal_name: "Halab Tech", status: "active" }]
-		}
-		listUsersMock.mockResolvedValue([memberWithCompany])
+		listUsersMock.mockResolvedValue([{ ...sampleUser, companies: [{ id: 45, legal_name: "Halab Tech", status: "active" }] }])
 		const wrapper = mountPage()
 		await flushPromises()
 
 		wrapper.vm.form.user_id = 5
+		await flushPromises()
 		wrapper.vm.userBalanceScope = "company"
-		wrapper.vm.form.amount = "75.00"
-		wrapper.vm.form.payment_method = "cash"
+		await flushPromises()
+		wrapper.vm.input = "500"
 		await wrapper.vm.submit()
 		await flushPromises()
 
 		expect(createWalletTopUpMock).toHaveBeenCalledWith({
-			amount: "75.00",
+			points: 500,
+			amount: "7350",
 			currency: "SYP",
 			payment_method: "cash",
 			company_id: 45,
@@ -348,14 +385,16 @@ describe("walletTopUpsPage", () => {
 		await flushPromises()
 
 		wrapper.vm.form.user_id = 5
+		await flushPromises()
 		wrapper.vm.selectedCurrency = "USD"
-		wrapper.vm.form.amount = "100.00"
-		wrapper.vm.form.payment_method = "cash"
+		await flushPromises()
+		wrapper.vm.input = "1000"
 		await wrapper.vm.submit()
 		await flushPromises()
 
 		expect(createWalletTopUpMock).toHaveBeenCalledWith({
-			amount: "100.00",
+			points: 1000,
+			amount: "100",
 			currency: "USD",
 			payment_method: "cash",
 			user_id: 5,
@@ -365,15 +404,15 @@ describe("walletTopUpsPage", () => {
 	})
 
 	it("blocks submit when selected company is inactive", async () => {
-		const inactiveCompany = { ...sampleCompany, status: "inactive" }
-		listCompaniesMock.mockResolvedValue([inactiveCompany])
+		listCompaniesMock.mockResolvedValue([{ ...sampleCompany, status: "inactive" }])
 		const wrapper = mountPage()
 		await flushPromises()
 
 		wrapper.vm.recipientType = "company"
 		await flushPromises()
 		wrapper.vm.form.company_id = 45
-		wrapper.vm.form.amount = "50.00"
+		await flushPromises()
+		wrapper.vm.input = "500"
 		await wrapper.vm.submit()
 		expect(createWalletTopUpMock).not.toHaveBeenCalled()
 		wrapper.unmount()
@@ -421,24 +460,16 @@ describe("walletTopUpsPage", () => {
 		expect(wrapper.vm.lastReceipt).toBeNull()
 
 		wrapper.vm.form.user_id = 5
-		wrapper.vm.form.amount = "50.00"
-		wrapper.vm.form.payment_method = "cash"
+		await flushPromises()
+		wrapper.vm.input = "500"
 		await wrapper.vm.submit()
 		await flushPromises()
 
 		expect(wrapper.vm.receiptModalVisible).toBe(true)
-		expect(wrapper.vm.lastReceipt).toMatchObject({
-			id: 789,
-			amount: "50.00",
-			// The receipt leads with what was credited, so the point count has to
-			// survive onto it too — not just the cash that bought it.
-			points_credited: 500
-		})
+		expect(wrapper.vm.lastReceipt).toMatchObject({ id: 789, amount: "50.00", points_credited: 500 })
 
 		wrapper.vm.closeReceiptModal()
 		expect(wrapper.vm.receiptModalVisible).toBe(false)
 		wrapper.unmount()
 	})
 })
-
-
