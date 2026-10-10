@@ -9,9 +9,15 @@ import { rowsOf } from "./pagination"
 
 const BASE = "/api/v1/admin/private-office-requests"
 
+import type { Paginated } from "./pagination"
+
 export async function listPrivateOfficeRequests(): Promise<PrivateOfficeRequest[]> {
 	const res = await get<{ data: PrivateOfficeRequest[] }>(BASE)
 	return rowsOf<PrivateOfficeRequest>(res.data)
+}
+
+export async function listPrivateOfficeRequestsPaginated(query?: Record<string, unknown>): Promise<Paginated<PrivateOfficeRequest>> {
+	return get<Paginated<PrivateOfficeRequest>>(BASE, query)
 }
 
 export async function getPrivateOfficeRequest(id: number): Promise<PrivateOfficeRequest> {

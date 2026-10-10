@@ -5,14 +5,37 @@
 		</div>
 
 		<div class="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
-			<n-card class="lg:col-span-8" :title="t('planPurchases.planDetails')">
+			<n-card class="lg:col-span-8">
+				<template #header>
+					{{ t('planPurchases.planDetails') }}
+				</template>
+				<template #header-extra>
+					<div v-if="form.payment_method === 'cash'">
+						<n-select
+							v-model:value="form.currency"
+							:options="currencyOptions"
+							:loading="isLoadingCurrencies"
+							style="width: 110px"
+							:consistent-menu-width="false"
+						/>
+					</div>
+				</template>
 				<n-form ref="formRef" :model="form" :rules size="large">
-					<n-form-item :label="t('planPurchases.recipientType')" path="recipientType">
-						<n-radio-group v-model:value="recipientType" name="recipient_type">
-							<n-radio-button value="user">{{ t('planPurchases.member') }}</n-radio-button>
-							<n-radio-button value="company">{{ t('planPurchases.company') }}</n-radio-button>
-						</n-radio-group>
-					</n-form-item>
+					<div class="grid grid-cols-2 gap-4">
+						<n-form-item :label="t('planPurchases.recipientType')" path="recipientType">
+							<n-radio-group v-model:value="recipientType" name="recipient_type">
+								<n-radio-button value="user">{{ t('planPurchases.member') }}</n-radio-button>
+								<n-radio-button value="company">{{ t('planPurchases.company') }}</n-radio-button>
+							</n-radio-group>
+						</n-form-item>
+
+						<n-form-item :label="t('planPurchases.paymentMethod')" path="payment_method">
+							<n-radio-group v-model:value="form.payment_method" name="payment_method">
+								<n-radio-button value="cash">{{ t('planPurchases.cash') }}</n-radio-button>
+								<n-radio-button value="wallet" :disabled="!walletCovers">{{ t('planPurchases.fromPoints') }}</n-radio-button>
+							</n-radio-group>
+						</n-form-item>
+					</div>
 
 					<n-form-item v-if="recipientType === 'user'" :label="t('planPurchases.member')" path="user_id">
 						<n-select
@@ -47,13 +70,6 @@
 						/>
 					</n-form-item>
 
-					<n-form-item :label="t('planPurchases.paymentMethod')" path="payment_method">
-						<n-radio-group v-model:value="form.payment_method" name="payment_method">
-							<n-radio-button value="cash">{{ t('planPurchases.cash') }}</n-radio-button>
-							<n-radio-button value="wallet" :disabled="!walletCovers">{{ t('planPurchases.fromPoints') }}</n-radio-button>
-						</n-radio-group>
-					</n-form-item>
-
 					<n-form-item
 						v-if="recipientType === 'user'"
 						:label="t('planPurchases.couponCode')"
@@ -64,9 +80,11 @@
 							<n-input
 								v-model:value="couponInput"
 								:placeholder="t('planPurchases.codeTheMemberBrought')"
-								:disabled="appliedCoupon !== null"
+								:readonly="appliedCoupon !== null"
+								clearable
 								data-test="coupon-input"
 								@keyup.enter="applyCoupon"
+								@clear="removeCoupon"
 							/>
 							<n-button v-if="appliedCoupon === null" :disabled="!couponInput.trim() || !isValid" data-test="coupon-apply" @click="applyCoupon">
 								{{ t('planPurchases.apply') }}
@@ -77,14 +95,6 @@
 						</div>
 					</n-form-item>
 
-					<n-form-item v-if="form.payment_method === 'cash'" :label="t('planPurchases.currency')" path="currency">
-						<n-select
-							v-model:value="form.currency"
-							:options="currencyOptions"
-							:placeholder="t('planPurchases.selectCurrency')"
-							:loading="isLoadingCurrencies"
-						/>
-					</n-form-item>
 				</n-form>
 			</n-card>
 
@@ -99,59 +109,62 @@
 							</span>
 						</div>
 
-						<div v-if="previewData" class="flex flex-col gap-3 rounded-lg bg-slate-50 p-4 border border-slate-200">
-							<div class="flex items-center justify-between text-sm">
-								<span class="text-slate-500">{{ t('planPurchases.planPrice') }}</span>
-								<span class="font-medium" :class="{ 'line-through text-slate-400': previewData.points < previewData.list_points }">
-									{{ previewData.list_points }} points
-								</span>
-							</div>
-							<div v-if="previewData.offer" class="flex flex-col gap-1 rounded-md bg-emerald-50 p-2 text-sm text-emerald-700" data-test="plan-offer">
-								<div class="flex items-center justify-between gap-2">
-									<span class="font-semibold">{{ previewData.offer.name || t('planPurchases.offer') }}</span>
-									<span class="font-semibold" dir="ltr">−{{ previewData.offer.saved_points }} points</span>
-								</div>
-								<div class="flex items-center justify-between gap-2 text-xs">
-									<span>{{ offerTerms(previewData.offer) }}</span>
-									<span v-if="previewData.offer.ends_at">{{ t('planPurchases.ends') }} {{ formatDate(previewData.offer.ends_at) }}</span>
-								</div>
-							</div>
-							<div v-if="previewData.coupon" data-test="plan-coupon">
-								<div v-if="previewData.coupon.applied" class="flex items-center justify-between rounded-md bg-emerald-50 p-2 text-sm text-emerald-700">
-									<span class="font-semibold">{{ t('planPurchases.coupon') }} {{ previewData.coupon.code }}</span>
-									<span class="font-semibold" dir="ltr">−{{ previewData.coupon.points_discounted }} points</span>
-								</div>
-								<div v-else class="rounded-md bg-amber-50 p-2 text-xs text-amber-700">
-									{{ t('planPurchases.coupon') }} {{ previewData.coupon.code }}: {{ previewData.coupon.message }}
-								</div>
-							</div>
-							<div v-if="previewData.points < previewData.list_points" class="flex items-center justify-between text-sm font-semibold text-emerald-600">
-								<span>{{ t('planPurchases.finalPrice') }}</span>
-								<span class="font-bold">{{ previewData.points }} points</span>
-							</div>
-							<div v-if="form.payment_method === 'cash'" class="mt-2 flex items-center justify-between border-t border-slate-200 pt-2 font-semibold">
-								<span>{{ t('planPurchases.requiredAmountCash') }}</span>
-								<span class="text-lg text-emerald-600">
-									{{ formatCurrency(previewData.payment_amount, previewData.payment_currency) }}
-								</span>
-							</div>
-							<template v-else>
-								<div class="mt-2 flex items-center justify-between border-t border-slate-200 pt-2 font-semibold">
-									<span>{{ t('planPurchases.deductedFromPoints') }}</span>
-									<span class="text-lg text-emerald-600">{{ previewData.points }} points</span>
-								</div>
+						<n-spin :show="isLoadingPreview">
+							<div v-if="previewData" class="flex flex-col gap-3 rounded-lg bg-slate-50 p-4 border border-slate-200">
 								<div class="flex items-center justify-between text-sm">
-									<span class="text-slate-500">{{ t('planPurchases.balanceAfter') }}</span>
-									<span class="font-medium">{{ previewData.balance_points - previewData.points }} points</span>
+									<span class="text-slate-500">{{ t('planPurchases.planPrice') }}</span>
+									<span class="font-medium" :class="{ 'line-through text-slate-400': previewData.points < previewData.list_points }">
+										{{ previewData.list_points }} points
+									</span>
 								</div>
-							</template>
-							<div v-if="!previewData.wallet_covers" class="text-xs text-slate-500">
-								{{ t('planPurchases.pointsDoNotCover') }}
+								<div v-if="previewData.offer" class="flex flex-col gap-1 rounded-md bg-emerald-50 p-2 text-sm text-emerald-700" data-test="plan-offer">
+									<div class="flex items-center justify-between gap-2">
+										<span class="font-semibold">{{ previewData.offer.name || t('planPurchases.offer') }}</span>
+										<span class="font-semibold" dir="ltr">−{{ previewData.offer.saved_points }} points</span>
+									</div>
+									<div class="flex items-center justify-between gap-2 text-xs">
+										<span>{{ offerTerms(previewData.offer) }}</span>
+										<span v-if="previewData.offer.ends_at">{{ t('planPurchases.ends') }} {{ formatDate(previewData.offer.ends_at) }}</span>
+									</div>
+								</div>
+								<div v-if="previewData.coupon" data-test="plan-coupon">
+									<div v-if="previewData.coupon.applied" class="flex items-center justify-between rounded-md bg-emerald-50 p-2 text-sm text-emerald-700">
+										<span class="font-semibold">{{ t('planPurchases.coupon') }} {{ previewData.coupon.code }}</span>
+										<span class="font-semibold" dir="ltr">−{{ previewData.coupon.points_discounted }} points</span>
+									</div>
+									<div v-else class="rounded-md bg-amber-50 p-2 text-xs text-amber-700">
+										{{ t('planPurchases.coupon') }} {{ previewData.coupon.code }}: {{ previewData.coupon.message }}
+									</div>
+								</div>
+								<div v-if="previewData.points < previewData.list_points" class="flex items-center justify-between text-sm font-semibold text-emerald-600">
+									<span>{{ t('planPurchases.finalPrice') }}</span>
+									<span class="font-bold">{{ previewData.points }} points</span>
+								</div>
+								<div v-if="form.payment_method === 'cash'" class="mt-2 flex items-center justify-between gap-4 border-t border-slate-200 pt-2 font-semibold">
+									<span>{{ t('planPurchases.requiredAmountCash') }}</span>
+									<span class="text-lg text-emerald-600 whitespace-nowrap" dir="ltr">
+										{{ formatCurrency(previewData.payment_amount, previewData.payment_currency) }}
+									</span>
+								</div>
+								<template v-else>
+									<div class="mt-2 flex items-center justify-between border-t border-slate-200 pt-2 font-semibold">
+										<span>{{ t('planPurchases.deductedFromPoints') }}</span>
+										<span class="text-lg text-emerald-600">{{ previewData.points }} points</span>
+									</div>
+									<div class="flex items-center justify-between text-sm">
+										<span class="text-slate-500">{{ t('planPurchases.balanceAfter') }}</span>
+										<span class="font-medium">{{ previewData.balance_points - previewData.points }} points</span>
+									</div>
+								</template>
+								<div v-if="!previewData.wallet_covers" class="text-xs text-slate-500">
+									{{ t('planPurchases.pointsDoNotCover') }}
+								</div>
 							</div>
-						</div>
-						<div v-else-if="previewError" class="rounded-lg bg-red-50 p-4 text-sm text-red-700">
-							{{ previewError }}
-						</div>
+							<div v-else-if="previewError" class="rounded-lg bg-red-50 p-4 text-sm text-red-700">
+								{{ previewError }}
+							</div>
+							<div v-else-if="isLoadingPreview" class="h-32 rounded-lg border border-transparent"></div>
+						</n-spin>
 
 						<n-button
 							type="primary"
@@ -185,7 +198,7 @@
 
 				<div class="flex justify-between border-b pb-2">
 					<span class="text-slate-500">{{ t('planPurchases.amountPaid') }}</span>
-					<span class="font-bold">
+					<span class="font-bold whitespace-nowrap" dir="ltr">
 						<template v-if="lastReceipt.payment_amount !== null && lastReceipt.payment_currency">
 							{{ formatCurrency(lastReceipt.payment_amount, lastReceipt.payment_currency) }}
 						</template>
@@ -235,7 +248,7 @@
 <script setup lang="ts">
 import type { FormInst, FormRules } from "naive-ui"
 import type { PlanPurchaseOffer, PlanPurchasePaymentMethod, PlanPurchasePreview, PlanPurchasePreviewPayload, PlanPurchaseReceipt } from "@/add-os/services/reception"
-import { NButton, NCard, NForm, NFormItem, NInput, NModal, NRadioButton, NRadioGroup, NSelect, useMessage } from "naive-ui"
+import { NButton, NCard, NForm, NFormItem, NInput, NModal, NRadioButton, NRadioGroup, NSelect, NSpin, useMessage } from "naive-ui"
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import AppliedDiscountList from "@/add-os/modules/pricing/components/AppliedDiscountList.vue"
@@ -266,7 +279,7 @@ const form = ref({
     user_id: null as number | null,
     company_id: null as number | null,
     plan_id: null as number | null,
-    currency: currencyStore.currency || DEFAULT_CURRENCY,
+    currency: null as string | null,
     payment_method: "cash" as PlanPurchasePaymentMethod
 })
 
@@ -412,6 +425,16 @@ async function fetchCurrencies() {
     try {
         const currencies = await listCurrencies()
         currencyOptions.value = currencies.map(c => ({ label: c.code, value: c.code }))
+        
+        // Auto-select the default currency if none is selected
+        if (!form.value.currency) {
+            const defaultCurrency = currencies.find(c => c.is_default) || currencies.find(c => c.is_base)
+            if (defaultCurrency) {
+                form.value.currency = defaultCurrency.code
+            } else if (currencies.length > 0) {
+                form.value.currency = currencies[0].code
+            }
+        }
     } catch {
         // Handle error quietly
     } finally {
@@ -441,21 +464,29 @@ async function fetchBalance() {
     }
 }
 
+const isLoadingPreview = ref(false)
+
 function cancelPendingPreview() {
     if (previewTimeout) clearTimeout(previewTimeout)
     previewTimeout = null
 }
 
-function resetPreview() {
+function resetPreview(clearData = false) {
     cancelPendingPreview()
-    previewData.value = null
+    if (clearData) {
+        previewData.value = null
+    }
     previewError.value = null
 }
 
 function schedulePreview() {
-    resetPreview()
-    if (!isValid.value) return
+    resetPreview(false)
+    if (!isValid.value) {
+        previewData.value = null
+        return
+    }
 
+    isLoadingPreview.value = true
     previewTimeout = setTimeout(async () => {
         try {
             previewData.value = await previewPlanPurchase(buildPayload())
@@ -474,6 +505,9 @@ function schedulePreview() {
             } else {
                 previewError.value = "Failed to load preview"
             }
+            previewData.value = null
+        } finally {
+            isLoadingPreview.value = false
         }
     }, 500)
 }

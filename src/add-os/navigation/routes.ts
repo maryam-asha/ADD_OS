@@ -79,7 +79,15 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"cms.partners": () => import("@/add-os/modules/cms/views/PartnersPage.vue"),
 	"cms.founders": () => import("@/add-os/modules/cms/views/FoundersPage.vue"),
 	"cms.contactLinks": () => import("@/add-os/modules/cms/views/ContactLinksPage.vue"),
-	"cms.notifications": () => import("@/add-os/modules/cms/views/NotificationsPage.vue")
+	"cms.notifications": () => import("@/add-os/modules/cms/views/NotificationsPage.vue"),
+	"providers.list": () => import("@/add-os/modules/providers/views/ProvidersListPage.vue"),
+	"providers.requests": () => import("@/add-os/modules/providers/views/ProviderRequestsPage.vue"),
+	"providerPortal.summary": () => import("@/add-os/modules/provider-portal/views/ProviderSummaryPage.vue"),
+	"providerPortal.companies": () => import("@/add-os/modules/provider-portal/views/ProviderCompaniesPage.vue"),
+	"providerPortal.requests": () => import("@/add-os/modules/provider-portal/views/ProviderRequestsPage.vue"),
+	"providerPortal.officeRequests": () => import("@/add-os/modules/provider-portal/views/ProviderOfficeRequestsPage.vue"),
+	"providerPortal.invoices": () => import("@/add-os/modules/provider-portal/views/ProviderInvoicesPage.vue"),
+	"payments.invoices": () => import("@/add-os/modules/payments/views/InvoicesPage.vue")
 }
 
 export function createAddOsRoutes(): RouteRecordRaw[] {
@@ -91,7 +99,7 @@ export function createAddOsRoutes(): RouteRecordRaw[] {
 			redirect: navRoutePath(section, firstPage),
 			meta: {
 				auth: true,
-				roles: "all",
+				roles: section.roles ?? ["admin", "operations"],
 				titleKey: navSectionTitleKey(section)
 			},
 			children: section.pages.map(page => ({

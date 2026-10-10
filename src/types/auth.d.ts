@@ -1,4 +1,4 @@
-export type Role = "all" | "admin" | "operations" | "moderator"
+export type Role = "all" | "admin" | "operations" | "moderator" | "provider"
 export type Roles = Role | Role[]
 
 export interface RouteMetaAuth {

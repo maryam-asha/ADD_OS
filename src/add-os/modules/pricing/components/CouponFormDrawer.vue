@@ -120,9 +120,7 @@
 								<n-radio-group v-model:value="form.discount_type">
 									<n-radio value="percentage">{{ t('coupons.form.percentage') }}</n-radio>
 									<n-radio value="amount_off">{{ t('coupons.form.amountOff') }}</n-radio>
-									<n-radio v-if="form.is_automatic" value="fixed_price" data-test="coupon-fixed-price">{{ t('coupons.form.fixedPrice') }}</n-radio>
 								</n-radio-group>
-								<span v-if="form.discount_type === 'fixed_price'" class="text-xs text-neutral-400">{{ t('coupons.form.fixedPriceHint') }}</span>
 								<span v-if="grouped.fields.discount_type" class="text-xs text-red-500">{{ grouped.fields.discount_type[0] }}</span>
 							</div>
 
@@ -197,7 +195,7 @@
 							<div class="flex items-center justify-between">
 								<div class="flex items-center gap-2 text-xs md:text-sm font-bold text-neutral-800">
 									<div class="w-6 h-6 rounded-md bg-[#fef1f1] text-[#e04545] flex items-center justify-center shrink-0">
-										<Icon name="carbon:bullseye" :size="14" />
+										<Icon name="carbon:target" :size="14" />
 									</div>
 									<span>{{ t('coupons.form.targets') }}</span>
 								</div>

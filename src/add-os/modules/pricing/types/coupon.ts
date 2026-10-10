@@ -7,27 +7,16 @@ import type { SpaceType } from "@/add-os/modules/spatial/types/space"
  * (`Admin (Dashboard) / Coupons`) — or, `is_automatic`, an offer: no code,
  * it applies itself (collection pinned 2026-10-06, `Offers (automatic)`).
  *
- * `fixed_price` is for offers only: `discount_value` is then the price —
- * points per hour for time in a space, points for a plan or an event.
+ * Offers and coupons share the same two discount types (`fixed_price` was
+ * dropped from ADDCore on 2026-10-08).
  */
-export type CouponDiscountType = "percentage" | "amount_off" | "fixed_price"
+export type CouponDiscountType = "percentage" | "amount_off"
 export const PRICING_PURPOSES = ["booking", "coworking_session", "plan_purchase", "event_registration"] as const
 export type PricingPurpose = (typeof PRICING_PURPOSES)[number]
 export const COUPON_STATES = ["running", "scheduled", "ended"] as const
 export type CouponState = (typeof COUPON_STATES)[number]
 
 export type TargetItemKey = "plan_id" | "space_id" | "space_type" | "event_id"
-
-/**
- * The purposes a fixed price means the same thing across — the server's
- * `offer_fixed_price_family` rule: a fixed-price offer's targets all come
- * from one of these.
- */
-export const FIXED_PRICE_FAMILIES: PricingPurpose[][] = [
-	["booking", "coworking_session"],
-	["plan_purchase"],
-	["event_registration"]
-]
 
 /**
  * Which item a target may name for its purpose — mirrors the backend's

@@ -96,12 +96,13 @@ describe("couponFormDrawer", () => {
 		expect(vm.form.code).toBe("SUMMER")
 	})
 
-	it("opens an offer with no code field, a fixed-price choice, and sends no code", async () => {
+	it("opens an offer with no code field and no fixed-price choice, and sends no code", async () => {
 		createMock.mockResolvedValue({ id: 2 })
 		const wrapper = mount(CouponFormDrawer, { props: { "show": true, "couponId": null, "automatic": true, "onUpdate:show": () => {} }, global: { plugins: [i18n] } })
 		await flushPromises()
 		expect(wrapper.text()).not.toContain(en.coupons.form.code)
-		expect(wrapper.find("[data-test='coupon-fixed-price']").exists()).toBe(true)
+		// Points off or a percentage, as for a coupon: the fixed price is gone.
+		expect(wrapper.find("[data-test='coupon-fixed-price']").exists()).toBe(false)
 		expect(wrapper.text()).not.toContain(en.coupons.form.combinable)
 		await (wrapper.vm as unknown as DrawerVm).submit()
 		const payload = createMock.mock.calls[0][0]

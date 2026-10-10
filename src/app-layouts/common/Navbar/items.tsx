@@ -6,6 +6,7 @@ import { RouterLink } from "vue-router"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import { NAV_SECTIONS, navPageTitleKey, navRouteName, navSectionTitleKey } from "@/add-os/navigation/sections"
 import { i18nGlobal } from "@/lang"
+import { useAuthStore } from "@/stores/auth"
 import { renderIcon } from "@/utils"
 
 /**
@@ -96,7 +97,11 @@ export default function getItems(args: { mode: "vertical" | "horizontal"; collap
 	// Dependency on the active language — see the note above. Do not remove.
 	void currentLocale.value
 
-	return NAV_SECTIONS.map<MenuMixedOption>(section => ({
+	const authStore = useAuthStore()
+
+	return NAV_SECTIONS
+		.filter(section => authStore.isRoleGranted(section.roles ?? ["admin", "operations"]))
+		.map<MenuMixedOption>(section => ({
 		key: section.key,
 		label: sectionLabel(section, args.collapsed),
 		icon: sectionIcon(section),

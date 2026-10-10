@@ -8,6 +8,7 @@ export interface CurrencyOption {
 	name: string
 	symbol: string
 	is_default?: boolean
+    is_base?: boolean
 }
 
 /**
@@ -25,6 +26,7 @@ export interface CurrencyOption {
 export const useCurrencyStore = defineStore("currency", {
 	state: () => ({
 		currency: DEFAULT_CURRENCY as CurrencyCode | string,
+        currencyInitialized: false,
 		availableCurrencies: [
 			{ code: "SYP", name: "ليرة سورية (SYP)", symbol: "ل.س" },
 			{ code: "USD", name: "دولار أمريكي (USD)", symbol: "$" },
@@ -34,24 +36,26 @@ export const useCurrencyStore = defineStore("currency", {
 		_fetchPromise: null as Promise<void> | null
 	}),
 	actions: {
-		fetchCurrencies(): Promise<void> {
-			if (this.hasFetched) return Promise.resolve()
-			if (this._fetchPromise) return this._fetchPromise
+		fetchCurrencies(force = false): Promise<void> {
+			if (this.hasFetched && !force) return Promise.resolve()
+			if (this._fetchPromise && !force) return this._fetchPromise
 
 			this._fetchPromise = (async () => {
 			try {
 				const { get } = await import("@/add-os/services/api")
-				const res = await get<{ data: Array<{ code: string; name: string; symbol: string; is_default?: boolean }> }>("/api/v1/currencies")
+				const res = await get<{ data: Array<{ code: string; name: any; symbol: string; is_default?: boolean; is_base?: boolean }> }>("/api/v1/currencies")
 				if (res?.data?.length) {
 					this.availableCurrencies = res.data.map(c => ({
 						code: c.code,
-						name: c.name,
+						name: typeof c.name === 'object' ? (c.name.ar || c.name.en) : c.name,
 						symbol: c.symbol,
-						is_default: c.is_default
+						is_default: c.is_default,
+                        is_base: c.is_base
 					}))
-					const defaultCurrency = this.availableCurrencies.find(c => c.is_default)
-					if (defaultCurrency) {
+					const defaultCurrency = this.availableCurrencies.find(c => c.is_default) || this.availableCurrencies.find(c => c.is_base)
+					if (defaultCurrency && (!this.currencyInitialized || force)) {
 						this.currency = defaultCurrency.code
+                        this.currencyInitialized = true
 					}
 					this.hasFetched = true
 				}
@@ -77,7 +81,7 @@ export const useCurrencyStore = defineStore("currency", {
 		}
 	},
 	persist: {
-		pick: ["currency"]
+		pick: ["currency", "currencyInitialized"]
 	}
 })
 

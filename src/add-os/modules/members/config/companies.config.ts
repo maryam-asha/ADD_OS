@@ -25,6 +25,7 @@ export function buildCompanyColumns(t: ComposerTranslation, branches: Branch[], 
 		{ title: t("companies.columns.legalName"), key: "legal_name" },
 		{ title: t("companies.columns.contractRef"), key: "contract_ref" },
 		{ title: t("companies.columns.branch"), key: "branch_id", render: row => branchName(row.branch_id) },
+		{ title: t("companies.columns.provider", "Provider"), key: "provider", render: row => row.provider?.name || t("companies.transferProvider.direct", "Direct") },
 		{
 			title: t("companies.columns.status"),
 			key: "status",

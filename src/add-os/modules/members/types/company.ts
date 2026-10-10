@@ -12,6 +12,7 @@ export interface Company {
 	contract_ref: string
 	branch_id: number
 	status: CompanyStatus
+	provider?: { id: number; name: string }
 }
 
 /**
