@@ -1155,7 +1155,21 @@
 		"rateWarning": "Changing the point rate reprices the entire catalogue and revalues every wallet balance. Plans, spaces and existing balances are all denominated in points — only what they are worth in cash moves.",
 		"rateLabel": "Point rate (USD per point)",
 		"credited": "Points credited",
-		"newBalance": "New balance"
+		"newBalance": "New balance",
+		"entryMode": { "points": "Points", "amount": "Amount" },
+		"pointsPlaceholder": "Number of points",
+		"collect": "Collect {amount} → {points}",
+		"buys": "Buys {points}",
+		"remainder": "{amount} is not enough for another point",
+		"raisedByRounding": "Raised to {points} by cash rounding",
+		"errors": {
+			"invalidPoints": "Enter a whole number of points.",
+			"invalidAmount": "Enter an amount above zero, with at most two decimals.",
+			"belowMinimum": "A top-up must be at least {min}.",
+			"notCashStep": "The amount must be a multiple of {step}.",
+			"currencyUnavailable": "This currency has no exchange rate yet.",
+			"quoteStale": "Rates changed since this top-up was prepared. Review the new figures and submit again."
+		}
 	},
 	"walletTopUps": {
 		"description": "Record a manual wallet top-up taken at reception, for a member or a company wallet.",

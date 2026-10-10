@@ -29,7 +29,7 @@ describe("wallet-top-ups service", () => {
 	it("createWalletTopUp POSTs a member top-up to the reception endpoint and unwraps the created transaction", async () => {
 		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: createdTransaction }, 201))
 
-		const payload = { amount: "50.00", payment_method: "cash" as const, user_id: 123, description: null }
+		const payload = { amount: "50.00", points: 500, payment_method: "cash" as const, user_id: 123, description: null }
 		const transaction = await createWalletTopUp(payload)
 
 		expect(fetch).toHaveBeenCalledWith(TOP_UP_URL, expect.objectContaining({ method: "POST", body: JSON.stringify(payload) }))
@@ -46,17 +46,17 @@ describe("wallet-top-ups service", () => {
 	it("createWalletTopUp POSTs a company top-up with company_id and never adds a user_id key", async () => {
 		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: { ...createdTransaction, payment_method: "cash" } }, 201))
 
-		await createWalletTopUp({ amount: "50.00", payment_method: "cash", company_id: 45, description: null })
+		await createWalletTopUp({ amount: "50.00", points: 500, payment_method: "cash", company_id: 45, description: null })
 
 		const body = JSON.parse(String(vi.mocked(fetch).mock.calls[0][1]?.body))
-		expect(body).toEqual({ amount: "50.00", payment_method: "cash", company_id: 45, description: null })
+		expect(body).toEqual({ amount: "50.00", points: 500, payment_method: "cash", company_id: 45, description: null })
 		expect(body).not.toHaveProperty("user_id")
 	})
 
 	it("propagates the 422 as an ApiError carrying the field-level errors", async () => {
 		vi.mocked(fetch).mockResolvedValue(jsonResponse({ message: "invalid", errors: { amount: ["The amount must be at least 0.01."] } }, 422))
 
-		await expect(createWalletTopUp({ amount: "0.00", payment_method: "cash", user_id: 123, description: null })).rejects.toMatchObject({
+		await expect(createWalletTopUp({ amount: "0.00", points: 500, payment_method: "cash", user_id: 123, description: null })).rejects.toMatchObject({
 			status: 422,
 			data: { errors: { amount: ["The amount must be at least 0.01."] } }
 		})

@@ -81,6 +81,8 @@ export interface WalletBalanceResponse {
 	currency: string
 	converted_balance?: string | null
 	display_currency?: string
+	/** The rates, steps and minimum the top-up form converts with — see `TopUpConfig`. */
+	top_up: TopUpConfig
 }
 
 /**
@@ -97,11 +99,41 @@ export interface WalletBalanceResponse {
  */
 export type WalletTopUpPayload = {
 	amount: string
+	/**
+	 * The whole points the form showed the operator. The server re-derives them
+	 * from `amount` at its current rates and refuses a mismatch with a 422 on
+	 * `points` — the form's arithmetic is a mirror, never the authority.
+	 */
+	points: number
 	currency?: string
 	payment_method: PaymentMethod
 	/** Optional, max 255 server-side. `null` when the operator left it blank. */
 	description: string | null
 } & ({ user_id: number } | { company_id: number })
+
+/** One currency the top-up form can quote in. */
+export interface TopUpCurrency {
+	code: string
+	/** Units of the base currency per one unit of `code`, decimal string ("1" for the base itself). */
+	rate_to_base: string
+	/** The smallest amount the till takes in this currency, decimal string, e.g. "1.00". */
+	cash_step: string
+	decimal_places: number
+}
+
+/**
+ * `wallet-balance`'s `top_up` block: everything the form needs to convert
+ * points ↔ cash without asking the server on every keystroke (ADDCore spec
+ * 2026-10-10-wallet-top-up-points-entry-design.md §4).
+ */
+export interface TopUpConfig {
+	/** USD value of one point, decimal string, e.g. "0.10". */
+	point_rate_usd: string
+	/** The fewest points one top-up may credit. */
+	min_points: number
+	/** Active currencies that have a current rate; one missing here cannot be quoted. */
+	currencies: TopUpCurrency[]
+}
 
 /**
  * Response of `POST .../wallet-top-ups/preview` — what the operator's cash
