@@ -5,21 +5,29 @@ import { createI18n } from "vue-i18n"
 import { ApiError } from "@/add-os/services/api"
 import WalletTopUpDialog from "../WalletTopUpDialog.vue"
 
-const { createWalletTopUpMock, previewWalletTopUpMock, getWalletBalanceMock } = vi.hoisted(() => ({
+const TOP_UP_CONFIG = {
+	point_rate_usd: "0.10",
+	min_points: 10,
+	currencies: [
+		{ code: "SYP", rate_to_base: "0.0068027211", cash_step: "1.00", decimal_places: 2 },
+		{ code: "USD", rate_to_base: "1", cash_step: "1.00", decimal_places: 2 }
+	]
+}
+
+const STALE = "Rates changed since this top-up was prepared. Review the new figures and submit again."
+
+const { createWalletTopUpMock, getWalletBalanceMock } = vi.hoisted(() => ({
 	createWalletTopUpMock: vi.fn(),
-	previewWalletTopUpMock: vi.fn(),
-	getWalletBalanceMock: vi.fn().mockResolvedValue({ balance_points: 200 })
+	getWalletBalanceMock: vi.fn()
 }))
 
 vi.mock("@/add-os/services/wallet-top-ups", () => ({
 	createWalletTopUp: createWalletTopUpMock,
-	previewWalletTopUp: previewWalletTopUpMock,
 	getWalletBalance: getWalletBalanceMock
 }))
 
-// Same pitfall the neighbouring dialog spec documents: the component calls
-// useMessage() directly, which needs a provider it has no reason to mount.
-// Mock only useMessage; every other naive-ui export stays real.
+// The component calls useMessage() directly, which needs a provider it has no
+// reason to mount. Mock only useMessage; every other naive-ui export stays real.
 const successMessages: string[] = []
 const errorMessages: string[] = []
 vi.mock("naive-ui", async () => {
@@ -42,18 +50,26 @@ const i18n = createI18n({
 		en: {
 			points: {
 				unit: "points",
-				label: "Points",
-				rate: "Point rate",
-				previewLoading: "Calculating…",
-				belowOnePoint: "This amount is too small to buy a single point. Enter a larger amount.",
-				previewFailed: "Could not calculate the point value. Check the amount and try again.",
 				credited: "Points credited",
-				newBalance: "New balance"
+				newBalance: "New balance",
+				entryMode: { points: "Points", amount: "Amount" },
+				pointsPlaceholder: "Number of points",
+				collect: "Collect {amount} → {points}",
+				buys: "Buys {points}",
+				remainder: "{amount} is not enough for another point",
+				raisedByRounding: "Raised to {points} by cash rounding",
+				errors: {
+					invalidPoints: "Enter a whole number of points.",
+					invalidAmount: "Enter an amount above zero, with at most two decimals.",
+					belowMinimum: "A top-up must be at least {min}.",
+					notCashStep: "The amount must be a multiple of {step}.",
+					currencyUnavailable: "This currency has no exchange rate yet.",
+					quoteStale: STALE
+				}
 			},
 			members: {
 				topUp: {
 					title: "Top Up Member Wallet",
-					recipientMember: "Individual Member",
 					amount: "Amount",
 					amountPlaceholder: "Enter amount...",
 					paymentMethod: "Payment Method",
@@ -64,10 +80,7 @@ const i18n = createI18n({
 				}
 			},
 			users: { form: { cancel: "Cancel" } },
-			walletTopUps: {
-				paymentMethod: { cash: "Cash" },
-				validation: { amountFormat: "Enter a valid positive amount" }
-			},
+			walletTopUps: { paymentMethod: { cash: "Cash" } },
 			resourceCrud: { mutations: { genericError: "Something went wrong." } }
 		}
 	}
@@ -84,57 +97,53 @@ function mountDialog() {
 	return mounted
 }
 
-/**
- * NModal teleports its body to document.body, so the mounted wrapper does not
- * contain the form — every query below goes through the document instead.
- */
-function amountInput(): HTMLInputElement {
-	const input = document.querySelector<HTMLInputElement>("input")
-	if (!input) throw new Error("amount input not rendered")
-	return input
-}
-
+// NModal teleports its body to document.body, so every query goes through the document.
 function dialogText(): string {
 	return document.body.textContent ?? ""
 }
 
-/** Types an amount the way the watcher sees it. */
-async function typeAmount(amount: string) {
-	const input = amountInput()
-	input.value = amount
+async function type(value: string) {
+	const input = document.querySelector<HTMLInputElement>("[data-testid=\"top-up-input\"]")
+	if (!input) throw new Error("top-up input not rendered")
+	input.value = value
 	input.dispatchEvent(new Event("input"))
 	await flushPromises()
 }
 
+async function chooseMode(mode: "points" | "amount") {
+	const radio = document.querySelector<HTMLInputElement>(`input[type="radio"][value="${mode}"]`)
+	if (!radio) throw new Error(`${mode} mode radio not rendered`)
+	radio.click()
+	await flushPromises()
+}
+
+function submitButton(): HTMLButtonElement {
+	const button = [...document.querySelectorAll<HTMLButtonElement>("button")].find(b => b.textContent?.includes("Confirm Top-up"))
+	if (!button) throw new Error("submit button not rendered")
+	return button
+}
+
 beforeEach(() => {
-	vi.useFakeTimers()
 	createWalletTopUpMock.mockReset()
-	previewWalletTopUpMock.mockReset()
+	getWalletBalanceMock.mockReset()
+	getWalletBalanceMock.mockResolvedValue({ balance_points: 200, top_up: TOP_UP_CONFIG })
 	successMessages.length = 0
 	errorMessages.length = 0
 })
 
 afterEach(() => {
-	// The modal teleports into document.body, so an un-unmounted dialog would
-	// leave its text visible to the next test's dialogText().
 	mounted?.unmount()
 	mounted = null
 	document.body.innerHTML = ""
-	vi.useRealTimers()
 })
 
-describe("walletTopUpDialog point preview", () => {
-	/** Like the Wallet Top-up page: the balance now, what the cash buys, and the balance after. */
+describe("walletTopUpDialog", () => {
 	it("shows the member's balance before and after the top-up", async () => {
-		previewWalletTopUpMock.mockResolvedValue({ points: 340, usd: "34.00", payment_amount: "500000", payment_currency: "SYP", point_rate_usd: "0.1000" })
-
 		mountDialog()
 		await flushPromises()
 		expect(getWalletBalanceMock).toHaveBeenCalledWith({ user_id: 5 })
 
-		await typeAmount("500000")
-		await vi.advanceTimersByTimeAsync(300)
-		await flushPromises()
+		await type("340")
 
 		const text = dialogText()
 		expect(text).toContain("200 points")
@@ -142,147 +151,72 @@ describe("walletTopUpDialog point preview", () => {
 		expect(text).toContain("540 points")
 	})
 
-	it("asks the server for the point value rather than computing one", async () => {
-		previewWalletTopUpMock.mockResolvedValue({
-			points: 340,
-			usd: "34.00",
-			payment_amount: "500000",
-			payment_currency: "SYP",
-			point_rate_usd: "0.1000"
-		})
-
+	it("turns typed points into the cash to collect without asking the server", async () => {
 		mountDialog()
-		await typeAmount("500000")
+		await flushPromises()
+		await type("340")
 
-		// Nothing is requested until the debounce window closes.
-		expect(previewWalletTopUpMock).not.toHaveBeenCalled()
+		expect(dialogText()).toContain("Collect 4,998 SYP → 340 points")
+		expect(getWalletBalanceMock).toHaveBeenCalledTimes(1)
+		expect(createWalletTopUpMock).not.toHaveBeenCalled()
+	})
 
-		await vi.advanceTimersByTimeAsync(300)
+	it("turns a typed amount into points in amount mode", async () => {
+		mountDialog()
+		await flushPromises()
+		await chooseMode("amount")
+		await type("5000")
+
+		expect(dialogText()).toContain("Buys 340 points")
+		expect(dialogText()).toContain("2 SYP is not enough for another point")
+	})
+
+	it("will not submit fewer points than the minimum", async () => {
+		mountDialog()
+		await flushPromises()
+		await type("9")
+
+		expect(dialogText()).toContain("A top-up must be at least 10 points.")
+		expect(submitButton().disabled).toBe(true)
+		submitButton().click()
+		await flushPromises()
+		expect(createWalletTopUpMock).not.toHaveBeenCalled()
+	})
+
+	it("submits the quoted points with the cash that buys them", async () => {
+		createWalletTopUpMock.mockResolvedValue({ points_credited: 340, new_balance_points: 540 })
+		mountDialog()
+		await flushPromises()
+		await type("340")
+
+		submitButton().click()
 		await flushPromises()
 
-		expect(previewWalletTopUpMock).toHaveBeenCalledTimes(1)
-		expect(previewWalletTopUpMock.mock.calls[0][0]).toMatchObject({
+		expect(createWalletTopUpMock).toHaveBeenCalledWith({
 			user_id: 5,
-			amount: "500000"
+			points: 340,
+			amount: "4998",
+			currency: "SYP",
+			payment_method: "cash",
+			description: null
 		})
-		expect(dialogText()).toContain("340 points")
 	})
 
-	it("debounces a burst of keystrokes into a single request", async () => {
-		previewWalletTopUpMock.mockResolvedValue({
-			points: 34,
-			usd: "3.40",
-			payment_amount: "50000",
-			payment_currency: "SYP",
-			point_rate_usd: "0.1000"
-		})
-
+	it("on a stale quote, says why and re-reads the rates without resubmitting", async () => {
+		createWalletTopUpMock.mockRejectedValue(new ApiError(422, JSON.stringify({ message: "invalid", errors: { points: [STALE] } })))
 		mountDialog()
-		await typeAmount("5")
-		await typeAmount("50")
-		await typeAmount("500")
-		await typeAmount("50000")
+		await flushPromises()
+		await type("340")
 
-		await vi.advanceTimersByTimeAsync(300)
+		submitButton().click()
 		await flushPromises()
 
-		expect(previewWalletTopUpMock).toHaveBeenCalledTimes(1)
-		expect(previewWalletTopUpMock.mock.calls[0][0]).toMatchObject({ amount: "50000" })
-	})
-
-	/**
-	 * The regression this guards: a slow answer for the old amount landing
-	 * after a fast answer for the new one, leaving the operator looking at a
-	 * point count that belongs to digits they already replaced.
-	 */
-	it("never lets a stale response overwrite a newer preview", async () => {
-		let resolveSlow: (v: unknown) => void = () => {}
-		const slow = new Promise(resolve => {
-			resolveSlow = resolve
-		})
-
-		previewWalletTopUpMock.mockImplementationOnce(() => slow).mockResolvedValueOnce({
-			points: 3400,
-			usd: "340.00",
-			payment_amount: "5000000",
-			payment_currency: "SYP",
-			point_rate_usd: "0.1000"
-		})
-
-		mountDialog()
-
-		// First amount: its request goes out, then stalls.
-		await typeAmount("500")
-		await vi.advanceTimersByTimeAsync(300)
-		await flushPromises()
-
-		// Second amount supersedes it and resolves first.
-		await typeAmount("5000000")
-		await vi.advanceTimersByTimeAsync(300)
-		await flushPromises()
-
-		expect(dialogText()).toContain("3,400 points")
-
-		// Now the stale one finally answers with the old figure.
-		resolveSlow({
-			points: 34,
-			usd: "3.40",
-			payment_amount: "500",
-			payment_currency: "SYP",
-			point_rate_usd: "0.1000"
-		})
-		await flushPromises()
-
-		expect(dialogText()).toContain("3,400 points")
-		expect(dialogText()).not.toContain("34 points")
-	})
-
-	it("surfaces the below-one-point rejection instead of failing silently", async () => {
-		previewWalletTopUpMock.mockRejectedValue(
-			new ApiError(422, JSON.stringify({ message: "The amount is below one point." }))
-		)
-
-		mountDialog()
-		await typeAmount("0.01")
-		await vi.advanceTimersByTimeAsync(300)
-		await flushPromises()
-
-		expect(dialogText()).toContain("The amount is below one point.")
-	})
-
-	it("falls back to its own wording when a 422 carries no message", async () => {
-		previewWalletTopUpMock.mockRejectedValue(new ApiError(422, ""))
-
-		mountDialog()
-		await typeAmount("0.01")
-		await vi.advanceTimersByTimeAsync(300)
-		await flushPromises()
-
-		expect(dialogText()).toContain("too small to buy a single point")
-	})
-
-	it("does not quote an empty or non-positive amount", async () => {
-		mountDialog()
-
-		await typeAmount("")
-		await vi.advanceTimersByTimeAsync(300)
-		await flushPromises()
-
-		await typeAmount("0")
-		await vi.advanceTimersByTimeAsync(300)
-		await flushPromises()
-
-		expect(previewWalletTopUpMock).not.toHaveBeenCalled()
+		expect(errorMessages).toContain(STALE)
+		expect(getWalletBalanceMock).toHaveBeenCalledTimes(2)
+		expect(createWalletTopUpMock).toHaveBeenCalledTimes(1)
 	})
 
 	it("reports credited points and the new balance after a successful top-up", async () => {
-		previewWalletTopUpMock.mockResolvedValue({
-			points: 340,
-			usd: "34.00",
-			payment_amount: "500000",
-			payment_currency: "SYP",
-			point_rate_usd: "0.1000"
-		})
 		createWalletTopUpMock.mockResolvedValue({
 			id: 1,
 			points_credited: 340,
@@ -294,15 +228,11 @@ describe("walletTopUpDialog point preview", () => {
 			payment_method: "cash",
 			performed_by_user_id: 1
 		})
-
 		mountDialog()
-		await typeAmount("500000")
-		await vi.advanceTimersByTimeAsync(300)
 		await flushPromises()
+		await type("340")
 
-		// Submit is the last button in the teleported dialog body.
-		const buttons = [...document.querySelectorAll<HTMLButtonElement>("button")]
-		buttons.at(-1)!.click()
+		submitButton().click()
 		await flushPromises()
 
 		expect(createWalletTopUpMock).toHaveBeenCalledTimes(1)
