@@ -1151,9 +1151,6 @@
 		"unit": "points",
 		"label": "Points",
 		"rate": "Point rate",
-		"previewLoading": "Calculating…",
-		"belowOnePoint": "This amount is too small to buy a single point. Enter a larger amount.",
-		"previewFailed": "Could not calculate the point value. Check the amount and try again.",
 		"rateWarning": "Changing the point rate reprices the entire catalogue and revalues every wallet balance. Plans, spaces and existing balances are all denominated in points — only what they are worth in cash moves.",
 		"rateLabel": "Point rate (USD per point)",
 		"credited": "Points credited",
@@ -1191,8 +1188,6 @@
 			"description": "Description (optional)"
 		},
 		"validation": {
-			"amountFormat": "Enter an amount of at least 0.01, using at most two decimals.",
-			"amountFormatSyp": "Enter a whole amount in Syrian pounds, at least 1, with no decimals.",
 			"userRequired": "Select a member.",
 			"companyRequired": "Select a company."
 		},
