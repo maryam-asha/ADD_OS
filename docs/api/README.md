@@ -66,8 +66,8 @@ requests — coupon codes, not credentials. Named as fields and requests only, n
 
 ### Encoding at this pin
 
-Strict, valid UTF-8; the file is now ASCII-escaped JSON (`—` rather than a raw em
-dash), and the 19 double-encoded em dashes (`â€”`) of earlier pins are gone.
+Strict, valid UTF-8; the file is now ASCII-escaped JSON (every em dash is the escape
+`—`, none raw), and the 19 double-encoded em dashes (`â€”`) of earlier pins are gone.
 
 ## Re-pinning
 
