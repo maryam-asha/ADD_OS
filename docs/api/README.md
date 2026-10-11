@@ -22,66 +22,52 @@ snapshot is unverified until someone re-reads the canonical file and re-pins it.
 
 | | |
 |---|---|
-| Pinned | 2026-10-07 |
-| Source | the canonical path above, read directly, copied byte-for-byte (`cp`, not a JSON re-serialize — key order and formatting are exactly the source's) |
-| Verified identical | `sha256` match between source and this copy at pin time, plus a `cmp` byte comparison |
-| Size | 1,491,207 bytes / 23,319 lines |
-| Leaf endpoints (parsed) | 369 — `GET` 162, `POST` 112, `DELETE` 36, `PATCH` 29, `PUT` 30 |
-| Distinct `METHOD + URL` | 366 |
+| Pinned | 2026-10-11 |
+| Source | the canonical file as committed on ADDCore `feat/add-point-system` at `4408620` (`git show`, copied byte-for-byte — no re-serialize). The sibling ADDCore checkout was on `feat/auto-renewal` at pin time, so `pnpm api:collection:check` reports `MISMATCH` there until that branch takes `4408620` |
+| Verified identical | `sha256` match (`f91edacc…604f96`) between source and this copy at pin time, plus a `cmp` byte comparison |
+| Size | 1,718,429 bytes / 26,503 lines |
+| Leaf endpoints (parsed) | 416 — `GET` 186, `POST` 129, `DELETE` 38, `PATCH` 33, `PUT` 30 |
+| Distinct `METHOD + URL` | 406 |
 
-### What changed since the 2026-10-06 pin
+### What changed since the 2026-10-07 pin
 
-**Three requests added, none removed — "my coupons", offer history and per-operation
-discounts** (ADDCore `docs/decisions/automatic-offers-savings-discount-ledger.md`):
-`Admin (Dashboard) / Coupons / Coupon Revisions` (`GET admin/coupons/{{coupon_id}}/revisions`,
-`per_page`), `Admin (Dashboard) / Reports / Offer Report` (`GET admin/reports/offers`,
-`from` and `to` required, `type=coupon` optional), and `Member (App) / 5. Wallet & Payments /
-Payments / My Coupons` (`GET member/coupons`), each with a saved example response.
+**44 `METHOD + URL` pairs added, 2 removed.** Added, by folder: `Admin (Dashboard) /
+Providers` (providers CRUD, linking accounts, moving a company, provider requests with
+approve/reject, invoices with payments, voids and cancel), `Admin (Dashboard) / Office
+Leases` (list, show, create from a private-office request, terminate), `Admin (Dashboard) /
+Reception Operations / Preview a Plan Sale` and `Sell a Plan (Cash or Points)`, a new
+`Provider (Dashboard)` folder (profile, summary, companies, office requests, plans,
+requests of five kinds, invoices, office leases), and on the member side `List My
+Memberships`, `2. Top Up Wallet` (`POST member/wallet/top-ups`), `Pay Coworking Session`
+and `Company Office Leases`.
 
-Changed, none of them path or method: the bookings (member detail, dashboard list and
-detail), payments (member and dashboard, list and detail), event attendees (list and
-pending) and current co-working session requests now describe a `discounts` array —
-`kind`, `offer_id` / `coupon_id` / `plan_discount_id`, `name`, `code`, `discount_type`,
-`discount_value`, `max_discount_points`, `base_points`, `points`, `percent` — and their
-saved examples carry it. `Get Booking Detail` (dashboard) gained an example priced with an
-offer and a coupon.
+Removed: `POST admin/reception/wallet-top-ups/preview` (the dashboard now quotes a top-up
+itself — ADDCore `docs/superpowers/specs/2026-10-10-wallet-top-up-points-entry-design.md`)
+and `POST member/payments` (its three requests — card top-up, cash at reception, start
+payment — replaced by the per-purpose member requests above).
 
-Credential scan repeated against the canonical file: the same 51 variables (none
-credential-shaped populated), 76 `auth` blocks (one more, from the new member request)
-and the same five `Authorization` headers, all on placeholders, zero `Cookie` headers, no
-new literal host, and the same nine populated password/token-shaped body fields — named
-as fields only, never values. Encoding: strict UTF-8; the double-encoded em dash (`â€”`)
-still appears 19 times, the correct one 343 times.
-
-### What changed since the second 2026-10-04 pin
-
-**Seven endpoints added, none removed — sales and coupons.** A new `Admin (Dashboard) /
-Coupons` folder: `GET admin/coupons` (filters `search`, `is_active`, `state`,
-`per_page`), `POST admin/coupons`, `GET`/`PUT`/`DELETE admin/coupons/{{coupon_id}}`, and
-`GET admin/coupons/{{coupon_id}}/redemptions`. There is no `PATCH` request for a coupon in
-the collection; `PUT` is the documented update. On the member side, `POST
-member/coupons/preview`. Two new variables, `coupon_id` and `coupon_code`, both empty.
-
-Fifteen existing requests changed body or description, none of them path or method:
-`Create Plan`/`Update Plan` and `Create Space`/`Update Space` (the three `sale_*` fields),
-and eleven member-app requests (space and package browse/detail, booking
-preview/create/batch, membership create, payment methods, start payment, event register)
-that gained the `sale` block or `coupon_code`. The member-app ones are cited by nothing in
-this dashboard.
+Changed, same path and method: `Top Up Wallet` (`POST admin/reception/wallet-top-ups`)
+now sends `points` alongside `amount` (422 on `points` when they disagree or fall below the
+minimum) and its company example uses `cash`; `Get Wallet Balance` documents the new
+`data.top_up` block (`point_rate_usd`, `min_points`, `currencies[]` with `rate_to_base`,
+`cash_step`, `decimal_places`).
 
 ### Credential scan at this pin
 
-Both halves repeated against the canonical file. **Nothing credential-shaped is new:**
-51 variables (the two additions above, both empty; the four credential-shaped ones still
-empty), 75 `auth` blocks (one more, from the new folder) and five `Authorization`
-headers all on placeholders, zero `Cookie` headers, no literal host, zero pattern
-matches, and the same nine populated password/token body fields in the same five
-requests. Named as fields and requests only, never values.
+Both halves repeated against the source, and compared with the 2026-10-07 file by the same
+script (its counting includes saved-example requests, so absolute counts are not comparable
+with earlier records — the deltas are). **Nothing credential-shaped is new or populated:**
+58 variables (7 more; the 4 credential-shaped ones still empty), `auth` blocks up with the
+new requests, the same five `Authorization` headers all on placeholders, zero `Cookie`
+headers, zero token/key pattern matches. One new literal host, `egate-t.paymera.test`, in a
+saved example's gateway `redirect_url` (a `.test` host). The only new populated
+password/token/code-shaped body fields are `coupon_code` values in four payment and plan-sale
+requests — coupon codes, not credentials. Named as fields and requests only, never values.
 
 ### Encoding at this pin
 
-Strict, valid UTF-8. The double-encoded em dash (`â€”`) still appears **19** times;
-the correct em dash (`—`) **345** times.
+Strict, valid UTF-8; the file is now ASCII-escaped JSON (`—` rather than a raw em
+dash), and the 19 double-encoded em dashes (`â€”`) of earlier pins are gone.
 
 ## Re-pinning
 
@@ -111,6 +97,73 @@ the correct em dash (`—`) **345** times.
 
 Kept verbatim. A claim written while one of these was current cites *that* pin, and a
 future reader needs to see what it actually said.
+
+### Pin of 2026-10-07 — superseded 2026-10-11
+
+#### Record as it stood
+
+| | |
+|---|---|
+| Pinned | 2026-10-07 |
+| Source | the canonical path above, read directly, copied byte-for-byte (`cp`, not a JSON re-serialize — key order and formatting are exactly the source's) |
+| Verified identical | `sha256` match between source and this copy at pin time, plus a `cmp` byte comparison |
+| Size | 1,491,207 bytes / 23,319 lines |
+| Leaf endpoints (parsed) | 369 — `GET` 162, `POST` 112, `DELETE` 36, `PATCH` 29, `PUT` 30 |
+| Distinct `METHOD + URL` | 366 |
+
+#### What changed since the 2026-10-06 pin
+
+**Three requests added, none removed — "my coupons", offer history and per-operation
+discounts** (ADDCore `docs/decisions/automatic-offers-savings-discount-ledger.md`):
+`Admin (Dashboard) / Coupons / Coupon Revisions` (`GET admin/coupons/{{coupon_id}}/revisions`,
+`per_page`), `Admin (Dashboard) / Reports / Offer Report` (`GET admin/reports/offers`,
+`from` and `to` required, `type=coupon` optional), and `Member (App) / 5. Wallet & Payments /
+Payments / My Coupons` (`GET member/coupons`), each with a saved example response.
+
+Changed, none of them path or method: the bookings (member detail, dashboard list and
+detail), payments (member and dashboard, list and detail), event attendees (list and
+pending) and current co-working session requests now describe a `discounts` array —
+`kind`, `offer_id` / `coupon_id` / `plan_discount_id`, `name`, `code`, `discount_type`,
+`discount_value`, `max_discount_points`, `base_points`, `points`, `percent` — and their
+saved examples carry it. `Get Booking Detail` (dashboard) gained an example priced with an
+offer and a coupon.
+
+Credential scan repeated against the canonical file: the same 51 variables (none
+credential-shaped populated), 76 `auth` blocks (one more, from the new member request)
+and the same five `Authorization` headers, all on placeholders, zero `Cookie` headers, no
+new literal host, and the same nine populated password/token-shaped body fields — named
+as fields only, never values. Encoding: strict UTF-8; the double-encoded em dash (`â€”`)
+still appears 19 times, the correct one 343 times.
+
+#### What changed since the second 2026-10-04 pin
+
+**Seven endpoints added, none removed — sales and coupons.** A new `Admin (Dashboard) /
+Coupons` folder: `GET admin/coupons` (filters `search`, `is_active`, `state`,
+`per_page`), `POST admin/coupons`, `GET`/`PUT`/`DELETE admin/coupons/{{coupon_id}}`, and
+`GET admin/coupons/{{coupon_id}}/redemptions`. There is no `PATCH` request for a coupon in
+the collection; `PUT` is the documented update. On the member side, `POST
+member/coupons/preview`. Two new variables, `coupon_id` and `coupon_code`, both empty.
+
+Fifteen existing requests changed body or description, none of them path or method:
+`Create Plan`/`Update Plan` and `Create Space`/`Update Space` (the three `sale_*` fields),
+and eleven member-app requests (space and package browse/detail, booking
+preview/create/batch, membership create, payment methods, start payment, event register)
+that gained the `sale` block or `coupon_code`. The member-app ones are cited by nothing in
+this dashboard.
+
+#### Credential scan at this pin
+
+Both halves repeated against the canonical file. **Nothing credential-shaped is new:**
+51 variables (the two additions above, both empty; the four credential-shaped ones still
+empty), 75 `auth` blocks (one more, from the new folder) and five `Authorization`
+headers all on placeholders, zero `Cookie` headers, no literal host, zero pattern
+matches, and the same nine populated password/token body fields in the same five
+requests. Named as fields and requests only, never values.
+
+#### Encoding at this pin
+
+Strict, valid UTF-8. The double-encoded em dash (`â€”`) still appears **19** times;
+the correct em dash (`—`) **345** times.
 
 ### Pin of 2026-10-06 — superseded 2026-10-07
 
