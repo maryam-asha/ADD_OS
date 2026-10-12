@@ -51,9 +51,8 @@ function payment(overrides: Record<string, unknown> = {}) {
 		method: "cash",
 		method_label: "Cash at reception",
 		user: { id: 8, name: "Reem Halabi", phone: "0990000108" },
-		amount_minor: null,
+		charged_amount: null,
 		currency: null,
-		currency_exponent: null,
 		points_to_credit: 0,
 		amount_points: 60,
 		transaction_id: null,
@@ -145,7 +144,7 @@ describe("paymentTransactionsPage", () => {
 	it("opens a payment's details and reverses an accepted card payment", async () => {
 		methodsMock.mockResolvedValue([...methods.slice(0, 1), { ...methods[1], key: "paymera" }])
 		listMock.mockResolvedValue({
-			data: [payment({ id: 52, method: "paymera", method_label: "Paymera card", received_amount: null, received_currency: null, amount_minor: 1000, currency: "USD", currency_exponent: 2, rrn: "RRN-77" })],
+			data: [payment({ id: 52, method: "paymera", method_label: "Paymera card", received_amount: null, received_currency: null, charged_amount: 10, currency: "USD", rrn: "RRN-77" })],
 			meta: { current_page: 1, last_page: 1, per_page: 20, total: 1 }
 		})
 		reverseMock.mockResolvedValue("The payment has been reversed.")

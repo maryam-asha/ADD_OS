@@ -22,10 +22,9 @@ export interface AdminPayment {
 	method: string
 	method_label: string
 	user: { id: number, name: string, phone: string } | null
-	/** What a card was charged, in the gateway's minor units. */
-	amount_minor: number | null
+	/** What a card was charged: a whole amount of `currency`, as sent to the gateway. */
+	charged_amount: number | null
 	currency: string | null
-	currency_exponent: number | null
 	points_to_credit: number | null
 	/** What the payment is worth in points, whatever the method. */
 	amount_points: number | null

@@ -192,10 +192,8 @@ function money(value: string, currency: string | null): string {
 }
 
 function cardAmount(payment: AdminPayment): string | null {
-	if (payment.amount_minor === null) return null
-	const exponent = payment.currency_exponent ?? 2
-	const value = (payment.amount_minor / 10 ** exponent).toFixed(exponent)
-	return money(value, payment.currency)
+	if (payment.charged_amount === null) return null
+	return money(String(payment.charged_amount), payment.currency)
 }
 
 /** The money behind a payment: cash handed over, or what a card was charged. */
