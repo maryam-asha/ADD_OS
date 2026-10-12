@@ -15,21 +15,60 @@
 			</n-button>
 		</div>
 
-		<div class="flex mb-4">
-			<n-select v-model:value="query.provider_id" :options="providerOptions" clearable :placeholder="t('companies.filters.provider', 'Provider')" class="w-48" />
+		<div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+			<n-input v-model:value="query.search" clearable :placeholder="t('privateOfficeRequests.filters.search')" />
+			<n-select v-model:value="query.status" :options="statusOptions" clearable :placeholder="t('privateOfficeRequests.filters.status')" />
+			<n-select v-model:value="query.provider_id" :options="providerOptions" clearable filterable :placeholder="t('companies.filters.provider')" />
 		</div>
 		<n-card class="add-ledger-table">
 			<n-data-table v-if="data.length > 0 || isLoading" remote :columns="columns" :data="data" :loading="isLoading" :bordered="false" :row-key="rowKey" :pagination="{ itemCount: meta?.total, page: meta?.current_page, pageSize: meta?.per_page, onChange: (p) => page = p }" />
 			<div v-else class="py-10 text-center">{{ t("privateOfficeRequests.empty") }}</div>
 		</n-card>
 
-		<ResourceFormDrawer
-			v-model:show="createDrawerVisible"
-			v-model:model="createForm"
-			:fields="requestFields"
-			:title="t('privateOfficeRequests.create.title')"
-			:submitting="mutations.isSubmitting.value"
-			:on-submit="submitCreate"
+		<!-- Custom Create Request Drawer supporting existing company and payer -->
+		<n-modal v-model:show="createDrawerVisible" preset="card" :title="t('privateOfficeRequests.create.title')" class="max-w-lg">
+			<n-form ref="createFormRef" :model="createForm" :rules="createRules" label-placement="top">
+				<n-form-item path="prospect_name" :label="t('privateOfficeRequests.form.prospectName')">
+					<n-input v-model:value="createForm.prospect_name" />
+				</n-form-item>
+
+				<n-form-item path="contact" :label="t('privateOfficeRequests.form.contact')">
+					<n-input v-model:value="createForm.contact" />
+				</n-form-item>
+
+				<n-form-item path="company_id" :label="t('privateOfficeRequests.form.company')">
+					<n-select
+						v-model:value="createForm.company_id"
+						:options="companyOptions"
+						:loading="isLoadingCompanies"
+						clearable
+						filterable
+						:placeholder="t('privateOfficeRequests.form.newCompany')"
+					/>
+				</n-form-item>
+
+				<n-form-item v-if="createForm.company_id" path="payer" :label="t('privateOfficeRequests.form.payer')">
+					<n-select
+						v-model:value="createForm.payer"
+						:options="payerOptions"
+						clearable
+					/>
+				</n-form-item>
+			</n-form>
+			<template #footer>
+				<div class="flex justify-end gap-2">
+					<n-button @click="createDrawerVisible = false">{{ t("resourceCrud.form.cancel") }}</n-button>
+					<n-button type="primary" :loading="mutations.isSubmitting.value" @click="handleCustomCreate">{{ t("resourceCrud.form.submit") }}</n-button>
+				</div>
+			</template>
+		</n-modal>
+
+		<!-- Create Lease from Request Drawer -->
+		<CreateLeaseDrawer
+			v-if="selectedRequestForLease !== null"
+			v-model:show="createLeaseDrawerVisible"
+			:request="selectedRequestForLease"
+			@created="refetch"
 		/>
 
 		<n-modal v-model:show="quoteModalVisible" preset="card" :title="t('privateOfficeRequests.markAsQuoted.title')" class="max-w-md">
@@ -55,15 +94,16 @@ import type { MarkAsQuotedPayload, PrivateOfficeRequest, PrivateOfficeRequestPay
 import { NAlert, NButton, NCard, NDataTable, NForm, NFormItem, NInput, NModal, NSelect, useDialog, useMessage } from "naive-ui"
 import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
-import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.vue"
 import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
-import { buildRequestColumns, emptyRequestPayload, requestFields } from "@/add-os/modules/members/config/private-office-requests.config"
+import { canCreateOfficeLeases } from "@/add-os/config/permissions"
+import CreateLeaseDrawer from "@/add-os/modules/members/components/CreateLeaseDrawer.vue"
+import { buildRequestColumns, emptyRequestPayload } from "@/add-os/modules/members/config/private-office-requests.config"
 import { ApiError } from "@/add-os/services/api"
+import { listCompanies } from "@/add-os/services/companies"
 import {
 	createPrivateOfficeRequest,
-	listPrivateOfficeRequests,
 	listPrivateOfficeRequestsPaginated,
 	markPrivateOfficeRequestAsQuoted,
 	removePrivateOfficeRequest
@@ -82,6 +122,15 @@ const { data, isLoading, error, refetch, meta } = useResourceList<PrivateOfficeR
 
 const { data: providers } = useResourceList(listProviders)
 const providerOptions = computed(() => providers.value.map(p => ({ label: p.name, value: p.id })))
+const statusOptions = computed(() => (["requested", "quoted", "contracted"] as const).map(s => ({ label: t(`privateOfficeRequests.status.${s}`), value: s })))
+
+const { data: companies, isLoading: isLoadingCompanies } = useResourceList(listCompanies)
+const companyOptions = computed(() => companies.value.map(c => ({ label: c.legal_name, value: c.id })))
+
+const payerOptions = computed(() => [
+	{ label: t("officeLeases.billedTo.provider"), value: "provider" },
+	{ label: t("officeLeases.billedTo.company"), value: "company" }
+])
 
 const mutations = useResourceMutations(
 	{ create: createPrivateOfficeRequest, update: markPrivateOfficeRequestAsQuoted, remove: removePrivateOfficeRequest },
@@ -113,18 +162,47 @@ function confirmDelete(row: PrivateOfficeRequest) {
 	})
 }
 
-const columns = computed<DataTableColumns<PrivateOfficeRequest>>(() => buildRequestColumns(t, openQuote, confirmDelete))
+const selectedRequestForLease = ref<PrivateOfficeRequest | null>(null)
+const createLeaseDrawerVisible = ref(false)
+
+function openCreateLease(row: PrivateOfficeRequest) {
+	selectedRequestForLease.value = row
+	createLeaseDrawerVisible.value = true
+}
+
+const columns = computed<DataTableColumns<PrivateOfficeRequest>>(() =>
+	buildRequestColumns(t, openQuote, confirmDelete, openCreateLease, canCreateOfficeLeases)
+)
 
 const createDrawerVisible = ref(false)
+const createFormRef = ref<FormInst | null>(null)
 const createForm = ref<PrivateOfficeRequestPayload>(emptyRequestPayload())
+
+const createRules: FormRules = {
+	prospect_name: { required: true, message: t("resourceCrud.form.required"), trigger: ["blur", "input"] },
+	contact: { required: true, message: t("resourceCrud.form.required"), trigger: ["blur", "input"] }
+}
 
 function openCreate() {
 	createForm.value = emptyRequestPayload()
+	createFormRef.value?.restoreValidation()
 	createDrawerVisible.value = true
 }
 
-async function submitCreate(payload: Record<string, unknown>) {
-	await mutations.create(payload as unknown as PrivateOfficeRequestPayload)
+async function handleCustomCreate() {
+	try {
+		await createFormRef.value?.validate()
+	} catch {
+		return
+	}
+	try {
+		await mutations.create(createForm.value)
+		createDrawerVisible.value = false
+	} catch (caught) {
+		if (caught instanceof ApiError && caught.status === 422) {
+			message.error(caught.data?.message ?? t("resourceCrud.mutations.genericError"))
+		}
+	}
 }
 
 const quoteModalVisible = ref(false)

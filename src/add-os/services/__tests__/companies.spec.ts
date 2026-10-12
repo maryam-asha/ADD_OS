@@ -29,7 +29,7 @@ describe("companies service", () => {
 
 		const companies = await listCompanies()
 
-		expect(fetch).toHaveBeenCalledWith("http://api.test/api/v1/admin/companies", expect.objectContaining({ method: "GET" }))
+		expect(fetch).toHaveBeenCalledWith("http://api.test/api/v1/admin/companies?all=1", expect.objectContaining({ method: "GET" }))
 		expect(companies).toEqual([sampleCompany])
 	})
 

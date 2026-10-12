@@ -54,7 +54,7 @@
 </template>
 
 <script setup lang="ts">
-import type { DataTableColumns, SelectOption } from "naive-ui"
+import type { DataTableColumns } from "naive-ui"
 import type { Coupon } from "@/add-os/modules/pricing/types/coupon"
 import { NAlert, NButton, NCard, NDataTable, NInput, NSwitch, NTag, useDialog, useMessage } from "naive-ui"
 import { computed, h, reactive, ref, watch } from "vue"
@@ -70,6 +70,8 @@ import { ApiError } from "@/add-os/services/api"
 import { deleteCoupon, listCoupons, setCouponActive } from "@/add-os/services/coupons"
 import { formatDateTime, formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
+
+type FilterOption = { label: string; value: string | number }
 
 defineProps<{ titleKey?: string }>()
 
@@ -101,8 +103,8 @@ const detailId = ref<number | null>(null)
 let request = 0
 let searchTimer: ReturnType<typeof setTimeout> | undefined
 
-const stateOptions = computed<SelectOption[]>(() => COUPON_STATES.map(value => ({ label: t(`coupons.state.${value}`), value })))
-const activeOptions = computed<SelectOption[]>(() => [{ label: t("coupons.filters.activeYes"), value: 1 }, { label: t("coupons.filters.activeNo"), value: 0 }])
+const stateOptions = computed<FilterOption[]>(() => COUPON_STATES.map(value => ({ label: t(`coupons.state.${value}`), value })))
+const activeOptions = computed<FilterOption[]>(() => [{ label: t("coupons.filters.activeYes"), value: 1 }, { label: t("coupons.filters.activeNo"), value: 0 }])
 const pagination = computed(() => ({ page: page.value, pageSize: PAGE_SIZE, itemCount: total.value }))
 
 function usage(row: Coupon): string {

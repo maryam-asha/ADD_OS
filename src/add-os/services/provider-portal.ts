@@ -2,6 +2,7 @@ import type { Paginated } from "./pagination"
 import type { Provider, ProviderRequest, Invoice } from "@/add-os/modules/providers/types"
 import type { Company } from "@/add-os/modules/members/types/company"
 import type { PrivateOfficeRequest } from "@/add-os/modules/members/types/private-office-request"
+import type { OfficeLease } from "@/add-os/modules/members/types/office-lease"
 import { get, post, patch, del } from "./api"
 
 export async function getProviderProfile(): Promise<Provider> {
@@ -67,3 +68,26 @@ export async function listPortalPlans(): Promise<any[]> {
 	const res = await get<{ data: any[] }>("/api/v1/provider/plans")
 	return res.data
 }
+
+export function listProviderOfficeLeases(query?: Record<string, unknown>): Promise<Paginated<OfficeLease>> {
+	return get<Paginated<OfficeLease>>("/api/v1/provider/office-leases", query)
+}
+
+export async function getProviderOfficeLease(id: number): Promise<OfficeLease> {
+	const res = await get<{ data: OfficeLease }>(`/api/v1/provider/office-leases/${id}`)
+	return res.data
+}
+
+export async function listProviderCompanyOfficeLeases(companyId: number): Promise<OfficeLease[]> {
+	const res = await get<{ data: OfficeLease[] }>(`/api/v1/provider/companies/${companyId}/office-leases`)
+	return res.data
+}
+
+export function setProviderMembershipAutoRenew(companyId: number, auto_renew: boolean): Promise<{ message: string }> {
+	return patch<{ message: string }>(`/api/v1/provider/companies/${companyId}/membership/auto-renew`, { auto_renew })
+}
+
+export function setProviderOfficeLeaseAutoRenew(leaseId: number, auto_renew: boolean): Promise<{ message: string }> {
+	return patch<{ message: string }>(`/api/v1/provider/office-leases/${leaseId}/auto-renew`, { auto_renew })
+}
+

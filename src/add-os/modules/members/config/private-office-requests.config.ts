@@ -16,10 +16,13 @@ const STATUS_TAG_TYPE: Record<PrivateOfficeRequest["status"], "info" | "warning"
 export function buildRequestColumns(
 	t: ComposerTranslation,
 	onQuote: (row: PrivateOfficeRequest) => void,
-	onDelete: (row: PrivateOfficeRequest) => void
+	onDelete: (row: PrivateOfficeRequest) => void,
+	onCreateLease?: (row: PrivateOfficeRequest) => void,
+	canCreateLease?: () => boolean
 ): DataTableColumns<PrivateOfficeRequest> {
 	return [
 		{ title: t("privateOfficeRequests.columns.prospectName"), key: "prospect_name" },
+		{ title: t("privateOfficeRequests.columns.company", "Company"), key: "company", render: row => row.company?.legal_name || "—" },
 		{ title: t("privateOfficeRequests.columns.contact"), key: "contact" },
 		{ title: t("privateOfficeRequests.columns.provider", "Provider"), key: "provider", render: row => row.provider?.name || "—" },
 		{
@@ -42,6 +45,31 @@ export function buildRequestColumns(
 							NButton,
 							{ text: true, type: "primary", "aria-label": label, title: label, onClick: () => onQuote(row) },
 							{ icon: () => h(Icon, { name: "carbon:currency", size: 18 }) }
+						)
+					)
+				}
+
+				if (row.status === "quoted" && (row.company_id || row.company) && onCreateLease && (!canCreateLease || canCreateLease())) {
+					const leaseLabel = t("privateOfficeRequests.createLease.button")
+					buttons.push(
+						h(
+							NButton,
+							{ text: true, type: "success", "aria-label": leaseLabel, title: leaseLabel, onClick: () => onCreateLease(row) },
+							{ icon: () => h(Icon, { name: "carbon:document-add", size: 18 }) }
+						)
+					)
+				}
+
+				// A quoted request for a new company becomes a company (and its lease) from the Companies page.
+				if (row.status === "quoted" && !row.company_id && !row.company) {
+					buttons.push(
+						h(
+							NTooltip,
+							{},
+							{
+								trigger: () => h(NTag, { size: "small", round: true, type: "info" }, { default: () => t("privateOfficeRequests.nextStepNewCompany") }),
+								default: () => t("privateOfficeRequests.nextStepNewCompanyHint")
+							}
 						)
 					)
 				}

@@ -14,7 +14,7 @@
 				<PinnedPages class="grow" />
 
 				<PillWrapper bordered>
-					<ProviderHeader v-if="authStore.userRole === 'provider'" />
+					<ProviderHeader v-if="authStore.isProvider" />
 					<Search />
 					<LocaleSwitch />
 					<FullscreenSwitch />

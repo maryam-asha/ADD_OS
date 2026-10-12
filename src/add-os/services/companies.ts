@@ -7,8 +7,9 @@ const BASE = "/api/v1/admin/companies"
 
 import type { Paginated } from "./pagination"
 
+/** Every company, unpaginated — for pickers. The paginated list is listCompaniesPaginated. */
 export async function listCompanies(): Promise<Company[]> {
-	const res = await get<{ data: Company[] }>(BASE)
+	const res = await get<{ data: Company[] }>(BASE, { all: 1 })
 	return rowsOf<Company>(res.data)
 }
 

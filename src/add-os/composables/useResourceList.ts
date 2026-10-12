@@ -42,10 +42,26 @@ export function useResourceList<T>(
 		provide(RESOURCE_REFETCH_KEY, refetch)
 	}
 
+	// Filters are bound to fields of `query` (v-model="query.status"), so the
+	// watch must be deep — a shallow one only sees `query.value = {...}`, and a
+	// changed filter would wait for the next page change to apply.
 	if (page) {
-		watch([query ?? ref(undefined), page], refetch, { immediate: true })
+		// A changed filter starts again at page 1: page 3 of an unfiltered list
+		// is rarely page 3 of the filtered one. Resetting the page triggers the
+		// refetch below; when already on page 1, the filter refetches directly.
+		if (query) {
+			watch(
+				query,
+				() => {
+					if (page.value !== 1) page.value = 1
+					else void refetch()
+				},
+				{ deep: true }
+			)
+		}
+		watch(page, refetch, { immediate: true })
 	} else if (query) {
-		watch(query, refetch, { immediate: true })
+		watch(query, refetch, { immediate: true, deep: true })
 	} else {
 		refetch()
 	}

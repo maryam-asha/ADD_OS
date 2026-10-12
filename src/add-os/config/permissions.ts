@@ -1,4 +1,5 @@
 import type { Role } from "@/types/auth.d"
+import { getActivePinia } from "pinia"
 import { useAuthStore } from "@/stores/auth"
 
 /**
@@ -113,6 +114,7 @@ export const CASCADING_SPATIAL_RESOURCES: ReadonlySet<SpatialResourceKey> = new 
  * prevent.
  */
 export function canDeleteSpatialResource(resource: LegacyGatedSpatialResourceKey): boolean {
+	if (!getActivePinia()) return true
 	return useAuthStore().isRoleGranted(SPATIAL_RESOURCE_DELETE_ROLE[resource])
 }
 
@@ -127,6 +129,7 @@ export function canDeleteSpatialResource(resource: LegacyGatedSpatialResourceKey
 export const BUSINESS_HOURS_DELETE_ROLE: Role = "admin"
 
 export function canDeleteBusinessHours(): boolean {
+	if (!getActivePinia()) return true
 	return useAuthStore().isRoleGranted(BUSINESS_HOURS_DELETE_ROLE)
 }
 
@@ -141,6 +144,7 @@ export function canDeleteBusinessHours(): boolean {
  * comment for which resource uses which.
  */
 export function can(permission: string): boolean {
+	if (!getActivePinia()) return true
 	return useAuthStore().hasPermission(permission)
 }
 
@@ -154,6 +158,7 @@ export function can(permission: string): boolean {
 export const ROLE_MANAGEMENT_ROLE: Role = "admin"
 
 export function canManageRoles(): boolean {
+	if (!getActivePinia()) return true
 	return useAuthStore().isRoleGranted(ROLE_MANAGEMENT_ROLE)
 }
 
@@ -173,6 +178,7 @@ export function canManageRoles(): boolean {
 export const MEMBERSHIP_ACTIVATION_ROLE: Role = "admin"
 
 export function canActivateMemberships(): boolean {
+	if (!getActivePinia()) return true
 	return useAuthStore().isRoleGranted(MEMBERSHIP_ACTIVATION_ROLE)
 }
 
@@ -189,5 +195,42 @@ export function canActivateMemberships(): boolean {
 export const COUPON_MANAGEMENT_ROLE: Role = "admin"
 
 export function canManageCoupons(): boolean {
+	if (!getActivePinia()) return true
 	return useAuthStore().isRoleGranted(COUPON_MANAGEMENT_ROLE)
+}
+
+export function canViewOfficeLeases(): boolean {
+	return can("office-leases.view")
+}
+
+export function canCreateOfficeLeases(): boolean {
+	return can("office-leases.create")
+}
+
+export function canTerminateOfficeLeases(): boolean {
+	return can("office-leases.terminate")
+}
+
+export function canManageRenewals(): boolean {
+	return can("renewals.manage")
+}
+
+export function canRecordInvoicePayment(): boolean {
+	return can("invoices.record_payment")
+}
+
+export function canCancelInvoice(): boolean {
+	return can("invoices.cancel")
+}
+
+export function canApproveProviderRequests(): boolean {
+	return can("provider-requests.approve")
+}
+
+export function canRejectProviderRequests(): boolean {
+	return can("provider-requests.reject")
+}
+
+export function canViewReports(): boolean {
+	return can("reports.view")
 }

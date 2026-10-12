@@ -57,6 +57,8 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"members.memberProfile": () => import("@/add-os/modules/members/views/MemberProfilePage.vue"),
 	"members.companies": () => import("@/add-os/modules/members/views/CompaniesPage.vue"),
 	"members.memberships": () => import("@/add-os/modules/members/views/MembershipsPage.vue"),
+	"members.officeLeases": () => import("@/add-os/modules/members/views/OfficeLeasesPage.vue"),
+	"members.stoppedRenewals": () => import("@/add-os/modules/members/views/StoppedRenewalsPage.vue"),
 	"plans.packages": () => import("@/add-os/modules/plans/views/PlansPage.vue"),
 	"plans.modules": () => import("@/add-os/modules/plans/views/PlanModulesPage.vue"),
 	"plans.resourceTypes": () => import("@/add-os/modules/plans/views/ResourceTypesPage.vue"),
@@ -86,7 +88,12 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"providerPortal.companies": () => import("@/add-os/modules/provider-portal/views/ProviderCompaniesPage.vue"),
 	"providerPortal.requests": () => import("@/add-os/modules/provider-portal/views/ProviderRequestsPage.vue"),
 	"providerPortal.officeRequests": () => import("@/add-os/modules/provider-portal/views/ProviderOfficeRequestsPage.vue"),
+	"providerPortal.officeLeases": () => import("@/add-os/modules/provider-portal/views/ProviderOfficeLeasesPage.vue"),
 	"providerPortal.invoices": () => import("@/add-os/modules/provider-portal/views/ProviderInvoicesPage.vue"),
+	"providerPortal.companyReport": () => import("@/add-os/modules/provider-portal/views/ProviderCompanyReportPage.vue"),
+	"providerPortal.invoiceStatement": () => import("@/add-os/modules/provider-portal/views/ProviderInvoiceStatementPage.vue"),
+	"reports.providersReport": () => import("@/add-os/modules/reports/views/AdminProvidersReportPage.vue"),
+	"reports.revenueReport": () => import("@/add-os/modules/reports/views/AdminRevenueReportPage.vue"),
 	"payments.invoices": () => import("@/add-os/modules/payments/views/InvoicesPage.vue")
 }
 
@@ -100,6 +107,7 @@ export function createAddOsRoutes(): RouteRecordRaw[] {
 			meta: {
 				auth: true,
 				roles: section.roles ?? ["admin", "operations"],
+				permission: section.permission,
 				titleKey: navSectionTitleKey(section)
 			},
 			children: section.pages.map(page => ({
@@ -107,7 +115,10 @@ export function createAddOsRoutes(): RouteRecordRaw[] {
 				name: navRouteName(section, page),
 				component: PAGE_COMPONENTS[navRouteName(section, page)] ?? ComingSoon,
 				props: { titleKey: navPageTitleKey(page) },
-				meta: { title: navPageTitleKey(page) }
+				meta: {
+					title: navPageTitleKey(page),
+					permission: page.permission ?? section.permission
+				}
 			}))
 		}
 	})

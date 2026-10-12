@@ -13,7 +13,7 @@
  *    drops the fraction, because CLDR defines the Syrian pound with zero minor
  *    units:
  *      (1234567.89).toLocaleString("ar-SY", {style:"currency",currency:"SYP"})
- *        → "‏١٬٢٣٤٬٥٦٨ ل.س.‏"        ← .89 gone, no warning
+ *        → "‏١٬٢٣٤٬٥٦٨ ل.س‏"        ← .89 gone, no warning
  *    For a wallet backed by DECIMAL columns that is silent data loss on screen.
  *
  * Everything here operates on the digit string, so a `string` input — which is
@@ -147,12 +147,17 @@ export interface NumberFormatOptions {
 	fractionDigits?: number
 	/** Pad up to this many decimals. Ignored when `fractionDigits` is set. */
 	minFractionDigits?: number
+	/**
+	 * Drop trailing zeros from the fraction ("300.00" → "300", "150.50" →
+	 * "150.5"). Applied after rounding; never removes a significant digit.
+	 */
+	trimZeros?: boolean
 	/** Thousands separators. Turn off for years, IDs, and similar. */
 	grouping?: boolean
 }
 
 export function formatNumber(value: number | string | bigint, options: NumberFormatOptions = {}): string {
-	const { fractionDigits, minFractionDigits = 0, grouping = true } = options
+	const { fractionDigits, minFractionDigits = 0, grouping = true, trimZeros = false } = options
 
 	let parts = decompose(value)
 
@@ -160,6 +165,10 @@ export function formatNumber(value: number | string | bigint, options: NumberFor
 		parts = round(parts, fractionDigits)
 	} else if (parts.frac.length < minFractionDigits) {
 		parts = { ...parts, frac: parts.frac.padEnd(minFractionDigits, "0") }
+	}
+
+	if (trimZeros) {
+		parts = { ...parts, frac: parts.frac.replace(/0+$/, "") }
 	}
 
 	const int = grouping ? group(parts.int) : parts.int

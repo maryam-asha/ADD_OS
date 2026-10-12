@@ -1,7 +1,7 @@
 import type { NumberFormatOptions } from "./numbers"
 import type { SupportedLocale } from "@/add-os/lang/locales"
 import { currentLocale } from "@/add-os/lang/currentLocale"
-import { formatNumber, hasFraction } from "./numbers"
+import { formatNumber } from "./numbers"
 
 /**
  * ADD OS — currency formatting.
@@ -29,11 +29,11 @@ interface CurrencyDefinition {
 /**
  * The symbol trails the amount in both languages. In an RTL paragraph the
  * bidi algorithm places the Latin-digit run first (visually rightmost), so
- * "1,234 ل.س." reads correctly without embedding any directional marks.
+ * "1,234 ل.س" reads correctly without embedding any directional marks.
  * ⚠️ Not visually verified — see I18N-REPORT.md.
  */
 const CURRENCIES: Record<CurrencyCode, CurrencyDefinition> = {
-	SYP: { defaultFractionDigits: 0, wholeOnly: true, symbol: { ar: "ل.س.", en: "SYP" } },
+	SYP: { defaultFractionDigits: 0, wholeOnly: true, symbol: { ar: "ل.س", en: "SYP" } },
 	USD: { defaultFractionDigits: 2, symbol: { ar: "$", en: "$" } },
 	EUR: { defaultFractionDigits: 2, symbol: { ar: "€", en: "€" } }
 }
@@ -59,9 +59,10 @@ export interface CurrencyFormatOptions extends Pick<NumberFormatOptions, "groupi
 	/**
 	 * Force a decimal count.
 	 *
-	 * Left unset, the formatter picks per value:
-	 *   • whole amount   → the currency's default (0 for SYP)
-	 *   • has a fraction → the fraction is PRESERVED, not rounded away
+	 * Left unset, the amount is shown as it is, without trailing zeros —
+	 * "300", "150.5", "12.75" (the product owner's rule, 2026-10-12, matching
+	 * the API's PlainAmount): the fraction is PRESERVED, never rounded away,
+	 * and never padded to the currency's default decimals.
 	 *
 	 * That asymmetry is deliberate. `Intl` with `currency: "SYP"` rounds
 	 * 1234567.89 to 1,234,568 and says nothing; with DECIMAL columns behind the
@@ -86,9 +87,9 @@ export function formatCurrency(value: number | string | bigint, options: Currenc
 
 	// A whole-only currency is always whole. Otherwise round only when told
 	// to, or when there is nothing to lose by rounding.
-	const digits = definition.wholeOnly ? 0 : fractionDigits ?? (hasFraction(value) ? undefined : definition.defaultFractionDigits)
+	const digits = definition.wholeOnly ? 0 : fractionDigits
 
-	const amount = formatNumber(value, { fractionDigits: digits, grouping })
+	const amount = formatNumber(value, { fractionDigits: digits, grouping, trimZeros: fractionDigits === undefined })
 
 	return showSymbol ? `${amount} ${definition.symbol[locale]}` : amount
 }

@@ -37,19 +37,55 @@ export function safeRedirect(raw: unknown): string {
  * straight back to it and loop.
  */
 export function authGuard(route: RouteLocationNormalized): RouteLocationRaw | void {
-	const { checkAuth, authRedirect, auth, roles }: RouteMetaAuth = route.meta
+	const { checkAuth, authRedirect, auth, roles, permission }: RouteMetaAuth = route.meta
 	const authStore = useAuthStore()
 
 	if (route.redirectedFrom?.name === "Logout") authStore.setLogout()
 
+	if (authStore.isLogged && authStore.isMemberOnly) {
+		authStore.setLogout()
+		return { path: "/login" }
+	}
+
+	const isProviderRoute = route.path === "/provider" || route.path.startsWith("/provider/")
+
 	if (auth) {
 		if (!authStore.isLogged) return { path: "/login", query: { [REDIRECT_QUERY]: route.fullPath } }
-		if (roles && !authStore.isRoleGranted(roles)) return { path: "/login" }
+
+		// Provider trying to open an admin route directly:
+		// "مسارات الإدارة في الواجهة لا يفتحها إلا حساب إداري. لو حاول المزوّد فتح رابط إداري مباشرة، وجّهوه إلى رئيسية بوابته."
+		if (authStore.isProvider && !isProviderRoute) {
+			return { path: "/provider/summary" }
+		}
+
+		// Non-provider trying to open a provider portal route:
+		// "مسارات البوابة لا يفتحها إلا حساب provider."
+		if (!authStore.isProvider && isProviderRoute) {
+			return { path: "/" }
+		}
+
+		if (roles && !authStore.isRoleGranted(roles)) {
+			return authStore.isProvider ? { path: "/provider/summary" } : { path: "/login" }
+		}
+
+		if (permission && !authStore.hasPermission(permission)) {
+			return authStore.isProvider ? { path: "/provider/summary" } : { path: "/" }
+		}
+
 		return
 	}
 
-	if (checkAuth && authStore.isLogged && (!roles || authStore.isRoleGranted(roles))) {
-		const requested = route.query[REDIRECT_QUERY]
-		return requested === undefined ? authRedirect || "/" : safeRedirect(requested)
+	if (checkAuth && authStore.isLogged) {
+		if (authStore.isProvider) {
+			const requested = route.query[REDIRECT_QUERY]
+			const safe = requested ? safeRedirect(requested) : "/provider/summary"
+			return safe.startsWith("/provider") ? safe : "/provider/summary"
+		}
+
+		if (!roles || authStore.isRoleGranted(roles)) {
+			const requested = route.query[REDIRECT_QUERY]
+			const safe = requested === undefined ? authRedirect || "/" : safeRedirect(requested)
+			return safe.startsWith("/provider") ? "/" : safe
+		}
 	}
 }

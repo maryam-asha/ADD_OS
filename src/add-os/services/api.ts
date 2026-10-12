@@ -152,6 +152,16 @@ async function request<T>(
 			useAuthStore().setLogout()
 			redirectToLoginIfProtected()
 		}
+		if (res.status === 403) {
+			const isProviderInactive =
+				text.includes("api.provider.inactive") ||
+				text.includes("provider.inactive") ||
+				text.includes("غير فعّال") ||
+				text.includes("inactive")
+			if (isProviderInactive && router.currentRoute.value.path !== "/provider/suspended") {
+				router.push({ path: "/provider/suspended" })
+			}
+		}
 		throw new ApiError(res.status, text || res.statusText)
 	}
 

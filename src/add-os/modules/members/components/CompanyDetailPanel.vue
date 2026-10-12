@@ -51,22 +51,52 @@
 					:scroll-x="520"
 				/>
 			</div>
+
+			<!-- Office Leases section (Gated by office-leases.view) -->
+			<div v-if="canViewOfficeLeases()" class="flex flex-col gap-3 mt-4 pt-4 border-t border-black/5 dark:border-white/5">
+				<div class="flex items-center justify-between">
+					<h3 class="text-sm font-semibold text-secondary">{{ t("companies.leases") }}</h3>
+				</div>
+
+				<div v-if="company.office_leases && company.office_leases.length > 0" class="add-ledger-table w-full overflow-x-auto">
+					<n-data-table
+						:columns="leaseColumns"
+						:data="company.office_leases"
+						:bordered="false"
+						:row-key="leaseRowKey"
+						:max-height="260"
+					/>
+				</div>
+				<div v-else class="text-xs text-neutral-400 italic py-2">
+					{{ t("companies.noLeases") }}
+				</div>
+			</div>
 		</div>
 	</n-modal>
 
 	<AddCompanyMemberDialog v-model:show="addDialogShow" :company-id @added="refetchMembers" />
+
+	<OfficeLeaseDetailModal
+		v-if="selectedLeaseId !== null"
+		v-model:show="leaseDetailModalShow"
+		:lease-id="selectedLeaseId"
+		@updated="refetchCompany"
+	/>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns } from "naive-ui"
 import type { CompanyMember } from "@/add-os/modules/members/types/company-member"
+import type { OfficeLease } from "@/add-os/modules/members/types/office-lease"
 import { NAlert, NButton, NDataTable, NModal, NSpin, NSwitch, NTag, useDialog, useMessage } from "naive-ui"
 import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import { canViewOfficeLeases } from "@/add-os/config/permissions"
 import { useCompanyDetail } from "@/add-os/modules/members/composables/useCompanyDetail"
 import { ApiError } from "@/add-os/services/api"
 import Icon from "@/components/common/Icon.vue"
 import AddCompanyMemberDialog from "./AddCompanyMemberDialog.vue"
+import OfficeLeaseDetailModal from "./OfficeLeaseDetailModal.vue"
 
 const props = defineProps<{ companyId: number }>()
 const show = defineModel<boolean>("show", { required: true })
@@ -77,6 +107,40 @@ const dialog = useDialog()
 
 const { company, isLoadingCompany, companyError, members, isLoadingMembers, refetchMembers, setDoorAccess, setAdminFlag, removeMember, refetchCompany } =
 	useCompanyDetail(props.companyId)
+
+const selectedLeaseId = ref<number | null>(null)
+const leaseDetailModalShow = ref(false)
+
+function openLeaseDetail(lease: OfficeLease) {
+	selectedLeaseId.value = lease.id
+	leaseDetailModalShow.value = true
+}
+
+function leaseRowKey(row: OfficeLease) {
+	return row.id
+}
+
+const leaseColumns = computed<DataTableColumns<OfficeLease>>(() => [
+	{ title: t("officeLeases.columns.reference"), key: "reference" },
+	{ title: t("officeLeases.columns.space"), key: "space", render: row => row.space?.name || `#${row.space?.id}` },
+	{ title: t("officeLeases.columns.dates"), key: "dates", render: row => `${row.starts_on} – ${row.ends_on}` },
+	{ title: t("officeLeases.columns.monthlyAmount"), key: "monthly_amount", render: row => `${row.monthly_amount} ${row.currency}` },
+	{
+		title: t("officeLeases.columns.status"),
+		key: "status",
+		render: row => h(NTag, { type: row.status === "active" ? "success" : row.status === "ended" ? "default" : "error", size: "small", round: true }, { default: () => t(`officeLeases.status.${row.status}`) })
+	},
+	{
+		title: t("officeLeases.columns.autoRenew"),
+		key: "auto_renew",
+		render: row => h(NTag, { type: row.auto_renew ? "success" : "default", size: "small", round: true }, { default: () => row.auto_renew ? t("officeLeases.detail.autoRenewYes") : t("officeLeases.detail.autoRenewNo") })
+	},
+	{
+		title: t("resourceCrud.table.actionsColumn"),
+		key: "actions",
+		render: row => h(NButton, { size: "small", quaternary: true, onClick: () => openLeaseDetail(row) }, { default: () => t("common.view", "View") })
+	}
+])
 
 const isInitialLoading = computed(
 	() => !companyError.value && (isLoadingCompany.value || (isLoadingMembers.value && members.value.length === 0))

@@ -78,6 +78,12 @@
 			"chart-histogram": {
 				"body": "<path fill=\"currentColor\" d=\"M6 16c2.973 0 4.232-2.251 5.345-4.237C12.475 9.744 13.45 8 16 8s3.526 1.744 4.655 3.763C21.768 13.749 23.027 16 26 16h4v-2h-4c-1.713 0-2.483-1.22-3.6-3.214C21.209 8.654 19.724 6 16 6s-5.207 2.654-6.4 4.786C8.482 12.779 7.712 14 6 14H4V2H2v26a2 2 0 0 0 2 2h26v-2h-2v-6h-2v6h-4v-8h-2v8h-4V16h-2v12h-4v-8H8v8H4V16Z\"/>"
 			},
+			"chart-line": {
+				"body": "<path fill=\"currentColor\" d=\"m4.67 28l6.39-12l7.3 6.49a2 2 0 0 0 1.7.47a2 2 0 0 0 1.42-1.07L27 10.9l-1.82-.9l-5.49 11l-7.3-6.49a2 2 0 0 0-1.68-.51a2 2 0 0 0-1.42 1L4 25V2H2v26a2 2 0 0 0 2 2h26v-2Z\"/>"
+			},
+			"chart-pie": {
+				"body": "<path fill=\"currentColor\" d=\"M16 4a12 12 0 1 0 12 12A12 12 0 0 0 16 4m10 11h-9V6.05A10 10 0 0 1 26 15M15.42 26A10 10 0 0 1 15 6.05v9a2 2 0 0 0 2 2h9A10 10 0 0 1 15.42 26\"/>"
+			},
 			"chat": {
 				"body": "<path fill=\"currentColor\" d=\"M17.74 30L16 29l4-7h6a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h9v2H6a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4h20a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4h-4.84Z\"/><path fill=\"currentColor\" d=\"M8 10h16v2H8zm0 6h10v2H8z\"/>"
 			},
@@ -179,6 +185,12 @@
 			},
 			"document-add": {
 				"body": "<path fill=\"currentColor\" d=\"M30 24h-4v-4h-2v4h-4v2h4v4h2v-4h4z\"/><path fill=\"currentColor\" d=\"M16 28H8V4h8v6a2.006 2.006 0 0 0 2 2h6v4h2v-6a.91.91 0 0 0-.3-.7l-7-7A.9.9 0 0 0 18 2H8a2.006 2.006 0 0 0-2 2v24a2.006 2.006 0 0 0 2 2h8Zm2-23.6l5.6 5.6H18Z\"/>"
+			},
+			"document-blank": {
+				"body": "<path fill=\"currentColor\" d=\"m25.7 9.3l-7-7A.9.9 0 0 0 18 2H8a2.006 2.006 0 0 0-2 2v24a2.006 2.006 0 0 0 2 2h16a2.006 2.006 0 0 0 2-2V10a.9.9 0 0 0-.3-.7M18 4.4l5.6 5.6H18ZM24 28H8V4h8v6a2.006 2.006 0 0 0 2 2h6Z\"/>"
+			},
+			"download": {
+				"body": "<path fill=\"currentColor\" d=\"M26 24v4H6v-4H4v4a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2v-4Zm0-10l-1.41-1.41L17 20.17V2h-2v18.17l-7.59-7.58L6 14l10 10z\"/>"
 			},
 			"draggable": {
 				"body": "<path fill=\"currentColor\" d=\"M10 6h4v4h-4zm8 0h4v4h-4zm-8 8h4v4h-4zm8 0h4v4h-4zm-8 8h4v4h-4zm8 0h4v4h-4z\"/>"

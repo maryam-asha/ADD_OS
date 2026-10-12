@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import type { SpaceResourcePayload } from "@/add-os/modules/spatial/types/resource"
 
 import { createResource, getResource, listResources, removeResource, updateResource, updateResourceStatus } from "../resources"
 
@@ -48,7 +49,7 @@ describe("resources service", () => {
 	it("createResource POSTs the payload and unwraps the created resource", async () => {
 		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: sampleResource }, 201))
 
-		const payload = { space_id: 1, name: "Projector", category: "projector", quantity: 1 }
+		const payload: SpaceResourcePayload = { space_id: 1, name: "Projector", category: "projector", quantity: 1 }
 		const resource = await createResource(payload)
 
 		expect(fetch).toHaveBeenCalledWith(
@@ -70,7 +71,7 @@ describe("resources service", () => {
 	it("updateResource PUTs the payload (never status fields) and returns the message body only", async () => {
 		vi.mocked(fetch).mockResolvedValue(jsonResponse({ message: "Updated." }))
 
-		const payload = { space_id: 1, name: "Projector HD", category: "projector", quantity: 2 }
+		const payload: SpaceResourcePayload = { space_id: 1, name: "Projector HD", category: "projector", quantity: 2 }
 		const result = await updateResource(1, payload)
 
 		expect(fetch).toHaveBeenCalledWith(

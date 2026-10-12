@@ -43,6 +43,7 @@ export interface NavPage {
 	 * the page stay defined in one place, which is the point of this file.
 	 */
 	hidden?: boolean
+	permission?: string
 }
 
 export interface NavSection {
@@ -55,6 +56,7 @@ export interface NavSection {
 	status: SectionStatus
 	pages: NavPage[]
 	roles?: Roles
+	permission?: string
 }
 
 export const NAV_SECTIONS: readonly NavSection[] = [
@@ -101,7 +103,9 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "individuals", path: "individuals" },
 			{ key: "memberProfile", path: "individuals/:id", hidden: true },
 			{ key: "companies", path: "companies" },
-			{ key: "memberships", path: "memberships" }
+			{ key: "memberships", path: "memberships" },
+			{ key: "officeLeases", path: "office-leases" },
+			{ key: "stoppedRenewals", path: "stopped-renewals" }
 		]
 	},
 	{
@@ -123,8 +127,11 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		pages: [
 			{ key: "summary", path: "summary" },
 			{ key: "companies", path: "companies" },
+			{ key: "companyReport", path: "company-report" },
+			{ key: "invoiceStatement", path: "invoice-statement" },
 			{ key: "requests", path: "requests" },
 			{ key: "officeRequests", path: "office-requests" },
+			{ key: "officeLeases", path: "office-leases" },
 			{ key: "invoices", path: "invoices" }
 		],
 		roles: ["provider"]
@@ -200,6 +207,18 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "cashRegister", path: "cash-register" },
 			{ key: "invoices", path: "invoices" }
 		]
+	},
+	{
+		key: "reports",
+		path: "/reports",
+		icon: "carbon:chart-line",
+		status: "active",
+		pages: [
+			{ key: "providersReport", path: "providers" },
+			{ key: "revenueReport", path: "revenue" }
+		],
+		roles: ["admin", "operations"],
+		permission: "reports.view"
 	},
 	{
 		key: "community",

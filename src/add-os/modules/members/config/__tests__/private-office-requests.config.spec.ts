@@ -20,8 +20,8 @@ describe("buildRequestColumns actions", () => {
 		expect(actionChildren("requested")).toHaveLength(2)
 	})
 
-	it("shows only delete for a quoted row — quoting again isn't a modeled action (1 control)", () => {
-		expect(actionChildren("quoted")).toHaveLength(1)
+	it("shows the next-step hint plus delete for a quoted new-company row — quoting again isn't a modeled action (2 controls)", () => {
+		expect(actionChildren("quoted")).toHaveLength(2)
 	})
 
 	it("shows a disabled locked tooltip plus delete for a contracted row — not silence, an explained block (2 controls)", () => {

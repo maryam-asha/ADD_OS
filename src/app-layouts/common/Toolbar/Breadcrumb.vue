@@ -28,6 +28,7 @@ import { onBeforeMount, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
 import { currentLocale } from "@/add-os/lang/currentLocale"
+import { NAV_SECTIONS, navSectionTitleKey } from "@/add-os/navigation/sections"
 import Icon from "@/components/common/Icon.vue"
 import { useBreadcrumb } from "@/composables/useBreadcrumb"
 
@@ -67,8 +68,10 @@ function checkRoute(route: RouteLocationNormalizedLoaded) {
 	let cumulativePath = ""
 
 	for (const chunk of pathChunks) {
-		const name = translate(`nav.sections.${chunk}`, _capitalize(chunk))
 		cumulativePath += `/${chunk}`
+		const section = NAV_SECTIONS.find(s => s.path === cumulativePath || s.path === `/${chunk}`)
+		const sectionKey = section ? navSectionTitleKey(section) : `nav.sections.${chunk}`
+		const name = translate(sectionKey, translate(`nav.sections.${chunk}`, _capitalize(chunk)))
 
 		newItems.push({
 			name,

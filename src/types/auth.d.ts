@@ -1,4 +1,4 @@
-export type Role = "all" | "admin" | "operations" | "moderator" | "provider"
+export type Role = "all" | "admin" | "operations" | "moderator" | "provider" | (string & {})
 export type Roles = Role | Role[]
 
 export interface RouteMetaAuth {
@@ -6,6 +6,7 @@ export interface RouteMetaAuth {
 	authRedirect?: string
 	auth?: boolean
 	roles?: Roles
+	permission?: string
 }
 
 /** Shape of `/api/v1/admin/me`'s `user` object — Fortify/Sanctum session auth. */

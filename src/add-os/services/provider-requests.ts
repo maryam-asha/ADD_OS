@@ -1,5 +1,5 @@
 import type { Paginated } from "./pagination"
-import type { ProviderRequest } from "@/add-os/modules/providers/types"
+import type { ApproveProviderRequestPayload, ProviderRequest } from "@/add-os/modules/providers/types"
 import { get, post } from "./api"
 
 export async function listProviderRequests(query?: Record<string, unknown>): Promise<Paginated<ProviderRequest>> {
@@ -11,7 +11,7 @@ export async function getProviderRequest(id: number): Promise<ProviderRequest> {
 	return res.data
 }
 
-export async function approveProviderRequest(id: number, payload?: { currency?: string; amount?: number; due_date?: string; allow_overcapacity?: boolean }): Promise<void> {
+export async function approveProviderRequest(id: number, payload?: ApproveProviderRequestPayload): Promise<void> {
 	await post(`/api/v1/admin/provider-requests/${id}/approve`, payload || {})
 }
 

@@ -1,15 +1,16 @@
+import type { Paginated } from "./pagination"
 import type { MessageResponse } from "./resource-factory"
+import type { CreateLeaseFromRequestPayload, OfficeLease } from "@/add-os/modules/members/types/office-lease"
 import type {
 	MarkAsQuotedPayload,
 	PrivateOfficeRequest,
 	PrivateOfficeRequestPayload
 } from "@/add-os/modules/members/types/private-office-request"
 import { del, get, post, put } from "./api"
+
 import { rowsOf } from "./pagination"
 
 const BASE = "/api/v1/admin/private-office-requests"
-
-import type { Paginated } from "./pagination"
 
 export async function listPrivateOfficeRequests(): Promise<PrivateOfficeRequest[]> {
 	const res = await get<{ data: PrivateOfficeRequest[] }>(BASE)
@@ -40,4 +41,9 @@ export async function markPrivateOfficeRequestAsQuoted(id: number, payload: Mark
 
 export async function removePrivateOfficeRequest(id: number): Promise<MessageResponse> {
 	return del<MessageResponse>(`${BASE}/${id}`)
+}
+
+export async function createLeaseFromRequest(requestId: number, payload: CreateLeaseFromRequestPayload): Promise<OfficeLease> {
+	const res = await post<{ data: OfficeLease }>(`${BASE}/${requestId}/lease`, payload)
+	return res.data
 }

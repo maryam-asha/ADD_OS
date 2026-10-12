@@ -46,10 +46,11 @@ export async function twoFactorChallenge(payload: { code?: string; recovery_code
 }
 
 /**
- * The authenticated admin/operations user for the current session.
+ * The authenticated user for the current session across all account types (admin, operations, provider, etc.).
+ * Hits the shared `/api/v1/auth/me` endpoint.
  */
 export async function getMe(): Promise<AdminUser> {
-	const res = await get<{ user: AdminUser }>("/api/v1/admin/me")
+	const res = await get<{ user: AdminUser }>("/api/v1/auth/me")
 	return res.user
 }
 

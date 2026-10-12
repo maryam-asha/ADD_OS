@@ -4,12 +4,13 @@ import { acceptHMRUpdate, defineStore } from "pinia"
 import { hasApiUrl } from "@/add-os/config/env"
 import { getMe } from "@/add-os/services/auth"
 
-/** ADD OS only ever gates on admin|operations — pick whichever the account holds. */
+/** ADD OS primary role: provider, admin, operations, moderator, or custom. */
 function primaryRole(roles: string[] | undefined): Role | null {
+	if (roles?.includes("provider")) return "provider"
 	if (roles?.includes("admin")) return "admin"
 	if (roles?.includes("operations")) return "operations"
-	if (roles?.includes("provider")) return "provider"
-	return null
+	if (roles?.includes("moderator")) return "moderator"
+	return (roles?.[0] as Role) || null
 }
 
 export const useAuthStore = defineStore("auth", {
@@ -41,7 +42,13 @@ export const useAuthStore = defineStore("auth", {
 		async initSession() {
 			if (!hasApiUrl()) return
 			try {
-				this.setLogged(await getMe())
+				const user = await getMe()
+				const isMemberOnly = Boolean(user.roles?.length && user.roles.every(r => r === "member"))
+				if (isMemberOnly) {
+					this.setLogout()
+					return
+				}
+				this.setLogged(user)
 			} catch {
 				this.setLogout()
 			}
@@ -54,12 +61,23 @@ export const useAuthStore = defineStore("auth", {
 		userRole(state) {
 			return state.role
 		},
+		isProvider(state) {
+			return Boolean(state.user?.roles?.includes("provider") || state.role === "provider")
+		},
+		isMemberOnly(state) {
+			return Boolean(state.user?.roles?.length && state.user.roles.every(r => r === "member"))
+		},
+		isAdmin(state) {
+			const isProv = Boolean(state.user?.roles?.includes("provider") || state.role === "provider")
+			const isMember = Boolean(state.user?.roles?.length && state.user.roles.every(r => r === "member"))
+			return state.logged && !isProv && !isMember
+		},
 		isRoleGranted(state) {
 			return (roles?: Roles) => {
 				if (!roles) {
 					return true
 				}
-				if (!state.role) {
+				if (!state.logged) {
 					return false
 				}
 
@@ -69,7 +87,27 @@ export const useAuthStore = defineStore("auth", {
 					return true
 				}
 
-				return arrRoles.includes(state.role)
+				const isProv = Boolean(state.user?.roles?.includes("provider") || state.role === "provider")
+				const isMember = Boolean(state.user?.roles?.length && state.user.roles.every(r => r === "member"))
+
+				if (arrRoles.includes("provider")) {
+					return isProv
+				}
+
+				// If gating on general admin dashboard:
+				if (arrRoles.includes("admin") && arrRoles.includes("operations")) {
+					return !isProv && !isMember
+				}
+
+				if (state.role && arrRoles.includes(state.role)) {
+					return true
+				}
+
+				if (state.user?.roles?.some(r => arrRoles.includes(r as Role))) {
+					return true
+				}
+
+				return false
 			}
 		},
 		hasPermission(state) {

@@ -12,19 +12,18 @@ export async function getProvider(id: number): Promise<Provider> {
 	return res.data
 }
 
-export async function createProvider(payload: { name: string; contract_ref?: string }): Promise<Provider> {
+export async function createProvider(payload: { name: string; contract_ref: string; payment_terms_days?: number | null }): Promise<Provider> {
 	const res = await post<{ data: Provider }>("/api/v1/admin/providers", payload)
 	return res.data
 }
 
-export async function updateProvider(id: number, payload: { name?: string; contract_ref?: string; payment_terms_days?: number | null }): Promise<Provider> {
-	const res = await patch<{ data: Provider }>(`/api/v1/admin/providers/${id}`, payload)
-	return res.data
+/** Update endpoints answer with a message, not the resource (CLAUDE.md, ADD Core). */
+export async function updateProvider(id: number, payload: { name?: string; contract_ref?: string; payment_terms_days?: number | null }): Promise<void> {
+	await patch(`/api/v1/admin/providers/${id}`, payload)
 }
 
-export async function updateProviderStatus(id: number, status: "active" | "inactive"): Promise<Provider> {
-	const res = await patch<{ data: Provider }>(`/api/v1/admin/providers/${id}/status`, { status })
-	return res.data
+export async function updateProviderStatus(id: number, status: "active" | "inactive"): Promise<void> {
+	await patch(`/api/v1/admin/providers/${id}/status`, { status })
 }
 
 export async function linkProviderUser(id: number, userId: number): Promise<void> {

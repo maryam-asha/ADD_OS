@@ -39,9 +39,9 @@
  *   import { formatCurrency, formatDate, formatNumber } from "@/add-os/utils/format"
  *
  *   formatNumber(1234567)                     → "1,234,567"
- *   formatCurrency(85000)                     → "85,000 ل.س."   (ar) · "85,000 SYP" (en)
- *   formatCurrency("1234567.89")              → "1,234,567.89 ل.س."  (fraction kept)
- *   formatCurrency(1234.56, { fractionDigits: 0 }) → "1,235 ل.س."    (rounding asked for)
+ *   formatCurrency(85000)                     → "85,000 ل.س"   (ar) · "85,000 SYP" (en)
+ *   formatCurrency("1234567.89")              → "1,234,567.89 ل.س"  (fraction kept)
+ *   formatCurrency(1234.56, { fractionDigits: 0 }) → "1,235 ل.س"    (rounding asked for)
  *   formatDate(new Date(2026, 7, 2))          → "2 آب 2026" · "2 August 2026"
  *   formatDate(d, { style: "long" })          → "الأحد، 2 آب 2026"
  */

@@ -259,9 +259,7 @@ import { listPlans } from "@/add-os/services/plans"
 import { executePlanPurchase, previewPlanPurchase } from "@/add-os/services/reception"
 import { listUsers } from "@/add-os/services/users"
 import { getWalletBalance } from "@/add-os/services/wallet-top-ups"
-import { DEFAULT_CURRENCY } from "@/add-os/utils/format/currency"
 import { formatDate } from "@/add-os/utils/format/dates"
-import { useCurrencyStore } from "@/stores/currency"
 
 function formatCurrency(amount: number, currency: string) {
     return `${amount.toLocaleString()} ${currency}`
@@ -269,7 +267,6 @@ function formatCurrency(amount: number, currency: string) {
 
 const { t, locale } = useI18n()
 const message = useMessage()
-const currencyStore = useCurrencyStore()
 
 const formRef = ref<FormInst | null>(null)
 
@@ -330,7 +327,7 @@ function buildPayload(): PlanPurchasePreviewPayload {
     return {
         plan_id: form.value.plan_id!,
         payment_method: form.value.payment_method,
-        ...(form.value.payment_method === "cash" ? { currency: form.value.currency } : {}),
+        ...(form.value.payment_method === "cash" && form.value.currency ? { currency: form.value.currency } : {}),
         ...(recipientType.value === "user" ? { user_id: form.value.user_id } : { company_id: form.value.company_id }),
         // A coupon is the member's own: never sent for a company.
         ...(recipientType.value === "user" && appliedCoupon.value !== null ? { coupon_code: appliedCoupon.value } : {})
@@ -428,7 +425,7 @@ async function fetchCurrencies() {
         
         // Auto-select the default currency if none is selected
         if (!form.value.currency) {
-            const defaultCurrency = currencies.find(c => c.is_default) || currencies.find(c => c.is_base)
+            const defaultCurrency = currencies.find(c => c.is_base)
             if (defaultCurrency) {
                 form.value.currency = defaultCurrency.code
             } else if (currencies.length > 0) {

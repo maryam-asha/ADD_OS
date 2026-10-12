@@ -60,13 +60,13 @@ describe("auth service", () => {
 		)
 	})
 
-	it("getMe GETs /api/v1/admin/me and unwraps the user envelope", async () => {
+	it("getMe GETs /api/v1/auth/me and unwraps the user envelope", async () => {
 		const user = { id: 1, name: "ADD Admin", email: "admin@add.local", roles: ["admin"] }
 		vi.mocked(fetch).mockResolvedValue(jsonResponse({ user }))
 
 		const result = await getMe()
 
-		expect(fetch).toHaveBeenCalledWith("http://api.test/api/v1/admin/me", expect.objectContaining({ method: "GET" }))
+		expect(fetch).toHaveBeenCalledWith("http://api.test/api/v1/auth/me", expect.objectContaining({ method: "GET" }))
 		expect(result).toEqual(user)
 	})
 

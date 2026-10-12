@@ -5,6 +5,7 @@ import { authGuard } from "@/add-os/navigation/authGuard"
 import { createAddOsRoutes } from "@/add-os/navigation/routes"
 import { HOME_REDIRECT } from "@/add-os/navigation/sections"
 import { i18nGlobal } from "@/lang"
+import { useAuthStore } from "@/stores/auth"
 import { Layout } from "@/types/theme.d"
 
 /**
@@ -25,13 +26,24 @@ const router = createRouter({
 	routes: [
 		{
 			path: "/",
-			// ADD OS: the first ACTIVE section, not the dashboard. The dashboard is
-			// scheduled last, so pointing home at it would leave the landing page
-			// saying "coming soon" for most of the build. Revisit once it exists.
-			redirect: HOME_REDIRECT
+			// ADD OS: provider portal summary for providers, HOME_REDIRECT for admins.
+			redirect: () => (useAuthStore().isProvider ? "/provider/summary" : HOME_REDIRECT)
 		},
 
 		...createAddOsRoutes(),
+
+		{
+			path: "/provider/suspended",
+			name: "ProviderSuspended",
+			component: () => import("@/add-os/modules/provider-portal/views/ProviderSuspendedPage.vue"),
+			meta: {
+				title: "providerPortal.suspended.title",
+				auth: true,
+				roles: ["provider"],
+				theme: { layout: Layout.Blank, boxed: { enabled: false }, padded: { enabled: false } },
+				skipPin: true
+			}
+		},
 
 		{
 			path: "/login",

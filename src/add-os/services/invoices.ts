@@ -1,5 +1,5 @@
 import type { Paginated } from "./pagination"
-import type { Invoice } from "@/add-os/modules/providers/types"
+import type { Invoice, RecordInvoicePaymentPayload } from "@/add-os/modules/providers/types"
 import { get, post } from "./api"
 
 export async function listInvoices(query?: Record<string, unknown>): Promise<Paginated<Invoice>> {
@@ -11,7 +11,7 @@ export async function getInvoice(id: number): Promise<Invoice> {
 	return res.data
 }
 
-export async function recordInvoicePayment(id: number, payload: { amount: number; currency: string; method: string; receipt_number?: string; payment_date: string }): Promise<void> {
+export async function recordInvoicePayment(id: number, payload: RecordInvoicePaymentPayload): Promise<void> {
 	await post(`/api/v1/admin/invoices/${id}/payments`, payload)
 }
 

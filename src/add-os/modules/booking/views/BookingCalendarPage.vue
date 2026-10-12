@@ -164,6 +164,10 @@
 						<span class="font-medium">{{ status === "ended" ? t("bookingCalendar.legend.ended") : t(`allBookings.status.${status}`) }}</span>
 					</span>
 					<span class="flex items-center gap-2">
+						<span class="add-legend-swatch c-leased" />
+						<span class="font-medium">{{ t("bookingCalendar.legend.leased") }}</span>
+					</span>
+					<span class="flex items-center gap-2">
 						<span class="add-legend-swatch c-closed" />
 						<span class="font-medium">{{ t("bookingCalendar.legend.closed") }}</span>
 					</span>
@@ -863,6 +867,18 @@ const events = computed<EventInput[]>(() => {
 		for (const day of resource.days) {
 			if (day.state === "closed") {
 				closedDates.add(day.date)
+			} else if (day.state === "leased") {
+				out.push({
+					id: `leased-${resource.space.id}-${day.date}`,
+					title: `${spaceName} · ${t("bookingCalendar.legend.leased")}`,
+					start: day.date,
+					allDay: true,
+					classNames: ["c-leased", "styled"],
+					extendedProps: {
+						spaceName,
+						isLeased: true
+					}
+				})
 			}
 
 			for (const booking of day.bookings) {
@@ -1168,7 +1184,7 @@ function formatQuoteAmount(amount: { currency: string, value: string }): string 
 		: amount.currency === "EUR"
 			? "€"
 			: amount.currency === "SYP"
-				? (locale.value === "ar" ? "ل.س." : "SYP")
+				? (locale.value === "ar" ? "ل.س" : "SYP")
 				: amount.currency
 	return `${valueWithFraction} ${symbol}`
 }
@@ -1305,7 +1321,10 @@ function isDateDisabled(timestamp: number): boolean {
 
 	const resources = response.value?.resources ?? []
 	if (resources.length === 0) return false
-	return resources.every(resource => resource.days.find(day => day.date === date)?.state === "closed")
+	return resources.every(resource => {
+		const state = resource.days.find(day => day.date === date)?.state
+		return state === "closed" || state === "leased"
+	})
 }
 
 const memberOptions = computed<SelectOption[]>(() =>
@@ -1760,6 +1779,24 @@ defineExpose({
 				}
 			}
 
+			&.c-leased {
+				background-color: rgba(var(--info-color-rgb) / 0.16) !important;
+				border-color: rgba(var(--info-color-rgb) / 0.35) !important;
+				border-inline-start-color: var(--info-color) !important;
+				color: var(--fg-default-color) !important;
+
+				&:hover {
+					background-color: rgba(var(--info-color-rgb) / 0.24) !important;
+				}
+				.fc-event-main,
+				.fc-event-title {
+					color: var(--fg-default-color) !important;
+				}
+				.fc-event-time {
+					color: var(--fg-secondary-color) !important;
+				}
+			}
+
 			&.c-pending {
 				background-color: rgba(var(--warning-color-rgb) / 0.18) !important;
 				border-color: rgba(var(--warning-color-rgb) / 0.4) !important;
@@ -2081,6 +2118,10 @@ defineExpose({
 		background-color: var(--bg-secondary-color);
 		border-color: var(--border-color);
 		opacity: 0.7;
+	}
+	&.c-leased {
+		background-color: rgba(var(--info-color-rgb) / 0.2);
+		border-color: var(--info-color);
 	}
 }
 
@@ -2535,6 +2576,9 @@ defineExpose({
 
 	&.c-confirmed {
 		border-inline-start-color: var(--success-color);
+	}
+	&.c-leased {
+		border-inline-start-color: var(--info-color);
 	}
 	&.c-pending {
 		border-inline-start-color: var(--warning-color);

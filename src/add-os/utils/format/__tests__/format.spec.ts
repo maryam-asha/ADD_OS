@@ -69,18 +69,18 @@ describe("formatNumber — Latin digits, always", () => {
 
 describe("formatCurrency — SYP is always whole", () => {
 	it("shows whole amounts with no decimals", () => {
-		expect(formatCurrency(85000, AR)).toBe("85,000 ل.س.")
+		expect(formatCurrency(85000, AR)).toBe("85,000 ل.س")
 		expect(formatCurrency(85000, EN)).toBe("85,000 SYP")
 	})
 
 	it("never shows piasters, even when the value carries them", () => {
 		// The pound has no fractional unit in use (product owner, 2026-10-04).
-		expect(formatCurrency("1234567.89", AR)).toBe("1,234,568 ل.س.")
+		expect(formatCurrency("1234567.89", AR)).toBe("1,234,568 ل.س")
 		expect(formatCurrency("33216.02", EN)).toBe("33,216 SYP")
 	})
 
 	it("stays whole even when a caller asks for decimals", () => {
-		expect(formatCurrency("1234.56", { ...AR, fractionDigits: 2 })).toBe("1,235 ل.س.")
+		expect(formatCurrency("1234.56", { ...AR, fractionDigits: 2 })).toBe("1,235 ل.س")
 	})
 
 	it("keeps full precision for huge DECIMAL values passed as strings", () => {
@@ -95,8 +95,12 @@ describe("formatCurrency — SYP is always whole", () => {
 		expect(formatCurrency(85000, { ...AR, showSymbol: false })).toBe("85,000")
 	})
 
-	it("uses two decimals for currencies that have them", () => {
-		expect(formatCurrency(1500, { ...EN, currency: "USD" })).toBe("1,500.00 $")
+	it("shows an amount as it is, without trailing zeros", () => {
+		expect(formatCurrency(1500, { ...EN, currency: "USD" })).toBe("1,500 $")
+		expect(formatCurrency("1500.00", { ...EN, currency: "USD" })).toBe("1,500 $")
+		expect(formatCurrency("150.50", { ...EN, currency: "USD" })).toBe("150.5 $")
+		expect(formatCurrency("12.75", { ...EN, currency: "USD" })).toBe("12.75 $")
+		expect(formatCurrency(1500, { ...EN, currency: "USD", fractionDigits: 2 })).toBe("1,500.00 $")
 	})
 
 	it("hasFraction distinguishes real fractions from trailing zeros", () => {

@@ -44,6 +44,36 @@ describe("authGuard", () => {
 	it("shows /login to a signed-out caller", () => {
 		expect(authGuard(loginPage({ redirect: "/members" }))).toBeUndefined()
 	})
+
+	it("redirects a provider attempting to access an admin route to /provider/summary", () => {
+		useAuthStore().setLogged({ id: 2, name: "Provider Alpha", email: "alpha@test.local", roles: ["provider"] })
+		expect(authGuard(protectedPage("/spatial/branches"))).toEqual({
+			path: "/provider/summary"
+		})
+	})
+
+	it("redirects an admin attempting to access a provider route to /", () => {
+		useAuthStore().setLogged(adminUser)
+		const providerPage = route("/provider/summary", { auth: true, roles: ["provider"] })
+		expect(authGuard(providerPage)).toEqual({
+			path: "/"
+		})
+	})
+
+	it("allows a provider to access a provider route", () => {
+		useAuthStore().setLogged({ id: 2, name: "Provider Alpha", email: "alpha@test.local", roles: ["provider"] })
+		const providerPage = route("/provider/summary", { auth: true, roles: ["provider"] })
+		expect(authGuard(providerPage)).toBeUndefined()
+	})
+
+	it("logs out and redirects a member-only user to /login", () => {
+		const store = useAuthStore()
+		store.setLogged({ id: 3, name: "Member User", email: "member@test.local", roles: ["member"] })
+		expect(authGuard(protectedPage("/spatial/branches"))).toEqual({
+			path: "/login"
+		})
+		expect(store.isLogged).toBe(false)
+	})
 })
 
 describe("safeRedirect", () => {

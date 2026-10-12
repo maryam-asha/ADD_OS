@@ -57,4 +57,43 @@ describe("auth store", () => {
 
 		expect(store.permissions).toEqual([])
 	})
+
+	it("identifies provider accounts correctly", () => {
+		const store = useAuthStore()
+
+		store.setLogged(sampleUser({ roles: ["provider"] }))
+		expect(store.isProvider).toBe(true)
+		expect(store.isAdmin).toBe(false)
+		expect(store.isMemberOnly).toBe(false)
+		expect(store.userRole).toBe("provider")
+		expect(store.isRoleGranted(["provider"])).toBe(true)
+		expect(store.isRoleGranted(["admin"])).toBe(false)
+	})
+
+	it("identifies member-only accounts correctly", () => {
+		const store = useAuthStore()
+
+		store.setLogged(sampleUser({ roles: ["member"] }))
+		expect(store.isProvider).toBe(false)
+		expect(store.isAdmin).toBe(false)
+		expect(store.isMemberOnly).toBe(true)
+		expect(store.userRole).toBe("member")
+	})
+
+	it("identifies admin and operations accounts correctly", () => {
+		const store = useAuthStore()
+
+		store.setLogged(sampleUser({ roles: ["admin"] }))
+		expect(store.isProvider).toBe(false)
+		expect(store.isAdmin).toBe(true)
+		expect(store.isMemberOnly).toBe(false)
+		expect(store.userRole).toBe("admin")
+		expect(store.isRoleGranted(["admin"])).toBe(true)
+		expect(store.isRoleGranted(["provider"])).toBe(false)
+
+		store.setLogged(sampleUser({ roles: ["operations"] }))
+		expect(store.isProvider).toBe(false)
+		expect(store.isAdmin).toBe(true)
+		expect(store.userRole).toBe("operations")
+	})
 })

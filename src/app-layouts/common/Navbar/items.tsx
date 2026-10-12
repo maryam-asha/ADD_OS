@@ -100,11 +100,30 @@ export default function getItems(args: { mode: "vertical" | "horizontal"; collap
 	const authStore = useAuthStore()
 
 	return NAV_SECTIONS
-		.filter(section => authStore.isRoleGranted(section.roles ?? ["admin", "operations"]))
+		.filter(section => {
+			if (authStore.isProvider) {
+				// Provider portal account only ever sees providerPortal sections
+				if (section.key !== "providerPortal" && !section.roles?.includes("provider")) {
+					return false
+				}
+			} else {
+				// Admin / operations account never sees provider portal sections
+				if (section.key === "providerPortal" || section.roles?.includes("provider")) {
+					return false
+				}
+			}
+
+			if (!authStore.isRoleGranted(section.roles ?? ["admin", "operations"])) return false
+			if (section.permission && !authStore.hasPermission(section.permission)) return false
+			return true
+		})
 		.map<MenuMixedOption>(section => ({
-		key: section.key,
-		label: sectionLabel(section, args.collapsed),
-		icon: sectionIcon(section),
-		children: section.pages.filter(page => !page.hidden).map(page => pageOption(section, page))
-	}))
+			key: section.key,
+			label: sectionLabel(section, args.collapsed),
+			icon: sectionIcon(section),
+			children: section.pages
+				.filter(page => !page.hidden)
+				.filter(page => !page.permission || authStore.hasPermission(page.permission))
+				.map(page => pageOption(section, page))
+		}))
 }

@@ -545,7 +545,7 @@ export const PROPORTIONAL_FIGURE_FACES: Record<string, { spreadUnits: number; un
  * decides the face that draws them.
  *
  * Direction is deliberately NOT set here. `formatCurrency` relies on the bidi
- * algorithm to place "1,234 ل.س." correctly, and forcing `direction: ltr` would
+ * algorithm to place "1,234 ل.س" correctly, and forcing `direction: ltr` would
  * move the symbol. Flagged for visual confirmation in Phase 5.
  */
 export const NUMERIC_CELL_CLASS = "add-numeric"
