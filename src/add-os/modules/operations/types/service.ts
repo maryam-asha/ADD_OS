@@ -71,15 +71,26 @@ export interface ServiceType {
 	name: string
 	description?: string
 	icon?: string
+	/** The cover on its "Explore ADD" card and page. */
+	image_url?: string | null
 	is_active: boolean
 	is_coming_soon: boolean
+	/** Whether the member app's home lists it under "Explore ADD". */
+	show_on_home?: boolean
 	requires_location: boolean
 	requires_review: boolean
+	visibility?: "member" | "public" | "both"
 	request_method: RequestMethod
 	request_config?: Record<string, unknown> | null
 	allowed_plan_module_ids?: number[] | null
 	order?: number
 	fields?: ServiceTypeField[]
+	/** Admin reads only: each text in both languages, for the edit form (name/description above are in the request's language). */
+	translations?: {
+		name: { en: string; ar: string }
+		description: { en: string; ar: string } | null
+		about: { en: string; ar: string } | null
+	}
 }
 
 export interface ServiceTypePayload {
@@ -87,9 +98,13 @@ export interface ServiceTypePayload {
 	slug: string
 	name: { en: string; ar: string }
 	description?: { en: string; ar: string } | null
+	/** The "Explore ADD" page: HTML the app renders, per language. */
+	about?: { en: string; ar: string } | null
 	icon?: string | null
+	image_url?: string | null
 	is_active?: boolean
 	is_coming_soon?: boolean
+	show_on_home?: boolean
 	requires_location?: boolean
 	requires_review?: boolean
 	visibility?: "member" | "public" | "both"

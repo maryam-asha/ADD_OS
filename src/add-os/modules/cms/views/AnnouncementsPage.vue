@@ -33,7 +33,7 @@
 		<ResourceFormDrawer
 			v-model:show="drawerVisible"
 			v-model:model="form"
-			:fields="announcementFields"
+			:fields
 			:title="mode === 'create' ? t('announcements.create.title') : t('announcements.edit.title')"
 			:submitting="mutations.isSubmitting.value"
 			:on-submit="submit"
@@ -43,17 +43,29 @@
 
 <script setup lang="ts">
 import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vue"
-import type { Announcement, AnnouncementPayload } from "@/add-os/modules/cms/types/announcement"
+import type { Announcement, AnnouncementOptions, AnnouncementPayload } from "@/add-os/modules/cms/types/announcement"
 import { NAlert, NButton } from "naive-ui"
-import { computed, ref } from "vue"
+import { computed, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.vue"
 import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
-import { announcementFields, buildAnnouncementColumns, emptyAnnouncementPayload } from "@/add-os/modules/cms/config/announcements.config"
-import { createAnnouncement, listAnnouncements, removeAnnouncement, updateAnnouncement } from "@/add-os/services/announcements"
+import {
+	announcementBody,
+	announcementToPayload,
+	buildAnnouncementColumns,
+	buildAnnouncementFields,
+	emptyAnnouncementPayload
+} from "@/add-os/modules/cms/config/announcements.config"
+import {
+	createAnnouncement,
+	getAnnouncementOptions,
+	listAnnouncements,
+	removeAnnouncement,
+	updateAnnouncement
+} from "@/add-os/services/announcements"
 import Icon from "@/components/common/Icon.vue"
 
 defineProps<{ titleKey?: string }>()
@@ -62,6 +74,19 @@ const { t } = useI18n()
 
 const { data, isLoading, error, refetch } = useResourceList<Announcement>(listAnnouncements)
 const columns = computed(() => buildAnnouncementColumns(t))
+
+// The type and placement pickers' choices, labelled by the server. Without
+// them the pickers are empty, and the list itself still works.
+const options = ref<AnnouncementOptions | null>(null)
+const fields = computed(() => buildAnnouncementFields(options.value))
+
+onMounted(async () => {
+	try {
+		options.value = await getAnnouncementOptions()
+	} catch {
+		options.value = null
+	}
+})
 
 const statCards = computed<StatCard[]>(() => {
 	const total = data.value.length
@@ -99,23 +124,16 @@ function openCreate() {
 function openEdit(row: Announcement) {
 	mode.value = "edit"
 	editingId.value = row.id
-	form.value = {
-		type: row.type,
-		image_url: row.image_url || "",
-		link_url: row.link_url || "",
-		sort_order: row.sort_order,
-		starts_at: row.starts_at || "",
-		ends_at: row.ends_at || "",
-		is_active: row.is_active
-	}
+	form.value = announcementToPayload(row)
 	drawerVisible.value = true
 }
 
 async function submit(payload: Record<string, unknown>) {
+	const body = announcementBody(payload) as unknown as AnnouncementPayload
 	if (mode.value === "create") {
-		await mutations.create(payload as unknown as AnnouncementPayload)
+		await mutations.create(body)
 	} else if (editingId.value !== null) {
-		await mutations.update(editingId.value, payload as unknown as AnnouncementPayload)
+		await mutations.update(editingId.value, body)
 	}
 	drawerVisible.value = false
 }

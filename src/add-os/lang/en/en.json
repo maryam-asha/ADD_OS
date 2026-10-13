@@ -1994,6 +1994,7 @@
 	"announcements": {
 		"columns": {
 			"type": "Type",
+			"placement": "Shown on",
 			"startsAt": "Starts at",
 			"endsAt": "Ends at",
 			"status": "Status",
@@ -2003,9 +2004,19 @@
 			"active": "Active",
 			"inactive": "Inactive"
 		},
+		"placement": {
+			"kiosk": "Reception kiosk",
+			"app": "Member app",
+			"all": "Kiosk and app"
+		},
 		"form": {
 			"type": "Type",
+			"placement": "Shown on",
 			"imageUrl": "Banner image",
+			"subtitle": "Small line above the title",
+			"title": "Title",
+			"description": "Text",
+			"ctaLabel": "Button label",
 			"linkUrl": "Link URL",
 			"startsAt": "Starts at",
 			"endsAt": "Ends at",
@@ -2280,7 +2291,13 @@
 			"confirmCancel": "Cancel",
 			"statusUpdated": "Service status updated successfully",
 			"locationRequired": "Requires Location",
-			"fields": "Form Fields"
+			"fields": "Form Fields",
+			"image": "Cover image",
+			"aboutEn": "Explore page (English, HTML)",
+			"aboutAr": "Explore page (Arabic, HTML)",
+			"showOnHome": "Show in the app's Explore ADD",
+			"onHome": "On the home",
+			"serviceUpdated": "Service updated successfully"
 		}
 	},
 	"closeSession": {

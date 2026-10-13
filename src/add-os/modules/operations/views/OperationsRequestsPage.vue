@@ -11,7 +11,7 @@
 				<n-button
 					v-if="selectedTab === 'catalog'"
 					type="primary"
-					@click="showCreateTypeModal = true"
+					@click="openServiceTypeForm(null)"
 				>
 					<template #icon><Icon name="carbon:add" :size="16" /></template>
 					{{ t("operationsRequests.actions.addService") }}
@@ -219,12 +219,15 @@
 									</div>
 								</div>
 
-								<div class="flex items-center gap-1.5">
+								<div class="flex flex-wrap items-center justify-end gap-1.5 max-w-[50%]">
 									<n-tag size="small" round :type="st.is_active ? 'success' : 'default'">
 										{{ st.is_active ? t('operationsRequests.catalog.active') : t('operationsRequests.catalog.inactive') }}
 									</n-tag>
 									<n-tag size="small" round :type="st.is_coming_soon ? 'warning' : 'info'">
 										{{ st.is_coming_soon ? t('operationsRequests.catalog.comingSoon') : t('operationsRequests.catalog.available') }}
+									</n-tag>
+									<n-tag v-if="st.show_on_home" size="small" round type="primary">
+										{{ t('operationsRequests.catalog.onHome') }}
 									</n-tag>
 								</div>
 							</div>
@@ -263,6 +266,14 @@
 							</div>
 
 							<div class="flex items-center gap-2">
+								<n-button
+									size="small"
+									quaternary
+									:title="t('operationsRequests.actions.editService')"
+									@click="openServiceTypeForm(st)"
+								>
+									<template #icon><Icon name="carbon:edit" :size="16" /></template>
+								</n-button>
 								<n-button
 									size="small"
 									secondary
@@ -308,9 +319,10 @@
 			:service-type="selectedServiceType"
 		/>
 
-		<CreateServiceTypeModal
-			v-model:show="showCreateTypeModal"
-			@created="fetchServiceTypes"
+		<ServiceTypeFormModal
+			v-model:show="showServiceTypeForm"
+			:service-type="editingServiceType"
+			@saved="fetchServiceTypes"
 		/>
 	</div>
 </template>
@@ -325,10 +337,10 @@ import { listBranches } from "@/add-os/services/branches"
 import { listServiceRequests, updateServiceRequestStatus } from "@/add-os/services/service-requests"
 import { listServiceTypes, removeServiceType, updateServiceType } from "@/add-os/services/service-types"
 import Icon from "@/components/common/Icon.vue"
-import CreateServiceTypeModal from "../components/CreateServiceTypeModal.vue"
 import ServiceRequestDetailModal from "../components/ServiceRequestDetailModal.vue"
 import ServiceStatusUpdateModal from "../components/ServiceStatusUpdateModal.vue"
 import ServiceTypeFieldsDrawer from "../components/ServiceTypeFieldsDrawer.vue"
+import ServiceTypeFormModal from "../components/ServiceTypeFormModal.vue"
 
 const { t } = useI18n()
 const message = useMessage()
@@ -351,7 +363,9 @@ const isUpdatingStatus = ref(false)
 const showDetailModal = ref(false)
 const showStatusModal = ref(false)
 const showFieldsDrawer = ref(false)
-const showCreateTypeModal = ref(false)
+const showServiceTypeForm = ref(false)
+/** The service the form edits; null when it creates one. */
+const editingServiceType = ref<ServiceType | null>(null)
 
 const selectedRequest = ref<ServiceRequest | null>(null)
 const selectedServiceType = ref<ServiceType | null>(null)
@@ -478,6 +492,11 @@ async function handleStatusSubmit(payload: { status: ServiceRequestStatus; resol
 }
 
 // ── Catalog Actions ──────────────────────────────────────────────────────────
+
+function openServiceTypeForm(type: ServiceType | null) {
+	editingServiceType.value = type
+	showServiceTypeForm.value = true
+}
 
 function openFieldsDrawer(type: ServiceType) {
 	selectedServiceType.value = type

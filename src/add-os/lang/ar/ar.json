@@ -1998,6 +1998,7 @@
 	"announcements": {
 		"columns": {
 			"type": "النوع",
+			"placement": "مكان العرض",
 			"startsAt": "تاريخ البدء",
 			"endsAt": "تاريخ الانتهاء",
 			"status": "الحالة",
@@ -2007,9 +2008,19 @@
 			"active": "نشط",
 			"inactive": "غير نشط"
 		},
+		"placement": {
+			"kiosk": "شاشة الاستقبال",
+			"app": "تطبيق الأعضاء",
+			"all": "الشاشة والتطبيق"
+		},
 		"form": {
 			"type": "النوع",
+			"placement": "مكان العرض",
 			"imageUrl": "صورة الإعلان",
+			"subtitle": "السطر الصغير فوق العنوان",
+			"title": "العنوان",
+			"description": "النص",
+			"ctaLabel": "نص الزر",
 			"linkUrl": "رابط التوجيه",
 			"startsAt": "تاريخ البدء",
 			"endsAt": "تاريخ الانتهاء",
@@ -2285,7 +2296,13 @@
 			"confirmCancel": "إلغاء",
 			"statusUpdated": "تم تحديث حالة الخدمة بنجاح",
 			"locationRequired": "يتطلب الموقع",
-			"fields": "حقول النموذج"
+			"fields": "حقول النموذج",
+			"image": "صورة الغلاف",
+			"aboutEn": "صفحة الشرح (إنكليزي، HTML)",
+			"aboutAr": "صفحة الشرح (عربي، HTML)",
+			"showOnHome": "تظهر في Explore ADD بالتطبيق",
+			"onHome": "على الرئيسية",
+			"serviceUpdated": "تم تحديث الخدمة بنجاح"
 		}
 	},
 	"closeSession": {
