@@ -535,7 +535,7 @@ import { ApiError } from "@/add-os/services/api"
 import { getCalendar, getSpaceSlots } from "@/add-os/services/booking-calendar"
 import { listMembers } from "@/add-os/services/members"
 import { createReceptionBooking, quoteReceptionBooking } from "@/add-os/services/reception"
-import { formatClockTime, formatCurrency, formatDate, formatDateTime, formatNumber, formatTime, isCurrencyCode } from "@/add-os/utils/format"
+import { formatClockTime, formatDate, formatDateTime, formatNumber, formatTime } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
 /**

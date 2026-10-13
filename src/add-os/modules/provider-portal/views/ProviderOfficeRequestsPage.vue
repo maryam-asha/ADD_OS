@@ -180,11 +180,11 @@
 				class="flex flex-col sm:flex-row items-center justify-between px-6 py-3.5 border-t border-[var(--add-border,#CDC2AF)]/30 dark:border-neutral-800 gap-3 text-xs text-[var(--add-text-secondary,#565B65)] dark:text-neutral-400 bg-[var(--add-surface,#F7F5F2)]/40 dark:bg-neutral-900/40"
 			>
 				<div>
-					{{ t('providerOfficeRequests.pagination.showing', 'عرض {from} إلى {to} من أصل {total} طلب', {
+					{{ t('providerOfficeRequests.pagination.showing', {
 						from: meta ? ((meta.current_page - 1) * meta.per_page) + 1 : 1,
 						to: meta ? Math.min(meta.current_page * meta.per_page, meta.total) : filteredData.length,
 						total: meta?.total ?? filteredData.length
-					}) }}
+					}, 'عرض {from} إلى {to} من أصل {total} طلب') }}
 				</div>
 
 				<n-pagination

@@ -1,4 +1,5 @@
 import type { SelectOption } from "naive-ui"
+import type { Ref } from "vue"
 import type { TargetItemKey } from "@/add-os/modules/pricing/types/coupon"
 import { ref } from "vue"
 import { useI18n } from "vue-i18n"
@@ -17,7 +18,20 @@ import { listUsers } from "@/add-os/services/users"
  * plans, spaces, events, and the known space types. Loaded once per
  * instance, on first open.
  */
-export function usePricingPickers() {
+export interface PricingPickers {
+	load: () => Promise<void>
+	users: Ref<SelectOption[]>
+	companies: Ref<SelectOption[]>
+	plans: Ref<SelectOption[]>
+	spaces: Ref<SelectOption[]>
+	events: Ref<SelectOption[]>
+	spaceTypes: SelectOption[]
+	optionsFor: (key: TargetItemKey) => SelectOption[]
+	nameOf: (key: TargetItemKey | "company_id" | "user", id: number | string) => string
+}
+
+/** Annotated: the inferred type (Naive option style props included) is too long for tsc to emit. */
+export function usePricingPickers(): PricingPickers {
 	const { t } = useI18n()
 	const users = ref<SelectOption[]>([])
 	const companies = ref<SelectOption[]>([])

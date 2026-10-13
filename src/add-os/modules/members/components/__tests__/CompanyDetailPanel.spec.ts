@@ -23,6 +23,11 @@ const refetchMembersMock = vi.fn()
 // useCompanyDetail (Task 9) actually returns.
 let membersFixture: ReturnType<typeof ref<CompanyMember[]>>
 
+// The office-leases section is permission-gated. These tests mount without
+// Pinia, so the gate is granted explicitly rather than relying on it failing
+// open (it no longer does).
+vi.mock("@/add-os/config/permissions", () => ({ canViewOfficeLeases: () => true }))
+
 vi.mock("@/add-os/modules/members/composables/useCompanyDetail", () => ({
 	useCompanyDetail: () => ({
 		company: ref(sampleCompany),

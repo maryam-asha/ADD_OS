@@ -29,8 +29,17 @@ import type { SpaceType } from "@/add-os/modules/spatial/types/space"
  *     multi-occupant space.
  */
 
-/** Whether the branch was open on a calendar cell's date. */
-export type CalendarDayState = "open" | "closed"
+/**
+ * Whether the branch was open on a calendar cell's date.
+ *
+ * **Changed 2026-10-13:** `leased` added. Point 1 above still holds — a full day
+ * is still `open` — but a day an office lease holds is not: ADDCore
+ * `BookingCalendarService` returns `leased` when a company holds the office all
+ * day, so the desk cannot book it whatever the hours say (ADDCore commit
+ * 3e2991a). The pinned collection does not list it yet; the source is the
+ * backend code, not the snapshot.
+ */
+export type CalendarDayState = "open" | "closed" | "leased"
 
 /** Which period the calendar spans. `week` runs Sunday–Saturday. */
 export type CalendarView = "day" | "week" | "month"

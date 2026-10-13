@@ -94,10 +94,10 @@
 						Still the same `success` ramp — the contrast-adjusted Smart Olive
 						already asserted in tokens.spec.ts — no new colour introduced.
 					-->
-					<!-- <div aria-hidden="true" class="bg-success h-1.5 w-20 rounded-full" /> -->
-					<!-- <h2 id="auth-panel-title" class="mt-6 text-4xl font-bold leading-tight xl:text-5xl">
+					<div aria-hidden="true" class="bg-success h-1.5 w-20 rounded-full" />
+					<h2 id="auth-panel-title" class="mt-6 text-4xl font-bold leading-tight xl:text-5xl">
 						{{ t("auth.panel.headline") }}
-					</h2> -->
+					</h2>
 				</div>
 
 				<!--

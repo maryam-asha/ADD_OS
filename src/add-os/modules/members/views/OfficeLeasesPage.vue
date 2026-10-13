@@ -84,9 +84,9 @@
 					</div>
 
 					<div class="flex items-center justify-between pt-1 border-t border-[var(--add-border,#CDC2AF)]/20 text-xs text-[var(--add-text-muted,#5A606B)] dark:border-neutral-800">
-						<span>{{ t("officeLeases.stats.acrossWings", "ضمن {count} أجنحة تقنية", { count: activeWingsCount }) }}</span>
+						<span>{{ t("officeLeases.stats.acrossWings", { count: activeWingsCount }, "ضمن {count} أجنحة تقنية") }}</span>
 						<span class="inline-flex items-center gap-1 font-bold text-[var(--add-primary-text,#556843)] dark:text-[var(--add-primary,#657C50)]">
-							<Icon name="carbon:trend-up" :size="13" />
+							<Icon name="carbon:arrow-up-right" :size="13" />
 							<span>+{{ newThisMonthCount }} هذا الشهر</span>
 						</span>
 					</div>
@@ -114,7 +114,7 @@
 
 					<div class="flex items-center justify-between gap-2 pt-1 border-t border-[var(--add-border,#CDC2AF)]/20 text-xs dark:border-neutral-800">
 						<span class="font-bold text-[var(--add-text-primary,#43474F)] dark:text-neutral-300">
-							{{ t("officeLeases.stats.occupancy", "إشغال {percent}%", { percent: occupancyRate }) }}
+							{{ t("officeLeases.stats.occupancy", { percent: occupancyRate }, "إشغال {percent}%") }}
 						</span>
 						<div class="h-2 w-28 overflow-hidden rounded-full bg-[var(--add-surface-sunken,#EDEAE8)] dark:bg-neutral-800">
 							<div
@@ -198,7 +198,7 @@
 					</div>
 					<div class="flex flex-col gap-0.5">
 						<h4 class="text-sm font-bold text-[var(--add-warning-text,#845A13)] dark:text-[var(--add-warning,#E7B155)]">
-							{{ t("officeLeases.alerts.smartCollectionTitle", "تنبيه نظام التحصيل الذكي: ({count}) عقود مقفلة تلقائياً عن التجديد", { count: blockedLeasesCount }) }}
+							{{ t("officeLeases.alerts.smartCollectionTitle", { count: blockedLeasesCount }, "تنبيه نظام التحصيل الذكي: ({count}) عقود مقفلة تلقائياً عن التجديد") }}
 						</h4>
 						<p class="text-xs text-[var(--add-warning-text,#845A13)]/90 dark:text-[var(--add-warning,#E7B155)]/90">
 							{{ t("officeLeases.alerts.smartCollectionDesc", "تم تقييد التجديد التلقائي لشركات عليها فواتير متأخرة تجاوزت شريحة 60 يوماً في كشف أعمار الديون حفاظاً على الانتظام المالي.") }}
@@ -318,11 +318,11 @@
 					class="flex flex-col sm:flex-row items-center justify-between px-6 py-3.5 border-t border-[var(--add-border,#CDC2AF)]/30 dark:border-neutral-800 gap-3 text-xs text-[var(--add-text-secondary,#565B65)] dark:text-neutral-400 bg-[var(--add-surface,#F7F5F2)]/40 dark:bg-neutral-900/40"
 				>
 					<div>
-						{{ t('officeLeases.pagination.showing', 'عرض {from} - {to} من أصل {total} عقد مسجل', {
+						{{ t('officeLeases.pagination.showing', {
 							from: meta ? ((meta.current_page - 1) * meta.per_page) + 1 : 1,
 							to: meta ? Math.min(meta.current_page * meta.per_page, meta.total) : filteredData.length,
 							total: meta?.total ?? filteredData.length
-						}) }}
+						}, 'عرض {from} - {to} من أصل {total} عقد مسجل') }}
 					</div>
 
 					<n-pagination
@@ -349,19 +349,16 @@
 
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
-import type { OfficeLease, OfficeLeaseFilterQuery, OfficeLeaseStatus } from "@/add-os/modules/members/types/office-lease"
-import { NAlert, NButton, NDataTable, NInput, NPagination, NSelect, NSwitch, NTag, NTooltip, useDialog, useMessage } from "naive-ui"
+import type { OfficeLease, OfficeLeaseFilterQuery } from "@/add-os/modules/members/types/office-lease"
+import { NAlert, NButton, NDataTable, NInput, NPagination, NSelect, NSwitch, NTag, useMessage } from "naive-ui"
 import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useResourceList } from "@/add-os/composables/useResourceList"
-import { canCreateOfficeLeases, canManageRenewals, canTerminateOfficeLeases, canViewOfficeLeases } from "@/add-os/config/permissions"
+import { canCreateOfficeLeases, canViewOfficeLeases } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import OfficeLeaseDetailModal from "@/add-os/modules/members/components/OfficeLeaseDetailModal.vue"
-import { ApiError } from "@/add-os/services/api"
 import { listBranches } from "@/add-os/services/branches"
-import { listCompanies } from "@/add-os/services/companies"
-import { listOfficeLeases, renewOfficeLease } from "@/add-os/services/office-leases"
-import { listProviders } from "@/add-os/services/providers"
+import { listOfficeLeases } from "@/add-os/services/office-leases"
 import { formatReportMoney } from "@/add-os/services/reports"
 import { listSpaces } from "@/add-os/services/spaces"
 import { formatDate } from "@/add-os/utils/format/dates"
@@ -369,12 +366,9 @@ import Icon from "@/components/common/Icon.vue"
 
 const props = defineProps<{ titleKey?: string }>()
 const { t } = useI18n()
-const dialog = useDialog()
 const message = useMessage()
 
 const canView = computed(() => canViewOfficeLeases())
-const canTerminate = computed(() => canTerminateOfficeLeases())
-const canRenew = computed(() => canManageRenewals())
 const canCreate = computed(() => canCreateOfficeLeases())
 
 const query = ref<OfficeLeaseFilterQuery>({})
@@ -401,8 +395,7 @@ function resolveLocalized(val: any, fallback: string): string {
 }
 
 // Select options
-const { data: companies, isLoading: isLoadingCompanies } = useResourceList(listCompanies)
-const { data: spaces, isLoading: isLoadingSpaces } = useResourceList(() => listSpaces())
+const { data: spaces } = useResourceList(() => listSpaces())
 const { data: branches, isLoading: isLoadingBranches } = useResourceList(listBranches)
 
 const branchOptions = computed(() => branches.value.map(b => ({
@@ -587,26 +580,6 @@ function exportCsv() {
 	link.click()
 	document.body.removeChild(link)
 	URL.revokeObjectURL(url)
-}
-
-function confirmRenew(row: OfficeLease) {
-	dialog.info({
-		title: t("officeLeases.detail.renewNow", "تجديد العقد الآن"),
-		content: t("officeLeases.detail.renewConfirm", "هل ترغب في تجديد هذا العقد لدورة إيجارية جديدة؟"),
-		positiveText: t("officeLeases.detail.renewNow", "تجديد الآن"),
-		negativeText: t("resourceCrud.form.cancel", "إلغاء"),
-		onPositiveClick: async () => {
-			try {
-				await renewOfficeLease(row.id)
-				message.success(t("officeLeases.detail.renewSuccess", "تم تجديد العقد بنجاح"))
-				refetch()
-			} catch (caught) {
-				if (caught instanceof ApiError) {
-					message.error(caught.data?.message ?? t("resourceCrud.mutations.genericError"))
-				}
-			}
-		}
-	})
 }
 
 const columns = computed<DataTableColumns<OfficeLease>>(() => [

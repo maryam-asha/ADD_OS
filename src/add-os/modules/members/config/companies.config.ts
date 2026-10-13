@@ -58,7 +58,7 @@ export function buildCompanyColumns(
 			minWidth: 260,
 			render: row => {
 				const lease = row.office_leases?.[0]
-				const spaceInfo = lease?.space?.name ? ` · ${pickLocalized(lease.space.name, locale) || lease.space.name}` : ""
+				const spaceInfo = lease?.space?.name ? ` · ${lease.space.name}` : ""
 				const monogram = getMonogram(row.legal_name)
 				const palette = getAvatarPalette(row.id)
 				return h("div", { class: "flex items-center gap-3 py-1 whitespace-nowrap" }, [
@@ -101,7 +101,7 @@ export function buildCompanyColumns(
 			render: row => {
 				const bName = branchName(row.branch_id)
 				const lease = row.office_leases?.[0]
-				const spaceName = lease?.space?.name ? (pickLocalized(lease.space.name, locale) || lease.space.name) : null
+				const spaceName = lease?.space?.name ? lease.space.name : null
 				return h("div", { class: "flex flex-col gap-0.5 whitespace-nowrap" }, [
 					h("span", { class: "text-sm font-medium text-slate-800 dark:text-slate-200" }, bName),
 					spaceName ? h("span", { class: "text-xs text-slate-400 dark:text-slate-500" }, spaceName) : null

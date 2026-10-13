@@ -609,7 +609,7 @@
 													{{ row.companyName }}
 												</span>
 												<span class="text-[11px] text-neutral-400">
-													{{ row.contractRef ? `سجل: ${row.contractRef}` : `#${row.companyId}` }}
+													{{ `#${row.companyId}` }}
 												</span>
 											</div>
 										</div>
@@ -697,11 +697,11 @@
 					<div class="flex flex-wrap items-center justify-between gap-3 pt-2 text-xs text-neutral-500">
 						<!-- Showing count -->
 						<span>
-							{{ t("reports.providerInvoices.paginationSummary", "عرض {start} - {end} من إجمالي {total} شركات مسجلة", {
+							{{ t("reports.providerInvoices.paginationSummary", {
 								start: filteredRows.length === 0 ? 0 : (currentPage - 1) * pageSize + 1,
 								end: Math.min(currentPage * pageSize, filteredRows.length),
 								total: filteredRows.length
-							}) }}
+							}, "عرض {start} - {end} من إجمالي {total} شركات مسجلة") }}
 						</span>
 
 						<!-- Pagination Controls -->
@@ -720,7 +720,7 @@
 </template>
 
 <script setup lang="ts">
-import type { CompanyInvoiceStatement, ProviderInvoicesReportData, ProviderInvoiceTotals, DebtAging } from "@/add-os/services/reports"
+import type { ProviderInvoicesReportData, ProviderInvoiceTotals, DebtAging } from "@/add-os/services/reports"
 import { NButton, NDatePicker, NInput, NPagination, NSelect, NSpin, NTag } from "naive-ui"
 import { computed, onMounted, reactive, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
@@ -897,7 +897,6 @@ interface CompanyTableRow {
 	key: string
 	companyId: number
 	companyName: string
-	contractRef?: string
 	currency: string
 	billed: string
 	paid: string
@@ -943,7 +942,6 @@ const flattenedCompanyRows = computed<CompanyTableRow[]>(() => {
 				key: `${compItem.company.id}-default`,
 				companyId: compItem.company.id,
 				companyName: name,
-				contractRef: compItem.company.contract_ref,
 				currency: "-",
 				billed: "0",
 				paid: "0",
@@ -972,7 +970,7 @@ const flattenedCompanyRows = computed<CompanyTableRow[]>(() => {
 					paymentStatus = { label: t("reports.status.paidFully", "مسدد بالكامل"), tagType: "success" }
 				} else {
 					paymentStatus = {
-						label: t("reports.status.paidPercentage", "سداد بنسبة {rate}%", { rate: Math.round(rate) }),
+						label: t("reports.status.paidPercentage", { rate: Math.round(rate) }, "سداد بنسبة {rate}%"),
 						tagType: "info"
 					}
 				}
@@ -981,7 +979,6 @@ const flattenedCompanyRows = computed<CompanyTableRow[]>(() => {
 					key: `${compItem.company.id}-${tot.currency}`,
 					companyId: compItem.company.id,
 					companyName: name,
-					contractRef: compItem.company.contract_ref,
 					currency: tot.currency,
 					billed: tot.billed,
 					paid: tot.paid,
@@ -1009,7 +1006,7 @@ const currencyFilterOptions = computed(() => {
 const filteredRows = computed(() => {
 	const q = searchQuery.value.trim().toLowerCase()
 	return flattenedCompanyRows.value.filter(row => {
-		const matchesQuery = !q || row.companyName.toLowerCase().includes(q) || (row.contractRef && row.contractRef.toLowerCase().includes(q))
+		const matchesQuery = !q || row.companyName.toLowerCase().includes(q)
 		const matchesCurrency = selectedCurrencyFilter.value === "ALL" || row.currency === selectedCurrencyFilter.value
 		return matchesQuery && matchesCurrency
 	})
@@ -1049,7 +1046,7 @@ function exportStatement() {
 
 	const rows = filteredRows.value.map(r => [
 		`"${r.companyName.replace(/"/g, '""')}"`,
-		`"${r.contractRef || r.companyId}"`,
+		`"${r.companyId}"`,
 		r.currency,
 		r.billed,
 		r.paid,
