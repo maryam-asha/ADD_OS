@@ -18,8 +18,8 @@ import { describe, expect, it } from "vitest"
  *
  * ── Changed 2026-10-13 ──────────────────────────────────────────────────────
  * The box above described the whole system as VPN-isolated. That stopped being
- * true for the API host: it is public (os.add-sy.com) because the member app
- * calls it from outside, and so does this dashboard (core.add-sy.com), because
+ * true for the API host: it is public (core.add-sy.com) because the member app
+ * calls it from outside, and so does this dashboard (os.add-sy.com), because
  * provider accounts log in from their own companies. What was given up:
  * isolation by network for the API and the dashboard. What replaces it for staff
  * operations: nginx admits only office/VPN IPs to /api/v1/admin/*
@@ -104,7 +104,7 @@ const ALLOWED: readonly AllowedHost[] = [
 		sourceOnly: true
 	},
 	{
-		host: "os.add-sy.com",
+		host: "core.add-sy.com",
 		why: "The ADD OS API itself — VITE_API_URL, baked in at build time. The ONE runtime host this dashboard is meant to call. Decided 2026-10-13: the API is on a public domain because the member app needs it from outside; /api/v1/admin/* is held to office/VPN IPs at nginx instead. See docs/DEPLOYMENT.md."
 	},
 	{

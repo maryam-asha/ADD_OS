@@ -9,7 +9,7 @@ One of four ADD OS consumers (this dashboard, Flutter member app, Nuxt public si
 reception kiosk). **Network-isolated**: VPN/office only. An external URL is a broken
 feature, not a slow one.
 
-**Changed 2026-10-13:** the API (`os.add-sy.com`) and this dashboard (`core.add-sy.com`)
+**Changed 2026-10-13:** the API (`core.add-sy.com`) and this dashboard (`os.add-sy.com`)
 are now public — the member app and provider accounts reach them from outside. Staff
 operations keep isolation by IP instead: nginx admits only office/VPN addresses to
 `/api/v1/admin/*`. The API host is the one runtime host allowed in the build; every
