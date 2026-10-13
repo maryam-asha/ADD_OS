@@ -125,9 +125,6 @@
 		}
 	},
 	"auth": {
-		"panel": {
-			"headline": "The unified operations workspace"
-		},
 		"help": "Need help? Contact your IT administrator.",
 		"common": {
 			"back": "Back"
