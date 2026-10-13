@@ -12,7 +12,16 @@ export async function getProvider(id: number): Promise<Provider> {
 	return res.data
 }
 
-export async function createProvider(payload: { name: string; contract_ref: string; payment_terms_days?: number | null }): Promise<Provider> {
+/** The provider's first sign-in account — created by the API as a `provider`-role user linked to it, in the same transaction. */
+export interface NewProviderAccount {
+	name: string
+	email: string
+	phone: string
+	password: string
+	password_confirmation: string
+}
+
+export async function createProvider(payload: { name: string; contract_ref: string; payment_terms_days?: number | null; account: NewProviderAccount }): Promise<Provider> {
 	const res = await post<{ data: Provider }>("/api/v1/admin/providers", payload)
 	return res.data
 }

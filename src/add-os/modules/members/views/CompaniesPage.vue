@@ -404,50 +404,60 @@ watch(quickAddDialogVisible, visible => {
 })
 
 function renderActions(row: Company) {
-	return h("div", { class: "flex items-center gap-3 whitespace-nowrap" }, [
-		// "العقد" (Lease)
+	return h("div", { class: "flex items-center justify-center gap-1.5" }, [
+		// 1. Contract / Lease details ("العقد")
 		h(
 			NButton,
 			{
-				text: true,
+				size: "small",
+				secondary: true,
 				type: "primary",
-				class: "font-semibold text-xs text-emerald-700 hover:text-emerald-800 dark:text-emerald-400",
+				class: "rounded-lg",
+				title: t("companies.actions.lease", "العقد"),
+				"aria-label": t("companies.actions.lease", "العقد"),
 				onClick: () => openDetail(row)
 			},
-			{ default: () => t("companies.actions.lease", "العقد") }
+			{ icon: () => h(Icon, { name: "carbon:document", size: 15 }) }
 		),
-		// "تعديل" (Edit status)
+		// 2. Edit / Change status ("تغيير الحالة")
 		h(
 			NButton,
 			{
-				text: true,
-				class: "font-semibold text-xs text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200",
+				size: "small",
+				secondary: true,
+				class: "rounded-lg",
+				title: t("companies.changeStatus.title", "تغيير الحالة"),
+				"aria-label": t("companies.changeStatus.title", "تغيير الحالة"),
 				onClick: () => openStatusModal(row)
 			},
-			{ default: () => t("companies.actions.edit", "تعديل") }
+			{ icon: () => h(Icon, { name: "carbon:edit", size: 15 }) }
 		),
-		// Add Member quick button
+		// 3. Add Member ("إضافة عضو")
 		h(
 			NButton,
 			{
-				text: true,
-				"aria-label": t("companyMembers.add.button"),
-				title: t("companyMembers.add.button"),
+				size: "small",
+				secondary: true,
+				class: "rounded-lg",
+				title: t("companies.actions.addMember", "إضافة عضو"),
+				"aria-label": t("companies.actions.addMember", "إضافة عضو"),
 				onClick: () => openQuickAdd(row)
 			},
-			{ icon: () => h(Icon, { name: "carbon:user-follow", size: 16 }) }
+			{ icon: () => h(Icon, { name: "carbon:user-follow", size: 15 }) }
 		),
-		// Transfer Provider button
+		// 4. Transfer Provider ("نقل لمزوّد")
 		h(
 			NButton,
 			{
-				text: true,
+				size: "small",
+				secondary: true,
 				type: "info",
-				"aria-label": t("companies.transferProvider.button", "Transfer"),
-				title: t("companies.transferProvider.button", "Transfer"),
+				class: "rounded-lg",
+				title: t("companies.actions.transfer", "نقل لمزوّد"),
+				"aria-label": t("companies.actions.transfer", "نقل لمزوّد"),
 				onClick: () => openTransferModal(row)
 			},
-			{ icon: () => h(Icon, { name: "carbon:arrows-horizontal", size: 16 }) }
+			{ icon: () => h(Icon, { name: "carbon:arrows-horizontal", size: 15 }) }
 		)
 	])
 }
@@ -463,6 +473,7 @@ const columns = computed<DataTableColumns<Company>>(() => {
 			key: "actions",
 			width: 170,
 			minWidth: 170,
+			align: "center",
 			render: renderActions
 		}
 	]

@@ -138,7 +138,20 @@ const leaseColumns = computed<DataTableColumns<OfficeLease>>(() => [
 	{
 		title: t("resourceCrud.table.actionsColumn"),
 		key: "actions",
-		render: row => h(NButton, { size: "small", quaternary: true, onClick: () => openLeaseDetail(row) }, { default: () => t("common.view", "View") })
+		render: row =>
+			h(
+				NButton,
+				{
+					size: "small",
+					quaternary: true,
+					title: t("common.view", "View"),
+					onClick: () => openLeaseDetail(row)
+				},
+				{
+					icon: () => h(Icon, { name: "carbon:view", size: 15 }),
+					default: () => t("common.view", "View")
+				}
+			)
 	}
 ])
 

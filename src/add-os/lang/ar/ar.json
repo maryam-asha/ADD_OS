@@ -3166,9 +3166,13 @@
 			"inactive": "غير نشط"
 		},
 		"activate": "تفعيل",
+		"activateConfirmTitle": "تفعيل حساب المزوّد",
+		"activateConfirmContent": "هل أنت متأكد من تفعيل هذا المزوّد؟ سيتمكن مستخدمو المزوّد من تسجيل الدخول إلى البوابة واستئناف العمليات.",
+		"activateSuccess": "تم تفعيل حساب المزوّد بنجاح",
 		"deactivate": "إيقاف",
 		"deactivateConfirmTitle": "إيقاف المزوّد",
 		"deactivateConfirmContent": "إيقاف المزوّد يمنع حساباته من الدخول، لكن شركاته تبقى تعمل ويمكن نقلها لمزوّد آخر.",
+		"deactivateSuccess": "تم إيقاف المزوّد بنجاح",
 		"error": "خطأ في تحميل المزوّدين",
 		"edit": "تعديل",
 		"updated": "تم تحديث المزوّد",
@@ -3183,8 +3187,44 @@
 			"pick": "اختاروا حساباً بدور مزوّد",
 			"link": "ربط",
 			"unlink": "فك الربط",
+			"unlinkConfirmTitle": "فك ربط الحساب",
+			"unlinkConfirmContent": "هل أنت متأكد من فك ربط هذا الحساب بالمزوّد؟ لن يتمكن هذا المستخدم من الدخول لبوابة هذا المزوّد بعد الآن.",
 			"linked": "تم ربط الحساب",
 			"unlinked": "تم فك ربط الحساب"
+		},
+		"newAccount": {
+			"title": "حساب الدخول",
+			"hint": "يُنشأ أول حساب للمزوّد معه ويُربط به بدور «مزوّد». يمكن ربط حسابات أخرى لاحقاً من «الحسابات».",
+			"name": "الاسم",
+			"email": "البريد الإلكتروني",
+			"phone": "رقم الهاتف",
+			"password": "كلمة المرور",
+			"passwordConfirmation": "تأكيد كلمة المرور",
+			"emailInvalid": "أدخلوا بريداً إلكترونياً صحيحاً",
+			"passwordShort": "8 أحرف على الأقل",
+			"passwordMismatch": "كلمتا المرور غير متطابقتين"
+		},
+		"description": "إدارة مزودي الخدمات، العقود التشغيلية، شروط السداد، وحسابات الدخول لبوابة المزوّدين.",
+		"searchPlaceholder": "البحث باسم المزوّد أو رقم العقد...",
+		"allStatuses": "كافة الحالات",
+		"registeredBadge": "{count} مزوّد مسجل",
+		"stats": {
+			"total": "إجمالي المزوّدين",
+			"active": "المزوّدون النشطون",
+			"inactive": "غير النشطين"
+		},
+		"form": {
+			"providerInfoSection": "بيانات المزوّد والعقد التشغيلي",
+			"providerInfoHint": "البيانات الأساسية لمزوّد الخدمة ومرجع العقد ومهلة السداد.",
+			"namePlaceholder": "أدخل اسم المزوّد...",
+			"contractPlaceholder": "مثال: CON-2026-001",
+			"daysSuffix": "يوم",
+			"accountSection": "حساب الدخول لبوابة المزوّد",
+			"accountHint": "يُنشأ هذا الحساب لتمكين ممثل المزوّد من تسجيل الدخول إلى البوابة وإدارة الشركات والفواتير."
+		},
+		"empty": {
+			"title": "لا يوجد مزوّدون مطابقون",
+			"desc": "لم يتم العثور على أي مزوّد يطابق معايير البحث الحالية."
 		}
 	},
 	"providerRequests": {
@@ -3215,13 +3255,20 @@
 		"filters": {
 			"type": "النوع",
 			"provider": "المزوّد",
-			"company": "الشركة"
+			"company": "الشركة",
+			"typeAll": "النوع: الكل",
+			"providerAll": "المزوّد: الكل",
+			"companyAll": "الشركة: الكل",
+			"reset": "إعادة ضبط الفلاتر"
 		},
 		"columns": {
 			"type": "النوع",
 			"provider": "المزوّد",
 			"company": "الشركة",
-			"submittedAt": "تاريخ الإرسال"
+			"submittedAt": "تاريخ الإرسال",
+			"request": "الطلب",
+			"summary": "المطلوب",
+			"status": "الحالة"
 		},
 		"fields": {
 			"type": "نوع الطلب",
@@ -3240,7 +3287,10 @@
 			"planNameEn": "اسم الخطة (إنجليزي)",
 			"pricePoints": "السعر (نقاط)",
 			"durationDays": "المدة (أيام)",
-			"isSubscription": "اشتراك"
+			"isSubscription": "اشتراك",
+			"provider": "المزوّد",
+			"submittedBy": "أرسله",
+			"submittedAt": "تاريخ الإرسال"
 		},
 		"invoice": {
 			"title": "الفاتورة التي ستصدر عند الموافقة",
@@ -3248,7 +3298,9 @@
 			"amount": "المبلغ",
 			"currency": "العملة",
 			"dueAt": "تاريخ الاستحقاق",
-			"issued": "الفاتورة {reference}: {amount}"
+			"issued": "الفاتورة {reference}: {amount}",
+			"computedLabel": "المبلغ المحسوب من السعر",
+			"adjustHint": "عدّلوا أي بند أدناه إن اتُّفق على غيره."
 		},
 		"create": {
 			"button": "طلب جديد",
@@ -3262,6 +3314,49 @@
 			"title": "إلغاء الطلب",
 			"content": "سيُسحب الطلب قبل مراجعته.",
 			"success": "تم إلغاء الطلب"
+		},
+		"subtitle": "ما يطلبه المزوّدون من ADD — اقرأ الطلب، اضبط الفاتورة، ثم قرّر.",
+		"loadError": "تعذّر تحميل الطلبات. حاولوا مجدداً.",
+		"empty": {
+			"pendingTitle": "لا شيء ينتظر",
+			"pendingBody": "كل طلبات المزوّدين حُسمت. تظهر الطلبات الجديدة هنا فور وصولها.",
+			"title": "لا توجد طلبات هنا",
+			"body": "جرّبوا نوعاً أو مزوّداً آخر."
+		},
+		"headline": {
+			"someProvider": "مزوّد",
+			"plan_assignment": "{provider} يطلب خطة {plan} لشركة {company} · {seats} مقعد",
+			"wallet_top_up": "{provider} يطلب شحن محفظة {company} بـ {points} نقطة",
+			"company_member": "{provider} يطلب إضافة {name} إلى {company}",
+			"company_admin": "{provider} يطلب تعيين {user} مديراً لشركة {company}",
+			"plan_design": "{provider} يقترح خطة جديدة: {plan}"
+		},
+		"wait": {
+			"today": "وصل اليوم",
+			"days": "ينتظر منذ يوم | ينتظر منذ {n} أيام"
+		},
+		"detail": {
+			"submittedBy": "أرسله {name}",
+			"asked": "المطلوب",
+			"parties": "الأطراف",
+			"title": "طلب {type}",
+			"pick": "اختاروا طلباً من القائمة لقراءته واتخاذ القرار."
+		},
+		"decision": {
+			"hint": "الموافقة تنفّذ الطلب وتُصدر فاتورته.",
+			"confirmReject": "رفض الطلب"
+		},
+		"pendingBadge": "{count} بانتظار المراجعة",
+		"stats": {
+			"pending": "تنتظر القرار",
+			"approved": "نُفّذت",
+			"rejected": "أُعيدت للمزوّد",
+			"cancelled": "سحبها المزوّد"
+		},
+		"summary": {
+			"plan_assignment": "{plan} · {seats} مقعد",
+			"wallet_top_up": "{points} نقطة",
+			"company_admin": "العضو #{id}"
 		}
 	},
 	"providerPortal": {

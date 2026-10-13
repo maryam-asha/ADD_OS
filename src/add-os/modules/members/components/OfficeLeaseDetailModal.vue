@@ -5,8 +5,10 @@
 		preset="card"
 		:title="lease?.reference ? `${t('officeLeases.detail.title')} · ${lease.reference}` : t('officeLeases.detail.title')"
 		closable
-		style="width: min(52rem, 95vw)"
-		content-style="max-height: 84vh; overflow-y: auto"
+		class="max-w-2xl w-full !rounded-2xl shadow-xl my-6"
+		style="max-height: 86vh; display: flex; flex-direction: column;"
+		content-style="max-height: calc(86vh - 140px); overflow-y: auto;"
+		:segmented="{ content: 'soft', footer: 'soft' }"
 	>
 		<div v-if="isLoading" class="py-16 flex items-center justify-center">
 			<n-spin size="large" />

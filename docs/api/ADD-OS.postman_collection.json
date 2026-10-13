@@ -5218,7 +5218,7 @@
                                         ],
                                         "body": {
                                             "mode": "raw",
-                                            "raw": "{\n  \"code\": \"{{coupon_code}}\",\n  \"purpose\": \"plan_purchase\",\n  \"plan_id\": {{plan_id}}\n}",
+                                            "raw": "{\n  \"code\": \"{{coupon_code}}\"\n}",
                                             "options": {
                                                 "raw": {
                                                     "language": "json"

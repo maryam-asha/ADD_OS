@@ -3161,9 +3161,13 @@
 			"inactive": "Inactive"
 		},
 		"activate": "Activate",
+		"activateConfirmTitle": "Activate Provider",
+		"activateConfirmContent": "Are you sure you want to activate this provider? Their users will be able to log in to the portal and resume operations.",
+		"activateSuccess": "Provider activated successfully.",
 		"deactivate": "Deactivate",
 		"deactivateConfirmTitle": "Deactivate Provider",
 		"deactivateConfirmContent": "Deactivating a provider will prevent their users from logging in, but their companies will remain active.",
+		"deactivateSuccess": "Provider deactivated successfully.",
 		"error": "Error loading providers",
 		"edit": "Edit",
 		"updated": "Provider updated",
@@ -3178,8 +3182,44 @@
 			"pick": "Choose a provider-role account",
 			"link": "Link",
 			"unlink": "Unlink",
+			"unlinkConfirmTitle": "Unlink Account",
+			"unlinkConfirmContent": "Are you sure you want to unlink this account from the provider? This user will no longer be able to access the provider portal.",
 			"linked": "Account linked",
 			"unlinked": "Account unlinked"
+		},
+		"newAccount": {
+			"title": "Sign-in account",
+			"hint": "The provider's first account is created with it and linked to it, with the provider role. More accounts can be linked later from Accounts.",
+			"name": "Name",
+			"email": "Email",
+			"phone": "Phone",
+			"password": "Password",
+			"passwordConfirmation": "Confirm password",
+			"emailInvalid": "Enter a valid email",
+			"passwordShort": "At least 8 characters",
+			"passwordMismatch": "The passwords do not match"
+		},
+		"description": "Manage service providers, operational contracts, payment terms, and portal accounts.",
+		"searchPlaceholder": "Search by provider name or contract number...",
+		"allStatuses": "All statuses",
+		"registeredBadge": "{count} Providers Registered",
+		"stats": {
+			"total": "Total Providers",
+			"active": "Active Providers",
+			"inactive": "Inactive Providers"
+		},
+		"form": {
+			"providerInfoSection": "Provider & Contract Details",
+			"providerInfoHint": "Basic provider details, contract reference, and payment terms.",
+			"namePlaceholder": "Enter provider name...",
+			"contractPlaceholder": "e.g. CON-2026-001",
+			"daysSuffix": "Days",
+			"accountSection": "Portal Sign-in Account",
+			"accountHint": "This account is created to allow the provider representative to sign into the portal."
+		},
+		"empty": {
+			"title": "No Providers Found",
+			"desc": "No providers match the current search or filter criteria."
 		}
 	},
 	"providerRequests": {
@@ -3210,13 +3250,20 @@
 		"filters": {
 			"type": "Type",
 			"provider": "Provider",
-			"company": "Company"
+			"company": "Company",
+			"typeAll": "Type: all",
+			"providerAll": "Provider: all",
+			"companyAll": "Company: all",
+			"reset": "Reset filters"
 		},
 		"columns": {
 			"type": "Type",
 			"provider": "Provider",
 			"company": "Company",
-			"submittedAt": "Submitted"
+			"submittedAt": "Submitted",
+			"request": "Request",
+			"summary": "What is asked",
+			"status": "Status"
 		},
 		"fields": {
 			"type": "Request type",
@@ -3235,7 +3282,10 @@
 			"planNameEn": "Plan name (English)",
 			"pricePoints": "Price (points)",
 			"durationDays": "Duration (days)",
-			"isSubscription": "Subscription"
+			"isSubscription": "Subscription",
+			"provider": "Provider",
+			"submittedBy": "Sent by",
+			"submittedAt": "Sent on"
 		},
 		"invoice": {
 			"title": "The invoice approval will issue",
@@ -3243,7 +3293,9 @@
 			"amount": "Amount",
 			"currency": "Currency",
 			"dueAt": "Due date",
-			"issued": "Invoice {reference}: {amount}"
+			"issued": "Invoice {reference}: {amount}",
+			"computedLabel": "Computed from the price",
+			"adjustHint": "Change any term below if agreed otherwise."
 		},
 		"create": {
 			"button": "New request",
@@ -3257,6 +3309,49 @@
 			"title": "Cancel the request",
 			"content": "The request will be withdrawn before review.",
 			"success": "Request cancelled"
+		},
+		"subtitle": "What providers ask ADD to grant — read it, set the invoice, decide.",
+		"loadError": "Could not load the requests. Try again.",
+		"empty": {
+			"pendingTitle": "Nothing waiting",
+			"pendingBody": "Every provider request has been decided. New ones appear here as they arrive.",
+			"title": "No requests here",
+			"body": "Try another type or provider."
+		},
+		"headline": {
+			"someProvider": "A provider",
+			"plan_assignment": "{provider} asks for the {plan} plan for {company} · {seats} seats",
+			"wallet_top_up": "{provider} asks to top up {company}'s wallet with {points} points",
+			"company_member": "{provider} asks to add {name} to {company}",
+			"company_admin": "{provider} asks to make {user} an admin of {company}",
+			"plan_design": "{provider} proposes a new plan: {plan}"
+		},
+		"wait": {
+			"today": "Arrived today",
+			"days": "Waiting 1 day | Waiting {n} days"
+		},
+		"detail": {
+			"submittedBy": "Sent by {name}",
+			"asked": "What is asked",
+			"parties": "Who is involved",
+			"title": "{type} request",
+			"pick": "Choose a request from the queue to read it and decide."
+		},
+		"decision": {
+			"hint": "Approving applies the request and issues its invoice.",
+			"confirmReject": "Reject request"
+		},
+		"pendingBadge": "{count} awaiting review",
+		"stats": {
+			"pending": "Waiting for a decision",
+			"approved": "Applied",
+			"rejected": "Returned to the provider",
+			"cancelled": "Withdrawn by the provider"
+		},
+		"summary": {
+			"plan_assignment": "{plan} · {seats} seats",
+			"wallet_top_up": "{points} points",
+			"company_admin": "Member #{id}"
 		}
 	},
 	"providerPortal": {
