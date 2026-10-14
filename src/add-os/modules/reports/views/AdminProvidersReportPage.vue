@@ -58,6 +58,8 @@
 		<!-- Data Table -->
 		<n-card class="add-ledger-table">
 			<n-data-table
+				size="small"
+				:scroll-x="1100"
 				:columns="columns"
 				:data="filteredRows"
 				:loading="isLoading"
@@ -121,9 +123,10 @@ const columns = computed<DataTableColumns<AdminProviderReportItem>>(() => [
 	{
 		title: t("providers.columns.name", "اسم المزوّد"),
 		key: "name",
-		width: 180,
+		minWidth: 180,
+		align: "center",
 		render: row =>
-			h("div", { class: "flex flex-col gap-0.5" }, [
+			h("div", { class: "inline-flex flex-col items-center gap-0.5" }, [
 				h("span", { class: "font-semibold text-neutral-800 dark:text-neutral-100" }, row.name),
 				h(
 					NTag,
@@ -143,7 +146,7 @@ const columns = computed<DataTableColumns<AdminProviderReportItem>>(() => [
 		key: "active_companies",
 		width: 110,
 		align: "center",
-		render: row => h("span", { class: "font-semibold text-neutral-800 dark:text-neutral-200" }, row.active_companies)
+		render: row => h("span", { class: "font-semibold font-mono text-neutral-800 dark:text-neutral-200" }, row.active_companies)
 	},
 	{
 		title: t("reports.adminProviders.totalSeats", "مجموع المقاعد"),
@@ -161,20 +164,21 @@ const columns = computed<DataTableColumns<AdminProviderReportItem>>(() => [
 		title: t("reports.adminProviders.branchShare", "الحصة من الفروع"),
 		key: "branch_share",
 		minWidth: 260,
+		align: "center",
 		render: row => {
 			if (!row.branch_share || row.branch_share.length === 0) {
 				return h("span", { class: "text-neutral-400 text-sm" }, "—")
 			}
 			return h(
 				"div",
-				{ class: "flex flex-col gap-2 py-1" },
+				{ class: "inline-flex flex-col items-center gap-2 py-1 w-full max-w-xs" },
 				row.branch_share.map(b => {
 					const hasCapacity = b.capacity > 0 && b.share !== null
 					const percentValue = hasCapacity ? Math.min(100, Math.round(Number.parseFloat(b.share!) * 100)) : 0
 
 					return h(
 						"div",
-						{ class: "flex flex-col gap-1 rounded-md p-1.5 bg-neutral-50 dark:bg-neutral-800/50 text-xs" },
+						{ class: "flex flex-col gap-1 rounded-md p-1.5 bg-neutral-50 dark:bg-neutral-800/50 text-xs w-full text-start" },
 						[
 							h("div", { class: "flex items-center justify-between gap-2" }, [
 								h("span", { class: "font-medium text-neutral-800 dark:text-neutral-200" }, b.branch_name || t("reports.adminProviders.unknownBranch", "فرع غير مسمى")),
@@ -220,13 +224,14 @@ const columns = computed<DataTableColumns<AdminProviderReportItem>>(() => [
 		title: t("reports.adminProviders.outstandingDues", "المستحق لكل عملة"),
 		key: "outstanding",
 		minWidth: 220,
+		align: "center",
 		render: row => {
 			if (!row.outstanding || row.outstanding.length === 0) {
 				return h("span", { class: "text-neutral-400" }, "—")
 			}
 			return h(
 				"div",
-				{ class: "flex flex-col gap-1 py-1" },
+				{ class: "inline-flex flex-col items-center gap-1 py-1" },
 				row.outstanding.map(o => {
 					const hasOverdue = Number.parseFloat(o.overdue) > 0
 					return h(

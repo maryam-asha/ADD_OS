@@ -25,12 +25,14 @@
 			</n-button>
 		</div>
 
-		<n-card class="shadow-sm">
+		<n-card class="add-ledger-table">
 			<n-data-table
 				:columns
 				:data="filteredSettings"
 				:loading="isLoading"
 				:bordered="false"
+				:scroll-x="750"
+				size="small"
 			/>
 		</n-card>
 
@@ -179,9 +181,11 @@ const columns = computed<DataTableColumns<SettingItem>>(() => [
 	{
 		title: t("systemSettings.nameLabel"),
 		key: "key",
+		minWidth: 260,
+		align: "center",
 		render: row => {
 			const hint = hintOf(row.key)
-			return h("div", { class: "flex flex-col gap-0.5" }, [
+			return h("div", { class: "flex flex-col items-center justify-center gap-0.5 text-center" }, [
 				h("span", { class: "text-sm font-semibold" }, labelOf(row.key)),
 				hint ? h("span", { class: "text-xs text-secondary" }, hint) : null,
 				// The raw key stays visible, smaller: it is what the API and the
@@ -193,12 +197,15 @@ const columns = computed<DataTableColumns<SettingItem>>(() => [
 	{
 		title: t("systemSettings.columns.type"),
 		key: "type",
-		width: 100,
+		width: 120,
+		align: "center",
 		render: row => h(NTag, { size: "small", round: true }, { default: () => typeLabel(row.type) })
 	},
 	{
 		title: t("systemSettings.columns.value"),
 		key: "value",
+		minWidth: 200,
+		align: "center",
 		render: row => {
 			if (row.type === "boolean") {
 				return h(
@@ -208,7 +215,7 @@ const columns = computed<DataTableColumns<SettingItem>>(() => [
 				)
 			}
 			if (row.type === "json") {
-				return h("pre", { class: "text-xs max-w-xs truncate" }, JSON.stringify(row.value))
+				return h("pre", { class: "text-xs max-w-xs truncate font-mono" }, JSON.stringify(row.value))
 			}
 			return h("span", { class: "text-sm max-w-sm truncate" }, String(row.value ?? "—"))
 		}
@@ -216,7 +223,8 @@ const columns = computed<DataTableColumns<SettingItem>>(() => [
 	{
 		title: t("systemSettings.columns.actions"),
 		key: "actions",
-		width: 100,
+		width: 120,
+		align: "center",
 		render: row =>
 			h(
 				NButton,

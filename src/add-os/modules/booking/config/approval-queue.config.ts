@@ -20,28 +20,36 @@ export function buildApprovalColumns(
 	onReject: (row: PendingApprovalBooking) => void
 ): DataTableColumns<PendingApprovalBooking> {
 	return [
-		{ title: t("approvalQueue.columns.requester"), key: "user_name" },
+		{ title: t("approvalQueue.columns.requester"), key: "user_name", minWidth: 150, align: "center" },
 		{
 			title: t("approvalQueue.columns.space"),
 			key: "space_type",
+			minWidth: 140,
+			align: "center",
 			render: row => spaceTypeLabel(t, row.space_type)
 		},
 		{
 			// Same-day bookings are the norm, so the end repeats only the clock.
 			title: t("approvalQueue.columns.when"),
 			key: "start_at",
-			render: row => `${formatDateTime(row.start_at)} – ${formatTime(row.end_at)}`
+			minWidth: 160,
+			align: "center",
+			render: row => h("span", { class: "font-mono text-xs" }, `${formatDateTime(row.start_at)} – ${formatTime(row.end_at)}`)
 		},
 		{
 			title: t("approvalQueue.columns.requested"),
 			key: "created_at",
-			render: row => formatDateTime(row.created_at)
+			minWidth: 140,
+			align: "center",
+			render: row => h("span", { class: "font-mono text-xs" }, formatDateTime(row.created_at))
 		},
 		{
 			title: t("approvalQueue.columns.actions"),
 			key: "actions",
+			width: 180,
+			align: "center",
 			render: row =>
-				h("div", { class: "flex gap-2" }, [
+				h("div", { class: "inline-flex items-center justify-center gap-2" }, [
 					h(
 						NButton,
 						{ size: "small", type: "primary", "aria-label": t("approvalQueue.approve.button"), onClick: () => onApprove(row) },

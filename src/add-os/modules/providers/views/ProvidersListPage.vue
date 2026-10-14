@@ -159,7 +159,7 @@
 		<!-- ════════════════════════════════════════════════════════════════════════ -->
 		<!-- DATA TABLE -->
 		<!-- ════════════════════════════════════════════════════════════════════════ -->
-		<div class="rounded-2xl border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface-raised,#FFFFFF)] p-5 shadow-xs flex flex-col gap-4">
+		<div class="rounded-2xl border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface-raised,#FFFFFF)] p-5 shadow-xs flex flex-col gap-4 add-ledger-table">
 			<n-data-table
 				:columns="columns"
 				:data="filteredData"
@@ -604,8 +604,9 @@ const columns = computed<DataTableColumns<Provider>>(() => [
 		title: t("providers.name", "المزوّد"),
 		key: "name",
 		minWidth: 200,
+		align: "center",
 		render: row =>
-			h("div", { class: "flex items-center gap-2.5 py-1" }, [
+			h("div", { class: "inline-flex items-center gap-2.5 py-1" }, [
 				h(
 					"div",
 					{
@@ -614,7 +615,7 @@ const columns = computed<DataTableColumns<Provider>>(() => [
 					},
 					[h(Icon, { name: "carbon:enterprise", size: 16 })]
 				),
-				h("div", { class: "flex flex-col min-w-0" }, [
+				h("div", { class: "flex flex-col min-w-0 text-start" }, [
 					h("span", { class: "text-xs font-bold text-[var(--add-text-primary,#43474F)] truncate" }, row.name),
 					h("span", { class: "text-[11px] font-mono text-[var(--add-text-muted,#5A606B)]" }, `#${row.id}`)
 				])
@@ -624,6 +625,7 @@ const columns = computed<DataTableColumns<Provider>>(() => [
 		title: t("providers.contract", "رقم العقد"),
 		key: "contract_ref",
 		width: 140,
+		align: "center",
 		render: row =>
 			h(
 				"span",
@@ -652,7 +654,8 @@ const columns = computed<DataTableColumns<Provider>>(() => [
 	{
 		title: t("providers.paymentTerms", "مدة الدفع (أيام)"),
 		key: "payment_terms_days",
-		width: 150,
+		width: 160,
+		align: "center",
 		render: row =>
 			row.payment_terms_days
 				? h("span", { class: "font-mono text-xs font-bold text-[var(--add-text-primary,#43474F)] whitespace-nowrap" }, `${formatNumber(row.payment_terms_days)} يوم`)
@@ -666,7 +669,7 @@ const columns = computed<DataTableColumns<Provider>>(() => [
 		render: row =>
 			h(
 				"div",
-				{ class: "inline-flex items-center gap-1.5 text-xs text-[var(--add-text-primary,#43474F)]" },
+				{ class: "inline-flex items-center justify-center gap-1.5 text-xs text-[var(--add-text-primary,#43474F)]" },
 				[
 					h(Icon, { name: "carbon:building", size: 14, class: "text-[var(--add-text-muted,#5A606B)]" }),
 					h("span", { class: "font-mono font-bold" }, formatNumber(row.companies_count ?? 0))
@@ -682,7 +685,7 @@ const columns = computed<DataTableColumns<Provider>>(() => [
 			h(
 				"div",
 				{
-					class: "inline-flex items-center gap-1.5 text-xs cursor-pointer hover:underline text-[var(--add-info-text,#006B7A)]",
+					class: "inline-flex items-center justify-center gap-1.5 text-xs cursor-pointer hover:underline text-[var(--add-info-text,#006B7A)]",
 					onClick: () => openAccounts(row)
 				},
 				[
@@ -694,10 +697,10 @@ const columns = computed<DataTableColumns<Provider>>(() => [
 	{
 		title: t("common.actions", "الإجراءات"),
 		key: "actions",
-		width: 130,
+		width: 140,
 		align: "center",
 		render: row =>
-			h("div", { class: "flex items-center justify-center gap-1.5" }, [
+			h("div", { class: "inline-flex items-center justify-center gap-1.5" }, [
 				// Edit Button (Icon Only)
 				h(
 					NButton,

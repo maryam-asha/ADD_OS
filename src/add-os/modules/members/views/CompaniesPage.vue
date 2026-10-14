@@ -165,7 +165,7 @@
 		</div>
 
 		<!-- Table Card -->
-		<div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
+		<div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden add-ledger-table">
 			<n-data-table
 				v-if="data.length > 0 || isLoading"
 				remote
@@ -176,6 +176,7 @@
 				:row-key
 				:pagination="false"
 				:scroll-x="1180"
+				size="small"
 			/>
 			<div v-else class="py-16 text-center text-slate-500 text-sm">
 				{{ t("companies.empty") }}

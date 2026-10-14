@@ -56,12 +56,13 @@ export function buildCompanyColumns(
 			title: t("companies.columns.companyAndRecord", "الشركة / السجل"),
 			key: "legal_name",
 			minWidth: 260,
+			align: "center",
 			render: row => {
 				const lease = row.office_leases?.[0]
 				const spaceInfo = lease?.space?.name ? ` · ${pickLocalized(lease.space.name, locale) || lease.space.name}` : ""
 				const monogram = getMonogram(row.legal_name)
 				const palette = getAvatarPalette(row.id)
-				return h("div", { class: "flex items-center gap-3 py-1 whitespace-nowrap" }, [
+				return h("div", { class: "inline-flex items-center gap-3 py-1 text-start whitespace-nowrap" }, [
 					h("div", { class: `w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 select-none ${palette}` }, monogram),
 					h("div", { class: "flex flex-col gap-0.5 min-w-0" }, [
 						h(
@@ -82,9 +83,10 @@ export function buildCompanyColumns(
 			key: "provider",
 			minWidth: 160,
 			width: 170,
+			align: "center",
 			render: row => {
 				const isDirect = !row.provider
-				return h("div", { class: "flex flex-col whitespace-nowrap" }, [
+				return h("div", { class: "flex flex-col items-center justify-center text-center whitespace-nowrap" }, [
 					h(
 						"span",
 						{ class: `text-sm ${isDirect ? "text-slate-500 dark:text-slate-400" : "font-medium text-slate-800 dark:text-slate-200"}` },
@@ -98,11 +100,12 @@ export function buildCompanyColumns(
 			key: "branch_id",
 			minWidth: 160,
 			width: 170,
+			align: "center",
 			render: row => {
 				const bName = branchName(row.branch_id)
 				const lease = row.office_leases?.[0]
 				const spaceName = lease?.space?.name ? (pickLocalized(lease.space.name, locale) || lease.space.name) : null
-				return h("div", { class: "flex flex-col gap-0.5 whitespace-nowrap" }, [
+				return h("div", { class: "flex flex-col items-center justify-center gap-0.5 text-center whitespace-nowrap" }, [
 					h("span", { class: "text-sm font-medium text-slate-800 dark:text-slate-200" }, bName),
 					spaceName ? h("span", { class: "text-xs text-slate-400 dark:text-slate-500" }, spaceName) : null
 				])
@@ -113,10 +116,11 @@ export function buildCompanyColumns(
 			key: "contract_start_date",
 			minWidth: 130,
 			width: 130,
+			align: "center",
 			render: row => {
 				const lease = row.office_leases?.[0]
 				const dateStr = lease?.starts_on ? formatDate(lease.starts_on) : "—"
-				return h("span", { class: "text-sm text-slate-700 dark:text-slate-300 font-medium whitespace-nowrap" }, dateStr)
+				return h("span", { class: "text-sm text-slate-700 dark:text-slate-300 font-medium whitespace-nowrap font-mono" }, dateStr)
 			}
 		},
 		{
@@ -124,6 +128,7 @@ export function buildCompanyColumns(
 			key: "monthly_amount",
 			minWidth: 150,
 			width: 150,
+			align: "center",
 			render: row => {
 				const lease = row.office_leases?.[0]
 				if (!lease) return h("span", { class: "text-sm text-slate-400 whitespace-nowrap" }, "—")
@@ -140,6 +145,7 @@ export function buildCompanyColumns(
 			key: "status",
 			minWidth: 120,
 			width: 120,
+			align: "center",
 			render: row => {
 				const lease = row.office_leases?.[0]
 				const isUnderRenewal = lease && (!lease.auto_renew || lease.renewal_stop_reason)

@@ -17,7 +17,7 @@
 
 		<!-- Roles Table -->
 		<n-card class="add-ledger-table">
-			<n-data-table :columns :data="roles" :loading :bordered="false" :row-key />
+			<n-data-table :columns :data="roles" :loading :bordered="false" :row-key size="small" :scroll-x="600" />
 		</n-card>
 
 		<!-- Role Create / Edit Modal -->
@@ -203,7 +203,7 @@ function renderNameCell(row: RoleRecord) {
 	const name = displayRoleName(row, t)
 	if (!row.protected) return name
 
-	return h("div", { class: "flex items-center gap-2" }, [
+	return h("div", { class: "inline-flex items-center justify-center gap-2" }, [
 		name,
 		h(NTag, { size: "small", round: true, bordered: true }, { default: () => t("roles.builtIn") })
 	])
@@ -220,7 +220,7 @@ function renderNameCell(row: RoleRecord) {
  * same defense-in-depth the Create button already has.
  */
 function renderActions(row: RoleRecord) {
-	if (!canManageRoles()) return h("div", { class: "flex gap-2" })
+	if (!canManageRoles()) return h("div", { class: "inline-flex items-center justify-center gap-2" })
 
 	const editLabel = t("roles.edit.button")
 	const deleteLabel = t("roles.delete.button")
@@ -244,17 +244,19 @@ function renderActions(row: RoleRecord) {
 			)
 		)
 	}
-	return h("div", { class: "flex gap-2" }, buttons)
+	return h("div", { class: "inline-flex items-center justify-center gap-2" }, buttons)
 }
 
 const columns = computed<DataTableColumns<RoleRecord>>(() => [
-	{ title: t("roles.columns.name"), key: "name", render: renderNameCell },
+	{ title: t("roles.columns.name"), key: "name", minWidth: 200, align: "center", render: renderNameCell },
 	{
 		title: t("roles.columns.permissions"),
 		key: "permissions",
+		minWidth: 200,
+		align: "center",
 		render: row => t("roles.columns.permissionCount", { count: row.permissions.length })
 	},
-	{ title: t("roles.columns.actions"), key: "actions", render: renderActions }
+	{ title: t("roles.columns.actions"), key: "actions", width: 120, align: "center", render: renderActions }
 ])
 
 async function loadRoles() {

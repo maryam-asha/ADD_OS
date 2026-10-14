@@ -90,7 +90,7 @@
 		</section>
 
 		<n-card class="add-ledger-table">
-			<n-data-table v-if="rows.length > 0 || isLoading" :columns :data="rows" :loading="isLoading" :bordered="false" :row-key />
+			<n-data-table v-if="rows.length > 0 || isLoading" :columns :data="rows" :loading="isLoading" :bordered="false" :row-key size="small" :scroll-x="1050" />
 
 			<!-- An empty result and an empty district are different facts, and an
 			     operator who filtered their way into nothing needs the way out,

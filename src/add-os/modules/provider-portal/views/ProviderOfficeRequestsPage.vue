@@ -157,16 +157,16 @@
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
 		<!-- MAIN DATA TABLE -->
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
-		<div class="overflow-hidden rounded-2xl border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface-raised,#FFFFFF)] shadow-xs dark:border-neutral-800 dark:bg-neutral-900/60">
+		<div class="overflow-hidden rounded-2xl border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface-raised,#FFFFFF)] shadow-xs dark:border-neutral-800 dark:bg-neutral-900/60 add-ledger-table">
 			<n-data-table
 				:columns="columns"
 				:data="filteredData"
 				:loading="isLoading"
 				:bordered="false"
+				size="small"
 				:row-key="rowKey"
 				:pagination="false"
 				:scroll-x="960"
-				class="add-ledger-table"
 			/>
 
 			<!-- Empty State when filtered data is empty -->
@@ -460,6 +460,7 @@ const columns = computed<DataTableColumns<PrivateOfficeRequest>>(() => [
 		title: t("providerOfficeRequests.columns.reference", "المرجع"),
 		key: "id",
 		width: 90,
+		align: "center",
 		render: row =>
 			h(
 				"span",
@@ -473,11 +474,12 @@ const columns = computed<DataTableColumns<PrivateOfficeRequest>>(() => [
 		title: t("providerOfficeRequests.columns.prospect", "العميل / الشركة"),
 		key: "prospect_name",
 		minWidth: 220,
+		align: "center",
 		render: row => {
 			const initials = (row.prospect_name || "?").slice(0, 2).toUpperCase()
 			const hasRegisteredCompany = !!row.company?.legal_name
 
-			return h("div", { class: "flex items-center gap-3 py-1" }, [
+			return h("div", { class: "inline-flex items-center gap-3 py-1 text-start" }, [
 				h(
 					"div",
 					{
@@ -501,8 +503,9 @@ const columns = computed<DataTableColumns<PrivateOfficeRequest>>(() => [
 		title: t("providerOfficeRequests.columns.contact", "بيانات التواصل"),
 		key: "contact",
 		minWidth: 180,
+		align: "center",
 		render: row =>
-			h("div", { class: "flex items-center gap-1.5 text-xs text-[var(--add-text-secondary,#565B65)] dark:text-neutral-300" }, [
+			h("div", { class: "inline-flex items-center justify-center gap-1.5 text-xs text-[var(--add-text-secondary,#565B65)] dark:text-neutral-300" }, [
 				h(Icon, { name: "carbon:email", size: 14, class: "text-[var(--add-text-muted,#5A606B)] shrink-0" }),
 				h("span", { class: "truncate font-mono" }, row.contact || "—")
 			])
@@ -511,6 +514,7 @@ const columns = computed<DataTableColumns<PrivateOfficeRequest>>(() => [
 		title: t("providerOfficeRequests.columns.payer", "الجهة الدافعة"),
 		key: "payer",
 		width: 140,
+		align: "center",
 		render: row => {
 			if (!row.payer) return "—"
 			const isProvider = row.payer === "provider"
@@ -537,6 +541,7 @@ const columns = computed<DataTableColumns<PrivateOfficeRequest>>(() => [
 		title: t("providerOfficeRequests.columns.status", "الحالة"),
 		key: "status",
 		width: 140,
+		align: "center",
 		render: row =>
 			h(
 				NTag,
@@ -553,6 +558,7 @@ const columns = computed<DataTableColumns<PrivateOfficeRequest>>(() => [
 		title: t("providerOfficeRequests.columns.quoteRef", "مرجع العرض"),
 		key: "quote_ref",
 		width: 150,
+		align: "center",
 		render: row =>
 			row.quote_ref
 				? h(

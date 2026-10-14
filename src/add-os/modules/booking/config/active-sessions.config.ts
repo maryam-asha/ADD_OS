@@ -31,15 +31,19 @@ interface SessionHandlers {
  */
 export function buildSessionColumns(t: ComposerTranslation, handlers: SessionHandlers): DataTableColumns<ActiveSession> {
 	return [
-		{ title: t("activeSessions.columns.occupant"), key: "user_name" },
+		{ title: t("activeSessions.columns.occupant"), key: "user_name", minWidth: 150, align: "center" },
 		{
 			title: t("activeSessions.columns.space"),
 			key: "space_type",
+			minWidth: 140,
+			align: "center",
 			render: row => spaceTypeLabel(t, row.space_type)
 		},
 		{
 			title: t("activeSessions.columns.type"),
 			key: "type",
+			minWidth: 160,
+			align: "center",
 			render: (row) => {
 				const label = t(`activeSessions.type.${row.type}`)
 				const tags = []
@@ -63,13 +67,15 @@ export function buildSessionColumns(t: ComposerTranslation, handlers: SessionHan
 				}
 				if (tags.length === 0) return label
 
-				return h("div", { class: "flex flex-wrap items-center gap-2" }, [h("span", label), ...tags])
+				return h("div", { class: "flex flex-wrap items-center justify-center gap-2" }, [h("span", label), ...tags])
 			}
 		},
 		{
 			title: t("activeSessions.columns.checkedInAt"),
 			key: "checked_in_at",
-			render: row => formatDateTime(row.checked_in_at)
+			minWidth: 150,
+			align: "center",
+			render: row => h("span", { class: "font-mono text-xs" }, formatDateTime(row.checked_in_at))
 		},
 		{
 			/**
@@ -81,6 +87,8 @@ export function buildSessionColumns(t: ComposerTranslation, handlers: SessionHan
 			 */
 			title: t("activeSessions.columns.status"),
 			key: "is_overdue",
+			width: 120,
+			align: "center",
 			render: row =>
 				h(
 					NTag,
@@ -91,6 +99,8 @@ export function buildSessionColumns(t: ComposerTranslation, handlers: SessionHan
 		{
 			title: t("activeSessions.columns.actions"),
 			key: "actions",
+			minWidth: 260,
+			align: "center",
 			render: row => {
 				const checkOutLabel = t("activeSessions.checkOut.button")
 				const detailsLabel = t("activeSessions.details")
@@ -127,7 +137,7 @@ export function buildSessionColumns(t: ComposerTranslation, handlers: SessionHan
 					)
 				}
 
-				return h("div", { class: "flex gap-2" }, buttons)
+				return h("div", { class: "inline-flex items-center justify-center gap-2" }, buttons)
 			}
 		}
 	]

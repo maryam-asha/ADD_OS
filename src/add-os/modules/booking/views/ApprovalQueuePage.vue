@@ -9,7 +9,7 @@
 		<n-alert v-if="error" type="error" :title="t('approvalQueue.loadError')" />
 
 		<n-card class="add-ledger-table">
-			<n-data-table v-if="rows.length > 0 || isLoading" :columns :data="rows" :loading="isLoading" :bordered="false" :row-key />
+			<n-data-table v-if="rows.length > 0 || isLoading" :columns :data="rows" :loading="isLoading" :bordered="false" :row-key size="small" :scroll-x="850" />
 			<div v-else-if="!error" class="py-10 text-center">{{ t("approvalQueue.empty") }}</div>
 
 			<div v-if="meta && meta.last_page > 1" class="mt-4 flex justify-end">

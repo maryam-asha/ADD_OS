@@ -52,6 +52,8 @@
 			<n-card class="add-ledger-table">
 				<n-data-table
 					remote
+					size="small"
+					:scroll-x="950"
 					:columns="columns"
 					:data="data"
 					:loading="isLoading"
@@ -194,6 +196,8 @@ const columns = computed<DataTableColumns<StoppedRenewalRow>>(() => [
 	{
 		title: t("renewals.columns.type"),
 		key: "type",
+		align: "center",
+		minWidth: 110,
 		render: row =>
 			h(
 				NTag,
@@ -208,26 +212,36 @@ const columns = computed<DataTableColumns<StoppedRenewalRow>>(() => [
 	{
 		title: t("renewals.columns.company"),
 		key: "company",
+		align: "center",
+		minWidth: 160,
 		render: row => row.company?.legal_name || "—"
 	},
 	{
 		title: t("renewals.columns.provider"),
 		key: "provider",
+		align: "center",
+		minWidth: 140,
 		render: row => row.provider?.name || t("companies.transferProvider.direct", "Direct")
 	},
 	{
 		title: t("renewals.columns.reason"),
 		key: "reason",
+		align: "center",
+		minWidth: 180,
 		render: row => h("span", { class: "text-error font-medium" }, row.reason_label || row.reason)
 	},
 	{
 		title: t("renewals.columns.endsAt"),
 		key: "ends_at",
+		align: "center",
+		minWidth: 130,
 		render: row => row.ends_at
 	},
 	{
 		title: t("renewals.columns.status"),
 		key: "has_ended",
+		align: "center",
+		minWidth: 110,
 		render: row =>
 			h(
 				NTag,
@@ -243,6 +257,8 @@ const columns = computed<DataTableColumns<StoppedRenewalRow>>(() => [
 	{
 		title: t("resourceCrud.table.actionsColumn"),
 		key: "actions",
+		align: "center",
+		width: 120,
 		render: row => {
 			const buttons = []
 
@@ -292,7 +308,7 @@ const columns = computed<DataTableColumns<StoppedRenewalRow>>(() => [
 				)
 			)
 
-			return h("div", { class: "flex items-center gap-2" }, buttons)
+			return h("div", { class: "inline-flex items-center justify-center gap-2" }, buttons)
 		}
 	}
 ])

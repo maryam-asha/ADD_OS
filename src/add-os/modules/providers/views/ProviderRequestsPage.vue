@@ -61,10 +61,11 @@
 		</div>
 
 		<!-- Table Card -->
-		<div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
+		<div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900 add-ledger-table">
 			<n-data-table
 				v-if="data.length > 0 || isLoading"
 				remote
+				size="small"
 				:columns
 				:data
 				:loading="isLoading"
@@ -229,8 +230,9 @@ const columns = computed<DataTableColumns<ProviderRequest>>(() => [
 		title: t("providerRequests.columns.request"),
 		key: "type",
 		minWidth: 220,
+		align: "center",
 		render: row =>
-			h("div", { class: "flex items-center gap-3 py-1 whitespace-nowrap" }, [
+			h("div", { class: "inline-flex items-center gap-3 py-1 whitespace-nowrap text-start" }, [
 				h("div", { class: "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400" }, [
 					h(Icon, { name: REQUEST_TYPE_ICON[row.type], size: 18 })
 				]),
@@ -244,24 +246,28 @@ const columns = computed<DataTableColumns<ProviderRequest>>(() => [
 		title: t("providerRequests.columns.provider"),
 		key: "provider",
 		minWidth: 150,
+		align: "center",
 		render: row => h("span", { class: "text-sm font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap" }, row.provider?.name ?? "—")
 	},
 	{
 		title: t("providerRequests.columns.company"),
 		key: "company",
 		minWidth: 160,
+		align: "center",
 		render: row => h("span", { class: "text-sm text-slate-700 dark:text-slate-300 whitespace-nowrap" }, row.company?.legal_name ?? "—")
 	},
 	{
 		title: t("providerRequests.columns.summary"),
 		key: "payload",
 		minWidth: 200,
+		align: "center",
 		render: row => h("span", { class: "text-sm text-slate-700 dark:text-slate-300" }, requestSummary(row, t, planNames.value))
 	},
 	{
 		title: t("providerRequests.columns.submittedAt"),
 		key: "created_at",
 		minWidth: 150,
+		align: "center",
 		render: row => {
 			const days = daysWaiting(row.created_at)
 			const waiting =
@@ -272,7 +278,7 @@ const columns = computed<DataTableColumns<ProviderRequest>>(() => [
 							days === 0 ? t("providerRequests.wait.today") : t("providerRequests.wait.days", { n: formatNumber(days) }, days)
 						)
 					: null
-			return h("div", { class: "flex flex-col gap-0.5 whitespace-nowrap" }, [
+			return h("div", { class: "inline-flex flex-col items-center gap-0.5 whitespace-nowrap" }, [
 				h("span", { class: "text-sm text-slate-700 dark:text-slate-300 font-medium" }, formatDate(row.created_at)),
 				waiting
 			])
@@ -282,6 +288,7 @@ const columns = computed<DataTableColumns<ProviderRequest>>(() => [
 		title: t("providerRequests.columns.status"),
 		key: "status",
 		width: 140,
+		align: "center",
 		render: row =>
 			h(
 				"span",
@@ -293,6 +300,7 @@ const columns = computed<DataTableColumns<ProviderRequest>>(() => [
 		title: t("common.actions"),
 		key: "actions",
 		width: 120,
+		align: "center",
 		render: row =>
 			h(
 				NButton,

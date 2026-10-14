@@ -39,6 +39,8 @@
 				:loading
 				:bordered="false"
 				:row-key
+				size="small"
+				:scroll-x="850"
 			/>
 		</n-card>
 
@@ -278,7 +280,7 @@ function renderActions(row: Member) {
 	const topUpLabel = t("members.topUp.button")
 	const statusLabel = t("members.changeStatus.button")
 
-	return h("div", { class: "flex gap-2" }, [
+	return h("div", { class: "inline-flex items-center justify-center gap-2" }, [
 		h(
 			NButton,
 			{
@@ -319,24 +321,26 @@ const columns = computed<DataTableColumns<Member>>(() => [
 	{
 		title: t("members.columns.member"),
 		key: "name",
+		minWidth: 200,
+		align: "center",
 		render: row => {
 			const avatar = row.personal_profile?.avatar_url
 			const initials = row.name.trim().split(" ").slice(0, 2).map(p => p[0]).join("").toUpperCase() || "M"
 
-			return h("div", { class: "flex items-center gap-3 py-1" }, [
+			return h("div", { class: "inline-flex items-center gap-3 py-1 text-start" }, [
 				avatar
 					? h(NAvatar, { round: true, size: 36, src: avatar, class: "shrink-0 ring-1 ring-emerald-600/20" })
 					: h(NAvatar, { round: true, size: 36, class: "shrink-0 bg-emerald-700 text-white font-bold text-xs" }, { default: () => initials }),
 				h("div", { class: "flex flex-col gap-0.5" }, [
 					h("span", { class: "font-semibold text-sm leading-snug text-stone-900" }, row.name),
-					h("span", { class: "text-xs text-secondary leading-snug font-mono" }, row.phone)
+					h("span", { class: "text-xs text-secondary leading-snug font-mono", dir: "ltr" }, row.phone)
 				])
 			])
 		}
 	},
-	{ title: t("members.columns.email"), key: "email" },
-	{ title: t("members.columns.company"), key: "company", render: renderCompany },
-	{ title: t("members.columns.status"), key: "status", render: renderStatusTag },
-	{ title: t("resourceCrud.table.actionsColumn"), key: "actions", render: renderActions, width: 100 }
+	{ title: t("members.columns.email"), key: "email", minWidth: 180, align: "center" },
+	{ title: t("members.columns.company"), key: "company", minWidth: 150, align: "center", render: renderCompany },
+	{ title: t("members.columns.status"), key: "status", minWidth: 120, align: "center", render: renderStatusTag },
+	{ title: t("resourceCrud.table.actionsColumn"), key: "actions", render: renderActions, width: 120, align: "center" }
 ])
 </script>

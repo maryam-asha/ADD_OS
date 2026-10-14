@@ -36,11 +36,13 @@
 			<n-tab name="rejected" :tab="t('events.approval.rejected')" />
 		</n-tabs>
 
-		<n-spin :show="isLoading">
+		<n-spin :show="isLoading" class="add-ledger-table">
 			<n-empty v-if="!attendees.length && !isLoading" :description="t('events.approval.empty')" />
 
 			<n-data-table
 				v-else
+				size="small"
+				:scroll-x="1100"
 				:columns
 				:data="attendees"
 				:bordered="false"
@@ -278,16 +280,20 @@ function openAnswers(row: EventAttendee) {
 }
 
 const columns = computed<DataTableColumns<EventAttendee>>(() => [
-	{ title: t("events.approval.columns.name"), key: "name" },
-	{ title: t("events.approval.columns.email"), key: "email" },
+	{ title: t("events.approval.columns.name"), key: "name", minWidth: 140, align: "center" },
+	{ title: t("events.approval.columns.email"), key: "email", minWidth: 180, align: "center" },
 	{
 		title: t("events.approval.columns.phone"),
 		key: "phone",
-		render: row => row.phone || "—"
+		minWidth: 130,
+		align: "center",
+		render: row => h("span", { class: "font-mono" }, row.phone || "—")
 	},
 	{
 		title: t("events.approval.columns.status"),
 		key: "status",
+		width: 120,
+		align: "center",
 		render: row =>
 			h(
 				NTag,
@@ -298,21 +304,29 @@ const columns = computed<DataTableColumns<EventAttendee>>(() => [
 	{
 		title: t("events.approval.columns.registeredAt"),
 		key: "registered_at",
-		render: row => (row.registered_at ? formatDateTime(row.registered_at, { locale: currentLocale.value }) : "—")
+		minWidth: 160,
+		align: "center",
+		render: row => (row.registered_at ? h("span", { class: "font-mono text-xs" }, formatDateTime(row.registered_at, { locale: currentLocale.value })) : "—")
 	},
 	{
 		title: t("events.approval.columns.reason"),
 		key: "rejection_reason",
+		minWidth: 160,
+		align: "center",
 		render: row => row.rejection_reason || "—"
 	},
 	{
 		title: t("events.approval.columns.discounts"),
 		key: "discounts",
+		minWidth: 130,
+		align: "center",
 		render: row => h(AppliedDiscountList, { discounts: row.discounts })
 	},
 	{
 		title: t("resourceCrud.table.actionsColumn"),
 		key: "actions",
+		width: 120,
+		align: "center",
 		render: row => {
 			const buttons = []
 
@@ -343,7 +357,7 @@ const columns = computed<DataTableColumns<EventAttendee>>(() => [
 				)
 			}
 
-			return h("div", { class: "flex items-center gap-2" }, buttons)
+			return h("div", { class: "inline-flex items-center justify-center gap-2" }, buttons)
 		}
 	}
 ])

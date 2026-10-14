@@ -2,8 +2,8 @@
 	<div class="flex flex-col gap-5">
 		<h1 class="text-2xl font-bold">{{ t("invoices.title") }}</h1>
 
-		<n-card>
-			<div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-4">
+		<n-card class="add-ledger-table shadow-sm border border-stone-200">
+			<div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
 				<n-select v-model:value="query.status" :options="statusOptions" clearable :placeholder="t('invoices.filters.status')" />
 				<n-select v-model:value="query.billed_to" :options="payerOptions" clearable :placeholder="t('invoices.filters.billedTo')" />
 				<n-select v-model:value="query.provider_id" :options="providerOptions" clearable filterable :placeholder="t('invoices.filters.provider')" />
@@ -14,6 +14,9 @@
 				:columns="columns"
 				:data="data"
 				:loading="isLoading"
+				:bordered="false"
+				:scroll-x="1350"
+				size="small"
 				:row-key="(row: Invoice) => row.id"
 				:pagination="{ itemCount: meta?.total, page: meta?.current_page, pageSize: meta?.per_page, onChange: (p: number) => (page = p) }"
 			/>
@@ -114,35 +117,101 @@ const methodOptions = computed<SelectOption[]>(() => METHODS.map(m => ({ label: 
 const isSubmitting = ref(false)
 
 const columns = computed<DataTableColumns<Invoice>>(() => [
-	{ title: t("invoices.columns.reference"), key: "reference" },
-	{ title: t("invoices.columns.company"), key: "company", render: row => row.company?.legal_name ?? "—" },
-	{ title: t("invoices.columns.provider"), key: "provider", render: row => row.provider?.name ?? t("invoices.direct") },
-	{ title: t("invoices.columns.billedTo"), key: "billed_to", render: row => t(`invoices.payerOptions.${row.billed_to}`) },
-	{ title: t("invoices.columns.amount"), key: "amount", render: row => formatMoney(row.amount, row.currency) },
-	{ title: t("invoices.columns.paid"), key: "paid_amount", render: row => formatMoney(row.paid_amount, row.currency) },
-	{ title: t("invoices.columns.remaining"), key: "remaining", render: row => formatMoney(row.remaining, row.currency) },
-	{ title: t("invoices.columns.dueAt"), key: "due_at", render: row => row.due_at ?? "—" },
+	{
+		title: t("invoices.columns.reference"),
+		key: "reference",
+		width: 140,
+		minWidth: 120,
+		align: "center",
+		render: row => h("span", { class: "font-mono font-bold text-stone-800 text-xs" }, row.reference)
+	},
+	{
+		title: t("invoices.columns.company"),
+		key: "company",
+		width: 180,
+		minWidth: 150,
+		align: "center",
+		render: row => h("span", { class: "font-medium text-stone-900" }, row.company?.legal_name ?? "—")
+	},
+	{
+		title: t("invoices.columns.provider"),
+		key: "provider",
+		width: 160,
+		minWidth: 140,
+		align: "center",
+		render: row => h("span", { class: "text-stone-700 font-medium text-xs" }, row.provider?.name ?? t("invoices.direct"))
+	},
+	{
+		title: t("invoices.columns.billedTo"),
+		key: "billed_to",
+		width: 130,
+		minWidth: 120,
+		align: "center",
+		render: row => h("span", { class: "text-xs font-medium text-stone-600" }, t(`invoices.payerOptions.${row.billed_to}`))
+	},
+	{
+		title: t("invoices.columns.amount"),
+		key: "amount",
+		width: 140,
+		minWidth: 130,
+		align: "center",
+		render: row => h("bdi", { dir: "ltr", class: "font-bold text-stone-900 whitespace-nowrap" }, formatMoney(row.amount, row.currency))
+	},
+	{
+		title: t("invoices.columns.paid"),
+		key: "paid_amount",
+		width: 140,
+		minWidth: 130,
+		align: "center",
+		render: row => h("bdi", { dir: "ltr", class: "font-semibold text-emerald-700 whitespace-nowrap" }, formatMoney(row.paid_amount, row.currency))
+	},
+	{
+		title: t("invoices.columns.remaining"),
+		key: "remaining",
+		width: 140,
+		minWidth: 130,
+		align: "center",
+		render: row => h("bdi", { dir: "ltr", class: "font-semibold text-stone-800 whitespace-nowrap" }, formatMoney(row.remaining, row.currency))
+	},
+	{
+		title: t("invoices.columns.dueAt"),
+		key: "due_at",
+		width: 140,
+		minWidth: 130,
+		align: "center",
+		render: row => h("span", { class: "text-xs font-medium text-stone-600 whitespace-nowrap" }, row.due_at ?? "—")
+	},
 	{
 		title: t("invoices.columns.status"),
 		key: "status",
+		width: 140,
+		minWidth: 130,
+		align: "center",
 		render: row =>
-			h("div", { class: "flex flex-wrap gap-1" }, [
-				h(NTag, { size: "small", round: true, type: STATUS_TAG[row.status] }, { default: () => t(`invoices.statusOptions.${row.status}`) }),
-				row.is_overdue ? h(NTag, { size: "small", round: true, type: "error" }, { default: () => t("invoices.overdue") }) : null
+			h("div", { class: "inline-flex items-center justify-center flex-wrap gap-1" }, [
+				h(NTag, { size: "small", round: true, bordered: false, type: STATUS_TAG[row.status] }, { default: () => t(`invoices.statusOptions.${row.status}`) }),
+				row.is_overdue ? h(NTag, { size: "small", round: true, bordered: false, type: "error" }, { default: () => t("invoices.overdue") }) : null
 			])
 	},
 	{
 		title: t("common.actions"),
 		key: "actions",
-		render: row =>
-			h("div", { class: "flex gap-2" }, [
-				canRecordInvoicePayment() && (row.status === "unpaid" || row.status === "partially_paid")
-					? h(NButton, { size: "small", type: "success", onClick: () => openPayment(row) }, { default: () => t("invoices.payment.button") })
+		width: 180,
+		minWidth: 160,
+		align: "center",
+		render: row => {
+			const canPay = canRecordInvoicePayment() && (row.status === "unpaid" || row.status === "partially_paid")
+			const canCancel = canCancelInvoice() && row.status === "unpaid"
+			if (!canPay && !canCancel) return "—"
+			return h("div", { class: "inline-flex items-center justify-center gap-1.5" }, [
+				canPay
+					? h(NButton, { size: "small", type: "success", secondary: true, onClick: () => openPayment(row) }, { default: () => t("invoices.payment.button") })
 					: null,
-				canCancelInvoice() && row.status === "unpaid"
+				canCancel
 					? h(NButton, { size: "small", type: "error", secondary: true, onClick: () => openCancel(row) }, { default: () => t("invoices.cancel.button") })
 					: null
 			])
+		}
 	}
 ])
 

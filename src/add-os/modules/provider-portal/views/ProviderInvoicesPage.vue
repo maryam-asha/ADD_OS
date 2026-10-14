@@ -5,7 +5,7 @@
 			<p class="text-sm text-neutral-500">{{ t("invoices.readOnlyDescription") }}</p>
 		</div>
 
-		<n-card class="add-ledger-table">
+		<n-card class="add-ledger-table shadow-sm border border-stone-200">
 			<div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
 				<n-select v-model:value="query.status" :options="statusOptions" clearable :placeholder="t('invoices.filters.status')" />
 				<n-select v-model:value="query.billed_to" :options="payerOptions" clearable :placeholder="t('invoices.filters.billedTo')" />
@@ -16,6 +16,9 @@
 				:columns="columns"
 				:data="data"
 				:loading="isLoading"
+				:bordered="false"
+				:scroll-x="1100"
+				size="small"
 				:row-key="(row: Invoice) => row.id"
 				:pagination="{ itemCount: meta?.total, page: meta?.current_page, pageSize: meta?.per_page, onChange: (p: number) => (page = p) }"
 			/>
@@ -141,28 +144,76 @@ async function openDetail(id: number) {
 }
 
 const columns = computed<DataTableColumns<Invoice>>(() => [
-	{ title: t("invoices.columns.reference"), key: "reference" },
-	{ title: t("invoices.columns.company"), key: "company", render: row => row.company?.legal_name ?? "—" },
-	{ title: t("invoices.columns.billedTo"), key: "billed_to", render: row => t(`invoices.payerOptions.${row.billed_to}`) },
-	{ title: t("invoices.columns.amount"), key: "amount", render: row => formatMoney(row.amount, row.currency) },
-	{ title: t("invoices.columns.remaining"), key: "remaining", render: row => formatMoney(row.remaining, row.currency) },
-	{ title: t("invoices.columns.dueAt"), key: "due_at", render: row => row.due_at ?? "—" },
+	{
+		title: t("invoices.columns.reference"),
+		key: "reference",
+		width: 140,
+		minWidth: 120,
+		align: "center",
+		render: row => h("span", { class: "font-mono font-bold text-stone-800 text-xs" }, row.reference)
+	},
+	{
+		title: t("invoices.columns.company"),
+		key: "company",
+		width: 200,
+		minWidth: 160,
+		align: "center",
+		render: row => h("span", { class: "font-medium text-stone-900" }, row.company?.legal_name ?? "—")
+	},
+	{
+		title: t("invoices.columns.billedTo"),
+		key: "billed_to",
+		width: 130,
+		minWidth: 120,
+		align: "center",
+		render: row => h("span", { class: "text-xs font-medium text-stone-600" }, t(`invoices.payerOptions.${row.billed_to}`))
+	},
+	{
+		title: t("invoices.columns.amount"),
+		key: "amount",
+		width: 140,
+		minWidth: 130,
+		align: "center",
+		render: row => h("bdi", { dir: "ltr", class: "font-bold text-stone-900 whitespace-nowrap" }, formatMoney(row.amount, row.currency))
+	},
+	{
+		title: t("invoices.columns.remaining"),
+		key: "remaining",
+		width: 140,
+		minWidth: 130,
+		align: "center",
+		render: row => h("bdi", { dir: "ltr", class: "font-semibold text-stone-800 whitespace-nowrap" }, formatMoney(row.remaining, row.currency))
+	},
+	{
+		title: t("invoices.columns.dueAt"),
+		key: "due_at",
+		width: 140,
+		minWidth: 130,
+		align: "center",
+		render: row => h("span", { class: "text-xs font-medium text-stone-600 whitespace-nowrap" }, row.due_at ?? "—")
+	},
 	{
 		title: t("invoices.columns.status"),
 		key: "status",
+		width: 140,
+		minWidth: 130,
+		align: "center",
 		render: row =>
-			h("div", { class: "flex flex-wrap gap-1" }, [
-				h(NTag, { size: "small", round: true, type: STATUS_TAG[row.status] }, { default: () => t(`invoices.statusOptions.${row.status}`) }),
-				row.is_overdue ? h(NTag, { size: "small", round: true, type: "error" }, { default: () => t("invoices.overdue") }) : null
+			h("div", { class: "inline-flex items-center justify-center flex-wrap gap-1" }, [
+				h(NTag, { size: "small", round: true, bordered: false, type: STATUS_TAG[row.status] }, { default: () => t(`invoices.statusOptions.${row.status}`) }),
+				row.is_overdue ? h(NTag, { size: "small", round: true, bordered: false, type: "error" }, { default: () => t("invoices.overdue") }) : null
 			])
 	},
 	{
 		title: t("common.actions"),
 		key: "actions",
+		width: 120,
+		minWidth: 110,
+		align: "center",
 		render: row =>
 			h(
 				NButton,
-				{ size: "small", type: "primary", text: true, onClick: () => openDetail(row.id) },
+				{ size: "small", type: "primary", secondary: true, onClick: () => openDetail(row.id) },
 				{ icon: () => h(Icon, { name: "carbon:view", size: 16 }), default: () => t("common.view") }
 			)
 	}

@@ -12,12 +12,15 @@
 				{{ t("providerRequests.create.button") }}
 			</n-button>
 		</div>
-		<n-card>
+		<n-card class="add-ledger-table">
 			<n-data-table
 				remote
+				size="small"
+				:scroll-x="850"
 				:columns="columns"
 				:data="data"
 				:loading="isLoading"
+				:bordered="false"
 				:row-key="(row: ProviderRequest) => row.id"
 				:pagination="{ itemCount: meta?.total, page: meta?.current_page, pageSize: meta?.per_page, onChange: (p: number) => (page = p) }"
 			/>
@@ -187,20 +190,24 @@ const payerOptions = computed<SelectOption[]>(() => [
 ])
 
 const columns = computed<DataTableColumns<ProviderRequest>>(() => [
-	{ title: t("common.id"), key: "id", width: 70 },
-	{ title: t("providerRequests.columns.type"), key: "type", render: row => t(`providerRequests.typeOptions.${row.type}`) },
-	{ title: t("providerRequests.columns.company"), key: "company", render: row => row.company?.legal_name ?? "—" },
-	{ title: t("providerRequests.columns.submittedAt"), key: "created_at", render: row => formatDateTime(row.created_at) },
+	{ title: t("common.id"), key: "id", width: 80, align: "center", render: row => h("span", { class: "font-mono" }, `#${row.id}`) },
+	{ title: t("providerRequests.columns.type"), key: "type", minWidth: 150, align: "center", render: row => t(`providerRequests.typeOptions.${row.type}`) },
+	{ title: t("providerRequests.columns.company"), key: "company", minWidth: 160, align: "center", render: row => row.company?.legal_name ?? "—" },
+	{ title: t("providerRequests.columns.submittedAt"), key: "created_at", minWidth: 160, align: "center", render: row => h("span", { class: "font-mono text-xs" }, formatDateTime(row.created_at)) },
 	{
 		title: t("providerRequests.status"),
 		key: "status",
+		width: 130,
+		align: "center",
 		render: row => h(NTag, { size: "small", round: true, type: STATUS_TAG[row.status] }, { default: () => t(`providerRequests.statusOptions.${row.status}`) })
 	},
 	{
 		title: t("common.actions"),
 		key: "actions",
+		width: 140,
+		align: "center",
 		render: row =>
-			h("div", { class: "flex items-center gap-2" }, [
+			h("div", { class: "inline-flex items-center justify-center gap-2" }, [
 				h(NButton, { size: "small", type: "primary", text: true, onClick: () => openDetail(row.id) }, { icon: () => h(Icon, { name: "carbon:view", size: 16 }), default: () => t("common.view") }),
 				row.status === "pending"
 					? h(NButton, { size: "small", type: "error", text: true, onClick: () => confirmCancel(row) }, { default: () => t("providerRequests.cancel.button") })

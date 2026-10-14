@@ -148,16 +148,16 @@
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
 		<!-- MAIN DATA TABLE -->
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
-		<div class="overflow-hidden rounded-2xl border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface-raised,#FFFFFF)] shadow-xs dark:border-neutral-800 dark:bg-neutral-900/60">
+		<div class="overflow-hidden rounded-2xl border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface-raised,#FFFFFF)] shadow-xs dark:border-neutral-800 dark:bg-neutral-900/60 add-ledger-table">
 			<n-data-table
 				:columns="columns"
 				:data="filteredData"
 				:loading="isLoading"
 				:bordered="false"
+				size="small"
 				:row-key="rowKey"
 				:pagination="false"
 				:scroll-x="1100"
-				class="add-ledger-table"
 			/>
 
 			<!-- Empty State when filtered data is empty -->
@@ -349,9 +349,10 @@ const columns = computed<DataTableColumns<Company>>(() => [
 		title: t("companies.columns.companyAndRecord", "الشركة والسجل"),
 		key: "legal_name",
 		minWidth: 240,
+		align: "center",
 		render: row => {
 			const monogram = getMonogram(row.legal_name)
-			return h("div", { class: "flex items-center gap-3 py-1" }, [
+			return h("div", { class: "inline-flex items-center gap-3 py-1 text-start" }, [
 				h(
 					"div",
 					{
@@ -384,6 +385,7 @@ const columns = computed<DataTableColumns<Company>>(() => [
 		title: t("providerPortal.membershipTitle", "الاشتراك والخطة"),
 		key: "membership",
 		minWidth: 200,
+		align: "center",
 		render: row => {
 			const m = (row as any).membership
 			if (!m) {
@@ -393,8 +395,8 @@ const columns = computed<DataTableColumns<Company>>(() => [
 			const isRenewalStopped = !m.auto_renew || !!m.renewal_stop_reason
 			const stopReasonText = m.renewal_stop_reason_label || m.renewal_stop_reason || t("reports.providerCompanies.renewalStopped", "تجديد متوقف")
 
-			return h("div", { class: "flex flex-col gap-1 py-1" }, [
-				h("div", { class: "flex flex-wrap items-center gap-1.5" }, [
+			return h("div", { class: "inline-flex flex-col items-center gap-1 py-1" }, [
+				h("div", { class: "flex flex-wrap items-center justify-center gap-1.5" }, [
 					h("span", { class: "text-xs font-bold text-[var(--add-text-primary,#43474F)] dark:text-neutral-200" }, m.plan_name || "خطة اشتراك"),
 					h(
 						NTag,
@@ -408,7 +410,7 @@ const columns = computed<DataTableColumns<Company>>(() => [
 						{ default: () => `${m.seats || 0} ${t("reports.providerCompanies.seats", "مقاعد")}` }
 					)
 				]),
-				h("div", { class: "flex items-center gap-2 text-xs text-[var(--add-text-muted,#5A606B)] dark:text-neutral-400" }, [
+				h("div", { class: "flex items-center justify-center gap-2 text-xs text-[var(--add-text-muted,#5A606B)] dark:text-neutral-400" }, [
 					h("span", `${t("reports.providerCompanies.endsAt", "ينتهي:")} ${m.current_period_end ? formatDate(m.current_period_end) : "—"}`)
 				]),
 				isRenewalStopped
@@ -461,6 +463,7 @@ const columns = computed<DataTableColumns<Company>>(() => [
 		title: t("providerPortal.companyLeases", "المكاتب المؤجرة"),
 		key: "leases",
 		minWidth: 170,
+		align: "center",
 		render: row => {
 			const leases = (row as any).office_leases || []
 			const lease = leases[0]
@@ -470,8 +473,8 @@ const columns = computed<DataTableColumns<Company>>(() => [
 				return h("span", { class: "text-xs text-[var(--add-text-muted,#5A606B)]" }, "0 مكتب")
 			}
 
-			return h("div", { class: "flex flex-col gap-0.5" }, [
-				h("div", { class: "flex items-center gap-1.5" }, [
+			return h("div", { class: "inline-flex flex-col items-center gap-0.5" }, [
+				h("div", { class: "flex items-center justify-center gap-1.5" }, [
 					h(
 						NTag,
 						{ size: "tiny", type: "info", round: true, bordered: false },
@@ -489,6 +492,7 @@ const columns = computed<DataTableColumns<Company>>(() => [
 		title: t("companies.columns.monthlyAmount", "البدل الشهري"),
 		key: "financials",
 		minWidth: 150,
+		align: "center",
 		render: row => {
 			const lease = (row as any).office_leases?.[0]
 			if (lease?.monthly_amount) {

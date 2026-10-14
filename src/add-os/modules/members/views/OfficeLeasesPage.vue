@@ -86,7 +86,7 @@
 					<div class="flex items-center justify-between pt-1 border-t border-[var(--add-border,#CDC2AF)]/20 text-xs text-[var(--add-text-muted,#5A606B)] dark:border-neutral-800">
 						<span>{{ t("officeLeases.stats.acrossWings", "ضمن {count} أجنحة تقنية", { count: activeWingsCount }) }}</span>
 						<span class="inline-flex items-center gap-1 font-bold text-[var(--add-primary-text,#556843)] dark:text-[var(--add-primary,#657C50)]">
-							<Icon name="carbon:trend-up" :size="13" />
+							<Icon name="carbon:growth" :size="13" />
 							<span>+{{ newThisMonthCount }} هذا الشهر</span>
 						</span>
 					</div>
@@ -304,6 +304,7 @@
 					:row-key="rowKey"
 					:pagination="false"
 					:scroll-x="1280"
+					size="small"
 					class="add-ledger-table"
 				/>
 
@@ -615,8 +616,9 @@ const columns = computed<DataTableColumns<OfficeLease>>(() => [
 		title: t("officeLeases.columns.reference", "رقم العقد"),
 		key: "reference",
 		minWidth: 150,
+		align: "center",
 		render: row =>
-			h("div", { class: "flex items-center gap-2" }, [
+			h("div", { class: "inline-flex items-center justify-center gap-2" }, [
 				h(Icon, { name: "carbon:document", size: 16, class: "text-[var(--add-primary-text,#556843)]" }),
 				h(
 					"span",
@@ -634,8 +636,9 @@ const columns = computed<DataTableColumns<OfficeLease>>(() => [
 		title: t("officeLeases.columns.company", "الشركة والفرع"),
 		key: "company",
 		minWidth: 200,
+		align: "center",
 		render: row =>
-			h("div", { class: "flex flex-col gap-0.5 py-1" }, [
+			h("div", { class: "flex flex-col items-center justify-center gap-0.5 py-1 text-center" }, [
 				h(
 					"span",
 					{
@@ -657,10 +660,11 @@ const columns = computed<DataTableColumns<OfficeLease>>(() => [
 		title: t("officeLeases.columns.space", "المكتب والمساحة"),
 		key: "space",
 		minWidth: 180,
+		align: "center",
 		render: row => {
 			const spaceName = resolveLocalized(row.space?.name, row.space?.id ? `مكتب #${row.space.id}` : "مكتب تنفيذي")
 			const spaceDetails = (row.space as any)?.building_wing || (row.space as any)?.wing || "المبنى C • الجناح الشمالي (85 م²)"
-			return h("div", { class: "flex flex-col gap-0.5 py-1" }, [
+			return h("div", { class: "flex flex-col items-center justify-center gap-0.5 py-1 text-center" }, [
 				h("span", { class: "font-bold text-sm text-[var(--add-text-primary,#43474F)] dark:text-neutral-200" }, spaceName),
 				h("span", { class: "text-xs text-[var(--add-text-muted,#5A606B)] dark:text-neutral-400" }, spaceDetails)
 			])
@@ -672,12 +676,13 @@ const columns = computed<DataTableColumns<OfficeLease>>(() => [
 		title: t("officeLeases.columns.monthlyAmount", "القيمة الإيجارية / الدورية"),
 		key: "monthly_amount",
 		minWidth: 170,
+		align: "center",
 		render: row => {
 			const formatted = formatReportMoney(row.monthly_amount, row.currency || "SYP")
 			const cycleText = row.currency === "USD" ? "ربع سنوي ($400 شهرياً)" : "شهرياً (يستحق في 1 من كل شهر)"
 			const hasOverdue = (row as any).overdue_invoices_count > 0 || row.id === 3
 
-			return h("div", { class: "flex flex-col gap-0.5 py-1" }, [
+			return h("div", { class: "flex flex-col items-center justify-center gap-0.5 py-1 text-center" }, [
 				h("span", { class: "font-mono font-bold text-sm text-[var(--add-text-primary,#43474F)] dark:text-neutral-100" }, formatted),
 				h("span", { class: "text-xs text-[var(--add-text-muted,#5A606B)] dark:text-neutral-400" }, cycleText),
 				hasOverdue
@@ -696,6 +701,7 @@ const columns = computed<DataTableColumns<OfficeLease>>(() => [
 		title: t("officeLeases.columns.dates", "فترة وسريان العقد"),
 		key: "dates",
 		minWidth: 180,
+		align: "center",
 		render: row => {
 			const start = row.starts_on ? formatDate(row.starts_on) : "01/01/2026"
 			const end = row.ends_on ? formatDate(row.ends_on) : "31/12/2026"
@@ -703,9 +709,9 @@ const columns = computed<DataTableColumns<OfficeLease>>(() => [
 			const progress = getProgressPercent(row.starts_on, row.ends_on)
 			const isEndingSoon = days <= 30
 
-			return h("div", { class: "flex flex-col gap-1 py-1" }, [
+			return h("div", { class: "flex flex-col items-center justify-center gap-1 py-1 text-center" }, [
 				h("span", { class: "font-mono text-xs text-[var(--add-text-secondary,#565B65)] dark:text-neutral-300" }, `${start} - ${end}`),
-				h("div", { class: "flex items-center gap-2" }, [
+				h("div", { class: "flex items-center justify-center gap-2" }, [
 					h(
 						"span",
 						{ class: `text-xs font-bold ${isEndingSoon ? "text-[var(--add-warning-text,#845A13)] dark:text-[var(--add-warning,#E7B155)]" : "text-[var(--add-text-muted,#5A606B)]"}` },
@@ -731,12 +737,13 @@ const columns = computed<DataTableColumns<OfficeLease>>(() => [
 		title: t("officeLeases.columns.autoRenew", "التجديد التلقائي"),
 		key: "auto_renew",
 		minWidth: 140,
+		align: "center",
 		render: row => {
 			const isBlocked = (row as any).auto_renew_blocked || (row as any).renewal_stop_reason || row.id === 3
 			if (isBlocked) {
 				return h(
 					"div",
-					{ class: "flex flex-col gap-0.5" },
+					{ class: "flex flex-col items-center justify-center gap-0.5 text-center" },
 					[
 						h(
 							"span",
@@ -750,7 +757,7 @@ const columns = computed<DataTableColumns<OfficeLease>>(() => [
 
 			return h(
 				"div",
-				{ class: "flex items-center gap-2" },
+				{ class: "flex items-center justify-center gap-2" },
 				[
 					h(NSwitch, {
 						value: row.auto_renew,
@@ -772,6 +779,7 @@ const columns = computed<DataTableColumns<OfficeLease>>(() => [
 		title: t("officeLeases.columns.status", "الحالة"),
 		key: "status",
 		minWidth: 120,
+		align: "center",
 		render: row => {
 			const days = getDaysRemaining(row.ends_on)
 			const isEndingSoon = row.status === "active" && days <= 30

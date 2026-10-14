@@ -47,6 +47,8 @@
 		<n-card class="add-ledger-table">
 			<n-data-table
 				remote
+				size="small"
+				:scroll-x="1000"
 				:columns="columns"
 				:data="data"
 				:loading="isLoading"
@@ -150,31 +152,43 @@ const columns = computed<DataTableColumns<OfficeLease>>(() => [
 	{
 		title: t("officeLeases.columns.reference"),
 		key: "reference",
+		minWidth: 120,
+		align: "center",
 		render: row => row.reference || `#${row.id}`
 	},
 	{
 		title: t("officeLeases.columns.space"),
 		key: "space",
+		minWidth: 130,
+		align: "center",
 		render: row => row.space?.name || (row.space?.id ? `#${row.space.id}` : "—")
 	},
 	{
 		title: t("officeLeases.columns.company"),
 		key: "company",
+		minWidth: 150,
+		align: "center",
 		render: row => row.company?.legal_name || "—"
 	},
 	{
 		title: t("officeLeases.columns.monthlyAmount"),
 		key: "monthly_amount",
-		render: row => `${row.monthly_amount} ${row.currency}`
+		minWidth: 130,
+		align: "center",
+		render: row => h("span", { class: "font-mono" }, `${row.monthly_amount} ${row.currency}`)
 	},
 	{
 		title: t("officeLeases.columns.dates"),
 		key: "dates",
-		render: row => `${row.starts_on} → ${row.ends_on}`
+		minWidth: 180,
+		align: "center",
+		render: row => h("span", { class: "font-mono text-xs" }, `${row.starts_on} → ${row.ends_on}`)
 	},
 	{
 		title: t("officeLeases.columns.status"),
 		key: "status",
+		minWidth: 110,
+		align: "center",
 		render: row =>
 			h(
 				NTag,
@@ -185,6 +199,8 @@ const columns = computed<DataTableColumns<OfficeLease>>(() => [
 	{
 		title: t("officeLeases.columns.autoRenew"),
 		key: "auto_renew",
+		minWidth: 100,
+		align: "center",
 		render: row =>
 			h(NSwitch, {
 				value: row.auto_renew,
@@ -195,6 +211,8 @@ const columns = computed<DataTableColumns<OfficeLease>>(() => [
 	{
 		title: t("officeLeases.columns.actions"),
 		key: "actions",
+		width: 90,
+		align: "center",
 		render: row =>
 			h(
 				NButton,

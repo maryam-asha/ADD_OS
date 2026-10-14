@@ -8,8 +8,8 @@
 
 		<n-alert v-if="error" type="error" :title="t('amenities.manage.loadError')" />
 
-		<n-card class="shadow-sm">
-			<n-data-table :columns :data="rows" :loading="isLoading" :bordered="false" />
+		<n-card class="shadow-sm add-ledger-table">
+			<n-data-table :columns :data="rows" :loading="isLoading" :bordered="false" size="small" :scroll-x="700" />
 		</n-card>
 
 		<n-modal v-model:show="dialogVisible" preset="card" :title="dialogTitle" class="max-w-md">
@@ -63,17 +63,21 @@ const columns = computed<DataTableColumns<SpaceTypeAmenities>>(() => [
 	{
 		title: t("amenities.manage.columns.spaceType"),
 		key: "space_type",
+		minWidth: 150,
+		align: "center",
 		render: row => t(`spaces.spaceType.${row.space_type}`)
 	},
 	{
 		title: t("amenities.manage.columns.amenities"),
 		key: "amenities",
+		minWidth: 350,
+		align: "center",
 		render: row =>
 			row.amenities.length === 0
 				? h("span", { class: "text-secondary text-sm" }, t("amenities.manage.none"))
 				: h(
 						"div",
-						{ class: "flex flex-wrap gap-1" },
+						{ class: "inline-flex flex-wrap items-center justify-center gap-1" },
 						row.amenities.map(amenity => h(NTag, { size: "small", round: true, key: amenity }, { default: () => t(`amenities.types.${amenity}`) }))
 					)
 	},
@@ -81,6 +85,7 @@ const columns = computed<DataTableColumns<SpaceTypeAmenities>>(() => [
 		title: t("amenities.manage.columns.actions"),
 		key: "actions",
 		width: 140,
+		align: "center",
 		render: row =>
 			h(
 				NButton,

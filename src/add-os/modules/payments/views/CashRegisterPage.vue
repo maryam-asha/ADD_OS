@@ -62,13 +62,16 @@
 		<!-- Sessions History -->
 		<div class="flex flex-col gap-3">
 			<h2 class="text-xl font-bold">{{ t("cashRegister.historyTitle") }}</h2>
-			<n-data-table
-				:columns
-				:data="sessions"
-				:loading="loadingHistory"
-				:bordered="false"
-				class="bg-surface-raised rounded-lg shadow-sm"
-			/>
+			<n-card class="add-ledger-table">
+				<n-data-table
+					:columns
+					:data="sessions"
+					:loading="loadingHistory"
+					:bordered="false"
+					:scroll-x="1200"
+					size="small"
+				/>
+			</n-card>
 		</div>
 
 		<!-- Open Session Modal -->
@@ -165,16 +168,20 @@ function formatAmount(val: string | null | undefined): string {
 }
 
 const columns = computed<DataTableColumns<CashRegisterSession>>(() => [
-	{ title: t("cashRegister.columns.id"), key: "id", width: 70 },
-	{ title: t("cashRegister.columns.operator"), key: "operator_name", render: row => row.operator_name || "—" },
+	{ title: t("cashRegister.columns.id"), key: "id", width: 70, align: "center" },
+	{ title: t("cashRegister.columns.operator"), key: "operator_name", minWidth: 140, align: "center", render: row => row.operator_name || "—" },
 	{
 		title: t("cashRegister.columns.branch"),
 		key: "branch_name",
+		minWidth: 140,
+		align: "center",
 		render: row => (typeof row.branch_name === "string" ? row.branch_name : row.branch_name ? pickLocalized(row.branch_name, currentLocale.value) : "—")
 	},
 	{
 		title: t("cashRegister.columns.status"),
 		key: "status",
+		width: 110,
+		align: "center",
 		render: row =>
 			h(
 				NTag,
@@ -182,19 +189,39 @@ const columns = computed<DataTableColumns<CashRegisterSession>>(() => [
 				{ default: () => t(`cashRegister.status.${row.status}`) }
 			)
 	},
-	{ title: t("cashRegister.columns.openedAt"), key: "opened_at", render: row => formatIsoDate(row.opened_at) },
-	{ title: t("cashRegister.columns.closedAt"), key: "closed_at", render: row => formatIsoDate(row.closed_at) },
-	{ title: t("cashRegister.columns.openingBalance"), key: "opening_balance", render: row => formatAmount(row.opening_balance) },
-	{ title: t("cashRegister.columns.expectedBalance"), key: "expected_balance", render: row => formatAmount(row.expected_balance) },
-	{ title: t("cashRegister.columns.closingBalance"), key: "closing_balance", render: row => formatAmount(row.closing_balance) },
+	{ title: t("cashRegister.columns.openedAt"), key: "opened_at", minWidth: 150, align: "center", render: row => formatIsoDate(row.opened_at) },
+	{ title: t("cashRegister.columns.closedAt"), key: "closed_at", minWidth: 150, align: "center", render: row => formatIsoDate(row.closed_at) },
+	{
+		title: t("cashRegister.columns.openingBalance"),
+		key: "opening_balance",
+		minWidth: 130,
+		align: "center",
+		render: row => h("span", { class: "font-mono font-medium" }, formatAmount(row.opening_balance))
+	},
+	{
+		title: t("cashRegister.columns.expectedBalance"),
+		key: "expected_balance",
+		minWidth: 130,
+		align: "center",
+		render: row => h("span", { class: "font-mono font-medium" }, formatAmount(row.expected_balance))
+	},
+	{
+		title: t("cashRegister.columns.closingBalance"),
+		key: "closing_balance",
+		minWidth: 130,
+		align: "center",
+		render: row => h("span", { class: "font-mono font-medium" }, formatAmount(row.closing_balance))
+	},
 	{
 		title: t("cashRegister.columns.difference"),
 		key: "difference",
+		minWidth: 120,
+		align: "center",
 		render: row => {
 			if (row.difference === null) return "—"
 			const diff = Number(row.difference)
 			const type = diff === 0 ? "default" : diff > 0 ? "success" : "error"
-			return h(NTag, { type, size: "small" }, { default: () => formatAmount(row.difference) })
+			return h(NTag, { type, size: "small", class: "font-mono" }, { default: () => formatAmount(row.difference) })
 		}
 	}
 ])

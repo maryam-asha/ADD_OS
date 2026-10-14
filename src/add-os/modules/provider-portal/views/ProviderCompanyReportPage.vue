@@ -65,6 +65,8 @@
 		<!-- Data Table -->
 		<n-card class="add-ledger-table">
 			<n-data-table
+				size="small"
+				:scroll-x="900"
 				:columns="columns"
 				:data="filteredRows"
 				:loading="isLoading"
@@ -131,9 +133,10 @@ const columns = computed<DataTableColumns<ProviderCompanyReportItem>>(() => [
 	{
 		title: t("companies.columns.legalName", "اسم الشركة"),
 		key: "legal_name",
-		width: 180,
+		minWidth: 180,
+		align: "center",
 		render: row =>
-			h("div", { class: "flex flex-col gap-0.5" }, [
+			h("div", { class: "inline-flex flex-col items-center gap-0.5" }, [
 				h("span", { class: "font-semibold text-neutral-800 dark:text-neutral-100" }, row.legal_name),
 				h(
 					NTag,
@@ -153,12 +156,13 @@ const columns = computed<DataTableColumns<ProviderCompanyReportItem>>(() => [
 		key: "members_count",
 		width: 100,
 		align: "center",
-		render: row => h("span", { class: "font-semibold" }, row.members_count ?? 0)
+		render: row => h("span", { class: "font-semibold font-mono" }, row.members_count ?? 0)
 	},
 	{
 		title: t("reports.providerCompanies.currentMembership", "الاشتراك الحالي"),
 		key: "membership",
 		minWidth: 220,
+		align: "center",
 		render: row => {
 			if (!row.membership) {
 				return h("span", { class: "text-neutral-400 text-sm" }, "—")
@@ -167,8 +171,8 @@ const columns = computed<DataTableColumns<ProviderCompanyReportItem>>(() => [
 			const isRenewalStopped = !m.auto_renew || !!m.renewal_stop_reason
 			const stopReasonText = m.renewal_stop_reason_label || m.renewal_stop_reason || t("reports.providerCompanies.renewalStopped", "تجديد متوقف")
 
-			return h("div", { class: "flex flex-col gap-1 py-1" }, [
-				h("div", { class: "flex items-center gap-1.5 flex-wrap" }, [
+			return h("div", { class: "inline-flex flex-col items-center gap-1 py-1" }, [
+				h("div", { class: "flex items-center justify-center gap-1.5 flex-wrap" }, [
 					h("span", { class: "font-medium text-sm text-neutral-800 dark:text-neutral-200" }, m.plan_name || "—"),
 					h(
 						NTag,
@@ -176,7 +180,7 @@ const columns = computed<DataTableColumns<ProviderCompanyReportItem>>(() => [
 						{ default: () => `${m.seats} ${t("reports.providerCompanies.seats", "مقاعد")}` }
 					)
 				]),
-				h("div", { class: "flex items-center gap-2 text-xs text-neutral-500" }, [
+				h("div", { class: "flex items-center justify-center gap-2 text-xs text-neutral-500" }, [
 					h("span", `${t("reports.providerCompanies.endsAt", "ينتهي:")} ${m.current_period_end ? formatDate(m.current_period_end, { style: "short" }) : "—"}`)
 				]),
 				isRenewalStopped
@@ -222,13 +226,14 @@ const columns = computed<DataTableColumns<ProviderCompanyReportItem>>(() => [
 		title: t("reports.providerCompanies.outstandingDues", "المستحق عليها"),
 		key: "outstanding",
 		minWidth: 200,
+		align: "center",
 		render: row => {
 			if (!row.outstanding || row.outstanding.length === 0) {
 				return h("span", { class: "text-neutral-400" }, "—")
 			}
 			return h(
 				"div",
-				{ class: "flex flex-col gap-1 py-1" },
+				{ class: "inline-flex flex-col items-center gap-1 py-1" },
 				row.outstanding.map(o => {
 					const hasOverdue = Number.parseFloat(o.overdue) > 0
 					return h(

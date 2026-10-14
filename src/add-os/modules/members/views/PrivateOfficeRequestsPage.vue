@@ -21,7 +21,7 @@
 			<n-select v-model:value="query.provider_id" :options="providerOptions" clearable filterable :placeholder="t('companies.filters.provider')" />
 		</div>
 		<n-card class="add-ledger-table">
-			<n-data-table v-if="data.length > 0 || isLoading" remote :columns="columns" :data="data" :loading="isLoading" :bordered="false" :row-key="rowKey" :pagination="{ itemCount: meta?.total, page: meta?.current_page, pageSize: meta?.per_page, onChange: (p) => page = p }" />
+			<n-data-table v-if="data.length > 0 || isLoading" remote :columns="columns" :data="data" :loading="isLoading" :bordered="false" :row-key="rowKey" :scroll-x="980" size="small" :pagination="{ itemCount: meta?.total, page: meta?.current_page, pageSize: meta?.per_page, onChange: (p) => page = p }" />
 			<div v-else class="py-10 text-center">{{ t("privateOfficeRequests.empty") }}</div>
 		</n-card>
 

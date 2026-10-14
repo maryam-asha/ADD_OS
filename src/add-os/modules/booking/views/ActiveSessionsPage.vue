@@ -16,7 +16,7 @@
 		</div>
 
 		<n-card class="add-ledger-table">
-			<n-data-table v-if="rows.length > 0 || isLoading" :columns :data="rows" :loading="isLoading" :bordered="false" :row-key />
+			<n-data-table v-if="rows.length > 0 || isLoading" :columns :data="rows" :loading="isLoading" :bordered="false" :row-key size="small" :scroll-x="1050" />
 			<div v-else-if="!error" class="py-10 text-center">{{ t("activeSessions.empty") }}</div>
 		</n-card>
 

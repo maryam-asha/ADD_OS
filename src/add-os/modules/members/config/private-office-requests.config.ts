@@ -21,20 +21,24 @@ export function buildRequestColumns(
 	canCreateLease?: () => boolean
 ): DataTableColumns<PrivateOfficeRequest> {
 	return [
-		{ title: t("privateOfficeRequests.columns.prospectName"), key: "prospect_name" },
-		{ title: t("privateOfficeRequests.columns.company", "Company"), key: "company", render: row => row.company?.legal_name || "—" },
-		{ title: t("privateOfficeRequests.columns.contact"), key: "contact" },
-		{ title: t("privateOfficeRequests.columns.provider", "Provider"), key: "provider", render: row => row.provider?.name || "—" },
+		{ title: t("privateOfficeRequests.columns.prospectName"), key: "prospect_name", minWidth: 150, align: "center" },
+		{ title: t("privateOfficeRequests.columns.company", "Company"), key: "company", minWidth: 150, align: "center", render: row => row.company?.legal_name || "—" },
+		{ title: t("privateOfficeRequests.columns.contact"), key: "contact", minWidth: 140, align: "center" },
+		{ title: t("privateOfficeRequests.columns.provider", "Provider"), key: "provider", minWidth: 150, align: "center", render: row => row.provider?.name || "—" },
 		{
 			title: t("privateOfficeRequests.columns.status"),
 			key: "status",
+			width: 120,
+			align: "center",
 			render: row =>
 				h(NTag, { type: STATUS_TAG_TYPE[row.status], round: true, bordered: true }, { default: () => t(`privateOfficeRequests.status.${row.status}`) })
 		},
-		{ title: t("privateOfficeRequests.columns.quoteRef"), key: "quote_ref", render: row => row.quote_ref ?? "—" },
+		{ title: t("privateOfficeRequests.columns.quoteRef"), key: "quote_ref", minWidth: 130, align: "center", render: row => (row.quote_ref ? h("span", { class: "font-mono text-xs" }, row.quote_ref) : "—") },
 		{
 			title: t("privateOfficeRequests.columns.actions"),
 			key: "actions",
+			width: 150,
+			align: "center",
 			render: row => {
 				const buttons = []
 
@@ -97,7 +101,7 @@ export function buildRequestColumns(
 					)
 				)
 
-				return h("div", { class: "flex gap-2" }, buttons)
+				return h("div", { class: "inline-flex items-center justify-center gap-2" }, buttons)
 			}
 		}
 	]

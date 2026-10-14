@@ -27,7 +27,7 @@
 			</div>
 		</div>
 
-		<n-card size="small">
+		<n-card size="small" class="add-ledger-table">
 			<div class="flex flex-col gap-4">
 				<div class="flex gap-2">
 					<n-button v-for="name in TABS" :key="name" size="small" :type="tab === name ? 'primary' : 'default'" :secondary="tab !== name" :data-test="`coupons-tab-${name}`" @click="tab = name">
@@ -44,7 +44,7 @@
 					<span class="text-xs text-secondary ms-auto">{{ t("coupons.page.count", { count: formatNumber(total) }) }}</span>
 				</div>
 				<n-alert v-if="failed" type="error" :bordered="false">{{ t("coupons.page.loadError") }}</n-alert>
-				<n-data-table remote :columns :data="rows" :loading="isLoading" :bordered="false" :row-key="(row: Coupon) => row.id" :pagination :row-props size="small" @update:page="onPage" @update:filters="handleFiltersChange" />
+				<n-data-table remote :columns :data="rows" :loading="isLoading" :bordered="false" :row-key="(row: Coupon) => row.id" :pagination :row-props size="small" :scroll-x="1100" @update:page="onPage" @update:filters="handleFiltersChange" />
 			</div>
 		</n-card>
 
@@ -126,25 +126,29 @@ function labelOf(row: Coupon): string {
 
 const columns = computed<DataTableColumns<Coupon>>(() => [
 	// An offer has no code to show.
-	...(automatic.value ? [] : [{ title: t("coupons.columns.code"), key: "code", render: (row: Coupon) => h("bdi", { dir: "ltr", class: "font-mono font-semibold" }, row.code ?? "") }]),
-	{ title: t("coupons.columns.name"), key: "name", render: row => (row.name ? pickLocalized(row.name, currentLocale.value) || "—" : "—") },
-	{ title: t("coupons.columns.discount"), key: "discount", render: row => discountLabel(t, row) },
+	...(automatic.value ? [] : [{ title: t("coupons.columns.code"), key: "code", minWidth: 140, align: "center" as const, render: (row: Coupon) => h("bdi", { dir: "ltr", class: "font-mono font-semibold" }, row.code ?? "") }]),
+	{ title: t("coupons.columns.name"), key: "name", minWidth: 160, align: "center", render: row => (row.name ? pickLocalized(row.name, currentLocale.value) || "—" : "—") },
+	{ title: t("coupons.columns.discount"), key: "discount", minWidth: 130, align: "center", render: row => discountLabel(t, row) },
 	{
 		title: t("coupons.columns.targets"),
 		key: "targets",
+		minWidth: 160,
+		align: "center",
 		render: row => (row.targets?.length
-			? h("div", { class: "flex flex-wrap gap-1" }, [...new Set(row.targets.map(target => target.purpose))].map(purpose => h(NTag, { size: "small", bordered: false }, { default: () => t(`pricing.purpose.${purpose}`) })))
+			? h("div", { class: "flex flex-wrap items-center justify-center gap-1" }, [...new Set(row.targets.map(target => target.purpose))].map(purpose => h(NTag, { size: "small", bordered: false }, { default: () => t(`pricing.purpose.${purpose}`) })))
 			: t("coupons.detail.allPurchases"))
 	},
-	{ title: t("coupons.columns.usage"), key: "used", render: row => h("bdi", { dir: "ltr" }, usage(row)) },
+	{ title: t("coupons.columns.usage"), key: "used", minWidth: 120, align: "center", render: row => h("bdi", { dir: "ltr" }, usage(row)) },
 	{
 		title: t("coupons.columns.window"),
 		key: "state", // changed key to state for filter
+		minWidth: 170,
+		align: "center",
 		filterMultiple: false,
 		filterOptionValue: filters.state,
 		filterOptions: stateOptions.value,
 		// Two lines, not "start → end": a fixed arrow points the wrong way in RTL.
-		render: row => h("div", { class: "flex flex-col text-xs" }, [
+		render: row => h("div", { class: "flex flex-col items-center justify-center text-xs" }, [
 			h("span", row.starts_at ? formatDateTime(row.starts_at) : "—"),
 			h("span", { class: "text-secondary" }, row.ends_at ? formatDateTime(row.ends_at) : "—")
 		])
@@ -152,6 +156,8 @@ const columns = computed<DataTableColumns<Coupon>>(() => [
 	{
 		title: t("coupons.columns.active"),
 		key: "is_active",
+		minWidth: 110,
+		align: "center",
 		filterMultiple: false,
 		filterOptionValue: filters.is_active,
 		filterOptions: activeOptions.value,
@@ -163,7 +169,9 @@ const columns = computed<DataTableColumns<Coupon>>(() => [
 		? [{
 				title: t("coupons.columns.actions"),
 				key: "actions",
-				render: (row: Coupon) => h("div", { class: "flex gap-3" }, [
+				width: 110,
+				align: "center" as const,
+				render: (row: Coupon) => h("div", { class: "inline-flex items-center justify-center gap-3" }, [
 					h(NButton, { text: true, type: "primary", "aria-label": t("coupons.edit"), title: t("coupons.edit"), onClick: only(() => openForm(row.id)) }, { icon: () => h(Icon, { name: "carbon:edit", size: 18 }) }),
 					h(NButton, { text: true, type: "error", "data-test": "coupon-delete", "aria-label": t("coupons.delete.action"), title: t("coupons.delete.action"), onClick: only(() => confirmDelete(row)) }, { icon: () => h(Icon, { name: "carbon:trash-can", size: 18 }) })
 				])

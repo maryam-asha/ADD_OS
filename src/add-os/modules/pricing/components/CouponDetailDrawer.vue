@@ -23,13 +23,13 @@
 					</dl>
 
 					<h3 class="font-semibold">{{ t("coupons.detail.redemptions") }}</h3>
-					<n-data-table remote size="small" :columns :data="redemptions" :loading="redemptionsLoading" :pagination :bordered="false" @update:page="loadRedemptions" />
+					<n-data-table remote size="small" class="add-ledger-table" :scroll-x="600" :columns :data="redemptions" :loading="redemptionsLoading" :pagination :bordered="false" @update:page="loadRedemptions" />
 
 					<section class="flex flex-col gap-2" data-test="coupon-history">
 						<h3 class="font-semibold">{{ t("coupons.history.title") }}</h3>
 						<p class="text-xs text-secondary">{{ t("coupons.history.description") }}</p>
 						<n-alert v-if="historyFailed" type="error" :bordered="false">{{ t("coupons.history.loadError") }}</n-alert>
-						<n-data-table remote size="small" :columns="historyColumns" :data="revisions" :loading="historyLoading" :pagination="historyPagination" :bordered="false" @update:page="loadRevisions" />
+						<n-data-table remote size="small" class="add-ledger-table" :scroll-x="600" :columns="historyColumns" :data="revisions" :loading="historyLoading" :pagination="historyPagination" :bordered="false" @update:page="loadRevisions" />
 					</section>
 				</div>
 			</n-spin>
@@ -130,16 +130,20 @@ const columns = computed<DataTableColumns<CouponRedemption>>(() => [
 	{
 		title: t("coupons.redemption.member"),
 		key: "user",
-		render: row => (row.user ? h("div", { class: "flex flex-col" }, [h("span", row.user.name), h("bdi", { dir: "ltr", class: "text-xs text-secondary" }, row.user.phone)]) : "—")
+		minWidth: 140,
+		align: "center",
+		render: row => (row.user ? h("div", { class: "inline-flex flex-col items-center" }, [h("span", row.user.name), h("bdi", { dir: "ltr", class: "text-xs text-secondary" }, row.user.phone)]) : "—")
 	},
-	{ title: t("coupons.redemption.purpose"), key: "purpose", render: row => t(`pricing.purpose.${row.purpose}`) },
-	{ title: t("coupons.redemption.record"), key: "record", render: row => h("bdi", { dir: "ltr" }, recordOf(row)) },
-	{ title: t("coupons.redemption.base"), key: "base_points", render: row => formatNumber(row.base_points) },
-	{ title: t("coupons.redemption.discounted"), key: "points", render: row => `${formatNumber(row.points)} (${formatNumber(row.percent)}%)` },
-	{ title: t("coupons.redemption.date"), key: "created_at", render: row => formatDateTime(row.created_at) },
+	{ title: t("coupons.redemption.purpose"), key: "purpose", minWidth: 100, align: "center", render: row => t(`pricing.purpose.${row.purpose}`) },
+	{ title: t("coupons.redemption.record"), key: "record", minWidth: 90, align: "center", render: row => h("bdi", { dir: "ltr", class: "font-mono" }, recordOf(row)) },
+	{ title: t("coupons.redemption.base"), key: "base_points", minWidth: 90, align: "center", render: row => h("span", { class: "font-mono" }, formatNumber(row.base_points)) },
+	{ title: t("coupons.redemption.discounted"), key: "points", minWidth: 110, align: "center", render: row => h("span", { class: "font-mono" }, `${formatNumber(row.points)} (${formatNumber(row.percent)}%)`) },
+	{ title: t("coupons.redemption.date"), key: "created_at", minWidth: 140, align: "center", render: row => h("span", { class: "font-mono text-xs" }, formatDateTime(row.created_at)) },
 	{
 		title: t("coupons.redemption.state"),
 		key: "counts",
+		minWidth: 100,
+		align: "center",
 		render: row => h(NTag, { "size": "small", "round": true, "bordered": false, "type": row.counts ? "success" : "default", "data-test": "redemption-state" }, { default: () => t(row.counts ? "coupons.redemption.used" : "coupons.redemption.refunded") })
 	}
 ])
@@ -149,26 +153,30 @@ const HISTORY_TAG: Record<CouponRevision["action"], "success" | "info" | "error"
 /** When a version ran: its own dates, either open. Two lines, not an arrow: an arrow points the wrong way in RTL. */
 function windowOf(row: CouponRevision) {
 	if (!row.starts_at && !row.ends_at) return t("coupons.history.always")
-	return h("div", { class: "flex flex-col" }, [
+	return h("div", { class: "inline-flex flex-col items-center text-xs" }, [
 		row.starts_at ? h("span", t("coupons.history.from", { date: formatDateTime(row.starts_at) })) : null,
 		h("span", row.ends_at ? t("coupons.history.until", { date: formatDateTime(row.ends_at) }) : t("coupons.history.always"))
 	])
 }
 
 const historyColumns = computed<DataTableColumns<CouponRevision>>(() => [
-	{ title: t("coupons.history.columns.at"), key: "recorded_at", render: row => formatDateTime(row.recorded_at) },
+	{ title: t("coupons.history.columns.at"), key: "recorded_at", minWidth: 140, align: "center", render: row => h("span", { class: "font-mono text-xs" }, formatDateTime(row.recorded_at)) },
 	{
 		title: t("coupons.history.columns.action"),
 		key: "action",
+		width: 100,
+		align: "center",
 		render: row => h(NTag, { size: "small", round: true, bordered: false, type: HISTORY_TAG[row.action] }, { default: () => t(`coupons.history.action.${row.action}`) })
 	},
 	{
 		title: t("coupons.history.columns.discount"),
 		key: "discount",
+		minWidth: 120,
+		align: "center",
 		render: row => discountLabel(t, row) + (row.max_discount_points ? ` · ${t("coupons.detail.cap", { value: formatNumber(row.max_discount_points) })}` : "")
 	},
-	{ title: t("coupons.history.columns.window"), key: "window", render: windowOf },
-	{ title: t("coupons.history.columns.active"), key: "is_active", render: row => yesNo(row.is_active) }
+	{ title: t("coupons.history.columns.window"), key: "window", minWidth: 140, align: "center", render: windowOf },
+	{ title: t("coupons.history.columns.active"), key: "is_active", width: 90, align: "center", render: row => yesNo(row.is_active) }
 ])
 
 async function loadRevisions(next = 1): Promise<void> {

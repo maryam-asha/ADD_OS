@@ -28,7 +28,7 @@
 		</div>
 
 		<n-card class="add-ledger-table">
-			<n-data-table :columns :data="filteredUsers" :loading :bordered="false" :row-key />
+			<n-data-table :columns :data="filteredUsers" :loading :bordered="false" :row-key size="small" :scroll-x="960" />
 		</n-card>
 
 		<n-modal
@@ -253,7 +253,7 @@ function renderActions(row: User) {
 	const statusLabel = t("users.changeStatus.button")
 	const roleLabel = t("users.changeRole.button")
 
-	return h("div", { class: "flex gap-2" }, [
+	return h("div", { class: "inline-flex items-center justify-center gap-2" }, [
 		h(
 			NButton,
 			{ text: true, type: "primary", "aria-label": editLabel, title: editLabel, onClick: () => openEdit(row) },
@@ -273,12 +273,12 @@ function renderActions(row: User) {
 }
 
 const columns = computed<DataTableColumns<User>>(() => [
-	{ title: t("users.columns.name"), key: "name" },
-	{ title: t("users.columns.phone"), key: "phone" },
-	{ title: t("users.columns.email"), key: "email" },
-	{ title: t("users.columns.role"), key: "roles", render: renderRoleTag },
-	{ title: t("users.columns.status"), key: "status", render: renderStatusTag },
-	{ title: t("users.columns.actions"), key: "actions", render: renderActions }
+	{ title: t("users.columns.name"), key: "name", minWidth: 160, align: "center" },
+	{ title: t("users.columns.phone"), key: "phone", minWidth: 140, align: "center", render: row => h("span", { class: "font-mono", dir: "ltr" }, row.phone) },
+	{ title: t("users.columns.email"), key: "email", minWidth: 180, align: "center" },
+	{ title: t("users.columns.role"), key: "roles", minWidth: 130, align: "center", render: renderRoleTag },
+	{ title: t("users.columns.status"), key: "status", minWidth: 120, align: "center", render: renderStatusTag },
+	{ title: t("users.columns.actions"), key: "actions", width: 120, align: "center", render: renderActions }
 ])
 
 async function loadUsers() {

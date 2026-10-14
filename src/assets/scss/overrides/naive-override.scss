@@ -110,6 +110,29 @@
 	.n-data-table-resize-button {
 		--n-merged-border-color: rgba(var(--fg-secondary-color-rgb) / 0.35);
 	}
+
+	.n-data-table-td,
+	.n-data-table-th {
+		white-space: nowrap;
+	}
+
+	.n-data-table-td--center-align {
+		text-align: center;
+
+		> .flex:not(.justify-start):not(.justify-end):not(.justify-between),
+		> div > .flex:not(.justify-start):not(.justify-end):not(.justify-between),
+		.n-space {
+			justify-content: center;
+		}
+	}
+
+	.n-data-table-th--center-align {
+		text-align: center;
+
+		.n-data-table-th__title-wrapper {
+			justify-content: center;
+		}
+	}
 }
 
 .n-steps {

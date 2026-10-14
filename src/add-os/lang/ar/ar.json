@@ -1626,7 +1626,9 @@
 			"companyReport": "تقرير شركاتي",
 			"invoiceStatement": "كشف الفواتير",
 			"providersReport": "تقرير المزوّدين",
-			"revenueReport": "تقرير الإيرادات"
+			"revenueReport": "تقرير الإيرادات",
+			"spacesReport": "تقرير المساحات",
+			"collectionsReport": "تقرير التحصيل"
 		}
 	},
 	"resourceCrud": {
@@ -3765,25 +3767,10 @@
 			"noDataDesc": "لم تصدر أي فواتير مطابقة للفترة المحددة. جرّب توسيع نطاق البحث."
 		},
 		"aging": {
-			"title": "أعمار الديون",
-			"totalOverdue": "إجمالي المتأخر:",
-			"bucket1": "1–30 يوماً",
-			"bucket2": "31–60 يوماً",
-			"bucket3": "أكثر من 60 يوماً",
 			"lowRisk": "تأخير خفيف",
-			"mediumRisk": "تأخير متوسط",
 			"highRisk": "عالي الخطورة",
 			"noDebts": "لا توجد ديون متأخرة مسجلة.",
-			"accurateClassification": "تصنيف زمني دقيق لاستحقاق الديون والمتأخرات",
-			"weightChart": "مخطط توزيع الثقل المالي للديون",
-			"safe": "سليم تماماً",
-			"recentDelay": "تأخير حديث وقابل للتحصيل",
-			"peakConcentration": "ذروة التركيز",
-			"noCritical": "لا توجد متأخرات حرجة",
-			"criticalFollowup": "ذمة حرجة للمتابعة",
-			"sypAnalysis": "تحليل استحقاق الليرة السورية",
-			"usdAnalysis": "تحليل استحقاق الدولار الأمريكي",
-			"allCurrenciesClean": "كافة الفواتير محصّلة ولا توجد أي ديون متأخرة"
+			"weightChart": "مخطط توزيع الثقل المالي للديون"
 		},
 		"sources": {
 			"planAssignment": "تعيين خطة",
@@ -3811,7 +3798,6 @@
 		},
 		"providerInvoices": {
 			"description": "كشف مالي متكامل بالفواتير الصادرة، المدفوعات، المبالغ المستحقة، وأعمار الديون.",
-			"totalsByCurrency": "الإجماليات لكل عملة",
 			"breakdownByPayer": "التقسيم حسب الدافع",
 			"payerComparison": "مقارنة الدافعين",
 			"payerProvider": "على المزوّد نفسه",
@@ -3838,17 +3824,7 @@
 		},
 		"adminRevenue": {
 			"description": "تقرير الإيرادات الشامل لكافة الفواتير ومصادر الدخل، أعمار الديون، وقائمة أكثر الدافعين تأخراً.",
-			"totalsTitle": "الإجماليات لكل عملة",
-			"calculatedPerCurrency": "تم احتساب القيود بناءً على العملة الرسمية لكل فاتورة",
 			"exportRevenueReport": "تصدير تقرير الإيرادات",
-			"collectionRate": "نسبة التحصيل",
-			"overdueNotice": "مستحقات متأخرة واجبة التحصيل",
-			"remainingToPay": "المتبقي للدفع:",
-			"allCollected": "تم تحصيل كافة الفواتير بالكامل",
-			"healthExcellent": "ممتاز",
-			"healthStable": "مستقر",
-			"healthAttention": "يحتاج متابعة",
-			"healthInactive": "غير نشط",
 			"bySourceTitle": "الإيراد حسب المصدر لكل عملة",
 			"sourcesForCurrency": "مصادر الإيراد",
 			"source": "المصدر",
@@ -3858,6 +3834,231 @@
 			"payerType": "النوع",
 			"payerName": "الدافع",
 			"noOverduePayers": "لا يوجد دافعون متأخرون في هذه الفترة."
+		}
+	},
+	"dashboard": {
+		"description": "إحصائيات الفترة المختارة بنظرة واحدة — وكل بطاقة تضيّق أرقامها بفلاترها الخاصة.",
+		"refresh": "تحديث",
+		"allBranches": "كل الفروع",
+		"presets": {
+			"today": "اليوم",
+			"last7Days": "آخر 7 أيام",
+			"thisMonth": "هذا الشهر",
+			"thisYear": "هذه السنة"
+		},
+		"comparedWith": "مقارنةً بالفترة من {from} إلى {to}",
+		"previousValue": "الفترة السابقة: {value}",
+		"noChange": "دون تغيير",
+		"notAvailable": "لا بيانات",
+		"percent": "{value}٪",
+		"percentPoints": "{value} نقطة مئوية",
+		"loadFailed": "تعذّر تحميل هذا القسم.",
+		"retry": "إعادة المحاولة",
+		"attention": "بحاجة إلى متابعة",
+		"allClear": "لا شيء بالانتظار",
+		"noSections": {
+			"title": "لا توجد أقسام من لوحة التحكم لدورك",
+			"body": "يمكن للمدير منحها من شاشة الأدوار: التشغيل أو المالية أو الأعضاء."
+		},
+		"operations": {
+			"title": "التشغيل",
+			"activeSessions": "في الداخل الآن",
+			"expectedToday": "متوقَّعون اليوم",
+			"seatsTaken": "{taken} مشغول من {seats}",
+			"awaitingApproval": "حجوزات بانتظار الموافقة",
+			"awaitingPayment": "حجوزات بانتظار الدفع",
+			"openServiceRequests": "طلبات خدمات مفتوحة",
+			"newSiteInquiries": "استفسارات جديدة من الموقع",
+			"unquotedOfficeRequests": "طلبات مكاتب خاصة لم تُسعَّر بعد"
+		},
+		"finance": {
+			"title": "المالية",
+			"collected": "المحصَّل",
+			"nothingCollected": "لم يُحصَّل شيء في هذه الفترة ولا في سابقتها.",
+			"cash": "نقداً",
+			"card": "بطاقة",
+			"invoicePayments": "دفعات الفواتير",
+			"invoiced": "المفوتَر",
+			"pointsByPurpose": "النقاط حسب الغرض",
+			"noPoints": "لا توجد دفعات مقبولة في هذه الفترة ولا في سابقتها.",
+			"pendingProviderRequests": "طلبات مزوّدين بانتظار القرار",
+			"stoppedRenewals": "تجديدات توقفت",
+			"pendingRateSuggestions": "اقتراحات أسعار صرف للمراجعة",
+			"openCashSessions": "جلسات صندوق مفتوحة"
+		},
+		"members": {
+			"title": "الأعضاء",
+			"newMembers": "أعضاء جدد",
+			"liveSubscriptions": "اشتراكات سارية",
+			"byPlan": "الاشتراكات السارية حسب الخطة",
+			"noSubscriptions": "لا توجد اشتراكات سارية.",
+			"planFallback": "الخطة رقم {id}",
+			"endingThisWeek": "اشتراكات تنتهي خلال 7 أيام",
+			"leasesEndingThisMonth": "عقود مكاتب تنتهي خلال 30 يوماً"
+		},
+		"viewDetails": "عرض التفاصيل",
+		"clearItems": "{count} بلا شيء بالانتظار",
+		"allSpaceTypes": "كل أنواع المساحات",
+		"currencies": {
+			"SYP": "الليرة السورية",
+			"USD": "الدولار الأمريكي",
+			"EUR": "اليورو"
+		},
+		"aging": {
+			"title": "الذمم المتأخرة حسب العملة",
+			"subtitle": "توزيع المبالغ المتأخرة على شرائح عمر الدين",
+			"eyebrow": "تحليل الاستحقاق",
+			"totalOverdue": "إجمالي المتأخر",
+			"olderThan30": "أقدم من 30 يوماً",
+			"newest": "الأحدث",
+			"oldest": "الأقدم",
+			"barLabel": "المبلغ المتأخر حسب عمره، من الأحدث إلى الأقدم",
+			"largestShare": "الحصة الأكبر",
+			"none": "لا توجد ذمم متأخرة — كل الفواتير ضمن موعد استحقاقها.",
+			"tone": {
+				"success": "حديث",
+				"warning": "متوسط",
+				"danger": "حرج"
+			},
+			"band": {
+				"0_30": "1–30 يوماً",
+				"31_60": "31–60 يوماً",
+				"60_plus": "أكثر من 60 يوماً"
+			},
+			"advice": {
+				"0_30": "قابل للتحصيل",
+				"31_60": "يحتاج تذكيراً",
+				"60_plus": "يحتاج متابعة"
+			},
+			"insight": {
+				"0_30": "{share} من المتأخرات حديثة وقابلة للتحصيل، والمبلغ الحرج محدود بـ {critical} ({criticalShare}).",
+				"31_60": "تتركّز {share} من المتأخرات في شريحة 31 إلى 60 يوماً، وستنتقل إلى الشريحة الحرجة خلال 30 يوماً إن لم تُحصَّل.",
+				"60_plus": "{share} من المتأخرات تجاوزت 60 يوماً — تحتاج متابعة مباشرة مع الدافعين."
+			}
+		},
+		"spaces": {
+			"title": "المساحات",
+			"bookings": "الحجوزات",
+			"occupancy": "متوسط الإشغال",
+			"occupancyHint": "الوقت المحجوز من ساعات العمل، للغرف والقاعات",
+			"noShowRate": "نسبة عدم الحضور",
+			"members": "أعضاء حجزوا",
+			"tableEyebrow": "حسب المساحة",
+			"tableTitle": "أداء كل مساحة",
+			"showing": "تعرض: {name}",
+			"pickHint": "اختر مساحة لعرض أرقامها وحدها",
+			"pooled": "مجمّع مشترك",
+			"pooledNote": "مقاعد Co-Space هي مجمّع الفرع المشترك، وجلسات الحضور المباشر السابقة غير مسجلة، فلا نسبة إشغال لكل مساحة.",
+			"hours": "{value} ساعة",
+			"columns": {
+				"space": "المساحة",
+				"bookings": "الحجوزات",
+				"perDay": "لكل يوم عمل",
+				"perWeek": "أسبوعياً",
+				"duration": "متوسط المدة",
+				"occupancy": "الإشغال",
+				"noShow": "عدم الحضور",
+				"cancellation": "الإلغاء",
+				"members": "الأعضاء"
+			},
+			"duration": {
+				"minutes": "{m} دقيقة",
+				"hours": "{h} س {m} د"
+			},
+			"peak": {
+				"eyebrow": "الوقت المحجوز",
+				"title": "أوقات الذروة",
+				"empty": "لا حجوزات في هذه الفترة.",
+				"insight": "يوم {day} هو الأكثر ازدحاماً، والساعة {hour} هي الذروة.",
+				"cell": "{day} الساعة {hour}: {value}",
+				"less": "أقل",
+				"more": "أكثر"
+			}
+		},
+		"times": "{value} ضعفاً",
+		"collapse": "طيّ القسم",
+		"expand": "فتح القسم",
+		"totals": {
+			"title": "الإجماليات لكل عملة",
+			"subtitle": "المفوتَر والمحصَّل والمتبقي، كلٌّ بعملته",
+			"eyebrow": "إجمالي الفواتير",
+			"billed": "المفوتَر",
+			"collectionRate": "نسبة التحصيل",
+			"barLabel": "المبلغ المفوتَر مقسوماً إلى مدفوع وغير مستحق بعد ومتأخر",
+			"none": "لا فواتير في هذه الفترة.",
+			"part": {
+				"paid": "المدفوع",
+				"upcoming": "غير مستحق بعد",
+				"overdue": "المتأخر"
+			},
+			"note": {
+				"paid": "محصَّل",
+				"upcoming": "ضمن موعد استحقاقه",
+				"overdue": "تجاوز موعد استحقاقه — يحتاج متابعة"
+			},
+			"state": {
+				"overdue": "يحتاج متابعة",
+				"onTrack": "ضمن المواعيد",
+				"collected": "محصَّل بالكامل"
+			},
+			"insight": {
+				"overdue": "حُصِّل {rate} من المفوتَر، و{overdue} تجاوزت موعد استحقاقها وتحتاج متابعة.",
+				"onTrack": "حُصِّل {rate} من المفوتَر، والمتبقي {remaining} ضمن مواعيد استحقاقه.",
+				"collected": "حُصِّل كل ما فُوتر في هذه الفترة."
+			}
+		},
+		"stats": {
+			"total": "الإجمالي: {count}",
+			"bookingsByStatus": "الحجوزات حسب الحالة",
+			"bookingStatus": {
+				"pending": "بانتظار الموافقة",
+				"awaiting_payment": "بانتظار الدفع",
+				"confirmed": "مؤكدة",
+				"completed": "مكتملة",
+				"no_show": "لم يحضر",
+				"cancelled": "ملغاة",
+				"rejected": "مرفوضة"
+			},
+			"serviceRequests": "طلبات الخدمات",
+			"byStatus": "حسب الحالة",
+			"byType": "حسب نوع الخدمة",
+			"noRequests": "لا طلبات خدمات في هذه الفترة.",
+			"requestStatus": {
+				"pending": "جديدة",
+				"in_progress": "قيد المعالجة",
+				"resolved": "محلولة",
+				"rejected": "مرفوضة",
+				"cancelled": "ملغاة"
+			},
+			"resolutionRate": "نسبة الحل",
+			"resolutionCaption": "من الطلبات المقدَّمة",
+			"seatsNow": "مقاعد Co-Space الآن",
+			"seatsCaption": "من المقاعد مشغولة",
+			"collectionRate": "تحصيل الفواتير",
+			"allInvoices": "كل الفواتير، لا فواتير هذه الفترة وحدها",
+			"collectedOf": "{paid} من {billed}",
+			"daily": "يوماً بيوم",
+			"dailyMetric": {
+				"bookings": "الحجوزات",
+				"members": "الأعضاء الجدد"
+			},
+			"spaceBookings": "الحجوزات لكل مساحة",
+			"spacesReport": "تقرير المساحات",
+			"noSpaces": "لا مساحات من هذا النوع.",
+			"appUsers": "مستخدمو تطبيق الأعضاء",
+			"membersTotal": "{count} عضواً",
+			"platform": {
+				"android": "أندرويد",
+				"ios": "آيفون",
+				"none": "بلا تطبيق",
+				"members": "كل الأعضاء"
+			},
+			"collected": "المحصَّل خلال الفترة",
+			"collectionsReport": "تقرير التحصيل"
+		},
+		"reports": {
+			"spacesDescription": "أداء كل مساحة قابلة للحجز خلال الفترة: الحجوزات والمتوسطات والإشغال وعدم الحضور وأوقات الذروة.",
+			"collectionsDescription": "المال المحصَّل خلال الفترة لكل عملة — نقداً وبالبطاقة ودفعات الفواتير — والنقاط حسب الغرض."
 		}
 	}
 }

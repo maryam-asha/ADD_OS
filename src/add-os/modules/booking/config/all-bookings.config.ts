@@ -48,9 +48,9 @@ const STATUS_TAG_TYPE: Readonly<Record<BookingStatus, "success" | "warning" | "d
  * and calendar rather than the server's.
  */
 function renderWhen(row: AdminBooking) {
-	return h("div", { class: "flex flex-col" }, [
+	return h("div", { class: "flex flex-col items-center justify-center text-center" }, [
 		h("span", formatDate(row.start_at)),
-		h("span", { class: "text-xs" }, `${formatTime(row.start_at)} – ${formatTime(row.end_at)}`)
+		h("span", { class: "text-xs text-secondary font-mono" }, `${formatTime(row.start_at)} – ${formatTime(row.end_at)}`)
 	])
 }
 
@@ -59,34 +59,42 @@ export function buildAllBookingsColumns(t: ComposerTranslation): DataTableColumn
 		{
 			title: t("allBookings.columns.member"),
 			key: "member",
+			minWidth: 150,
+			align: "center",
 			render: row =>
-				h("div", { class: "flex flex-col" }, [
+				h("div", { class: "flex flex-col items-center justify-center text-center" }, [
 					h("span", row.member.name ?? "—"),
-					row.member.phone ? h("span", { class: "text-xs" }, row.member.phone) : null
+					row.member.phone ? h("span", { class: "text-xs text-secondary font-mono" }, row.member.phone) : null
 				])
 		},
 		{
 			title: t("allBookings.columns.space"),
 			key: "space",
+			minWidth: 160,
+			align: "center",
 			render: (row) => {
 				// A space can be named or unnamed; when unnamed, its type is the
 				// established stand-in (see `space-type-label.ts`). Branch sits
 				// underneath because one district can hold several.
 				const title = row.space.title ?? (row.space.space_type ? spaceTypeLabel(t, row.space.space_type) : "—")
-				return h("div", { class: "flex flex-col" }, [
+				return h("div", { class: "flex flex-col items-center justify-center text-center" }, [
 					h("span", title),
-					row.space.branch ? h("span", { class: "text-xs" }, row.space.branch) : null
+					row.space.branch ? h("span", { class: "text-xs text-secondary" }, row.space.branch) : null
 				])
 			}
 		},
 		{
 			title: t("allBookings.columns.when"),
 			key: "when",
+			minWidth: 140,
+			align: "center",
 			render: renderWhen
 		},
 		{
 			title: t("allBookings.columns.status"),
 			key: "status",
+			width: 120,
+			align: "center",
 			// `status_label` is already translated by the server against the
 			// request's `lang` header, so it is rendered rather than re-derived
 			// from the enum — two translations of one value is one too many.
@@ -95,31 +103,37 @@ export function buildAllBookingsColumns(t: ComposerTranslation): DataTableColumn
 		{
 			title: t("allBookings.columns.payment"),
 			key: "payment",
+			minWidth: 130,
+			align: "center",
 			render: (row) => {
 				const state = t(`allBookings.paymentState.${row.payment_state}`)
 				const source = row.payment_source ? t(`allBookings.paymentSource.${row.payment_source}`) : null
-				return h("div", { class: "flex flex-col" }, [
+				return h("div", { class: "flex flex-col items-center justify-center text-center" }, [
 					h("span", state),
-					source ? h("span", { class: "text-xs" }, source) : null
+					source ? h("span", { class: "text-xs text-secondary" }, source) : null
 				])
 			}
 		},
 		{
 			title: t("allBookings.columns.amount"),
 			key: "amount",
+			minWidth: 120,
+			align: "center",
 			render: (row) => {
 				// `amount_owed` is null until checkout — the server writes it at
 				// settlement, not at creation. Saying so is more useful than a
 				// dash, which reads as missing data on an upcoming booking.
 				if (row.amount_owed === null) {
-					return h("span", { class: "text-xs" }, t("allBookings.notSettled"))
+					return h("span", { class: "text-xs text-secondary" }, t("allBookings.notSettled"))
 				}
-				return h("span", `${row.amount_owed} ${row.currency ?? ""}`.trim())
+				return h("span", { class: "font-mono font-medium" }, `${row.amount_owed} ${row.currency ?? ""}`.trim())
 			}
 		},
 		{
 			title: t("allBookings.columns.discounts"),
 			key: "discounts",
+			minWidth: 140,
+			align: "center",
 			// The offer or coupon as it was when the booking was priced.
 			render: row => h(AppliedDiscountList, { discounts: row.discounts })
 		}

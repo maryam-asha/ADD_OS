@@ -11,6 +11,7 @@
 				:bordered="false"
 				:row-key="resolveRowKey"
 				:scroll-x
+				size="small"
 			/>
 		</div>
 		<div v-if="!loading && data.length === 0" class="py-10 text-center">
@@ -142,7 +143,7 @@ function renderActions(row: T) {
 		)
 	}
 
-	return h("div", { class: "flex items-center gap-2" }, buttons)
+	return h("div", { class: "inline-flex items-center justify-center gap-2" }, buttons)
 }
 
 /**
@@ -150,15 +151,18 @@ function renderActions(row: T) {
  * This ensures action icons sit side by side without artificial table column spacing.
  */
 const tableColumns = computed<DataTableColumns<T>>(() => {
-	// Caller columns are kept as-is; white-space: nowrap is applied globally
-	// via the scoped <style> block below so TypeScript's column union stays intact.
-	const columns: DataTableColumns<T> = [...props.columns]
+	// Caller columns are defaulted to align: "center" if not specified.
+	const columns: DataTableColumns<T> = props.columns.map(col => ({
+		align: "center" as const,
+		...col
+	}))
 
 	if (props.onEdit || props.extraActions || props.onDelete) {
 		columns.push({
 			title: t("resourceCrud.table.actionsColumn"),
 			key: "actions",
 			width: 100,
+			align: "center",
 			render: renderActions
 		})
 	}

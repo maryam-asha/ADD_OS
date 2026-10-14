@@ -1622,7 +1622,9 @@
 			"companyReport": "My Companies Report",
 			"invoiceStatement": "Invoices Statement",
 			"providersReport": "Providers Report",
-			"revenueReport": "Revenue Report"
+			"revenueReport": "Revenue Report",
+			"spacesReport": "Spaces report",
+			"collectionsReport": "Collections report"
 		}
 	},
 	"resourceCrud": {
@@ -3760,25 +3762,10 @@
 			"noDataDesc": "No invoices were issued matching the selected period. Try expanding your search range."
 		},
 		"aging": {
-			"title": "Debt Aging",
-			"totalOverdue": "Total Overdue:",
-			"bucket1": "1–30 days",
-			"bucket2": "31–60 days",
-			"bucket3": "> 60 days",
 			"lowRisk": "Low Risk",
-			"mediumRisk": "Medium Risk",
 			"highRisk": "High Risk",
 			"noDebts": "No overdue debts recorded.",
-			"accurateClassification": "Accurate timeline classification of debts & overdues",
-			"weightChart": "Debt Financial Weight Distribution",
-			"safe": "Completely Clear",
-			"recentDelay": "Recent delay, collectable",
-			"peakConcentration": "Peak Concentration",
-			"noCritical": "No Critical Delays",
-			"criticalFollowup": "Critical Follow-up Required",
-			"sypAnalysis": "SYP Debt Aging Analysis",
-			"usdAnalysis": "USD Debt Aging Analysis",
-			"allCurrenciesClean": "All invoices collected, no overdue debts."
+			"weightChart": "Debt Financial Weight Distribution"
 		},
 		"sources": {
 			"planAssignment": "Plan Assignment",
@@ -3806,7 +3793,6 @@
 		},
 		"providerInvoices": {
 			"description": "Financial invoice statement including issued invoices, payments, outstanding balances, and debt aging.",
-			"totalsByCurrency": "Totals per Currency",
 			"breakdownByPayer": "Breakdown by Payer",
 			"payerComparison": "Payer Comparison",
 			"payerProvider": "Billed to Provider",
@@ -3833,17 +3819,7 @@
 		},
 		"adminRevenue": {
 			"description": "Comprehensive revenue report across all invoices, revenue sources, debt aging, and top overdue payers.",
-			"totalsTitle": "Totals per Currency",
-			"calculatedPerCurrency": "Entries calculated based on each invoice's official currency",
 			"exportRevenueReport": "Export Revenue Report",
-			"collectionRate": "Collection Rate",
-			"overdueNotice": "Overdue receivables requiring collection",
-			"remainingToPay": "Remaining to pay:",
-			"allCollected": "All invoices fully collected",
-			"healthExcellent": "Excellent",
-			"healthStable": "Stable",
-			"healthAttention": "Needs Attention",
-			"healthInactive": "Inactive",
 			"bySourceTitle": "Revenue by Source per Currency",
 			"sourcesForCurrency": "Revenue Sources",
 			"source": "Source",
@@ -3853,6 +3829,231 @@
 			"payerType": "Type",
 			"payerName": "Payer",
 			"noOverduePayers": "No overdue payers in this period."
+		}
+	},
+	"dashboard": {
+		"description": "Statistics for the chosen period at a glance — every card narrows further with its own filters.",
+		"refresh": "Refresh",
+		"allBranches": "All branches",
+		"presets": {
+			"today": "Today",
+			"last7Days": "Last 7 days",
+			"thisMonth": "This month",
+			"thisYear": "This year"
+		},
+		"comparedWith": "Compared with {from} – {to}",
+		"previousValue": "Previous period: {value}",
+		"noChange": "No change",
+		"notAvailable": "No data",
+		"percent": "{value}%",
+		"percentPoints": "{value} pts",
+		"loadFailed": "This section could not be loaded.",
+		"retry": "Retry",
+		"attention": "Needs attention",
+		"allClear": "Nothing waiting",
+		"noSections": {
+			"title": "No dashboard sections for your role",
+			"body": "An admin can grant them from Roles: operations, finance or members."
+		},
+		"operations": {
+			"title": "Operations",
+			"activeSessions": "Inside now",
+			"expectedToday": "Expected today",
+			"seatsTaken": "{taken} of {seats} taken",
+			"awaitingApproval": "Bookings awaiting approval",
+			"awaitingPayment": "Bookings awaiting payment",
+			"openServiceRequests": "Open service requests",
+			"newSiteInquiries": "New website inquiries",
+			"unquotedOfficeRequests": "Private office requests not yet quoted"
+		},
+		"finance": {
+			"title": "Finance",
+			"collected": "Collected",
+			"nothingCollected": "Nothing collected in this period or the one before.",
+			"cash": "Cash",
+			"card": "Card",
+			"invoicePayments": "Invoice payments",
+			"invoiced": "Invoiced",
+			"pointsByPurpose": "Points by purpose",
+			"noPoints": "No accepted payments in this period or the one before.",
+			"pendingProviderRequests": "Provider requests awaiting a decision",
+			"stoppedRenewals": "Renewals that stopped",
+			"pendingRateSuggestions": "Exchange-rate suggestions to review",
+			"openCashSessions": "Open cash register sessions"
+		},
+		"members": {
+			"title": "Members",
+			"newMembers": "New members",
+			"liveSubscriptions": "Live subscriptions",
+			"byPlan": "Live subscriptions by plan",
+			"noSubscriptions": "No live subscriptions.",
+			"planFallback": "Plan #{id}",
+			"endingThisWeek": "Subscriptions ending within 7 days",
+			"leasesEndingThisMonth": "Office leases ending within 30 days"
+		},
+		"viewDetails": "View details",
+		"clearItems": "{count} with nothing waiting",
+		"allSpaceTypes": "All space types",
+		"currencies": {
+			"SYP": "Syrian pound",
+			"USD": "US dollar",
+			"EUR": "Euro"
+		},
+		"aging": {
+			"title": "Overdue receivables by currency",
+			"subtitle": "Overdue amounts split by how long they have been due",
+			"eyebrow": "Aging analysis",
+			"totalOverdue": "Total overdue",
+			"olderThan30": "Older than 30 days",
+			"newest": "Newest",
+			"oldest": "Oldest",
+			"barLabel": "Overdue amount by age, newest to oldest",
+			"largestShare": "Largest share",
+			"none": "Nothing is overdue — every invoice is within its due date.",
+			"tone": {
+				"success": "Recent",
+				"warning": "Medium",
+				"danger": "Critical"
+			},
+			"band": {
+				"0_30": "1–30 days",
+				"31_60": "31–60 days",
+				"60_plus": "Over 60 days"
+			},
+			"advice": {
+				"0_30": "collectible",
+				"31_60": "needs a reminder",
+				"60_plus": "needs follow-up"
+			},
+			"insight": {
+				"0_30": "{share} of what is overdue is recent and collectible; the critical amount is limited to {critical} ({criticalShare}).",
+				"31_60": "{share} of what is overdue sits at 31–60 days and turns critical within 30 days unless collected.",
+				"60_plus": "{share} of what is overdue is more than 60 days late — follow up with the payers directly."
+			}
+		},
+		"spaces": {
+			"title": "Spaces",
+			"bookings": "Bookings",
+			"occupancy": "Average occupancy",
+			"occupancyHint": "Booked time over open hours, rooms and halls",
+			"noShowRate": "No-show rate",
+			"members": "Members who booked",
+			"tableEyebrow": "By space",
+			"tableTitle": "How each space did",
+			"showing": "Showing {name}",
+			"pickHint": "Pick a space to narrow the section to it",
+			"pooled": "Shared pool",
+			"pooledNote": "Co-Space seats are the branch's shared pool, and past walk-ins are not recorded, so there is no occupancy per space.",
+			"hours": "{value} h",
+			"columns": {
+				"space": "Space",
+				"bookings": "Bookings",
+				"perDay": "Per open day",
+				"perWeek": "Per week",
+				"duration": "Average length",
+				"occupancy": "Occupancy",
+				"noShow": "No-show",
+				"cancellation": "Cancelled",
+				"members": "Members"
+			},
+			"duration": {
+				"minutes": "{m} min",
+				"hours": "{h} h {m} min"
+			},
+			"peak": {
+				"eyebrow": "Booked time",
+				"title": "Peak times",
+				"empty": "No bookings in this period.",
+				"insight": "{day} is the busiest day, and {hour} the busiest hour.",
+				"cell": "{day} at {hour}: {value}",
+				"less": "Less",
+				"more": "More"
+			}
+		},
+		"times": "×{value}",
+		"collapse": "Collapse section",
+		"expand": "Expand section",
+		"totals": {
+			"title": "Totals by currency",
+			"subtitle": "Billed, collected and still owed, each in its own currency",
+			"eyebrow": "Invoice totals",
+			"billed": "Billed",
+			"collectionRate": "Collection rate",
+			"barLabel": "Billed amount split into paid, not yet due, and overdue",
+			"none": "No invoices in this period.",
+			"part": {
+				"paid": "Paid",
+				"upcoming": "Not yet due",
+				"overdue": "Overdue"
+			},
+			"note": {
+				"paid": "collected",
+				"upcoming": "within its due date",
+				"overdue": "past due — needs follow-up"
+			},
+			"state": {
+				"overdue": "Needs follow-up",
+				"onTrack": "On track",
+				"collected": "Fully collected"
+			},
+			"insight": {
+				"overdue": "{rate} of what was billed is collected; {overdue} is past due and needs follow-up.",
+				"onTrack": "{rate} of what was billed is collected; the remaining {remaining} is within its due date.",
+				"collected": "Everything billed in this period is collected."
+			}
+		},
+		"stats": {
+			"total": "Total: {count}",
+			"bookingsByStatus": "Bookings by status",
+			"bookingStatus": {
+				"pending": "Awaiting approval",
+				"awaiting_payment": "Awaiting payment",
+				"confirmed": "Confirmed",
+				"completed": "Completed",
+				"no_show": "No-show",
+				"cancelled": "Cancelled",
+				"rejected": "Rejected"
+			},
+			"serviceRequests": "Service requests",
+			"byStatus": "By status",
+			"byType": "By service type",
+			"noRequests": "No service requests in this period.",
+			"requestStatus": {
+				"pending": "New",
+				"in_progress": "In progress",
+				"resolved": "Resolved",
+				"rejected": "Rejected",
+				"cancelled": "Cancelled"
+			},
+			"resolutionRate": "Resolved",
+			"resolutionCaption": "of the requests submitted",
+			"seatsNow": "Co-Space seats now",
+			"seatsCaption": "of the seats taken",
+			"collectionRate": "Invoice collection",
+			"allInvoices": "Every invoice, not only this period's",
+			"collectedOf": "{paid} of {billed}",
+			"daily": "Day by day",
+			"dailyMetric": {
+				"bookings": "Bookings",
+				"members": "New members"
+			},
+			"spaceBookings": "Bookings per space",
+			"spacesReport": "Spaces report",
+			"noSpaces": "No spaces of this kind.",
+			"appUsers": "Member app users",
+			"membersTotal": "{count} members",
+			"platform": {
+				"android": "Android",
+				"ios": "iPhone",
+				"none": "No app",
+				"members": "All members"
+			},
+			"collected": "Collected this period",
+			"collectionsReport": "Collections report"
+		},
+		"reports": {
+			"spacesDescription": "How each bookable space did over the period: bookings, averages, occupancy, no-shows and when bookings fall.",
+			"collectionsDescription": "Money collected over the period per currency — cash, cards and invoice payments — and the points each purpose took."
 		}
 	}
 }

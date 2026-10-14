@@ -62,6 +62,11 @@
 	color: var(--add-table-header-text);
 }
 
+.add-ledger-table .n-data-table .n-data-table-th,
+.add-ledger-table .n-data-table .n-data-table-td {
+	white-space: nowrap;
+}
+
 .add-ledger-table .n-data-table .n-data-table-th__title {
 	// Deliberately NOT `--add-font-size-caption` (13px) any more. `body` is the
 	// same step the rows use, so the header reads as a peer of the data rather
@@ -70,6 +75,24 @@
 	font-weight: var(--add-font-weight-bold);
 	color: var(--add-table-header-text);
 	white-space: nowrap;
+}
+
+.add-ledger-table .n-data-table .n-data-table-td--center-align {
+	text-align: center;
+
+	> .flex:not(.justify-start):not(.justify-end):not(.justify-between),
+	> div > .flex:not(.justify-start):not(.justify-end):not(.justify-between),
+	.n-space {
+		justify-content: center;
+	}
+}
+
+.add-ledger-table .n-data-table .n-data-table-th--center-align {
+	text-align: center;
+
+	.n-data-table-th__title-wrapper {
+		justify-content: center;
+	}
 }
 
 // `text-transform: uppercase` was part of the superseded ledger treatment and is

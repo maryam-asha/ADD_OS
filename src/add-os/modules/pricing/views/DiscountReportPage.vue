@@ -36,7 +36,7 @@
 		</div>
 
 		<n-card class="add-ledger-table">
-			<n-data-table remote :columns :data="rows" :loading="isLoading" :bordered="false" :row-key :pagination @update:page="onPage" />
+			<n-data-table remote :columns :data="rows" :loading="isLoading" :bordered="false" :row-key :pagination size="small" :scroll-x="1250" @update:page="onPage" />
 		</n-card>
 	</div>
 </template>
@@ -113,7 +113,9 @@ const columns = computed<DataTableColumns<DiscountReportRow>>(() => [
 	{
 		title: t("discountReport.columns.record"),
 		key: "record",
-		render: row => h("div", { class: "flex flex-col" }, [
+		minWidth: 150,
+		align: "center",
+		render: row => h("div", { class: "flex flex-col items-center justify-center text-center" }, [
 			h("span", t(`discountReport.record.${row.record.type}`)),
 			h("bdi", { dir: "ltr", class: "text-xs text-secondary" }, row.record.reference ?? `#${row.record.id}`)
 		])
@@ -121,14 +123,18 @@ const columns = computed<DataTableColumns<DiscountReportRow>>(() => [
 	{
 		title: t("discountReport.columns.member"),
 		key: "member",
-		render: row => (row.member ? h("div", { class: "flex flex-col" }, [h("span", row.member.name), h("bdi", { dir: "ltr", class: "text-xs text-secondary" }, row.member.phone)]) : "—")
+		minWidth: 160,
+		align: "center",
+		render: row => (row.member ? h("div", { class: "flex flex-col items-center justify-center text-center" }, [h("span", row.member.name), h("bdi", { dir: "ltr", class: "text-xs text-secondary" }, row.member.phone)]) : "—")
 	},
-	{ title: t("discountReport.columns.purpose"), key: "purpose", render: row => t(`pricing.purpose.${row.purpose}`) },
-	{ title: t("discountReport.columns.at"), key: "at", render: row => formatDateTime(row.at) },
+	{ title: t("discountReport.columns.purpose"), key: "purpose", minWidth: 120, align: "center", render: row => t(`pricing.purpose.${row.purpose}`) },
+	{ title: t("discountReport.columns.at"), key: "at", minWidth: 150, align: "center", render: row => formatDateTime(row.at) },
 	{
 		title: t("discountReport.columns.status"),
 		key: "counted",
-		render: row => h("div", { class: "flex flex-col gap-1" }, [
+		minWidth: 120,
+		align: "center",
+		render: row => h("div", { class: "flex flex-col items-center justify-center gap-1" }, [
 			h(NTag, { size: "small", round: true, bordered: false, type: row.counted ? "success" : "default" }, { default: () => t(row.counted ? "discountReport.counted.yes" : "discountReport.counted.no") }),
 			row.status ? h("span", { class: "text-xs text-secondary" }, row.status) : null
 		])
@@ -136,8 +142,10 @@ const columns = computed<DataTableColumns<DiscountReportRow>>(() => [
 	{
 		title: t("discountReport.columns.price"),
 		key: "price",
+		minWidth: 130,
+		align: "center",
 		// Two lines, not "list → final": a fixed arrow points the wrong way in RTL.
-		render: row => h("div", { class: "flex flex-col text-xs" }, [
+		render: row => h("div", { class: "flex flex-col items-center justify-center text-xs font-mono" }, [
 			h("span", { class: "text-secondary line-through" }, row.list_points === null ? "—" : formatNumber(row.list_points)),
 			h("span", { class: "font-semibold" }, row.final_points === null ? "—" : formatNumber(row.final_points))
 		])
@@ -145,13 +153,17 @@ const columns = computed<DataTableColumns<DiscountReportRow>>(() => [
 	{
 		title: t("discountReport.columns.discounts"),
 		key: "discounts",
+		minWidth: 200,
+		align: "center",
 		render: row => (row.discounts.length
-			? h("div", { class: "flex flex-col gap-1 text-xs" }, row.discounts.map(discount => h("span", discountText(discount))))
+			? h("div", { class: "flex flex-col items-center justify-center gap-1 text-xs" }, row.discounts.map(discount => h("span", discountText(discount))))
 			: "—")
 	},
 	{
 		title: t("discountReport.columns.saving"),
 		key: "saving",
+		minWidth: 160,
+		align: "center",
 		render: row => (row.saving
 			? h("span", { class: "text-xs" }, t("discountReport.saving", { points: formatNumber(row.saving.points), percent: formatNumber(row.saving.percent), name: row.saving.reference_name ?? "—" }))
 			: "—")

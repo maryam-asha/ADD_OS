@@ -117,149 +117,7 @@
 			<!-- ════════════════════════════════════════════════════════════════════════════ -->
 			<!-- SECTION 1: FINANCIAL TOTALS PER CURRENCY -->
 			<!-- ════════════════════════════════════════════════════════════════════════════ -->
-			<section class="flex flex-col gap-3">
-				<div class="flex flex-wrap items-baseline justify-between gap-2 pb-1">
-					<div class="flex items-center gap-2">
-						<Icon name="carbon:wallet" :size="18" class="text-neutral-700 dark:text-neutral-300" />
-						<h2 class="text-base font-bold text-neutral-800 dark:text-neutral-100">
-							{{ t("reports.providerInvoices.totalsByCurrency", "الإجماليات المالية لكل عملة") }}
-						</h2>
-					</div>
-					<span class="text-xs text-neutral-400 dark:text-neutral-500">
-						{{ t("reports.providerInvoices.calculatedPerCurrency", "تم احتساب القيود بناءً على العملة الرسمية لكل فاتورة") }}
-					</span>
-				</div>
-
-				<div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-					<div
-						v-for="tot in reportData?.totals || []"
-						:key="tot.currency"
-						class="flex flex-col justify-between gap-4 rounded-2xl border border-neutral-200/90 bg-white p-5 shadow-xs transition-shadow hover:shadow-sm dark:border-neutral-800 dark:bg-neutral-900"
-						:style="tot.currency === 'SYP' ? 'border-right: 4px solid var(--add-primary, #657C50);' : 'border-right: 4px solid var(--add-info, #007F91);'"
-					>
-						<!-- Card Header -->
-						<div class="flex items-start justify-between gap-2">
-							<div class="flex flex-col">
-								<div class="flex items-center gap-2">
-									<span class="text-base font-bold text-neutral-900 dark:text-neutral-50">
-										{{ getCurrencyTitle(tot.currency) }}
-									</span>
-									<n-tag size="small" type="primary" :bordered="false" class="font-mono font-bold">
-										{{ tot.currency }}
-									</n-tag>
-								</div>
-								<span class="text-xs text-neutral-400">
-									{{ getCurrencySubtitle(tot.currency) }}
-								</span>
-							</div>
-
-							<!-- Dynamic Health / System Status Tag -->
-							<n-tag
-								size="small"
-								:type="getCollectionBadgeType(tot)"
-								:bordered="false"
-								class="font-medium"
-							>
-								{{ getCollectionBadgeText(tot) }}
-							</n-tag>
-						</div>
-
-						<!-- 4 Metric Boxes -->
-						<div class="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-							<!-- 1. Billed -->
-							<div class="flex flex-col justify-between rounded-xl border border-neutral-200/50 bg-neutral-50/70 p-3 text-center dark:border-neutral-800/80 dark:bg-neutral-800/30">
-								<span class="text-xs text-neutral-500">{{ t("reports.common.billed", "إجمالي المفوتر") }}</span>
-								<span class="mt-1.5 font-mono text-sm font-bold text-neutral-800 dark:text-neutral-100">
-									{{ formatReportMoney(tot.billed, tot.currency) }}
-								</span>
-							</div>
-
-							<!-- 2. Paid -->
-							<div
-								class="flex flex-col justify-between rounded-xl border p-3 text-center"
-								style="background-color: rgba(101, 124, 80, 0.08); border-color: rgba(101, 124, 80, 0.25);"
-							>
-								<span class="text-xs font-semibold" style="color: var(--add-primary-text, #556843);">
-									{{ t("reports.common.paid", "المدفوع / المحصل") }}
-								</span>
-								<span class="mt-1.5 font-mono text-sm font-bold" style="color: var(--add-primary-text, #556843);">
-									{{ formatReportMoney(tot.paid, tot.currency) }}
-								</span>
-							</div>
-
-							<!-- 3. Remaining -->
-							<div class="flex flex-col justify-between rounded-xl border border-neutral-200/50 bg-neutral-50/70 p-3 text-center dark:border-neutral-800/80 dark:bg-neutral-800/30">
-								<span class="text-xs text-neutral-500">{{ t("reports.common.remaining", "المتبقي غير المحصل") }}</span>
-								<span class="mt-1.5 font-mono text-sm font-bold text-neutral-800 dark:text-neutral-100">
-									{{ formatReportMoney(tot.remaining, tot.currency) }}
-								</span>
-							</div>
-
-							<!-- 4. Overdue -->
-							<div
-								class="flex flex-col justify-between rounded-xl border p-3 text-center"
-								:style="Number.parseFloat(tot.overdue) > 0 ? 'background-color: rgba(217, 61, 35, 0.08); border-color: rgba(217, 61, 35, 0.25); color: var(--add-danger-text, #B4321D);' : ''"
-								:class="Number.parseFloat(tot.overdue) <= 0 ? 'border-neutral-200/50 bg-neutral-50/70 dark:border-neutral-800/80 dark:bg-neutral-800/30' : ''"
-							>
-								<span
-									class="text-xs"
-									:class="Number.parseFloat(tot.overdue) <= 0 ? 'text-neutral-500' : 'font-medium'"
-								>
-									{{ t("reports.common.overdue", "المتأخر المستحق") }}
-								</span>
-								<span
-									class="mt-1.5 font-mono text-sm font-bold"
-									:class="Number.parseFloat(tot.overdue) <= 0 ? 'text-neutral-800 dark:text-neutral-100' : ''"
-								>
-									{{ formatReportMoney(tot.overdue, tot.currency) }}
-								</span>
-							</div>
-						</div>
-
-						<!-- Card Footer: Rate & Notice -->
-						<div class="flex flex-wrap items-center justify-between gap-3 pt-2 text-xs">
-							<!-- Warning or remaining alert -->
-							<div>
-								<span
-									v-if="Number.parseFloat(tot.overdue) > 0"
-									class="inline-flex items-center gap-1 font-semibold"
-									style="color: var(--add-danger-text, #B4321D);"
-								>
-									<Icon name="carbon:warning-alt" :size="13" />
-									{{ t("reports.providerInvoices.overdueNotice", "مستحقات متأخرة واجبة التحصيل") }}
-								</span>
-								<span
-									v-else-if="Number.parseFloat(tot.remaining) > 0"
-									class="text-neutral-500 dark:text-neutral-400"
-								>
-									{{ t("reports.providerInvoices.remainingToPay", "المتبقي للدفع:") }} {{ formatReportMoney(tot.remaining, tot.currency) }}
-								</span>
-								<span
-									v-else
-									class="font-medium"
-									style="color: var(--add-primary-text, #556843);"
-								>
-									{{ t("reports.providerInvoices.allCollected", "تم تحصيل كافة الفواتير بالكامل") }}
-								</span>
-							</div>
-
-							<!-- Collection Progress -->
-							<div class="flex items-center gap-2">
-								<span class="text-neutral-500">
-									{{ t("reports.providerInvoices.collectionRate", "نسبة التحصيل:") }} {{ getRatePercent(tot.billed, tot.paid) }}%
-								</span>
-								<div class="h-2 w-20 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800">
-									<div
-										class="h-full rounded-full transition-all duration-300"
-										style="background-color: var(--add-primary, #657C50);"
-										:style="{ width: `${Math.min(100, Math.max(0, getRateNumber(tot.billed, tot.paid)))}%` }"
-									></div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</section>
+			<InvoiceTotalsCards :totals="reportData?.totals || []" details-to="/provider/invoices" />
 
 			<!-- ════════════════════════════════════════════════════════════════════════════ -->
 			<!-- SECTION 2: BREAKDOWN BY PAYER CATEGORY -->
@@ -391,143 +249,7 @@
 			<!-- ════════════════════════════════════════════════════════════════════════════ -->
 			<!-- SECTION 3: AGING ANALYSIS -->
 			<!-- ════════════════════════════════════════════════════════════════════════════ -->
-			<section class="flex flex-col gap-3">
-				<div class="flex flex-wrap items-baseline justify-between gap-2 pb-1">
-					<div class="flex items-center gap-2">
-						<Icon name="carbon:time" :size="18" class="text-neutral-700 dark:text-neutral-300" />
-						<h2 class="text-base font-bold text-neutral-800 dark:text-neutral-100">
-							{{ t("reports.aging.title", "أعمار الديون والذمم المدينة (Aging Analysis)") }}
-						</h2>
-					</div>
-					<div class="flex items-center gap-2">
-						<span class="text-xs text-neutral-400 dark:text-neutral-500">
-							{{ t("reports.aging.subtitle", "توزيع المبالغ المتأخرة حسب فترات الاستحقاق ومؤشرات مخاطر التحصيل") }}
-						</span>
-						<n-tag size="small" round :bordered="false" class="font-medium">
-							{{ t("reports.aging.accurateClassification", "تصنيف زمني دقيق") }}
-						</n-tag>
-					</div>
-				</div>
-
-				<div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-					<div
-						v-for="item in reportData?.aging || []"
-						:key="`aging-${item.currency}`"
-						class="flex flex-col gap-4 rounded-2xl border border-neutral-200/90 bg-white p-5 shadow-xs dark:border-neutral-800 dark:bg-neutral-900"
-					>
-						<!-- Aging Header -->
-						<div class="flex items-start justify-between gap-2">
-							<div
-								class="rounded-full px-2.5 py-1 text-xs font-bold"
-								style="background-color: rgba(217, 61, 35, 0.08); border: 1px solid rgba(217, 61, 35, 0.25); color: var(--add-danger-text, #B4321D);"
-							>
-								{{ t("reports.aging.totalOverdue", "إجمالي المتأخر:") }} {{ formatReportMoney(getAgingTotal(item), item.currency) }}
-							</div>
-
-							<div class="flex items-center gap-2">
-								<span class="text-sm font-bold text-neutral-800 dark:text-neutral-100">
-									{{ item.currency === 'SYP' ? 'تحليل استحقاق الليرة السورية' : item.currency === 'USD' ? 'تحليل استحقاق الدولار الأمريكي' : `تحليل استحقاق ${item.currency}` }}
-								</span>
-								<n-tag size="tiny" type="primary" :bordered="false" class="font-mono font-bold">
-									{{ item.currency }}
-								</n-tag>
-							</div>
-						</div>
-
-
-						<!-- 3 Risk Bucket Cards -->
-						<div class="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-							<!-- 1 - 30 Days -->
-							<div
-								class="flex flex-col justify-between rounded-xl border p-3 dark:bg-neutral-800/30"
-								:style="Number.parseFloat(item['0_30']) > 0 ? 'background-color: rgba(0, 127, 145, 0.05); border-color: rgba(0, 127, 145, 0.25);' : 'border-color: rgba(205, 194, 175, 0.5);'"
-							>
-								<div class="flex items-center justify-between">
-									<n-tag size="tiny" round type="info" :bordered="false" class="font-mono font-bold">
-										{{ getAgingPercent(item, '0_30').toFixed(1) }}%
-									</n-tag>
-									<span class="text-xs font-semibold text-neutral-700 dark:text-neutral-200">
-										{{ t("reports.aging.bucket1", "1 - 30 يوماً") }}
-									</span>
-								</div>
-								<div class="my-2 text-center font-mono text-sm font-bold text-neutral-800 dark:text-neutral-100">
-									{{ formatReportMoney(item["0_30"], item.currency) }}
-								</div>
-								<div class="text-center text-[10px] text-neutral-500">
-									<span v-if="Number.parseFloat(item['0_30']) === 0" class="inline-flex items-center gap-1">
-										<Icon name="carbon:checkmark" :size="12" />
-										{{ t("reports.aging.safe", "سليم تماماً") }}
-									</span>
-									<span v-else class="inline-flex items-center gap-1">
-										<Icon name="carbon:time" :size="12" />
-										{{ t("reports.aging.recentDelay", "تأخير حديث وقابل للتحصيل") }}
-									</span>
-								</div>
-							</div>
-
-							<!-- 31 - 60 Days -->
-							<div
-								class="flex flex-col justify-between rounded-xl border p-3 dark:bg-neutral-800/30"
-								:style="Number.parseFloat(item['31_60']) > 0 ? 'background-color: rgba(231, 177, 85, 0.08); border-color: rgba(231, 177, 85, 0.3);' : 'border-color: rgba(205, 194, 175, 0.5);'"
-							>
-								<div class="flex items-center justify-between">
-									<n-tag size="tiny" round type="warning" :bordered="false" class="font-mono font-bold">
-										{{ getAgingPercent(item, '31_60').toFixed(1) }}%
-									</n-tag>
-									<span class="text-xs font-semibold text-neutral-700 dark:text-neutral-200">
-										{{ t("reports.aging.bucket2", "31 - 60 يوماً") }}
-									</span>
-								</div>
-								<div class="my-2 text-center font-mono text-sm font-bold text-neutral-800 dark:text-neutral-100">
-									{{ formatReportMoney(item["31_60"], item.currency) }}
-								</div>
-								<div class="text-center text-[10px] text-neutral-500">
-									<span v-if="Number.parseFloat(item['31_60']) === 0" class="inline-flex items-center gap-1">
-										<Icon name="carbon:checkmark" :size="12" />
-										{{ t("reports.aging.safe", "سليم تماماً") }}
-									</span>
-									<span v-else-if="getAgingPercent(item, '31_60') >= 50" class="inline-flex items-center gap-1">
-										<Icon name="carbon:warning" :size="12" />
-										{{ t("reports.aging.peakConcentration", "ذروة التركيز") }}
-									</span>
-									<span v-else class="inline-flex items-center gap-1">
-										<Icon name="carbon:warning" :size="12" />
-										{{ t("reports.aging.mediumRisk", "تأخير متوسط") }}
-									</span>
-								</div>
-							</div>
-
-							<!-- 60+ Days -->
-							<div
-								class="flex flex-col justify-between rounded-xl border p-3 dark:bg-neutral-800/30"
-								:style="Number.parseFloat(item['60_plus']) > 0 ? 'background-color: rgba(217, 61, 35, 0.08); border-color: rgba(217, 61, 35, 0.25);' : 'border-color: rgba(205, 194, 175, 0.5);'"
-							>
-								<div class="flex items-center justify-between">
-									<n-tag size="tiny" round type="error" :bordered="false" class="font-mono font-bold">
-										{{ getAgingPercent(item, '60_plus').toFixed(1) }}%
-									</n-tag>
-									<span class="text-xs font-semibold text-neutral-700 dark:text-neutral-200">
-										{{ t("reports.aging.bucket3", "أكثر من 60 يوماً") }}
-									</span>
-								</div>
-								<div class="my-2 text-center font-mono text-sm font-bold text-neutral-800 dark:text-neutral-100">
-									{{ formatReportMoney(item["60_plus"], item.currency) }}
-								</div>
-								<div class="text-center text-[10px] text-neutral-500">
-									<span v-if="Number.parseFloat(item['60_plus']) === 0" class="inline-flex items-center gap-1">
-										<Icon name="carbon:checkmark-filled" :size="12" />
-										{{ t("reports.aging.noCritical", "لا توجد متأخرات حرجة") }}
-									</span>
-									<span v-else style="color: var(--add-danger-text, #B4321D);" class="inline-flex items-center gap-1 font-semibold">
-										<Icon name="carbon:error-filled" :size="12" />
-										{{ t("reports.aging.criticalFollowup", "ذمة حرجة للمتابعة") }}
-									</span>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</section>
+			<ReceivablesAging :aging="reportData?.aging || []" details-to="/provider/invoices" />
 
 			<!-- ════════════════════════════════════════════════════════════════════════════ -->
 			<!-- SECTION 4: TABLE BY COMPANY -->
@@ -579,12 +301,12 @@
 						<table class="w-full text-right text-xs">
 							<thead>
 								<tr class="border-b border-neutral-200/60 bg-neutral-50/70 text-neutral-500 dark:border-neutral-800 dark:bg-neutral-800/40">
-									<th class="py-3 px-4 font-semibold">{{ t("companies.columns.legalName", "الاسم التجاري والقانوني للشركة") }}</th>
+									<th class="py-3 px-4 font-semibold text-center">{{ t("companies.columns.legalName", "الاسم التجاري والقانوني للشركة") }}</th>
 									<th class="py-3 px-3 font-semibold text-center">{{ t("reports.common.currency", "العملة") }}</th>
-									<th class="py-3 px-3 font-semibold">{{ t("reports.common.billed", "إجمالي المفوتر") }}</th>
-									<th class="py-3 px-3 font-semibold">{{ t("reports.common.paid", "المدفوع / المحصل") }}</th>
-									<th class="py-3 px-3 font-semibold">{{ t("reports.common.remaining", "المتبقي") }}</th>
-									<th class="py-3 px-3 font-semibold">{{ t("reports.common.overdue", "المتأخر المستحق") }}</th>
+									<th class="py-3 px-3 font-semibold text-center">{{ t("reports.common.billed", "إجمالي المفوتر") }}</th>
+									<th class="py-3 px-3 font-semibold text-center">{{ t("reports.common.paid", "المدفوع / المحصل") }}</th>
+									<th class="py-3 px-3 font-semibold text-center">{{ t("reports.common.remaining", "المتبقي") }}</th>
+									<th class="py-3 px-3 font-semibold text-center">{{ t("reports.common.overdue", "المتأخر المستحق") }}</th>
 									<th class="py-3 px-4 font-semibold text-center">{{ t("invoices.status", "حالة السداد") }}</th>
 									<th class="py-3 px-4 font-semibold text-center">{{ t("common.actions", "الإجراءات") }}</th>
 								</tr>
@@ -596,8 +318,8 @@
 									class="transition-colors hover:bg-neutral-50/70 dark:hover:bg-neutral-800/30"
 								>
 									<!-- Company Name & Avatar -->
-									<td class="py-3 px-4">
-										<div class="flex items-center gap-3">
+									<td class="py-3 px-4 text-center">
+										<div class="inline-flex items-center gap-3 text-start">
 											<div
 												class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-mono text-xs font-bold"
 												:style="row.avatarStyle"
@@ -623,22 +345,22 @@
 									</td>
 
 									<!-- Billed -->
-									<td class="py-3 px-3 font-mono font-bold text-neutral-800 dark:text-neutral-100">
+									<td class="py-3 px-3 text-center font-mono font-bold text-neutral-800 dark:text-neutral-100">
 										{{ formatReportMoney(row.billed, row.currency) }}
 									</td>
 
 									<!-- Paid -->
-									<td class="py-3 px-3 font-mono font-bold" style="color: var(--add-primary-text, #556843);">
+									<td class="py-3 px-3 text-center font-mono font-bold" style="color: var(--add-primary-text, #556843);">
 										{{ formatReportMoney(row.paid, row.currency) }}
 									</td>
 
 									<!-- Remaining -->
-									<td class="py-3 px-3 font-mono text-neutral-700 dark:text-neutral-200">
+									<td class="py-3 px-3 text-center font-mono text-neutral-700 dark:text-neutral-200">
 										{{ formatReportMoney(row.remaining, row.currency) }}
 									</td>
 
 									<!-- Overdue -->
-									<td class="py-3 px-3 font-mono font-bold">
+									<td class="py-3 px-3 text-center font-mono font-bold">
 										<span
 											:style="Number.parseFloat(row.overdue) > 0 ? 'color: var(--add-danger-text, #B4321D);' : ''"
 											:class="Number.parseFloat(row.overdue) <= 0 ? 'text-neutral-700 dark:text-neutral-300' : ''"
@@ -720,13 +442,15 @@
 </template>
 
 <script setup lang="ts">
-import type { CompanyInvoiceStatement, ProviderInvoicesReportData, ProviderInvoiceTotals, DebtAging } from "@/add-os/services/reports"
+import type { CompanyInvoiceStatement, ProviderInvoicesReportData } from "@/add-os/services/reports"
 import { NButton, NDatePicker, NInput, NPagination, NSelect, NSpin, NTag } from "naive-ui"
 import { computed, onMounted, reactive, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import { formatReportMoney, getProviderInvoicesReport } from "@/add-os/services/reports"
 import { formatDate } from "@/add-os/utils/format/dates"
+import InvoiceTotalsCards from "@/add-os/modules/dashboard/components/InvoiceTotalsCards.vue"
+import ReceivablesAging from "@/add-os/modules/dashboard/components/ReceivablesAging.vue"
 import Icon from "@/components/common/Icon.vue"
 
 const { t } = useI18n()
@@ -828,68 +552,6 @@ async function fetchData() {
 onMounted(() => {
 	fetchData()
 })
-
-// ── Helpers for Totals & Calculations ────────────────────────────────────────
-
-function getCurrencyTitle(currency: string): string {
-	if (currency === "SYP") return t("reports.currency.sypTitle", "الليرة السورية (SYP)")
-	if (currency === "USD") return t("reports.currency.usdTitle", "الدولار الأمريكي (USD)")
-	return `${currency}`
-}
-
-function getCurrencySubtitle(currency: string): string {
-	if (currency === "SYP") return t("reports.currency.sypSubtitle", "إجمالي الحركات الصادرة بالليرة")
-	if (currency === "USD") return t("reports.currency.usdSubtitle", "إجمالي الحركات الصادرة بالدولار")
-	return t("reports.currency.genericSubtitle", "إجمالي الحركات الصادرة بالعملة")
-}
-
-function getRateNumber(billedStr: string, paidStr: string): number {
-	const billed = Number.parseFloat(billedStr) || 0
-	const paid = Number.parseFloat(paidStr) || 0
-	if (billed <= 0) return 0
-	return (paid / billed) * 100
-}
-
-function getRatePercent(billedStr: string, paidStr: string): string {
-	const rate = getRateNumber(billedStr, paidStr)
-	return rate.toFixed(rate % 1 === 0 ? 0 : 2)
-}
-
-function getCollectionBadgeText(tot: ProviderInvoiceTotals): string {
-	const rate = getRateNumber(tot.billed, tot.paid)
-	const overdue = Number.parseFloat(tot.overdue) || 0
-	if (tot.currency === "SYP") {
-		return t("reports.currency.sypSystemRate", "سعر النظام الموحد")
-	}
-	if (rate >= 80) return t("reports.status.excellentCollection", "تحصيل ممتاز")
-	if (rate >= 40) return t("reports.status.stableCollection", "تحصيل مستقر")
-	if (overdue > 0) return t("reports.status.overdueOutstanding", "مستحقات متأخرة")
-	return t("reports.status.regularCollection", "تحصيل منتظم")
-}
-
-function getCollectionBadgeType(tot: ProviderInvoiceTotals): "default" | "primary" | "info" | "success" | "warning" | "error" {
-	const rate = getRateNumber(tot.billed, tot.paid)
-	if (tot.currency === "SYP") return "default"
-	if (rate >= 70) return "success"
-	if (rate >= 40) return "info"
-	return "warning"
-}
-
-// ── Aging Calculations ───────────────────────────────────────────────────────
-
-function getAgingTotal(item: DebtAging): number {
-	const b1 = Number.parseFloat(item["0_30"]) || 0
-	const b2 = Number.parseFloat(item["31_60"]) || 0
-	const b3 = Number.parseFloat(item["60_plus"]) || 0
-	return b1 + b2 + b3
-}
-
-function getAgingPercent(item: DebtAging, bucket: "0_30" | "31_60" | "60_plus"): number {
-	const total = getAgingTotal(item)
-	if (total <= 0) return 0
-	const val = Number.parseFloat(item[bucket]) || 0
-	return (val / total) * 100
-}
 
 // ── Company Table Flattening & Filtering ─────────────────────────────────────
 

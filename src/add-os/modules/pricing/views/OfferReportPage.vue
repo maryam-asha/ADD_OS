@@ -39,8 +39,8 @@
 		<n-alert v-if="failed" type="error" :bordered="false">{{ t("offerReport.loadError") }}</n-alert>
 		<n-alert v-else-if="!range" type="info" :bordered="false">{{ t("offerReport.pickPeriod") }}</n-alert>
 
-		<n-card v-else size="small">
-			<n-data-table :columns :data="rows" :loading="isLoading" :bordered="false" :row-key size="small">
+		<n-card v-else size="small" class="add-ledger-table">
+			<n-data-table :columns :data="rows" :loading="isLoading" :bordered="false" :row-key size="small" :scroll-x="800">
 				<template #empty>{{ t("offerReport.empty") }}</template>
 			</n-data-table>
 		</n-card>
@@ -86,7 +86,7 @@ function rowKey(row: OfferReportRow): number {
 /** One stretch: its terms, then when it started and ended — two lines, not an arrow, which points the wrong way in RTL. */
 function renderPeriod(period: OfferReportPeriod) {
 	const cap = period.max_discount_points ? ` · ${t("coupons.detail.cap", { value: formatNumber(period.max_discount_points) })}` : ""
-	return h("div", { "class": "flex flex-col", "data-test": "offer-period" }, [
+	return h("div", { "class": "flex flex-col items-center justify-center text-center", "data-test": "offer-period" }, [
 		h("span", { class: "font-semibold" }, discountLabel(t, period) + cap),
 		h("span", { class: "text-xs text-secondary" }, `${t("offerReport.from")} ${formatDateTime(period.from)}`),
 		h("span", { class: "text-xs text-secondary" }, `${t("offerReport.to")} ${formatDateTime(period.to)}`)
@@ -97,19 +97,23 @@ const columns = computed<DataTableColumns<OfferReportRow>>(() => [
 	{
 		title: t("offerReport.columns.offer"),
 		key: "name",
-		render: row => h("div", { class: "flex flex-col gap-1" }, [
+		minWidth: 200,
+		align: "center",
+		render: row => h("div", { class: "flex flex-col items-center justify-center gap-1 text-center" }, [
 			h("span", row.name ?? `#${row.id}`),
-			row.code ? h("bdi", { dir: "ltr", class: "text-xs text-secondary" }, row.code) : null,
+			row.code ? h("bdi", { dir: "ltr", class: "text-xs text-secondary font-mono" }, row.code) : null,
 			row.deleted ? h(NTag, { size: "small", round: true, bordered: false, type: "error" }, { default: () => t("offerReport.deleted") }) : null
 		])
 	},
 	{
 		title: t("offerReport.columns.periods"),
 		key: "periods",
-		render: row => h("div", { class: "flex flex-col gap-2" }, row.periods.map(renderPeriod))
+		minWidth: 260,
+		align: "center",
+		render: row => h("div", { class: "flex flex-col items-center justify-center gap-2 text-center" }, row.periods.map(renderPeriod))
 	},
-	{ title: t("offerReport.columns.operations"), key: "operations", render: row => formatNumber(row.operations) },
-	{ title: t("offerReport.columns.points"), key: "points", render: row => formatNumber(row.points) }
+	{ title: t("offerReport.columns.operations"), key: "operations", width: 130, align: "center", render: row => h("span", { class: "font-mono font-medium" }, formatNumber(row.operations)) },
+	{ title: t("offerReport.columns.points"), key: "points", width: 130, align: "center", render: row => h("span", { class: "font-mono font-semibold" }, formatNumber(row.points)) }
 ])
 
 async function fetchReport(): Promise<void> {
