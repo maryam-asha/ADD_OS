@@ -1,3 +1,4 @@
+import type { BranchSeats } from "@/add-os/services/dashboard"
 import { flushPromises, mount } from "@vue/test-utils"
 import { createPinia, setActivePinia } from "pinia"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -11,6 +12,7 @@ import DashboardPanel from "@/add-os/modules/dashboard/components/DashboardPanel
 import InvoiceTotalsCards from "@/add-os/modules/dashboard/components/InvoiceTotalsCards.vue"
 import PeakHeatmap from "@/add-os/modules/dashboard/components/PeakHeatmap.vue"
 import ReceivablesAging from "@/add-os/modules/dashboard/components/ReceivablesAging.vue"
+import OfficesGaugeCard from "@/add-os/modules/dashboard/components/stats/OfficesGaugeCard.vue"
 import SeatsGaugeCard from "@/add-os/modules/dashboard/components/stats/SeatsGaugeCard.vue"
 import StatusTiles from "@/add-os/modules/dashboard/components/stats/StatusTiles.vue"
 import StatTile from "@/add-os/modules/dashboard/components/StatTile.vue"
@@ -341,32 +343,61 @@ describe("statusTiles", () => {
 	})
 })
 
-describe("seatsGaugeCard", () => {
+describe("branch gauges", () => {
 	const gauge = { name: "apexchart", props: ["series", "options", "type", "height"], template: "<div class='gauge' />" }
-	const mountSeats = (branchId: number | null = null) => mount(SeatsGaugeCard, {
-		props: {
-			branches: [{ id: 1, name: "A", seats: 10, taken: 5 }, { id: 2, name: "B", seats: 10, taken: 9 }, { id: 3, name: "C", seats: 0, taken: 0 }],
-			branchId,
-			isLoading: false,
-			error: null,
-			ready: true
-		},
+	const branches: BranchSeats[] = [
+		{ id: 1, name: "A", seats: 10, taken: 5, offices: 4, offices_leased: 1 },
+		{ id: 2, name: "B", seats: 10, taken: 9, offices: 2, offices_leased: 2 },
+		{ id: 3, name: "C", seats: 10, taken: 12, offices: 0, offices_leased: 0 }
+	]
+	const mountGauge = (card: typeof SeatsGaugeCard | typeof OfficesGaugeCard, branchId: number | null = null) => mount(card, {
+		props: { branches, branchId, isLoading: false, error: null, ready: true },
 		global: { plugins: [i18n()], stubs: { apexchart: gauge } }
 	})
 
-	it("shows the seats taken across every branch as one share", () => {
-		const wrapper = mountSeats()
+	it("shows the seats reserved across every branch as one share", () => {
+		const wrapper = mountGauge(SeatsGaugeCard)
 
-		expect(wrapper.findComponent(gauge).props("series")).toEqual([70])
-		expect(wrapper.text()).toContain("14 of 20 taken")
+		expect(wrapper.findComponent(gauge).props("series")).toEqual([86.66666666666667])
+		expect(wrapper.text()).toContain("26 of 30 reserved")
+		expect(wrapper.text()).not.toContain("Over capacity")
 		wrapper.unmount()
 	})
 
-	it("narrows to the page's branch", () => {
-		const wrapper = mountSeats(2)
+	it("narrows the seats to the page's branch", () => {
+		const wrapper = mountGauge(SeatsGaugeCard, 2)
 
 		expect(wrapper.findComponent(gauge).props("series")).toEqual([90])
-		expect(wrapper.text()).toContain("9 of 10 taken")
+		expect(wrapper.text()).toContain("9 of 10 reserved")
+		wrapper.unmount()
+	})
+
+	it("says by how much the seats were sold past capacity, the gauge stopping at full", () => {
+		const wrapper = mountGauge(SeatsGaugeCard, 3)
+
+		expect(wrapper.findComponent(gauge).props("series")).toEqual([100])
+		expect(wrapper.text()).toContain("12 of 10 reserved")
+		expect(wrapper.text()).toContain("Over capacity by 2")
+		wrapper.unmount()
+	})
+
+	it("shows the private offices leased across every branch, then in the page's branch", () => {
+		const all = mountGauge(OfficesGaugeCard)
+		expect(all.findComponent(gauge).props("series")).toEqual([50])
+		expect(all.text()).toContain("3 of 6 leased")
+		all.unmount()
+
+		const one = mountGauge(OfficesGaugeCard, 1)
+		expect(one.findComponent(gauge).props("series")).toEqual([25])
+		expect(one.text()).toContain("1 of 4 leased")
+		one.unmount()
+	})
+
+	it("has nothing to measure in a branch without private offices", () => {
+		const wrapper = mountGauge(OfficesGaugeCard, 3)
+
+		expect(wrapper.findComponent(gauge).exists()).toBe(false)
+		expect(wrapper.text()).toContain(en.dashboard.stats.noOffices)
 		wrapper.unmount()
 	})
 })

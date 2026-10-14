@@ -54,14 +54,24 @@
 			<DashboardPanel v-if="can.operations" section="operations" :title="t('dashboard.operations.title')" icon="carbon:building">
 				<div class="grid grid-cols-1 gap-5 xl:grid-cols-3">
 					<BookingsByStatusCard class="xl:col-span-2" :scope />
-					<SeatsGaugeCard
-						:branches="operations.data.value?.now.branches ?? []"
-						:branch-id
-						:is-loading="operations.isLoading.value"
-						:error="operations.error.value"
-						:ready="operations.data.value !== null"
-						@retry="operations.reload"
-					/>
+					<div class="flex flex-col gap-5">
+						<SeatsGaugeCard
+							:branches="operations.data.value?.now.branches ?? []"
+							:branch-id
+							:is-loading="operations.isLoading.value"
+							:error="operations.error.value"
+							:ready="operations.data.value !== null"
+							@retry="operations.reload"
+						/>
+						<OfficesGaugeCard
+							:branches="operations.data.value?.now.branches ?? []"
+							:branch-id
+							:is-loading="operations.isLoading.value"
+							:error="operations.error.value"
+							:ready="operations.data.value !== null"
+							@retry="operations.reload"
+						/>
+					</div>
 					<ServiceRequestsCard class="xl:col-span-3" :scope />
 					<DailyTrendCard class="xl:col-span-3" :scope :metrics="dailyMetrics" />
 				</div>
@@ -127,6 +137,7 @@ import BookingsByStatusCard from "@/add-os/modules/dashboard/components/stats/Bo
 import CollectedSummaryCard from "@/add-os/modules/dashboard/components/stats/CollectedSummaryCard.vue"
 import CollectionGaugeCard from "@/add-os/modules/dashboard/components/stats/CollectionGaugeCard.vue"
 import DailyTrendCard from "@/add-os/modules/dashboard/components/stats/DailyTrendCard.vue"
+import OfficesGaugeCard from "@/add-os/modules/dashboard/components/stats/OfficesGaugeCard.vue"
 import PlansCard from "@/add-os/modules/dashboard/components/stats/PlansCard.vue"
 import SeatsGaugeCard from "@/add-os/modules/dashboard/components/stats/SeatsGaugeCard.vue"
 import ServiceRequestsCard from "@/add-os/modules/dashboard/components/stats/ServiceRequestsCard.vue"

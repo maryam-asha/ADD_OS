@@ -36,8 +36,12 @@ export interface MoneyAmount {
 export interface BranchSeats {
 	id: number
 	name: string | null
+	/** The Co-Space seat pool: seats open, and seats reserved — a subscription holds its seats whether or not anyone sits in them, and staff may sell past capacity, so taken can exceed seats. */
 	seats: number
 	taken: number
+	/** Private offices not retired, and those a lease holds today. */
+	offices: number
+	offices_leased: number
 }
 
 export interface OperationsActivity {
