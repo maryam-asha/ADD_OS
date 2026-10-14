@@ -18,6 +18,7 @@
 			}"
 			:expanded-keys
 			@update:expanded-keys="handleUpdateExpandedKeys"
+			@update:value="handleUpdateValue"
 		/>
 	</nav>
 </template>
@@ -86,6 +87,12 @@ function handleUpdateExpandedKeys(value: string[]) {
 		}
 	} else {
 		expandedKeys.value = undefined
+	}
+}
+
+function handleUpdateValue(key: string) {
+	if (key && router.hasRoute(key) && route.name !== key) {
+		router.push({ name: key }).catch(() => {})
 	}
 }
 </script>

@@ -1,6 +1,9 @@
 import type { RouteRecordRaw } from "vue-router"
 import { describe, expect, it } from "vitest"
+import { createPinia, setActivePinia } from "pinia"
 import ComingSoon from "@/add-os/views/ComingSoon.vue"
+import getItems from "@/app-layouts/common/Navbar/items"
+import { useAuthStore } from "@/stores/auth"
 import ar from "../../lang/ar"
 import en from "../../lang/en"
 import { createAddOsRoutes } from "../routes"
@@ -163,3 +166,24 @@ describe("translations", () => {
 		expect(typeof messagesAt(en, "common.comingSoon")).toBe("string")
 	})
 })
+
+describe("sidebar menu items", () => {
+	it("renders single-page sections like dashboard as direct top-level links without children", () => {
+		setActivePinia(createPinia())
+		const authStore = useAuthStore()
+		authStore.logged = true
+		authStore.role = "admin"
+
+		const items = getItems({ mode: "vertical", collapsed: false })
+		const dashboardItem = items.find(item => item.key === "dashboard.overview")
+
+		expect(dashboardItem).toBeDefined()
+		expect((dashboardItem as { children?: unknown }).children).toBeUndefined()
+
+		// Multi-page sections like spatial should have children
+		const spatialItem = items.find(item => item.key === "spatial")
+		expect(spatialItem).toBeDefined()
+		expect((spatialItem as { children?: unknown[] }).children?.length).toBeGreaterThan(0)
+	})
+})
+

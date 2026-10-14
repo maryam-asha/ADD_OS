@@ -93,6 +93,35 @@ function sectionIcon(section: NavSection) {
 	return () => h("span", { class: "add-os-nav-soon-icon" }, [icon()])
 }
 
+/** A single-page section (e.g. Dashboard) rendered directly as a top-level link, without a dropdown. */
+function directSectionOption(section: NavSection, page: NavPage, collapsed: boolean): MenuMixedOption {
+	const name = navRouteName(section, page)
+	const soon = section.status === "coming-soon"
+
+	return {
+		key: name,
+		icon: sectionIcon(section),
+		label: () =>
+			h(
+				RouterLink,
+				{ to: { name }, class: soon ? "add-os-nav-soon" : undefined },
+				{
+					default: () =>
+						soon && !collapsed ? (
+							<span class="add-os-nav-soon add-os-nav-section">
+								<span class="add-os-nav-section__text">{t(navSectionTitleKey(section))}</span>
+								<NTag size="tiny" round bordered={false} class="add-os-nav-section__badge">
+									{t("common.comingSoon")}
+								</NTag>
+							</span>
+						) : (
+							t(navSectionTitleKey(section))
+						)
+				}
+			)
+	}
+}
+
 export default function getItems(args: { mode: "vertical" | "horizontal"; collapsed: boolean }): MenuMixedOption[] {
 	// Dependency on the active language — see the note above. Do not remove.
 	void currentLocale.value
@@ -117,13 +146,21 @@ export default function getItems(args: { mode: "vertical" | "horizontal"; collap
 			if (section.permission && !authStore.hasPermission(section.permission)) return false
 			return true
 		})
-		.map<MenuMixedOption>(section => ({
-			key: section.key,
-			label: sectionLabel(section, args.collapsed),
-			icon: sectionIcon(section),
-			children: section.pages
+		.map<MenuMixedOption>(section => {
+			const visiblePages = section.pages
 				.filter(page => !page.hidden)
 				.filter(page => !page.permission || authStore.hasPermission(page.permission))
-				.map(page => pageOption(section, page))
-		}))
+
+			// When a section has only one page (like Dashboard), render it as a direct link instead of a dropdown
+			if (visiblePages.length === 1) {
+				return directSectionOption(section, visiblePages[0], args.collapsed)
+			}
+
+			return {
+				key: section.key,
+				label: sectionLabel(section, args.collapsed),
+				icon: sectionIcon(section),
+				children: visiblePages.map(page => pageOption(section, page))
+			}
+		})
 }
