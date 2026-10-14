@@ -48,7 +48,7 @@
 
 export { MONTHS, MONTHS_SHORT, WEEKDAYS, WEEKDAYS_SHORT } from "./calendar"
 export type { CurrencyCode, CurrencyFormatOptions } from "./currency"
-export { DEFAULT_CURRENCY, formatCurrency, isCurrencyCode } from "./currency"
+export { currencySymbol, DEFAULT_CURRENCY, formatCurrency, isCurrencyCode } from "./currency"
 export { formatClockTime, formatDate, formatDateTime, formatTime, toOffsetIso } from "./dates"
 
 export type { DateFormatOptions, DateInput, DateStyle } from "./dates"

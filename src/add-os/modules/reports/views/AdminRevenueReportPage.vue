@@ -134,148 +134,7 @@
 				<!-- ════════════════════════════════════════════════════════════════════════ -->
 				<!-- SECTION 1: FINANCIAL TOTALS PER CURRENCY -->
 				<!-- ════════════════════════════════════════════════════════════════════════ -->
-				<section class="flex flex-col gap-3">
-					<div class="flex flex-wrap items-baseline justify-between gap-2 pb-1">
-						<div class="flex items-center gap-2">
-							<Icon name="carbon:wallet" :size="18" class="text-[var(--add-text-primary,#43474F)]" />
-							<h2 class="text-base font-bold text-[var(--add-text-primary,#43474F)]">
-								{{ t("reports.adminRevenue.totalsTitle", "الإجماليات لكل عملة") }}
-							</h2>
-						</div>
-						<span class="text-xs text-[var(--add-text-muted,#5A606B)]">
-							{{ t("reports.adminRevenue.calculatedPerCurrency", "تم احتساب القيود بناءً على العملة الرسمية لكل فاتورة") }}
-						</span>
-					</div>
-
-					<div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-						<div
-							v-for="tot in reportData?.totals || []"
-							:key="tot.currency"
-							class="flex flex-col justify-between gap-4 rounded-2xl border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface-raised,#FFFFFF)] p-5 shadow-xs transition-shadow hover:shadow-sm"
-							:style="tot.currency === 'SYP' ? 'border-right: 4px solid var(--add-primary, #657C50);' : 'border-right: 4px solid var(--add-info, #007F91);'"
-						>
-							<!-- Card Header -->
-							<div class="flex items-start justify-between gap-2">
-								<div class="flex flex-col">
-									<div class="flex items-center gap-2">
-										<span class="text-base font-bold text-[var(--add-text-primary,#43474F)]">
-											{{ getCurrencyTitle(tot.currency) }}
-										</span>
-										<n-tag size="small" type="primary" :bordered="false" class="font-mono font-bold">
-											{{ tot.currency }}
-										</n-tag>
-									</div>
-									<span class="text-xs text-[var(--add-text-muted,#5A606B)]">
-										{{ getCurrencySubtitle(tot.currency) }}
-									</span>
-								</div>
-
-								<!-- Dynamic Health / Status Tag -->
-								<n-tag
-									size="small"
-									:type="getCollectionBadgeType(tot)"
-									:bordered="false"
-									class="font-medium"
-								>
-									{{ getCollectionBadgeText(tot) }}
-								</n-tag>
-							</div>
-
-							<!-- 4 Metric Boxes -->
-							<div class="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-								<!-- 1. Billed -->
-								<div class="flex flex-col justify-between rounded-xl border border-[var(--add-border,#CDC2AF)]/30 bg-[var(--add-surface,#F7F5F2)]/60 p-3 text-center">
-									<span class="text-xs text-[var(--add-text-muted,#5A606B)]">{{ t("reports.common.billed", "إجمالي المفوتر") }}</span>
-									<span class="mt-1.5 font-mono text-sm font-bold text-[var(--add-text-primary,#43474F)]">
-										{{ formatReportMoney(tot.billed, tot.currency) }}
-									</span>
-								</div>
-
-								<!-- 2. Paid -->
-								<div
-									class="flex flex-col justify-between rounded-xl border p-3 text-center"
-									style="background-color: rgba(101, 124, 80, 0.08); border-color: rgba(101, 124, 80, 0.25);"
-								>
-									<span class="text-xs font-semibold" style="color: var(--add-primary-text, #556843);">
-										{{ t("reports.common.paid", "المدفوع / المحصل") }}
-									</span>
-									<span class="mt-1.5 font-mono text-sm font-bold" style="color: var(--add-primary-text, #556843);">
-										{{ formatReportMoney(tot.paid, tot.currency) }}
-									</span>
-								</div>
-
-								<!-- 3. Remaining -->
-								<div class="flex flex-col justify-between rounded-xl border border-[var(--add-border,#CDC2AF)]/30 bg-[var(--add-surface,#F7F5F2)]/60 p-3 text-center">
-									<span class="text-xs text-[var(--add-text-muted,#5A606B)]">{{ t("reports.common.remaining", "المتبقي غير المحصل") }}</span>
-									<span class="mt-1.5 font-mono text-sm font-bold text-[var(--add-text-primary,#43474F)]">
-										{{ formatReportMoney(tot.remaining, tot.currency) }}
-									</span>
-								</div>
-
-								<!-- 4. Overdue -->
-								<div
-									class="flex flex-col justify-between rounded-xl border p-3 text-center"
-									:style="Number.parseFloat(tot.overdue) > 0 ? 'background-color: rgba(217, 61, 35, 0.08); border-color: rgba(217, 61, 35, 0.25); color: var(--add-danger-text, #B4321D);' : ''"
-									:class="Number.parseFloat(tot.overdue) <= 0 ? 'border-[var(--add-border,#CDC2AF)]/30 bg-[var(--add-surface,#F7F5F2)]/60' : ''"
-								>
-									<span
-										class="text-xs"
-										:class="Number.parseFloat(tot.overdue) <= 0 ? 'text-[var(--add-text-muted,#5A606B)]' : 'font-medium'"
-									>
-										{{ t("reports.common.overdue", "المتأخر المستحق") }}
-									</span>
-									<span
-										class="mt-1.5 font-mono text-sm font-bold"
-										:class="Number.parseFloat(tot.overdue) <= 0 ? 'text-[var(--add-text-primary,#43474F)]' : ''"
-									>
-										{{ formatReportMoney(tot.overdue, tot.currency) }}
-									</span>
-								</div>
-							</div>
-
-							<!-- Card Footer: Rate & Notice -->
-							<div class="flex flex-wrap items-center justify-between gap-3 pt-2 text-xs">
-								<div>
-									<span
-										v-if="Number.parseFloat(tot.overdue) > 0"
-										class="inline-flex items-center gap-1 font-semibold"
-										style="color: var(--add-danger-text, #B4321D);"
-									>
-										<Icon name="carbon:warning-alt" :size="13" />
-										{{ t("reports.adminRevenue.overdueNotice", "مستحقات متأخرة واجبة التحصيل") }}
-									</span>
-									<span
-										v-else-if="Number.parseFloat(tot.remaining) > 0"
-										class="text-[var(--add-text-muted,#5A606B)]"
-									>
-										{{ t("reports.adminRevenue.remainingToPay", "المتبقي للدفع:") }} {{ formatReportMoney(tot.remaining, tot.currency) }}
-									</span>
-									<span
-										v-else
-										class="font-medium"
-										style="color: var(--add-primary-text, #556843);"
-									>
-										{{ t("reports.adminRevenue.allCollected", "تم تحصيل كافة الفواتير بالكامل") }}
-									</span>
-								</div>
-
-								<!-- Collection Progress -->
-								<div class="flex items-center gap-2">
-									<span class="text-[var(--add-text-muted,#5A606B)]">
-										{{ t("reports.adminRevenue.collectionRate", "نسبة التحصيل:") }} {{ getRatePercent(tot.billed, tot.paid) }}%
-									</span>
-									<div class="h-2 w-20 overflow-hidden rounded-full bg-[var(--add-surface-sunken,#EDEAE8)]">
-										<div
-											class="h-full rounded-full transition-all duration-300"
-											style="background-color: var(--add-primary, #657C50);"
-											:style="{ width: `${Math.min(100, Math.max(0, getRateNumber(tot.billed, tot.paid)))}%` }"
-										/>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</section>
+				<InvoiceTotalsCards :totals="reportData?.totals || []" details-to="/payments/invoices" />
 
 				<!-- ════════════════════════════════════════════════════════════════════════ -->
 				<!-- SECTION 2: REVENUE BY SOURCE PER CURRENCY -->
@@ -363,20 +222,7 @@
 				<!-- ════════════════════════════════════════════════════════════════════════ -->
 				<!-- SECTION 3: DEBT AGING -->
 				<!-- ════════════════════════════════════════════════════════════════════════ -->
-				<section class="flex flex-col gap-3">
-					<div class="flex flex-wrap items-baseline justify-between gap-2 pb-1">
-						<div class="flex items-center gap-2">
-							<Icon name="carbon:time" :size="18" class="text-[var(--add-text-primary,#43474F)]" />
-							<h2 class="text-base font-bold text-[var(--add-text-primary,#43474F)]">
-								{{ t("reports.aging.title", "أعمار الديون") }}
-							</h2>
-						</div>
-						<span class="text-xs text-[var(--add-text-muted,#5A606B)]">
-							{{ t("reports.aging.accurateClassification", "تصنيف زمني دقيق لاستحقاق الديون والمتأخرات") }}
-						</span>
-					</div>
-					<DebtAgingCards :aging="reportData?.aging || []" />
-				</section>
+				<ReceivablesAging :aging="reportData?.aging || []" />
 
 				<!-- ════════════════════════════════════════════════════════════════════════ -->
 				<!-- SECTION 4: TOP OVERDUE PAYERS PER CURRENCY -->
@@ -456,11 +302,12 @@
 
 <script setup lang="ts">
 import type { SelectOption } from "naive-ui"
-import type { AdminRevenueReportData, OverduePayer, RevenueBySource, RevenueSourceKey, RevenueTotal } from "@/add-os/services/reports"
+import type { AdminRevenueReportData, OverduePayer, RevenueBySource, RevenueSourceKey } from "@/add-os/services/reports"
 import { NButton, NDatePicker, NSelect, NSpin, NTag } from "naive-ui"
 import { computed, onMounted, reactive, ref } from "vue"
 import { useI18n } from "vue-i18n"
-import DebtAgingCards from "@/add-os/modules/reports/components/DebtAgingCards.vue"
+import InvoiceTotalsCards from "@/add-os/modules/dashboard/components/InvoiceTotalsCards.vue"
+import ReceivablesAging from "@/add-os/modules/dashboard/components/ReceivablesAging.vue"
 import { listProviders } from "@/add-os/services/providers"
 import { formatReportMoney, getAdminRevenueReport } from "@/add-os/services/reports"
 import { formatDate } from "@/add-os/utils/format/dates"
@@ -555,48 +402,6 @@ function checkPresetMatch(from: string | null, to: string | null) {
 		return
 	}
 	activePreset.value = "custom"
-}
-
-// ── Helpers for Totals & Calculations ────────────────────────────────────────
-function getCurrencyTitle(currency: string): string {
-	if (currency === "SYP") return t("reports.currency.sypTitle", "الليرة السورية (SYP)")
-	if (currency === "USD") return t("reports.currency.usdTitle", "الدولار الأمريكي (USD)")
-	return `${currency}`
-}
-
-function getCurrencySubtitle(currency: string): string {
-	if (currency === "SYP") return t("reports.currency.sypSubtitle", "إجمالي الإيرادات بالليرة")
-	if (currency === "USD") return t("reports.currency.usdSubtitle", "إجمالي الإيرادات بالدولار")
-	return t("reports.adminRevenue.totalsTitle", "الإجماليات لكل عملة")
-}
-
-function getRateNumber(billed: string | number, paid: string | number): number {
-	const b = Number.parseFloat(String(billed)) || 0
-	const p = Number.parseFloat(String(paid)) || 0
-	if (b <= 0) return 100
-	return Math.round((p / b) * 100)
-}
-
-function getRatePercent(billed: string | number, paid: string | number): number {
-	return getRateNumber(billed, paid)
-}
-
-function getCollectionBadgeType(tot: RevenueTotal): "success" | "info" | "warning" | "default" {
-	const rate = getRateNumber(tot.billed, tot.paid)
-	const overdue = Number.parseFloat(tot.overdue) || 0
-	if (overdue > 0) return "warning"
-	if (rate >= 90) return "success"
-	if (rate >= 60) return "info"
-	return "default"
-}
-
-function getCollectionBadgeText(tot: RevenueTotal): string {
-	const rate = getRateNumber(tot.billed, tot.paid)
-	const overdue = Number.parseFloat(tot.overdue) || 0
-	if (overdue > 0) return t("reports.adminRevenue.healthAttention", "يحتاج متابعة")
-	if (rate >= 90) return t("reports.adminRevenue.healthExcellent", "ممتاز")
-	if (rate >= 60) return t("reports.adminRevenue.healthStable", "مستقر")
-	return t("reports.adminRevenue.healthInactive", "غير نشط")
 }
 
 // ── Data Fetching ────────────────────────────────────────────────────────────

@@ -1,9 +1,10 @@
 import { watch } from "vue"
 import { createRouter, createWebHistory } from "vue-router"
+import { canViewDashboard } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import { authGuard } from "@/add-os/navigation/authGuard"
 import { createAddOsRoutes } from "@/add-os/navigation/routes"
-import { HOME_REDIRECT } from "@/add-os/navigation/sections"
+import { DASHBOARD_HOME, HOME_REDIRECT } from "@/add-os/navigation/sections"
 import { i18nGlobal } from "@/lang"
 import { useAuthStore } from "@/stores/auth"
 import { Layout } from "@/types/theme.d"
@@ -26,8 +27,12 @@ const router = createRouter({
 	routes: [
 		{
 			path: "/",
-			// ADD OS: provider portal summary for providers, HOME_REDIRECT for admins.
-			redirect: () => (useAuthStore().isProvider ? "/provider/summary" : HOME_REDIRECT)
+			// ADD OS: provider portal summary for providers; for staff, the dashboard
+			// when they may see any of it, else HOME_REDIRECT.
+			redirect: () => {
+				if (useAuthStore().isProvider) return "/provider/summary"
+				return canViewDashboard() ? DASHBOARD_HOME : HOME_REDIRECT
+			}
 		},
 
 		...createAddOsRoutes(),

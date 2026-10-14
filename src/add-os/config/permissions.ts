@@ -234,3 +234,23 @@ export function canRejectProviderRequests(): boolean {
 export function canViewReports(): boolean {
 	return can("reports.view")
 }
+
+/**
+ * The dashboard's home page shows one section per permission
+ * (`dashboard.operations|spaces|finance|members`, gated the same way on ADD Core's
+ * `admin/dashboard/*` routes), so each role sees what its work needs: the
+ * admin role holds all three, operations is granted what it should see from
+ * the roles screen.
+ */
+export const DASHBOARD_SECTIONS = ["operations", "spaces", "finance", "members"] as const
+
+export type DashboardSection = (typeof DASHBOARD_SECTIONS)[number]
+
+export function canViewDashboardSection(section: DashboardSection): boolean {
+	return can(`dashboard.${section}`)
+}
+
+/** At least one section to show — where "/" lands for staff when true. */
+export function canViewDashboard(): boolean {
+	return DASHBOARD_SECTIONS.some(canViewDashboardSection)
+}

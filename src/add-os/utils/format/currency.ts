@@ -53,6 +53,14 @@ export function isCurrencyCode(code: string | null | undefined): code is Currenc
 	return code != null && code in CURRENCIES
 }
 
+/**
+ * A currency's symbol in the active language ("ل.س", "$"), for layouts that
+ * set it apart from the amount; an unknown code is its own symbol.
+ */
+export function currencySymbol(code: string, locale: SupportedLocale = currentLocale.value): string {
+	return isCurrencyCode(code) ? CURRENCIES[code].symbol[locale] : code
+}
+
 export interface CurrencyFormatOptions extends Pick<NumberFormatOptions, "grouping"> {
 	currency?: CurrencyCode
 	locale?: SupportedLocale

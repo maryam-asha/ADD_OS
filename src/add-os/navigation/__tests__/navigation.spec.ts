@@ -33,6 +33,7 @@ describe("section list", () => {
 		const active = NAV_SECTIONS.filter(section => section.status === "active").map(section => section.key)
 
 		expect(active).toEqual([
+			"dashboard",
 			"spatial",
 			"system",
 			"members",

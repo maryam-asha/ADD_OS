@@ -92,8 +92,11 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"providerPortal.invoices": () => import("@/add-os/modules/provider-portal/views/ProviderInvoicesPage.vue"),
 	"providerPortal.companyReport": () => import("@/add-os/modules/provider-portal/views/ProviderCompanyReportPage.vue"),
 	"providerPortal.invoiceStatement": () => import("@/add-os/modules/provider-portal/views/ProviderInvoiceStatementPage.vue"),
+	"dashboard.overview": () => import("@/add-os/modules/dashboard/views/DashboardOverviewPage.vue"),
 	"reports.providersReport": () => import("@/add-os/modules/reports/views/AdminProvidersReportPage.vue"),
 	"reports.revenueReport": () => import("@/add-os/modules/reports/views/AdminRevenueReportPage.vue"),
+	"reports.spacesReport": () => import("@/add-os/modules/reports/views/SpacesReportPage.vue"),
+	"reports.collectionsReport": () => import("@/add-os/modules/reports/views/CollectionsReportPage.vue"),
 	"payments.invoices": () => import("@/add-os/modules/payments/views/InvoicesPage.vue")
 }
 

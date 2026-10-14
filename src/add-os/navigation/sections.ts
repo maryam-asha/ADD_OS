@@ -64,7 +64,10 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		key: "dashboard",
 		path: "/dashboard",
 		icon: "carbon:dashboard",
-		status: "coming-soon",
+		status: "active",
+		// No section-level permission: the page shows one panel per
+		// `dashboard.*` permission the account holds (config/permissions.ts),
+		// and says so when it holds none.
 		pages: [{ key: "overview", path: "overview" }]
 	},
 	{
@@ -215,7 +218,11 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		status: "active",
 		pages: [
 			{ key: "providersReport", path: "providers" },
-			{ key: "revenueReport", path: "revenue" }
+			{ key: "revenueReport", path: "revenue" },
+			// The figures the dashboard sums up, in full; each behind the
+			// permission of the dashboard section it expands.
+			{ key: "spacesReport", path: "spaces", permission: "dashboard.spaces" },
+			{ key: "collectionsReport", path: "collections", permission: "dashboard.finance" }
 		],
 		roles: ["admin", "operations"],
 		permission: "reports.view"
@@ -309,3 +316,12 @@ export function navSectionTitleKey(section: NavSection): string {
  * the first real screen ships. Revisit once the dashboard exists.
  */
 export const HOME_REDIRECT = "/spatial/branches"
+
+/**
+ * The dashboard now exists (2026-10-13), so "/" lands on it for any staff
+ * account holding at least one `dashboard.*` permission (`src/router/index.ts`).
+ * HOME_REDIRECT above is kept, unchanged, as the landing page for an account
+ * holding none — sending it to a dashboard with nothing to show would trade a
+ * useful first screen for an empty one.
+ */
+export const DASHBOARD_HOME = "/dashboard/overview"

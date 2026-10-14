@@ -8,6 +8,7 @@ import Components from "unplugin-vue-components/vite"
 import { defineConfig, loadEnv } from "vite"
 import VueDevTools from "vite-plugin-vue-devtools"
 import svgLoader from "vite-svg-loader"
+import { PINNED_PAGES_FILE, rewritePinnedPageTitles } from "./src/add-os/navigation/pinnedPageTitles"
 
 /**
  * ADD OS — strips Iconify's remote API hosts out of the bundle.
@@ -43,6 +44,23 @@ function stripIconifyRemoteApi(): Plugin {
 	}
 }
 
+/**
+ * ADD OS — the toolbar's recent and pinned pages show their titles translated
+ * rather than as raw i18n keys. Rewrites the vendor file as it loads; the
+ * file on disk is untouched (see src/add-os/navigation/pinnedPageTitles.ts).
+ */
+function translatePinnedPageTitles(): Plugin {
+	return {
+		name: "add-os:pinned-page-titles",
+		enforce: "pre",
+		transform(code, id) {
+			// The SFC itself only — its `?vue&type=…` parts are already compiled out of it.
+			if (id.includes("?") || !PINNED_PAGES_FILE.test(id)) return null
+			return { code: rewritePinnedPageTitles(code), map: null }
+		}
+	}
+}
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
 	// Load env file based on `mode` in the current working directory.
@@ -52,6 +70,7 @@ export default defineConfig(({ mode }) => {
 	return {
 		plugins: [
 			stripIconifyRemoteApi(),
+			translatePinnedPageTitles(),
 			tailwindcss(),
 			vue({
 				script: {

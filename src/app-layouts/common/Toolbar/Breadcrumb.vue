@@ -19,16 +19,13 @@
 <script lang="ts" setup>
 import type { RouteLocationNormalizedLoaded } from "vue-router"
 import type { BreadcrumbItem } from "@/composables/useBreadcrumb"
-import _capitalize from "lodash/capitalize"
-import _compact from "lodash/compact"
 import _isEqual from "lodash/isEqual"
-import _split from "lodash/split"
 import { NBreadcrumb, NBreadcrumbItem } from "naive-ui"
 import { onBeforeMount, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
 import { currentLocale } from "@/add-os/lang/currentLocale"
-import { NAV_SECTIONS, navSectionTitleKey } from "@/add-os/navigation/sections"
+import { buildCrumbs } from "@/add-os/navigation/breadcrumb"
 import Icon from "@/components/common/Icon.vue"
 import { useBreadcrumb } from "@/composables/useBreadcrumb"
 
@@ -39,11 +36,10 @@ const { items, setItems } = useBreadcrumb()
 const { t, te } = useI18n()
 
 /**
- * ADD OS: crumb labels are i18n KEYS, not text.
- *
- * `meta.title` carries `nav.pages.<key>`, and each path segment maps to
- * `nav.sections.<segment>`. Anything without a translation keeps the template's
- * original capitalised segment, so non-ADD OS routes still read sensibly.
+ * ADD OS: crumb labels are i18n KEYS, not text — `buildCrumbs` picks them from
+ * the routes (`nav.sections.*`, `nav.pages.*`, `meta.title`) and this only
+ * translates. `breadcrumb.spec.ts` holds every routed crumb to a key in both
+ * catalogues, so the raw-key fallback below should never render.
  */
 function translate(key: string, fallback: string): string {
 	return te(key) ? t(key) : fallback
@@ -59,34 +55,11 @@ function goto(page: Partial<BreadcrumbItem>) {
 }
 
 function checkRoute(route: RouteLocationNormalizedLoaded) {
-	const newItems: BreadcrumbItem[] = []
-	let pathChunks = _compact(_split(route?.path || "", "/"))
-	if (!pathChunks.length) {
-		pathChunks = _compact(_split(route?.matched?.[0]?.aliasOf?.path || "", "/"))
-	}
-
-	let cumulativePath = ""
-
-	for (const chunk of pathChunks) {
-		cumulativePath += `/${chunk}`
-		const section = NAV_SECTIONS.find(s => s.path === cumulativePath || s.path === `/${chunk}`)
-		const sectionKey = section ? navSectionTitleKey(section) : `nav.sections.${chunk}`
-		const name = translate(sectionKey, translate(`nav.sections.${chunk}`, _capitalize(chunk)))
-
-		newItems.push({
-			name,
-			path: cumulativePath,
-			key: name + cumulativePath
-		})
-	}
-
-	if (route.meta?.title && newItems.length) {
-		const lastItem = newItems.at(-1)
-		if (lastItem) {
-			const title = String(route.meta.title)
-			lastItem.name = translate(title, title)
-		}
-	}
+	const newItems: BreadcrumbItem[] = buildCrumbs(route, path => router.resolve(path)).map(crumb => ({
+		name: translate(crumb.titleKey, crumb.titleKey),
+		path: crumb.path,
+		key: crumb.path
+	}))
 
 	if (!_isEqual(items.value, newItems)) {
 		setItems(newItems)
