@@ -34,7 +34,7 @@
 			</n-card>
 		</div>
 
-		<n-card size="small" class="shadow-sm border border-stone-200">
+		<n-card size="small" class="add-ledger-table shadow-sm border border-stone-200">
 			<div class="flex flex-col gap-4">
 				<!-- Filters -->
 				<div class="flex flex-wrap items-center gap-3">
@@ -43,7 +43,7 @@
 							<template #prefix><Icon name="carbon:search" :size="16" /></template>
 						</n-input>
 					</div>
-					<div v-for="filter in selectFilters" :key="filter.key" class="w-44 shrink-0">
+					<div v-for="filter in selectFilters" :key="filter.key" class="w-40 shrink-0">
 						<n-select v-model:value="filters[filter.key]" :options="filter.options" :placeholder="filter.placeholder" clearable size="small" class="w-full" />
 					</div>
 					<n-date-picker v-model:formatted-value="range" type="daterange" value-format="yyyy-MM-dd" clearable size="small" class="w-64 shrink-0" />
@@ -61,6 +61,7 @@
 					:row-key="(row: AdminPayment) => row.id"
 					:pagination
 					:row-props
+					:scroll-x="1200"
 					size="small"
 					@update:page="onPage"
 				/>
@@ -68,59 +69,62 @@
 		</n-card>
 
 		<!-- One payment, in full -->
-		<n-drawer v-model:show="detailVisible" :width="440" :placement="isRtl ? 'left' : 'right'">
-			<n-drawer-content :title="selected ? t('payments.transactions.detailTitle', { id: selected.id }) : ''" closable>
-				<div v-if="selected" class="flex flex-col gap-4 text-sm" data-test="payment-detail">
-					<div class="flex items-center justify-between">
-						<span class="flex items-center gap-2 font-semibold text-stone-900">
-							<Icon :name="methodIcon(selected.method)" :size="18" class="text-emerald-700" />{{ selected.method_label }}
-						</span>
-						<n-tag :type="statusType(selected.status)" size="small" round>{{ statusLabel(selected.status) }}</n-tag>
-					</div>
-
-					<dl class="flex flex-col divide-y divide-stone-100">
-						<div v-for="field in detailFields" :key="field.label" class="flex justify-between gap-4 py-2">
-							<dt class="text-stone-500">{{ field.label }}</dt>
-							<dd class="font-medium text-stone-900 text-end break-all">
-								<bdi v-if="field.ltr" dir="ltr">{{ field.value }}</bdi>
-								<template v-else>{{ field.value }}</template>
-							</dd>
-						</div>
-					</dl>
-
-					<div v-if="selected.discounts?.length" class="flex flex-col gap-2" data-test="payment-discounts">
-						<span class="text-stone-500">{{ t("payments.transactions.discounts") }}</span>
-						<AppliedDiscountList :discounts="selected.discounts" />
-					</div>
-
-					<n-alert v-if="selected.review_reason" type="warning" :bordered="false" :title="t('payments.transactions.reviewReason')">
-						{{ selected.review_reason }}
-					</n-alert>
-
-					<div class="flex flex-wrap gap-2">
-						<n-button v-if="selected.user" secondary size="small" @click="openMember(selected.user.id)">
-							<template #icon><Icon name="carbon:user" :size="16" /></template>
-							{{ t("payments.transactions.openMember") }}
-						</n-button>
-						<n-button v-if="canReverse(selected)" type="error" secondary size="small" :loading="reversing" data-test="payment-reverse" @click="confirmReverse(selected)">
-							<template #icon><Icon name="carbon:undo" :size="16" /></template>
-							{{ t("payments.transactions.reverse") }}
-						</n-button>
-					</div>
+		<n-modal
+			v-model:show="detailVisible"
+			preset="card"
+			class="max-w-lg w-full !rounded-2xl shadow-xl"
+			:title="selected ? t('payments.transactions.detailTitle', { id: selected.id }) : ''"
+			closable
+		>
+			<div v-if="selected" class="flex flex-col gap-4 text-sm" data-test="payment-detail">
+				<div class="flex items-center justify-between p-3 bg-stone-50 rounded-xl border border-stone-200/80">
+					<span class="flex items-center gap-2 font-semibold text-stone-900">
+						<Icon :name="methodIcon(selected.method)" :size="20" class="text-emerald-700" />{{ selected.method_label }}
+					</span>
+					<n-tag :type="statusType(selected.status)" size="small" round>{{ statusLabel(selected.status) }}</n-tag>
 				</div>
-			</n-drawer-content>
-		</n-drawer>
+
+				<dl class="flex flex-col divide-y divide-stone-100">
+					<div v-for="field in detailFields" :key="field.label" class="flex justify-between gap-4 py-2.5">
+						<dt class="text-stone-500">{{ field.label }}</dt>
+						<dd class="font-medium text-stone-900 text-end break-all">
+							<bdi v-if="field.ltr" dir="ltr">{{ field.value }}</bdi>
+							<template v-else>{{ field.value }}</template>
+						</dd>
+					</div>
+				</dl>
+
+				<div v-if="selected.discounts?.length" class="flex flex-col gap-2" data-test="payment-discounts">
+					<span class="text-stone-500 font-medium">{{ t("payments.transactions.discounts") }}</span>
+					<AppliedDiscountList :discounts="selected.discounts" />
+				</div>
+
+				<n-alert v-if="selected.review_reason" type="warning" :bordered="false" :title="t('payments.transactions.reviewReason')">
+					{{ selected.review_reason }}
+				</n-alert>
+
+				<div v-if="selected.user || canReverse(selected)" class="flex flex-wrap justify-end gap-2 pt-2 border-t border-stone-100">
+					<n-button v-if="selected.user" secondary size="small" @click="openMember(selected.user.id)">
+						<template #icon><Icon name="carbon:user" :size="16" /></template>
+						{{ t("payments.transactions.openMember") }}
+					</n-button>
+					<n-button v-if="canReverse(selected)" type="error" secondary size="small" :loading="reversing" data-test="payment-reverse" @click="confirmReverse(selected)">
+						<template #icon><Icon name="carbon:undo" :size="16" /></template>
+						{{ t("payments.transactions.reverse") }}
+					</n-button>
+				</div>
+			</div>
+		</n-modal>
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
 import type { AdminPayment, PaymentMethodInfo, PaymentsSummary, PaymentStatus } from "@/add-os/modules/payments/types/payment"
-import { NAlert, NButton, NCard, NDataTable, NDatePicker, NDrawer, NDrawerContent, NInput, NSelect, NTag, useDialog, useMessage } from "naive-ui"
+import { NAlert, NButton, NCard, NDataTable, NDatePicker, NInput, NModal, NSelect, NTag, useDialog, useMessage } from "naive-ui"
 import { computed, h, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
-import { currentLocale } from "@/add-os/lang/currentLocale"
 import { PAYMENT_PURPOSES, PAYMENT_STATUSES } from "@/add-os/modules/payments/types/payment"
 import AppliedDiscountList from "@/add-os/modules/pricing/components/AppliedDiscountList.vue"
 import { ApiError } from "@/add-os/services/api"
@@ -137,8 +141,6 @@ const message = useMessage()
 const dialog = useDialog()
 
 const PAGE_SIZE = 20
-
-const isRtl = computed(() => currentLocale.value === "ar")
 
 /** A link may arrive already filtered, e.g. from a method's card: `?method=cash`. */
 function fromRoute(key: string): string | null {
@@ -264,24 +266,85 @@ function tag(label: string, type: "success" | "warning" | "error" | "default" = 
 }
 
 const columns = computed<DataTableColumns<AdminPayment>>(() => [
-	{ title: "#", key: "id", width: 70 },
-	{ title: t("payments.columns.date"), key: "created_at", render: row => (row.created_at ? formatDateTime(row.created_at) : "—") },
+	{
+		title: "#",
+		key: "id",
+		width: 70,
+		align: "center",
+		render: row => h("span", { class: "font-mono font-medium text-stone-600" }, row.id)
+	},
+	{
+		title: t("payments.columns.date"),
+		key: "created_at",
+		width: 170,
+		minWidth: 160,
+		align: "center",
+		render: row => (row.created_at ? h("span", { class: "text-xs font-medium text-stone-700 leading-tight" }, formatDateTime(row.created_at)) : "—")
+	},
 	{
 		title: t("payments.columns.member"),
 		key: "user",
+		width: 180,
+		minWidth: 160,
+		align: "center",
 		render: row => (row.user
-			? h("div", { class: "flex flex-col" }, [
-					h("span", { class: "font-medium text-stone-900" }, row.user.name),
-					h("bdi", { dir: "ltr", class: "text-xs text-stone-500" }, row.user.phone)
+			? h("div", { class: "flex flex-col items-center justify-center text-center leading-tight gap-0.5" }, [
+					h("span", { class: "font-semibold text-stone-900 whitespace-nowrap" }, row.user.name),
+					row.user.phone ? h("bdi", { dir: "ltr", class: "text-xs text-stone-500 font-mono" }, row.user.phone) : null
 				])
 			: "—")
 	},
-	{ title: t("payments.columns.purpose"), key: "purpose", render: row => t(`payments.purpose.${row.purpose}`) },
-	{ title: t("payments.columns.method"), key: "method", render: row => h("span", { class: "flex items-center gap-1.5" }, [h(Icon, { name: methodIcon(row.method), size: 14, class: "text-emerald-700" }), row.method_label]) },
-	{ title: t("payments.columns.points"), key: "amount_points", render: row => (pointsOf(row) ? h("span", { class: "font-semibold" }, formatNumber(pointsOf(row) as number)) : "—") },
-	{ title: t("payments.columns.amount"), key: "amount", render: row => (moneyOf(row) ? h("bdi", { dir: "ltr" }, moneyOf(row) as string) : "—") },
-	{ title: t("payments.columns.status"), key: "status", render: row => tag(statusLabel(row.status), statusType(row.status)) },
-	{ title: t("payments.columns.discounts"), key: "discounts", render: row => h(AppliedDiscountList, { discounts: row.discounts }) }
+	{
+		title: t("payments.columns.purpose"),
+		key: "purpose",
+		width: 140,
+		minWidth: 130,
+		align: "center",
+		render: row => h("span", { class: "text-xs font-medium text-stone-700 leading-tight" }, t(`payments.purpose.${row.purpose}`))
+	},
+	{
+		title: t("payments.columns.method"),
+		key: "method",
+		width: 160,
+		minWidth: 150,
+		align: "center",
+		render: row => h("div", { class: "inline-flex items-center justify-center gap-1.5 whitespace-nowrap" }, [
+			h(Icon, { name: methodIcon(row.method), size: 14, class: "text-emerald-700 shrink-0" }),
+			h("span", { class: "text-xs font-medium text-stone-700" }, row.method_label)
+		])
+	},
+	{
+		title: t("payments.columns.points"),
+		key: "amount_points",
+		width: 110,
+		minWidth: 100,
+		align: "center",
+		render: row => (pointsOf(row) ? h("span", { class: "font-semibold text-stone-900" }, formatNumber(pointsOf(row) as number)) : "—")
+	},
+	{
+		title: t("payments.columns.amount"),
+		key: "amount",
+		width: 150,
+		minWidth: 140,
+		align: "center",
+		render: row => (moneyOf(row) ? h("bdi", { dir: "ltr", class: "font-semibold text-stone-900 whitespace-nowrap" }, moneyOf(row) as string) : "—")
+	},
+	{
+		title: t("payments.columns.status"),
+		key: "status",
+		width: 120,
+		minWidth: 110,
+		align: "center",
+		render: row => tag(statusLabel(row.status), statusType(row.status))
+	},
+	{
+		title: t("payments.columns.discounts"),
+		key: "discounts",
+		width: 150,
+		minWidth: 140,
+		align: "center",
+		render: row => h("div", { class: "flex items-center justify-center" }, [h(AppliedDiscountList, { discounts: row.discounts })])
+	}
 ])
 
 function rowProps(row: AdminPayment) {

@@ -69,6 +69,7 @@
 	font-size: var(--add-font-size-body);
 	font-weight: var(--add-font-weight-bold);
 	color: var(--add-table-header-text);
+	white-space: nowrap;
 }
 
 // `text-transform: uppercase` was part of the superseded ledger treatment and is

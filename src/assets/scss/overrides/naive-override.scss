@@ -386,6 +386,12 @@
 		}
 	}
 
+	.n-date-picker {
+		.n-input__separator {
+			transform: scaleX(-1);
+		}
+	}
+
 	.n-date-panel-calendar {
 		direction: ltr;
 	}
