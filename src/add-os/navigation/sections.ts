@@ -279,7 +279,17 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "partners", path: "partners" },
 			{ key: "founders", path: "founders" },
 			{ key: "contactLinks", path: "contact-links" },
-			{ key: "notifications", path: "notifications" },
+			{ key: "notifications", path: "notifications" }
+		]
+	},
+	{
+		// What the member app shows as its own pages — apart from the website's
+		// content above, since operations edit them for a different audience.
+		key: "appContent",
+		path: "/app-content",
+		icon: "carbon:application-mobile",
+		status: "active",
+		pages: [
 			{ key: "termsOfUse", path: "terms-of-use", icon: "carbon:document-tasks" },
 			{ key: "helpSupport", path: "help-support", icon: "carbon:help" }
 		]
