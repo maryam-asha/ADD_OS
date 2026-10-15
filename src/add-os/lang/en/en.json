@@ -1607,6 +1607,7 @@
 			"founders": "Founders",
 			"contactLinks": "Contact links",
 			"notifications": "Broadcast notifications",
+			"privacyPolicy": "Privacy Policy",
 			"termsOfUse": "Terms of Use",
 			"helpSupport": "Help & Support",
 			"accountSecurity": "Account & security",
@@ -4179,6 +4180,24 @@
 		"words": "words",
 		"chars": "chars"
 	},
+	"helpSupport": {
+		"title": "Help & Support",
+		"subtitle": "The app's Help & Support page, in Markdown in Arabic and English. The contact rows under it (email, phone, WhatsApp, address...) come from Contact Links.",
+		"loadError": "Failed to load Help & Support. Please try again.",
+		"saveSuccess": "Help & Support saved successfully.",
+		"saveError": "Failed to save Help & Support.",
+		"saveButton": "Save Changes",
+		"refresh": "Refresh",
+		"retry": "Retry",
+		"arabicTab": "Arabic",
+		"englishTab": "English",
+		"sideBySideTab": "Side-by-Side",
+		"unsavedChanges": "Unsaved changes",
+		"allSaved": "All changes saved",
+		"lastUpdated": "Last updated",
+		"arPlaceholder": "Write the Help & Support page in Arabic using Markdown formatting...",
+		"enPlaceholder": "Write the Help & Support page in English using Markdown formatting..."
+	},
 	"termsOfUse": {
 		"title": "Terms of Use",
 		"subtitle": "Manage the app's terms of use in Arabic and English, written in Markdown.",
@@ -4197,12 +4216,12 @@
 		"arPlaceholder": "Write the terms of use in Arabic using Markdown formatting...",
 		"enPlaceholder": "Write the terms of use in English using Markdown formatting..."
 	},
-	"helpSupport": {
-		"title": "Help & Support",
-		"subtitle": "The app's Help & Support page, in Markdown in Arabic and English. The contact rows under it (email, phone, WhatsApp, address...) come from Contact Links.",
-		"loadError": "Failed to load Help & Support. Please try again.",
-		"saveSuccess": "Help & Support saved successfully.",
-		"saveError": "Failed to save Help & Support.",
+	"privacyPolicy": {
+		"title": "Privacy Policy",
+		"subtitle": "Manage privacy policy content in both Arabic and English for district members and app users.",
+		"loadError": "Failed to load the privacy policy. Please try again.",
+		"saveSuccess": "Privacy policy saved successfully.",
+		"saveError": "Failed to save privacy policy changes.",
 		"saveButton": "Save Changes",
 		"refresh": "Refresh",
 		"retry": "Retry",
@@ -4212,7 +4231,7 @@
 		"unsavedChanges": "Unsaved changes",
 		"allSaved": "All changes saved",
 		"lastUpdated": "Last updated",
-		"arPlaceholder": "Write the Help & Support page in Arabic using Markdown formatting...",
-		"enPlaceholder": "Write the Help & Support page in English using Markdown formatting..."
+		"arPlaceholder": "Write the privacy policy clauses in Arabic using Markdown formatting...",
+		"enPlaceholder": "Write the privacy policy clauses in English using Markdown formatting..."
 	}
 }

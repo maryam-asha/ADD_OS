@@ -290,6 +290,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		icon: "carbon:application-mobile",
 		status: "active",
 		pages: [
+			{ key: "privacyPolicy", path: "privacy-policy", icon: "carbon:security" },
 			{ key: "termsOfUse", path: "terms-of-use", icon: "carbon:document-tasks" },
 			{ key: "helpSupport", path: "help-support", icon: "carbon:help" }
 		]
