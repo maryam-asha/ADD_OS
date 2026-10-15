@@ -5,10 +5,9 @@ import { createI18n } from "vue-i18n"
 import { ApiError } from "@/add-os/services/api"
 import ActiveSessionsPage from "../ActiveSessionsPage.vue"
 
-const { listActiveSessionsMock, checkOutSessionMock, settleSessionPaymentMock, cancelBookingMock, extendBookingMock, getExtensionOptionsMock } = vi.hoisted(() => ({
+const { listActiveSessionsMock, checkOutSessionMock, cancelBookingMock, extendBookingMock, getExtensionOptionsMock } = vi.hoisted(() => ({
 	listActiveSessionsMock: vi.fn(),
 	checkOutSessionMock: vi.fn(),
-	settleSessionPaymentMock: vi.fn(),
 	cancelBookingMock: vi.fn(),
 	extendBookingMock: vi.fn(),
 	getExtensionOptionsMock: vi.fn()
@@ -17,11 +16,12 @@ const { listActiveSessionsMock, checkOutSessionMock, settleSessionPaymentMock, c
 vi.mock("@/add-os/services/reception", () => ({
 	listActiveSessions: listActiveSessionsMock,
 	checkOutSession: checkOutSessionMock,
-	settleSessionPayment: settleSessionPaymentMock,
 	cancelBooking: cancelBookingMock,
 	extendBooking: extendBookingMock,
 	getExtensionOptions: getExtensionOptionsMock
 }))
+
+vi.mock("@/add-os/modules/payments/components/CollectPaymentModal.vue", () => ({ default: { name: "CollectPaymentModal", render: () => null } }))
 
 /** What `GET .../extension-options` answers for a booking with two hours free after it. */
 function extensionOptions(overrides: Record<string, unknown> = {}) {
@@ -138,7 +138,6 @@ describe("activeSessionsPage", () => {
 		vi.clearAllMocks()
 		listActiveSessionsMock.mockResolvedValue([bookingSession, walkinSession])
 		checkOutSessionMock.mockResolvedValue({ message: "Checked out." })
-		settleSessionPaymentMock.mockResolvedValue({ message: "Payment settled." })
 		cancelBookingMock.mockResolvedValue({ message: "Cancelled." })
 		extendBookingMock.mockResolvedValue({ message: "Extended." })
 		getExtensionOptionsMock.mockResolvedValue(extensionOptions())
@@ -358,9 +357,10 @@ describe("activeSessionsPage", () => {
 		 * Settlement is folded into check-out because the API refuses to settle a
 		 * session that has not been checked out — every row on this board is by
 		 * definition not yet checked out, so a standalone settle button could
-		 * only ever 422.
+		 * only ever 422. The money itself is entered in the collect dialog, as
+		 * it was handed over.
 		 */
-		it("settles payment after check-out when a method was chosen", async () => {
+		it("opens the collect dialog on the session after check-out when a method was chosen", async () => {
 			const wrapper = mountPage()
 			await flushPromises()
 
@@ -370,7 +370,9 @@ describe("activeSessionsPage", () => {
 			await flushPromises()
 
 			expect(checkOutSessionMock).toHaveBeenCalledWith("walkin", 2, expect.any(Date))
-			expect(settleSessionPaymentMock).toHaveBeenCalledWith("walkin", 2, "cash")
+			expect(wrapper.vm.checkOutModalVisible).toBe(false)
+			expect(wrapper.vm.collectVisible).toBe(true)
+			expect(wrapper.vm.collectTarget).toEqual({ userId: 13, focus: { purpose: "coworking_session", id: 2 } })
 			wrapper.unmount()
 		})
 
@@ -383,7 +385,7 @@ describe("activeSessionsPage", () => {
 			await flushPromises()
 
 			expect(checkOutSessionMock).toHaveBeenCalledOnce()
-			expect(settleSessionPaymentMock).not.toHaveBeenCalled()
+			expect(wrapper.vm.collectVisible).toBe(false)
 			wrapper.unmount()
 		})
 
@@ -397,19 +399,12 @@ describe("activeSessionsPage", () => {
 			await wrapper.vm.submitCheckOut()
 			await flushPromises()
 
-			expect(settleSessionPaymentMock).not.toHaveBeenCalled()
+			expect(wrapper.vm.collectVisible).toBe(false)
 			expect(wrapper.vm.checkOutModalVisible).toBe(true)
 			wrapper.unmount()
 		})
 
-		/**
-		 * The check-out succeeded even though the settlement did not, so the
-		 * dialog must close and the board must not keep showing a session that
-		 * has ended. The failed settlement is reported by the toast, and the
-		 * operator settles it from wherever settled payments are managed.
-		 */
-		it("closes and refetches when check-out succeeds but settlement fails", async () => {
-			settleSessionPaymentMock.mockRejectedValue(new ApiError(409, JSON.stringify({ message: "This booking or session has already been paid." })))
+		it("collects a booking as a booking, for its member", async () => {
 			const wrapper = mountPage()
 			await flushPromises()
 
@@ -418,8 +413,7 @@ describe("activeSessionsPage", () => {
 			await wrapper.vm.submitCheckOut()
 			await flushPromises()
 
-			expect(checkOutSessionMock).toHaveBeenCalledOnce()
-			expect(wrapper.vm.checkOutModalVisible).toBe(false)
+			expect(wrapper.vm.collectTarget).toEqual({ userId: 12, focus: { purpose: "booking", id: 1 } })
 			expect(listActiveSessionsMock.mock.calls.length).toBeGreaterThanOrEqual(2)
 			wrapper.unmount()
 		})

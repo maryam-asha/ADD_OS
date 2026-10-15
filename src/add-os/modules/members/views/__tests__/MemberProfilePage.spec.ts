@@ -24,6 +24,7 @@ vi.mock("@/add-os/services/member-profile", () => ({
 }))
 vi.mock("@/add-os/services/booking-calendar", () => ({ listBookings: bookingsMock }))
 vi.mock("@/add-os/modules/members/components/WalletTopUpDialog.vue", () => ({ default: { name: "WalletTopUpDialog", render: () => null } }))
+vi.mock("@/add-os/modules/payments/components/CollectPaymentModal.vue", () => ({ default: { name: "CollectPaymentModal", render: () => null } }))
 vi.mock("vue-router", async () => {
 	const actual = await vi.importActual<typeof import("vue-router")>("vue-router")
 	return { ...actual, useRouter: () => ({ push: pushMock }), useRoute: () => ({ params: { id: "8" } }) }

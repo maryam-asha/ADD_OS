@@ -161,6 +161,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		 */
 		pages: [
 			{ key: "receptionDesk", path: "reception-desk" },
+			{ key: "arrivals", path: "arrivals" },
 			{ key: "approvalQueue", path: "approval-queue" },
 			{ key: "activeSessions", path: "active-sessions" },
 			{ key: "activeSessionDetail", path: "active-sessions/:type/:id", hidden: true },

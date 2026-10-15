@@ -57,6 +57,15 @@ export function buildSessionColumns(t: ComposerTranslation, handlers: SessionHan
 						{ default: () => t(covered ? "activeSessions.seat.covered" : "activeSessions.seat.pool") }
 					))
 				}
+				// How it began, when it was not the desk: the kiosk scan, or the
+				// member opening the booked room's door.
+				if (row.started_via && row.started_via !== "reception") {
+					tags.push(h(
+						NTag,
+						{ size: "small", round: true, type: "default", title: t("activeSessions.startedVia.hint") },
+						{ default: () => t(`activeSessions.startedVia.${row.started_via}`) }
+					))
+				}
 				// A Dedicated Desk member's own desk, to send them to it.
 				for (const code of row.desk_codes ?? []) {
 					tags.push(h(

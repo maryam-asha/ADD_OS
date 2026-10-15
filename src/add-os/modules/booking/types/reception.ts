@@ -85,6 +85,7 @@ export interface ActiveSession {
 	desk_codes: string[]
 	/** The member's waiting "end session" press, or null. */
 	end_request?: SessionEndRequestSummary | null
+	started_via?: SessionStartSource
 	member?: { id: number, name: string, phone: string | null, avatar_url: string | null, company: string | null }
 }
 
@@ -143,6 +144,7 @@ export interface ReceptionSessionReport {
 		checked_in_at: string
 		checked_out_at: string | null
 		duration_seconds: number
+		started_via?: SessionStartSource
 	}
 	lines: SessionReportLine[]
 	member: { id: number, name: string, phone: string | null }
@@ -244,6 +246,74 @@ export interface CheckOutSessionPayload {
 
 export interface SettlePaymentPayload {
 	payment_method: PaymentMethod
+}
+
+/** How a session began: the desk (or its activating the door code), the kiosk scan, or the member opening the booked room's door. */
+export type SessionStartSource = "reception" | "scan" | "door"
+
+/**
+ * A member's "I have arrived" from the app (`GET reception/arrival-requests`).
+ * With a matched booking, confirming checks that booking in; without one the
+ * desk names the co-working space and a walk-in starts there.
+ */
+export interface ArrivalRequest {
+	id: number
+	status: "pending" | "confirmed" | "rejected" | "expired"
+	requested_at: string
+	matched_booking_id: number | null
+	user: { id: number, name: string, phone: string | null }
+	matched_booking: {
+		id: number
+		space_id: number
+		space_type: SpaceType | null
+		space_name: string | null
+		start_at: string
+		end_at: string
+	} | null
+}
+
+/** What `POST reception/payments/settle` settles, as `reception/outstanding` names it. */
+export type OutstandingPurpose = "booking" | "coworking_session" | "event_registration" | "plan_purchase"
+
+/** One thing a member still owes (ADDCore `OutstandingItems`). */
+export interface OutstandingItem {
+	purpose: OutstandingPurpose
+	/** Every purpose but `plan_purchase`. */
+	payable_id?: number
+	/** `plan_purchase` only: the held payment. */
+	payment_id?: number
+	title: string | null
+	starts_at: string | null
+	amount_points: number
+	/** What it costs in the currency asked for. */
+	amount: { value: string, currency: string }
+}
+
+export interface OutstandingSummary {
+	items: OutstandingItem[]
+	total_points: number
+	total_amount: { value: string, currency: string }
+}
+
+/**
+ * The money as it was handed over: `amount` in `currency`. The server turns it
+ * into points, spends what is due and leaves the rest in the member's wallet;
+ * too little is a 422 carrying `shortage` and `currency`.
+ */
+export interface SettleAtReceptionPayload {
+	purpose: OutstandingPurpose
+	payable_id?: number
+	payment_id?: number
+	collected_via: PaymentMethod
+	amount: string
+	currency: string
+}
+
+export interface SettleAtReceptionResult {
+	points_credited: number
+	points_charged: number
+	/** Paid over what was due, kept as points in the member's wallet. */
+	change_points: number
 }
 
 /**

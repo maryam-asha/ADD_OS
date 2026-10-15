@@ -42,6 +42,7 @@
 							<div class="flex flex-col gap-1 items-center p-3 rounded-xl bg-stone-50">
 								<span class="text-stone-400 font-medium">{{ t("closeSession.detail.checkIn") }}</span>
 								<span class="font-bold text-stone-900 text-base">{{ formatTime(report.session.checked_in_at) }}</span>
+								<span v-if="report.session.started_via" class="text-stone-500">{{ t(`activeSessions.startedVia.${report.session.started_via}`) }}</span>
 							</div>
 							<div class="flex flex-col gap-1 items-center p-3 rounded-xl bg-stone-50">
 								<span class="text-stone-400 font-medium">{{ t("closeSession.detail.endAt") }}</span>
@@ -212,6 +213,13 @@
 				</div>
 			</div>
 		</n-spin>
+
+		<CollectPaymentModal
+			v-model:show="collectVisible"
+			:user-id="report?.member.id ?? null"
+			:focus="{ purpose: type === 'booking' ? 'booking' : 'coworking_session', id }"
+			@update:show="open => { if (!open) backToList() }"
+		/>
 	</div>
 </template>
 
@@ -221,6 +229,7 @@ import { NAlert, NAvatar, NButton, NCard, NSpin, NTag, useDialog, useMessage } f
 import { computed, onBeforeUnmount, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
+import CollectPaymentModal from "@/add-os/modules/payments/components/CollectPaymentModal.vue"
 import { ApiError } from "@/add-os/services/api"
 import { confirmSessionEnd, getSessionReport } from "@/add-os/services/reception"
 import { formatCurrency, formatDateTime, formatNumber, formatTime, isCurrencyCode } from "@/add-os/utils/format"
@@ -311,15 +320,29 @@ function askConfirm(cashCollected: boolean): void {
 	})
 }
 
+const collectVisible = ref(false)
+
+/**
+ * Collecting cash closes the session first, unpaid, and then opens the collect
+ * dialog, where the desk enters the money as it was handed over — amount and
+ * currency. `cash_collected: true` would record exactly what is due in the base
+ * currency, whatever the member actually paid in. Leaving the dialog without
+ * collecting keeps the session owed, collectable later from the member's profile.
+ */
 async function confirm(cashCollected: boolean): Promise<void> {
 	const request = endRequest.value
 	if (!request) return
 
 	isConfirming.value = true
 	try {
-		const result = await confirmSessionEnd(request.id, cashCollected)
+		const result = await confirmSessionEnd(request.id, false)
+		const settled = result.data.payment_state === "paid" || result.data.price_points <= 0
+		if (cashCollected && !settled) {
+			collectVisible.value = true
+			return
+		}
 		// The server says whether anything is still owed.
-		if (result.data.payment_state === "paid" || result.data.price_points <= 0) message.success(result.message)
+		if (settled) message.success(result.message)
 		else message.warning(result.message)
 		backToList()
 	} catch (caught) {

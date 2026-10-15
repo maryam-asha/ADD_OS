@@ -93,13 +93,20 @@
 				</div>
 			</template>
 		</n-modal>
+
+		<CollectPaymentModal
+			v-model:show="collectVisible"
+			:user-id="collectTarget?.userId ?? null"
+			:focus="collectTarget?.focus ?? null"
+			@settled="refetch"
+		/>
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
 import type { FieldErrors } from "@/add-os/modules/booking/composables/useReceptionAction"
-import type { ActiveSession, BookingExtensionOptions, ExtensionOption } from "@/add-os/modules/booking/types/reception"
+import type { ActiveSession, BookingExtensionOptions, ExtensionOption, OutstandingPurpose } from "@/add-os/modules/booking/types/reception"
 import type { PaymentMethod } from "@/add-os/modules/payments/types/wallet-top-up"
 import {
 	NAlert,
@@ -122,14 +129,14 @@ import { useRouter } from "vue-router"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useReceptionAction } from "@/add-os/modules/booking/composables/useReceptionAction"
 import { buildSessionColumns } from "@/add-os/modules/booking/config/active-sessions.config"
+import CollectPaymentModal from "@/add-os/modules/payments/components/CollectPaymentModal.vue"
 import { PAYMENT_METHODS } from "@/add-os/modules/payments/types/wallet-top-up"
 import {
 	cancelBooking,
 	checkOutSession,
 	extendBooking,
 	getExtensionOptions,
-	listActiveSessions,
-	settleSessionPayment
+	listActiveSessions
 } from "@/add-os/services/reception"
 import { formatTime } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
@@ -153,6 +160,12 @@ import Icon from "@/components/common/Icon.vue"
  * no-op in every case it is offered. Folded into the check-out dialog it fires
  * the instant it becomes legal, which is also the moment the operator is
  * taking the money.
+ *
+ * Choosing a method opens the collect dialog once the check-out lands, where
+ * the operator enters the money as it was handed over — amount and currency
+ * (`reception/payments/settle`). It used to call `settle-payment`, which takes
+ * no amount and records exactly what is due in the base currency, so a member
+ * paying in SYP was booked as paying in the base currency.
  */
 
 defineProps<{ titleKey?: string }>()
@@ -190,6 +203,9 @@ const checkOutForm = ref<{ checked_out_at: number | null; payment_method: Paymen
 	payment_method: null
 })
 const checkOutFieldErrors = ref<FieldErrors>({})
+/** The session just checked out, whose money the collect dialog takes. */
+const collectVisible = ref(false)
+const collectTarget = ref<{ userId: number, focus: { purpose: OutstandingPurpose, id: number } } | null>(null)
 
 /** Greys out tomorrow onward in the picker; the submit check below is the real rule. */
 function isFutureDate(timestamp: number): boolean {
@@ -212,13 +228,11 @@ function openCheckOut(row: ActiveSession) {
  * data to evaluate — so a 422 still comes back as a toast carrying the server's
  * own wording.
  *
- * Settlement runs as a second call, after check-out has actually succeeded.
- * Sequential rather than combined because the failure modes differ: if the
- * check-out fails, nothing happened and the dialog stays open for another try;
- * if the check-out succeeded and only the settlement failed, the session HAS
- * ended, and holding the dialog open would invite the operator to check out a
- * session that is already checked out. So the dialog closes and the failed
- * settlement is reported on its own.
+ * Collection follows as its own dialog, after check-out has actually
+ * succeeded: only then does the session have its final price, and if the
+ * check-out fails nothing happened and this dialog stays open for another try.
+ * Closing the collect dialog without taking the money leaves the session owed,
+ * to be collected later from the member's profile.
  */
 async function submitCheckOut() {
 	const target = checkOutTarget.value
@@ -236,11 +250,13 @@ async function submitCheckOut() {
 	const checkedOut = await action.run(() => checkOutSession(target.type, target.id, new Date(at)), t("activeSessions.checkOut.success"))
 	if (!checkedOut) return
 
-	if (paymentMethod) {
-		await action.run(() => settleSessionPayment(target.type, target.id, paymentMethod), t("activeSessions.checkOut.settleSuccess"))
-	}
-
 	checkOutModalVisible.value = false
+
+	if (paymentMethod) {
+		const purpose: OutstandingPurpose = target.type === "booking" ? "booking" : "coworking_session"
+		collectTarget.value = { userId: target.user_id, focus: { purpose, id: target.id } }
+		collectVisible.value = true
+	}
 }
 
 /* ── Extend ────────────────────────────────────────────────────────────────── */
@@ -346,6 +362,8 @@ defineExpose({
 	checkOutForm,
 	checkOutFieldErrors,
 	checkOutModalVisible,
+	collectVisible,
+	collectTarget,
 	openExtend,
 	submitExtend,
 	extendForm,

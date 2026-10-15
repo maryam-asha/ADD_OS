@@ -97,7 +97,12 @@
 						</div>
 
 						<!-- Right: Primary Action Button -->
-						<div class="shrink-0 flex items-center md:self-center">
+						<div class="shrink-0 flex items-center gap-2 md:self-center">
+							<!-- Money the member hands over for what they owe, entered as given: amount and currency. -->
+							<n-button v-if="summary.outstanding.points > 0" type="warning" secondary size="medium" @click="collectVisible = true">
+								<template #icon><Icon name="carbon:money" :size="16" /></template>
+								{{ t("memberProfile.collect") }}
+							</n-button>
 							<n-button type="primary" size="medium" @click="topUpVisible = true">
 								<template #icon><Icon name="carbon:wallet" :size="16" /></template>
 								{{ t("memberProfile.topUp") }}
@@ -391,6 +396,7 @@
 		</div>
 
 		<WalletTopUpDialog v-model:show="topUpVisible" :member @success="loadSummary" />
+		<CollectPaymentModal v-model:show="collectVisible" :user-id @settled="loadSummary" />
 	</div>
 </template>
 
@@ -415,6 +421,7 @@ import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
 import ProfileTable from "@/add-os/modules/members/components/profile/ProfileTable.vue"
 import WalletTopUpDialog from "@/add-os/modules/members/components/WalletTopUpDialog.vue"
+import CollectPaymentModal from "@/add-os/modules/payments/components/CollectPaymentModal.vue"
 import { ApiError } from "@/add-os/services/api"
 import { listBookings } from "@/add-os/services/booking-calendar"
 import {
@@ -441,6 +448,7 @@ const summary = ref<MemberProfileSummary | null>(null)
 const isLoading = ref(false)
 const loadFailed = ref(false)
 const topUpVisible = ref(false)
+const collectVisible = ref(false)
 const tab = ref("overview")
 
 const member = computed(() => summary.value?.member ?? null)

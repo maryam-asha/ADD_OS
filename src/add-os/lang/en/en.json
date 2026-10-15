@@ -1304,6 +1304,12 @@
 		}
 	},
 	"activeSessions": {
+		"startedVia": {
+			"hint": "How the session began",
+			"reception": "At the desk",
+			"scan": "Kiosk scan",
+			"door": "Door opened"
+		},
 		"description": "Everyone currently checked in, bookings and walk-ins together.",
 		"loadError": "Couldn't load active sessions. You may not have permission to view this page.",
 		"empty": "Nobody is checked in right now.",
@@ -1572,6 +1578,7 @@
 			"individuals": "Individuals",
 			"companies": "Companies",
 			"memberships": "Memberships",
+			"arrivals": "Arrivals",
 			"approvalQueue": "Approval queue",
 			"activeSessions": "Active sessions",
 			"allBookings": "All bookings",
@@ -2629,6 +2636,59 @@
 			"error": "Couldn't activate the membership."
 		}
 	},
+	"collectPayment": {
+		"title": "Collect payment",
+		"loadError": "Could not load what is owed.",
+		"nothingOwed": "Nothing is owed.",
+		"itemLabel": "What the money is for",
+		"due": "Due: {title}",
+		"duePoints": "{points} points",
+		"received": "Amount received",
+		"currency": "Currency",
+		"amountPlaceholder": "Amount as handed over",
+		"changeNote": "Enter the amount and currency exactly as the member paid. Anything over what is due is added to their wallet as points.",
+		"short": "Short of what is due by {amount}",
+		"submit": "Record payment",
+		"success": "Payment recorded.",
+		"successWithChange": "Payment recorded; {points} points added to the member's wallet.",
+		"purpose": {
+			"booking": "Booking",
+			"coworking_session": "Co-working session",
+			"event_registration": "Event registration",
+			"plan_purchase": "Plan"
+		}
+	},
+	"arrivals": {
+		"description": "Today's bookings not yet checked in, and arrival requests from the member app. A booked room starts by itself when its door is opened by QR or its code is activated; anything else starts here.",
+		"loadError": "Couldn't load.",
+		"columns": {
+			"member": "Member",
+			"space": "Space",
+			"time": "Time",
+			"payment": "Payment",
+			"requestedAt": "Requested",
+			"booking": "Booking"
+		},
+		"expected": {
+			"title": "Today's bookings waiting",
+			"empty": "No bookings are waiting for their member.",
+			"checkIn": "Check in",
+			"checkedIn": "Session started.",
+			"opensAt": "Opens {time}"
+		},
+		"requests": {
+			"title": "Arrival requests",
+			"empty": "No arrival requests.",
+			"noBooking": "No booking",
+			"confirm": "Confirm",
+			"reject": "Reject",
+			"confirmed": "Arrival confirmed.",
+			"rejected": "Request rejected.",
+			"walkInTitle": "Start a co-working session",
+			"walkInBody": "This member has no booking today. Choose the co-working space they sit in.",
+			"spacePlaceholder": "Choose a space"
+		}
+	},
 	"memberProfile": {
 		"back": "Back to members",
 		"refresh": "Refresh",
@@ -2636,6 +2696,7 @@
 		"joined": "Member since {date}",
 		"companyAdmin": "admin",
 		"topUp": "Top up wallet",
+		"collect": "Collect dues",
 		"insideNow": "Inside now — {space}, since {time}",
 		"viewSession": "Open session",
 		"details": "Details",

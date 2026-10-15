@@ -95,6 +95,18 @@
 					</div>
 
 					<div class="flex items-center gap-2 text-stone-500 font-medium text-xs sm:text-sm">
+						<!-- A booking waiting for its member starts here, as soon as its check-in window opens. -->
+						<n-button
+							v-if="item.kind === 'booking'"
+							size="small"
+							type="primary"
+							secondary
+							:disabled="!checkInOpen(item)"
+							:loading="checkingIn === item.id"
+							@click.stop="checkIn(item)"
+						>
+							{{ t("arrivals.expected.checkIn") }}
+						</n-button>
 						<span>{{ formatTime(item.at) }}</span>
 						<Icon name="carbon:chevron-right" :size="18" class="rtl:rotate-180" />
 					</div>
@@ -106,12 +118,12 @@
 
 <script setup lang="ts">
 import type { ReceptionSummary } from "@/add-os/modules/booking/types/reception"
-import { NAlert, NButton, NCard, NSpin } from "naive-ui"
+import { NAlert, NButton, NCard, NSpin, useMessage } from "naive-ui"
 import { computed, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import { ApiError } from "@/add-os/services/api"
-import { getReceptionSummary } from "@/add-os/services/reception"
+import { checkInBooking, getReceptionSummary } from "@/add-os/services/reception"
 import { formatDate, formatNumber, formatTime } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
@@ -119,6 +131,7 @@ type UpcomingItem = ReceptionSummary["upcoming"][number]
 
 const { t } = useI18n()
 const router = useRouter()
+const message = useMessage()
 
 const summary = ref<ReceptionSummary | null>(null)
 const isLoading = ref(false)
@@ -139,8 +152,8 @@ const statCards = computed(() => {
 	const stats = summary.value?.stats
 	return [
 		{ key: "active", title: t("reception.stats.activeSessions"), value: stats?.active_sessions ?? 0, icon: "carbon:user", route: "/bookings/active-sessions" },
-		{ key: "expected", title: t("reception.stats.expectedBookings"), value: stats?.expected_bookings ?? 0, icon: "carbon:calendar", route: "/bookings/calendar" },
-		{ key: "arrivals", title: t("reception.stats.pendingGuests"), value: stats?.pending_arrivals ?? 0, icon: "carbon:group", route: "/bookings/active-sessions" },
+		{ key: "expected", title: t("reception.stats.expectedBookings"), value: stats?.expected_bookings ?? 0, icon: "carbon:calendar", route: "/bookings/arrivals" },
+		{ key: "arrivals", title: t("reception.stats.pendingGuests"), value: stats?.pending_arrivals ?? 0, icon: "carbon:group", route: "/bookings/arrivals" },
 		{ key: "endRequests", title: t("reception.stats.pendingEndRequests"), value: stats?.pending_end_requests ?? 0, icon: "carbon:logout", route: "/bookings/close-session" },
 		{ key: "payments", title: t("reception.stats.pendingPayments"), value: stats?.pending_payments ?? 0, icon: "carbon:wallet", route: null }
 	]
@@ -150,10 +163,32 @@ const statCards = computed(() => {
 function open(item: UpcomingItem): void {
 	if (item.kind === "end_request" && item.session) {
 		router.push({ name: "bookings.closeSessionDetail", params: { type: item.session.type, id: item.session.id } })
-	} else if (item.kind === "booking") {
-		router.push("/bookings/calendar")
 	} else {
-		router.push("/bookings/active-sessions")
+		// A booking still to arrive, or a member saying they have: both are handled on the arrivals page.
+		router.push("/bookings/arrivals")
+	}
+}
+
+/** BookingCheckInService::EARLY_CHECK_IN_MINUTES: no check-in sooner than this before the start. */
+const EARLY_CHECK_IN_MINUTES = 15
+
+function checkInOpen(item: UpcomingItem): boolean {
+	return new Date(item.at).getTime() - EARLY_CHECK_IN_MINUTES * 60_000 <= Date.now()
+}
+
+const checkingIn = ref<number | null>(null)
+
+async function checkIn(item: UpcomingItem): Promise<void> {
+	checkingIn.value = item.id
+	try {
+		const result = await checkInBooking(item.id)
+		message.success(result.message ?? t("arrivals.expected.checkedIn"))
+		await load()
+	} catch (caught) {
+		if (!(caught instanceof ApiError)) throw caught
+		message.error(caught.data?.message ?? t("resourceCrud.mutations.genericError"))
+	} finally {
+		checkingIn.value = null
 	}
 }
 

@@ -45,6 +45,7 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"address.privateOfficeRequests": () => import("@/add-os/modules/members/views/PrivateOfficeRequestsPage.vue"),
 	"address.operationsRequests": () => import("@/add-os/modules/operations/views/OperationsRequestsPage.vue"),
 	"bookings.receptionDesk": () => import("@/add-os/modules/reception/views/ReceptionDeskPage.vue"),
+	"bookings.arrivals": () => import("@/add-os/modules/booking/views/ArrivalsPage.vue"),
 	"bookings.approvalQueue": () => import("@/add-os/modules/booking/views/ApprovalQueuePage.vue"),
 	"bookings.activeSessions": () => import("@/add-os/modules/booking/views/ActiveSessionsPage.vue"),
 	"bookings.closeSession": () => import("@/add-os/modules/booking/views/CloseSessionPage.vue"),

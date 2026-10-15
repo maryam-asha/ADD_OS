@@ -25,6 +25,8 @@ vi.mock("@/add-os/services/reception", () => ({
 	getReceptionSummary: getReceptionSummaryMock
 }))
 
+vi.mock("@/add-os/modules/payments/components/CollectPaymentModal.vue", () => ({ default: { name: "CollectPaymentModal", props: ["show", "userId", "focus"], emits: ["update:show"], render: () => null } }))
+
 vi.mock("vue-router", async () => {
 	const actual = await vi.importActual<typeof import("vue-router")>("vue-router")
 	return { ...actual, useRouter: () => ({ push: pushMock }), useRoute: () => ({ params: routeParams }) }
@@ -112,8 +114,14 @@ describe("end requests", () => {
 		wrapper.unmount()
 	})
 
-	it("ends a cash request with the money in hand in one step", async () => {
+	/**
+	 * The session is ended unpaid, then the money is entered as it was handed
+	 * over — amount and currency — in the collect dialog, never recorded as
+	 * exactly what is due in the base currency.
+	 */
+	it("ends a cash request, then collects the money as handed over", async () => {
 		getSessionReportMock.mockResolvedValue(report("cash"))
+		confirmSessionEndMock.mockResolvedValue({ message: "Session ended. Payment is still due.", data: { payment_state: "unpaid", price_points: 200, amount_owed: "20.00" } })
 		const wrapper = mountWith(CloseSessionDetailPage)
 		await flushPromises()
 
@@ -124,8 +132,15 @@ describe("end requests", () => {
 		await button!.trigger("click")
 		await flushPromises()
 
-		expect(confirmSessionEndMock).toHaveBeenCalledWith(11, true)
-		expect(successMock).toHaveBeenCalledWith("Session ended and paid.")
+		expect(confirmSessionEndMock).toHaveBeenCalledWith(11, false)
+		const modal = wrapper.findComponent({ name: "CollectPaymentModal" })
+		expect(modal.props("show")).toBe(true)
+		expect(modal.props("userId")).toBe(3)
+		expect(modal.props("focus")).toEqual({ purpose: "coworking_session", id: 7 })
+		expect(pushMock).not.toHaveBeenCalled()
+
+		modal.vm.$emit("update:show", false)
+		await flushPromises()
 		expect(pushMock).toHaveBeenCalledWith({ name: "bookings.closeSession" })
 
 		wrapper.unmount()

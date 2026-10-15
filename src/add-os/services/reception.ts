@@ -2,11 +2,13 @@ import type { Paginated, RawPaginatedResponse } from "./pagination"
 import type { MessageResponse } from "./resource-factory"
 import type {
 	ActiveSession,
+	ArrivalRequest,
 	BookingExtensionOptions,
 	CheckOutSessionPayload,
 	ConfirmSessionEndResponse,
 	CreateReceptionBookingPayload,
 	ExtendBookingPayload,
+	OutstandingSummary,
 	PendingApprovalBooking,
 	QuoteReceptionBookingPayload,
 	ReceptionBookingQuote,
@@ -14,6 +16,8 @@ import type {
 	ReceptionSummary,
 	RejectBookingPayload,
 	SessionType,
+	SettleAtReceptionPayload,
+	SettleAtReceptionResult,
 	SettlePaymentPayload
 } from "@/add-os/modules/booking/types/reception"
 import type { PaymentMethod } from "@/add-os/modules/payments/types/wallet-top-up"
@@ -101,6 +105,33 @@ export async function listActiveSessions(): Promise<ActiveSession[]> {
 	return rowsOf<ActiveSession>(raw.data)
 }
 
+/**
+ * Starts a booking's session at the desk. 409 `{message}` when it cannot start
+ * yet or any more: awaiting approval or payment, more than 15 minutes early,
+ * already ended, already checked in; 422 outside business hours.
+ */
+export async function checkInBooking(id: number): Promise<MessageResponse> {
+	return post<MessageResponse>(`${BASE}/bookings/${id}/check-in`)
+}
+
+/** Members who pressed "I have arrived" in the app, oldest first. */
+export async function listArrivalRequests(query?: Record<string, unknown>): Promise<Paginated<ArrivalRequest>> {
+	const raw = await get<RawPaginatedResponse<ArrivalRequest>>(`${BASE}/arrival-requests`, query)
+	return toPaginated(raw)
+}
+
+/**
+ * Checks the matched booking in, or — with no booking — starts a walk-in on
+ * `spaceId`, which is then required (422 without it).
+ */
+export async function confirmArrivalRequest(id: number, spaceId?: number): Promise<MessageResponse> {
+	return post<MessageResponse>(`${BASE}/arrival-requests/${id}/confirm`, spaceId === undefined ? undefined : { space_id: spaceId })
+}
+
+export async function rejectArrivalRequest(id: number): Promise<MessageResponse> {
+	return post<MessageResponse>(`${BASE}/arrival-requests/${id}/reject`)
+}
+
 /** 409 `{message}` when the booking is already confirmed, rejected or cancelled. */
 export async function approveBooking(id: number): Promise<MessageResponse> {
 	return post<MessageResponse>(`${BASE}/bookings/${id}/approve`)
@@ -154,6 +185,23 @@ export async function checkOutSession(type: SessionType, id: number, checkedOutA
 export async function settleSessionPayment(type: SessionType, id: number, paymentMethod: PaymentMethod): Promise<MessageResponse> {
 	const payload: SettlePaymentPayload = { payment_method: paymentMethod }
 	return post<MessageResponse>(`${sessionPrefix(type)}/${id}/settle-payment`, payload)
+}
+
+/** Everything one member owes, priced in `currency`. */
+export async function getOutstanding(userId: number, currency: string): Promise<OutstandingSummary> {
+	const res = await get<{ data: OutstandingSummary }>(`${BASE}/outstanding`, { user_id: userId, currency })
+	return res.data
+}
+
+/**
+ * Settles one owed item with the money as it was handed over — any amount, in
+ * any currency the desk takes. Unlike `settleSessionPayment`, which records
+ * exactly what is due in the base currency, this keeps what was actually
+ * received, so the drawer counts per currency come out right.
+ */
+export async function settleAtReception(payload: SettleAtReceptionPayload): Promise<SettleAtReceptionResult> {
+	const res = await post<{ data: SettleAtReceptionResult }>(`${BASE}/payments/settle`, payload)
+	return res.data
 }
 
 /** The desk's day: counts, and what needs it next. */

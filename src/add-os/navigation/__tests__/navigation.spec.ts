@@ -1,6 +1,6 @@
 import type { RouteRecordRaw } from "vue-router"
-import { describe, expect, it } from "vitest"
 import { createPinia, setActivePinia } from "pinia"
+import { describe, expect, it } from "vitest"
 import ComingSoon from "@/add-os/views/ComingSoon.vue"
 import getItems from "@/app-layouts/common/Navbar/items"
 import { useAuthStore } from "@/stores/auth"
@@ -186,4 +186,3 @@ describe("sidebar menu items", () => {
 		expect((spatialItem as { children?: unknown[] }).children?.length).toBeGreaterThan(0)
 	})
 })
-
