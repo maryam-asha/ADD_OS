@@ -44,6 +44,12 @@ export interface NavPage {
 	 */
 	hidden?: boolean
 	permission?: string
+	/**
+	 * Iconify name drawn beside the page in the sidebar. Optional: most pages
+	 * carry none and read by their label alone; it marks pages a quick glance
+	 * should tell apart, like the app's content pages. Bundled like any icon.
+	 */
+	icon?: string
 }
 
 export interface NavSection {
@@ -274,8 +280,8 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "founders", path: "founders" },
 			{ key: "contactLinks", path: "contact-links" },
 			{ key: "notifications", path: "notifications" },
-			{ key: "termsOfUse", path: "terms-of-use" },
-			{ key: "helpSupport", path: "help-support" }
+			{ key: "termsOfUse", path: "terms-of-use", icon: "carbon:document-tasks" },
+			{ key: "helpSupport", path: "help-support", icon: "carbon:help" }
 		]
 	},
 	{

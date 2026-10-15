@@ -38,6 +38,7 @@ function pageOption(section: NavSection, page: NavPage): MenuMixedOption {
 
 	return {
 		key: name,
+		icon: page.icon ? renderIcon(page.icon) : undefined,
 		label: () =>
 			h(
 				RouterLink,
