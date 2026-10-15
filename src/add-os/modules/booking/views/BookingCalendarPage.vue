@@ -152,6 +152,18 @@
 		/>
 
 		<n-card class="add-calendar-card">
+			<!--
+				Bookings of rooms and spaces, and companies' office leases, on
+				separate views: a lease holds its office every day, and drawn among
+				the bookings it filled each day with "Leased" marks that pushed the
+				bookings themselves behind "+N".
+			-->
+			<div class="mb-4 flex justify-center">
+				<n-radio-group v-model:value="calendarMode" size="medium" :aria-label="t('bookingCalendar.mode.label')">
+					<n-radio-button value="bookings">{{ t("bookingCalendar.mode.bookings") }}</n-radio-button>
+					<n-radio-button value="leases">{{ t("bookingCalendar.mode.leases") }}</n-radio-button>
+				</n-radio-group>
+			</div>
 			<n-spin :show="isLoading">
 				<div class="add-calendar-wrap">
 					<FullCalendar ref="refCalendar" :options="calendarOptions" />
@@ -159,11 +171,13 @@
 
 				<div class="mt-4 flex flex-wrap items-center gap-4 text-xs">
 					<span class="font-semibold opacity-80">{{ t("bookingCalendar.legend.title") }}:</span>
-					<span v-for="status in LEGEND_STATUSES" :key="status" class="flex items-center gap-2">
-						<span class="add-legend-swatch" :class="`c-${status}`" />
-						<span class="font-medium">{{ status === "ended" ? t("bookingCalendar.legend.ended") : t(`allBookings.status.${status}`) }}</span>
-					</span>
-					<span class="flex items-center gap-2">
+					<template v-if="calendarMode === 'bookings'">
+						<span v-for="status in LEGEND_STATUSES" :key="status" class="flex items-center gap-2">
+							<span class="add-legend-swatch" :class="`c-${status}`" />
+							<span class="font-medium">{{ status === "ended" ? t("bookingCalendar.legend.ended") : t(`allBookings.status.${status}`) }}</span>
+						</span>
+					</template>
+					<span v-else class="flex items-center gap-2">
 						<span class="add-legend-swatch c-leased" />
 						<span class="font-medium">{{ t("bookingCalendar.legend.leased") }}</span>
 					</span>
@@ -520,6 +534,7 @@ import {
 	NInput,
 	NModal,
 	NRadio,
+	NRadioButton,
 	NRadioGroup,
 	NSelect,
 	NSpin,
@@ -535,7 +550,7 @@ import { ApiError } from "@/add-os/services/api"
 import { getCalendar, getSpaceSlots } from "@/add-os/services/booking-calendar"
 import { listMembers } from "@/add-os/services/members"
 import { createReceptionBooking, quoteReceptionBooking } from "@/add-os/services/reception"
-import { formatClockTime, formatCurrency, formatDate, formatDateTime, formatNumber, formatTime, isCurrencyCode } from "@/add-os/utils/format"
+import { formatClockTime, formatDate, formatDateTime, formatNumber, formatTime } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
 /**
@@ -857,29 +872,45 @@ function openFromDayList(item: DayListItem): void {
 // Events
 // ---------------------------------------------------------------
 
+/** Bookings of rooms and spaces, or companies' office leases: never both at once. */
+const calendarMode = ref<"bookings" | "leases">("bookings")
+
+/** The day after a `YYYY-MM-DD` date: FullCalendar's all-day `end` is exclusive. */
+function dayAfter(date: string): string {
+	const next = new Date(`${date}T00:00:00Z`)
+	next.setUTCDate(next.getUTCDate() + 1)
+	return next.toISOString().slice(0, 10)
+}
+
 const events = computed<EventInput[]>(() => {
 	const out: EventInput[] = []
 	const closedDates = new Set<string>()
+	const showLeases = calendarMode.value === "leases"
 
 	for (const resource of response.value?.resources ?? []) {
 		const spaceName = resource.space.title ?? spaceTypeLabel(t, resource.space.space_type)
 
+		// One bar per lease, across its whole term, named for the company holding it.
+		if (showLeases) {
+			for (const lease of resource.leases ?? []) {
+				out.push({
+					id: `lease-${lease.id}`,
+					title: [spaceName, lease.company].filter(Boolean).join(" · "),
+					start: lease.starts_on,
+					end: dayAfter(lease.ends_on),
+					allDay: true,
+					classNames: ["c-leased", "styled"],
+					extendedProps: { spaceName, isLeased: true, company: lease.company }
+				})
+			}
+		}
+
 		for (const day of resource.days) {
 			if (day.state === "closed") {
 				closedDates.add(day.date)
-			} else if (day.state === "leased") {
-				out.push({
-					id: `leased-${resource.space.id}-${day.date}`,
-					title: `${spaceName} · ${t("bookingCalendar.legend.leased")}`,
-					start: day.date,
-					allDay: true,
-					classNames: ["c-leased", "styled"],
-					extendedProps: {
-						spaceName,
-						isLeased: true
-					}
-				})
 			}
+
+			if (showLeases) continue
 
 			for (const booking of day.bookings) {
 				out.push({
@@ -1354,6 +1385,8 @@ const canSubmit = computed(
  * Resets the create form state cleanly when the dialog is closed,
  * ensuring no stale member, space, time range, note, or errors linger.
  */
+const slotsGridRef = ref<HTMLElement | null>(null)
+
 function resetCreateForm(): void {
 	createErrors.value = {}
 	createForm.value.user_id = null
@@ -1479,8 +1512,6 @@ function selectSlot(slot: AvailabilitySlot): void {
 		createForm.value.to = slot.start_time
 	}
 }
-
-const slotsGridRef = ref<HTMLElement | null>(null)
 
 // A new space or date invalidates the chosen run: the cells free on Tuesday
 // say nothing about Wednesday.

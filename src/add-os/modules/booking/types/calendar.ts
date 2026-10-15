@@ -30,7 +30,8 @@ import type { SpaceType } from "@/add-os/modules/spatial/types/space"
  */
 
 /** Whether the branch was open on a calendar cell's date. */
-export type CalendarDayState = "open" | "closed"
+/** `leased`: a company holds the office all day, so nothing can be booked on it. */
+export type CalendarDayState = "open" | "closed" | "leased"
 
 /** Which period the calendar spans. `week` runs Sunday–Saturday. */
 export type CalendarView = "day" | "week" | "month"
@@ -143,9 +144,21 @@ export interface CalendarSpace {
 }
 
 /** One row of the calendar: a space, and a cell per day in the range. */
+/** A company's lease on an office, whole: `ends_on` is its last day with access. */
+export interface CalendarLease {
+	id: number
+	company: string | null
+	/** District-local dates, `YYYY-MM-DD`, both inclusive. */
+	starts_on: string
+	ends_on: string
+	status: string
+}
+
 export interface CalendarResource {
 	space: CalendarSpace
 	days: CalendarDay[]
+	/** The leases holding this office over the range; empty for anything else. */
+	leases?: CalendarLease[]
 }
 
 /** One day the branch is closed all day. */

@@ -1402,6 +1402,11 @@
 		}
 	},
 	"bookingCalendar": {
+		"mode": {
+			"label": "What the calendar shows",
+			"bookings": "Bookings",
+			"leases": "Office leases"
+		},
 		"description": "Which spaces are booked, and how full each day is. Read-only — act on a booking from the reception desk.",
 		"loadError": "Couldn't load the calendar. You may not have permission to view this page.",
 		"empty": "No active spaces match these filters.",

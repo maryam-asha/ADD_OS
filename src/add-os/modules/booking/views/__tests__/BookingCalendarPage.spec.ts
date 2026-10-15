@@ -578,6 +578,49 @@ describe("bookingCalendarPage", () => {
 		expect(background[0].classNames).toContain("c-closed")
 	})
 
+	/**
+	 * A lease holds its office every day; drawn among the bookings it put a
+	 * "Leased" mark on every day of every leased office and pushed the
+	 * bookings behind "+N". Leases have their own view, one bar each.
+	 */
+	describe("office leases", () => {
+		function leasedResponse() {
+			return response({
+				resources: [
+					response().resources[0],
+					{
+						space: { id: 2, title: "Office 1", space_type: "business" as const, capacity: 4, concurrency_ceiling: 1, status: "active", requires_approval: false },
+						days: [day({ state: "leased", bookings: [] })],
+						leases: [{ id: 5, company: "Acme", starts_on: "2026-08-01", ends_on: "2026-10-31", status: "active" }]
+					}
+				]
+			})
+		}
+
+		it("keeps leases off the bookings view", async () => {
+			getCalendarMock.mockResolvedValue(leasedResponse())
+
+			mountPage()
+			await navigate("dayGridMonth", "2026-08-01", "2026-09-01")
+
+			const drawn = (lastOptions!.events as EventInput[]).filter(event => event.display !== "background")
+			expect(drawn.map(event => event.id)).toEqual(["9"])
+		})
+
+		it("draws each lease once, across its whole term, on the leases view", async () => {
+			getCalendarMock.mockResolvedValue(leasedResponse())
+
+			const wrapper = mountPage()
+			await navigate("dayGridMonth", "2026-08-01", "2026-09-01")
+			await wrapper.find("input[value=\"leases\"]").trigger("change")
+			await flushPromises()
+
+			const drawn = (lastOptions!.events as EventInput[]).filter(event => event.display !== "background")
+			expect(drawn).toHaveLength(1)
+			expect(drawn[0]).toMatchObject({ id: "lease-5", title: "Office 1 · Acme", start: "2026-08-01", end: "2026-11-01", allDay: true })
+		})
+	})
+
 	it("shows the branch hours card from the server, including its derived timezone label", async () => {
 		const wrapper = mountPage()
 		await flushPromises()
