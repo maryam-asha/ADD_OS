@@ -15,6 +15,7 @@
 					type="button"
 					class="editor-btn font-bold text-xs"
 					:title="t('markdown.h1', 'عنوان رئيسي H1')"
+					@mousedown.prevent
 					@click="applyPrefix('# ')"
 				>
 					H1
@@ -23,6 +24,7 @@
 					type="button"
 					class="editor-btn font-bold text-xs"
 					:title="t('markdown.h2', 'عنوان فرعي H2')"
+					@mousedown.prevent
 					@click="applyPrefix('## ')"
 				>
 					H2
@@ -31,6 +33,7 @@
 					type="button"
 					class="editor-btn font-bold text-xs"
 					:title="t('markdown.h3', 'عنوان صغير H3')"
+					@mousedown.prevent
 					@click="applyPrefix('### ')"
 				>
 					H3
@@ -43,6 +46,7 @@
 					type="button"
 					class="editor-btn font-bold"
 					:title="t('markdown.bold', 'غامق (Ctrl+B)')"
+					@mousedown.prevent
 					@click="applyWrap('**', '**', t('markdown.boldPlaceholder', 'نص عريض'))"
 				>
 					<Icon name="carbon:text-bold" :size="15" />
@@ -51,6 +55,7 @@
 					type="button"
 					class="editor-btn italic"
 					:title="t('markdown.italic', 'مائل (Ctrl+I)')"
+					@mousedown.prevent
 					@click="applyWrap('*', '*', t('markdown.italicPlaceholder', 'نص مائل'))"
 				>
 					<Icon name="carbon:text-italic" :size="15" />
@@ -59,6 +64,7 @@
 					type="button"
 					class="editor-btn"
 					:title="t('markdown.strikethrough', 'مشطوب')"
+					@mousedown.prevent
 					@click="applyWrap('~~', '~~', t('markdown.strikePlaceholder', 'نص مشطوب'))"
 				>
 					<Icon name="carbon:text-strikethrough" :size="15" />
@@ -71,6 +77,7 @@
 					type="button"
 					class="editor-btn"
 					:title="t('markdown.bulletList', 'قائمة نقطية')"
+					@mousedown.prevent
 					@click="applyPrefix('- ')"
 				>
 					<Icon name="carbon:list-bulleted" :size="15" />
@@ -79,6 +86,7 @@
 					type="button"
 					class="editor-btn"
 					:title="t('markdown.numberedList', 'قائمة مرقمة')"
+					@mousedown.prevent
 					@click="applyPrefix('1. ')"
 				>
 					<Icon name="carbon:list-numbered" :size="15" />
@@ -87,6 +95,7 @@
 					type="button"
 					class="editor-btn"
 					:title="t('markdown.taskList', 'قائمة مهام')"
+					@mousedown.prevent
 					@click="applyPrefix('- [ ] ')"
 				>
 					<Icon name="carbon:list-checked" :size="15" />
@@ -99,6 +108,7 @@
 					type="button"
 					class="editor-btn"
 					:title="t('markdown.quote', 'اقتباس')"
+					@mousedown.prevent
 					@click="applyPrefix('> ')"
 				>
 					<Icon name="carbon:quotes" :size="15" />
@@ -107,6 +117,7 @@
 					type="button"
 					class="editor-btn font-mono"
 					:title="t('markdown.code', 'شيفرة برمجية')"
+					@mousedown.prevent
 					@click="applyCode"
 				>
 					<Icon name="carbon:code" :size="15" />
@@ -119,6 +130,7 @@
 					type="button"
 					class="editor-btn"
 					:title="t('markdown.link', 'إدراج رابط')"
+					@mousedown.prevent
 					@click="insertLink"
 				>
 					<Icon name="carbon:link" :size="15" />
@@ -127,6 +139,7 @@
 					type="button"
 					class="editor-btn"
 					:title="t('markdown.table', 'إدراج جدول')"
+					@mousedown.prevent
 					@click="insertTable"
 				>
 					<Icon name="carbon:data-table" :size="15" />
@@ -140,6 +153,7 @@
 					class="mode-btn"
 					:class="{ active: viewMode === 'edit' }"
 					:title="t('markdown.editMode', 'تحرير')"
+					@mousedown.prevent
 					@click="viewMode = 'edit'"
 				>
 					<Icon name="carbon:edit" :size="13" />
@@ -150,6 +164,7 @@
 					class="mode-btn"
 					:class="{ active: viewMode === 'split' }"
 					:title="t('markdown.splitMode', 'مقسم')"
+					@mousedown.prevent
 					@click="viewMode = 'split'"
 				>
 					<span class="text-xs">{{ t('markdown.split', 'مقسم') }}</span>
@@ -159,6 +174,7 @@
 					class="mode-btn"
 					:class="{ active: viewMode === 'preview' }"
 					:title="t('markdown.previewMode', 'معاينة')"
+					@mousedown.prevent
 					@click="viewMode = 'preview'"
 				>
 					<Icon name="carbon:view" :size="13" />
@@ -181,12 +197,12 @@
 					ref="textareaRef"
 					v-model="model"
 					:placeholder="placeholder || t('markdown.placeholder', 'اكتب هنا باستخدام Markdown...')"
-					:rows="rows"
-					:disabled="disabled"
-					:readonly="readonly"
+					:rows
+					:disabled
+					:readonly
 					dir="auto"
 					class="h-full w-full resize-y bg-transparent p-3.5 text-sm font-sans leading-relaxed text-[var(--add-text-primary,#43474F)] outline-hidden dark:text-neutral-200 placeholder:text-neutral-400 dark:placeholder:text-neutral-600"
-					:style="{ minHeight: minHeight }"
+					:style="{ minHeight }"
 					@keydown="handleKeydown"
 				/>
 			</div>
@@ -195,7 +211,7 @@
 			<div
 				v-show="viewMode === 'preview' || viewMode === 'split'"
 				class="preview-container overflow-y-auto p-4 bg-[var(--add-surface,#F7F5F2)]/20 dark:bg-neutral-900/30"
-				:style="{ minHeight: minHeight, maxHeight: viewMode === 'split' ? maxHeight : 'auto' }"
+				:style="{ minHeight, maxHeight: viewMode === 'split' ? maxHeight : 'auto' }"
 			>
 				<MarkdownViewer :content="model" :empty-text="t('markdown.emptyPreview', 'المعاينة فارغة... اكتب نصاً للبدء')" />
 			</div>
@@ -272,12 +288,58 @@ const wordCount = computed(() => {
 })
 
 /**
+ * Captures all scroll states (window, textarea, and all parent scroll containers)
+ * so applying formatting never causes page or container scroll jumps.
+ */
+function captureScrollContext(el: HTMLTextAreaElement) {
+	const textareaScrollTop = el.scrollTop
+	const textareaScrollLeft = el.scrollLeft
+	const winX = typeof window !== "undefined" ? window.scrollX : 0
+	const winY = typeof window !== "undefined" ? window.scrollY : 0
+
+	const scrollParents: { el: HTMLElement; top: number; left: number }[] = []
+	if (typeof window !== "undefined") {
+		let curr = el.parentElement
+		while (curr && curr !== document.body) {
+			const style = window.getComputedStyle(curr)
+			if (/auto|scroll/.test(style.overflow + style.overflowY + style.overflowX)) {
+				scrollParents.push({ el: curr, top: curr.scrollTop, left: curr.scrollLeft })
+			}
+			curr = curr.parentElement
+		}
+	}
+
+	return {
+		restore(start: number, end: number) {
+			nextTick(() => {
+				try {
+					el.focus({ preventScroll: true })
+				} catch {
+					el.focus()
+				}
+				el.setSelectionRange(start, end)
+				el.scrollTop = textareaScrollTop
+				el.scrollLeft = textareaScrollLeft
+				for (const sp of scrollParents) {
+					sp.el.scrollTop = sp.top
+					sp.el.scrollLeft = sp.left
+				}
+				if (typeof window !== "undefined" && (window.scrollX !== winX || window.scrollY !== winY)) {
+					window.scrollTo(winX, winY)
+				}
+			})
+		}
+	}
+}
+
+/**
  * Wraps selected text with prefix and suffix, or inserts sample text
  */
 function applyWrap(prefix: string, suffix: string, defaultText = "") {
 	const el = textareaRef.value
 	if (!el) return
 
+	const scroll = captureScrollContext(el)
 	const start = el.selectionStart
 	const end = el.selectionEnd
 	const fullText = model.value
@@ -288,11 +350,9 @@ function applyWrap(prefix: string, suffix: string, defaultText = "") {
 
 	model.value = newContent
 
-	nextTick(() => {
-		el.focus()
-		const newCursor = start + prefix.length + insert.length
-		el.setSelectionRange(start + prefix.length, newCursor)
-	})
+	const newStart = start + prefix.length
+	const newEnd = newStart + insert.length
+	scroll.restore(newStart, newEnd)
 }
 
 /**
@@ -302,6 +362,7 @@ function applyPrefix(prefix: string) {
 	const el = textareaRef.value
 	if (!el) return
 
+	const scroll = captureScrollContext(el)
 	const start = el.selectionStart
 	const end = el.selectionEnd
 	const fullText = model.value
@@ -316,10 +377,8 @@ function applyPrefix(prefix: string) {
 
 	model.value = newContent
 
-	nextTick(() => {
-		el.focus()
-		el.setSelectionRange(start + prefix.length, start + prefix.length)
-	})
+	const newPos = start + prefix.length
+	scroll.restore(newPos, newPos)
 }
 
 /**
@@ -349,6 +408,7 @@ function insertLink() {
 	const el = textareaRef.value
 	if (!el) return
 
+	const scroll = captureScrollContext(el)
 	const start = el.selectionStart
 	const end = el.selectionEnd
 	const selected = model.value.substring(start, end)
@@ -359,20 +419,16 @@ function insertLink() {
 	const fullText = model.value
 	model.value = fullText.substring(0, start) + linkTemplate + fullText.substring(end)
 
-	nextTick(() => {
-		el.focus()
-		// Highlight the URL part so the user can easily replace it
-		const urlStart = start + label.length + 3
-		const urlEnd = urlStart + 19
-		el.setSelectionRange(urlStart, urlEnd)
-	})
+	const urlStart = start + label.length + 3
+	const urlEnd = urlStart + 19
+	scroll.restore(urlStart, urlEnd)
 }
 
 /**
  * Inserts a sample Markdown table
  */
 function insertTable() {
-	const tableSnippet = "\n| " + t("markdown.col1", "العمود 1") + " | " + t("markdown.col2", "العمود 2") + " |\n| --- | --- |\n| " + t("markdown.val1", "بيانات 1") + " | " + t("markdown.val2", "بيانات 2") + " |\n"
+	const tableSnippet = `\n| ${t("markdown.col1", "العمود 1")} | ${t("markdown.col2", "العمود 2")} |\n| --- | --- |\n| ${t("markdown.val1", "بيانات 1")} | ${t("markdown.val2", "بيانات 2")} |\n`
 	applyWrap("", tableSnippet)
 }
 
@@ -396,12 +452,11 @@ function handleKeydown(e: KeyboardEvent) {
 		e.preventDefault()
 		const el = textareaRef.value
 		if (!el) return
+		const scroll = captureScrollContext(el)
 		const start = el.selectionStart
 		const end = el.selectionEnd
-		model.value = model.value.substring(0, start) + "  " + model.value.substring(end)
-		nextTick(() => {
-			el.setSelectionRange(start + 2, start + 2)
-		})
+		model.value = `${model.value.substring(0, start)}  ${model.value.substring(end)}`
+		scroll.restore(start + 2, start + 2)
 	}
 }
 </script>
