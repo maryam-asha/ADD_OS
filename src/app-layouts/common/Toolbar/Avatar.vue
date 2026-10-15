@@ -27,6 +27,7 @@ import { renderIcon } from "@/utils"
  *
  * The label is now an i18n key and lives in a computed, so it follows the language.
  */
+const ProfileIcon = "carbon:user-avatar"
 const LogoutIcon = "ion:log-out-outline"
 const router = useRouter()
 const { t } = useI18n()
@@ -34,6 +35,11 @@ const authStore = useAuthStore()
 const message = useMessage()
 
 const options = computed(() => [
+	{
+		label: t("account.profile.title", "الملف الشخصي"),
+		key: "route-settings.accountSecurity",
+		icon: renderIcon(ProfileIcon)
+	},
 	{
 		label: t("common.logout"),
 		key: "route-Logout",
