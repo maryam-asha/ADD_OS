@@ -1,8 +1,11 @@
 import { flushPromises, mount } from "@vue/test-utils"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { createI18n } from "vue-i18n"
+import { registerLocalIcons } from "@/add-os/assets/icons"
 import en from "@/add-os/lang/en/en.json"
 import DiscountReportPage from "../DiscountReportPage.vue"
+
+registerLocalIcons()
 
 const { reportMock } = vi.hoisted(() => ({ reportMock: vi.fn() }))
 vi.mock("@/add-os/services/discount-report", () => ({ getDiscountReport: reportMock }))
