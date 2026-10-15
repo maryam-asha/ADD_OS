@@ -3040,10 +3040,12 @@
 		"description": "Every operation with an offer, a plan discount, a coupon or a package saving in the period, and its status. Cancelled, rejected, failed or reversed ones are listed but not counted.",
 		"refresh": "Refresh",
 		"loadError": "Could not load the report.",
+		"empty": "No operations recorded for the selected filters.",
 		"filters": {
 			"kind": "Kind",
 			"purpose": "Purchase",
-			"status": "Status"
+			"status": "Status",
+			"reset": "Reset filters"
 		},
 		"kind": {
 			"offer": "Offer",
