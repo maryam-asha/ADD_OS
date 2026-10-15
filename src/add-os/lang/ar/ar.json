@@ -1610,6 +1610,7 @@
 			"founders": "المؤسسون",
 			"contactLinks": "روابط التواصل",
 			"notifications": "إرسال إشعار عام",
+			"termsOfUse": "شروط الاستخدام",
 			"accountSecurity": "الحساب والأمان",
 			"systemSettings": "إعدادات النظام",
 			"eventCategories": "فئات الفعاليات",
@@ -4168,5 +4169,23 @@
 		"emptyPreview": "المعاينة فارغة. اكتب في التحرير لرؤية النتيجة المنسقة.",
 		"words": "كلمة",
 		"chars": "حرف"
+	},
+	"termsOfUse": {
+		"title": "شروط الاستخدام",
+		"subtitle": "إدارة شروط استخدام التطبيق بالعربية والإنجليزية بصيغة Markdown.",
+		"loadError": "تعذر تحميل شروط الاستخدام. يرجى المحاولة مرة أخرى.",
+		"saveSuccess": "تم حفظ شروط الاستخدام بنجاح.",
+		"saveError": "تعذر حفظ شروط الاستخدام.",
+		"saveButton": "حفظ التعديلات",
+		"refresh": "تحديث",
+		"retry": "إعادة المحاولة",
+		"arabicTab": "العربية",
+		"englishTab": "الإنجليزية",
+		"sideBySideTab": "عرض متجاور",
+		"unsavedChanges": "يوجد تعديلات غير محفوظة",
+		"allSaved": "تم حفظ جميع التعديلات",
+		"lastUpdated": "آخر تحديث",
+		"arPlaceholder": "اكتب شروط الاستخدام بالعربية بصيغة Markdown...",
+		"enPlaceholder": "اكتب شروط الاستخدام بالإنجليزية بصيغة Markdown..."
 	}
 }

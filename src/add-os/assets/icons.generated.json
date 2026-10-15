@@ -207,6 +207,9 @@
 			"document-multiple-01": {
 				"body": "<path fill=\"currentColor\" d=\"M2 6h2v20H2zm4-2h2v24H6zm8 18h12v2H14zm0-6h12v2H14z\"/><path fill=\"currentColor\" d=\"m29.7 9.3l-7-7c-.2-.2-.4-.3-.7-.3H12c-1.1 0-2 .9-2 2v24c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V10c0-.3-.1-.5-.3-.7M22 4.4l5.6 5.6H22zM28 28H12V4h8v6c0 1.1.9 2 2 2h6z\"/>"
 			},
+			"document-tasks": {
+				"body": "<path fill=\"currentColor\" d=\"m22 27.18l-2.59-2.59L18 26l4 4l8-8l-1.41-1.41z\"/><path fill=\"currentColor\" d=\"M15 28H8V4h8v6a2.006 2.006 0 0 0 2 2h6v6h2v-8a.91.91 0 0 0-.3-.7l-7-7A.9.9 0 0 0 18 2H8a2.006 2.006 0 0 0-2 2v24a2.006 2.006 0 0 0 2 2h7Zm3-23.6l5.6 5.6H18Z\"/>"
+			},
 			"download": {
 				"body": "<path fill=\"currentColor\" d=\"M26 24v4H6v-4H4v4a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2v-4Zm0-10l-1.41-1.41L17 20.17V2h-2v18.17l-7.59-7.58L6 14l10 10z\"/>"
 			},

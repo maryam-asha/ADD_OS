@@ -273,7 +273,8 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "partners", path: "partners" },
 			{ key: "founders", path: "founders" },
 			{ key: "contactLinks", path: "contact-links" },
-			{ key: "notifications", path: "notifications" }
+			{ key: "notifications", path: "notifications" },
+			{ key: "termsOfUse", path: "terms-of-use" }
 		]
 	},
 	{

@@ -83,6 +83,7 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"cms.founders": () => import("@/add-os/modules/cms/views/FoundersPage.vue"),
 	"cms.contactLinks": () => import("@/add-os/modules/cms/views/ContactLinksPage.vue"),
 	"cms.notifications": () => import("@/add-os/modules/cms/views/NotificationsPage.vue"),
+	"cms.termsOfUse": () => import("@/add-os/modules/cms/views/TermsOfUsePage.vue"),
 	"providers.list": () => import("@/add-os/modules/providers/views/ProvidersListPage.vue"),
 	"providers.requests": () => import("@/add-os/modules/providers/views/ProviderRequestsPage.vue"),
 	"providerPortal.summary": () => import("@/add-os/modules/provider-portal/views/ProviderSummaryPage.vue"),
