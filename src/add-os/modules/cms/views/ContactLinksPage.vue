@@ -33,7 +33,7 @@
 		<ResourceFormDrawer
 			v-model:show="drawerVisible"
 			v-model:model="form"
-			:fields="contactLinkFields"
+			:fields
 			:title="mode === 'create' ? t('contactLinks.create.title') : t('contactLinks.edit.title')"
 			:submitting="mutations.isSubmitting.value"
 			:on-submit="submit"
@@ -52,7 +52,7 @@ import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vu
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
-import { buildContactLinkColumns, contactLinkFields, emptyContactLinkPayload } from "@/add-os/modules/cms/config/contact-links.config"
+import { buildContactLinkColumns, buildContactLinkFields, emptyContactLinkPayload } from "@/add-os/modules/cms/config/contact-links.config"
 import { createContactLink, listContactLinks, removeContactLink, updateContactLink } from "@/add-os/services/contact-links"
 import Icon from "@/components/common/Icon.vue"
 
@@ -62,6 +62,7 @@ const { t } = useI18n()
 
 const { data, isLoading, error, refetch } = useResourceList<ContactLink>(listContactLinks)
 const columns = computed(() => buildContactLinkColumns(t))
+const fields = computed(() => buildContactLinkFields(t))
 
 const statCards = computed<StatCard[]>(() => {
 	const total = data.value.length

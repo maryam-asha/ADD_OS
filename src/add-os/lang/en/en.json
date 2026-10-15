@@ -1607,6 +1607,7 @@
 			"contactLinks": "Contact links",
 			"notifications": "Broadcast notifications",
 			"termsOfUse": "Terms of Use",
+			"helpSupport": "Help & Support",
 			"accountSecurity": "Account & security",
 			"systemSettings": "System settings",
 			"eventCategories": "Event Categories",
@@ -2136,6 +2137,18 @@
 		"loadError": "Couldn't load founders."
 	},
 	"contactLinks": {
+		"types": {
+			"email": "Email",
+			"phone": "Phone",
+			"mobile": "Mobile",
+			"whatsapp": "WhatsApp",
+			"telegram": "Telegram",
+			"address": "Address",
+			"website": "Website",
+			"instagram": "Instagram",
+			"facebook": "Facebook",
+			"linkedin": "LinkedIn"
+		},
 		"columns": {
 			"type": "Type",
 			"value": "Value",
@@ -4182,5 +4195,23 @@
 		"lastUpdated": "Last updated",
 		"arPlaceholder": "Write the terms of use in Arabic using Markdown formatting...",
 		"enPlaceholder": "Write the terms of use in English using Markdown formatting..."
+	},
+	"helpSupport": {
+		"title": "Help & Support",
+		"subtitle": "The app's Help & Support page, in Markdown in Arabic and English. The contact rows under it (email, phone, WhatsApp, address...) come from Contact Links.",
+		"loadError": "Failed to load Help & Support. Please try again.",
+		"saveSuccess": "Help & Support saved successfully.",
+		"saveError": "Failed to save Help & Support.",
+		"saveButton": "Save Changes",
+		"refresh": "Refresh",
+		"retry": "Retry",
+		"arabicTab": "Arabic",
+		"englishTab": "English",
+		"sideBySideTab": "Side-by-Side",
+		"unsavedChanges": "Unsaved changes",
+		"allSaved": "All changes saved",
+		"lastUpdated": "Last updated",
+		"arPlaceholder": "Write the Help & Support page in Arabic using Markdown formatting...",
+		"enPlaceholder": "Write the Help & Support page in English using Markdown formatting..."
 	}
 }

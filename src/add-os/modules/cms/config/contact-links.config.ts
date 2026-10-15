@@ -5,12 +5,24 @@ import type { ContactLink, ContactLinkPayload } from "@/add-os/modules/cms/types
 import { NTag } from "naive-ui"
 import { h } from "vue"
 
+/**
+ * The types the app knows how to draw — an icon each, and what tapping opens
+ * (a mail, a call, a WhatsApp chat, a map, a link): the backend builds the
+ * `url` from the type (ContactLink::url()).
+ */
+export const CONTACT_LINK_TYPES = ["email", "phone", "mobile", "whatsapp", "telegram", "address", "website", "instagram", "facebook", "linkedin"] as const
+
+/** A known type's label, or the stored value for one entered before the list existed. */
+function typeLabel(t: ComposerTranslation, type: string): string {
+	return (CONTACT_LINK_TYPES as readonly string[]).includes(type) ? t(`contactLinks.types.${type}`) : type
+}
+
 export function buildContactLinkColumns(t: ComposerTranslation): DataTableColumns<ContactLink> {
 	return [
 		{
 			title: t("contactLinks.columns.type"),
 			key: "type",
-			render: row => row.type
+			render: row => typeLabel(t, row.type)
 		},
 		{
 			title: t("contactLinks.columns.value"),
@@ -34,13 +46,21 @@ export function buildContactLinkColumns(t: ComposerTranslation): DataTableColumn
 	]
 }
 
-export const contactLinkFields: FieldDescriptor<ContactLinkPayload>[] = [
-	{ key: "type", labelKey: "contactLinks.form.type", type: "text", required: true },
-	{ key: "value", labelKey: "contactLinks.form.value", type: "text", required: true },
-	{ key: "label", labelKey: "contactLinks.form.label", type: "text" },
-	{ key: "sort_order", labelKey: "contactLinks.form.sortOrder", type: "number" },
-	{ key: "is_visible", labelKey: "contactLinks.form.isVisible", type: "switch" }
-]
+export function buildContactLinkFields(t: ComposerTranslation): FieldDescriptor<ContactLinkPayload>[] {
+	return [
+		{
+			key: "type",
+			labelKey: "contactLinks.form.type",
+			type: "select",
+			required: true,
+			options: CONTACT_LINK_TYPES.map(type => ({ label: typeLabel(t, type), value: type }))
+		},
+		{ key: "value", labelKey: "contactLinks.form.value", type: "text", required: true },
+		{ key: "label", labelKey: "contactLinks.form.label", type: "text" },
+		{ key: "sort_order", labelKey: "contactLinks.form.sortOrder", type: "number" },
+		{ key: "is_visible", labelKey: "contactLinks.form.isVisible", type: "switch" }
+	]
+}
 
 export function emptyContactLinkPayload(): ContactLinkPayload {
 	return {
