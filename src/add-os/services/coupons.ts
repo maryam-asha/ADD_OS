@@ -1,7 +1,6 @@
 import type { Paginated, RawPaginatedResponse } from "./pagination"
 import type { Coupon, CouponPayload, CouponRedemption, CouponRevision } from "@/add-os/modules/pricing/types/coupon"
-import { couponToPayload } from "@/add-os/modules/pricing/utils/coupon-payload"
-import { del, get, post, put } from "./api"
+import { del, get, patch, post, put } from "./api"
 import { toPaginated } from "./pagination"
 
 /**
@@ -33,7 +32,7 @@ export async function createCoupon(payload: CouponPayload): Promise<Coupon> {
 	return (await post<{ data: Coupon }>(BASE, payload)).data
 }
 
-/** Full body only — the server requires code, discount_type and discount_value on every update. */
+/** Full body only — the server requires code, discount_type and discount_value on every update; 409 once the coupon is `locked`. */
 export async function updateCoupon(id: number, payload: CouponPayload): Promise<{ message: string }> {
 	return put<{ message: string }>(`${BASE}/${id}`, payload)
 }
@@ -44,10 +43,9 @@ export async function deleteCoupon(id: number): Promise<void> {
 }
 
 /**
- * Switches a coupon on or off without touching anything else: re-reads the
- * detail (so `user_ids` are the real ones) and sends all of it back.
+ * Switches a coupon on or off without touching anything else: `is_active`
+ * alone — the only change a used (`locked`) coupon or offer accepts.
  */
 export async function setCouponActive(id: number, active: boolean): Promise<{ message: string }> {
-	const payload = couponToPayload(await getCoupon(id))
-	return updateCoupon(id, { ...payload, is_active: active })
+	return patch<{ message: string }>(`${BASE}/${id}`, { is_active: active })
 }

@@ -87,13 +87,12 @@ describe("coupons service", () => {
 		await expect(deleteCoupon(7)).resolves.toBeUndefined()
 	})
 
-	it("sets active by re-reading the detail and sending all of it back", async () => {
-		vi.mocked(fetch).mockResolvedValueOnce(jsonResponse({ data: detail })).mockResolvedValueOnce(jsonResponse({ message: "Saved." }))
+	it("sets active by sending is_active alone", async () => {
+		vi.mocked(fetch).mockResolvedValueOnce(jsonResponse({ message: "Saved." }))
 		await setCouponActive(7, false)
-		const [url, init] = vi.mocked(fetch).mock.calls[1]
+		const [url, init] = vi.mocked(fetch).mock.calls[0]
 		expect(url).toBe("http://api.test/api/v1/admin/coupons/7")
-		const body = JSON.parse(String((init as RequestInit).body))
-		expect(body).toMatchObject({ code: "VIP", discount_type: "amount_off", discount_value: 50, is_active: false, user_ids: [4, 9], company_id: 3, starts_at: "2026-10-05T06:00:00.000000Z" })
-		expect(body).not.toHaveProperty("used")
+		expect((init as RequestInit).method).toBe("PATCH")
+		expect(JSON.parse(String((init as RequestInit).body))).toEqual({ is_active: false })
 	})
 })

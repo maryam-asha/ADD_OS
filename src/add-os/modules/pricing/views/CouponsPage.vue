@@ -71,7 +71,7 @@ import { deleteCoupon, listCoupons, setCouponActive } from "@/add-os/services/co
 import { formatDateTime, formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
-type FilterOption = { label: string; value: string | number }
+interface FilterOption { label: string; value: string | number }
 
 defineProps<{ titleKey?: string }>()
 
@@ -171,7 +171,10 @@ const columns = computed<DataTableColumns<Coupon>>(() => [
 				key: "actions",
 				width: 110,
 				align: "center" as const,
-				render: (row: Coupon) => h("div", { class: "inline-flex items-center justify-center gap-3" }, [
+				// A used coupon or offer is only switched off — never edited or deleted.
+				render: (row: Coupon) => row.locked
+					? null
+					: h("div", { class: "inline-flex items-center justify-center gap-3" }, [
 					h(NButton, { text: true, type: "primary", "aria-label": t("coupons.edit"), title: t("coupons.edit"), onClick: only(() => openForm(row.id)) }, { icon: () => h(Icon, { name: "carbon:edit", size: 18 }) }),
 					h(NButton, { text: true, type: "error", "data-test": "coupon-delete", "aria-label": t("coupons.delete.action"), title: t("coupons.delete.action"), onClick: only(() => confirmDelete(row)) }, { icon: () => h(Icon, { name: "carbon:trash-can", size: 18 }) })
 				])

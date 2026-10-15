@@ -65,6 +65,8 @@ export interface Coupon {
 	is_active: boolean
 	/** Uses that still count against the limits. List and detail. */
 	used?: number
+	/** Used at all (even if every use was cancelled): only the on/off switch is accepted. List and detail. */
+	locked?: boolean
 	/** List, detail and create response. */
 	targets?: CouponTarget[]
 	/** Detail and create response ONLY — never on a list row. */

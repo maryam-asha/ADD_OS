@@ -70,6 +70,14 @@ describe("couponsPage", () => {
 		expect(wrapper.find("[data-test='coupon-active-switch']").exists()).toBe(false)
 	})
 
+	it("leaves a locked (used) coupon only its switch", async () => {
+		listMock.mockResolvedValue(page([row({ locked: true })]))
+		const wrapper = await mountPage()
+		expect(wrapper.find("[data-test='coupon-delete']").exists()).toBe(false)
+		expect(wrapper.find("[aria-label='Edit']").exists()).toBe(false)
+		expect(wrapper.find("[data-test='coupon-active-switch']").exists()).toBe(true)
+	})
+
 	it("switches active through setCouponActive", async () => {
 		const wrapper = await mountPage()
 		await wrapper.get("[data-test='coupon-active-switch']").trigger("click")
