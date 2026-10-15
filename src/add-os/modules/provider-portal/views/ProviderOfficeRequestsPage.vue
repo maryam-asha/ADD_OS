@@ -157,47 +157,16 @@
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
 		<!-- MAIN DATA TABLE -->
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
-		<div class="overflow-hidden rounded-2xl border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface-raised,#FFFFFF)] shadow-xs dark:border-neutral-800 dark:bg-neutral-900/60 add-ledger-table">
-			<n-data-table
-				:columns="columns"
-				:data="filteredData"
-				:loading="isLoading"
-				:bordered="false"
-				size="small"
-				:row-key="rowKey"
-				:pagination="false"
-				:scroll-x="960"
-			/>
-
-			<!-- Empty State when filtered data is empty -->
-			<div v-if="!isLoading && filteredData.length === 0" class="py-14 text-center text-sm text-[var(--add-text-muted,#5A606B)]">
-				{{ t("providerOfficeRequests.empty", "لا توجد طلبات مكاتب خاصة مطابقة لمعايير البحث.") }}
-			</div>
-
-			<!-- Custom Pagination Footer -->
-			<div
-				v-if="filteredData.length > 0"
-				class="flex flex-col sm:flex-row items-center justify-between px-6 py-3.5 border-t border-[var(--add-border,#CDC2AF)]/30 dark:border-neutral-800 gap-3 text-xs text-[var(--add-text-secondary,#565B65)] dark:text-neutral-400 bg-[var(--add-surface,#F7F5F2)]/40 dark:bg-neutral-900/40"
-			>
-				<div>
-					{{ t('providerOfficeRequests.pagination.showing', 'عرض {from} إلى {to} من أصل {total} طلب', {
-						from: meta ? ((meta.current_page - 1) * meta.per_page) + 1 : 1,
-						to: meta ? Math.min(meta.current_page * meta.per_page, meta.total) : filteredData.length,
-						total: meta?.total ?? filteredData.length
-					}) }}
-				</div>
-
-				<n-pagination
-					v-model:page="page"
-					:page-count="meta?.last_page || Math.ceil((meta?.total || filteredData.length) / (meta?.per_page || 15))"
-					:page-slot="5"
-					size="small"
-				>
-					<template #prev>{{ t('providerOfficeRequests.pagination.prev', 'السابق') }}</template>
-					<template #next>{{ t('providerOfficeRequests.pagination.next', 'التالي') }}</template>
-				</n-pagination>
-			</div>
-		</div>
+		<AddDataTable
+			:columns="columns"
+			:data="filteredData"
+			:loading="isLoading"
+			:row-key="rowKey"
+			:scroll-x="960"
+			:empty-text="t('providerOfficeRequests.empty', 'لا توجد طلبات مكاتب خاصة مطابقة لمعايير البحث.')"
+			:meta="meta"
+			v-model:page="page"
+		/>
 
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
 		<!-- CREATE REQUEST MODAL -->
@@ -304,6 +273,7 @@ import { useI18n } from "vue-i18n"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { ApiError } from "@/add-os/services/api"
 import { createPortalOfficeRequest, listPortalOfficeRequests, listProviderCompanies } from "@/add-os/services/provider-portal"
+import AddDataTable from "@/add-os/components/table/AddDataTable.vue"
 import Icon from "@/components/common/Icon.vue"
 
 const { t } = useI18n()

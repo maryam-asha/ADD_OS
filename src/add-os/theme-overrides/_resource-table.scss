@@ -112,3 +112,56 @@
 		}
 	}
 }
+
+// ── Global DataTable Empty State Overflow Safeguard ───────────────────────
+//
+// When a DataTable has no rows (.n-data-table-empty is present), Naive UI's
+// internal NScrollbar still applies `min-width: scrollX` (e.g. 1100px, 1350px),
+// which generates an unnecessary and awkward horizontal scrollbar rail across
+// the empty placeholder.
+//
+// This rule globally disables horizontal scrolling and hides the scrollbar rail
+// on empty tables across the ENTIRE system, so any new or existing table
+// with :scroll-x automatically stays clean and responsive when empty.
+.n-data-table:has(.n-data-table-empty) {
+	.n-scrollbar-rail--horizontal {
+		display: none !important;
+	}
+
+	.n-data-table-base-table-body {
+		overflow-x: hidden !important;
+
+		> .n-scrollbar-container {
+			overflow-x: hidden !important;
+		}
+
+		.n-scrollbar-content {
+			min-width: 100% !important;
+			width: 100% !important;
+		}
+	}
+
+	.n-data-table-base-table-header {
+		overflow-x: hidden !important;
+
+		.n-data-table-table {
+			min-width: 100% !important;
+		}
+	}
+}
+
+.n-data-table .n-data-table-empty {
+	padding: 2.5rem 1.5rem;
+
+	.n-empty {
+		--n-icon-size: 38px;
+		opacity: 0.7;
+	}
+
+	.n-empty__description {
+		margin-top: 0.5rem;
+		font-size: var(--add-font-size-sub, 0.875rem);
+		color: var(--add-text-muted, #5A606B);
+		font-weight: 500;
+	}
+}
