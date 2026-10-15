@@ -1,0 +1,255 @@
+// ── ADD OS — Markdown Content Typography ──────────────────────────────────
+//
+// Renders markdown content predictably across the application, adhering to
+// ADD OS design tokens, Levant Teal headings, RTL support, and Dark Mode.
+
+.add-markdown-content {
+	font-family: inherit;
+	font-size: var(--add-font-size-body, 0.875rem);
+	line-height: 1.7;
+	color: var(--add-text-primary, #43474F);
+	word-break: break-word;
+
+	> *:first-child {
+		margin-top: 0 !important;
+	}
+
+	> *:last-child {
+		margin-bottom: 0 !important;
+	}
+
+	// ── Headings ──────────────────────────────────────────────────────────
+	h1, h2, h3, h4, h5, h6 {
+		font-weight: var(--add-font-weight-bold, 700);
+		line-height: 1.35;
+		color: var(--add-text-primary, #43474F);
+		margin-top: 1.5rem;
+		margin-bottom: 0.6rem;
+	}
+
+	h1 {
+		font-size: 1.5rem;
+		color: var(--add-primary-text, #556843);
+		border-bottom: 1px solid var(--add-border, #CDC2AF)30;
+		padding-bottom: 0.4rem;
+	}
+
+	h2 {
+		font-size: 1.25rem;
+		color: var(--add-primary-text, #556843);
+	}
+
+	h3 {
+		font-size: 1.1rem;
+	}
+
+	h4 {
+		font-size: 1rem;
+	}
+
+	h5, h6 {
+		font-size: 0.9rem;
+	}
+
+	// ── Paragraphs & Inline ───────────────────────────────────────────────
+	p {
+		margin-top: 0;
+		margin-bottom: 0.85rem;
+	}
+
+	strong, b {
+		font-weight: var(--add-font-weight-bold, 700);
+		color: var(--add-text-primary, #43474F);
+	}
+
+	em, i {
+		font-style: italic;
+	}
+
+	del, s {
+		text-decoration: line-through;
+		opacity: 0.7;
+	}
+
+	a {
+		color: var(--add-primary-text, #556843);
+		text-decoration: underline;
+		text-underline-offset: 3px;
+		transition: opacity 0.15s ease;
+
+		&:hover {
+			opacity: 0.8;
+		}
+	}
+
+	hr {
+		border: 0;
+		height: 1px;
+		background: var(--add-border, #CDC2AF)40;
+		margin: 1.5rem 0;
+	}
+
+	// ── Lists ─────────────────────────────────────────────────────────────
+	ul, ol {
+		margin-top: 0;
+		margin-bottom: 0.85rem;
+		padding-inline-start: 1.6rem;
+
+		li {
+			margin-bottom: 0.35rem;
+
+			> p {
+				margin-bottom: 0.35rem;
+			}
+		}
+	}
+
+	ul {
+		list-style-type: disc;
+
+		ul {
+			list-style-type: circle;
+		}
+	}
+
+	ol {
+		list-style-type: decimal;
+	}
+
+	// Task lists (GFM)
+	ul:has(input[type="checkbox"]) {
+		list-style-type: none;
+		padding-inline-start: 0.5rem;
+
+		li {
+			display: flex;
+			align-items: baseline;
+			gap: 0.5rem;
+
+			input[type="checkbox"] {
+				margin: 0;
+				accent-color: var(--add-primary, #657C50);
+			}
+		}
+	}
+
+	// ── Blockquotes ───────────────────────────────────────────────────────
+	blockquote {
+		margin: 1rem 0;
+		padding: 0.6rem 1rem;
+		border-inline-start: 4px solid var(--add-primary, #657C50);
+		background: var(--add-surface-sunken, #EDEAE8)30;
+		color: var(--add-text-secondary, #565B65);
+		border-radius: 4px;
+
+		p:last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	// ── Code & Preformatted ───────────────────────────────────────────────
+	code {
+		font-family: var(--add-font-mono, "JetBrains Mono", monospace);
+		font-size: 0.85em;
+		padding: 0.15rem 0.35rem;
+		background: var(--add-surface-sunken, #EDEAE8);
+		border: 1px solid var(--add-border, #CDC2AF)30;
+		border-radius: 4px;
+		color: var(--add-primary-text, #556843);
+	}
+
+	pre {
+		margin: 1rem 0;
+		padding: 1rem;
+		background: var(--add-surface-sunken, #EDEAE8)60;
+		border: 1px solid var(--add-border, #CDC2AF)40;
+		border-radius: 0.75rem;
+		overflow-x: auto;
+		line-height: 1.5;
+
+		code {
+			padding: 0;
+			background: transparent;
+			border: 0;
+			font-size: 0.85rem;
+			color: inherit;
+		}
+	}
+
+	// ── Tables (GFM) ──────────────────────────────────────────────────────
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		margin: 1rem 0;
+		font-size: 0.875rem;
+
+		th, td {
+			padding: 0.55rem 0.75rem;
+			border: 1px solid var(--add-border, #CDC2AF)40;
+			text-align: start;
+		}
+
+		th {
+			font-weight: var(--add-font-weight-bold, 700);
+			background: var(--add-surface-sunken, #EDEAE8)80;
+			color: var(--add-text-primary, #43474F);
+		}
+
+		tbody tr:nth-child(even) {
+			background: var(--add-surface-sunken, #EDEAE8)20;
+		}
+	}
+}
+
+// ── Dark Mode Overrides ───────────────────────────────────────────────────
+.dark .add-markdown-content {
+	color: #D1D5DB;
+
+	h1, h2, h3, h4, h5, h6 {
+		color: #F3F4F6;
+	}
+
+	h1, h2 {
+		color: #A3E635;
+	}
+
+	a {
+		color: #A3E635;
+	}
+
+	strong, b {
+		color: #F9FAFB;
+	}
+
+	code {
+		background: #1F2937;
+		border-color: #374151;
+		color: #A3E635;
+	}
+
+	pre {
+		background: #111827;
+		border-color: #374151;
+	}
+
+	blockquote {
+		background: #1F293750;
+		color: #9CA3AF;
+		border-inline-start-color: #657C50;
+	}
+
+	table {
+		th, td {
+			border-color: #374151;
+		}
+
+		th {
+			background: #1F2937;
+			color: #F3F4F6;
+		}
+
+		tbody tr:nth-child(even) {
+			background: #1F293730;
+		}
+	}
+}

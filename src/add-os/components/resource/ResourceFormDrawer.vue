@@ -5,8 +5,8 @@
 		preset="card"
 		:title
 		closable
-		style="max-width: 28rem"
-		content-style="max-height: 60vh; overflow-y: auto"
+		:style="{ maxWidth: hasWideField ? '46rem' : '28rem', width: '95vw' }"
+		content-style="max-height: 75vh; overflow-y: auto"
 	>
 		<n-form ref="formRef" :model :rules label-placement="top">
 			<template v-for="field in fields" :key="field.key">
@@ -46,6 +46,46 @@
 								:status="fieldErrors[`${field.key}.en`] ? 'error' : undefined"
 								:type="isLongTextField(field) ? 'textarea' : 'text'"
 								:autosize="isLongTextField(field) ? { minRows: 4, maxRows: 10 } : undefined"
+							/>
+							<n-text v-if="fieldErrors[`${field.key}.en`]" type="error" class="text-xs">
+								{{ fieldErrors[`${field.key}.en`]?.[0] }}
+							</n-text>
+						</div>
+					</div>
+					<div v-else-if="field.type === 'markdown'" class="w-full">
+						<MarkdownEditor
+							:value="((model as Record<string, unknown>)[field.key] as string) ?? ''"
+							:disabled="field.disabledWhen?.(model) ?? false"
+							@update:value="val => writeField(field.key, val)"
+						/>
+					</div>
+					<div
+						v-else-if="field.type === 'bilingual-markdown'"
+						class="flex flex-col w-full gap-4"
+					>
+						<div class="w-full flex flex-col gap-1.5">
+							<span class="text-xs font-medium text-secondary">
+								{{ t('resourceCrud.form.arabicPlaceholder') }}
+							</span>
+							<MarkdownEditor
+								:value="((model as Record<string, unknown>)[field.key] as Bilingual)?.ar ?? ''"
+								:disabled="field.disabledWhen?.(model) ?? false"
+								placeholder="Markdown (العربية)..."
+								@update:value="val => writeBilingualSubfield(field.key, 'ar', val)"
+							/>
+							<n-text v-if="fieldErrors[`${field.key}.ar`]" type="error" class="text-xs">
+								{{ fieldErrors[`${field.key}.ar`]?.[0] }}
+							</n-text>
+						</div>
+						<div class="w-full flex flex-col gap-1.5">
+							<span class="text-xs font-medium text-secondary">
+								{{ t('resourceCrud.form.englishPlaceholder') }}
+							</span>
+							<MarkdownEditor
+								:value="((model as Record<string, unknown>)[field.key] as Bilingual)?.en ?? ''"
+								:disabled="field.disabledWhen?.(model) ?? false"
+								placeholder="Markdown (English)..."
+								@update:value="val => writeBilingualSubfield(field.key, 'en', val)"
 							/>
 							<n-text v-if="fieldErrors[`${field.key}.en`]" type="error" class="text-xs">
 								{{ fieldErrors[`${field.key}.en`]?.[0] }}
@@ -330,6 +370,7 @@ import { NButton, NDatePicker, NForm, NFormItem, NInput, NInputNumber, NModal, N
 import { computed, reactive, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import DateTimeInput from "@/add-os/components/form/DateTimeInput.vue"
+import MarkdownEditor from "@/add-os/components/form/MarkdownEditor.vue"
 import SessionsField from "@/add-os/components/resource/SessionsField.vue"
 import { ApiError } from "@/add-os/services/api"
 import { uploadMedia } from "@/add-os/services/media"
@@ -347,6 +388,16 @@ const show = defineModel<boolean>("show", { required: true })
 const model = defineModel<TModel>("model", { required: true })
 
 const { t } = useI18n()
+
+const hasWideField = computed(() =>
+	props.fields.some(
+		field =>
+			field.type === "markdown" ||
+			field.type === "bilingual-markdown" ||
+			field.type === "sessions" ||
+			field.type === "multi-image"
+	)
+)
 
 const formRef = ref<FormInst | null>(null)
 const fieldErrors = ref<Record<string, string[]>>({})
@@ -494,6 +545,13 @@ function writeField(key: string, value: unknown) {
 	target[key] = value
 }
 
+/** Write a subfield of a bilingual field ({ ar, en }). */
+function writeBilingualSubfield(key: string, lang: "ar" | "en", value: string) {
+	const target = model.value as Record<string, unknown>
+	const current = (target[key] as Bilingual | null | undefined) ?? { ar: "", en: "" }
+	target[key] = { ...current, [lang]: value }
+}
+
 /** Adds/removes one option's value from a switch-group field's array. */
 function toggleSwitchGroupValue(key: string, value: string | number, checked: boolean) {
 	const target = model.value as Record<string, unknown>
@@ -613,7 +671,7 @@ function isLongTextField(field: FieldDescriptor<TModel>): boolean {
 }
 
 function isFieldValueEmpty(field: FieldDescriptor<TModel>, value: unknown): boolean {
-	if (field.type === "bilingual-text" || field.type === "bilingual-textarea") return !isBilingualComplete(value)
+	if (field.type === "bilingual-text" || field.type === "bilingual-textarea" || field.type === "bilingual-markdown") return !isBilingualComplete(value)
 	if (value === null || value === undefined) return true
 	if (Array.isArray(value)) return value.length === 0
 	return typeof value === "string" && value.trim().length === 0
@@ -669,13 +727,17 @@ const rules = computed<FormRules>(() => {
  * `bilingual-text`. Everything else (an undotted key, or a dotted key whose
  * root is bilingual-text or matches no known field) passes through unchanged.
  */
+function isBilingualType(type?: string): boolean {
+	return type === "bilingual-text" || type === "bilingual-textarea" || type === "bilingual-markdown"
+}
+
 function foldNonBilingualDottedErrors(errors: Record<string, string[]>): Record<string, string[]> {
 	const result: Record<string, string[]> = {}
 	for (const [key, messages] of Object.entries(errors)) {
 		const dot = key.indexOf(".")
 		const root = dot === -1 ? key : key.slice(0, dot)
 		const rootField = dot === -1 ? undefined : props.fields.find(field => field.key === root)
-		const target = rootField && rootField.type !== "bilingual-text" ? root : key
+		const target = rootField && !isBilingualType(rootField.type) ? root : key
 		result[target] = [...(result[target] ?? []), ...messages]
 	}
 	return result
