@@ -267,7 +267,7 @@
 import type { DataTableColumns, FormInst, FormRules, SelectOption } from "naive-ui"
 import type { Company } from "@/add-os/modules/members/types/company"
 import type { PrivateOfficeRequest } from "@/add-os/modules/members/types/private-office-request"
-import { NButton, NDataTable, NForm, NFormItem, NInput, NModal, NPagination, NSelect, NTag, useMessage } from "naive-ui"
+import { NButton, NForm, NFormItem, NInput, NModal, NSelect, NTag, useMessage } from "naive-ui"
 import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useResourceList } from "@/add-os/composables/useResourceList"

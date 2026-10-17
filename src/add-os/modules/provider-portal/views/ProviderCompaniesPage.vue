@@ -173,7 +173,7 @@
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
 import type { Company } from "@/add-os/modules/members/types/company"
-import { NButton, NDataTable, NInput, NPagination, NSelect, NTag, NTooltip } from "naive-ui"
+import { NButton, NInput, NSelect, NTag, NTooltip } from "naive-ui"
 import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useResourceList } from "@/add-os/composables/useResourceList"
