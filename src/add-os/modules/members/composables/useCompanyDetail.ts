@@ -15,8 +15,9 @@ import { listUsers } from "@/add-os/services/users"
 /**
  * The one shared fetch/mutate surface for a single company: its own record,
  * its members, and the user list needed to add one. Every consumer of company
- * data — the detail panel, the shared AddCompanyMemberDialog, anything future —
- * calls this instead of writing its own fetch logic.
+ * data — the company profile page, anything future — calls this instead of
+ * writing its own fetch logic. Call it once per screen and hand its state down
+ * (AddCompanyMemberForm takes it as props): each call fetches all three again.
  */
 export function useCompanyDetail(companyId: number) {
 	const company = ref<Company | null>(null)

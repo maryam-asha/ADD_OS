@@ -112,6 +112,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "individuals", path: "individuals" },
 			{ key: "memberProfile", path: "individuals/:id", hidden: true },
 			{ key: "companies", path: "companies" },
+			{ key: "companyProfile", path: "companies/:id", hidden: true },
 			{ key: "memberships", path: "memberships" },
 			{ key: "officeLeases", path: "office-leases" },
 			{ key: "stoppedRenewals", path: "stopped-renewals" }

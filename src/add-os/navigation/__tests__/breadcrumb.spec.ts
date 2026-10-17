@@ -72,6 +72,7 @@ describe("toolbar breadcrumb", () => {
 
 	it.each([
 		["/members/individuals/7", ["nav.sections.members", "nav.pages.individuals", "nav.pages.memberProfile"]],
+		["/members/companies/7", ["nav.sections.members", "nav.pages.companies", "nav.pages.companyProfile"]],
 		["/bookings/active-sessions/booking/7", ["nav.sections.bookings", "nav.pages.activeSessions", "nav.pages.activeSessionDetail"]],
 		["/bookings/close-session/booking/7", ["nav.sections.bookings", "nav.pages.closeSession", "nav.pages.closeSessionDetail"]],
 		["/community/events/7/attendees", ["nav.sections.community", "nav.pages.events", "nav.pages.eventAttendees"]]

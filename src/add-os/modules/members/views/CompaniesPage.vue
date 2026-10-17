@@ -208,66 +208,24 @@
 			v-model:show="createDrawerVisible"
 			@created="onCompanyCreated"
 		/>
-
-		<!-- Change Status Modal -->
-		<n-modal v-model:show="statusModalVisible" preset="card" :title="t('companies.changeStatus.title')" class="max-w-md !rounded-2xl">
-			<n-form>
-				<n-form-item :label="t('companies.columns.status')">
-					<n-select v-model:value="statusForm.status" :options="statusOptions" />
-				</n-form-item>
-			</n-form>
-			<template #footer>
-				<div class="flex justify-end gap-2">
-					<n-button @click="statusModalVisible = false">{{ t("resourceCrud.form.cancel") }}</n-button>
-					<n-button type="primary" :loading="statusChange.isSubmitting.value" @click="submitStatusChange">{{ t("resourceCrud.form.submit") }}</n-button>
-				</div>
-			</template>
-		</n-modal>
-
-		<!-- Transfer Provider Modal -->
-		<n-modal v-model:show="transferModalVisible" preset="card" :title="t('companies.transferProvider.title', 'Transfer Provider')" class="max-w-md !rounded-2xl">
-			<n-alert type="info" class="mb-4">
-				{{ t("companies.transferProvider.autoRenewNotice") }}
-			</n-alert>
-			<n-form>
-				<n-form-item :label="t('companies.columns.provider', 'Provider')">
-					<n-select v-model:value="transferForm.provider_id" :options="transferProviderOptions" clearable />
-				</n-form-item>
-			</n-form>
-			<template #footer>
-				<div class="flex justify-end gap-2">
-					<n-button @click="transferModalVisible = false">{{ t("resourceCrud.form.cancel") }}</n-button>
-					<n-button type="primary" :loading="isTransferring" @click="submitTransfer">{{ t("resourceCrud.form.submit") }}</n-button>
-				</div>
-			</template>
-		</n-modal>
-
-		<!-- Company Details Modal -->
-		<CompanyDetailPanel v-if="activeDetailCompanyId !== null" ref="detailPanelRef" v-model:show="detailPanelVisible" :company-id="activeDetailCompanyId" />
-
-		<!-- Quick Add Member Dialog -->
-		<AddCompanyMemberDialog v-if="quickAddCompanyId !== null" v-model:show="quickAddDialogVisible" :company-id="quickAddCompanyId" />
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
-import type { Company, CompanyStatus, CompanyStatusPayload } from "@/add-os/modules/members/types/company"
+import type { Company, CompanyStatus } from "@/add-os/modules/members/types/company"
 import type { PrivateOfficeRequest } from "@/add-os/modules/members/types/private-office-request"
-import { NAlert, NButton, NDataTable, NForm, NFormItem, NInput, NModal, NPagination, NSelect, useDialog } from "naive-ui"
-import { computed, h, ref, watch } from "vue"
+import { NAlert, NButton, NDataTable, NInput, NPagination, NSelect, useDialog } from "naive-ui"
+import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { canCreateOfficeLeases } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
-import AddCompanyMemberDialog from "@/add-os/modules/members/components/AddCompanyMemberDialog.vue"
-import CompanyDetailPanel from "@/add-os/modules/members/components/CompanyDetailPanel.vue"
 import CreateCompanyDrawer from "@/add-os/modules/members/components/CreateCompanyDrawer.vue"
-import { useCompanyStatusChange } from "@/add-os/modules/members/composables/useCompanyMutations"
 import { buildCompanyColumns } from "@/add-os/modules/members/config/companies.config"
 import { listBranches } from "@/add-os/services/branches"
-import { listCompaniesPaginated, transferCompanyProvider } from "@/add-os/services/companies"
+import { listCompaniesPaginated } from "@/add-os/services/companies"
 import { listPrivateOfficeRequests } from "@/add-os/services/private-office-requests"
 import { listProviders } from "@/add-os/services/providers"
 import { formatDate } from "@/add-os/utils/format"
@@ -379,88 +337,26 @@ function rowKey(row: Company) {
 	return row.id
 }
 
-const activeDetailCompanyId = ref<number | null>(null)
-const detailPanelVisible = ref(false)
-const detailPanelRef = ref<InstanceType<typeof CompanyDetailPanel> | null>(null)
-
 function openDetail(row: Company) {
-	activeDetailCompanyId.value = row.id
-	detailPanelVisible.value = true
+	router.push({ name: "members.companyProfile", params: { id: row.id } })
 }
-
-watch(detailPanelVisible, visible => {
-	if (!visible) activeDetailCompanyId.value = null
-})
-
-const quickAddCompanyId = ref<number | null>(null)
-const quickAddDialogVisible = ref(false)
-
-function openQuickAdd(row: Company) {
-	quickAddCompanyId.value = row.id
-	quickAddDialogVisible.value = true
-}
-
-watch(quickAddDialogVisible, visible => {
-	if (!visible) quickAddCompanyId.value = null
-})
 
 function renderActions(row: Company) {
-	return h("div", { class: "flex items-center justify-center gap-1.5" }, [
-		// 1. Contract / Lease details ("العقد")
-		h(
-			NButton,
-			{
-				size: "small",
-				secondary: true,
-				type: "primary",
-				class: "rounded-lg",
-				title: t("companies.actions.lease", "العقد"),
-				"aria-label": t("companies.actions.lease", "العقد"),
-				onClick: () => openDetail(row)
-			},
-			{ icon: () => h(Icon, { name: "carbon:document", size: 15 }) }
-		),
-		// 2. Edit / Change status ("تغيير الحالة")
-		h(
-			NButton,
-			{
-				size: "small",
-				secondary: true,
-				class: "rounded-lg",
-				title: t("companies.changeStatus.title", "تغيير الحالة"),
-				"aria-label": t("companies.changeStatus.title", "تغيير الحالة"),
-				onClick: () => openStatusModal(row)
-			},
-			{ icon: () => h(Icon, { name: "carbon:edit", size: 15 }) }
-		),
-		// 3. Add Member ("إضافة عضو")
-		h(
-			NButton,
-			{
-				size: "small",
-				secondary: true,
-				class: "rounded-lg",
-				title: t("companies.actions.addMember", "إضافة عضو"),
-				"aria-label": t("companies.actions.addMember", "إضافة عضو"),
-				onClick: () => openQuickAdd(row)
-			},
-			{ icon: () => h(Icon, { name: "carbon:user-follow", size: 15 }) }
-		),
-		// 4. Transfer Provider ("نقل لمزوّد")
-		h(
-			NButton,
-			{
-				size: "small",
-				secondary: true,
-				type: "info",
-				class: "rounded-lg",
-				title: t("companies.actions.transfer", "نقل لمزوّد"),
-				"aria-label": t("companies.actions.transfer", "نقل لمزوّد"),
-				onClick: () => openTransferModal(row)
-			},
-			{ icon: () => h(Icon, { name: "carbon:arrows-horizontal", size: 15 }) }
-		)
-	])
+	return h(
+		NButton,
+		{
+			size: "small",
+			secondary: true,
+			type: "primary",
+			class: "rounded-lg",
+			"aria-label": t("companies.actions.open"),
+			onClick: () => openDetail(row)
+		},
+		{
+			icon: () => h(Icon, { name: "carbon:arrow-right", size: 15, class: "rtl:rotate-180" }),
+			default: () => t("companies.actions.open")
+		}
+	)
 }
 
 const columns = computed<DataTableColumns<Company>>(() => {
@@ -472,8 +368,8 @@ const columns = computed<DataTableColumns<Company>>(() => {
 		{
 			title: t("resourceCrud.table.actionsColumn", "إجراءات"),
 			key: "actions",
-			width: 170,
-			minWidth: 170,
+			width: 130,
+			minWidth: 130,
 			align: "center",
 			render: renderActions
 		}
@@ -503,61 +399,7 @@ function onCompanyCreated() {
 	refetchRequests()
 }
 
-const statusChange = useCompanyStatusChange(refetchCompanies)
-const statusModalVisible = ref(false)
-const statusTargetId = ref<number | null>(null)
-const statusForm = ref<CompanyStatusPayload>({ status: "active" })
-
 const statusOptions = computed<SelectOption[]>(() =>
 	(["active", "inactive"] as CompanyStatus[]).map(status => ({ label: t(`companies.status.${status}`), value: status }))
 )
-
-function openStatusModal(row: Company) {
-	statusTargetId.value = row.id
-	statusForm.value = { status: row.status }
-	statusModalVisible.value = true
-}
-
-async function submitStatusChange() {
-	if (statusTargetId.value === null) return
-	try {
-		await statusChange.submit(statusTargetId.value, statusForm.value)
-	} catch {
-		return
-	}
-	statusModalVisible.value = false
-	if (activeDetailCompanyId.value === statusTargetId.value) {
-		await detailPanelRef.value?.refetchCompany()
-	}
-}
-
-const transferModalVisible = ref(false)
-const transferTargetId = ref<number | null>(null)
-const transferForm = ref<{ provider_id: number | null }>({ provider_id: null })
-const isTransferring = ref(false)
-
-const transferProviderOptions = computed(() => {
-	const opts = [{ label: t("companies.transferProvider.direct", "Direct (No Provider)"), value: null as any }]
-	return [...opts, ...providerOptions.value]
-})
-
-function openTransferModal(row: Company) {
-	transferTargetId.value = row.id
-	transferForm.value = { provider_id: row.provider?.id ?? null }
-	transferModalVisible.value = true
-}
-
-async function submitTransfer() {
-	if (transferTargetId.value === null) return
-	isTransferring.value = true
-	try {
-		await transferCompanyProvider(transferTargetId.value, transferForm.value.provider_id)
-		transferModalVisible.value = false
-		refetchCompanies()
-	} catch {
-		// error handled by api client
-	} finally {
-		isTransferring.value = false
-	}
-}
 </script>

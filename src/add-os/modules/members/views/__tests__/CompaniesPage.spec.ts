@@ -4,21 +4,12 @@ import path from "node:path"
 import { describe, expect, it } from "vitest"
 
 const FILE = path.resolve(__dirname, "..", "CompaniesPage.vue")
-const DETAIL_PANEL_FILE = path.resolve(__dirname, "..", "..", "components", "CompanyDetailPanel.vue")
 
 describe("companiesPage wiring", () => {
-	it("imports AddCompanyMemberDialog from the shared component path — the same one CompanyDetailPanel uses", () => {
-		const pageSource = readFileSync(FILE, "utf8")
-		const panelSource = readFileSync(DETAIL_PANEL_FILE, "utf8")
-
-		expect(pageSource).toContain('from "@/add-os/modules/members/components/AddCompanyMemberDialog.vue"')
-		expect(panelSource).toContain('from "./AddCompanyMemberDialog.vue"')
-	})
-
-	it("passes the row's own id as company-id to the quick-add dialog, not a hardcoded value", () => {
+	it("opens a company on its own page rather than in a modal", () => {
 		const source = readFileSync(FILE, "utf8")
-		expect(source).toContain(":company-id=\"quickAddCompanyId\"")
-		expect(source).toContain("quickAddCompanyId.value = row.id")
+		expect(source).toContain('router.push({ name: "members.companyProfile", params: { id: row.id } })')
+		expect(source).not.toMatch(/<n-modal|CompanyDetailPanel|AddCompanyMemberDialog/)
 	})
 
 	it("filters the create form's request dropdown to quoted requests only, via quotedRequestOptions/quotedRequests", () => {

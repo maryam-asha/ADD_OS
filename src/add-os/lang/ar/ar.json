@@ -1579,6 +1579,7 @@
 			"roles": "الأدوار والصلاحيات",
 			"individuals": "الأفراد",
 			"companies": "الشركات",
+			"companyProfile": "ملف الشركة",
 			"memberships": "العضويات",
 			"arrivals": "الوصول",
 			"approvalQueue": "طلبات الموافقة",
@@ -1783,12 +1784,8 @@
 			"goToRequests": "الذهاب إلى طلبات المكاتب الخاصة"
 		},
 		"changeStatus": {
-			"button": "تغيير الحالة",
 			"title": "تغيير الحالة",
 			"success": "تم تحديث الحالة."
-		},
-		"viewMembers": {
-			"button": "عرض الأعضاء"
 		},
 		"form": {
 			"privateOfficeRequest": "طلب المكتب الخاص",
@@ -1812,7 +1809,6 @@
 			"percentOfTotal": "{percent}% من الإجمالي"
 		},
 		"detail": {
-			"title": "الشركة",
 			"loadError": "تعذّر تحميل بيانات هذه الشركة."
 		},
 		"transferProvider": {
@@ -1840,11 +1836,7 @@
 			"underRenewal": "قيد التجديد"
 		},
 		"actions": {
-			"lease": "العقد",
-			"edit": "تعديل",
-			"viewMembers": "عرض الأعضاء",
-			"addMember": "إضافة عضو",
-			"transfer": "نقل لمزوّد"
+			"open": "فتح"
 		},
 		"pagination": {
 			"showing": "عرض {from} إلى {to} من أصل {total} شركة مسجلة",
@@ -1874,6 +1866,21 @@
 			"autoBadge": "تلقائي",
 			"autoRenewHint": "يُمدَّد العقد لمدة مماثلة قبل انتهائه بأيام قليلة، ما دامت فواتيره مسددة والمكتب متاحاً.",
 			"loadError": "تعذّر تحميل الطلبات أو المكاتب أو العملات. حاولوا مجدداً."
+		}
+	},
+	"companyProfile": {
+		"back": "العودة إلى الشركات",
+		"refresh": "تحديث",
+		"transferSuccess": "تم نقل الشركة.",
+		"tabs": {
+			"members": "الأعضاء",
+			"manage": "الإدارة"
+		},
+		"cards": {
+			"members": "الأعضاء",
+			"admins": "المسؤولون",
+			"doorAccess": "صلاحية الباب",
+			"monthly": "القيمة الشهرية"
 		}
 	},
 	"companyMembers": {

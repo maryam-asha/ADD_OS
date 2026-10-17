@@ -1575,6 +1575,7 @@
 			"roles": "Roles & permissions",
 			"individuals": "Individuals",
 			"companies": "Companies",
+			"companyProfile": "Company profile",
 			"memberships": "Memberships",
 			"arrivals": "Arrivals",
 			"approvalQueue": "Approval queue",
@@ -1779,12 +1780,8 @@
 			"goToRequests": "Go to Private Office Requests"
 		},
 		"changeStatus": {
-			"button": "Change status",
 			"title": "Change status",
 			"success": "Status updated."
-		},
-		"viewMembers": {
-			"button": "View members"
 		},
 		"form": {
 			"privateOfficeRequest": "Private office request",
@@ -1808,7 +1805,6 @@
 			"percentOfTotal": "{percent}% of total"
 		},
 		"detail": {
-			"title": "Company",
 			"loadError": "Couldn't load this company."
 		},
 		"transferProvider": {
@@ -1836,11 +1832,7 @@
 			"underRenewal": "Under Renewal"
 		},
 		"actions": {
-			"lease": "Lease",
-			"edit": "Edit",
-			"viewMembers": "View Members",
-			"addMember": "Add Member",
-			"transfer": "Transfer Provider"
+			"open": "Open"
 		},
 		"pagination": {
 			"showing": "Showing {from} to {to} of {total} registered companies",
@@ -1870,6 +1862,21 @@
 			"autoBadge": "Automatic",
 			"autoRenewHint": "The lease is extended by another term shortly before it ends, as long as its invoices are paid and the office is free.",
 			"loadError": "Could not load requests, offices or currencies. Try again."
+		}
+	},
+	"companyProfile": {
+		"back": "Back to companies",
+		"refresh": "Refresh",
+		"transferSuccess": "Company transferred.",
+		"tabs": {
+			"members": "Members",
+			"manage": "Manage"
+		},
+		"cards": {
+			"members": "Members",
+			"admins": "Admins",
+			"doorAccess": "Door access",
+			"monthly": "Monthly amount"
 		}
 	},
 	"companyMembers": {
