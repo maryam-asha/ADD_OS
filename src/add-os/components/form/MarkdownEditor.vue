@@ -414,14 +414,17 @@ function insertLink() {
 	const selected = model.value.substring(start, end)
 
 	const label = selected.length > 0 ? selected : t("markdown.linkLabel", "رابط")
-	const linkTemplate = `[${label}](https://example.com)`
+	// A bare scheme, not a sample host: a placeholder domain would ship in the
+	// build and trip the network-isolation guard, and would publish as a live
+	// link if left in. The caret lands after it, ready for the address.
+	const urlPrefix = "https://"
+	const linkTemplate = `[${label}](${urlPrefix})`
 
 	const fullText = model.value
 	model.value = fullText.substring(0, start) + linkTemplate + fullText.substring(end)
 
-	const urlStart = start + label.length + 3
-	const urlEnd = urlStart + 19
-	scroll.restore(urlStart, urlEnd)
+	const caret = start + label.length + 3 + urlPrefix.length
+	scroll.restore(caret, caret)
 }
 
 /**

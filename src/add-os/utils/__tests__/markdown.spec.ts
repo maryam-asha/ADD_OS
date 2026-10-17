@@ -36,7 +36,7 @@ describe("markdown utils", () => {
 
 	describe("stripMarkdown", () => {
 		it("strips common markdown formatting into clean plain text", () => {
-			const md = "### Aleppo **Digital** District: [link](https://example.com) and `code`"
+			const md = "### Aleppo **Digital** District: [link](/about) and `code`"
 			const plain = stripMarkdown(md)
 			expect(plain).toBe("Aleppo Digital District: link and code")
 		})
