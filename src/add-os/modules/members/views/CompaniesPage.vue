@@ -538,7 +538,7 @@ const isTransferring = ref(false)
 
 const transferProviderOptions = computed(() => {
 	const opts = [{ label: t("companies.transferProvider.direct", "Direct (No Provider)"), value: null as any }]
-	return opts.concat(providerOptions.value)
+	return [...opts, ...providerOptions.value]
 })
 
 function openTransferModal(row: Company) {

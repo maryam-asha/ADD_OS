@@ -68,7 +68,7 @@
 					<!-- Pricing: Monthly Amount & Currency -->
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<n-form-item path="monthly_amount" :label="t('officeLeases.create.monthlyAmount')">
-							<n-input v-model:value="form.monthly_amount" placeholder="500.00" />
+							<n-input :value="String(form.monthly_amount)" placeholder="500.00" @update:value="v => (form.monthly_amount = v)" />
 						</n-form-item>
 
 						<n-form-item path="currency" :label="t('officeLeases.create.currency')">
@@ -159,7 +159,7 @@ const officeOptions = computed<SelectOption[]>(() =>
 	spaces.value
 		.filter(s => s.space_type === "business")
 		.map(s => ({
-			label: `${pickLocalized(s.name, currentLocale.value) || `Space #${s.id}`}${s.status !== "active" ? ` (${s.status})` : ""}`,
+			label: `${(s.name && pickLocalized(s.name, currentLocale.value)) || `Space #${s.id}`}${s.status !== "active" ? ` (${s.status})` : ""}`,
 			value: s.id
 		}))
 )

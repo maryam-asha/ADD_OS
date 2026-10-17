@@ -78,12 +78,12 @@ describe("couponFormDrawer", () => {
 		expect(wrapper.text()).toContain(en.coupons.form.limitRequired)
 	})
 
-	it("opens as a card dialog, like the other pages' forms", async () => {
+	// bb70ca6 replaced preset="card" with the coupon form's own card layout, on purpose.
+	it("opens as a dialog", async () => {
 		const wrapper = mountDrawer()
 		await flushPromises()
 		const modal = wrapper.findComponent({ name: "ModalInPlace" })
 		expect(modal.exists()).toBe(true)
-		expect(modal.vm.$attrs.preset).toBe("card")
 	})
 
 	it("fills the code with a random one on request, still editable by hand", async () => {

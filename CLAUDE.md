@@ -9,6 +9,12 @@ One of four ADD OS consumers (this dashboard, Flutter member app, Nuxt public si
 reception kiosk). **Network-isolated**: VPN/office only. An external URL is a broken
 feature, not a slow one.
 
+**Changed 2026-10-13:** the API (`core.add-sy.com`) and this dashboard (`os.add-sy.com`)
+are now public — the member app and provider accounts reach them from outside. Staff
+operations keep isolation by IP instead: nginx admits only office/VPN addresses to
+`/api/v1/admin/*`. The API host is the one runtime host allowed in the build; every
+other external URL is still a broken feature. See `docs/DEPLOYMENT.md`.
+
 <!-- Maintainer note: this file is stripped of HTML comments before it reaches context,
      so notes here cost nothing. Keep this file under 200 lines. Detail belongs in
      .claude/rules/ (path-scoped, loads only when relevant) or docs/. -->
@@ -165,6 +171,5 @@ treat a stale pin the same as a failing guard, not as background noise.
 | Noto IKEA Arabic licence + `woff2`, or a Guideline revision naming an embeddable face. **Changed 2026-08-30:** the design owner supplied the files and the face now ships, so the Guideline and the product agree — but the licence question is untouched and the deviation existed precisely because of it. The files are a third-party redistribution, not an IKEA grant. See `docs/brand/GUIDELINE-FEEDBACK.md` §1. | Brand |
 | Adopt or deliberately replace `warning` `#E7B155` as a canonical brand state colour. | Brand |
 | `borderStrong` light-mode value (Aleppo Stone fails 3:1). | Design |
-| **Set the real internal `VITE_API_URL`.** Empty today; production refuses to start. | Infra |
 | List-endpoint pagination shape. `pagination.ts`/`listPage()` assume Laravel's default paginator (`data` + `meta: {current_page, last_page, per_page, total}` + `links`), and it is **still never been observed**: zero example responses anywhere in `ADD-OS.postman_collection.json`, and the one admin list endpoint live-tested so far (`GET /api/v1/admin/plans`) returned a flat array with no `meta` at all. Need one real response body to close this — `GET /api/v1/admin/reception/bookings/pending-approval?page=2` is now the cheapest place to capture one, since it is the first documented-paginated endpoint with a screen built on it. **Narrowed 2026-08-25:** this no longer blocks pagination UI. The backend task that shipped `pending-approval` specifies `meta: {current_page, last_page, total}` — note the absent `per_page`, which `toPaginated` already falls back to `data.length` for — and `ApprovalQueuePage.vue` renders a pager against it. What stays open is confirmation from a real response; if the shape differs, that page is where it surfaces first. | Backend |
 | Courtesy: tell the Pinx vendor their MapTiler keys shipped in a publicly sold template. Not ADD's to revoke. | Infra |

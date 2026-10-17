@@ -624,6 +624,9 @@ describe("bookingCalendarPage", () => {
 	it("shows the branch hours card from the server, including its derived timezone label", async () => {
 		const wrapper = mountPage()
 		await flushPromises()
+		// The filters & statistics section opens collapsed (eee92f1).
+		;(wrapper.vm as unknown as { isFiltersExpanded: boolean }).isFiltersExpanded = true
+		await flushPromises()
 
 		expect(wrapper.text()).toContain("Main Branch Hours")
 		expect(wrapper.text()).toContain("Saturday – Friday")
@@ -632,6 +635,9 @@ describe("bookingCalendarPage", () => {
 
 	it("shows the totals the server computed", async () => {
 		const wrapper = mountPage()
+		await flushPromises()
+		// The filters & statistics section opens collapsed (eee92f1).
+		;(wrapper.vm as unknown as { isFiltersExpanded: boolean }).isFiltersExpanded = true
 		await flushPromises()
 
 		expect(wrapper.text()).toContain("Average occupancy")
@@ -1313,6 +1319,9 @@ describe("bookingCalendarPage", () => {
 
 		vm.spaceType = "room"
 		vm.spaceId = 1
+		await flushPromises()
+		// The filters & statistics section opens collapsed (eee92f1).
+		;(wrapper.vm as unknown as { isFiltersExpanded: boolean }).isFiltersExpanded = true
 		await flushPromises()
 
 		expect(vm.hasFilters).toBe(true)

@@ -20,13 +20,13 @@ const messages = {
 	en: {
 		auth: {
 			common: { back: "Back" },
-			help: "Need help? Contact your IT administrator.",
+			help: "Need help? Contact your IT administrator."
 			// One key, deliberately. The eyebrow, body paragraph, pillar row and
 			// footer were built on 2026-09-22 and removed the same day — see the
 			// panel comment in AuthShell.vue. Their keys are gone from both
 			// catalogues, so a fixture carrying them would let a reintroduced
 			// element pass tests that the real catalogues would fail.
-			panel: { headline: "The unified operations workspace" }
+			// The headline followed on 2026-10-13, so the panel has no keys at all.
 		}
 	}
 }
@@ -309,10 +309,13 @@ describe("authShell", () => {
 		 * A test that only checked the headline renders would not have caught any
 		 * of that, so this counts what is there instead.
 		 */
-		it("keeps the panel to one piece of copy", () => {
+		// Changed 2026-10-13: the headline was removed at the owner's request, so
+		// the ceiling is now zero pieces of copy.
+		it("keeps the panel free of copy", () => {
 			const panel = mountShell().find("section")
 
-			expect(panel.text()).toContain("The unified operations workspace")
+			expect(panel.text().trim()).toBe("")
+			expect(panel.findAll("h1, h2, h3")).toHaveLength(0)
 			expect(panel.findAll("p")).toHaveLength(0)
 			expect(panel.findAll("ul")).toHaveLength(0)
 		})

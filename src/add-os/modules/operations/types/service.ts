@@ -1,3 +1,5 @@
+import type { FieldValidation } from "@/add-os/components/resource/form-fields"
+
 export type RequestMethod =
 	| "form"
 	| "external_link"
@@ -50,7 +52,8 @@ export interface ServiceTypeFieldPayload {
 	placeholder?: { en: string; ar: string } | null
 	type: FieldType
 	options?: ServiceTypeFieldOption[] | null
-	validation?: Record<string, unknown> | null
+	/** What FormFieldsBuilder writes; the response type above stays loose for legacy rows. */
+	validation?: FieldValidation | null
 	is_required?: boolean
 	is_active?: boolean
 	order?: number

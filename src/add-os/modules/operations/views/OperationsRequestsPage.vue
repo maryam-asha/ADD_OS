@@ -380,7 +380,9 @@ const statusFilterOptions = computed(() => [
 ])
 
 const branchOptions = computed(() => [
-	{ value: null, label: t("operationsRequests.allBranches") },
+	// 0, not null: Naive renders a null value as "nothing selected", so this
+	// label never showed. The fetch's truthiness check already reads 0 as "all".
+	{ value: 0, label: t("operationsRequests.allBranches") },
 	...branches.value.map(b => ({
 		value: b.id,
 		label: typeof b.name === "string" ? b.name : (b.name as { en: string }).en || String(b.id)

@@ -39,7 +39,6 @@
 		<div class="auth-shell bg-surface grid min-h-screen lg:grid-cols-5">
 			<section
 				class="relative hidden min-h-screen overflow-hidden bg-[var(--add-auth-panel-background)] px-10 py-12 text-[var(--add-auth-panel-text)] lg:col-span-3 lg:flex lg:flex-col lg:justify-between xl:px-16"
-				aria-labelledby="auth-panel-title"
 			>
 				<!--
 					── REVERSAL, 2026-09-22 (same day, second attempt) ──────────────────
@@ -82,30 +81,19 @@
 					for the removed copy (`auth.panel.eyebrow`, `.body`, `.pillars.*`,
 					`.footer`) are deleted from BOTH catalogues in the same change, per
 					Invariant 4 — a removed control takes its i18n with it.
+
+					── REVERSAL, 2026-10-13 ──────────────────────────────────────────────
+					The headline and its accent rule are gone too, at the owner's request:
+					the panel is now the logo and the pattern only. Given up: the one line
+					saying what the product is. `auth.panel.headline` is deleted from both
+					catalogues, and `aria-labelledby` went with the heading it pointed at.
+					(It had been commented out on 2026-10-04 and was briefly restored as
+					an apparent accident; it was not one.)
 				-->
 				<div class="relative flex items-center">
 					<img :src="logoLight" :alt="t('common.logoAlt')" class="h-12 w-auto object-contain" />
 				</div>
 
-				<div class="relative max-w-2xl pb-8">
-					<!--
-						Replaces the old isolated success dot with a short accent rule,
-						echoing the banner's lime-highlighted line above its headline.
-						Still the same `success` ramp — the contrast-adjusted Smart Olive
-						already asserted in tokens.spec.ts — no new colour introduced.
-					-->
-					<!-- <div aria-hidden="true" class="bg-success h-1.5 w-20 rounded-full" /> -->
-					<!-- <h2 id="auth-panel-title" class="mt-6 text-4xl font-bold leading-tight xl:text-5xl">
-						{{ t("auth.panel.headline") }}
-					</h2> -->
-				</div>
-
-				<!--
-					An empty third row, so the headline sits at the panel's optical centre
-					under `justify-between` rather than being pushed to the bottom edge by
-					a two-child layout. Nothing is rendered into it.
-				-->
-				<div aria-hidden="true" />
 			</section>
 
 			<!--

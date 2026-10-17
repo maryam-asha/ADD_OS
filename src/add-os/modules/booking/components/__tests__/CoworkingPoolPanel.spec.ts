@@ -52,6 +52,12 @@ interface PanelVm {
 	takeBack: (window: { id: number }, override?: boolean) => Promise<void>
 }
 
+/** The panel opens collapsed (36c31db); the counts and alerts live in the expanded body. */
+async function expand(wrapper: ReturnType<typeof mountPanel>) {
+	(wrapper.vm as unknown as { isExpanded: boolean }).isExpanded = true
+	await flushPromises()
+}
+
 function mountPanel() {
 	return mount(CoworkingPoolPanel, {
 		props: {
@@ -78,6 +84,7 @@ describe("coworkingPoolPanel", () => {
 		await flushPromises()
 
 		expect(getPoolMock).toHaveBeenCalledWith(1)
+		await expand(wrapper)
 		const text = wrapper.text()
 		expect(text).toContain("16")
 		expect(text).toContain("11")
@@ -103,6 +110,7 @@ describe("coworkingPoolPanel", () => {
 		}))
 		const wrapper = mountPanel()
 		await flushPromises()
+		await expand(wrapper)
 
 		const rows = wrapper.findAll(".add-segment-row")
 		expect(rows).toHaveLength(2)
@@ -113,6 +121,7 @@ describe("coworkingPoolPanel", () => {
 		getPoolMock.mockResolvedValue(pool({ usage_now: 16, free_now: 0, min_free: 0 }))
 		const wrapper = mountPanel()
 		await flushPromises()
+		await expand(wrapper)
 
 		expect(wrapper.text()).toContain("coworkingPool.full")
 	})

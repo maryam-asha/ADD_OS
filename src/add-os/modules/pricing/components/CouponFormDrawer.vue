@@ -38,7 +38,7 @@
 
 			<div class="overflow-y-auto flex-1 p-4 md:p-5 bg-[#faf9f8] flex flex-col gap-3.5">
 				<n-spin :show="loading">
-					<n-alert v-if="grouped.other.length || loadFailed" type="error" :bordered="false" class="mb-4">
+					<n-alert v-if="grouped.other.length || loadFailed" type="error" :bordered="false" class="mb-4" data-test="coupon-form-other-errors">
 						<div v-if="loadFailed">{{ t('coupons.form.loadError') }}</div>
 						<div v-for="text in grouped.other" :key="text">{{ text }}</div>
 					</n-alert>
@@ -64,7 +64,7 @@
 								<span class="text-xs font-semibold text-neutral-600">{{ t('coupons.form.code') }} *</span>
 								<n-input-group>
 									<n-input :value="form.code" :maxlength="40" dir="ltr" :status="grouped.fields.code ? 'error' : undefined" @update:value="(v: string) => (form.code = v.toUpperCase())" />
-									<n-button @click="form.code = generateCouponCode()">
+									<n-button data-test="coupon-code-generate" @click="form.code = generateCouponCode()">
 										<template #icon><Icon name="carbon:shuffle" :size="16" /></template>
 										{{ t('coupons.form.generateCode') }}
 									</n-button>
@@ -223,7 +223,7 @@
 									<n-select :value="row.itemKey" :options="itemKindOptions(row)" :placeholder="t('coupons.form.itemKind')" :disabled="!row.purpose" size="small" clearable @update:value="(v: TargetItemKey | null) => setItemKey(row, v)" />
 									<n-select v-model:value="row.itemValue" :options="row.itemKey ? pickers.optionsFor(row.itemKey) : []" :placeholder="t('coupons.form.item')" :disabled="!row.itemKey" filterable size="small" />
 								</div>
-								<span v-if="grouped.targets[index]" class="text-xs text-red-500">
+								<span v-if="grouped.targets[index]" class="text-xs text-red-500" :data-test="`coupon-target-error-${index}`">
 									<div v-for="text in grouped.targets[index]" :key="text">{{ text }}</div>
 								</span>
 							</div>

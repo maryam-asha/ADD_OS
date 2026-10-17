@@ -16,6 +16,16 @@ import { describe, expect, it } from "vitest"
  * break a test, not silently ship and then either fail on a closed network or —
  * worse, if a port is open — leak usage patterns out of a closed system.
  *
+ * ── Changed 2026-10-13 ──────────────────────────────────────────────────────
+ * The box above described the whole system as VPN-isolated. That stopped being
+ * true for the API host: it is public (core.add-sy.com) because the member app
+ * calls it from outside, and so does this dashboard (os.add-sy.com), because
+ * provider accounts log in from their own companies. What was given up:
+ * isolation by network for the API and the dashboard. What replaces it for staff
+ * operations: nginx admits only office/VPN IPs to /api/v1/admin/*
+ * (docs/DEPLOYMENT.md). The guard's job is unchanged — every OTHER host still
+ * fails the build.
+ *
  * ── Two passes ──────────────────────────────────────────────────────────────
  * 1. EMITTED ARTIFACTS (`dist/`) — the authoritative check, because unrouted
  *    demo pages never reach it. Skipped when `dist/` is absent, so a plain
@@ -94,6 +104,15 @@ const ALLOWED: readonly AllowedHost[] = [
 		sourceOnly: true
 	},
 	{
+		host: "core.add-sy.com",
+		why: "The ADD OS API itself — VITE_API_URL, baked in at build time. The ONE runtime host this dashboard is meant to call. Decided 2026-10-13: the API is on a public domain because the member app needs it from outside; /api/v1/admin/* is held to office/VPN IPs at nginx instead. See docs/DEPLOYMENT.md."
+	},
+	{
+		host: "linkedin.com",
+		why: "Test fixture only: a member's own profile link in MemberProfilePage.spec.ts. Real links are member data from the API, never a string in the build.",
+		sourceOnly: true
+	},
+	{
 		host: "scripts.sil.org",
 		why: "The SIL Open Font License text shipped with the self-hosted Poppins files (add-os/assets/fonts/en/OFL.txt). The URL is prose inside a licence the font's terms require us to keep; a .txt under assets/ is never imported by the app, so the bundler never emits it. Deleting the line would breach the licence it appears in.",
 		sourceOnly: true
@@ -147,6 +166,9 @@ function scan(files: string[]): Finding[] {
 		}
 		for (const m of text.matchAll(URL_RE)) {
 			const host = cleanHost(m[1])
+			// A scheme with no host (`https://.` in copy telling a user what to type)
+			// names nothing to fetch.
+			if (!host) continue
 			if (ALLOWED_HOSTS.has(host)) continue
 			findings.push({
 				file: path.relative(ROOT, file).replace(/\\/g, "/"),
