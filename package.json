@@ -76,6 +76,8 @@
 		"jsvectormap": "^1.7.0",
 		"lodash": "^4.18.1",
 		"maplibre-gl": "^5.24.0",
+		"micromark": "^4.0.2",
+		"micromark-extension-gfm": "^3.0.0",
 		"mitt": "^3.0.1",
 		"naive-ui": "^2.44.1",
 		"pinia": "^3.0.4",
