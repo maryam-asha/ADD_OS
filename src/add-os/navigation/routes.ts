@@ -103,10 +103,14 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"reports.spacesReport": () => import("@/add-os/modules/reports/views/SpacesReportPage.vue"),
 	"reports.collectionsReport": () => import("@/add-os/modules/reports/views/CollectionsReportPage.vue"),
 	"payments.invoices": () => import("@/add-os/modules/payments/views/InvoicesPage.vue"),
-	"hr.employees": () => import("@/add-os/modules/hr/views/EmployeesPage.vue"),
-	"hr.employeeProfile": () => import("@/add-os/modules/hr/views/EmployeeProfilePage.vue"),
-	"hr.orgStructure": () => import("@/add-os/modules/hr/views/OrgStructurePage.vue"),
-	"myHr.myProfile": () => import("@/add-os/modules/hr/views/MyHrPage.vue")
+	"hr.employees": () => import("@/add-os/modules/hr/views/core/EmployeesPage.vue"),
+	"hr.employeeProfile": () => import("@/add-os/modules/hr/views/core/EmployeeProfilePage.vue"),
+	"hr.orgStructure": () => import("@/add-os/modules/hr/views/core/OrgStructurePage.vue"),
+	"hr.hrAlerts": () => import("@/add-os/modules/hr/views/core/HrAlertsPage.vue"),
+	"hrSettings.hrDocumentTypes": () => import("@/add-os/modules/hr/views/core/DocumentTypesPage.vue"),
+	"hrSettings.hrChecklistTemplates": () => import("@/add-os/modules/hr/views/core/ChecklistTemplatesPage.vue"),
+	"myHr.myProfile": () => import("@/add-os/modules/hr/views/core/MyHrPage.vue"),
+	"myHr.hrMyCertificate": () => import("@/add-os/modules/hr/views/core/MyCertificatePage.vue")
 }
 
 export function createAddOsRoutes(): RouteRecordRaw[] {

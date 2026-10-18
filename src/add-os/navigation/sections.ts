@@ -310,7 +310,21 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		pages: [
 			{ key: "employees", path: "employees", permission: "hr.employees.view" },
 			{ key: "employeeProfile", path: "employees/:id", hidden: true, permission: "hr.employees.view" },
-			{ key: "orgStructure", path: "org-structure", permission: "hr.org.view" }
+			{ key: "orgStructure", path: "org-structure", permission: "hr.org.view" },
+			{ key: "hrAlerts", path: "alerts", permission: "hr.alerts.view" }
+		]
+	},
+	{
+		// HR setup. Every page needs hr.settings.manage, so the section shows
+		// only to whoever runs HR; it is hidden for everyone else.
+		key: "hrSettings",
+		path: "/hr-settings",
+		icon: "carbon:settings-adjust",
+		status: "active",
+		roles: ["all"],
+		pages: [
+			{ key: "hrDocumentTypes", path: "document-types", permission: "hr.settings.manage" },
+			{ key: "hrChecklistTemplates", path: "checklist-templates", permission: "hr.settings.manage" }
 		]
 	},
 	{
@@ -322,7 +336,10 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		status: "active",
 		roles: ["all"],
 		employee: true,
-		pages: [{ key: "myProfile", path: "profile" }]
+		pages: [
+			{ key: "myProfile", path: "profile" },
+			{ key: "hrMyCertificate", path: "certificates/:kind", hidden: true }
+		]
 	},
 	{
 		key: "settings",

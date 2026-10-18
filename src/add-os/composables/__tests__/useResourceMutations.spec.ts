@@ -60,6 +60,18 @@ describe("useResourceMutations", () => {
 		expect(successMock).toHaveBeenCalledWith("Updated.")
 	})
 
+	it("update() toasts the server's own message when asked to, and the fixed one when it sends none", async () => {
+		const api = { create: vi.fn(), update: vi.fn().mockResolvedValue({ message: "تم تحديث الدرجة." }), remove: vi.fn().mockResolvedValue(undefined) }
+		const refetch = vi.fn().mockResolvedValue(undefined)
+		const { update, remove } = useResourceMutations(api, refetch, MESSAGES, { serverMessages: true })
+
+		await update(1, { label: "B" })
+		expect(successMock).toHaveBeenLastCalledWith("تم تحديث الدرجة.")
+
+		await remove(1)
+		expect(successMock).toHaveBeenLastCalledWith("Deleted.")
+	})
+
 	/**
 	 * Not every admin resource is keyed by an autoincrement id. Currencies are
 	 * keyed by a 3-letter `code` string (`Currency::$primaryKey = 'code'`), so

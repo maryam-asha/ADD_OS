@@ -49,6 +49,9 @@
 						@search="searchManagers"
 					/>
 				</n-form-item>
+				<n-form-item path="workLocationId" :label="t('hr.profile.fields.workLocation')">
+					<n-select v-model:value="form.workLocationId" :options="locationOptions" clearable />
+				</n-form-item>
 				<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
 					<n-form-item path="employmentType" :label="t('hr.hire.employmentType')">
 						<n-select v-model:value="form.employmentType" :options="employmentTypeOptions" />
@@ -87,14 +90,14 @@
 
 <script setup lang="ts">
 import type { FormInst, FormRules, SelectOption } from "naive-ui"
-import type { ContractType, EmploymentType, JobGrade, OrgUnit, Position, WorkMode } from "@/add-os/modules/hr/types/hr"
+import type { ContractType, EmploymentType, JobGrade, OrgUnit, Position, WorkLocation, WorkMode } from "@/add-os/modules/hr/types/hr"
 import { NButton, NDatePicker, NDrawer, NDrawerContent, NForm, NFormItem, NInput, NSelect, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { CONTRACT_TYPES, EMPLOYMENT_TYPES, WORK_MODES } from "@/add-os/modules/hr/types/hr"
 import { translated } from "@/add-os/modules/hr/utils/translated"
 import { ApiError } from "@/add-os/services/api"
-import { hireEmployee, listEmployees, listJobGrades, listPositions } from "@/add-os/services/hr"
+import { hireEmployee, listEmployees, listJobGrades, listPositions, listWorkLocations } from "@/add-os/services/hr/core"
 import Icon from "@/components/common/Icon.vue"
 
 const props = defineProps<{ units: OrgUnit[] }>()
@@ -115,6 +118,7 @@ interface HireForm {
 	positionId: number | null
 	jobGradeId: number | null
 	managerId: number | null
+	workLocationId: number | null
 	employmentType: EmploymentType
 	workMode: WorkMode
 	contractType: ContractType
@@ -134,6 +138,7 @@ function blankForm(): HireForm {
 		positionId: null,
 		jobGradeId: null,
 		managerId: null,
+		workLocationId: null,
 		employmentType: "full_time",
 		workMode: "on_site",
 		contractType: "open_ended",
@@ -159,6 +164,7 @@ const rules = computed<FormRules>(() => ({
 // ── Options ─────────────────────────────────────────────────────────────────
 const positions = ref<Position[]>([])
 const grades = ref<JobGrade[]>([])
+const locations = ref<WorkLocation[]>([])
 const managerOptions = ref<SelectOption[]>([])
 const searchingManagers = ref(false)
 
@@ -166,6 +172,7 @@ const unitOptions = computed<SelectOption[]>(() => props.units.filter(u => u.is_
 const positionOptions = computed<SelectOption[]>(() =>
 	positions.value.filter(p => p.is_active).map(p => ({ label: `${translated(p.title)} (${p.occupied}/${p.headcount})`, value: p.id, disabled: p.occupied >= p.headcount }))
 )
+const locationOptions = computed<SelectOption[]>(() => locations.value.filter(l => l.is_active).map(l => ({ label: translated(l.name), value: l.id })))
 const gradeOptions = computed<SelectOption[]>(() => grades.value.map(g => ({ label: `${g.code} · ${translated(g.name)}`, value: g.id })))
 const employmentTypeOptions = computed<SelectOption[]>(() => EMPLOYMENT_TYPES.map(v => ({ label: t(`hr.employmentType.${v}`), value: v })))
 const workModeOptions = computed<SelectOption[]>(() => WORK_MODES.map(v => ({ label: t(`hr.workMode.${v}`), value: v })))
@@ -175,7 +182,7 @@ watch(show, async visible => {
 	if (!visible) return
 	form.value = blankForm()
 	try {
-		grades.value = await listJobGrades()
+		;[grades.value, locations.value] = await Promise.all([listJobGrades(), listWorkLocations()])
 	} catch (e) {
 		if (!(e instanceof ApiError)) throw e
 	}
@@ -237,6 +244,7 @@ async function submit() {
 				position_id: f.positionId,
 				job_grade_id: f.jobGradeId,
 				manager_id: f.managerId,
+				work_location_id: f.workLocationId,
 				employment_type: f.employmentType,
 				work_mode: f.workMode
 			}

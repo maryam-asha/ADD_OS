@@ -10,7 +10,14 @@
 			"view": "View",
 			"edit": "Edit",
 			"active": "Active",
-			"inactive": "Inactive"
+			"inactive": "Inactive",
+			"arabicRequired": "{field}: the Arabic text is required",
+			"delete": "Delete",
+			"invalidEmail": "Enter a valid email address",
+			"no": "No",
+			"yes": "Yes",
+			"saveError": "Could not save. Try again.",
+			"status": "Status"
 		},
 		"status": {
 			"upcoming": "Joining soon",
@@ -94,7 +101,8 @@
 			"tabs": {
 				"overview": "Overview",
 				"career": "Career",
-				"documents": "Documents"
+				"documents": "Documents",
+				"checklist": "Checklist"
 			},
 			"personal": "Personal details",
 			"job": "Current job",
@@ -133,7 +141,8 @@
 				"type": "Event",
 				"effectiveOn": "Effective on",
 				"reason": "Reason"
-			}
+			},
+			"dependents": "Dependents"
 		},
 		"documents": {
 			"empty": "No documents.",
@@ -143,7 +152,10 @@
 			"expiresOn": "Expires on",
 			"expired": "Expired",
 			"linkError": "Could not open the document.",
-			"noAccess": "You are not allowed to view documents."
+			"noAccess": "You are not allowed to view documents.",
+			"delete": "Delete document",
+			"deleteConfirm": "Delete the {type} document \"{file}\" from this file? It no longer counts toward the employee's documents.",
+			"deleted": "Document deleted."
 		},
 		"org": {
 			"description": "Organisational units, their positions and seats.",
@@ -163,7 +175,17 @@
 			"positionTitle": "Position",
 			"headcount": "Seats",
 			"occupied": "Filled",
-			"saved": "The unit was saved."
+			"saved": "The unit was saved.",
+			"tabs": {
+				"units": "Units",
+				"grades": "Job grades",
+				"locations": "Work locations"
+			},
+			"emptyManage": "No unit yet. Add the first one to start the structure.",
+			"noPositionsManage": "No positions in this unit. Add one to hire into it.",
+			"deleteUnit": "Delete unit",
+			"deleteUnitConfirm": "Delete the unit {name}? A unit with sub-units, positions or anyone ever assigned to it cannot be deleted; deactivate it instead.",
+			"deleted": "Unit deleted."
 		},
 		"me": {
 			"description": "Your employment file at ADD.",
@@ -173,7 +195,243 @@
 			"documents": "My documents",
 			"team": "My team",
 			"teamEmpty": "No direct reports.",
-			"notEmployee": "No employee record is linked to your account."
+			"notEmployee": "No employee record is linked to your account.",
+			"career": "My career",
+			"noContacts": "No emergency contacts yet. Add someone to call if needed."
+		},
+		"terminationReason": {
+			"resignation": "Resignation",
+			"dismissal": "Dismissal",
+			"end_of_contract": "End of contract",
+			"retirement": "Retirement",
+			"death": "Death",
+			"other": "Other"
+		},
+		"gender": {
+			"male": "Male",
+			"female": "Female"
+		},
+		"maritalStatus": {
+			"single": "Single",
+			"married": "Married",
+			"divorced": "Divorced",
+			"widowed": "Widowed"
+		},
+		"checklistKind": {
+			"onboarding": "Onboarding",
+			"offboarding": "Offboarding"
+		},
+		"alertType": {
+			"contract_ending": "Contract ending",
+			"probation_ending": "Probation ending",
+			"document_expiring": "Document expiring",
+			"document_expired": "Document expired",
+			"document_missing": "Required document missing",
+			"certification_expiring": "Certification expiring",
+			"certification_expired": "Certification expired"
+		},
+		"alerts": {
+			"description": "What HR has to decide soon for everyone employed today: fixed-term contracts ending without a renewal, probations ending, and documents expiring, expired or missing. Open a row to go to the employee.",
+			"typeFilter": "Alert type",
+			"empty": "Nothing needs attention right now.",
+			"emptyFiltered": "No alerts of this type.",
+			"now": "Now",
+			"today": "Today",
+			"inDays": "In {n} day | In {n} days",
+			"daysAgo": "{n} day ago | {n} days ago",
+			"columns": {
+				"type": "Alert",
+				"dueOn": "Date",
+				"when": "When",
+				"detail": "Document"
+			},
+			"stats": {
+				"overdue": "Past due",
+				"week": "Within 7 days",
+				"total": "All alerts"
+			}
+		},
+		"career": {
+			"events": "Events",
+			"assignments": "Assignments",
+			"contracts": "Contracts",
+			"noAssignments": "No assignments.",
+			"noContracts": "No contracts.",
+			"period": "Period",
+			"since": "Since {date}"
+		},
+		"certificate": {
+			"employmentTitle": "Employment certificate",
+			"salaryTitle": "Salary certificate",
+			"issuer": "Aleppo Digital District",
+			"generatedAt": "Issued {date}",
+			"toWhom": "To whom it may concern,",
+			"statement": "This is to certify that {name}, employee number {number}, has worked at Aleppo Digital District since {date} as {title}, and is still employed.",
+			"statementFormer": "This is to certify that {name}, employee number {number}, worked at Aleppo Digital District from {date} as {title}.",
+			"name": "Name",
+			"monthlyPay": "Monthly pay",
+			"component": "Component",
+			"amount": "Amount",
+			"noPay": "No pay is recorded for today.",
+			"lastPayslip": "Last payslip ({period})",
+			"gross": "Gross",
+			"net": "Net",
+			"footer": "Issued at the employee's request from the HR records of Aleppo Digital District.",
+			"print": "Print",
+			"unknown": "There is no such certificate."
+		},
+		"checklist": {
+			"empty": "No tasks. Tasks appear here from the active checklist templates when the employee is hired or leaves.",
+			"progress": "{done} of {total} done",
+			"doneOn": "Done {date}",
+			"dueOn": "Due {date}",
+			"overdue": "Overdue since {date}",
+			"note": "Note",
+			"saved": "Task updated."
+		},
+		"documentTypes": {
+			"description": "The kinds of document an employee file holds. A required type counts toward each employee's completeness, for every contract type or only the ones you tick. A type with an expiry date asks for one on upload and raises alerts before it runs out. A type with documents on file cannot be deleted; deactivate it instead.",
+			"add": "Add document type",
+			"edit": "Edit document type",
+			"name": "Name",
+			"isRequired": "Required",
+			"contractTypes": "Required for (none ticked: every contract type)",
+			"hasExpiry": "Has an expiry date",
+			"required": "Required",
+			"optional": "Optional",
+			"requiredAll": "Every contract",
+			"created": "Document type added.",
+			"updated": "Document type updated.",
+			"deleted": "Document type deleted.",
+			"deleteWarning": "A type with documents on file cannot be deleted."
+		},
+		"upload": {
+			"title": "Upload document",
+			"choose": "Choose file",
+			"fileHint": "PDF, JPG or PNG, up to 10 MB.",
+			"fileRequired": "Choose a file to upload",
+			"notes": "Notes",
+			"submit": "Upload",
+			"success": "Document uploaded."
+		},
+		"editEmployee": {
+			"title": "Edit details",
+			"gender": "Gender",
+			"dateOfBirth": "Date of birth",
+			"nationality": "Nationality",
+			"nationalityHint": "Two-letter country code, e.g. SY",
+			"maritalStatus": "Marital status",
+			"address": "Address",
+			"sensitiveHint": "Stored encrypted. Leave blank to keep what is on file.",
+			"keepCurrent": "On file; leave blank to keep",
+			"saved": "Employee updated."
+		},
+		"sensitive": {
+			"title": "National ID and bank account",
+			"nationalId": "National ID",
+			"bankAccount": "Bank account",
+			"onFile": "On file",
+			"notOnFile": "Not on file",
+			"show": "Show",
+			"hide": "Hide",
+			"audited": "Your viewing was recorded. The values hide again after a minute."
+		},
+		"events": {
+			"title": "Record event",
+			"type": "Event",
+			"typePlaceholder": "Choose what changed",
+			"effectiveOn": "Effective on",
+			"lastWorkingDay": "Last working day",
+			"suspendedFrom": "Suspended from",
+			"suspendedUntil": "Suspended until (optional)",
+			"reason": "Reason",
+			"notes": "Notes",
+			"newContract": "New contract",
+			"noticeDays": "Notice period (days)",
+			"contractReference": "Contract reference",
+			"newAssignment": "New assignment",
+			"assignmentChange": "What changes",
+			"promotionHint": "A promotion must change the grade or the position. Only what you change is sent.",
+			"transferHint": "A transfer must change the unit; the position is cleared unless you choose one. Only what you change is sent.",
+			"assignmentHint": "Only what you change is sent.",
+			"nothingChanged": "Nothing changes from the current assignment.",
+			"submit": "Record",
+			"recorded": "{type} recorded.",
+			"terminationTitle": "Ending the employment",
+			"terminationNote": "After the last working day, the employee's dashboard roles are removed and they are signed out everywhere; their member account stays. Their pending loans and learning-budget requests are cancelled, and the offboarding checklist is created.",
+			"terminationConfirmTitle": "End the employment of {name}?",
+			"terminationConfirm": "The last working day is {date}. After it, their dashboard access is withdrawn and they are signed out everywhere; if that day has already passed, this happens now. This cannot be undone, only followed by a rehire.",
+			"terminationConfirmOk": "End employment"
+		},
+		"grades": {
+			"description": "Job grades, ordered by rank. A position and an assignment can name one.",
+			"add": "Add grade",
+			"edit": "Edit grade",
+			"name": "Name",
+			"rank": "Rank",
+			"rankHint": "Grades are listed from the lowest rank up.",
+			"created": "Grade added.",
+			"updated": "Grade updated.",
+			"deleted": "Grade deleted."
+		},
+		"locations": {
+			"description": "Where employees work. An assignment can name one.",
+			"add": "Add work location",
+			"edit": "Edit work location",
+			"name": "Name",
+			"address": "Address",
+			"created": "Work location added.",
+			"updated": "Work location updated.",
+			"deleted": "Work location deleted."
+		},
+		"people": {
+			"contactsTitle": "Emergency contacts",
+			"dependentsTitle": "Dependents",
+			"contactsHint": "Up to {n} contacts. Saving replaces the whole list.",
+			"dependentsHint": "Up to {n} dependents. Saving replaces the whole list.",
+			"name": "Name",
+			"relation": "Relation",
+			"phone": "Phone",
+			"dateOfBirth": "Date of birth",
+			"add": "Add",
+			"remove": "Remove",
+			"noDependents": "No dependents recorded.",
+			"incomplete": "Fill in every row, or remove the empty ones.",
+			"saved": "Saved."
+		},
+		"positions": {
+			"add": "Add position",
+			"edit": "Edit position",
+			"delete": "Delete position",
+			"deleteConfirm": "Delete the position {name}? A position anyone has held stays in their history and cannot be deleted; deactivate it instead.",
+			"deleted": "Position deleted.",
+			"titleAr": "Title in Arabic",
+			"titleEn": "Title in English",
+			"unit": "Unit",
+			"unitLocked": "Employees hold this position; move them before moving it to another unit.",
+			"headcountFloor": "{n} seats are taken; the headcount cannot go below that.",
+			"saved": "Position saved."
+		},
+		"templates": {
+			"description": "Tasks to do when someone joins or leaves. When an employee is hired, every active onboarding template becomes tasks on their checklist, due a number of days from the start date; when one leaves, the offboarding templates, from the last working day.",
+			"add": "Add template",
+			"edit": "Edit template",
+			"kind": "Kind",
+			"name": "Name",
+			"nameAr": "Name in Arabic",
+			"nameEn": "Name in English",
+			"items": "Tasks",
+			"itemAr": "Task in Arabic",
+			"itemEn": "Task in English",
+			"offset": "Days",
+			"offsetHintOn": "Days after the start date (negative: before it).",
+			"offsetHintOff": "Days after the last working day (negative: before it).",
+			"addItem": "Add task",
+			"removeItem": "Remove task",
+			"itemIncomplete": "Every task needs its Arabic text and a number of days.",
+			"created": "Template added.",
+			"updated": "Template updated.",
+			"deleted": "Template deleted."
 		}
 	}
 }

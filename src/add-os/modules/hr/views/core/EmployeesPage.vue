@@ -1,4 +1,4 @@
-<!-- src/add-os/modules/hr/views/EmployeesPage.vue -->
+<!-- src/add-os/modules/hr/views/core/EmployeesPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
 		<div class="flex flex-wrap items-start justify-between gap-3">
@@ -15,13 +15,13 @@
 		<n-alert v-if="loadError" type="error" :title="t('hr.common.loadError')" />
 
 		<div class="flex flex-wrap items-center gap-3">
-			<n-input v-model:value="search" :placeholder="t('hr.employees.searchPlaceholder')" clearable class="min-w-[240px] flex-1">
+			<n-input v-model:value="filters.q" :placeholder="t('hr.employees.searchPlaceholder')" clearable class="min-w-[240px] flex-1">
 				<template #prefix>
 					<Icon name="carbon:search" :size="16" />
 				</template>
 			</n-input>
 			<n-select
-				v-model:value="statusFilter"
+				v-model:value="filters.status"
 				:placeholder="t('hr.employees.statusFilter')"
 				:options="statusOptions"
 				clearable
@@ -29,7 +29,7 @@
 			/>
 			<n-select
 				v-if="unitOptions.length"
-				v-model:value="unitFilter"
+				v-model:value="filters.org_unit_id"
 				:placeholder="t('hr.employees.unitFilter')"
 				:options="unitOptions"
 				clearable
@@ -66,16 +66,17 @@
 import type { DataTableColumns, SelectOption } from "naive-ui"
 import type { EmployeeStatus, EmployeeSummary, OrgUnit } from "@/add-os/modules/hr/types/hr"
 import { NAlert, NButton, NCard, NDataTable, NInput, NPagination, NSelect } from "naive-ui"
-import { computed, h, onMounted, ref, watch } from "vue"
+import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import { canHireEmployees } from "@/add-os/config/permissions"
 import EmployeeStatusTag from "@/add-os/modules/hr/components/EmployeeStatusTag.vue"
 import HireEmployeeDrawer from "@/add-os/modules/hr/components/HireEmployeeDrawer.vue"
+import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
 import { EMPLOYEE_STATUSES } from "@/add-os/modules/hr/types/hr"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
 import { ApiError } from "@/add-os/services/api"
-import { listEmployees, listOrgUnits } from "@/add-os/services/hr"
+import { listEmployees, listOrgUnits } from "@/add-os/services/hr/core"
 import { formatDate } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
@@ -90,13 +91,13 @@ const hireVisible = ref(false)
 const rows = ref<EmployeeSummary[]>([])
 const loading = ref(true)
 const loadError = ref(false)
-const page = ref(1)
 const lastPage = ref(1)
 const units = ref<OrgUnit[]>([])
 
-const search = ref("")
-const statusFilter = ref<EmployeeStatus | null>(null)
-const unitFilter = ref<number | null>(null)
+/** Filters and page live in the URL; a new filter starts from page one. */
+const { filters, applied, page } = useRouteFilters({ q: "string", status: "string", org_unit_id: "number" }, () => void load(), {
+	debounced: ["q"]
+})
 
 async function load() {
 	loading.value = true
@@ -104,9 +105,9 @@ async function load() {
 	try {
 		const result = await listEmployees({
 			page: page.value,
-			q: search.value.trim() || undefined,
-			status: statusFilter.value,
-			org_unit_id: unitFilter.value
+			q: applied.value.q?.trim() || undefined,
+			status: applied.value.status as EmployeeStatus | null,
+			org_unit_id: applied.value.org_unit_id
 		})
 		rows.value = result.data
 		lastPage.value = result.meta.last_page
@@ -127,24 +128,7 @@ async function loadUnits() {
 	}
 }
 
-onMounted(() => {
-	void load()
-	void loadUnits()
-})
-
-/** A new filter starts from page one; changing the page reloads by itself. */
-function reloadFromFirstPage() {
-	if (page.value === 1) void load()
-	else page.value = 1
-}
-
-let searchTimer: ReturnType<typeof setTimeout> | undefined
-watch(search, () => {
-	clearTimeout(searchTimer)
-	searchTimer = setTimeout(reloadFromFirstPage, 350)
-})
-watch([statusFilter, unitFilter], reloadFromFirstPage)
-watch(page, () => void load())
+onMounted(loadUnits)
 
 // ── Options ─────────────────────────────────────────────────────────────────
 const statusOptions = computed<SelectOption[]>(() => EMPLOYEE_STATUSES.map(s => ({ label: t(`hr.status.${s}`), value: s })))

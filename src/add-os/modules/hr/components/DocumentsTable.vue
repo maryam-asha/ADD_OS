@@ -15,18 +15,23 @@ import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
 import { ApiError } from "@/add-os/services/api"
+import { STATUS_ICONS } from "@/add-os/theme/tokens"
 import { formatDate } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
 /**
  * Employee documents. A file opens only through a signed link that works
  * for a few minutes (every link is audited on the server), so `open`
- * fetches a fresh one per click.
+ * fetches a fresh one per click. `remove`, when given, adds a delete action
+ * (the caller confirms it).
  */
 const props = defineProps<{
 	documents: EmployeeDocument[]
 	loading?: boolean
 	open: (documentId: number) => Promise<DocumentLink>
+	remove?: (document: EmployeeDocument) => void
+	/** Ids the server counts as expired (`compliance.expired`); without it, the date decides. */
+	expiredIds?: number[]
 }>()
 
 const { t } = useI18n()
@@ -47,6 +52,7 @@ async function openDocument(document: EmployeeDocument) {
 }
 
 function isExpired(document: EmployeeDocument): boolean {
+	if (props.expiredIds) return props.expiredIds.includes(document.id)
 	return document.expires_on !== null && document.expires_on < new Date().toISOString().slice(0, 10)
 }
 
@@ -63,28 +69,41 @@ const columns = computed<DataTableColumns<EmployeeDocument>>(() => [
 			if (!isExpired(row)) return formatDate(row.expires_on)
 			return h("span", { class: "inline-flex items-center gap-2" }, [
 				formatDate(row.expires_on),
-				h(NTag, { type: "error", size: "small", round: true }, { default: () => t("hr.documents.expired") })
+				h(
+					NTag,
+					{ type: "error", size: "small", round: true, bordered: true },
+					{ icon: () => h(Icon, { name: STATUS_ICONS.danger, size: 14 }), default: () => t("hr.documents.expired") }
+				)
 			])
 		}
 	},
 	{
 		title: "",
 		key: "open",
-		width: 70,
+		width: props.remove ? 100 : 70,
 		align: "center",
 		render: row =>
-			h(
-				NButton,
-				{
-					text: true,
-					type: "primary",
-					loading: opening.value === row.id,
-					"aria-label": t("hr.common.open"),
-					title: t("hr.common.open"),
-					onClick: () => openDocument(row)
-				},
-				{ icon: () => h(Icon, { name: "carbon:launch", size: 18 }) }
-			)
+			h("div", { class: "flex justify-center gap-3" }, [
+				h(
+					NButton,
+					{
+						text: true,
+						type: "primary",
+						loading: opening.value === row.id,
+						"aria-label": t("hr.common.open"),
+						title: t("hr.common.open"),
+						onClick: () => openDocument(row)
+					},
+					{ icon: () => h(Icon, { name: "carbon:launch", size: 18 }) }
+				),
+				props.remove
+					? h(
+							NButton,
+							{ text: true, type: "error", "aria-label": t("hr.common.delete"), title: t("hr.common.delete"), onClick: () => props.remove?.(row) },
+							{ icon: () => h(Icon, { name: "carbon:trash-can", size: 18 }) }
+						)
+					: null
+			])
 	}
 ])
 </script>

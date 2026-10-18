@@ -9,6 +9,15 @@ interface MutationMessages {
 	deleteSuccess: string
 }
 
+interface MutationOptions {
+	/**
+	 * Show the `{message}` an update answers instead of `updateSuccess` when
+	 * there is one. HR's endpoints translate it on the server; resources whose
+	 * message is a fixed English string keep the default.
+	 */
+	serverMessages?: boolean
+}
+
 /**
  * `TKey` defaults to `number` because almost every admin resource here is an
  * autoincrement id, and several callers pass rejecting stubs for verbs their
@@ -24,7 +33,8 @@ export function useResourceMutations<T, CreatePayload, UpdatePayload, TKey exten
 		remove: (id: TKey) => Promise<{ message?: string }>
 	},
 	refetch: () => Promise<void>,
-	messages: MutationMessages
+	messages: MutationMessages,
+	options: MutationOptions = {}
 ) {
 	const message = useMessage()
 	const { t } = useI18n()
@@ -45,7 +55,8 @@ export function useResourceMutations<T, CreatePayload, UpdatePayload, TKey exten
 		isSubmitting.value = true
 		try {
 			const result = await action()
-			message.success(successMessage)
+			const serverText = options.serverMessages ? (result as { message?: unknown } | undefined)?.message : undefined
+			message.success(typeof serverText === "string" && serverText ? serverText : successMessage)
 			await refetch()
 			return result
 		} catch (caught) {

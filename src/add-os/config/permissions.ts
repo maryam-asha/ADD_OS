@@ -251,16 +251,56 @@ export function canViewDashboard(): boolean {
 /**
  * HR (add/hr in ADD Core). Every HR admin route carries its own `hr.*`
  * permission and no role gate, so a custom HR role works without
- * admin|operations; these only decide which controls to show.
+ * admin|operations; these only decide which controls to show. Each name
+ * below is the `can:` middleware on its route in
+ * `packages/add/hr/routes/<module>/admin.php`.
  */
+
+// ── HR core ─────────────────────────────────────────────────────────────────
+
+/** Whether an employee's name may link to their profile from another HR page. */
+export function canViewEmployees(): boolean {
+	return can("hr.employees.view")
+}
+
 export function canHireEmployees(): boolean {
 	return can("hr.employees.create")
+}
+
+/** PATCH employees/{id}, and PUT its contacts and dependents. */
+export function canUpdateEmployees(): boolean {
+	return can("hr.employees.update")
+}
+
+/** GET employees/{id}/sensitive — the national ID and bank account, audited on each read. */
+export function canViewEmployeeSensitive(): boolean {
+	return can("hr.employees.view_sensitive")
+}
+
+/** POST employees/{id}/events: promotions, transfers, renewals, suspensions, terminations, rehires. */
+export function canRecordEmploymentEvents(): boolean {
+	return can("hr.lifecycle.manage")
 }
 
 export function canViewEmployeeDocuments(): boolean {
 	return can("hr.documents.view")
 }
 
+/** Uploading and deleting an employee's documents. */
+export function canManageEmployeeDocuments(): boolean {
+	return can("hr.documents.manage")
+}
+
+/** An employee's onboarding/offboarding tasks: reading them as well as ticking them. */
+export function canManageChecklists(): boolean {
+	return can("hr.checklists.manage")
+}
+
 export function canManageOrgStructure(): boolean {
 	return can("hr.org.manage")
+}
+
+/** HR settings: document types, checklist templates (and later modules' setup). */
+export function canManageHrSettings(): boolean {
+	return can("hr.settings.manage")
 }

@@ -1,0 +1,36 @@
+// ── Printing one page ───────────────────────────────────────────────────────
+//
+// A page that is meant for paper — an HR certificate, later a payslip —
+// carries `.add-print-page` on its root and hides its own buttons with
+// Tailwind's `print:hidden`. Printing it then keeps only that page: the
+// sidebar, toolbar and footer belong to the template, so they are hidden by
+// visibility rather than by naming the template's classes, and the page is
+// lifted to the top of the sheet.
+//
+// `!important` because the shell's scroll container sets its overflow and
+// height inline (naive-ui's n-scrollbar), which would clip a long page.
+
+@media print {
+	body:has(.add-print-page) {
+		* {
+			visibility: hidden;
+		}
+
+		.add-print-page,
+		.add-print-page * {
+			visibility: visible;
+		}
+
+		.add-print-page {
+			position: absolute;
+			inset-inline: 0;
+			top: 0;
+		}
+
+		.n-scrollbar-container,
+		.n-scrollbar-content {
+			overflow: visible !important;
+			height: auto !important;
+		}
+	}
+}

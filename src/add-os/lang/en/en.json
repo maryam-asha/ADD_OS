@@ -1560,7 +1560,8 @@
 			"providerPortal": "Provider Portal",
 			"reports": "Reports",
 			"hr": "Human resources",
-			"myHr": "My HR"
+			"myHr": "My HR",
+			"hrSettings": "HR settings"
 		},
 		"pages": {
 			"overview": "Overview",
@@ -1644,7 +1645,11 @@
 			"employees": "Employees",
 			"employeeProfile": "Employee profile",
 			"orgStructure": "Org structure",
-			"myProfile": "My profile"
+			"myProfile": "My profile",
+			"hrAlerts": "Alerts",
+			"hrDocumentTypes": "Document types",
+			"hrChecklistTemplates": "Checklist templates",
+			"hrMyCertificate": "Certificate"
 		}
 	},
 	"resourceCrud": {

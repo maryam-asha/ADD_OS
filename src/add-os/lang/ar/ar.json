@@ -1564,7 +1564,8 @@
 			"providerPortal": "بوابة المزوّد",
 			"reports": "التقارير",
 			"hr": "الموارد البشرية",
-			"myHr": "شؤوني الوظيفية"
+			"myHr": "شؤوني الوظيفية",
+			"hrSettings": "إعدادات الموارد البشرية"
 		},
 		"pages": {
 			"overview": "نظرة عامة",
@@ -1648,7 +1649,11 @@
 			"employees": "الموظفون",
 			"employeeProfile": "ملف الموظف",
 			"orgStructure": "الهيكل التنظيمي",
-			"myProfile": "ملفي الوظيفي"
+			"myProfile": "ملفي الوظيفي",
+			"hrAlerts": "التنبيهات",
+			"hrDocumentTypes": "أنواع الوثائق",
+			"hrChecklistTemplates": "قوالب قوائم المهام",
+			"hrMyCertificate": "الشهادة"
 		}
 	},
 	"resourceCrud": {
