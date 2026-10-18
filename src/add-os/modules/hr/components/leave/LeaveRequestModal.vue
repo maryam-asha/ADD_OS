@@ -1,72 +1,71 @@
-<!-- src/add-os/modules/hr/components/leave/LeaveRequestDrawer.vue -->
+<!-- src/add-os/modules/hr/components/leave/LeaveRequestModal.vue -->
 <template>
-	<n-drawer v-model:show="show" :width="520" placement="right">
-		<n-drawer-content :title closable>
-			<n-form ref="formRef" :model="form" :rules label-placement="top">
-				<n-form-item path="typeId" :label="t('hrLeave.request.type')">
-					<n-select v-model:value="form.typeId" :options="typeOptions" />
+	<HrFormModal v-model:show="show" :title>
+		<n-form ref="formRef" :model="form" :rules label-placement="top">
+			<n-form-item path="typeId" :label="t('hrLeave.request.type')">
+				<n-select v-model:value="form.typeId" :options="typeOptions" />
+			</n-form-item>
+
+			<template v-if="selected">
+				<n-form-item v-if="selected.unit === 'hour'" path="startsOn" :label="t('hrLeave.request.day')">
+					<n-date-picker v-model:formatted-value="form.startsOn" value-format="yyyy-MM-dd" type="date" class="w-full" />
+				</n-form-item>
+				<n-form-item v-else path="range" :label="t('hrLeave.request.dates')">
+					<n-date-picker v-model:formatted-value="form.range" value-format="yyyy-MM-dd" type="daterange" class="w-full" />
 				</n-form-item>
 
-				<template v-if="selected">
-					<n-form-item v-if="selected.unit === 'hour'" path="startsOn" :label="t('hrLeave.request.day')">
-						<n-date-picker v-model:formatted-value="form.startsOn" value-format="yyyy-MM-dd" type="date" class="w-full" />
-					</n-form-item>
-					<n-form-item v-else path="range" :label="t('hrLeave.request.dates')">
-						<n-date-picker v-model:formatted-value="form.range" value-format="yyyy-MM-dd" type="daterange" class="w-full" />
-					</n-form-item>
+				<n-form-item v-if="selected.unit === 'hour'" path="hours" :label="t('hrLeave.request.hours')">
+					<n-input-number v-model:value="form.hours" :min="0.25" :max="24" :step="0.5" class="w-full" />
+				</n-form-item>
+				<n-form-item v-else-if="halfDayOffered" path="halfDay" :label="t('hrLeave.request.halfDay')" :feedback="singleDay ? undefined : t('hrLeave.request.halfDayHint')">
+					<n-select v-model:value="form.halfDay" :options="halfDayOptions" :disabled="!singleDay" clearable :placeholder="t('hrLeave.request.fullDay')" />
+				</n-form-item>
 
-					<n-form-item v-if="selected.unit === 'hour'" path="hours" :label="t('hrLeave.request.hours')">
-						<n-input-number v-model:value="form.hours" :min="0.25" :max="24" :step="0.5" class="w-full" />
-					</n-form-item>
-					<n-form-item v-else-if="halfDayOffered" path="halfDay" :label="t('hrLeave.request.halfDay')" :feedback="singleDay ? undefined : t('hrLeave.request.halfDayHint')">
-						<n-select v-model:value="form.halfDay" :options="halfDayOptions" :disabled="!singleDay" clearable :placeholder="t('hrLeave.request.fullDay')" />
-					</n-form-item>
+				<n-alert v-if="quote" type="info" class="mb-4" :title="t('hrLeave.quote.title', { amount: leaveAmount(t, quote.amount, quote.unit) })">
+					<template v-if="quote.available !== null">
+						{{ t("hrLeave.quote.balance", { available: leaveAmount(t, quote.available, quote.unit), after: leaveAmount(t, quote.remaining_after, quote.unit) }) }}
+					</template>
+				</n-alert>
+				<n-alert v-else-if="quoteError" type="warning" class="mb-4" :title="quoteError" />
 
-					<n-alert v-if="quote" type="info" class="mb-4" :title="t('hrLeave.quote.title', { amount: leaveAmount(t, quote.amount, quote.unit) })">
-						<template v-if="quote.available !== null">
-							{{ t("hrLeave.quote.balance", { available: leaveAmount(t, quote.available, quote.unit), after: leaveAmount(t, quote.remaining_after, quote.unit) }) }}
-						</template>
-					</n-alert>
-					<n-alert v-else-if="quoteError" type="warning" class="mb-4" :title="quoteError" />
-
-					<n-form-item path="reason" :label="t('hrLeave.request.reason')">
-						<n-input v-model:value="form.reason" type="textarea" :autosize="{ minRows: 2, maxRows: 5 }" :maxlength="1000" />
-					</n-form-item>
-					<n-form-item
-						path="attachment"
-						:label="t('hrLeave.request.attachment')"
-						:feedback="selected.requires_attachment ? t('hrLeave.request.attachmentRequired') : t('hrLeave.request.attachmentHint')"
-					>
-						<n-upload :default-upload="false" :max="1" accept=".pdf,.jpg,.jpeg,.png" :file-list @update:file-list="onFiles">
-							<n-button>
-								<template #icon><Icon name="carbon:document-add" :size="16" /></template>
-								{{ t("hr.upload.choose") }}
-							</n-button>
-						</n-upload>
-					</n-form-item>
-				</template>
-			</n-form>
-
-			<template #footer>
-				<div class="flex justify-end gap-2">
-					<n-button @click="show = false">{{ t("hr.common.cancel") }}</n-button>
-					<n-button type="primary" :loading="submitting" :disabled="!selected" @click="send">
-						<template #icon><Icon name="carbon:send" :size="16" /></template>
-						{{ t("hrLeave.request.submit") }}
-					</n-button>
-				</div>
+				<n-form-item path="reason" :label="t('hrLeave.request.reason')">
+					<n-input v-model:value="form.reason" type="textarea" :autosize="{ minRows: 2, maxRows: 5 }" :maxlength="1000" />
+				</n-form-item>
+				<n-form-item
+					path="attachment"
+					:label="t('hrLeave.request.attachment')"
+					:feedback="selected.requires_attachment ? t('hrLeave.request.attachmentRequired') : t('hrLeave.request.attachmentHint')"
+				>
+					<n-upload :default-upload="false" :max="1" accept=".pdf,.jpg,.jpeg,.png" :file-list @update:file-list="onFiles">
+						<n-button>
+							<template #icon><Icon name="carbon:document-add" :size="16" /></template>
+							{{ t("hr.upload.choose") }}
+						</n-button>
+					</n-upload>
+				</n-form-item>
 			</template>
-		</n-drawer-content>
-	</n-drawer>
+		</n-form>
+
+		<template #footer>
+			<div class="flex justify-end gap-2">
+				<n-button @click="show = false">{{ t("hr.common.cancel") }}</n-button>
+				<n-button type="primary" :loading="submitting" :disabled="!selected" @click="send">
+					<template #icon><Icon name="carbon:send" :size="16" /></template>
+					{{ t("hrLeave.request.submit") }}
+				</n-button>
+			</div>
+		</template>
+	</HrFormModal>
 </template>
 
 <script setup lang="ts">
 import type { FormInst, FormItemRule, FormRules, SelectOption, UploadFileInfo } from "naive-ui"
 import type { Translatable } from "@/add-os/modules/hr/types/hr"
 import type { HalfDay, LeaveQuote, LeaveRequest, LeaveUnit, SubmitLeavePayload } from "@/add-os/modules/hr/types/leave"
-import { NAlert, NButton, NDatePicker, NDrawer, NDrawerContent, NForm, NFormItem, NInput, NInputNumber, NSelect, NUpload, useMessage } from "naive-ui"
+import { NAlert, NButton, NDatePicker, NForm, NFormItem, NInput, NInputNumber, NSelect, NUpload, useMessage } from "naive-ui"
 import { computed, onBeforeUnmount, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import { HALF_DAYS } from "@/add-os/modules/hr/types/leave"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import { nullable } from "@/add-os/modules/hr/utils/forms"

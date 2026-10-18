@@ -11,18 +11,7 @@
 		<div class="flex flex-wrap items-center gap-3">
 			<n-select v-model:value="filters.status" :options="statusOptions" :placeholder="t('hr.common.status')" clearable class="max-w-xs" />
 			<n-select v-model:value="filters.leave_type_id" :options="typeOptions" :placeholder="t('hrLeave.request.type')" clearable class="max-w-xs" />
-			<n-select
-				v-if="mayFindEmployees"
-				v-model:value="filters.employee_id"
-				:options="employeeOptions"
-				:loading="searching"
-				:placeholder="t('hrApprovals.requests.employeeFilter')"
-				filterable
-				remote
-				clearable
-				class="max-w-xs"
-				@search="searchEmployees"
-			/>
+			<EmployeeSelect v-if="mayFindEmployees" v-model:value="filters.employee_id" include-former :placeholder="t('hrApprovals.requests.employeeFilter')" class="max-w-xs" />
 			<n-date-picker
 				:formatted-value="range"
 				value-format="yyyy-MM-dd"
@@ -56,13 +45,14 @@ import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { canManageLeave, canViewEmployees } from "@/add-os/config/permissions"
 import ApprovalStatusTag from "@/add-os/modules/hr/components/approvals/ApprovalStatusTag.vue"
+import EmployeeSelect from "@/add-os/modules/hr/components/EmployeeSelect.vue"
 import LeaveRequestDetailDrawer from "@/add-os/modules/hr/components/leave/LeaveRequestDetailDrawer.vue"
 import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
 import { LEAVE_REQUEST_STATUSES } from "@/add-os/modules/hr/types/leave"
+import { employeeCell } from "@/add-os/modules/hr/utils/cells"
 import { leaveAmount, leavePeriod } from "@/add-os/modules/hr/utils/leave"
 import { translated } from "@/add-os/modules/hr/utils/translated"
 import { ApiError } from "@/add-os/services/api"
-import { listEmployees } from "@/add-os/services/hr/core"
 import { cancelLeaveRequest, getLeaveRequest, listLeaveRequests, listLeaveTypes } from "@/add-os/services/hr/leave"
 
 /**
@@ -128,21 +118,6 @@ function onRange(value: [string, string] | null) {
 const statusOptions = computed<SelectOption[]>(() => LEAVE_REQUEST_STATUSES.map(s => ({ label: t(`hrApprovals.status.${s}`), value: s })))
 const typeOptions = computed<SelectOption[]>(() => types.value.map(type => ({ label: translated(type.name), value: type.id })))
 
-const employeeOptions = ref<SelectOption[]>([])
-const searching = ref(false)
-async function searchEmployees(term: string) {
-	if (!term.trim()) return
-	searching.value = true
-	try {
-		const result = await listEmployees({ q: term.trim() })
-		employeeOptions.value = result.data.map(e => ({ label: `${translated(e.name)} · ${e.employee_number}`, value: e.id }))
-	} catch (e) {
-		if (!(e instanceof ApiError)) throw e
-	} finally {
-		searching.value = false
-	}
-}
-
 const detailVisible = ref(false)
 const openId = ref<number | null>(null)
 function rowProps(row: LeaveRequest) {
@@ -160,11 +135,7 @@ const columns = computed<DataTableColumns<LeaveRequest>>(() => [
 		title: t("hr.employees.columns.employee"),
 		key: "employee",
 		minWidth: 200,
-		render: row =>
-			h("div", { class: "flex flex-col gap-0.5 py-1" }, [
-				h("span", { class: "font-semibold text-sm" }, translated(row.employee.name)),
-				h("span", { class: "text-xs text-secondary font-mono", dir: "ltr" }, row.employee.employee_number)
-			])
+		render: row => employeeCell(row.employee)
 	},
 	{ title: t("hrLeave.request.type"), key: "leave_type", minWidth: 130, render: row => translated(row.leave_type.name) },
 	{ title: t("hrLeave.request.dates"), key: "starts_on", minWidth: 200, render: row => leavePeriod(t, row) },

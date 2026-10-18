@@ -1,101 +1,100 @@
-<!-- src/add-os/modules/hr/components/leave/LeavePolicyDrawer.vue -->
+<!-- src/add-os/modules/hr/components/leave/LeavePolicyModal.vue -->
 <template>
-	<n-drawer v-model:show="show" :width="640" placement="right">
-		<n-drawer-content :title="policy ? t('hrLeave.policies.edit') : t('hrLeave.policies.add')" closable>
-			<n-form ref="formRef" :model="form" :rules label-placement="top">
-				<n-form-item path="leaveTypeId" :label="t('hrLeave.request.type')">
-					<n-select v-model:value="form.leaveTypeId" :options="typeOptions" :disabled="policy !== null" />
+	<HrFormModal v-model:show="show" :title="policy ? t('hrLeave.policies.edit') : t('hrLeave.policies.add')" size="lg">
+		<n-form ref="formRef" :model="form" :rules label-placement="top">
+			<n-form-item path="leaveTypeId" :label="t('hrLeave.request.type')">
+				<n-select v-model:value="form.leaveTypeId" :options="typeOptions" :disabled="policy !== null" />
+			</n-form-item>
+			<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+				<n-form-item path="nameAr" :label="t('hrApprovals.flows.nameAr')">
+					<n-input v-model:value="form.nameAr" />
 				</n-form-item>
-				<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
-					<n-form-item path="nameAr" :label="t('hrApprovals.flows.nameAr')">
-						<n-input v-model:value="form.nameAr" />
-					</n-form-item>
-					<n-form-item path="nameEn" :label="t('hrApprovals.flows.nameEn')">
-						<n-input v-model:value="form.nameEn" />
-					</n-form-item>
-					<n-form-item path="effectiveFrom" :label="t('hrLeave.policies.effectiveFrom')">
-						<n-date-picker v-model:formatted-value="form.effectiveFrom" value-format="yyyy-MM-dd" type="date" class="w-full" />
-					</n-form-item>
-					<n-form-item path="effectiveTo" :label="t('hrLeave.policies.effectiveTo')">
-						<n-date-picker v-model:formatted-value="form.effectiveTo" value-format="yyyy-MM-dd" type="date" clearable class="w-full" />
-					</n-form-item>
-				</div>
-
-				<h3 class="mb-2 mt-2 font-semibold">{{ t("hrLeave.policies.entitlement") }}</h3>
-				<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
-					<n-form-item path="accrualMethod" :label="t('hrLeave.policies.accrualMethod')" :feedback="t(`hrLeave.accrual.hint.${form.accrualMethod}`)">
-						<n-select v-model:value="form.accrualMethod" :options="accrualOptions" />
-					</n-form-item>
-					<n-form-item path="annualEntitlement" :label="t('hrLeave.policies.annualEntitlement')">
-						<n-input-number v-model:value="form.annualEntitlement" :min="0" :max="366" :step="0.5" class="w-full" />
-					</n-form-item>
-					<n-form-item path="maxNegative" :label="t('hrLeave.policies.maxNegative')" :feedback="t('hrLeave.policies.maxNegativeHint')">
-						<n-input-number v-model:value="form.maxNegative" :min="0" :max="366" :step="0.5" class="w-full" />
-					</n-form-item>
-				</div>
-
-				<div class="mb-4 flex flex-col gap-2">
-					<span class="font-semibold">{{ t("hrLeave.policies.serviceTiers") }}</span>
-					<span class="text-sm text-secondary">{{ t("hrLeave.policies.serviceTiersHint") }}</span>
-					<div v-for="(tier, index) in form.tiers" :key="index" class="grid grid-cols-[1fr_1fr_auto] items-center gap-2">
-						<n-input-number v-model:value="tier.minYears" :min="1" :max="60" :precision="0" :placeholder="t('hrLeave.policies.minYears')" :aria-label="t('hrLeave.policies.minYears')" />
-						<n-input-number v-model:value="tier.entitlement" :min="0" :max="366" :step="0.5" :placeholder="t('hrLeave.policies.tierEntitlement')" :aria-label="t('hrLeave.policies.tierEntitlement')" />
-						<n-button text type="error" :aria-label="t('hrLeave.policies.removeTier')" :title="t('hrLeave.policies.removeTier')" @click="form.tiers.splice(index, 1)">
-							<template #icon><Icon name="carbon:trash-can" :size="18" /></template>
-						</n-button>
-					</div>
-					<div>
-						<n-button size="small" :disabled="form.tiers.length >= 20" @click="form.tiers.push({ minYears: null, entitlement: null })">
-							<template #icon><Icon name="carbon:add" :size="16" /></template>
-							{{ t("hrLeave.policies.addTier") }}
-						</n-button>
-					</div>
-				</div>
-
-				<h3 class="mb-2 font-semibold">{{ t("hrLeave.policies.carryOver") }}</h3>
-				<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
-					<n-form-item path="carryOverMax" :label="t('hrLeave.policies.carryOverMax')" :feedback="t('hrLeave.policies.carryOverMaxHint')">
-						<n-input-number v-model:value="form.carryOverMax" :min="0" :max="366" :step="0.5" clearable class="w-full" />
-					</n-form-item>
-					<n-form-item path="carryOverExpiry" :label="t('hrLeave.policies.carryOverExpiry')" :feedback="t('hrLeave.policies.carryOverExpiryHint')">
-						<n-input-number v-model:value="form.carryOverExpiry" :min="1" :max="24" :precision="0" clearable class="w-full" />
-					</n-form-item>
-				</div>
-
-				<h3 class="mb-1 mt-2 font-semibold">{{ t("hrLeave.policies.appliesTo") }}</h3>
-				<p class="mb-3 text-sm text-secondary">{{ t("hrLeave.policies.appliesToHint") }}</p>
-				<n-form-item path="contractTypes" :label="t('hr.profile.fields.contractType')">
-					<n-select v-model:value="form.contractTypes" :options="contractOptions" multiple clearable :placeholder="t('hrLeave.policies.everyone')" />
+				<n-form-item path="nameEn" :label="t('hrApprovals.flows.nameEn')">
+					<n-input v-model:value="form.nameEn" />
 				</n-form-item>
-				<n-form-item path="gradeIds" :label="t('hr.hire.jobGrade')">
-					<n-select v-model:value="form.gradeIds" :options="gradeOptions" multiple clearable filterable :placeholder="t('hrLeave.policies.everyone')" />
+				<n-form-item path="effectiveFrom" :label="t('hrLeave.policies.effectiveFrom')">
+					<n-date-picker v-model:formatted-value="form.effectiveFrom" value-format="yyyy-MM-dd" type="date" class="w-full" />
 				</n-form-item>
-				<n-form-item path="unitIds" :label="t('hr.hire.orgUnit')">
-					<n-select v-model:value="form.unitIds" :options="unitOptions" multiple clearable filterable :placeholder="t('hrLeave.policies.everyone')" />
+				<n-form-item path="effectiveTo" :label="t('hrLeave.policies.effectiveTo')">
+					<n-date-picker v-model:formatted-value="form.effectiveTo" value-format="yyyy-MM-dd" type="date" clearable class="w-full" />
 				</n-form-item>
-				<p v-if="tierError" class="text-sm text-error">{{ tierError }}</p>
-			</n-form>
+			</div>
 
-			<template #footer>
-				<div class="flex justify-end gap-2">
-					<n-button @click="show = false">{{ t("hr.common.cancel") }}</n-button>
-					<n-button type="primary" :loading="saving" @click="save">
-						<template #icon><Icon name="carbon:checkmark" :size="16" /></template>
-						{{ t("hr.common.save") }}
+			<h3 class="mb-2 mt-2 font-semibold">{{ t("hrLeave.policies.entitlement") }}</h3>
+			<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+				<n-form-item path="accrualMethod" :label="t('hrLeave.policies.accrualMethod')" :feedback="t(`hrLeave.accrual.hint.${form.accrualMethod}`)">
+					<n-select v-model:value="form.accrualMethod" :options="accrualOptions" />
+				</n-form-item>
+				<n-form-item path="annualEntitlement" :label="t('hrLeave.policies.annualEntitlement')">
+					<n-input-number v-model:value="form.annualEntitlement" :min="0" :max="366" :step="0.5" class="w-full" />
+				</n-form-item>
+				<n-form-item path="maxNegative" :label="t('hrLeave.policies.maxNegative')" :feedback="t('hrLeave.policies.maxNegativeHint')">
+					<n-input-number v-model:value="form.maxNegative" :min="0" :max="366" :step="0.5" class="w-full" />
+				</n-form-item>
+			</div>
+
+			<div class="mb-4 flex flex-col gap-2">
+				<span class="font-semibold">{{ t("hrLeave.policies.serviceTiers") }}</span>
+				<span class="text-sm text-secondary">{{ t("hrLeave.policies.serviceTiersHint") }}</span>
+				<div v-for="(tier, index) in form.tiers" :key="index" class="grid grid-cols-[1fr_1fr_auto] items-center gap-2">
+					<n-input-number v-model:value="tier.minYears" :min="1" :max="60" :precision="0" :placeholder="t('hrLeave.policies.minYears')" :aria-label="t('hrLeave.policies.minYears')" />
+					<n-input-number v-model:value="tier.entitlement" :min="0" :max="366" :step="0.5" :placeholder="t('hrLeave.policies.tierEntitlement')" :aria-label="t('hrLeave.policies.tierEntitlement')" />
+					<n-button text type="error" :aria-label="t('hrLeave.policies.removeTier')" :title="t('hrLeave.policies.removeTier')" @click="form.tiers.splice(index, 1)">
+						<template #icon><Icon name="carbon:trash-can" :size="18" /></template>
 					</n-button>
 				</div>
-			</template>
-		</n-drawer-content>
-	</n-drawer>
+				<div>
+					<n-button size="small" :disabled="form.tiers.length >= 20" @click="form.tiers.push({ minYears: null, entitlement: null })">
+						<template #icon><Icon name="carbon:add" :size="16" /></template>
+						{{ t("hrLeave.policies.addTier") }}
+					</n-button>
+				</div>
+			</div>
+
+			<h3 class="mb-2 font-semibold">{{ t("hrLeave.policies.carryOver") }}</h3>
+			<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+				<n-form-item path="carryOverMax" :label="t('hrLeave.policies.carryOverMax')" :feedback="t('hrLeave.policies.carryOverMaxHint')">
+					<n-input-number v-model:value="form.carryOverMax" :min="0" :max="366" :step="0.5" clearable class="w-full" />
+				</n-form-item>
+				<n-form-item path="carryOverExpiry" :label="t('hrLeave.policies.carryOverExpiry')" :feedback="t('hrLeave.policies.carryOverExpiryHint')">
+					<n-input-number v-model:value="form.carryOverExpiry" :min="1" :max="24" :precision="0" clearable class="w-full" />
+				</n-form-item>
+			</div>
+
+			<h3 class="mb-1 mt-2 font-semibold">{{ t("hrLeave.policies.appliesTo") }}</h3>
+			<p class="mb-3 text-sm text-secondary">{{ t("hrLeave.policies.appliesToHint") }}</p>
+			<n-form-item path="contractTypes" :label="t('hr.profile.fields.contractType')">
+				<n-select v-model:value="form.contractTypes" :options="contractOptions" multiple clearable :placeholder="t('hrLeave.policies.everyone')" />
+			</n-form-item>
+			<n-form-item path="gradeIds" :label="t('hr.hire.jobGrade')">
+				<n-select v-model:value="form.gradeIds" :options="gradeOptions" multiple clearable filterable :placeholder="t('hrLeave.policies.everyone')" />
+			</n-form-item>
+			<n-form-item path="unitIds" :label="t('hr.hire.orgUnit')">
+				<n-select v-model:value="form.unitIds" :options="unitOptions" multiple clearable filterable :placeholder="t('hrLeave.policies.everyone')" />
+			</n-form-item>
+			<p v-if="tierError" class="text-sm text-error">{{ tierError }}</p>
+		</n-form>
+
+		<template #footer>
+			<div class="flex justify-end gap-2">
+				<n-button @click="show = false">{{ t("hr.common.cancel") }}</n-button>
+				<n-button type="primary" :loading="saving" @click="save">
+					<template #icon><Icon name="carbon:checkmark" :size="16" /></template>
+					{{ t("hr.common.save") }}
+				</n-button>
+			</div>
+		</template>
+	</HrFormModal>
 </template>
 
 <script setup lang="ts">
 import type { FormInst, FormRules, SelectOption } from "naive-ui"
 import type { ContractType, JobGrade, OrgUnit } from "@/add-os/modules/hr/types/hr"
 import type { AccrualMethod, LeavePolicy, LeavePolicyPayload, LeaveType } from "@/add-os/modules/hr/types/leave"
-import { NButton, NDatePicker, NDrawer, NDrawerContent, NForm, NFormItem, NInput, NInputNumber, NSelect, useMessage } from "naive-ui"
+import { NButton, NDatePicker, NForm, NFormItem, NInput, NInputNumber, NSelect, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import { CONTRACT_TYPES } from "@/add-os/modules/hr/types/hr"
 import { ACCRUAL_METHODS } from "@/add-os/modules/hr/types/leave"
 import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"

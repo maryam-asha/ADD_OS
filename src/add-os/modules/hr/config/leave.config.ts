@@ -12,7 +12,7 @@ import { formatDate, formatNumber } from "@/add-os/utils/format"
 /**
  * Leave settings edited through ResourceTable + ResourceFormDrawer. Rules
  * mirror ADD Core's Store*Request classes for leave types, holidays and
- * coverage rules; policies have their own drawer (LeavePolicyDrawer).
+ * coverage rules; policies have their own drawer (LeavePolicyModal).
  */
 
 const yesNo = (t: ComposerTranslation, value: boolean) => (value ? t("hr.common.yes") : t("hr.common.no"))

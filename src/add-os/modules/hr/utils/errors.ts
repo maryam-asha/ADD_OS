@@ -17,3 +17,16 @@ export function apiErrorMessage(caught: unknown, fallback: string): string {
 export function serverMessage(result: { message?: string } | undefined, fallback: string): string {
 	return result?.message || fallback
 }
+
+/**
+ * A lookup a form can do without — grades, units, document types: one the
+ * account may not be allowed to read. A refusal leaves the choices empty;
+ * anything that is not an API error is a bug and is re-thrown.
+ */
+export async function quietly<T>(load: () => Promise<T>, apply: (value: T) => void): Promise<void> {
+	try {
+		apply(await load())
+	} catch (caught) {
+		if (!(caught instanceof ApiError)) throw caught
+	}
+}

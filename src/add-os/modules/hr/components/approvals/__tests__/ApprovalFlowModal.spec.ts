@@ -6,13 +6,13 @@ import { createI18n } from "vue-i18n"
 import en from "@/add-os/lang/en/en.json"
 import enApprovals from "@/add-os/lang/en/hr-approvals.json"
 import enHr from "@/add-os/lang/en/hr.json"
-import ApprovalFlowDrawer from "../ApprovalFlowDrawer.vue"
+import ApprovalFlowModal from "../ApprovalFlowModal.vue"
 
 const { createMock, updateMock, errorMock } = vi.hoisted(() => ({ createMock: vi.fn(), updateMock: vi.fn(), errorMock: vi.fn() }))
 
 vi.mock("@/add-os/config/permissions", () => ({ canViewEmployees: () => true }))
 vi.mock("@/add-os/services/hr/approvals", () => ({ createApprovalFlow: createMock, updateApprovalFlow: updateMock }))
-vi.mock("@/add-os/services/hr/core", () => ({ listEmployees: vi.fn() }))
+vi.mock("@/add-os/services/hr/core", () => ({ listEmployees: vi.fn(), getEmployee: vi.fn().mockResolvedValue({ id: 9, employee_number: "E-9", name: { ar: "سامر", en: "Samer" } }) }))
 vi.mock("naive-ui", async () => {
 	const actual = await vi.importActual<typeof import("naive-ui")>("naive-ui")
 	return { ...actual, useMessage: () => ({ success: vi.fn(), error: errorMock }) }
@@ -24,7 +24,7 @@ interface StepVm { approver: string; ability: string | null; employeeId: number 
 interface DrawerVm { requestType: string | null; steps: StepVm[]; addStep: () => void; move: (i: number, by: -1 | 1) => void; save: () => Promise<void> }
 
 async function mountDrawer(flow: ApprovalFlow | null = null) {
-	const wrapper = mount(ApprovalFlowDrawer, {
+	const wrapper = mount(ApprovalFlowModal, {
 		props: { flow, types: ["leave", "loan"], takenTypes: ["loan"], show: false },
 		global: { plugins: [i18n], stubs: { Icon: true } },
 		attachTo: document.body
@@ -34,7 +34,7 @@ async function mountDrawer(flow: ApprovalFlow | null = null) {
 	return { wrapper, vm: wrapper.vm as unknown as DrawerVm }
 }
 
-describe("approvalFlowDrawer", () => {
+describe("approvalFlowModal", () => {
 	beforeEach(() => {
 		vi.clearAllMocks()
 		createMock.mockResolvedValue({ id: 1 })

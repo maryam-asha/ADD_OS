@@ -15,18 +15,7 @@
 		<div class="flex flex-wrap items-center gap-3">
 			<n-date-picker :formatted-value="range" value-format="yyyy-MM-dd" type="daterange" :clearable="false" class="max-w-sm" @update:formatted-value="onRange" />
 			<n-select v-if="unitOptions.length" v-model:value="filters.org_unit_id" :options="unitOptions" :placeholder="t('hr.employees.unitFilter')" clearable filterable class="max-w-xs" />
-			<n-select
-				v-if="mayFindEmployees"
-				v-model:value="filters.employee_id"
-				:options="employeeOptions"
-				:loading="searching"
-				:placeholder="t('hrApprovals.requests.employeeFilter')"
-				filterable
-				remote
-				clearable
-				class="max-w-xs"
-				@search="searchEmployees"
-			/>
+			<EmployeeSelect v-if="mayFindEmployees" v-model:value="filters.employee_id" include-former :placeholder="t('hrApprovals.requests.employeeFilter')" class="max-w-xs" />
 			<n-select v-if="filters.view === 'days'" v-model:value="filters.status" :options="dayStatusOptions" :placeholder="t('hr.common.status')" clearable class="max-w-xs" />
 			<template v-else>
 				<n-select v-model:value="filters.type" :options="typeOptions" :placeholder="t('hrAttendance.exceptions.type')" clearable class="max-w-xs" />
@@ -98,16 +87,18 @@ import { NAlert, NButton, NCard, NDataTable, NDatePicker, NFormItem, NInput, NMo
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { canCorrectAttendance, canViewEmployees } from "@/add-os/config/permissions"
+import EmployeeSelect from "@/add-os/modules/hr/components/EmployeeSelect.vue"
 import DayStatusTag from "@/add-os/modules/hr/components/time/DayStatusTag.vue"
 import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
 import { DAY_STATUSES, EXCEPTION_RESOLUTIONS, EXCEPTION_TYPES } from "@/add-os/modules/hr/types/time"
+import { employeeCell } from "@/add-os/modules/hr/utils/cells"
 import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
 import { nullable } from "@/add-os/modules/hr/utils/forms"
 import { todayIso } from "@/add-os/modules/hr/utils/leave"
 import { minutesLabel, orgClock } from "@/add-os/modules/hr/utils/time"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
 import { ApiError } from "@/add-os/services/api"
-import { listEmployees, listOrgUnits } from "@/add-os/services/hr/core"
+import { listOrgUnits } from "@/add-os/services/hr/core"
 import { listAttendanceDays, listAttendanceExceptions, reprocessAttendance, resolveAttendanceException } from "@/add-os/services/hr/time"
 import { STATUS_ICONS } from "@/add-os/theme/tokens"
 import { formatDate } from "@/add-os/utils/format"
@@ -193,28 +184,6 @@ const exceptionStatusOptions = computed<SelectOption[]>(() => [
 	{ label: t("hrAttendance.exceptions.resolved"), value: "resolved" }
 ])
 const resolutionOptions = computed<SelectOption[]>(() => EXCEPTION_RESOLUTIONS.map(r => ({ label: t(`hrAttendance.resolution.${r}`), value: r })))
-
-const employeeOptions = ref<SelectOption[]>([])
-const searching = ref(false)
-async function searchEmployees(term: string) {
-	if (!term.trim()) return
-	searching.value = true
-	try {
-		const result = await listEmployees({ q: term.trim() })
-		employeeOptions.value = result.data.map(e => ({ label: `${translated(e.name)} · ${e.employee_number}`, value: e.id }))
-	} catch (e) {
-		if (!(e instanceof ApiError)) throw e
-	} finally {
-		searching.value = false
-	}
-}
-
-function employeeCell(employee: { name: { ar: string; en?: string | null }; employee_number?: string } | undefined) {
-  return h("div", { class: "flex flex-col gap-0.5 py-1" }, [
-		h("span", { class: "font-semibold text-sm" }, translated(employee?.name)),
-		employee?.employee_number ? h("span", { class: "text-xs text-secondary font-mono", dir: "ltr" }, employee.employee_number) : null
-	])
-}
 
 const dayColumns = computed<DataTableColumns<AttendanceDay>>(() => [
 	{ title: t("hrAttendance.days.date"), key: "work_date", minWidth: 110, render: row => formatDate(row.work_date) },

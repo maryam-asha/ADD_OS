@@ -14,7 +14,7 @@ import AttendancePage from "../AttendancePage.vue"
 import RosterPage from "../RosterPage.vue"
 import TimePeriodsPage from "../TimePeriodsPage.vue"
 
-const { rosterMock, saveRosterMock, daysMock, exceptionsMock, resolveMock, periodsMock, lockMock, errorMock, permissions, route } = vi.hoisted(() => ({
+const { rosterMock, saveRosterMock, daysMock, exceptionsMock, resolveMock, periodsMock, lockMock, errorMock, dialogMock, permissions, route } = vi.hoisted(() => ({
 	rosterMock: vi.fn(),
 	saveRosterMock: vi.fn(),
 	daysMock: vi.fn(),
@@ -23,6 +23,7 @@ const { rosterMock, saveRosterMock, daysMock, exceptionsMock, resolveMock, perio
 	periodsMock: vi.fn(),
 	lockMock: vi.fn(),
 	errorMock: vi.fn(),
+	dialogMock: vi.fn((options: { onPositiveClick: () => unknown }) => options.onPositiveClick()),
 	permissions: { roster: true, correct: true, lock: true },
 	route: { query: {} as Record<string, string> }
 }))
@@ -54,7 +55,7 @@ vi.mock("naive-ui", async () => {
 	return {
 		...actual,
 		useMessage: () => ({ success: vi.fn(), error: errorMock }),
-		useDialog: () => ({ warning: (options: { onPositiveClick: () => unknown }) => options.onPositiveClick() })
+		useDialog: () => ({ warning: dialogMock })
 	}
 })
 vi.mock("vue-router", async () => {
@@ -131,6 +132,23 @@ describe("time pages", () => {
 		vm.edit(7, day, 1)
 		vm.edit(7, day, "pattern")
 		expect(vm.changeCount).toBe(0)
+		wrapper.unmount()
+	})
+
+	it("roster: asks before a unit change drops unsaved edits, and holds copying until they are saved", async () => {
+		const wrapper = mountPage(RosterPage)
+		await flushPromises()
+		const vm = wrapper.vm as unknown as { edit: (id: number, day: object, v: number | "off" | "pattern") => void; navigate: (go: () => void) => void; changeCount: number }
+		vm.edit(7, { date: "2026-03-01", kind: "shift", shift_template_id: 1, rostered: false }, "off")
+		await flushPromises()
+
+		const copy = [...document.querySelectorAll("button")].find(b => b.textContent?.includes("Copy week"))
+		expect(copy?.disabled).toBe(true)
+
+		const go = vi.fn()
+		vm.navigate(go)
+		expect(dialogMock).toHaveBeenCalledTimes(1)
+		expect(go).toHaveBeenCalledTimes(1)
 		wrapper.unmount()
 	})
 

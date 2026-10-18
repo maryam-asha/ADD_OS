@@ -11,18 +11,7 @@
 		<div class="flex flex-wrap items-center gap-3">
 			<n-select v-model:value="filters.status" :options="statusOptions" class="max-w-xs" :aria-label="t('hr.common.status')" />
 			<n-select v-model:value="filters.request_type" :options="typeOptions" :placeholder="t('hrApprovals.columns.type')" clearable class="max-w-xs" />
-			<n-select
-				v-if="mayFindEmployees"
-				v-model:value="filters.employee_id"
-				:options="employeeOptions"
-				:loading="searching"
-				:placeholder="t('hrApprovals.requests.employeeFilter')"
-				filterable
-				remote
-				clearable
-				class="max-w-xs"
-				@search="searchEmployees"
-			/>
+			<EmployeeSelect v-if="mayFindEmployees" v-model:value="filters.employee_id" include-former :placeholder="t('hrApprovals.requests.employeeFilter')" class="max-w-xs" />
 		</div>
 
 		<n-card class="add-ledger-table">
@@ -57,13 +46,14 @@ import { useI18n } from "vue-i18n"
 import { canViewEmployees } from "@/add-os/config/permissions"
 import ApprovalDetailDrawer from "@/add-os/modules/hr/components/approvals/ApprovalDetailDrawer.vue"
 import ApprovalStatusTag from "@/add-os/modules/hr/components/approvals/ApprovalStatusTag.vue"
+import EmployeeSelect from "@/add-os/modules/hr/components/EmployeeSelect.vue"
 import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
 import { APPROVAL_STATUSES, KNOWN_REQUEST_TYPES } from "@/add-os/modules/hr/types/approvals"
 import { requestTypeLabel, summaryHeadline } from "@/add-os/modules/hr/utils/approvalSummary"
+import { employeeCell } from "@/add-os/modules/hr/utils/cells"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
 import { ApiError } from "@/add-os/services/api"
 import { getApprovalRequest, listApprovalRequests, overrideApprove, overrideReject } from "@/add-os/services/hr/approvals"
-import { listEmployees } from "@/add-os/services/hr/core"
 import { formatDateTime, formatNumber } from "@/add-os/utils/format"
 
 /**
@@ -110,22 +100,6 @@ const statusOptions = computed<SelectOption[]>(() => [
 ])
 const typeOptions = computed<SelectOption[]>(() => KNOWN_REQUEST_TYPES.map(type => ({ label: requestTypeLabel(t, type), value: type })))
 
-const employeeOptions = ref<SelectOption[]>([])
-const searching = ref(false)
-
-async function searchEmployees(term: string) {
-	if (!term.trim()) return
-	searching.value = true
-	try {
-		const result = await listEmployees({ q: term.trim() })
-		employeeOptions.value = result.data.map(e => ({ label: `${translated(e.name)} · ${e.employee_number}`, value: e.id }))
-	} catch (e) {
-		if (!(e instanceof ApiError)) throw e
-	} finally {
-		searching.value = false
-	}
-}
-
 const detailVisible = ref(false)
 const openId = ref<number | null>(null)
 
@@ -153,11 +127,7 @@ const columns = computed<DataTableColumns<ApprovalRequest>>(() => [
 		title: t("hr.employees.columns.employee"),
 		key: "employee",
 		minWidth: 200,
-		render: row =>
-			h("div", { class: "flex flex-col gap-0.5 py-1" }, [
-				h("span", { class: "font-semibold text-sm" }, translated(row.employee.name)),
-				h("span", { class: "text-xs text-secondary font-mono", dir: "ltr" }, row.employee.employee_number)
-			])
+		render: row => employeeCell(row.employee)
 	},
 	{ title: t("hrApprovals.columns.summary"), key: "subject", minWidth: 200, ellipsis: { tooltip: true }, render: row => summaryHeadline(t, row.request_type, row.subject) },
 	{ title: t("hrApprovals.columns.waitingFor"), key: "waiting", minWidth: 180, render: waitingFor },

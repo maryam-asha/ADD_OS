@@ -1,103 +1,94 @@
-<!-- src/add-os/modules/hr/components/HireEmployeeDrawer.vue -->
+<!-- src/add-os/modules/hr/components/HireEmployeeModal.vue -->
 <template>
-	<n-drawer v-model:show="show" :width="560" placement="right">
-		<n-drawer-content :title="t('hr.hire.title')" closable>
-			<n-form ref="formRef" :model="form" :rules label-placement="top">
-				<h3 class="mb-2 font-semibold">{{ t("hr.hire.person") }}</h3>
-				<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
-					<n-form-item path="nameAr" :label="t('hr.hire.nameAr')">
-						<n-input v-model:value="form.nameAr" />
-					</n-form-item>
-					<n-form-item path="nameEn" :label="t('hr.hire.nameEn')">
-						<n-input v-model:value="form.nameEn" />
-					</n-form-item>
-				</div>
-				<n-form-item path="phone" :label="t('hr.hire.phone')" :feedback="t('hr.hire.phoneHint')">
-					<n-input v-model:value="form.phone" dir="ltr" />
+	<HrFormModal v-model:show="show" :title="t('hr.hire.title')">
+		<n-form ref="formRef" :model="form" :rules label-placement="top">
+			<h3 class="mb-2 font-semibold">{{ t("hr.hire.person") }}</h3>
+			<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+				<n-form-item path="nameAr" :label="t('hr.hire.nameAr')">
+					<n-input v-model:value="form.nameAr" />
 				</n-form-item>
-				<n-form-item path="workEmail" :label="t('hr.hire.workEmail')" :feedback="t('hr.hire.workEmailHint')">
-					<n-input v-model:value="form.workEmail" dir="ltr" />
+				<n-form-item path="nameEn" :label="t('hr.hire.nameEn')">
+					<n-input v-model:value="form.nameEn" />
 				</n-form-item>
-				<n-form-item path="personalEmail" :label="t('hr.hire.personalEmail')">
-					<n-input v-model:value="form.personalEmail" dir="ltr" />
-				</n-form-item>
+			</div>
+			<n-form-item path="phone" :label="t('hr.hire.phone')" :feedback="t('hr.hire.phoneHint')">
+				<n-input v-model:value="form.phone" dir="ltr" />
+			</n-form-item>
+			<n-form-item path="workEmail" :label="t('hr.hire.workEmail')" :feedback="t('hr.hire.workEmailHint')">
+				<n-input v-model:value="form.workEmail" dir="ltr" />
+			</n-form-item>
+			<n-form-item path="personalEmail" :label="t('hr.hire.personalEmail')">
+				<n-input v-model:value="form.personalEmail" dir="ltr" />
+			</n-form-item>
 
-				<h3 class="mb-2 mt-2 font-semibold">{{ t("hr.hire.job") }}</h3>
-				<n-form-item path="hiredOn" :label="t('hr.hire.hiredOn')">
-					<n-date-picker v-model:formatted-value="form.hiredOn" value-format="yyyy-MM-dd" type="date" class="w-full" />
+			<h3 class="mb-2 mt-2 font-semibold">{{ t("hr.hire.job") }}</h3>
+			<n-form-item path="hiredOn" :label="t('hr.hire.hiredOn')">
+				<n-date-picker v-model:formatted-value="form.hiredOn" value-format="yyyy-MM-dd" type="date" class="w-full" />
+			</n-form-item>
+			<n-form-item path="orgUnitId" :label="t('hr.hire.orgUnit')">
+				<n-select v-model:value="form.orgUnitId" :options="unitOptions" filterable />
+			</n-form-item>
+			<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+				<n-form-item path="positionId" :label="t('hr.hire.position')">
+					<n-select v-model:value="form.positionId" :options="positionOptions" :disabled="!form.orgUnitId" clearable />
 				</n-form-item>
-				<n-form-item path="orgUnitId" :label="t('hr.hire.orgUnit')">
-					<n-select v-model:value="form.orgUnitId" :options="unitOptions" filterable />
+				<n-form-item path="jobGradeId" :label="t('hr.hire.jobGrade')">
+					<n-select v-model:value="form.jobGradeId" :options="gradeOptions" clearable />
 				</n-form-item>
-				<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
-					<n-form-item path="positionId" :label="t('hr.hire.position')">
-						<n-select v-model:value="form.positionId" :options="positionOptions" :disabled="!form.orgUnitId" clearable />
-					</n-form-item>
-					<n-form-item path="jobGradeId" :label="t('hr.hire.jobGrade')">
-						<n-select v-model:value="form.jobGradeId" :options="gradeOptions" clearable />
-					</n-form-item>
-				</div>
-				<n-form-item path="managerId" :label="t('hr.hire.manager')">
-					<n-select
-						v-model:value="form.managerId"
-						:options="managerOptions"
-						:placeholder="t('hr.hire.managerPlaceholder')"
-						:loading="searchingManagers"
-						filterable
-						remote
-						clearable
-						@search="searchManagers"
-					/>
+			</div>
+			<n-form-item path="managerId" :label="t('hr.hire.manager')">
+				<EmployeeSelect v-model:value="form.managerId" />
+			</n-form-item>
+			<n-form-item path="workLocationId" :label="t('hr.profile.fields.workLocation')">
+				<n-select v-model:value="form.workLocationId" :options="locationOptions" clearable />
+			</n-form-item>
+			<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+				<n-form-item path="employmentType" :label="t('hr.hire.employmentType')">
+					<n-select v-model:value="form.employmentType" :options="employmentTypeOptions" />
 				</n-form-item>
-				<n-form-item path="workLocationId" :label="t('hr.profile.fields.workLocation')">
-					<n-select v-model:value="form.workLocationId" :options="locationOptions" clearable />
+				<n-form-item path="workMode" :label="t('hr.hire.workMode')">
+					<n-select v-model:value="form.workMode" :options="workModeOptions" />
 				</n-form-item>
-				<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
-					<n-form-item path="employmentType" :label="t('hr.hire.employmentType')">
-						<n-select v-model:value="form.employmentType" :options="employmentTypeOptions" />
-					</n-form-item>
-					<n-form-item path="workMode" :label="t('hr.hire.workMode')">
-						<n-select v-model:value="form.workMode" :options="workModeOptions" />
-					</n-form-item>
-				</div>
+			</div>
 
-				<h3 class="mb-2 mt-2 font-semibold">{{ t("hr.hire.contract") }}</h3>
-				<n-form-item path="contractType" :label="t('hr.hire.contractType')">
-					<n-select v-model:value="form.contractType" :options="contractTypeOptions" />
+			<h3 class="mb-2 mt-2 font-semibold">{{ t("hr.hire.contract") }}</h3>
+			<n-form-item path="contractType" :label="t('hr.hire.contractType')">
+				<n-select v-model:value="form.contractType" :options="contractTypeOptions" />
+			</n-form-item>
+			<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+				<n-form-item v-if="form.contractType === 'fixed_term'" path="contractEndsOn" :label="t('hr.hire.contractEndsOn')">
+					<n-date-picker v-model:formatted-value="form.contractEndsOn" value-format="yyyy-MM-dd" type="date" class="w-full" />
 				</n-form-item>
-				<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
-					<n-form-item v-if="form.contractType === 'fixed_term'" path="contractEndsOn" :label="t('hr.hire.contractEndsOn')">
-						<n-date-picker v-model:formatted-value="form.contractEndsOn" value-format="yyyy-MM-dd" type="date" class="w-full" />
-					</n-form-item>
-					<n-form-item path="probationEndsOn" :label="t('hr.hire.probationEndsOn')">
-						<n-date-picker v-model:formatted-value="form.probationEndsOn" value-format="yyyy-MM-dd" type="date" clearable class="w-full" />
-					</n-form-item>
-				</div>
-			</n-form>
+				<n-form-item path="probationEndsOn" :label="t('hr.hire.probationEndsOn')">
+					<n-date-picker v-model:formatted-value="form.probationEndsOn" value-format="yyyy-MM-dd" type="date" clearable class="w-full" />
+				</n-form-item>
+			</div>
+		</n-form>
 
-			<template #footer>
-				<div class="flex justify-end gap-2">
-					<n-button @click="show = false">{{ t("hr.common.cancel") }}</n-button>
-					<n-button type="primary" :loading="submitting" @click="submit">
-						<template #icon><Icon name="carbon:checkmark" :size="16" /></template>
-						{{ t("hr.hire.submit") }}
-					</n-button>
-				</div>
-			</template>
-		</n-drawer-content>
-	</n-drawer>
+		<template #footer>
+			<div class="flex justify-end gap-2">
+				<n-button @click="show = false">{{ t("hr.common.cancel") }}</n-button>
+				<n-button type="primary" :loading="submitting" @click="submit">
+					<template #icon><Icon name="carbon:checkmark" :size="16" /></template>
+					{{ t("hr.hire.submit") }}
+				</n-button>
+			</div>
+		</template>
+	</HrFormModal>
 </template>
 
 <script setup lang="ts">
 import type { FormInst, FormRules, SelectOption } from "naive-ui"
 import type { ContractType, EmploymentType, JobGrade, OrgUnit, Position, WorkLocation, WorkMode } from "@/add-os/modules/hr/types/hr"
-import { NButton, NDatePicker, NDrawer, NDrawerContent, NForm, NFormItem, NInput, NSelect, useMessage } from "naive-ui"
+import { NButton, NDatePicker, NForm, NFormItem, NInput, NSelect, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import EmployeeSelect from "@/add-os/modules/hr/components/EmployeeSelect.vue"
+import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import { CONTRACT_TYPES, EMPLOYMENT_TYPES, WORK_MODES } from "@/add-os/modules/hr/types/hr"
 import { translated } from "@/add-os/modules/hr/utils/translated"
 import { ApiError } from "@/add-os/services/api"
-import { hireEmployee, listEmployees, listJobGrades, listPositions, listWorkLocations } from "@/add-os/services/hr/core"
+import { hireEmployee, listJobGrades, listPositions, listWorkLocations } from "@/add-os/services/hr/core"
 import Icon from "@/components/common/Icon.vue"
 
 const props = defineProps<{ units: OrgUnit[] }>()
@@ -165,8 +156,6 @@ const rules = computed<FormRules>(() => ({
 const positions = ref<Position[]>([])
 const grades = ref<JobGrade[]>([])
 const locations = ref<WorkLocation[]>([])
-const managerOptions = ref<SelectOption[]>([])
-const searchingManagers = ref(false)
 
 const unitOptions = computed<SelectOption[]>(() => props.units.filter(u => u.is_active).map(u => ({ label: translated(u.name), value: u.id })))
 const positionOptions = computed<SelectOption[]>(() =>
@@ -201,21 +190,6 @@ watch(
 		}
 	}
 )
-
-async function searchManagers(term: string) {
-	if (!term.trim()) return
-	searchingManagers.value = true
-	try {
-		const result = await listEmployees({ q: term.trim() })
-		managerOptions.value = result.data
-			.filter(e => e.status !== "terminated")
-			.map(e => ({ label: `${translated(e.name)} · ${e.employee_number}`, value: e.id }))
-	} catch (e) {
-		if (!(e instanceof ApiError)) throw e
-	} finally {
-		searchingManagers.value = false
-	}
-}
 
 // ── Submit ──────────────────────────────────────────────────────────────────
 async function submit() {

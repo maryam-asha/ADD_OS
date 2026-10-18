@@ -115,7 +115,7 @@ const contractColumns = computed<DataTableColumns<Contract>>(() => [
 		title: t("hr.profile.fields.noticePeriod"),
 		key: "notice_period_days",
 		minWidth: 110,
-		render: row => (row.notice_period_days ? t("hr.profile.fields.noticeDays", { n: formatNumber(row.notice_period_days) }) : EMPTY)
+		render: row => (row.notice_period_days ? t("hr.profile.fields.noticeDays", { n: formatNumber(row.notice_period_days) }, row.notice_period_days) : EMPTY)
 	},
 	{ title: t("hr.events.contractReference"), key: "reference", minWidth: 120, render: row => (row.reference ? h("span", { dir: "ltr" }, row.reference) : EMPTY) }
 ])

@@ -1,50 +1,48 @@
 <!-- src/add-os/modules/hr/components/approvals/ApprovalDetailDrawer.vue -->
 <template>
-	<n-drawer v-model:show="show" :width="560" placement="right">
-		<n-drawer-content :title="request ? requestTypeLabel(t, request.request_type) : t('hrApprovals.detail')" closable>
-			<n-alert v-if="loadError" type="error" :title="loadError" />
-			<n-skeleton v-else-if="loading" text :repeat="6" />
+	<HrDrawer v-model:show="show" :title="request ? requestTypeLabel(t, request.request_type) : t('hrApprovals.detail')">
+		<n-alert v-if="loadError" type="error" :title="loadError" />
+		<n-skeleton v-else-if="loading" text :repeat="6" />
 
-			<div v-else-if="request" class="flex flex-col gap-5">
-				<div class="flex flex-wrap items-center justify-between gap-3">
-					<div class="flex flex-col gap-0.5">
-						<span class="font-semibold">{{ translated(request.employee.name) }}</span>
-						<span class="font-mono text-xs text-secondary" dir="ltr">{{ request.employee.employee_number }}</span>
-					</div>
-					<ApprovalStatusTag :status="request.status" />
+		<div v-else-if="request" class="flex flex-col gap-5">
+			<div class="flex flex-wrap items-center justify-between gap-3">
+				<div class="flex flex-col gap-0.5">
+					<span class="font-semibold">{{ translated(request.employee.name) }}</span>
+					<span class="font-mono text-xs text-secondary" dir="ltr">{{ request.employee.employee_number }}</span>
 				</div>
-				<p v-if="request.created_at" class="text-sm text-secondary">{{ t("hrApprovals.submittedAt", { date: formatDateTime(request.created_at) }) }}</p>
-
-				<n-descriptions v-if="rows.length" :column="1" label-placement="left" size="small" bordered>
-					<n-descriptions-item v-for="row in rows" :key="row.label" :label="row.label">
-						<span :dir="row.ltr ? 'ltr' : undefined">{{ row.value }}</span>
-					</n-descriptions-item>
-				</n-descriptions>
-
-				<section class="flex flex-col gap-2">
-					<h3 class="font-semibold">{{ t("hrApprovals.steps") }}</h3>
-					<ApprovalStepsList :steps="request.steps" />
-				</section>
-
-				<n-alert v-if="override && canDecide" type="warning" :title="t('hrApprovals.overrideTitle')">
-					{{ t("hrApprovals.overrideNote") }}
-				</n-alert>
+				<ApprovalStatusTag :status="request.status" />
 			</div>
+			<p v-if="request.created_at" class="text-sm text-secondary">{{ t("hrApprovals.submittedAt", { date: formatDateTime(request.created_at) }) }}</p>
 
-			<template v-if="request && canDecide" #footer>
-				<div class="flex justify-end gap-2">
-					<n-button type="error" secondary @click="openDecision('reject')">
-						<template #icon><Icon name="carbon:close" :size="16" /></template>
-						{{ t("hrApprovals.reject") }}
-					</n-button>
-					<n-button type="primary" @click="openDecision('approve')">
-						<template #icon><Icon name="carbon:checkmark" :size="16" /></template>
-						{{ t("hrApprovals.approve") }}
-					</n-button>
-				</div>
-			</template>
-		</n-drawer-content>
-	</n-drawer>
+			<n-descriptions v-if="rows.length" :column="1" label-placement="left" size="small" bordered>
+				<n-descriptions-item v-for="row in rows" :key="row.label" :label="row.label">
+					<span :dir="row.ltr ? 'ltr' : undefined">{{ row.value }}</span>
+				</n-descriptions-item>
+			</n-descriptions>
+
+			<section class="flex flex-col gap-2">
+				<h3 class="font-semibold">{{ t("hrApprovals.steps") }}</h3>
+				<ApprovalStepsList :steps="request.steps" />
+			</section>
+
+			<n-alert v-if="override && canDecide" type="warning" :title="t('hrApprovals.overrideTitle')">
+				{{ t("hrApprovals.overrideNote") }}
+			</n-alert>
+		</div>
+
+		<template v-if="request && canDecide" #footer>
+			<div class="flex justify-end gap-2">
+				<n-button type="error" secondary @click="openDecision('reject')">
+					<template #icon><Icon name="carbon:close" :size="16" /></template>
+					{{ t("hrApprovals.reject") }}
+				</n-button>
+				<n-button type="primary" @click="openDecision('approve')">
+					<template #icon><Icon name="carbon:checkmark" :size="16" /></template>
+					{{ t("hrApprovals.approve") }}
+				</n-button>
+			</div>
+		</template>
+	</HrDrawer>
 
 	<n-modal
 		v-model:show="decisionVisible"
@@ -76,11 +74,12 @@
 <script setup lang="ts">
 import type { ApprovalRequest } from "@/add-os/modules/hr/types/approvals"
 import type { UpdateResult } from "@/add-os/services/hr/core"
-import { NAlert, NButton, NDescriptions, NDescriptionsItem, NDrawer, NDrawerContent, NInput, NModal, NSkeleton, useMessage } from "naive-ui"
+import { NAlert, NButton, NDescriptions, NDescriptionsItem, NInput, NModal, NSkeleton, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import ApprovalStatusTag from "@/add-os/modules/hr/components/approvals/ApprovalStatusTag.vue"
 import ApprovalStepsList from "@/add-os/modules/hr/components/approvals/ApprovalStepsList.vue"
+import HrDrawer from "@/add-os/modules/hr/components/HrDrawer.vue"
 import { requestTypeLabel, summaryRows } from "@/add-os/modules/hr/utils/approvalSummary"
 import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
 import { nullable } from "@/add-os/modules/hr/utils/forms"

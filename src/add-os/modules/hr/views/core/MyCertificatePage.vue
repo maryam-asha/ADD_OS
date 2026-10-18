@@ -63,7 +63,7 @@
 
 					<section v-if="salary.last_payslip" class="flex flex-col gap-2">
 						<h2 class="text-lg font-semibold">{{ t("hr.certificate.lastPayslip", { period: salary.last_payslip.period }) }}</h2>
-						<n-descriptions :column="2" label-placement="left" size="small" bordered>
+						<n-descriptions :column="narrow ? 1 : 2" label-placement="left" size="small" bordered>
 							<n-descriptions-item :label="t('hr.certificate.gross')">
 								<span class="add-numeric">{{ money(salary.last_payslip.gross, salary.last_payslip.currency) }}</span>
 							</n-descriptions-item>
@@ -86,6 +86,7 @@ import { NAlert, NButton, NCard, NDescriptions, NDescriptionsItem, NSkeleton, NT
 import { computed, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
+import { useNarrowScreen } from "@/add-os/modules/hr/composables/useNarrowScreen"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import { money } from "@/add-os/modules/hr/utils/money"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
@@ -101,6 +102,8 @@ import Icon from "@/components/common/Icon.vue"
 defineProps<{ titleKey?: string }>()
 
 const { t } = useI18n()
+/** One column of details on a phone, two from `sm` up. */
+const narrow = useNarrowScreen()
 const route = useRoute()
 const router = useRouter()
 const none = EMPTY

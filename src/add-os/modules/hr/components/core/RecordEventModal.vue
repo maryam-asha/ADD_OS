@@ -1,110 +1,99 @@
-<!-- src/add-os/modules/hr/components/core/RecordEventDrawer.vue -->
+<!-- src/add-os/modules/hr/components/core/RecordEventModal.vue -->
 <template>
-	<n-drawer v-model:show="show" :width="560" placement="right">
-		<n-drawer-content :title="t('hr.events.title')" closable>
-			<n-form ref="formRef" :model="form" :rules label-placement="top">
-				<n-form-item path="type" :label="t('hr.events.type')">
-					<n-select v-model:value="form.type" :options="typeOptions" :placeholder="t('hr.events.typePlaceholder')" />
+	<HrFormModal v-model:show="show" :title="t('hr.events.title')">
+		<n-form ref="formRef" :model="form" :rules label-placement="top">
+			<n-form-item path="type" :label="t('hr.events.type')">
+				<n-select v-model:value="form.type" :options="typeOptions" :placeholder="t('hr.events.typePlaceholder')" />
+			</n-form-item>
+
+			<template v-if="form.type">
+				<n-alert v-if="form.type === 'termination'" type="warning" class="mb-4" :title="t('hr.events.terminationTitle')">
+					{{ t("hr.events.terminationNote") }}
+				</n-alert>
+
+				<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+					<n-form-item path="effectiveOn" :label="effectiveLabel">
+						<n-date-picker v-model:formatted-value="form.effectiveOn" value-format="yyyy-MM-dd" type="date" class="w-full" />
+					</n-form-item>
+					<n-form-item v-if="form.type === 'suspension'" path="effectiveTo" :label="t('hr.events.suspendedUntil')">
+						<n-date-picker v-model:formatted-value="form.effectiveTo" value-format="yyyy-MM-dd" type="date" clearable class="w-full" />
+					</n-form-item>
+				</div>
+
+				<n-form-item v-if="form.type === 'termination'" path="terminationReason" :label="t('hr.events.reason')">
+					<n-select v-model:value="form.terminationReason" :options="terminationOptions" />
+				</n-form-item>
+				<n-form-item v-else path="reason" :label="t('hr.events.reason')">
+					<n-input v-model:value="form.reason" :maxlength="32" show-count />
 				</n-form-item>
 
-				<template v-if="form.type">
-					<n-alert v-if="form.type === 'termination'" type="warning" class="mb-4" :title="t('hr.events.terminationTitle')">
-						{{ t("hr.events.terminationNote") }}
-					</n-alert>
-
+				<template v-if="needsContract">
+					<h3 class="mb-2 mt-2 font-semibold">{{ t("hr.events.newContract") }}</h3>
 					<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
-						<n-form-item path="effectiveOn" :label="effectiveLabel">
-							<n-date-picker v-model:formatted-value="form.effectiveOn" value-format="yyyy-MM-dd" type="date" class="w-full" />
+						<n-form-item path="contractType" :label="t('hr.hire.contractType')">
+							<n-select v-model:value="form.contractType" :options="contractTypeOptions" />
 						</n-form-item>
-						<n-form-item v-if="form.type === 'suspension'" path="effectiveTo" :label="t('hr.events.suspendedUntil')">
-							<n-date-picker v-model:formatted-value="form.effectiveTo" value-format="yyyy-MM-dd" type="date" clearable class="w-full" />
+						<n-form-item v-if="form.contractType === 'fixed_term'" path="contractEndsOn" :label="t('hr.hire.contractEndsOn')">
+							<n-date-picker v-model:formatted-value="form.contractEndsOn" value-format="yyyy-MM-dd" type="date" class="w-full" />
+						</n-form-item>
+						<n-form-item v-if="form.type === 'rehire'" path="probationEndsOn" :label="t('hr.hire.probationEndsOn')">
+							<n-date-picker v-model:formatted-value="form.probationEndsOn" value-format="yyyy-MM-dd" type="date" clearable class="w-full" />
+						</n-form-item>
+						<n-form-item path="noticeDays" :label="t('hr.events.noticeDays')">
+							<n-input-number v-model:value="form.noticeDays" :min="0" :max="365" :precision="0" clearable class="w-full" />
+						</n-form-item>
+						<n-form-item path="contractReference" :label="t('hr.events.contractReference')">
+							<n-input v-model:value="form.contractReference" dir="ltr" :maxlength="100" />
 						</n-form-item>
 					</div>
-
-					<n-form-item v-if="form.type === 'termination'" path="terminationReason" :label="t('hr.events.reason')">
-						<n-select v-model:value="form.terminationReason" :options="terminationOptions" />
-					</n-form-item>
-					<n-form-item v-else path="reason" :label="t('hr.events.reason')">
-						<n-input v-model:value="form.reason" :maxlength="32" show-count />
-					</n-form-item>
-
-					<template v-if="needsContract">
-						<h3 class="mb-2 mt-2 font-semibold">{{ t("hr.events.newContract") }}</h3>
-						<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
-							<n-form-item path="contractType" :label="t('hr.hire.contractType')">
-								<n-select v-model:value="form.contractType" :options="contractTypeOptions" />
-							</n-form-item>
-							<n-form-item v-if="form.contractType === 'fixed_term'" path="contractEndsOn" :label="t('hr.hire.contractEndsOn')">
-								<n-date-picker v-model:formatted-value="form.contractEndsOn" value-format="yyyy-MM-dd" type="date" class="w-full" />
-							</n-form-item>
-							<n-form-item v-if="form.type === 'rehire'" path="probationEndsOn" :label="t('hr.hire.probationEndsOn')">
-								<n-date-picker v-model:formatted-value="form.probationEndsOn" value-format="yyyy-MM-dd" type="date" clearable class="w-full" />
-							</n-form-item>
-							<n-form-item path="noticeDays" :label="t('hr.events.noticeDays')">
-								<n-input-number v-model:value="form.noticeDays" :min="0" :max="365" :precision="0" clearable class="w-full" />
-							</n-form-item>
-							<n-form-item path="contractReference" :label="t('hr.events.contractReference')">
-								<n-input v-model:value="form.contractReference" dir="ltr" :maxlength="100" />
-							</n-form-item>
-						</div>
-					</template>
-
-					<template v-if="needsAssignment">
-						<h3 class="mb-1 mt-2 font-semibold">{{ form.type === "rehire" ? t("hr.events.newAssignment") : t("hr.events.assignmentChange") }}</h3>
-						<p v-if="form.type !== 'rehire'" class="mb-3 text-sm text-secondary">{{ assignmentHint }}</p>
-						<n-form-item path="orgUnitId" :label="t('hr.hire.orgUnit')">
-							<n-select v-model:value="form.orgUnitId" :options="unitOptions" filterable />
-						</n-form-item>
-						<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
-							<n-form-item path="positionId" :label="t('hr.hire.position')">
-								<n-select v-model:value="form.positionId" :options="positionOptions" :disabled="!form.orgUnitId" clearable />
-							</n-form-item>
-							<n-form-item path="jobGradeId" :label="t('hr.hire.jobGrade')">
-								<n-select v-model:value="form.jobGradeId" :options="gradeOptions" clearable />
-							</n-form-item>
-						</div>
-						<n-form-item path="managerId" :label="t('hr.hire.manager')">
-							<n-select
-								v-model:value="form.managerId"
-								:options="managerOptions"
-								:placeholder="t('hr.hire.managerPlaceholder')"
-								:loading="searchingManagers"
-								filterable
-								remote
-								clearable
-								@search="searchManagers"
-							/>
-						</n-form-item>
-						<n-form-item path="workLocationId" :label="t('hr.profile.fields.workLocation')">
-							<n-select v-model:value="form.workLocationId" :options="locationOptions" clearable />
-						</n-form-item>
-						<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
-							<n-form-item path="employmentType" :label="t('hr.hire.employmentType')">
-								<n-select v-model:value="form.employmentType" :options="employmentTypeOptions" />
-							</n-form-item>
-							<n-form-item path="workMode" :label="t('hr.hire.workMode')">
-								<n-select v-model:value="form.workMode" :options="workModeOptions" />
-							</n-form-item>
-						</div>
-					</template>
-
-					<n-form-item path="notes" :label="t('hr.events.notes')">
-						<n-input v-model:value="form.notes" type="textarea" :autosize="{ minRows: 2, maxRows: 6 }" :maxlength="2000" />
-					</n-form-item>
 				</template>
-			</n-form>
 
-			<template #footer>
-				<div class="flex justify-end gap-2">
-					<n-button @click="show = false">{{ t("hr.common.cancel") }}</n-button>
-					<n-button :type="form.type === 'termination' ? 'error' : 'primary'" :loading="submitting" :disabled="!form.type" @click="submit">
-						<template #icon><Icon name="carbon:checkmark" :size="16" /></template>
-						{{ t("hr.events.submit") }}
-					</n-button>
-				</div>
+				<template v-if="needsAssignment">
+					<h3 class="mb-1 mt-2 font-semibold">{{ form.type === "rehire" ? t("hr.events.newAssignment") : t("hr.events.assignmentChange") }}</h3>
+					<p v-if="form.type !== 'rehire'" class="mb-3 text-sm text-secondary">{{ assignmentHint }}</p>
+					<n-form-item path="orgUnitId" :label="t('hr.hire.orgUnit')">
+						<n-select v-model:value="form.orgUnitId" :options="unitOptions" filterable />
+					</n-form-item>
+					<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+						<n-form-item path="positionId" :label="t('hr.hire.position')">
+							<n-select v-model:value="form.positionId" :options="positionOptions" :disabled="!form.orgUnitId" clearable />
+						</n-form-item>
+						<n-form-item path="jobGradeId" :label="t('hr.hire.jobGrade')">
+							<n-select v-model:value="form.jobGradeId" :options="gradeOptions" clearable />
+						</n-form-item>
+					</div>
+					<n-form-item path="managerId" :label="t('hr.hire.manager')">
+						<EmployeeSelect v-model:value="form.managerId" :options="managerOptions" :exclude="[employee.id]" />
+					</n-form-item>
+					<n-form-item path="workLocationId" :label="t('hr.profile.fields.workLocation')">
+						<n-select v-model:value="form.workLocationId" :options="locationOptions" clearable />
+					</n-form-item>
+					<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+						<n-form-item path="employmentType" :label="t('hr.hire.employmentType')">
+							<n-select v-model:value="form.employmentType" :options="employmentTypeOptions" />
+						</n-form-item>
+						<n-form-item path="workMode" :label="t('hr.hire.workMode')">
+							<n-select v-model:value="form.workMode" :options="workModeOptions" />
+						</n-form-item>
+					</div>
+				</template>
+
+				<n-form-item path="notes" :label="t('hr.events.notes')">
+					<n-input v-model:value="form.notes" type="textarea" :autosize="{ minRows: 2, maxRows: 6 }" :maxlength="2000" />
+				</n-form-item>
 			</template>
-		</n-drawer-content>
-	</n-drawer>
+		</n-form>
+
+		<template #footer>
+			<div class="flex justify-end gap-2">
+				<n-button @click="show = false">{{ t("hr.common.cancel") }}</n-button>
+				<n-button :type="form.type === 'termination' ? 'error' : 'primary'" :loading="submitting" :disabled="!form.type" @click="submit">
+					<template #icon><Icon name="carbon:checkmark" :size="16" /></template>
+					{{ t("hr.events.submit") }}
+				</n-button>
+			</div>
+		</template>
+	</HrFormModal>
 </template>
 
 <script setup lang="ts">
@@ -123,15 +112,17 @@ import type {
 	WorkLocation,
 	WorkMode
 } from "@/add-os/modules/hr/types/hr"
-import { NAlert, NButton, NDatePicker, NDrawer, NDrawerContent, NForm, NFormItem, NInput, NInputNumber, NSelect, useDialog, useMessage } from "naive-ui"
+import { NAlert, NButton, NDatePicker, NForm, NFormItem, NInput, NInputNumber, NSelect, useDialog, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import EmployeeSelect from "@/add-os/modules/hr/components/EmployeeSelect.vue"
+import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import { CONTRACT_TYPES, EMPLOYMENT_TYPES, RECORDABLE_EVENT_TYPES, TERMINATION_REASONS, WORK_MODES } from "@/add-os/modules/hr/types/hr"
-import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
+import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
 import { nullable } from "@/add-os/modules/hr/utils/forms"
+import { todayIso } from "@/add-os/modules/hr/utils/leave"
 import { translated } from "@/add-os/modules/hr/utils/translated"
-import { ApiError } from "@/add-os/services/api"
-import { listEmployees, listJobGrades, listOrgUnits, listPositions, listWorkLocations, recordEmploymentEvent } from "@/add-os/services/hr/core"
+import { listJobGrades, listOrgUnits, listPositions, listWorkLocations, recordEmploymentEvent } from "@/add-os/services/hr/core"
 import { formatDate } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
@@ -205,12 +196,18 @@ const submitting = ref(false)
 const needsContract = computed(() => form.value.type === "contract_renewal" || form.value.type === "rehire")
 const needsAssignment = computed(() => form.value.type === "rehire" || (form.value.type !== null && ASSIGNMENT_TYPES.includes(form.value.type)))
 
-/** Only the types that can apply to this employee now; the server checks the date as well. */
+/**
+ * Only the types that can apply to this employee now; the server checks the
+ * date as well. A termination recorded for a later day leaves the employee
+ * employed until then — their notice period — so everything but a second
+ * termination still applies; a rehire waits until that day has passed.
+ */
 const availableTypes = computed<RecordableEventType[]>(() => {
 	const e = props.employee
-	if (e.terminated_on) return ["rehire"]
+	if (e.terminated_on && e.terminated_on < todayIso()) return ["rehire"]
 	return RECORDABLE_EVENT_TYPES.filter(type => {
 		if (type === "rehire") return false
+		if (type === "termination") return !e.terminated_on
 		if (type === "confirmation") return e.confirmed_on === null && e.probation_ends_on !== null
 		if (type === "reinstatement") return e.status === "suspended"
 		if (type === "suspension") return e.status !== "suspended"
@@ -251,7 +248,6 @@ const positions = ref<Position[]>([])
 const grades = ref<JobGrade[]>([])
 const locations = ref<WorkLocation[]>([])
 const managerOptions = ref<SelectOption[]>([])
-const searchingManagers = ref(false)
 
 const unitOptions = computed<SelectOption[]>(() => units.value.filter(u => u.is_active || u.id === form.value.orgUnitId).map(u => ({ label: translated(u.name), value: u.id })))
 const positionOptions = computed<SelectOption[]>(() =>
@@ -261,14 +257,6 @@ const positionOptions = computed<SelectOption[]>(() =>
 )
 const gradeOptions = computed<SelectOption[]>(() => grades.value.map(g => ({ label: `${g.code} · ${translated(g.name)}`, value: g.id })))
 const locationOptions = computed<SelectOption[]>(() => locations.value.filter(l => l.is_active || l.id === form.value.workLocationId).map(l => ({ label: translated(l.name), value: l.id })))
-
-async function quietly<T>(load: () => Promise<T>, apply: (value: T) => void) {
-	try {
-		apply(await load())
-	} catch (e) {
-		if (!(e instanceof ApiError)) throw e
-	}
-}
 
 watch(show, visible => {
 	if (!visible) return
@@ -283,7 +271,7 @@ watch(show, visible => {
 
 /**
  * A position belongs to one unit, so once the unit's positions are in, a
- * chosen position from another unit is dropped. Reopening the drawer on the
+ * chosen position from another unit is dropped. Reopening the form on the
  * current unit therefore keeps the current position — clearing it there
  * would send a promotion `position_id: null` nobody asked for.
  */
@@ -309,21 +297,6 @@ watch(
 	() => form.value.orgUnitId,
 	unitId => void loadPositions(unitId)
 )
-
-async function searchManagers(term: string) {
-	if (!term.trim()) return
-	searchingManagers.value = true
-	try {
-		const result = await listEmployees({ q: term.trim() })
-		managerOptions.value = result.data
-			.filter(e => e.status !== "terminated" && e.id !== props.employee.id)
-			.map(e => ({ label: `${translated(e.name)} · ${e.employee_number}`, value: e.id }))
-	} catch (e) {
-		if (!(e instanceof ApiError)) throw e
-	} finally {
-		searchingManagers.value = false
-	}
-}
 
 // ── Submit ──────────────────────────────────────────────────────────────────
 

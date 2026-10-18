@@ -20,7 +20,7 @@
 
 		<template v-if="mayManage">
 			<AdjustBalanceModal v-model:show="adjustVisible" :employee-id :types="trackedTypes" @saved="reload" />
-			<LeaveRequestDrawer
+			<LeaveRequestModal
 				v-model:show="requestVisible"
 				:types="requestTypes"
 				:title="t('hrLeave.profile.requestFor')"
@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import type { LeaveTypeChoice } from "@/add-os/modules/hr/components/leave/LeaveRequestDrawer.vue"
+import type { LeaveTypeChoice } from "@/add-os/modules/hr/components/leave/LeaveRequestModal.vue"
 import type { LeaveBalance, LeaveType, LeaveTypeRef } from "@/add-os/modules/hr/types/leave"
 import { NButton, NCard } from "naive-ui"
 import { computed, onMounted, ref } from "vue"
@@ -41,7 +41,7 @@ import { canManageLeave } from "@/add-os/config/permissions"
 import AdjustBalanceModal from "@/add-os/modules/hr/components/leave/AdjustBalanceModal.vue"
 import LeaveBalances from "@/add-os/modules/hr/components/leave/LeaveBalances.vue"
 import LeaveLedgerTable from "@/add-os/modules/hr/components/leave/LeaveLedgerTable.vue"
-import LeaveRequestDrawer from "@/add-os/modules/hr/components/leave/LeaveRequestDrawer.vue"
+import LeaveRequestModal from "@/add-os/modules/hr/components/leave/LeaveRequestModal.vue"
 import { ApiError } from "@/add-os/services/api"
 import { employeeLeaveBalances, employeeLeaveLedger, listLeaveTypes, submitLeaveForEmployee } from "@/add-os/services/hr/leave"
 import Icon from "@/components/common/Icon.vue"

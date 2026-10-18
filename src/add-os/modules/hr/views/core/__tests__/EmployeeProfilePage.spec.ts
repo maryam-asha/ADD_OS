@@ -28,10 +28,10 @@ vi.mock("@/add-os/services/hr/core", () => ({
 }))
 vi.mock("@/add-os/modules/hr/components/core/CareerTab.vue", () => ({ default: { name: "CareerTab", render: () => null } }))
 vi.mock("@/add-os/modules/hr/components/core/ChecklistTab.vue", () => ({ default: { name: "ChecklistTab", render: () => null } }))
-vi.mock("@/add-os/modules/hr/components/core/EditEmployeeDrawer.vue", () => ({ default: { name: "EditEmployeeDrawer", props: ["show", "employee"], render: () => null } }))
+vi.mock("@/add-os/modules/hr/components/core/EditEmployeeModal.vue", () => ({ default: { name: "EditEmployeeModal", props: ["show", "employee"], render: () => null } }))
 vi.mock("@/add-os/modules/hr/components/core/EmployeeDocumentsTab.vue", () => ({ default: { name: "EmployeeDocumentsTab", render: () => null } }))
 vi.mock("@/add-os/modules/hr/components/core/PeopleListModal.vue", () => ({ default: { name: "PeopleListModal", render: () => null } }))
-vi.mock("@/add-os/modules/hr/components/core/RecordEventDrawer.vue", () => ({ default: { name: "RecordEventDrawer", props: ["show", "employee"], render: () => null } }))
+vi.mock("@/add-os/modules/hr/components/core/RecordEventModal.vue", () => ({ default: { name: "RecordEventModal", props: ["show", "employee"], render: () => null } }))
 vi.mock("naive-ui", async () => {
 	const actual = await vi.importActual<typeof import("naive-ui")>("naive-ui")
 	return { ...actual, useMessage: () => ({ success: vi.fn(), error: vi.fn() }) }
@@ -120,7 +120,7 @@ describe("employeeProfilePage", () => {
 		expect(text).not.toContain("Edit details")
 		expect(text).not.toContain("Record event")
 		expect(text).not.toContain("Checklist")
-		expect(wrapper.findComponent({ name: "RecordEventDrawer" }).exists()).toBe(false)
+		expect(wrapper.findComponent({ name: "RecordEventModal" }).exists()).toBe(false)
 		wrapper.unmount()
 	})
 
@@ -129,7 +129,7 @@ describe("employeeProfilePage", () => {
 		await flushPromises()
 		getEmployeeMock.mockClear()
 
-		wrapper.findComponent({ name: "RecordEventDrawer" }).vm.$emit("recorded")
+		wrapper.findComponent({ name: "RecordEventModal" }).vm.$emit("recorded")
 		await flushPromises()
 
 		expect(getEmployeeMock).toHaveBeenCalledWith(7)

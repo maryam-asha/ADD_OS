@@ -20,7 +20,7 @@ vi.mock("@/add-os/services/hr/core", () => ({
 	listEmployees: listEmployeesMock,
 	listOrgUnits: vi.fn().mockResolvedValue([{ id: 4, name: { ar: "العمليات", en: "Operations" }, is_active: true, parent_id: null, code: null, head_employee_id: null }])
 }))
-vi.mock("@/add-os/modules/hr/components/HireEmployeeDrawer.vue", () => ({ default: { name: "HireEmployeeDrawer", render: () => null } }))
+vi.mock("@/add-os/modules/hr/components/HireEmployeeModal.vue", () => ({ default: { name: "HireEmployeeModal", render: () => null } }))
 vi.mock("vue-router", async () => {
 	const actual = await vi.importActual<typeof import("vue-router")>("vue-router")
 	return { ...actual, useRouter: () => ({ push: vi.fn(), replace: replaceMock }), useRoute: () => route }

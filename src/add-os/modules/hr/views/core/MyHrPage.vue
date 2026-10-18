@@ -42,7 +42,7 @@
 			</n-alert>
 
 			<n-card :title="t('hr.profile.personal')" size="small">
-				<n-descriptions :column="2" label-placement="left" size="small">
+				<n-descriptions :column="narrow ? 1 : 2" label-placement="left" size="small">
 					<n-descriptions-item :label="t('hr.profile.fields.hiredOn')">{{ formatDate(profile.hired_on) }}</n-descriptions-item>
 					<n-descriptions-item :label="t('hr.profile.fields.phone')">
 						<span dir="ltr">{{ profile.phone || none }}</span>
@@ -104,6 +104,8 @@ import PeopleListModal from "@/add-os/modules/hr/components/core/PeopleListModal
 import DocumentsTable from "@/add-os/modules/hr/components/DocumentsTable.vue"
 import EmployeeStatusTag from "@/add-os/modules/hr/components/EmployeeStatusTag.vue"
 import JobDetails from "@/add-os/modules/hr/components/JobDetails.vue"
+import { useNarrowScreen } from "@/add-os/modules/hr/composables/useNarrowScreen"
+import { employeeCell } from "@/add-os/modules/hr/utils/cells"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
 import { ApiError } from "@/add-os/services/api"
 import { listMyApprovals } from "@/add-os/services/hr/approvals"
@@ -118,6 +120,8 @@ import Icon from "@/components/common/Icon.vue"
 defineProps<{ titleKey?: string }>()
 
 const { t, te } = useI18n()
+/** One column of details on a phone, two from `sm` up. */
+const narrow = useNarrowScreen()
 const router = useRouter()
 const none = EMPTY
 const contactsVisible = ref(false)
@@ -209,11 +213,7 @@ const teamColumns = computed<DataTableColumns<TeamMember>>(() => [
 		title: t("hr.employees.columns.employee"),
 		key: "name",
 		minWidth: 200,
-		render: row =>
-			h("div", { class: "flex flex-col gap-0.5" }, [
-				h("span", { class: "font-semibold text-sm" }, translated(row.name)),
-				h("span", { class: "text-xs text-secondary font-mono", dir: "ltr" }, row.employee_number)
-			])
+		render: row => employeeCell(row)
 	},
 	{ title: t("hr.employees.columns.jobTitle"), key: "job_title", minWidth: 160, render: row => translated(row.job_title) || EMPTY },
 	{ title: t("hr.employees.columns.unit"), key: "unit", minWidth: 140, render: row => translated(row.org_unit?.name) || EMPTY },

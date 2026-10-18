@@ -6,7 +6,7 @@ import { createI18n } from "vue-i18n"
 import en from "@/add-os/lang/en/en.json"
 import enHr from "@/add-os/lang/en/hr.json"
 import { ApiError } from "@/add-os/services/api"
-import RecordEventDrawer from "../RecordEventDrawer.vue"
+import RecordEventModal from "../RecordEventModal.vue"
 
 const { recordMock, listPositionsMock, warningMock, successMock, errorMock } = vi.hoisted(() => ({
 	recordMock: vi.fn(),
@@ -16,6 +16,7 @@ const { recordMock, listPositionsMock, warningMock, successMock, errorMock } = v
 	errorMock: vi.fn()
 }))
 
+vi.mock("@/add-os/config/permissions", () => ({ canViewEmployees: () => false }))
 vi.mock("@/add-os/services/hr/core", () => ({
 	recordEmploymentEvent: recordMock,
 	listOrgUnits: vi.fn().mockResolvedValue([]),
@@ -80,13 +81,13 @@ interface DrawerVm {
 }
 
 async function mountDrawer(e: Employee = employee()) {
-	const wrapper = mount(RecordEventDrawer, { props: { employee: e, show: false }, global: { plugins: [i18n], stubs: { Icon: true } }, attachTo: document.body })
+	const wrapper = mount(RecordEventModal, { props: { employee: e, show: false }, global: { plugins: [i18n], stubs: { Icon: true } }, attachTo: document.body })
 	await wrapper.setProps({ show: true })
 	await flushPromises()
 	return { wrapper, vm: wrapper.vm as unknown as DrawerVm }
 }
 
-describe("recordEventDrawer", () => {
+describe("recordEventModal", () => {
 	beforeEach(() => {
 		vi.clearAllMocks()
 		recordMock.mockResolvedValue({ id: 30 })
@@ -103,6 +104,20 @@ describe("recordEventDrawer", () => {
 		expect(types).not.toContain("rehire")
 		expect(types).not.toContain("reinstatement")
 		wrapper.unmount()
+	})
+
+	it("keeps every event but a second termination open during a notice period, and offers only a rehire after it", async () => {
+		const leaving = { ...employee(), terminated_on: "2099-12-31" }
+		const notice = await mountDrawer(leaving)
+		const during = notice.vm.typeOptions.map(o => o.value)
+		expect(during).toContain("promotion")
+		expect(during).not.toContain("termination")
+		expect(during).not.toContain("rehire")
+		notice.wrapper.unmount()
+
+		const gone = await mountDrawer({ ...employee(), terminated_on: "2020-01-31", status: "terminated" })
+		expect(gone.vm.typeOptions.map(o => o.value)).toEqual(["rehire"])
+		gone.wrapper.unmount()
 	})
 
 	it("sends a promotion with only what changed from the current assignment", async () => {

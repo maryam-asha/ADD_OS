@@ -58,7 +58,7 @@
 			</div>
 		</n-card>
 
-		<HireEmployeeDrawer v-if="mayHire" v-model:show="hireVisible" :units @hired="onHired" />
+		<HireEmployeeModal v-if="mayHire" v-model:show="hireVisible" :units @hired="onHired" />
 	</div>
 </template>
 
@@ -71,9 +71,10 @@ import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import { canHireEmployees } from "@/add-os/config/permissions"
 import EmployeeStatusTag from "@/add-os/modules/hr/components/EmployeeStatusTag.vue"
-import HireEmployeeDrawer from "@/add-os/modules/hr/components/HireEmployeeDrawer.vue"
+import HireEmployeeModal from "@/add-os/modules/hr/components/HireEmployeeModal.vue"
 import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
 import { EMPLOYEE_STATUSES } from "@/add-os/modules/hr/types/hr"
+import { employeeCell } from "@/add-os/modules/hr/utils/cells"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
 import { ApiError } from "@/add-os/services/api"
 import { listEmployees, listOrgUnits } from "@/add-os/services/hr/core"
@@ -152,11 +153,7 @@ const columns = computed<DataTableColumns<EmployeeSummary>>(() => [
 		title: t("hr.employees.columns.employee"),
 		key: "name",
 		minWidth: 220,
-		render: row =>
-			h("div", { class: "flex flex-col gap-0.5 py-1" }, [
-				h("span", { class: "font-semibold text-sm" }, translated(row.name)),
-				h("span", { class: "text-xs text-secondary font-mono", dir: "ltr" }, row.employee_number)
-			])
+		render: row => employeeCell(row)
 	},
 	{ title: t("hr.employees.columns.unit"), key: "unit", minWidth: 160, render: row => translated(row.org_unit?.name) || EMPTY },
 	{ title: t("hr.employees.columns.jobTitle"), key: "job_title", minWidth: 160, render: row => translated(row.job_title) || EMPTY },

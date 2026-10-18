@@ -7,13 +7,13 @@
 				<p class="max-w-3xl">{{ t("hrAttendance.roster.description") }}</p>
 			</div>
 			<div v-if="mayManage" class="flex flex-wrap gap-2">
-				<n-button :disabled="!rows.length" @click="copyVisible = true">
+				<n-button :disabled="!rows.length || changeCount > 0" :title="changeCount ? t('hrAttendance.roster.saveBeforeCopy') : undefined" @click="copyVisible = true">
 					<template #icon><Icon name="carbon:copy" :size="16" /></template>
 					{{ t("hrAttendance.roster.copyWeek") }}
 				</n-button>
 				<n-button type="primary" :disabled="!changeCount" :loading="saving" @click="save">
 					<template #icon><Icon name="carbon:save" :size="16" /></template>
-					{{ changeCount ? t("hrAttendance.roster.saveChanges", { n: formatNumber(changeCount) }) : t("hr.common.save") }}
+					{{ changeCount ? t("hrAttendance.roster.saveChanges", { n: formatNumber(changeCount) }, changeCount) : t("hr.common.save") }}
 				</n-button>
 			</div>
 		</div>
@@ -28,11 +28,20 @@
 				</n-button>
 			</n-button-group>
 			<n-date-picker :formatted-value="start" value-format="yyyy-MM-dd" type="date" :clearable="false" @update:formatted-value="onStart" />
-			<n-select v-if="unitOptions.length" v-model:value="filters.org_unit_id" :options="unitOptions" :placeholder="t('hr.employees.unitFilter')" clearable filterable class="max-w-xs" />
+			<n-select
+				v-if="unitOptions.length"
+				:value="filters.org_unit_id"
+				:options="unitOptions"
+				:placeholder="t('hr.employees.unitFilter')"
+				clearable
+				filterable
+				class="max-w-xs"
+				@update:value="(v: number | null) => navigate(() => (filters.org_unit_id = v))"
+			/>
 		</div>
 
 		<n-alert v-if="loadError" type="error" :title="t('hr.common.loadError')" />
-		<n-alert v-if="changeCount" type="warning" :title="t('hrAttendance.roster.unsaved', { n: formatNumber(changeCount) })" />
+		<n-alert v-if="changeCount" type="warning" :title="t('hrAttendance.roster.unsaved', { n: formatNumber(changeCount) }, changeCount)" />
 
 		<n-card>
 			<n-spin :show="loading">
@@ -75,7 +84,8 @@
 		</n-card>
 
 		<n-modal v-model:show="copyVisible" preset="card" :title="t('hrAttendance.roster.copyWeek')" closable class="max-w-md">
-			<p class="mb-4 text-sm">{{ t("hrAttendance.roster.copyHint", { from: formatDate(start) }) }}</p>
+			<p class="mb-3 text-sm">{{ t("hrAttendance.roster.copyHint", { from: formatDate(start) }) }}</p>
+			<n-alert type="warning" class="mb-4" :title="t('hrAttendance.roster.copyOverwrites')" />
 			<n-form-item :label="t('hrAttendance.roster.copyTo')">
 				<n-date-picker v-model:formatted-value="copyTo" value-format="yyyy-MM-dd" type="date" class="w-full" />
 			</n-form-item>
@@ -151,12 +161,12 @@ function shiftWeek(by: number) {
 	navigate(() => (filters.value.start = addDays(start.value, by)))
 }
 
-/** Leaving the week drops unsaved changes — asked first. */
+/** Leaving the week or the unit drops unsaved changes — asked first. */
 function navigate(go: () => void) {
 	if (!edits.value.size) return go()
 	dialog.warning({
 		title: t("hrAttendance.roster.discardTitle"),
-		content: t("hrAttendance.roster.discard", { n: formatNumber(edits.value.size) }),
+		content: t("hrAttendance.roster.discard", { n: formatNumber(edits.value.size) }, edits.value.size),
 		positiveText: t("hrAttendance.roster.discardOk"),
 		negativeText: t("hr.common.cancel"),
 		onPositiveClick: go

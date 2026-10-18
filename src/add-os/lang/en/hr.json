@@ -133,7 +133,7 @@
 				"startsOn": "Contract start",
 				"endsOn": "Contract end",
 				"noticePeriod": "Notice period",
-				"noticeDays": "{n} days",
+				"noticeDays": "{n} day | {n} days",
 				"relation": "Relation"
 			},
 			"career": {
@@ -409,7 +409,7 @@
 			"titleEn": "Title in English",
 			"unit": "Unit",
 			"unitLocked": "Employees hold this position; move them before moving it to another unit.",
-			"headcountFloor": "{n} seats are taken; the headcount cannot go below that.",
+			"headcountFloor": "{n} seat is taken; the headcount cannot go below it. | {n} seats are taken; the headcount cannot go below that.",
 			"saved": "Position saved."
 		},
 		"templates": {

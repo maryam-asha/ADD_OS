@@ -36,7 +36,7 @@ import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vu
 import { canViewEmployees } from "@/add-os/config/permissions"
 import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
 import { ALERT_TYPES } from "@/add-os/modules/hr/types/hr"
-import { translated } from "@/add-os/modules/hr/utils/translated"
+import { employeeCell } from "@/add-os/modules/hr/utils/cells"
 import { ApiError } from "@/add-os/services/api"
 import { listHrAlerts } from "@/add-os/services/hr/core"
 import { STATUS_ICONS } from "@/add-os/theme/tokens"
@@ -135,11 +135,7 @@ const columns = computed<DataTableColumns<HrAlert>>(() => [
 		title: t("hr.employees.columns.employee"),
 		key: "employee",
 		minWidth: 220,
-		render: row =>
-			h("div", { class: "flex flex-col gap-0.5 py-1" }, [
-				h("span", { class: "font-semibold text-sm" }, translated(row.employee.name)),
-				row.employee.employee_number ? h("span", { class: "text-xs text-secondary font-mono", dir: "ltr" }, row.employee.employee_number) : null
-			])
+		render: row => employeeCell(row.employee)
 	},
 	{ title: t("hr.alerts.columns.dueOn"), key: "due_on", minWidth: 120, render: row => formatDate(row.due_on) },
 	{ title: t("hr.alerts.columns.when"), key: "days_left", minWidth: 130, render: whenLabel },

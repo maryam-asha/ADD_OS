@@ -1,69 +1,68 @@
-<!-- src/add-os/modules/hr/components/time/WorkPatternDrawer.vue -->
+<!-- src/add-os/modules/hr/components/time/WorkPatternModal.vue -->
 <template>
-	<n-drawer v-model:show="show" :width="520" placement="right">
-		<n-drawer-content :title="pattern ? t('hrAttendance.patterns.edit') : t('hrAttendance.patterns.add')" closable>
-			<n-form ref="formRef" :model="form" :rules label-placement="top">
-				<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
-					<n-form-item path="nameAr" :label="t('hr.org.nameAr')">
-						<n-input v-model:value="form.nameAr" />
-					</n-form-item>
-					<n-form-item path="nameEn" :label="t('hr.org.nameEn')">
-						<n-input v-model:value="form.nameEn" />
-					</n-form-item>
-					<n-form-item path="code" :label="t('hr.org.code')">
-						<n-input v-model:value="form.code" dir="ltr" />
-					</n-form-item>
-					<n-form-item path="isActive" :label="t('hr.common.active')">
-						<n-switch v-model:value="form.isActive" />
-					</n-form-item>
-				</div>
-				<n-form-item path="kind" :label="t('hrAttendance.patterns.kind')" :feedback="t(`hrAttendance.patterns.kindHint.${form.kind}`)">
-					<n-select v-model:value="form.kind" :options="kindOptions" />
+	<HrFormModal v-model:show="show" :title="pattern ? t('hrAttendance.patterns.edit') : t('hrAttendance.patterns.add')">
+		<n-form ref="formRef" :model="form" :rules label-placement="top">
+			<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+				<n-form-item path="nameAr" :label="t('hr.org.nameAr')">
+					<n-input v-model:value="form.nameAr" />
 				</n-form-item>
+				<n-form-item path="nameEn" :label="t('hr.org.nameEn')">
+					<n-input v-model:value="form.nameEn" />
+				</n-form-item>
+				<n-form-item path="code" :label="t('hr.org.code')">
+					<n-input v-model:value="form.code" dir="ltr" />
+				</n-form-item>
+				<n-form-item path="isActive" :label="t('hr.common.active')">
+					<n-switch v-model:value="form.isActive" />
+				</n-form-item>
+			</div>
+			<n-form-item path="kind" :label="t('hrAttendance.patterns.kind')" :feedback="t(`hrAttendance.patterns.kindHint.${form.kind}`)">
+				<n-select v-model:value="form.kind" :options="kindOptions" />
+			</n-form-item>
 
-				<template v-if="form.kind === 'fixed'">
-					<h3 class="mb-2 font-semibold">{{ t("hrAttendance.patterns.week") }}</h3>
-					<div class="flex flex-col gap-2">
-						<div v-for="day in ISO_WEEKDAYS" :key="day" class="grid grid-cols-[8rem_1fr] items-center gap-3">
-							<span>{{ WEEKDAYS[locale][day % 7] }}</span>
-							<n-select
-								:value="form.weekly[day] ?? null"
-								:options="shiftOptions"
-								:placeholder="t('hrAttendance.patterns.restDay')"
-								clearable
-								:aria-label="WEEKDAYS[locale][day % 7]"
-								@update:value="(v: number | null) => (form.weekly[day] = v)"
-							/>
-						</div>
+			<template v-if="form.kind === 'fixed'">
+				<h3 class="mb-2 font-semibold">{{ t("hrAttendance.patterns.week") }}</h3>
+				<div class="flex flex-col gap-2">
+					<div v-for="day in ISO_WEEKDAYS" :key="day" class="grid grid-cols-[8rem_1fr] items-center gap-3">
+						<span>{{ WEEKDAYS[locale][day % 7] }}</span>
+						<n-select
+							:value="form.weekly[day] ?? null"
+							:options="shiftOptions"
+							:placeholder="t('hrAttendance.patterns.restDay')"
+							clearable
+							:aria-label="WEEKDAYS[locale][day % 7]"
+							@update:value="(v: number | null) => (form.weekly[day] = v)"
+						/>
 					</div>
-					<p v-if="showErrors && !anyWorkDay" class="mt-2 text-sm text-error">{{ t("hrAttendance.patterns.needsAShift") }}</p>
-				</template>
-
-				<n-form-item v-else-if="form.kind === 'flexible'" path="weeklyHours" :label="t('hrAttendance.patterns.weeklyHours')">
-					<n-input-number v-model:value="form.weeklyHours" :min="1" :max="84" :step="0.5" class="w-full" />
-				</n-form-item>
-			</n-form>
-
-			<template #footer>
-				<div class="flex justify-end gap-2">
-					<n-button @click="show = false">{{ t("hr.common.cancel") }}</n-button>
-					<n-button type="primary" :loading="saving" @click="save">
-						<template #icon><Icon name="carbon:checkmark" :size="16" /></template>
-						{{ t("hr.common.save") }}
-					</n-button>
 				</div>
+				<p v-if="showErrors && !anyWorkDay" class="mt-2 text-sm text-error">{{ t("hrAttendance.patterns.needsAShift") }}</p>
 			</template>
-		</n-drawer-content>
-	</n-drawer>
+
+			<n-form-item v-else-if="form.kind === 'flexible'" path="weeklyHours" :label="t('hrAttendance.patterns.weeklyHours')">
+				<n-input-number v-model:value="form.weeklyHours" :min="1" :max="84" :step="0.5" class="w-full" />
+			</n-form-item>
+		</n-form>
+
+		<template #footer>
+			<div class="flex justify-end gap-2">
+				<n-button @click="show = false">{{ t("hr.common.cancel") }}</n-button>
+				<n-button type="primary" :loading="saving" @click="save">
+					<template #icon><Icon name="carbon:checkmark" :size="16" /></template>
+					{{ t("hr.common.save") }}
+				</n-button>
+			</div>
+		</template>
+	</HrFormModal>
 </template>
 
 <script setup lang="ts">
 import type { FormInst, FormItemRule, FormRules, SelectOption } from "naive-ui"
 import type { ShiftTemplate, WorkPattern, WorkPatternKind, WorkPatternPayload } from "@/add-os/modules/hr/types/time"
-import { NButton, NDrawer, NDrawerContent, NForm, NFormItem, NInput, NInputNumber, NSelect, NSwitch, useMessage } from "naive-ui"
+import { NButton, NForm, NFormItem, NInput, NInputNumber, NSelect, NSwitch, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { currentLocale } from "@/add-os/lang/currentLocale"
+import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import { ISO_WEEKDAYS, WORK_PATTERN_KINDS } from "@/add-os/modules/hr/types/time"
 import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
 import { nullable } from "@/add-os/modules/hr/utils/forms"

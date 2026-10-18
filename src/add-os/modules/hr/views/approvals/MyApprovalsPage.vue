@@ -67,6 +67,7 @@ import { useI18n } from "vue-i18n"
 import ApprovalDetailDrawer from "@/add-os/modules/hr/components/approvals/ApprovalDetailDrawer.vue"
 import DelegationModal from "@/add-os/modules/hr/components/approvals/DelegationModal.vue"
 import { requestTypeLabel, summaryHeadline } from "@/add-os/modules/hr/utils/approvalSummary"
+import { employeeCell } from "@/add-os/modules/hr/utils/cells"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
 import { ApiError } from "@/add-os/services/api"
@@ -139,11 +140,7 @@ const columns = computed<DataTableColumns<ApprovalRequest>>(() => [
 		title: t("hr.employees.columns.employee"),
 		key: "employee",
 		minWidth: 200,
-		render: row =>
-			h("div", { class: "flex flex-col gap-0.5 py-1" }, [
-				h("span", { class: "font-semibold text-sm" }, translated(row.employee.name)),
-				h("span", { class: "text-xs text-secondary font-mono", dir: "ltr" }, row.employee.employee_number)
-			])
+		render: row => employeeCell(row.employee)
 	},
 	{ title: t("hrApprovals.columns.summary"), key: "subject", minWidth: 220, ellipsis: { tooltip: true }, render: row => summaryHeadline(t, row.request_type, row.subject) },
 	{ title: t("hrApprovals.columns.submitted"), key: "created_at", minWidth: 150, render: row => (row.created_at ? formatDateTime(row.created_at) : EMPTY) },

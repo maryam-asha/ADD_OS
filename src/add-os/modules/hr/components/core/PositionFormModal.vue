@@ -24,7 +24,7 @@
 			<n-form-item
 				path="headcount"
 				:label="t('hr.org.headcount')"
-				:feedback="position && position.occupied > 0 ? t('hr.positions.headcountFloor', { n: formatNumber(position.occupied) }) : undefined"
+				:feedback="position && position.occupied > 0 ? t('hr.positions.headcountFloor', { n: formatNumber(position.occupied) }, position.occupied) : undefined"
 			>
 				<n-input-number v-model:value="form.headcount" :min="minHeadcount" :max="1000" :precision="0" class="w-full" />
 			</n-form-item>

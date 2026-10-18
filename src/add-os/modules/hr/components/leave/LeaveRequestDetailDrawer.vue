@@ -1,53 +1,52 @@
 <!-- src/add-os/modules/hr/components/leave/LeaveRequestDetailDrawer.vue -->
 <template>
-	<n-drawer v-model:show="show" :width="480" placement="right">
-		<n-drawer-content :title="t('hrLeave.detail.title')" closable>
-			<n-alert v-if="loadError" type="error" :title="loadError" />
-			<n-skeleton v-else-if="loading" text :repeat="5" />
-			<div v-else-if="leave" class="flex flex-col gap-4">
-				<div class="flex flex-wrap items-center justify-between gap-3">
-					<div class="flex flex-col gap-0.5">
-						<span class="font-semibold">{{ translated(leave.employee.name) }}</span>
-						<span class="font-mono text-xs text-secondary" dir="ltr">{{ leave.employee.employee_number }}</span>
-					</div>
-					<ApprovalStatusTag :status="leave.status" />
+	<HrDrawer v-model:show="show" :title="t('hrLeave.detail.title')">
+		<n-alert v-if="loadError" type="error" :title="loadError" />
+		<n-skeleton v-else-if="loading" text :repeat="5" />
+		<div v-else-if="leave" class="flex flex-col gap-4">
+			<div class="flex flex-wrap items-center justify-between gap-3">
+				<div class="flex flex-col gap-0.5">
+					<span class="font-semibold">{{ translated(leave.employee.name) }}</span>
+					<span class="font-mono text-xs text-secondary" dir="ltr">{{ leave.employee.employee_number }}</span>
 				</div>
-				<n-descriptions :column="1" label-placement="left" size="small" bordered>
-					<n-descriptions-item :label="t('hrLeave.request.type')">{{ translated(leave.leave_type.name) }}</n-descriptions-item>
-					<n-descriptions-item :label="t('hrLeave.request.dates')">{{ leavePeriod(t, leave) }}</n-descriptions-item>
-					<n-descriptions-item :label="t('hrLeave.detail.amount')">
-						<span class="add-numeric">{{ leaveAmount(t, leave.amount, leave.leave_type.unit) }}</span>
-					</n-descriptions-item>
-					<n-descriptions-item :label="t('hrLeave.request.reason')">{{ leave.reason || none }}</n-descriptions-item>
-					<n-descriptions-item :label="t('hrLeave.request.attachment')">{{ leave.document_id ? t("hr.common.yes") : t("hr.common.no") }}</n-descriptions-item>
-					<n-descriptions-item v-if="leave.approval" :label="t('hrLeave.detail.approval')">
-						{{ t(`hrApprovals.status.${leave.approval.status}`) }} · {{ t("hrApprovals.step", { n: formatNumber(leave.approval.current_step) }) }}
-					</n-descriptions-item>
-					<n-descriptions-item v-if="leave.created_at" :label="t('hrLeave.detail.submittedAt')">{{ formatDateTime(leave.created_at) }}</n-descriptions-item>
-					<n-descriptions-item v-if="leave.cancelled_at" :label="t('hrLeave.detail.cancelledAt')">{{ formatDateTime(leave.cancelled_at) }}</n-descriptions-item>
-				</n-descriptions>
-				<p v-if="leave.document_id" class="text-sm text-secondary">{{ t("hrLeave.detail.attachmentWhere") }}</p>
+				<ApprovalStatusTag :status="leave.status" />
 			</div>
+			<n-descriptions :column="1" label-placement="left" size="small" bordered>
+				<n-descriptions-item :label="t('hrLeave.request.type')">{{ translated(leave.leave_type.name) }}</n-descriptions-item>
+				<n-descriptions-item :label="t('hrLeave.request.dates')">{{ leavePeriod(t, leave) }}</n-descriptions-item>
+				<n-descriptions-item :label="t('hrLeave.detail.amount')">
+					<span class="add-numeric">{{ leaveAmount(t, leave.amount, leave.leave_type.unit) }}</span>
+				</n-descriptions-item>
+				<n-descriptions-item :label="t('hrLeave.request.reason')">{{ leave.reason || none }}</n-descriptions-item>
+				<n-descriptions-item :label="t('hrLeave.request.attachment')">{{ leave.document_id ? t("hr.common.yes") : t("hr.common.no") }}</n-descriptions-item>
+				<n-descriptions-item v-if="leave.approval" :label="t('hrLeave.detail.approval')">
+					{{ t(`hrApprovals.status.${leave.approval.status}`) }} · {{ t("hrApprovals.step", { n: formatNumber(leave.approval.current_step) }) }}
+				</n-descriptions-item>
+				<n-descriptions-item v-if="leave.created_at" :label="t('hrLeave.detail.submittedAt')">{{ formatDateTime(leave.created_at) }}</n-descriptions-item>
+				<n-descriptions-item v-if="leave.cancelled_at" :label="t('hrLeave.detail.cancelledAt')">{{ formatDateTime(leave.cancelled_at) }}</n-descriptions-item>
+			</n-descriptions>
+			<p v-if="leave.document_id" class="text-sm text-secondary">{{ t("hrLeave.detail.attachmentWhere") }}</p>
+		</div>
 
-			<template v-if="leave && canCancel" #footer>
-				<div class="flex justify-end">
-					<n-button type="error" secondary :loading="cancelling" @click="confirmCancel">
-						<template #icon><Icon name="carbon:close" :size="16" /></template>
-						{{ t("hrLeave.detail.cancel") }}
-					</n-button>
-				</div>
-			</template>
-		</n-drawer-content>
-	</n-drawer>
+		<template v-if="leave && canCancel" #footer>
+			<div class="flex justify-end">
+				<n-button type="error" secondary :loading="cancelling" @click="confirmCancel">
+					<template #icon><Icon name="carbon:close" :size="16" /></template>
+					{{ t("hrLeave.detail.cancel") }}
+				</n-button>
+			</div>
+		</template>
+	</HrDrawer>
 </template>
 
 <script setup lang="ts">
 import type { LeaveRequest } from "@/add-os/modules/hr/types/leave"
 import type { UpdateResult } from "@/add-os/services/hr/core"
-import { NAlert, NButton, NDescriptions, NDescriptionsItem, NDrawer, NDrawerContent, NSkeleton, useDialog, useMessage } from "naive-ui"
+import { NAlert, NButton, NDescriptions, NDescriptionsItem, NSkeleton, useDialog, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import ApprovalStatusTag from "@/add-os/modules/hr/components/approvals/ApprovalStatusTag.vue"
+import HrDrawer from "@/add-os/modules/hr/components/HrDrawer.vue"
 import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
 import { leaveAmount, leavePeriod } from "@/add-os/modules/hr/utils/leave"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"

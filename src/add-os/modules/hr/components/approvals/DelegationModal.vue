@@ -4,15 +4,7 @@
 		<p class="mb-4 text-sm text-secondary">{{ t("hrApprovals.delegations.hint") }}</p>
 		<n-form ref="formRef" :model="form" :rules label-placement="top">
 			<n-form-item path="delegateId" :label="t('hrApprovals.delegations.delegate')" :feedback="mayFindEmployees ? undefined : t('hrApprovals.delegations.pickHint')">
-				<n-select
-					v-model:value="form.delegateId"
-					:options="delegateOptions"
-					:loading="searching"
-					filterable
-					:remote="mayFindEmployees"
-					:placeholder="mayFindEmployees ? t('hr.hire.managerPlaceholder') : undefined"
-					@search="search"
-				/>
+				<EmployeeSelect v-model:value="form.delegateId" :options="nearby" />
 			</n-form-item>
 			<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
 				<n-form-item path="startsOn" :label="t('hrApprovals.delegations.startsOn')">
@@ -50,13 +42,14 @@ import { NButton, NDatePicker, NForm, NFormItem, NModal, NSelect, useMessage } f
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { canViewEmployees } from "@/add-os/config/permissions"
+import EmployeeSelect from "@/add-os/modules/hr/components/EmployeeSelect.vue"
 import { KNOWN_REQUEST_TYPES } from "@/add-os/modules/hr/types/approvals"
 import { requestTypeLabel } from "@/add-os/modules/hr/utils/approvalSummary"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import { translated } from "@/add-os/modules/hr/utils/translated"
 import { ApiError } from "@/add-os/services/api"
 import { createDelegation } from "@/add-os/services/hr/approvals"
-import { getMyProfile, listEmployees, listMyTeam } from "@/add-os/services/hr/core"
+import { getMyProfile, listMyTeam } from "@/add-os/services/hr/core"
 import Icon from "@/components/common/Icon.vue"
 
 /**
@@ -83,14 +76,7 @@ interface DelegationForm {
 const formRef = ref<FormInst | null>(null)
 const form = ref<DelegationForm>({ delegateId: null, startsOn: null, endsOn: null, requestType: null })
 const saving = ref(false)
-const searching = ref(false)
 const nearby = ref<SelectOption[]>([])
-const found = ref<SelectOption[]>([])
-
-const delegateOptions = computed<SelectOption[]>(() => {
-	const seen = new Set<unknown>()
-	return [...found.value, ...nearby.value].filter(option => !seen.has(option.value) && seen.add(option.value))
-})
 const typeOptions = computed<SelectOption[]>(() => KNOWN_REQUEST_TYPES.map(type => ({ label: requestTypeLabel(t, type), value: type })))
 
 const required = { required: true, message: () => t("hr.common.required"), trigger: ["blur", "change"] }
@@ -104,7 +90,6 @@ function beforeStart(ts: number): boolean {
 watch(show, async visible => {
 	if (!visible) return
 	form.value = { delegateId: null, startsOn: null, endsOn: null, requestType: null }
-	found.value = []
 	try {
 		const [me, team] = await Promise.all([getMyProfile(), listMyTeam()])
 		const manager = me.current_assignment?.manager
@@ -116,19 +101,6 @@ watch(show, async visible => {
 		if (!(e instanceof ApiError)) throw e
 	}
 })
-
-async function search(term: string) {
-	if (!mayFindEmployees || !term.trim()) return
-	searching.value = true
-	try {
-		const result = await listEmployees({ q: term.trim() })
-		found.value = result.data.filter(e => e.status !== "terminated").map(e => ({ label: `${translated(e.name)} · ${e.employee_number}`, value: e.id }))
-	} catch (e) {
-		if (!(e instanceof ApiError)) throw e
-	} finally {
-		searching.value = false
-	}
-}
 
 async function save() {
 	try {

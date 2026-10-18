@@ -92,7 +92,7 @@
 			</n-tab-pane>
 		</n-tabs>
 
-		<LeavePolicyDrawer v-if="mayManage" v-model:show="policyVisible" :policy="editingPolicy" :types="leaveTypes" :grades :units @saved="loadPolicies" />
+		<LeavePolicyModal v-if="mayManage" v-model:show="policyVisible" :policy="editingPolicy" :types="leaveTypes" :grades :units @saved="loadPolicies" />
 	</div>
 </template>
 
@@ -106,7 +106,7 @@ import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { canManageHrSettings } from "@/add-os/config/permissions"
 import HrResourcePanel from "@/add-os/modules/hr/components/core/HrResourcePanel.vue"
-import LeavePolicyDrawer from "@/add-os/modules/hr/components/leave/LeavePolicyDrawer.vue"
+import LeavePolicyModal from "@/add-os/modules/hr/components/leave/LeavePolicyModal.vue"
 import {
 	buildCoverageColumns,
 	buildCoverageFields,
@@ -118,7 +118,7 @@ import {
 	emptyHolidayForm,
 	emptyLeaveTypeForm
 } from "@/add-os/modules/hr/config/leave.config"
-import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
+import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
 import { toBilingual, toTranslatable } from "@/add-os/modules/hr/utils/forms"
 import { leaveAmount } from "@/add-os/modules/hr/utils/leave"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
@@ -162,14 +162,6 @@ const grades = ref<JobGrade[]>([])
 const units = ref<OrgUnit[]>([])
 const positions = ref<Position[]>([])
 const documentTypeOptions = ref<SelectOption[]>([])
-
-async function quietly<T>(load: () => Promise<T>, apply: (value: T) => void) {
-	try {
-		apply(await load())
-	} catch (e) {
-		if (!(e instanceof ApiError)) throw e
-	}
-}
 
 onMounted(() => {
 	void quietly(listLeaveTypes, v => (leaveTypes.value = v))

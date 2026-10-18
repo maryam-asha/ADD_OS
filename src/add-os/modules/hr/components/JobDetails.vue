@@ -23,7 +23,7 @@
 				<n-descriptions-item :label="t('hr.profile.fields.startsOn')">{{ formatDate(contract.starts_on) }}</n-descriptions-item>
 				<n-descriptions-item :label="t('hr.profile.fields.endsOn')">{{ contract.ends_on ? formatDate(contract.ends_on) : none }}</n-descriptions-item>
 				<n-descriptions-item :label="t('hr.profile.fields.noticePeriod')">
-					{{ contract.notice_period_days ? t("hr.profile.fields.noticeDays", { n: formatNumber(contract.notice_period_days) }) : none }}
+					{{ contract.notice_period_days ? t("hr.profile.fields.noticeDays", { n: formatNumber(contract.notice_period_days) }, contract.notice_period_days) : none }}
 				</n-descriptions-item>
 			</n-descriptions>
 			<p v-else class="text-secondary">{{ t("hr.profile.noContract") }}</p>

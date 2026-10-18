@@ -22,7 +22,7 @@
 			</n-data-table>
 		</n-card>
 
-		<ApprovalFlowDrawer v-model:show="drawerVisible" :flow="editing" :types :taken-types="flows.map(f => f.request_type)" @saved="load" />
+		<ApprovalFlowModal v-model:show="flowVisible" :flow="editing" :types :taken-types="flows.map(f => f.request_type)" @saved="load" />
 	</div>
 </template>
 
@@ -33,7 +33,7 @@ import { NAlert, NButton, NCard, NDataTable, useDialog, useMessage } from "naive
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import ActiveTag from "@/add-os/modules/hr/components/ActiveTag.vue"
-import ApprovalFlowDrawer from "@/add-os/modules/hr/components/approvals/ApprovalFlowDrawer.vue"
+import ApprovalFlowModal from "@/add-os/modules/hr/components/approvals/ApprovalFlowModal.vue"
 import { abilityLabel } from "@/add-os/modules/hr/utils/approvalLabels"
 import { requestTypeLabel } from "@/add-os/modules/hr/utils/approvalSummary"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
@@ -76,12 +76,12 @@ onMounted(load)
 
 const freeTypes = computed(() => types.value.filter(type => !flows.value.some(f => f.request_type === type)))
 
-const drawerVisible = ref(false)
+const flowVisible = ref(false)
 const editing = ref<ApprovalFlow | null>(null)
 
 function openFlow(flow: ApprovalFlow | null) {
 	editing.value = flow
-	drawerVisible.value = true
+	flowVisible.value = true
 }
 
 function confirmDelete(flow: ApprovalFlow) {

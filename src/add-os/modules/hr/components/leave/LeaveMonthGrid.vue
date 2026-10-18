@@ -18,7 +18,7 @@
 							<div
 								v-if="row.byDay[day.date]"
 								class="flex h-7 items-center justify-center rounded border"
-								:class="row.byDay[day.date].status === 'approved' ? 'border-success bg-success text-white' : 'border-warning'"
+								:class="row.byDay[day.date].status === 'approved' ? 'border-success bg-success text-[var(--add-success-on)]' : 'border-warning'"
 								:title="cellTitle(row.byDay[day.date])"
 								:aria-label="cellTitle(row.byDay[day.date])"
 							>
@@ -32,7 +32,7 @@
 		<p v-if="!rows.length" class="text-secondary">{{ emptyText }}</p>
 		<div class="flex flex-wrap gap-4 text-sm">
 			<span class="inline-flex items-center gap-2">
-				<span class="inline-flex h-5 w-5 items-center justify-center rounded border border-success bg-success text-white"><Icon :name="STATUS_ICONS.success" :size="12" /></span>
+				<span class="inline-flex h-5 w-5 items-center justify-center rounded border border-success bg-success text-[var(--add-success-on)]"><Icon :name="STATUS_ICONS.success" :size="12" /></span>
 				{{ t("hrLeave.calendar.approved") }}
 			</span>
 			<span class="inline-flex items-center gap-2">

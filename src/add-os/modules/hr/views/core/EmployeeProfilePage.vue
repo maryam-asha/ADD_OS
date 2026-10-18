@@ -35,7 +35,7 @@
 				<n-tab-pane name="overview" :tab="t('hr.profile.tabs.overview')">
 					<div class="flex flex-col gap-4">
 						<n-card :title="t('hr.profile.personal')" size="small">
-							<n-descriptions :column="2" label-placement="left" size="small">
+							<n-descriptions :column="narrow ? 1 : 2" label-placement="left" size="small">
 								<n-descriptions-item :label="t('hr.profile.fields.employeeNumber')">
 									<span dir="ltr">{{ employee.employee_number }}</span>
 								</n-descriptions-item>
@@ -129,7 +129,7 @@
 				</n-tab-pane>
 			</n-tabs>
 
-			<EditEmployeeDrawer v-if="mayUpdate" v-model:show="editVisible" :employee @saved="load" />
+			<EditEmployeeModal v-if="mayUpdate" v-model:show="editVisible" :employee @saved="load" />
 			<PeopleListModal
 				v-if="mayUpdate"
 				v-model:show="contactsVisible"
@@ -146,7 +146,7 @@
 				:save-dependents="rows => replaceEmployeeDependents(employeeId, rows)"
 				@saved="load"
 			/>
-			<RecordEventDrawer v-if="mayRecordEvents" v-model:show="eventVisible" :employee @recorded="onEventRecorded" />
+			<RecordEventModal v-if="mayRecordEvents" v-model:show="eventVisible" :employee @recorded="onEventRecorded" />
 		</template>
 	</div>
 </template>
@@ -160,15 +160,16 @@ import { useRoute, useRouter } from "vue-router"
 import { canManageChecklists, canRecordEmploymentEvents, canUpdateEmployees, canViewAttendance, canViewEmployeeDocuments, canViewLeave } from "@/add-os/config/permissions"
 import CareerTab from "@/add-os/modules/hr/components/core/CareerTab.vue"
 import ChecklistTab from "@/add-os/modules/hr/components/core/ChecklistTab.vue"
-import EditEmployeeDrawer from "@/add-os/modules/hr/components/core/EditEmployeeDrawer.vue"
+import EditEmployeeModal from "@/add-os/modules/hr/components/core/EditEmployeeModal.vue"
 import EmployeeDocumentsTab from "@/add-os/modules/hr/components/core/EmployeeDocumentsTab.vue"
 import PeopleListModal from "@/add-os/modules/hr/components/core/PeopleListModal.vue"
-import RecordEventDrawer from "@/add-os/modules/hr/components/core/RecordEventDrawer.vue"
+import RecordEventModal from "@/add-os/modules/hr/components/core/RecordEventModal.vue"
 import SensitiveDetails from "@/add-os/modules/hr/components/core/SensitiveDetails.vue"
 import EmployeeStatusTag from "@/add-os/modules/hr/components/EmployeeStatusTag.vue"
 import JobDetails from "@/add-os/modules/hr/components/JobDetails.vue"
 import EmployeeLeaveTab from "@/add-os/modules/hr/components/leave/EmployeeLeaveTab.vue"
 import EmployeeAttendanceTab from "@/add-os/modules/hr/components/time/EmployeeAttendanceTab.vue"
+import { useNarrowScreen } from "@/add-os/modules/hr/composables/useNarrowScreen"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
 import { ApiError } from "@/add-os/services/api"
 import { getEmployee, replaceEmployeeContacts, replaceEmployeeDependents } from "@/add-os/services/hr/core"
@@ -178,6 +179,8 @@ import Icon from "@/components/common/Icon.vue"
 defineProps<{ titleKey?: string }>()
 
 const { t } = useI18n()
+/** One column of details on a phone, two from `sm` up. */
+const narrow = useNarrowScreen()
 const route = useRoute()
 const router = useRouter()
 const mayViewDocuments = canViewEmployeeDocuments()

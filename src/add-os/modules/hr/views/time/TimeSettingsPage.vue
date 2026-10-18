@@ -71,7 +71,7 @@
 			</n-tab-pane>
 		</n-tabs>
 
-		<WorkPatternDrawer v-if="mayManage" v-model:show="patternVisible" :pattern="editingPattern" :shifts @saved="loadPatterns" />
+		<WorkPatternModal v-if="mayManage" v-model:show="patternVisible" :pattern="editingPattern" :shifts @saved="loadPatterns" />
 	</div>
 </template>
 
@@ -86,7 +86,7 @@ import { canManageHrSettings } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import ActiveTag from "@/add-os/modules/hr/components/ActiveTag.vue"
 import HrResourcePanel from "@/add-os/modules/hr/components/core/HrResourcePanel.vue"
-import WorkPatternDrawer from "@/add-os/modules/hr/components/time/WorkPatternDrawer.vue"
+import WorkPatternModal from "@/add-os/modules/hr/components/time/WorkPatternModal.vue"
 import {
 	buildAttendancePolicyColumns,
 	buildAttendancePolicyFields,
@@ -209,7 +209,7 @@ function confirmDeletePattern(pattern: WorkPattern) {
 
 /** The working days of a fixed pattern by weekday, the hours of a flexible one. */
 function patternSummary(row: WorkPattern): string {
-	if (row.kind === "flexible") return t("hrAttendance.patterns.hoursAWeek", { n: formatNumber(row.weekly_hours ?? 0) })
+	if (row.kind === "flexible") return t("hrAttendance.patterns.hoursAWeek", { n: formatNumber(row.weekly_hours ?? 0) }, row.weekly_hours ?? 0)
 	if (row.kind === "roster") return t("hrAttendance.patterns.kinds.roster")
 	const days = ISO_WEEKDAYS.filter(day => row.weekly?.[String(day)])
 	return days.length ? days.map(day => WEEKDAYS_SHORT[currentLocale.value][day % 7]).join("، ") : EMPTY

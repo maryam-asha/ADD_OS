@@ -50,7 +50,7 @@
 			</n-tab-pane>
 		</n-tabs>
 
-		<LeaveRequestDrawer
+		<LeaveRequestModal
 			v-model:show="requestVisible"
 			:types="balanceTypes"
 			:title="t('hrLeave.me.request')"
@@ -72,7 +72,7 @@ import ApprovalStatusTag from "@/add-os/modules/hr/components/approvals/Approval
 import LeaveBalances from "@/add-os/modules/hr/components/leave/LeaveBalances.vue"
 import LeaveLedgerTable from "@/add-os/modules/hr/components/leave/LeaveLedgerTable.vue"
 import LeaveMonthGrid from "@/add-os/modules/hr/components/leave/LeaveMonthGrid.vue"
-import LeaveRequestDrawer from "@/add-os/modules/hr/components/leave/LeaveRequestDrawer.vue"
+import LeaveRequestModal from "@/add-os/modules/hr/components/leave/LeaveRequestModal.vue"
 import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
 import { leaveAmount, leavePeriod, monthRange, todayIso } from "@/add-os/modules/hr/utils/leave"
 import { translated } from "@/add-os/modules/hr/utils/translated"
