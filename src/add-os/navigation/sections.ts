@@ -62,6 +62,8 @@ export interface NavSection {
 	status: SectionStatus
 	pages: NavPage[]
 	roles?: Roles
+	/** Shown and routable only for accounts with an HR employee record. */
+	employee?: boolean
 	permission?: string
 }
 
@@ -295,6 +297,32 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "termsOfUse", path: "terms-of-use", icon: "carbon:document-tasks" },
 			{ key: "helpSupport", path: "help-support", icon: "carbon:help" }
 		]
+	},
+	{
+		// HR administration (add/hr). No role gate: every page carries its
+		// own hr.* permission, so a custom HR role works without
+		// admin|operations, as on the backend.
+		key: "hr",
+		path: "/hr",
+		icon: "carbon:user-multiple",
+		status: "active",
+		roles: ["all"],
+		pages: [
+			{ key: "employees", path: "employees", permission: "hr.employees.view" },
+			{ key: "employeeProfile", path: "employees/:id", hidden: true, permission: "hr.employees.view" },
+			{ key: "orgStructure", path: "org-structure", permission: "hr.org.view" }
+		]
+	},
+	{
+		// The signed-in employee's own HR file — operations, sales, the café:
+		// being an employee is an HR record, not a role.
+		key: "myHr",
+		path: "/my-hr",
+		icon: "carbon:user-profile",
+		status: "active",
+		roles: ["all"],
+		employee: true,
+		pages: [{ key: "myProfile", path: "profile" }]
 	},
 	{
 		key: "settings",

@@ -50,8 +50,9 @@ export async function twoFactorChallenge(payload: { code?: string; recovery_code
  * Hits the shared `/api/v1/auth/me` endpoint.
  */
 export async function getMe(): Promise<AdminUser> {
-	const res = await get<{ user: AdminUser }>("/api/v1/auth/me")
-	return res.user
+	const res = await get<{ user: AdminUser; employee?: AdminUser["employee"] }>("/api/v1/auth/me")
+	// HR: the account's employee record, if any, rides along beside `user`.
+	return { ...res.user, employee: res.employee ?? null }
 }
 
 /**

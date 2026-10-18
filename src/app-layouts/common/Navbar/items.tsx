@@ -145,7 +145,10 @@ export default function getItems(args: { mode: "vertical" | "horizontal"; collap
 
 			if (!authStore.isRoleGranted(section.roles ?? ["admin", "operations"])) return false
 			if (section.permission && !authStore.hasPermission(section.permission)) return false
-			return true
+			// My HR: accounts with an employee record only.
+			if (section.employee && !authStore.isEmployee) return false
+			// A section whose every page needs a permission the account lacks would open empty.
+			return section.pages.some(page => !page.hidden && (!page.permission || authStore.hasPermission(page.permission)))
 		})
 		.map<MenuMixedOption>(section => {
 			const visiblePages = section.pages

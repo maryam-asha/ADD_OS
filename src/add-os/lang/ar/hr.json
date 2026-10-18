@@ -1,0 +1,179 @@
+{
+	"hr": {
+		"common": {
+			"loadError": "تعذّر تحميل البيانات. حاول مجدداً.",
+			"required": "هذا الحقل مطلوب",
+			"back": "رجوع",
+			"cancel": "إلغاء",
+			"save": "حفظ",
+			"open": "فتح",
+			"view": "عرض",
+			"edit": "تعديل",
+			"active": "فعّال",
+			"inactive": "متوقف"
+		},
+		"status": {
+			"upcoming": "قيد الانضمام",
+			"probation": "فترة تجربة",
+			"active": "على رأس عمله",
+			"suspended": "موقوف",
+			"terminated": "منتهية خدمته"
+		},
+		"employmentType": {
+			"full_time": "دوام كامل",
+			"part_time": "دوام جزئي"
+		},
+		"workMode": {
+			"on_site": "من المقر",
+			"remote": "عن بُعد",
+			"hybrid": "مختلط"
+		},
+		"contractType": {
+			"open_ended": "غير محدد المدة",
+			"fixed_term": "محدد المدة",
+			"hourly": "بالساعة",
+			"internship": "تدريب"
+		},
+		"eventType": {
+			"hire": "تعيين",
+			"confirmation": "تثبيت",
+			"promotion": "ترقية",
+			"transfer": "نقل",
+			"assignment_change": "تغيير المهمة",
+			"contract_renewal": "تجديد العقد",
+			"suspension": "إيقاف",
+			"reinstatement": "إعادة إلى العمل",
+			"termination": "إنهاء خدمة",
+			"rehire": "إعادة تعيين",
+			"compensation_change": "تعديل الأجر"
+		},
+		"employees": {
+			"description": "كل موظفي ADD من التشغيل والمبيعات إلى المقهى: الحالة الوظيفية والوحدة والمنصب.",
+			"searchPlaceholder": "ابحث بالاسم أو الرقم الوظيفي",
+			"statusFilter": "الحالة",
+			"unitFilter": "الوحدة",
+			"hire": "تعيين موظف",
+			"empty": "لا يوجد موظفون مطابقون.",
+			"columns": {
+				"employee": "الموظف",
+				"unit": "الوحدة",
+				"jobTitle": "المسمى الوظيفي",
+				"hiredOn": "تاريخ التعيين",
+				"status": "الحالة",
+				"actions": "إجراءات"
+			}
+		},
+		"hire": {
+			"title": "تعيين موظف",
+			"person": "بيانات الموظف",
+			"job": "الوظيفة",
+			"contract": "العقد",
+			"nameAr": "الاسم بالعربية",
+			"nameEn": "الاسم بالإنجليزية",
+			"phone": "رقم الهاتف",
+			"phoneHint": "بالصيغة الدولية، مثل ‎+963944000000. إن كان لصاحبه حساب في ADD يُربط به.",
+			"workEmail": "البريد المؤسسي",
+			"workEmailHint": "به يدخل الموظف إلى لوحة التحكم.",
+			"personalEmail": "البريد الشخصي",
+			"hiredOn": "تاريخ المباشرة",
+			"orgUnit": "الوحدة",
+			"position": "المنصب",
+			"jobGrade": "الدرجة",
+			"manager": "المدير المباشر",
+			"managerPlaceholder": "ابحث عن موظف",
+			"employmentType": "نوع الدوام",
+			"workMode": "نمط العمل",
+			"contractType": "نوع العقد",
+			"contractEndsOn": "تاريخ انتهاء العقد",
+			"probationEndsOn": "نهاية فترة التجربة",
+			"submit": "تعيين",
+			"success": "تم تعيين الموظف وربط حسابه."
+		},
+		"profile": {
+			"notFound": "لم يُعثر على هذا الموظف.",
+			"tabs": {
+				"overview": "نظرة عامة",
+				"career": "المسار الوظيفي",
+				"documents": "الوثائق"
+			},
+			"personal": "البيانات الشخصية",
+			"job": "الوظيفة الحالية",
+			"contract": "العقد الحالي",
+			"contacts": "جهات الاتصال للطوارئ",
+			"noAssignment": "لا مهمة سارية.",
+			"noContract": "لا عقد سارٍ.",
+			"noContacts": "لا جهات اتصال مسجّلة.",
+			"fields": {
+				"employeeNumber": "الرقم الوظيفي",
+				"status": "الحالة",
+				"hiredOn": "تاريخ التعيين",
+				"probationEndsOn": "نهاية التجربة",
+				"confirmedOn": "تاريخ التثبيت",
+				"terminatedOn": "آخر يوم عمل",
+				"phone": "الهاتف",
+				"workEmail": "البريد المؤسسي",
+				"personalEmail": "البريد الشخصي",
+				"orgUnit": "الوحدة",
+				"position": "المنصب",
+				"jobTitle": "المسمى الوظيفي",
+				"jobGrade": "الدرجة",
+				"manager": "المدير المباشر",
+				"workLocation": "موقع العمل",
+				"employmentType": "نوع الدوام",
+				"workMode": "نمط العمل",
+				"contractType": "نوع العقد",
+				"startsOn": "بداية العقد",
+				"endsOn": "نهاية العقد",
+				"noticePeriod": "مدة الإشعار",
+				"noticeDays": "{n} يوماً",
+				"relation": "الصلة"
+			},
+			"career": {
+				"empty": "لا أحداث مسجّلة.",
+				"type": "الحدث",
+				"effectiveOn": "تاريخ السريان",
+				"reason": "السبب"
+			}
+		},
+		"documents": {
+			"empty": "لا وثائق.",
+			"type": "نوع الوثيقة",
+			"file": "الملف",
+			"issuedOn": "تاريخ الإصدار",
+			"expiresOn": "تاريخ الانتهاء",
+			"expired": "منتهية",
+			"linkError": "تعذّر فتح الوثيقة.",
+			"noAccess": "لا تملك صلاحية عرض الوثائق."
+		},
+		"org": {
+			"description": "الوحدات التنظيمية ومناصبها وعدد مقاعدها.",
+			"empty": "لم تُنشأ أي وحدة بعد.",
+			"addUnit": "إضافة وحدة",
+			"addChild": "إضافة وحدة فرعية",
+			"editUnit": "تعديل الوحدة",
+			"selectUnit": "اختر وحدة لعرض مناصبها.",
+			"code": "الرمز",
+			"nameAr": "الاسم بالعربية",
+			"nameEn": "الاسم بالإنجليزية",
+			"parent": "الوحدة الأم",
+			"noParent": "وحدة رئيسية",
+			"isActive": "فعّالة",
+			"positions": "المناصب",
+			"noPositions": "لا مناصب في هذه الوحدة.",
+			"positionTitle": "المنصب",
+			"headcount": "المقاعد",
+			"occupied": "المشغول",
+			"saved": "تم حفظ الوحدة."
+		},
+		"me": {
+			"description": "ملفك الوظيفي في ADD.",
+			"compliance": "وثائق مطلوبة غير مكتملة",
+			"complianceMissing": "ناقص: {list}",
+			"complianceExpired": "منتهية الصلاحية: {n}",
+			"documents": "وثائقي",
+			"team": "فريقي",
+			"teamEmpty": "لا مرؤوسين مباشرين.",
+			"notEmployee": "لا يوجد ملف موظف مرتبط بحسابك."
+		}
+	}
+}

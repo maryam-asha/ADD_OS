@@ -102,7 +102,11 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"reports.revenueReport": () => import("@/add-os/modules/reports/views/AdminRevenueReportPage.vue"),
 	"reports.spacesReport": () => import("@/add-os/modules/reports/views/SpacesReportPage.vue"),
 	"reports.collectionsReport": () => import("@/add-os/modules/reports/views/CollectionsReportPage.vue"),
-	"payments.invoices": () => import("@/add-os/modules/payments/views/InvoicesPage.vue")
+	"payments.invoices": () => import("@/add-os/modules/payments/views/InvoicesPage.vue"),
+	"hr.employees": () => import("@/add-os/modules/hr/views/EmployeesPage.vue"),
+	"hr.employeeProfile": () => import("@/add-os/modules/hr/views/EmployeeProfilePage.vue"),
+	"hr.orgStructure": () => import("@/add-os/modules/hr/views/OrgStructurePage.vue"),
+	"myHr.myProfile": () => import("@/add-os/modules/hr/views/MyHrPage.vue")
 }
 
 export function createAddOsRoutes(): RouteRecordRaw[] {
@@ -116,6 +120,7 @@ export function createAddOsRoutes(): RouteRecordRaw[] {
 				auth: true,
 				roles: section.roles ?? ["admin", "operations"],
 				permission: section.permission,
+				employee: section.employee,
 				titleKey: navSectionTitleKey(section)
 			},
 			children: section.pages.map(page => ({
@@ -125,7 +130,8 @@ export function createAddOsRoutes(): RouteRecordRaw[] {
 				props: { titleKey: navPageTitleKey(page) },
 				meta: {
 					title: navPageTitleKey(page),
-					permission: page.permission ?? section.permission
+					permission: page.permission ?? section.permission,
+					employee: section.employee
 				}
 			}))
 		}

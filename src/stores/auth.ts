@@ -43,7 +43,8 @@ export const useAuthStore = defineStore("auth", {
 			if (!hasApiUrl()) return
 			try {
 				const user = await getMe()
-				const isMemberOnly = Boolean(user.roles?.length && user.roles.every(r => r === "member"))
+				// A member who is also an employee signs in for My HR.
+				const isMemberOnly = Boolean(user.roles?.length && user.roles.every(r => r === "member")) && !user.employee
 				if (isMemberOnly) {
 					this.setLogout()
 					return
@@ -65,7 +66,11 @@ export const useAuthStore = defineStore("auth", {
 			return Boolean(state.user?.roles?.includes("provider") || state.role === "provider")
 		},
 		isMemberOnly(state) {
-			return Boolean(state.user?.roles?.length && state.user.roles.every(r => r === "member"))
+			return Boolean(state.user?.roles?.length && state.user.roles.every(r => r === "member")) && !state.user?.employee
+		},
+		/** Has an HR employee record: reaches My HR whatever the role. */
+		isEmployee(state) {
+			return Boolean(state.user?.employee)
 		},
 		isAdmin(state) {
 			const isProv = Boolean(state.user?.roles?.includes("provider") || state.role === "provider")

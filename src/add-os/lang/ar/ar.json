@@ -1562,7 +1562,9 @@
 			"providers": "المزوّدون",
 			"provider": "بوابة المزوّد",
 			"providerPortal": "بوابة المزوّد",
-			"reports": "التقارير"
+			"reports": "التقارير",
+			"hr": "الموارد البشرية",
+			"myHr": "شؤوني الوظيفية"
 		},
 		"pages": {
 			"overview": "نظرة عامة",
@@ -1642,7 +1644,11 @@
 			"providersReport": "تقرير المزوّدين",
 			"revenueReport": "تقرير الإيرادات",
 			"spacesReport": "تقرير المساحات",
-			"collectionsReport": "تقرير التحصيل"
+			"collectionsReport": "تقرير التحصيل",
+			"employees": "الموظفون",
+			"employeeProfile": "ملف الموظف",
+			"orgStructure": "الهيكل التنظيمي",
+			"myProfile": "ملفي الوظيفي"
 		}
 	},
 	"resourceCrud": {

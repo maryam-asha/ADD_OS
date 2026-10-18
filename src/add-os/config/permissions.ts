@@ -247,3 +247,20 @@ export function canViewDashboardSection(section: DashboardSection): boolean {
 export function canViewDashboard(): boolean {
 	return DASHBOARD_SECTIONS.some(canViewDashboardSection)
 }
+
+/**
+ * HR (add/hr in ADD Core). Every HR admin route carries its own `hr.*`
+ * permission and no role gate, so a custom HR role works without
+ * admin|operations; these only decide which controls to show.
+ */
+export function canHireEmployees(): boolean {
+	return can("hr.employees.create")
+}
+
+export function canViewEmployeeDocuments(): boolean {
+	return can("hr.documents.view")
+}
+
+export function canManageOrgStructure(): boolean {
+	return can("hr.org.manage")
+}

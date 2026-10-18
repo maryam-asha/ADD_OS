@@ -67,7 +67,17 @@ describe("auth service", () => {
 		const result = await getMe()
 
 		expect(fetch).toHaveBeenCalledWith("http://api.test/api/v1/auth/me", expect.objectContaining({ method: "GET" }))
-		expect(result).toEqual(user)
+		expect(result).toEqual({ ...user, employee: null })
+	})
+
+	it("getMe keeps the HR employee record that comes beside the user", async () => {
+		const user = { id: 7, name: "Café", email: "cafe@add.local", roles: ["member"] }
+		const employee = { id: 3, employee_number: "ADD-0003", name: { ar: "لينا" }, status: "active", user_id: 7, hired_on: "2026-01-01", job_title: null, org_unit: null }
+		vi.mocked(fetch).mockResolvedValue(jsonResponse({ user, employee }))
+
+		const result = await getMe()
+
+		expect(result.employee).toEqual(employee)
 	})
 
 	it("logout POSTs to /logout", async () => {

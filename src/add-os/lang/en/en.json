@@ -1558,7 +1558,9 @@
 			"providers": "Providers",
 			"provider": "Provider Portal",
 			"providerPortal": "Provider Portal",
-			"reports": "Reports"
+			"reports": "Reports",
+			"hr": "Human resources",
+			"myHr": "My HR"
 		},
 		"pages": {
 			"overview": "Overview",
@@ -1638,7 +1640,11 @@
 			"providersReport": "Providers Report",
 			"revenueReport": "Revenue Report",
 			"spacesReport": "Spaces report",
-			"collectionsReport": "Collections report"
+			"collectionsReport": "Collections report",
+			"employees": "Employees",
+			"employeeProfile": "Employee profile",
+			"orgStructure": "Org structure",
+			"myProfile": "My profile"
 		}
 	},
 	"resourceCrud": {

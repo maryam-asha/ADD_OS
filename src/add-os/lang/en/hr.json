@@ -1,0 +1,179 @@
+{
+	"hr": {
+		"common": {
+			"loadError": "Could not load the data. Try again.",
+			"required": "This field is required",
+			"back": "Back",
+			"cancel": "Cancel",
+			"save": "Save",
+			"open": "Open",
+			"view": "View",
+			"edit": "Edit",
+			"active": "Active",
+			"inactive": "Inactive"
+		},
+		"status": {
+			"upcoming": "Joining soon",
+			"probation": "On probation",
+			"active": "Active",
+			"suspended": "Suspended",
+			"terminated": "Left"
+		},
+		"employmentType": {
+			"full_time": "Full time",
+			"part_time": "Part time"
+		},
+		"workMode": {
+			"on_site": "On site",
+			"remote": "Remote",
+			"hybrid": "Hybrid"
+		},
+		"contractType": {
+			"open_ended": "Open-ended",
+			"fixed_term": "Fixed term",
+			"hourly": "Hourly",
+			"internship": "Internship"
+		},
+		"eventType": {
+			"hire": "Hire",
+			"confirmation": "Confirmation",
+			"promotion": "Promotion",
+			"transfer": "Transfer",
+			"assignment_change": "Assignment change",
+			"contract_renewal": "Contract renewal",
+			"suspension": "Suspension",
+			"reinstatement": "Reinstatement",
+			"termination": "Termination",
+			"rehire": "Rehire",
+			"compensation_change": "Pay change"
+		},
+		"employees": {
+			"description": "Every ADD employee, from operations and sales to the café: employment status, unit and position.",
+			"searchPlaceholder": "Search by name or employee number",
+			"statusFilter": "Status",
+			"unitFilter": "Unit",
+			"hire": "Hire employee",
+			"empty": "No matching employees.",
+			"columns": {
+				"employee": "Employee",
+				"unit": "Unit",
+				"jobTitle": "Job title",
+				"hiredOn": "Hired on",
+				"status": "Status",
+				"actions": "Actions"
+			}
+		},
+		"hire": {
+			"title": "Hire employee",
+			"person": "Employee",
+			"job": "Job",
+			"contract": "Contract",
+			"nameAr": "Name in Arabic",
+			"nameEn": "Name in English",
+			"phone": "Phone",
+			"phoneHint": "International format, e.g. +963944000000. An existing ADD account with this number is linked.",
+			"workEmail": "Work email",
+			"workEmailHint": "The employee signs in to the dashboard with it.",
+			"personalEmail": "Personal email",
+			"hiredOn": "Start date",
+			"orgUnit": "Unit",
+			"position": "Position",
+			"jobGrade": "Grade",
+			"manager": "Direct manager",
+			"managerPlaceholder": "Search for an employee",
+			"employmentType": "Employment type",
+			"workMode": "Work mode",
+			"contractType": "Contract type",
+			"contractEndsOn": "Contract end date",
+			"probationEndsOn": "Probation ends on",
+			"submit": "Hire",
+			"success": "The employee was hired and their account linked."
+		},
+		"profile": {
+			"notFound": "This employee was not found.",
+			"tabs": {
+				"overview": "Overview",
+				"career": "Career",
+				"documents": "Documents"
+			},
+			"personal": "Personal details",
+			"job": "Current job",
+			"contract": "Current contract",
+			"contacts": "Emergency contacts",
+			"noAssignment": "No current assignment.",
+			"noContract": "No current contract.",
+			"noContacts": "No contacts recorded.",
+			"fields": {
+				"employeeNumber": "Employee number",
+				"status": "Status",
+				"hiredOn": "Hired on",
+				"probationEndsOn": "Probation ends",
+				"confirmedOn": "Confirmed on",
+				"terminatedOn": "Last working day",
+				"phone": "Phone",
+				"workEmail": "Work email",
+				"personalEmail": "Personal email",
+				"orgUnit": "Unit",
+				"position": "Position",
+				"jobTitle": "Job title",
+				"jobGrade": "Grade",
+				"manager": "Direct manager",
+				"workLocation": "Work location",
+				"employmentType": "Employment type",
+				"workMode": "Work mode",
+				"contractType": "Contract type",
+				"startsOn": "Contract start",
+				"endsOn": "Contract end",
+				"noticePeriod": "Notice period",
+				"noticeDays": "{n} days",
+				"relation": "Relation"
+			},
+			"career": {
+				"empty": "No events recorded.",
+				"type": "Event",
+				"effectiveOn": "Effective on",
+				"reason": "Reason"
+			}
+		},
+		"documents": {
+			"empty": "No documents.",
+			"type": "Document type",
+			"file": "File",
+			"issuedOn": "Issued on",
+			"expiresOn": "Expires on",
+			"expired": "Expired",
+			"linkError": "Could not open the document.",
+			"noAccess": "You are not allowed to view documents."
+		},
+		"org": {
+			"description": "Organisational units, their positions and seats.",
+			"empty": "No unit has been created yet.",
+			"addUnit": "Add unit",
+			"addChild": "Add sub-unit",
+			"editUnit": "Edit unit",
+			"selectUnit": "Select a unit to see its positions.",
+			"code": "Code",
+			"nameAr": "Name in Arabic",
+			"nameEn": "Name in English",
+			"parent": "Parent unit",
+			"noParent": "Top-level unit",
+			"isActive": "Active",
+			"positions": "Positions",
+			"noPositions": "No positions in this unit.",
+			"positionTitle": "Position",
+			"headcount": "Seats",
+			"occupied": "Filled",
+			"saved": "The unit was saved."
+		},
+		"me": {
+			"description": "Your employment file at ADD.",
+			"compliance": "Required documents incomplete",
+			"complianceMissing": "Missing: {list}",
+			"complianceExpired": "Expired: {n}",
+			"documents": "My documents",
+			"team": "My team",
+			"teamEmpty": "No direct reports.",
+			"notEmployee": "No employee record is linked to your account."
+		}
+	}
+}

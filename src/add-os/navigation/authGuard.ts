@@ -2,6 +2,9 @@ import type { RouteLocationNormalized, RouteLocationRaw } from "vue-router"
 import type { RouteMetaAuth } from "@/types/auth.d"
 import { useAuthStore } from "@/stores/auth"
 
+/** Where an employee without dashboard access lands: their own HR page. */
+export const MY_HR_PATH = "/my-hr/profile"
+
 /** Query key `/login` carries the page the caller was sent away from. */
 export const REDIRECT_QUERY = "redirect"
 
@@ -37,7 +40,7 @@ export function safeRedirect(raw: unknown): string {
  * straight back to it and loop.
  */
 export function authGuard(route: RouteLocationNormalized): RouteLocationRaw | void {
-	const { checkAuth, authRedirect, auth, roles, permission }: RouteMetaAuth = route.meta
+	const { checkAuth, authRedirect, auth, roles, permission, employee }: RouteMetaAuth = route.meta
 	const authStore = useAuthStore()
 
 	if (route.redirectedFrom?.name === "Logout") authStore.setLogout()
@@ -64,8 +67,13 @@ export function authGuard(route: RouteLocationNormalized): RouteLocationRaw | vo
 			return { path: "/" }
 		}
 
+		// My HR is for accounts with an employee record, whatever their role.
+		if (employee && !authStore.isEmployee) return { path: "/" }
+
 		if (roles && !authStore.isRoleGranted(roles)) {
-			return authStore.isProvider ? { path: "/provider/summary" } : { path: "/login" }
+			if (authStore.isProvider) return { path: "/provider/summary" }
+			// A café or sales employee with no dashboard role still has My HR.
+			return authStore.isEmployee ? { path: MY_HR_PATH } : { path: "/login" }
 		}
 
 		if (permission && !authStore.hasPermission(permission)) {

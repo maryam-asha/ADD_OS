@@ -15,10 +15,12 @@
  */
 import base from "@/lang/locales/en.json"
 import addOs from "./en.json"
+import hr from "./hr.json"
 
 const messages = {
 	...base,
-	...addOs
+	...addOs,
+	...hr
 	// ...spread future ADD OS module bundles here (mirror ../ar/index.ts exactly)
 }
 
