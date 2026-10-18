@@ -1,0 +1,213 @@
+{
+	"hrLeave": {
+		"amount": {
+			"days": "{n} day | {n} days",
+			"hours": "{n} hour | {n} hours"
+		},
+		"unit": {
+			"day": "Days",
+			"hour": "Hours"
+		},
+		"accrual": {
+			"monthly": "Monthly",
+			"annual_grant": "Granted yearly",
+			"none": "Not earned",
+			"hint": {
+				"monthly": "A twelfth of the yearly entitlement is booked at the end of each month.",
+				"annual_grant": "The whole yearly entitlement is booked at the start of the year.",
+				"none": "Nothing is booked automatically; HR records any balance by hand."
+			}
+		},
+		"ledgerKind": {
+			"opening": "Opening balance",
+			"accrual": "Accrual",
+			"usage": "Leave taken",
+			"reversal": "Reversal",
+			"adjustment": "Adjustment",
+			"expiry": "Expired",
+			"encashment": "Encashment"
+		},
+		"balances": {
+			"empty": "No leave type applies yet. HR sets up types and the policies that give them.",
+			"available": "available now",
+			"detail": "Balance {balance} · waiting for approval {pending}",
+			"maxNegative": "May go up to {n} below zero",
+			"untracked": "Not counted against a balance",
+			"pendingOnly": "Waiting for approval: {pending}"
+		},
+		"ledger": {
+			"allTypes": "Every leave type",
+			"empty": "No movements yet.",
+			"date": "Date",
+			"type": "Leave type",
+			"kind": "Movement",
+			"amount": "Amount",
+			"year": "Year",
+			"notes": "Notes"
+		},
+		"request": {
+			"type": "Leave type",
+			"dates": "Dates",
+			"day": "Day",
+			"hours": "Hours",
+			"halfDay": "Half day",
+			"fullDay": "Full day",
+			"halfDayHint": "A half day is for a single day.",
+			"reason": "Reason",
+			"attachment": "Attachment",
+			"attachmentHint": "Some leave types need a supporting document. PDF, JPG or PNG, up to 10 MB.",
+			"attachmentRequired": "This leave type needs an attachment.",
+			"submit": "Submit request",
+			"submitted": "Leave request sent for approval."
+		},
+		"quote": {
+			"title": "This request takes {amount}",
+			"balance": "Available now {available} · left after it {after}",
+			"failed": "This request cannot be made as it stands."
+		},
+		"detail": {
+			"title": "Leave request",
+			"amount": "Amount",
+			"approval": "Approval",
+			"submittedAt": "Submitted",
+			"cancelledAt": "Cancelled",
+			"attachmentWhere": "The attachment is kept in the employee's documents.",
+			"cancel": "Cancel leave",
+			"cancelConfirm": "Cancel {name}'s leave ({dates})? A pending request is withdrawn; an approved one gives its days back to the balance. Leave that has already started cannot be cancelled.",
+			"cancelled": "Leave cancelled."
+		},
+		"adjust": {
+			"title": "Adjust balance",
+			"kind": "Movement",
+			"kindHint": {
+				"opening": "The balance the employee started with in the system.",
+				"adjustment": "A correction, up or down.",
+				"encashment": "Days paid out instead of taken; always taken out of the balance."
+			},
+			"amount": "Amount",
+			"signHint": "Negative takes from the balance.",
+			"negativeOnly": "Enter a negative amount.",
+			"nonZero": "Enter an amount other than zero.",
+			"effectiveOn": "Effective on",
+			"today": "Today",
+			"periodYear": "Leave year",
+			"periodYearHint": "The year of the effective date",
+			"notes": "Why (kept with the movement)",
+			"submit": "Record",
+			"saved": "Balance adjusted."
+		},
+		"requests": {
+			"description": "Every leave request, newest first. Approvals happen through each request's approval flow; here you read them and, with the permission, cancel one.",
+			"empty": "No leave requests match."
+		},
+		"calendar": {
+			"description": "Who is away, or asking to be, in the month.",
+			"empty": "Nobody is away this month.",
+			"approved": "Approved",
+			"pending": "Waiting for approval",
+			"leave": "Leave"
+		},
+		"settings": {
+			"description": "Leave types, the policies that give them, public holidays and the minimum staffing checked before a leave is approved.",
+			"tabs": {
+				"types": "Leave types",
+				"policies": "Policies",
+				"holidays": "Holidays",
+				"coverage": "Coverage"
+			}
+		},
+		"types": {
+			"description": "A type counted in days or hours, paid or not, against a balance or not. A type with requests, balances or policies cannot be deleted; deactivate it instead.",
+			"add": "Add leave type",
+			"edit": "Edit leave type",
+			"name": "Name",
+			"unit": "Counted in",
+			"isPaid": "Paid",
+			"tracksBalance": "Against a balance",
+			"allowsHalfDay": "Half days allowed",
+			"countsCalendarDays": "Counts calendar days (holidays and rest days too)",
+			"hideReason": "Show to managers as plain leave",
+			"attachmentType": "Needs a document of type",
+			"requiresAttachment": "Needs a document",
+			"created": "Leave type added.",
+			"updated": "Leave type updated.",
+			"deleted": "Leave type deleted.",
+			"deleteWarning": "A type with requests, balances or policies cannot be deleted."
+		},
+		"policies": {
+			"description": "What each type gives, to whom and from when. An employee gets a type when a policy in effect covers their contract type, grade and unit.",
+			"add": "Add policy",
+			"edit": "Edit policy",
+			"empty": "No policy yet: nobody earns leave against a balance until one gives it.",
+			"effective": "In effect",
+			"effectiveFrom": "In effect from",
+			"effectiveTo": "Until (optional)",
+			"entitlement": "Entitlement",
+			"accrualMethod": "Earned",
+			"annualEntitlement": "Per year",
+			"maxNegative": "May go below zero by",
+			"maxNegativeHint": "0 keeps the balance from going negative.",
+			"serviceTiers": "More with years of service",
+			"serviceTiersHint": "From a number of years of service, a different yearly entitlement.",
+			"minYears": "From years of service",
+			"tierEntitlement": "Per year",
+			"addTier": "Add tier",
+			"removeTier": "Remove tier",
+			"tierIncomplete": "Fill in both numbers of every service tier.",
+			"tierDuplicate": "Two tiers start at the same number of years.",
+			"carryOver": "Carry-over",
+			"carryOverMax": "Carry at most",
+			"carryOverMaxHint": "Empty carries everything into next year.",
+			"carryOverExpiry": "Carried days expire after (months)",
+			"carryOverExpiryHint": "Empty: carried days do not expire.",
+			"appliesTo": "Applies to",
+			"appliesToHint": "Leave a list empty to cover everyone on it.",
+			"everyone": "Everyone",
+			"saved": "Leave policy saved.",
+			"delete": "Delete policy",
+			"deleteConfirm": "Delete this policy? Days already earned stay in the balances; nothing more is earned from it.",
+			"deleted": "Leave policy deleted."
+		},
+		"holidays": {
+			"description": "Public holidays are not counted as leave days. A holiday spans 31 days at most; a recurring one comes back each year. Leave already approved keeps the days it was counted with.",
+			"add": "Add holiday",
+			"edit": "Edit holiday",
+			"name": "Name",
+			"dates": "Dates",
+			"startsOn": "From",
+			"endsOn": "To",
+			"recurs": "Every year",
+			"created": "Holiday added.",
+			"updated": "Holiday updated.",
+			"deleted": "Holiday deleted."
+		},
+		"coverage": {
+			"description": "The fewest people of a unit, or holding a position, who must be at work. A leave that would go below it is refused at approval.",
+			"add": "Add coverage rule",
+			"edit": "Edit coverage rule",
+			"scope": "For",
+			"minPresent": "At least at work",
+			"created": "Coverage rule added.",
+			"updated": "Coverage rule updated.",
+			"deleted": "Coverage rule deleted."
+		},
+		"me": {
+			"description": "Your leave: what you have, what you asked for, and every movement on your balances.",
+			"request": "Request leave",
+			"myRequests": "My requests",
+			"noRequests": "You have not asked for leave yet.",
+			"tabs": {
+				"overview": "Balances and requests",
+				"ledger": "Ledger",
+				"team": "My team"
+			},
+			"teamEmpty": "None of your direct reports is away this month.",
+			"cancelPending": "Withdraw your request for {dates}?",
+			"cancelApproved": "Cancel your approved leave for {dates}? Its days go back to your balance."
+		},
+		"profile": {
+			"tab": "Leave",
+			"requestFor": "Request leave for the employee"
+		}
+	}
+}

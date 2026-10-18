@@ -316,6 +316,19 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		]
 	},
 	{
+		// Time and leave (add/hr Leave; attendance and timesheets join it).
+		// Every page carries its own hr.* permission, as on the backend.
+		key: "hrTime",
+		path: "/hr-time",
+		icon: "carbon:calendar",
+		status: "active",
+		roles: ["all"],
+		pages: [
+			{ key: "hrLeaveRequests", path: "leave-requests", permission: "hr.leave.view" },
+			{ key: "hrLeaveCalendar", path: "leave-calendar", permission: "hr.leave.view" }
+		]
+	},
+	{
 		// HR setup. Each page needs its own setup permission (hr.settings.manage,
 		// hr.approvals.manage), so the section shows only to whoever runs HR.
 		key: "hrSettings",
@@ -326,7 +339,8 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		pages: [
 			{ key: "hrDocumentTypes", path: "document-types", permission: "hr.settings.manage" },
 			{ key: "hrChecklistTemplates", path: "checklist-templates", permission: "hr.settings.manage" },
-			{ key: "hrApprovalFlows", path: "approval-flows", permission: "hr.approvals.manage" }
+			{ key: "hrApprovalFlows", path: "approval-flows", permission: "hr.approvals.manage" },
+			{ key: "hrLeaveSettings", path: "leave", permission: "hr.leave.view" }
 		]
 	},
 	{
@@ -341,6 +355,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		pages: [
 			{ key: "myProfile", path: "profile" },
 			{ key: "hrMyApprovals", path: "approvals" },
+			{ key: "hrMyLeave", path: "leave" },
 			{ key: "hrMyCertificate", path: "certificates/:kind", hidden: true }
 		]
 	},

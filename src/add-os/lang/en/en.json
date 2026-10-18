@@ -1561,7 +1561,8 @@
 			"reports": "Reports",
 			"hr": "Human resources",
 			"myHr": "My HR",
-			"hrSettings": "HR settings"
+			"hrSettings": "HR settings",
+			"hrTime": "Time and leave"
 		},
 		"pages": {
 			"overview": "Overview",
@@ -1652,7 +1653,11 @@
 			"hrMyCertificate": "Certificate",
 			"hrMyApprovals": "My approvals",
 			"hrApprovalFlows": "Approval flows",
-			"hrApprovalRequests": "Approval requests"
+			"hrApprovalRequests": "Approval requests",
+			"hrLeaveRequests": "Leave requests",
+			"hrLeaveCalendar": "Leave calendar",
+			"hrLeaveSettings": "Leave settings",
+			"hrMyLeave": "My leave"
 		}
 	},
 	"resourceCrud": {

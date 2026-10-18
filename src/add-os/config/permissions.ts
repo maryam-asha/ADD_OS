@@ -304,3 +304,15 @@ export function canManageOrgStructure(): boolean {
 export function canManageHrSettings(): boolean {
 	return can("hr.settings.manage")
 }
+
+// ── HR leave ────────────────────────────────────────────────────────────────
+
+/** Balances, ledgers, requests and the calendar — and the leave tab on an employee's file. */
+export function canViewLeave(): boolean {
+	return can("hr.leave.view")
+}
+
+/** Filing or cancelling leave for an employee, and adjusting their balance. */
+export function canManageLeave(): boolean {
+	return can("hr.leave.manage")
+}

@@ -1565,7 +1565,8 @@
 			"reports": "التقارير",
 			"hr": "الموارد البشرية",
 			"myHr": "شؤوني الوظيفية",
-			"hrSettings": "إعدادات الموارد البشرية"
+			"hrSettings": "إعدادات الموارد البشرية",
+			"hrTime": "الدوام والإجازات"
 		},
 		"pages": {
 			"overview": "نظرة عامة",
@@ -1656,7 +1657,11 @@
 			"hrMyCertificate": "الشهادة",
 			"hrMyApprovals": "صندوق موافقاتي",
 			"hrApprovalFlows": "مسارات الموافقة",
-			"hrApprovalRequests": "طلبات الموافقة"
+			"hrApprovalRequests": "طلبات الموافقة",
+			"hrLeaveRequests": "طلبات الإجازة",
+			"hrLeaveCalendar": "تقويم الإجازات",
+			"hrLeaveSettings": "إعدادات الإجازات",
+			"hrMyLeave": "إجازاتي"
 		}
 	},
 	"resourceCrud": {
