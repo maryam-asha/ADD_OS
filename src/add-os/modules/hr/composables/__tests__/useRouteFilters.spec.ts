@@ -29,7 +29,7 @@ function setup(onChange: () => void) {
 describe("useRouteFilters", () => {
 	beforeEach(() => {
 		vi.useFakeTimers()
-		vi.clearAllMocks()
+		vi.resetAllMocks()
 		route.query = {}
 	})
 
@@ -85,6 +85,34 @@ describe("useRouteFilters", () => {
 		await nextTick()
 		expect(state.applied.value.q).toBe("rim")
 		expect(onChange).toHaveBeenCalledTimes(1)
+	})
+
+	it("opens on a default that stays out of the URL until changed", async () => {
+		let state!: ReturnType<typeof useRouteFilters<{ status: "string" }>>
+		// The router writes the query it is given back onto the route.
+		replaceMock.mockImplementation(({ query }: { query: Record<string, string> }) => {
+			route.query = query
+		})
+		mount(
+			defineComponent({
+				setup() {
+					state = useRouteFilters({ status: "string" }, () => {}, { defaults: { status: "pending" } })
+					return () => h("div")
+				}
+			})
+		)
+		await flushPromises()
+		expect(state.applied.value.status).toBe("pending")
+
+		state.filters.value.status = "approved"
+		await nextTick()
+		await nextTick()
+		expect(replaceMock).toHaveBeenLastCalledWith({ query: { status: "approved" } })
+
+		state.filters.value.status = "pending"
+		await nextTick()
+		await nextTick()
+		expect(replaceMock).toHaveBeenLastCalledWith({ query: {} })
 	})
 
 	it("keeps the filters when only the page changes", async () => {

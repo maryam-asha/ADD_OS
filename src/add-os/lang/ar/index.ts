@@ -11,11 +11,13 @@
  * `src/lang/locales/index.ts` never needs to change again.
  */
 import base from "./ar.json"
+import hrApprovals from "./hr-approvals.json"
 import hr from "./hr.json"
 
 const messages = {
 	...base,
-	...hr
+	...hr,
+	...hrApprovals
 	// ...spread future ADD OS module bundles here
 }
 

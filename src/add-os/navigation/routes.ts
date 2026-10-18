@@ -107,9 +107,12 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"hr.employeeProfile": () => import("@/add-os/modules/hr/views/core/EmployeeProfilePage.vue"),
 	"hr.orgStructure": () => import("@/add-os/modules/hr/views/core/OrgStructurePage.vue"),
 	"hr.hrAlerts": () => import("@/add-os/modules/hr/views/core/HrAlertsPage.vue"),
+	"hr.hrApprovalRequests": () => import("@/add-os/modules/hr/views/approvals/ApprovalRequestsPage.vue"),
 	"hrSettings.hrDocumentTypes": () => import("@/add-os/modules/hr/views/core/DocumentTypesPage.vue"),
 	"hrSettings.hrChecklistTemplates": () => import("@/add-os/modules/hr/views/core/ChecklistTemplatesPage.vue"),
+	"hrSettings.hrApprovalFlows": () => import("@/add-os/modules/hr/views/approvals/ApprovalFlowsPage.vue"),
 	"myHr.myProfile": () => import("@/add-os/modules/hr/views/core/MyHrPage.vue"),
+	"myHr.hrMyApprovals": () => import("@/add-os/modules/hr/views/approvals/MyApprovalsPage.vue"),
 	"myHr.hrMyCertificate": () => import("@/add-os/modules/hr/views/core/MyCertificatePage.vue")
 }
 

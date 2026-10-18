@@ -1653,7 +1653,10 @@
 			"hrAlerts": "التنبيهات",
 			"hrDocumentTypes": "أنواع الوثائق",
 			"hrChecklistTemplates": "قوالب قوائم المهام",
-			"hrMyCertificate": "الشهادة"
+			"hrMyCertificate": "الشهادة",
+			"hrMyApprovals": "صندوق موافقاتي",
+			"hrApprovalFlows": "مسارات الموافقة",
+			"hrApprovalRequests": "طلبات الموافقة"
 		}
 	},
 	"resourceCrud": {

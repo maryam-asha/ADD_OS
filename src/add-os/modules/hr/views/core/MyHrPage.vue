@@ -15,6 +15,12 @@
 					<p>{{ t("hr.me.description") }}</p>
 				</div>
 				<div class="flex flex-wrap gap-2">
+					<n-badge :value="pendingApprovals" :max="99" :show="pendingApprovals > 0" type="warning">
+						<n-button @click="router.push({ name: 'myHr.hrMyApprovals' })">
+							<template #icon><Icon name="carbon:task-approved" :size="16" /></template>
+							{{ t("nav.pages.hrMyApprovals") }}
+						</n-button>
+					</n-badge>
 					<n-button @click="router.push({ name: 'myHr.hrMyCertificate', params: { kind: 'employment' } })">
 						<template #icon><Icon name="carbon:certificate" :size="16" /></template>
 						{{ t("hr.certificate.employmentTitle") }}
@@ -90,7 +96,7 @@
 <script setup lang="ts">
 import type { DataTableColumns } from "naive-ui"
 import type { EmployeeDocument, MyEmploymentEvent, MyProfile, TeamMember } from "@/add-os/modules/hr/types/hr"
-import { NAlert, NButton, NCard, NDataTable, NDescriptions, NDescriptionsItem, NSkeleton } from "naive-ui"
+import { NAlert, NBadge, NButton, NCard, NDataTable, NDescriptions, NDescriptionsItem, NSkeleton } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
@@ -100,6 +106,7 @@ import EmployeeStatusTag from "@/add-os/modules/hr/components/EmployeeStatusTag.
 import JobDetails from "@/add-os/modules/hr/components/JobDetails.vue"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
 import { ApiError } from "@/add-os/services/api"
+import { listMyApprovals } from "@/add-os/services/hr/approvals"
 import { getMyProfile, listMyDocuments, listMyEvents, listMyTeam, myDocumentLink, replaceMyContacts } from "@/add-os/services/hr/core"
 import { formatDate, formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
@@ -166,11 +173,23 @@ async function loadEvents() {
 	}
 }
 
+/** How many requests wait for this employee's decision: the inbox's total, shown on its button. */
+const pendingApprovals = ref(0)
+
+async function loadPendingApprovals() {
+	try {
+		pendingApprovals.value = (await listMyApprovals(1)).meta.total
+	} catch (e) {
+		if (!(e instanceof ApiError)) throw e
+	}
+}
+
 onMounted(() => {
 	void load()
 	void loadDocuments()
 	void loadEvents()
 	void loadTeam()
+	void loadPendingApprovals()
 })
 
 function reasonLabel(row: MyEmploymentEvent): string {

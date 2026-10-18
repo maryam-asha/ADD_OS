@@ -14,6 +14,11 @@ export interface RouteFiltersOptions<S extends Record<string, FilterKind>> {
 	/** Filters typed into, applied once typing pauses — a search box. */
 	debounced?: (keyof S & string)[]
 	delayMs?: number
+	/**
+	 * What a filter is when the URL does not name it — a queue that opens on
+	 * its pending items. A filter at its default stays out of the URL.
+	 */
+	defaults?: Partial<FilterValues<S>>
 }
 
 const SEARCH_DELAY_MS = 350
@@ -41,6 +46,7 @@ export function useRouteFilters<S extends Record<string, FilterKind>>(
 	const keys = Object.keys(schema) as (keyof S & string)[]
 	const debounced = new Set<string>(options.debounced ?? [])
 	const delay = options.delayMs ?? SEARCH_DELAY_MS
+	const defaults = (options.defaults ?? {}) as Partial<Record<string, string | number | null>>
 
 	function read(query: LocationQuery): { values: FilterValues<S>; page: number } {
 		const values = {} as Record<string, string | number | null>
@@ -48,7 +54,7 @@ export function useRouteFilters<S extends Record<string, FilterKind>>(
 			const raw = query[key]
 			const text = Array.isArray(raw) ? raw[0] : raw
 			if (text === undefined || text === null || text === "") {
-				values[key] = schema[key] === "string" && debounced.has(key) ? "" : null
+				values[key] = defaults[key] ?? (schema[key] === "string" && debounced.has(key) ? "" : null)
 			} else if (schema[key] === "number") {
 				const parsed = Number(text)
 				values[key] = Number.isFinite(parsed) ? parsed : null
@@ -72,7 +78,7 @@ export function useRouteFilters<S extends Record<string, FilterKind>>(
 		for (const key of keys) {
 			const value = values[key]
 			const blank = value === null || (typeof value === "string" && value.trim() === "")
-			if (blank) delete query[key]
+			if (blank || value === defaults[key]) delete query[key]
 			else query[key] = String(typeof value === "string" ? value.trim() : value)
 		}
 		if (p > 1) query.page = String(p)

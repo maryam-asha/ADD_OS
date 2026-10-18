@@ -1649,7 +1649,10 @@
 			"hrAlerts": "Alerts",
 			"hrDocumentTypes": "Document types",
 			"hrChecklistTemplates": "Checklist templates",
-			"hrMyCertificate": "Certificate"
+			"hrMyCertificate": "Certificate",
+			"hrMyApprovals": "My approvals",
+			"hrApprovalFlows": "Approval flows",
+			"hrApprovalRequests": "Approval requests"
 		}
 	},
 	"resourceCrud": {

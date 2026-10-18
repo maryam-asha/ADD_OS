@@ -311,12 +311,13 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "employees", path: "employees", permission: "hr.employees.view" },
 			{ key: "employeeProfile", path: "employees/:id", hidden: true, permission: "hr.employees.view" },
 			{ key: "orgStructure", path: "org-structure", permission: "hr.org.view" },
-			{ key: "hrAlerts", path: "alerts", permission: "hr.alerts.view" }
+			{ key: "hrAlerts", path: "alerts", permission: "hr.alerts.view" },
+			{ key: "hrApprovalRequests", path: "approval-requests", permission: "hr.approvals.manage" }
 		]
 	},
 	{
-		// HR setup. Every page needs hr.settings.manage, so the section shows
-		// only to whoever runs HR; it is hidden for everyone else.
+		// HR setup. Each page needs its own setup permission (hr.settings.manage,
+		// hr.approvals.manage), so the section shows only to whoever runs HR.
 		key: "hrSettings",
 		path: "/hr-settings",
 		icon: "carbon:settings-adjust",
@@ -324,7 +325,8 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		roles: ["all"],
 		pages: [
 			{ key: "hrDocumentTypes", path: "document-types", permission: "hr.settings.manage" },
-			{ key: "hrChecklistTemplates", path: "checklist-templates", permission: "hr.settings.manage" }
+			{ key: "hrChecklistTemplates", path: "checklist-templates", permission: "hr.settings.manage" },
+			{ key: "hrApprovalFlows", path: "approval-flows", permission: "hr.approvals.manage" }
 		]
 	},
 	{
@@ -338,6 +340,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		employee: true,
 		pages: [
 			{ key: "myProfile", path: "profile" },
+			{ key: "hrMyApprovals", path: "approvals" },
 			{ key: "hrMyCertificate", path: "certificates/:kind", hidden: true }
 		]
 	},

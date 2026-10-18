@@ -15,12 +15,14 @@
  */
 import base from "@/lang/locales/en.json"
 import addOs from "./en.json"
+import hrApprovals from "./hr-approvals.json"
 import hr from "./hr.json"
 
 const messages = {
 	...base,
 	...addOs,
-	...hr
+	...hr,
+	...hrApprovals
 	// ...spread future ADD OS module bundles here (mirror ../ar/index.ts exactly)
 }
 
