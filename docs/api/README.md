@@ -22,52 +22,54 @@ snapshot is unverified until someone re-reads the canonical file and re-pins it.
 
 | | |
 |---|---|
-| Pinned | 2026-10-11 |
-| Source | the canonical file as committed on ADDCore `feat/add-point-system` at `4408620` (`git show`, copied byte-for-byte — no re-serialize). The sibling ADDCore checkout was on `feat/auto-renewal` at pin time, so `pnpm api:collection:check` reports `MISMATCH` there until that branch takes `4408620` |
-| Verified identical | `sha256` match (`f91edacc…604f96`) between source and this copy at pin time, plus a `cmp` byte comparison |
-| Size | 1,718,429 bytes / 26,503 lines |
-| Leaf endpoints (parsed) | 416 — `GET` 186, `POST` 129, `DELETE` 38, `PATCH` 33, `PUT` 30 |
-| Distinct `METHOD + URL` | 406 |
+| Pinned | 2026-10-18 |
+| Source | the canonical file as committed on ADDCore `master` at `0ebb5cf5` (`git show`, copied byte-for-byte — no re-serialize). The sibling ADDCore checkout is on `master` but its working copy carries uncommitted edits to the collection (the member payment-methods request and the coupon preview body), so `pnpm api:collection:check` reports `MISMATCH` until those are committed and this is re-pinned |
+| Verified identical | `sha256` match (`cace4de2…2087d4`) between source and this copy at pin time, plus a `cmp` byte comparison |
+| Size | 2,625,201 bytes / 41,913 lines |
+| Leaf endpoints (parsed) | 745 — `GET` 337, `POST` 250, `PATCH` 64, `DELETE` 54, `PUT` 40 |
+| Distinct `METHOD + URL` | 725 |
 
-### What changed since the 2026-10-07 pin
+### What changed since the 2026-10-11 pin
 
-**44 `METHOD + URL` pairs added, 2 removed.** Added, by folder: `Admin (Dashboard) /
-Providers` (providers CRUD, linking accounts, moving a company, provider requests with
-approve/reject, invoices with payments, voids and cancel), `Admin (Dashboard) / Office
-Leases` (list, show, create from a private-office request, terminate), `Admin (Dashboard) /
-Reception Operations / Preview a Plan Sale` and `Sell a Plan (Cash or Points)`, a new
-`Provider (Dashboard)` folder (profile, summary, companies, office requests, plans,
-requests of five kinds, invoices, office leases), and on the member side `List My
-Memberships`, `2. Top Up Wallet` (`POST member/wallet/top-ups`), `Pay Coworking Session`
-and `Company Office Leases`.
+**320 `METHOD + URL` pairs added, 1 removed.** Almost all of it is HR: a new
+`HR (Dashboard)` folder (305 requests: Core, Approvals, Leave, Time & attendance,
+Timesheets & cost, Payroll, Benefits, Recruitment, Performance, Training, Reports, and
+`My HR (hr/me)`), `Careers (HR)` (the public job board, 3) and `Kiosk (device app)`
+(`POST kiosk/attendance/punches` and friends, 3). The HR folder is what the dashboard's
+HR block is built against, unit by unit; its exact shapes are read from the package
+Resources and Requests, the collection names the routes.
 
-Removed: `POST admin/reception/wallet-top-ups/preview` (the dashboard now quotes a top-up
-itself — ADDCore `docs/superpowers/specs/2026-10-10-wallet-top-up-points-entry-design.md`)
-and `POST member/payments` (its three requests — card top-up, cash at reception, start
-payment — replaced by the per-purpose member requests above).
-
-Changed, same path and method: `Top Up Wallet` (`POST admin/reception/wallet-top-ups`)
-now sends `points` alongside `amount` (422 on `points` when they disagree or fall below the
-minimum) and its company example uses `cash`; `Get Wallet Balance` documents the new
-`data.top_up` block (`point_rate_usd`, `min_points`, `currencies[]` with `rate_to_base`,
-`cash_step`, `decimal_places`).
+Outside HR, 23 pairs added: auto-renewal (`PATCH …/auto-renew` and `POST …/renew` on
+memberships and office leases, the provider's two auto-renew toggles,
+`GET admin/renewals/stopped`), reports (`admin/reports/providers`, `admin/reports/revenue`,
+`provider/reports/companies|invoices`), content pages (`terms-of-use` and `help-support`,
+admin `GET`/`PATCH` and public `GET`; public `GET privacy-policy`),
+`GET admin/announcements/options`, `GET member/home`, and `PATCH admin/coupons/{id}`.
+Removed: `GET member/privacy-policy` (now the public `GET privacy-policy`).
 
 ### Credential scan at this pin
 
-Both halves repeated against the source, and compared with the 2026-10-07 file by the same
-script (its counting includes saved-example requests, so absolute counts are not comparable
-with earlier records — the deltas are). **Nothing credential-shaped is new or populated:**
-58 variables (7 more; the 4 credential-shaped ones still empty), `auth` blocks up with the
-new requests, the same five `Authorization` headers all on placeholders, zero `Cookie`
-headers, zero token/key pattern matches. One new literal host, `egate-t.paymera.test`, in a
-saved example's gateway `redirect_url` (a `.test` host). The only new populated
-password/token/code-shaped body fields are `coupon_code` values in four payment and plan-sale
-requests — coupon codes, not credentials. Named as fields and requests only, never values.
+Both halves repeated against the source with the 2026-10-11 script, and compared with the
+2026-10-11 file. 68 variables (10 more, among them `hr_document_file_url`, a
+`{{placeholder}}` request URL; no credential-shaped variable populated), 176 `auth` blocks
+(one more), three `Authorization` headers (two fewer) all on placeholders, zero `Cookie`
+headers, zero token/key pattern matches, no new literal host.
+
+**One finding, ruled on.** `Admin (Dashboard) / Providers / Create Provider` now sends
+populated `password` and `password_confirmation` body fields — new since 2026-10-11, where
+the request had none. Step 2 below says to stop and report that, and the pin was held
+while it was reported. The project owner ruled on 2026-10-18 that it is sample data (the
+password a new provider account is created with, the same kind as the long-standing
+`Create User` sample), so the copy went ahead. The other new populated `code`-shaped
+fields are entity codes in fifteen HR create requests (unit, grade, document type, leave
+type, shift, work pattern, cost center, pay component, rate table, benefits, pipeline
+stage, review template, course) — identifiers, not credentials. Named as fields and
+requests only, never values.
 
 ### Encoding at this pin
 
-Strict, valid UTF-8; the file is now ASCII-escaped JSON (every em dash is the escape
-`\u2014`, none raw), and the 19 double-encoded em dashes (`â€”`) of earlier pins are gone.
+Strict, valid UTF-8, still ASCII-escaped JSON: 423 `—` escapes, no raw em dash, no
+double-encoded `â€”`.
 
 ## Re-pinning
 
@@ -97,6 +99,59 @@ Strict, valid UTF-8; the file is now ASCII-escaped JSON (every em dash is the es
 
 Kept verbatim. A claim written while one of these was current cites *that* pin, and a
 future reader needs to see what it actually said.
+
+### Pin of 2026-10-11 — superseded 2026-10-18
+
+#### Record as it stood
+
+| | |
+|---|---|
+| Pinned | 2026-10-11 |
+| Source | the canonical file as committed on ADDCore `feat/add-point-system` at `4408620` (`git show`, copied byte-for-byte — no re-serialize). The sibling ADDCore checkout was on `feat/auto-renewal` at pin time, so `pnpm api:collection:check` reports `MISMATCH` there until that branch takes `4408620` |
+| Verified identical | `sha256` match (`f91edacc…604f96`) between source and this copy at pin time, plus a `cmp` byte comparison |
+| Size | 1,718,429 bytes / 26,503 lines |
+| Leaf endpoints (parsed) | 416 — `GET` 186, `POST` 129, `DELETE` 38, `PATCH` 33, `PUT` 30 |
+| Distinct `METHOD + URL` | 406 |
+
+#### What changed since the 2026-10-07 pin
+
+**44 `METHOD + URL` pairs added, 2 removed.** Added, by folder: `Admin (Dashboard) /
+Providers` (providers CRUD, linking accounts, moving a company, provider requests with
+approve/reject, invoices with payments, voids and cancel), `Admin (Dashboard) / Office
+Leases` (list, show, create from a private-office request, terminate), `Admin (Dashboard) /
+Reception Operations / Preview a Plan Sale` and `Sell a Plan (Cash or Points)`, a new
+`Provider (Dashboard)` folder (profile, summary, companies, office requests, plans,
+requests of five kinds, invoices, office leases), and on the member side `List My
+Memberships`, `2. Top Up Wallet` (`POST member/wallet/top-ups`), `Pay Coworking Session`
+and `Company Office Leases`.
+
+Removed: `POST admin/reception/wallet-top-ups/preview` (the dashboard now quotes a top-up
+itself — ADDCore `docs/superpowers/specs/2026-10-10-wallet-top-up-points-entry-design.md`)
+and `POST member/payments` (its three requests — card top-up, cash at reception, start
+payment — replaced by the per-purpose member requests above).
+
+Changed, same path and method: `Top Up Wallet` (`POST admin/reception/wallet-top-ups`)
+now sends `points` alongside `amount` (422 on `points` when they disagree or fall below the
+minimum) and its company example uses `cash`; `Get Wallet Balance` documents the new
+`data.top_up` block (`point_rate_usd`, `min_points`, `currencies[]` with `rate_to_base`,
+`cash_step`, `decimal_places`).
+
+#### Credential scan at this pin
+
+Both halves repeated against the source, and compared with the 2026-10-07 file by the same
+script (its counting includes saved-example requests, so absolute counts are not comparable
+with earlier records — the deltas are). **Nothing credential-shaped is new or populated:**
+58 variables (7 more; the 4 credential-shaped ones still empty), `auth` blocks up with the
+new requests, the same five `Authorization` headers all on placeholders, zero `Cookie`
+headers, zero token/key pattern matches. One new literal host, `egate-t.paymera.test`, in a
+saved example's gateway `redirect_url` (a `.test` host). The only new populated
+password/token/code-shaped body fields are `coupon_code` values in four payment and plan-sale
+requests — coupon codes, not credentials. Named as fields and requests only, never values.
+
+#### Encoding at this pin
+
+Strict, valid UTF-8; the file is now ASCII-escaped JSON (every em dash is the escape
+`\u2014`, none raw), and the 19 double-encoded em dashes (`â€”`) of earlier pins are gone.
 
 ### Pin of 2026-10-07 — superseded 2026-10-11
 
