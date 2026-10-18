@@ -120,6 +120,10 @@
 					<EmployeeLeaveTab :employee-id />
 				</n-tab-pane>
 
+				<n-tab-pane v-if="mayViewAttendance" name="attendance" :tab="t('hrAttendance.profile.tab')" display-directive="show:lazy">
+					<EmployeeAttendanceTab :employee-id :employee-name="translated(employee.name)" />
+				</n-tab-pane>
+
 				<n-tab-pane v-if="mayManageChecklists" name="checklist" :tab="t('hr.profile.tabs.checklist')" display-directive="show:lazy">
 					<ChecklistTab ref="checklistTab" :employee-id />
 				</n-tab-pane>
@@ -153,7 +157,7 @@ import { NAlert, NButton, NCard, NDescriptions, NDescriptionsItem, NSkeleton, NT
 import { computed, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
-import { canManageChecklists, canRecordEmploymentEvents, canUpdateEmployees, canViewEmployeeDocuments, canViewLeave } from "@/add-os/config/permissions"
+import { canManageChecklists, canRecordEmploymentEvents, canUpdateEmployees, canViewAttendance, canViewEmployeeDocuments, canViewLeave } from "@/add-os/config/permissions"
 import CareerTab from "@/add-os/modules/hr/components/core/CareerTab.vue"
 import ChecklistTab from "@/add-os/modules/hr/components/core/ChecklistTab.vue"
 import EditEmployeeDrawer from "@/add-os/modules/hr/components/core/EditEmployeeDrawer.vue"
@@ -164,6 +168,7 @@ import SensitiveDetails from "@/add-os/modules/hr/components/core/SensitiveDetai
 import EmployeeStatusTag from "@/add-os/modules/hr/components/EmployeeStatusTag.vue"
 import JobDetails from "@/add-os/modules/hr/components/JobDetails.vue"
 import EmployeeLeaveTab from "@/add-os/modules/hr/components/leave/EmployeeLeaveTab.vue"
+import EmployeeAttendanceTab from "@/add-os/modules/hr/components/time/EmployeeAttendanceTab.vue"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
 import { ApiError } from "@/add-os/services/api"
 import { getEmployee, replaceEmployeeContacts, replaceEmployeeDependents } from "@/add-os/services/hr/core"
@@ -180,6 +185,7 @@ const mayUpdate = canUpdateEmployees()
 const mayRecordEvents = canRecordEmploymentEvents()
 const mayManageChecklists = canManageChecklists()
 const mayViewLeave = canViewLeave()
+const mayViewAttendance = canViewAttendance()
 const none = EMPTY
 
 const employeeId = computed(() => Number(route.params.id))
@@ -188,7 +194,7 @@ const loading = ref(true)
 const loadError = ref(false)
 const notFound = ref(false)
 /** Each tab after the first loads the first time it opens (`show:lazy`). */
-const tab = ref<"overview" | "career" | "documents" | "leave" | "checklist">("overview")
+const tab = ref<"overview" | "career" | "documents" | "leave" | "attendance" | "checklist">("overview")
 
 const editVisible = ref(false)
 const contactsVisible = ref(false)

@@ -1657,7 +1657,13 @@
 			"hrLeaveRequests": "Leave requests",
 			"hrLeaveCalendar": "Leave calendar",
 			"hrLeaveSettings": "Leave settings",
-			"hrMyLeave": "My leave"
+			"hrMyLeave": "My leave",
+			"hrAttendance": "Attendance",
+			"hrRoster": "Roster",
+			"hrTimeRequests": "Time entries and overtime",
+			"hrTimePeriods": "Monthly lock",
+			"hrTimeSettings": "Time settings",
+			"hrMyAttendance": "My attendance"
 		}
 	},
 	"resourceCrud": {

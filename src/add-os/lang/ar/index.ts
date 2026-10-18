@@ -12,6 +12,7 @@
  */
 import base from "./ar.json"
 import hrApprovals from "./hr-approvals.json"
+import hrAttendance from "./hr-attendance.json"
 import hrLeave from "./hr-leave.json"
 import hr from "./hr.json"
 
@@ -19,7 +20,8 @@ const messages = {
 	...base,
 	...hr,
 	...hrApprovals,
-	...hrLeave
+	...hrLeave,
+	...hrAttendance
 	// ...spread future ADD OS module bundles here
 }
 

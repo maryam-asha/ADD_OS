@@ -1661,7 +1661,13 @@
 			"hrLeaveRequests": "طلبات الإجازة",
 			"hrLeaveCalendar": "تقويم الإجازات",
 			"hrLeaveSettings": "إعدادات الإجازات",
-			"hrMyLeave": "إجازاتي"
+			"hrMyLeave": "إجازاتي",
+			"hrAttendance": "الحضور والاستثناءات",
+			"hrRoster": "جدول الشيفتات",
+			"hrTimeRequests": "القيود والعمل الإضافي",
+			"hrTimePeriods": "قفل الشهر",
+			"hrTimeSettings": "إعدادات الدوام",
+			"hrMyAttendance": "حضوري"
 		}
 	},
 	"resourceCrud": {

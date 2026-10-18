@@ -1,0 +1,247 @@
+{
+	"hrAttendance": {
+		"dayKind": {
+			"shift": "Shift",
+			"flexible": "Flexible",
+			"unscheduled": "Unscheduled",
+			"rest": "Rest day",
+			"holiday": "Holiday",
+			"leave": "On leave",
+			"not_employed": "Not employed"
+		},
+		"dayStatus": {
+			"present": "Present",
+			"incomplete": "Incomplete",
+			"no_record": "No record",
+			"absent": "Absent",
+			"excused": "Excused",
+			"rest": "Rest day",
+			"holiday": "Holiday",
+			"leave": "On leave",
+			"open": "Still open"
+		},
+		"exceptionType": {
+			"missing_out": "No departure",
+			"no_record": "No record",
+			"late": "Late",
+			"early_leave": "Left early",
+			"unscheduled_work": "Worked off schedule"
+		},
+		"resolution": {
+			"excused": "Excused",
+			"absent": "Absent",
+			"dismissed": "Dismissed",
+			"corrected": "Corrected"
+		},
+		"resolutionHint": {
+			"excused": "For a missing record or departure, the day counts as excused.",
+			"absent": "For a missing record or departure, the day counts as absent.",
+			"dismissed": "Closes the exception and leaves the day as it is.",
+			"corrected": "The punches were fixed (add the missing one first); the day is rebuilt from them."
+		},
+		"entryStatus": {
+			"verified": "Confirmed by card scans"
+		},
+		"punchSource": {
+			"card_scan": "Card scan",
+			"manual_entry": "Entered by the employee",
+			"manual": "Added by HR"
+		},
+		"settings": {
+			"description": "Shifts, the work patterns that plan each employee's week, and the attendance rules days are judged by.",
+			"tabs": {
+				"shifts": "Shifts",
+				"patterns": "Work patterns",
+				"policies": "Attendance policies"
+			}
+		},
+		"shifts": {
+			"description": "A shift's hours and break. A shift that is rostered, worked or in a work pattern cannot be deleted; deactivate it instead.",
+			"add": "Add shift",
+			"edit": "Edit shift",
+			"name": "Name",
+			"hours": "Hours",
+			"startsAt": "Starts at",
+			"endsAt": "Ends at",
+			"break": "Break",
+			"breakMinutes": "Break (minutes)",
+			"planned": "Planned work",
+			"overnight": "overnight",
+			"overnightHint": "An end before the start runs past midnight.",
+			"created": "Shift added.",
+			"updated": "Shift updated.",
+			"deleted": "Shift deleted.",
+			"deleteWarning": "A shift that is rostered, worked or in a work pattern cannot be deleted."
+		},
+		"patterns": {
+			"description": "How an employee's week is planned. An assignment names its work pattern; one in use cannot be deleted.",
+			"add": "Add work pattern",
+			"edit": "Edit work pattern",
+			"kind": "Kind",
+			"kinds": {
+				"fixed": "Fixed week",
+				"roster": "Rostered",
+				"flexible": "Flexible hours"
+			},
+			"kindHint": {
+				"fixed": "The same shift on chosen weekdays; any other day is a rest day.",
+				"roster": "Each day is whatever the roster plans.",
+				"flexible": "A number of hours a week, at any time."
+			},
+			"week": "The week",
+			"restDay": "Rest day",
+			"weeklyHours": "Hours a week",
+			"hoursAWeek": "{n} hours a week",
+			"days": "Days",
+			"needsAShift": "Choose a shift for at least one day.",
+			"empty": "No work pattern yet.",
+			"saved": "Work pattern saved.",
+			"delete": "Delete work pattern",
+			"deleteConfirm": "Delete the work pattern {name}? A pattern assignments use cannot be deleted; deactivate it instead.",
+			"deleted": "Work pattern deleted."
+		},
+		"policies": {
+			"description": "The rules attendance days are judged by, from a date.",
+			"add": "Add attendance policy",
+			"edit": "Edit attendance policy",
+			"grace": "Late after",
+			"earlyLeaveGrace": "Early leave after",
+			"minOvertime": "Overtime from",
+			"preApproval": "Overtime approved beforehand",
+			"entryTolerance": "Entry tolerance",
+			"minutes": "{n} min",
+			"hints": {
+				"grace": "Minutes after the start before arriving counts as late.",
+				"earlyLeaveGrace": "Minutes before the end before leaving counts as early.",
+				"minOvertime": "Extra time shorter than this is not overtime.",
+				"entryTolerance": "A time an employee enters that card scans confirm within this many minutes needs no approval."
+			},
+			"created": "Attendance policy added.",
+			"updated": "Attendance policy updated.",
+			"deleted": "Attendance policy deleted."
+		},
+		"roster": {
+			"description": "A week of everyone's plan. Set a day to a shift, a day off, or back to the work pattern; save the changes together.",
+			"previousWeek": "Previous week",
+			"nextWeek": "Next week",
+			"fromPattern": "Pattern: {plan}",
+			"backToPattern": "Back to the pattern",
+			"dayOff": "Day off",
+			"saveChanges": "Save {n} changes",
+			"unsaved": "{n} unsaved changes",
+			"saved": "Roster saved.",
+			"empty": "Nobody is employed in this week for this unit.",
+			"discardTitle": "Leave without saving?",
+			"discard": "{n} changes to this week will be lost.",
+			"discardOk": "Discard",
+			"copyWeek": "Copy week",
+			"copyHint": "Copies the roster of the week starting {from} onto the week starting the date you choose, for the same people.",
+			"copyTo": "Onto the week starting",
+			"copy": "Copy",
+			"copied": "Week copied."
+		},
+		"days": {
+			"tab": "Days",
+			"description": "Each day as attendance built it from punches and plans, and the exceptions it raised. A range is two months at most.",
+			"date": "Date",
+			"shift": "Shift",
+			"firstIn": "In",
+			"lastOut": "Out",
+			"worked": "Worked",
+			"late": "Late",
+			"earlyLeave": "Left early",
+			"overtime": "Overtime",
+			"empty": "No attendance days match."
+		},
+		"exceptions": {
+			"tab": "Exceptions",
+			"type": "Exception",
+			"open": "Needs review",
+			"resolved": "Resolved",
+			"note": "Note",
+			"resolve": "Resolve",
+			"resolveTitle": "Resolve exception",
+			"resolution": "Decision",
+			"empty": "No exceptions match."
+		},
+		"reprocess": {
+			"title": "Rebuild days",
+			"hint": "Rebuilds the attendance days of a range (two months at most) from punches and plans — after punches were added or a plan changed. Locked months stay as they are. With an employee filter set, only that employee.",
+			"submit": "Rebuild",
+			"done": "Days rebuilt."
+		},
+		"requests": {
+			"description": "Times employees entered for a missed punch, and overtime requests. Both are decided through their approval flow; here HR reads them.",
+			"entries": "Time entries",
+			"overtime": "Overtime",
+			"emptyEntries": "No time entries match.",
+			"emptyOvertime": "No overtime requests match."
+		},
+		"periods": {
+			"description": "Locking a month freezes its attendance; a regular payroll run is calculated only for a locked month. A month can be locked once it has ended, no exception in it is open and no time entry or overtime is pending — the server says what is left.",
+			"pickMonth": "Month to lock",
+			"lock": "Lock month",
+			"unlock": "Unlock",
+			"month": "Month",
+			"locked": "Locked",
+			"open": "Open",
+			"lockedAt": "Locked at",
+			"empty": "No month has been locked yet.",
+			"lockTitle": "Lock {month}?",
+			"lockConfirm": "Its attendance days, punches and exceptions can no longer change, and payroll can then be calculated for it.",
+			"unlockTitle": "Unlock {month}?",
+			"unlockConfirm": "Its attendance can change again. A payroll already calculated for it may no longer match."
+		},
+		"card": {
+			"title": "Staff card",
+			"issue": "Issue card",
+			"reissue": "Issue a new card",
+			"revoke": "Revoke card",
+			"active": "Card issued {date}.",
+			"none": "No card.",
+			"reissueConfirm": "The current card stops working at once; the new one is shown once to print.",
+			"revokeConfirm": "The card stops working at once; the employee can no longer punch with it.",
+			"issued": "Card issued.",
+			"revoked": "Card revoked.",
+			"printTitle": "Print the staff card",
+			"printHint": "This code is shown only now. Print it before closing; to replace it later, issue a new card."
+		},
+		"punches": {
+			"title": "Punches",
+			"add": "Add a punch",
+			"addHint": "A punch the employee missed, in the organisation's local time. It is recorded with your reason.",
+			"time": "Time",
+			"source": "Source",
+			"reason": "Reason",
+			"save": "Add",
+			"saved": "Punch added.",
+			"empty": "No punches in this range."
+		},
+		"profile": {
+			"tab": "Attendance"
+		},
+		"me": {
+			"description": "Your plan, your attendance, and the times and overtime you asked for.",
+			"tabs": {
+				"schedule": "My schedule",
+				"days": "My attendance",
+				"requests": "My requests",
+				"team": "My team today"
+			},
+			"plan": "Plan",
+			"addEntry": "Enter a missed time",
+			"addOvertime": "Request overtime",
+			"entryHint": "An arrival or departure you did not punch, for today or a past day. Card scans may confirm it; otherwise it goes for approval.",
+			"overtimeHint": "Overtime goes for approval. Where it must be approved beforehand, ask before you work it.",
+			"minutes": "Minutes",
+			"sent": "Sent.",
+			"cancel": "Cancel",
+			"cancelTitle": "Cancel this request?",
+			"cancelConfirm": "It is withdrawn from approval.",
+			"noDays": "No attendance recorded this month.",
+			"noEntries": "You have not entered any time.",
+			"noOvertime": "You have not requested overtime.",
+			"noTeam": "No direct reports on this day."
+		}
+	}
+}

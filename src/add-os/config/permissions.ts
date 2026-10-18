@@ -316,3 +316,28 @@ export function canViewLeave(): boolean {
 export function canManageLeave(): boolean {
 	return can("hr.leave.manage")
 }
+
+// ── HR time and attendance ──────────────────────────────────────────────────
+
+/** Attendance days, exceptions, punches, the roster and a staff card's state — and the attendance tab on a file. */
+export function canViewAttendance(): boolean {
+	return can("hr.attendance.view")
+}
+
+/** Manual punches, resolving exceptions, reprocessing days. */
+export function canCorrectAttendance(): boolean {
+	return can("hr.attendance.correct")
+}
+
+export function canLockAttendance(): boolean {
+	return can("hr.attendance.lock")
+}
+
+/** Issuing and revoking staff attendance cards. */
+export function canManageAttendanceCards(): boolean {
+	return can("hr.attendance.cards")
+}
+
+export function canManageRoster(): boolean {
+	return can("hr.roster.manage")
+}
