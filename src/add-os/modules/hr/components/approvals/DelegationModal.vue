@@ -1,6 +1,6 @@
 <!-- src/add-os/modules/hr/components/approvals/DelegationModal.vue -->
 <template>
-	<n-modal v-model:show="show" preset="card" :title="t('hrApprovals.delegations.add')" closable class="max-w-lg">
+	<HrFormModal v-model:show="show" :title="t('hrApprovals.delegations.add')" size="md" icon="carbon:user-multiple">
 		<p class="mb-4 text-sm text-secondary">{{ t("hrApprovals.delegations.hint") }}</p>
 		<n-form ref="formRef" :model="form" :rules label-placement="top">
 			<n-form-item path="delegateId" :label="t('hrApprovals.delegations.delegate')" :feedback="mayFindEmployees ? undefined : t('hrApprovals.delegations.pickHint')">
@@ -33,16 +33,17 @@
 				</n-button>
 			</div>
 		</template>
-	</n-modal>
+	</HrFormModal>
 </template>
 
 <script setup lang="ts">
 import type { FormInst, FormRules, SelectOption } from "naive-ui"
-import { NButton, NDatePicker, NForm, NFormItem, NModal, NSelect, useMessage } from "naive-ui"
+import { NButton, NDatePicker, NForm, NFormItem, NSelect, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { canViewEmployees } from "@/add-os/config/permissions"
 import EmployeeSelect from "@/add-os/modules/hr/components/EmployeeSelect.vue"
+import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import { KNOWN_REQUEST_TYPES } from "@/add-os/modules/hr/types/approvals"
 import { requestTypeLabel } from "@/add-os/modules/hr/utils/approvalSummary"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"

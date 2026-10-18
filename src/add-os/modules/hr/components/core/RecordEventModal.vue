@@ -1,6 +1,6 @@
 <!-- src/add-os/modules/hr/components/core/RecordEventModal.vue -->
 <template>
-	<HrFormModal v-model:show="show" :title="t('hr.events.title')">
+	<HrFormModal v-model:show="show" :title="t('hr.events.title')" icon="carbon:event-schedule">
 		<n-form ref="formRef" :model="form" :rules label-placement="top">
 			<n-form-item path="type" :label="t('hr.events.type')">
 				<n-select v-model:value="form.type" :options="typeOptions" :placeholder="t('hr.events.typePlaceholder')" />

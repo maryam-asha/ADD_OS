@@ -1,6 +1,6 @@
 <!-- src/add-os/modules/hr/components/leave/LeavePolicyModal.vue -->
 <template>
-	<HrFormModal v-model:show="show" :title="policy ? t('hrLeave.policies.edit') : t('hrLeave.policies.add')" size="lg">
+	<HrFormModal v-model:show="show" :title="policy ? t('hrLeave.policies.edit') : t('hrLeave.policies.add')" size="lg" icon="carbon:rule">
 		<n-form ref="formRef" :model="form" :rules label-placement="top">
 			<n-form-item path="leaveTypeId" :label="t('hrLeave.request.type')">
 				<n-select v-model:value="form.leaveTypeId" :options="typeOptions" :disabled="policy !== null" />

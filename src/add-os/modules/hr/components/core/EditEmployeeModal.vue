@@ -1,6 +1,6 @@
 <!-- src/add-os/modules/hr/components/core/EditEmployeeModal.vue -->
 <template>
-	<HrFormModal v-model:show="show" :title="t('hr.editEmployee.title')">
+	<HrFormModal v-model:show="show" :title="t('hr.editEmployee.title')" icon="carbon:user-profile">
 		<n-form ref="formRef" :model="form" :rules label-placement="top">
 			<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
 				<n-form-item path="nameAr" :label="t('hr.hire.nameAr')">

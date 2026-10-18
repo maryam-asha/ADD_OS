@@ -197,7 +197,22 @@
 			"teamEmpty": "لا مرؤوسين مباشرين.",
 			"notEmployee": "لا يوجد ملف موظف مرتبط بحسابك.",
 			"career": "مساري الوظيفي",
-			"noContacts": "لا جهات اتصال للطوارئ بعد. أضف من يُتصل به عند الحاجة."
+			"noContacts": "لا جهات اتصال للطوارئ بعد. أضف من يُتصل به عند الحاجة.",
+			"stats": {
+				"approvals": "بانتظار موافقتي",
+				"approvalsHint": "طلبات تحتاج قرارك",
+				"approvalsNone": "لا شيء ينتظرك",
+				"leave": "الإجازات",
+				"leaveHint": "متاح الآن",
+				"leaveNone": "لا رصيد إجازات بعد",
+				"today": "اليوم",
+				"todayHint": "لا شيفت اليوم",
+				"documents": "وثائقي",
+				"documentsComplete": "مكتملة",
+				"documentsCompleteHint": "كل الوثائق المطلوبة محفوظة",
+				"documentsHint": "ناقصة أو منتهية — انظر أدناه",
+				"open": "فتح"
+			}
 		},
 		"terminationReason": {
 			"resignation": "استقالة",
@@ -248,7 +263,10 @@
 			"stats": {
 				"overdue": "فات موعدها",
 				"week": "خلال ٧ أيام",
-				"total": "كل التنبيهات"
+				"total": "كل التنبيهات",
+				"overdueHint": "فات تاريخها",
+				"weekHint": "تستحق خلال الأيام السبعة القادمة",
+				"totalHint": "كل ما يجب أن تقرّره الموارد البشرية قريباً"
 			}
 		},
 		"career": {

@@ -5,22 +5,8 @@
 		<n-skeleton v-else-if="loading && !profile" text :repeat="6" />
 
 		<template v-else-if="profile">
-			<div class="flex flex-wrap items-start justify-between gap-3">
-				<div class="flex flex-col gap-1">
-					<div class="flex flex-wrap items-center gap-3">
-						<h1 class="text-2xl font-bold">{{ translated(profile.name) }}</h1>
-						<span class="font-mono text-secondary" dir="ltr">{{ profile.employee_number }}</span>
-						<EmployeeStatusTag :status="profile.status" />
-					</div>
-					<p>{{ t("hr.me.description") }}</p>
-				</div>
-				<div class="flex flex-wrap gap-2">
-					<n-badge :value="pendingApprovals" :max="99" :show="pendingApprovals > 0" type="warning">
-						<n-button @click="router.push({ name: 'myHr.hrMyApprovals' })">
-							<template #icon><Icon name="carbon:task-approved" :size="16" /></template>
-							{{ t("nav.pages.hrMyApprovals") }}
-						</n-button>
-					</n-badge>
+			<EmployeeHero :name="profile.name" :employee-number="profile.employee_number" :status="profile.status" :assignment="profile.current_assignment">
+				<template #actions>
 					<n-button @click="router.push({ name: 'myHr.hrMyCertificate', params: { kind: 'employment' } })">
 						<template #icon><Icon name="carbon:certificate" :size="16" /></template>
 						{{ t("hr.certificate.employmentTitle") }}
@@ -29,7 +15,43 @@
 						<template #icon><Icon name="carbon:receipt" :size="16" /></template>
 						{{ t("hr.certificate.salaryTitle") }}
 					</n-button>
-				</div>
+				</template>
+			</EmployeeHero>
+
+			<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+				<HrStatCard
+					:label="t('hr.me.stats.approvals')"
+					:value="formatNumber(pendingApprovals)"
+					icon="carbon:task-approved"
+					:hint="pendingApprovals ? t('hr.me.stats.approvalsHint') : t('hr.me.stats.approvalsNone')"
+					:to="{ name: 'myHr.hrMyApprovals' }"
+					:cta="t('hr.me.stats.open')"
+					:loading="pendingLoading"
+				/>
+				<HrStatCard
+					:label="leaveCard ? translated(leaveCard.leave_type.name) : t('hr.me.stats.leave')"
+					:value="leaveCard ? leaveAmount(t, leaveCard.available, leaveCard.leave_type.unit) : none"
+					icon="carbon:calendar"
+					:hint="leaveCard ? t('hr.me.stats.leaveHint') : t('hr.me.stats.leaveNone')"
+					:to="{ name: 'myHr.hrMyLeave' }"
+					:cta="t('hr.me.stats.open')"
+					:loading="leaveLoading"
+				/>
+				<HrStatCard
+					:label="t('hr.me.stats.today')"
+					:value="todayLabel"
+					icon="carbon:time"
+					:hint="todayHint"
+					:to="{ name: 'myHr.hrMyAttendance' }"
+					:cta="t('hr.me.stats.open')"
+					:loading="todayLoading"
+				/>
+				<HrStatCard
+					:label="t('hr.me.stats.documents')"
+					:value="profile.compliance.complete ? t('hr.me.stats.documentsComplete') : formatNumber(profile.compliance.missing.length + profile.compliance.expired_count)"
+					icon="carbon:document"
+					:hint="profile.compliance.complete ? t('hr.me.stats.documentsCompleteHint') : t('hr.me.stats.documentsHint')"
+				/>
 			</div>
 
 			<n-alert v-if="!profile.compliance.complete" type="warning" :title="t('hr.me.compliance')">
@@ -41,7 +63,7 @@
 				</p>
 			</n-alert>
 
-			<n-card :title="t('hr.profile.personal')" size="small">
+			<HrPanel :title="t('hr.profile.personal')" icon="carbon:user">
 				<n-descriptions :column="narrow ? 1 : 2" label-placement="left" size="small">
 					<n-descriptions-item :label="t('hr.profile.fields.hiredOn')">{{ formatDate(profile.hired_on) }}</n-descriptions-item>
 					<n-descriptions-item :label="t('hr.profile.fields.phone')">
@@ -53,12 +75,12 @@
 						{{ formatDate(profile.probation_ends_on) }}
 					</n-descriptions-item>
 				</n-descriptions>
-			</n-card>
+			</HrPanel>
 
 			<JobDetails :assignment="profile.current_assignment" :contract="profile.current_contract" />
 
-			<n-card :title="t('hr.profile.contacts')" size="small">
-				<template #header-extra>
+			<HrPanel :title="t('hr.profile.contacts')" icon="carbon:phone">
+				<template #extra>
 					<n-button size="small" text type="primary" @click="contactsVisible = true">
 						<template #icon><Icon name="carbon:edit" :size="16" /></template>
 						{{ t("hr.common.edit") }}
@@ -70,23 +92,23 @@
 					</n-descriptions-item>
 				</n-descriptions>
 				<p v-else class="text-secondary">{{ t("hr.me.noContacts") }}</p>
-			</n-card>
+			</HrPanel>
 
-			<n-card :title="t('hr.me.career')" size="small">
+			<HrPanel :title="t('hr.me.career')" icon="carbon:events">
 				<n-data-table :columns="eventColumns" :data="events" :loading="eventsLoading" :bordered="false" size="small" :scroll-x="480">
 					<template #empty>
 						<span class="text-secondary">{{ t("hr.profile.career.empty") }}</span>
 					</template>
 				</n-data-table>
-			</n-card>
+			</HrPanel>
 
-			<n-card :title="t('hr.me.documents')" size="small">
+			<HrPanel :title="t('hr.me.documents')" icon="carbon:document">
 				<DocumentsTable :documents :loading="documentsLoading" :open="myDocumentLink" />
-			</n-card>
+			</HrPanel>
 
-			<n-card v-if="team.length" :title="t('hr.me.team')" size="small">
+			<HrPanel v-if="team.length" :title="t('hr.me.team')" icon="carbon:group">
 				<n-data-table :columns="teamColumns" :data="team" :bordered="false" size="small" />
-			</n-card>
+			</HrPanel>
 
 			<PeopleListModal v-model:show="contactsVisible" kind="contacts" :contacts="profile.contacts" :save-contacts="replaceMyContacts" @saved="load" />
 		</template>
@@ -96,7 +118,9 @@
 <script setup lang="ts">
 import type { DataTableColumns } from "naive-ui"
 import type { EmployeeDocument, MyEmploymentEvent, MyProfile, TeamMember } from "@/add-os/modules/hr/types/hr"
-import { NAlert, NBadge, NButton, NCard, NDataTable, NDescriptions, NDescriptionsItem, NSkeleton } from "naive-ui"
+import type { LeaveBalance } from "@/add-os/modules/hr/types/leave"
+import type { MyScheduleDay } from "@/add-os/modules/hr/types/time"
+import { NAlert, NButton, NDataTable, NDescriptions, NDescriptionsItem, NSkeleton } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
@@ -104,12 +128,20 @@ import PeopleListModal from "@/add-os/modules/hr/components/core/PeopleListModal
 import DocumentsTable from "@/add-os/modules/hr/components/DocumentsTable.vue"
 import EmployeeStatusTag from "@/add-os/modules/hr/components/EmployeeStatusTag.vue"
 import JobDetails from "@/add-os/modules/hr/components/JobDetails.vue"
+import EmployeeHero from "@/add-os/modules/hr/components/ui/EmployeeHero.vue"
+import HrPanel from "@/add-os/modules/hr/components/ui/HrPanel.vue"
+import HrStatCard from "@/add-os/modules/hr/components/ui/HrStatCard.vue"
 import { useNarrowScreen } from "@/add-os/modules/hr/composables/useNarrowScreen"
 import { employeeCell } from "@/add-os/modules/hr/utils/cells"
+import { quietly } from "@/add-os/modules/hr/utils/errors"
+import { leaveAmount, todayIso } from "@/add-os/modules/hr/utils/leave"
+import { orgClock } from "@/add-os/modules/hr/utils/time"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
 import { ApiError } from "@/add-os/services/api"
 import { listMyApprovals } from "@/add-os/services/hr/approvals"
 import { getMyProfile, listMyDocuments, listMyEvents, listMyTeam, myDocumentLink, replaceMyContacts } from "@/add-os/services/hr/core"
+import { myLeaveBalances } from "@/add-os/services/hr/leave"
+import { mySchedule } from "@/add-os/services/hr/time"
 import { formatDate, formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
@@ -177,16 +209,44 @@ async function loadEvents() {
 	}
 }
 
-/** How many requests wait for this employee's decision: the inbox's total, shown on its button. */
+// ── At a glance: each figure from its own module, and simply left out if that module refuses ──
+/** How many requests wait for this employee's decision: the inbox's total. */
 const pendingApprovals = ref(0)
+const pendingLoading = ref(true)
+/** The first leave type kept against a balance — usually annual leave. */
+const leaveCard = ref<LeaveBalance | null>(null)
+const leaveLoading = ref(true)
+const today = ref<MyScheduleDay | null>(null)
+const todayLoading = ref(true)
 
 async function loadPendingApprovals() {
-	try {
-		pendingApprovals.value = (await listMyApprovals(1)).meta.total
-	} catch (e) {
-		if (!(e instanceof ApiError)) throw e
-	}
+	await quietly(
+		() => listMyApprovals(1),
+		page => (pendingApprovals.value = page.meta.total)
+	)
+	pendingLoading.value = false
 }
+
+async function loadGlance() {
+	await Promise.all([
+		quietly(myLeaveBalances, rows => (leaveCard.value = rows.find(b => b.tracks_balance) ?? null)),
+		quietly(
+			() => mySchedule(todayIso(), todayIso()),
+			days => (today.value = days[0] ?? null)
+		)
+	])
+	leaveLoading.value = false
+	todayLoading.value = false
+}
+
+const todayLabel = computed(() => {
+	if (!today.value) return none
+	return today.value.shift ? translated(today.value.shift.name) : t(`hrAttendance.dayKind.${today.value.kind}`)
+})
+const todayHint = computed(() => {
+	const shift = today.value?.shift
+	return shift ? `${orgClock(shift.starts_at)} – ${orgClock(shift.ends_at)}` : t("hr.me.stats.todayHint")
+})
 
 onMounted(() => {
 	void load()
@@ -194,6 +254,7 @@ onMounted(() => {
 	void loadEvents()
 	void loadTeam()
 	void loadPendingApprovals()
+	void loadGlance()
 })
 
 function reasonLabel(row: MyEmploymentEvent): string {

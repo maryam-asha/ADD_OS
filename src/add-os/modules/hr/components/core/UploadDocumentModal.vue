@@ -1,6 +1,6 @@
 <!-- src/add-os/modules/hr/components/core/UploadDocumentModal.vue -->
 <template>
-	<n-modal v-model:show="show" preset="card" :title="t('hr.upload.title')" closable class="max-w-lg">
+	<HrFormModal v-model:show="show" :title="t('hr.upload.title')" size="md" icon="carbon:document-add">
 		<n-form ref="formRef" :model="form" :rules label-placement="top">
 			<n-form-item path="documentTypeId" :label="t('hr.documents.type')">
 				<n-select v-model:value="form.documentTypeId" :options="typeOptions" :loading="typesLoading" filterable />
@@ -41,15 +41,16 @@
 				</n-button>
 			</div>
 		</template>
-	</n-modal>
+	</HrFormModal>
 </template>
 
 <script setup lang="ts">
 import type { FormInst, FormItemRule, FormRules, SelectOption, UploadFileInfo } from "naive-ui"
 import type { DocumentType } from "@/add-os/modules/hr/types/hr"
-import { NButton, NDatePicker, NForm, NFormItem, NInput, NModal, NSelect, NUpload, useMessage } from "naive-ui"
+import { NButton, NDatePicker, NForm, NFormItem, NInput, NSelect, NUpload, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import { nullable } from "@/add-os/modules/hr/utils/forms"
 import { translated } from "@/add-os/modules/hr/utils/translated"

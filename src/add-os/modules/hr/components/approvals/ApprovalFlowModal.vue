@@ -1,6 +1,6 @@
 <!-- src/add-os/modules/hr/components/approvals/ApprovalFlowModal.vue -->
 <template>
-	<HrFormModal v-model:show="show" :title="flow ? t('hrApprovals.flows.edit') : t('hrApprovals.flows.add')" size="lg">
+	<HrFormModal v-model:show="show" :title="flow ? t('hrApprovals.flows.edit') : t('hrApprovals.flows.add')" size="lg" icon="carbon:flow">
 		<div class="flex flex-col gap-4">
 			<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
 				<n-form-item :label="t('hrApprovals.flows.requestType')" :feedback="typeError" :validation-status="typeError ? 'error' : undefined">

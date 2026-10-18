@@ -13,13 +13,8 @@
 		<n-skeleton v-else-if="loading && !employee" text :repeat="6" />
 
 		<template v-else-if="employee">
-			<div class="flex flex-wrap items-center justify-between gap-3">
-				<div class="flex flex-wrap items-center gap-3">
-					<h1 class="text-2xl font-bold">{{ translated(employee.name) }}</h1>
-					<span class="font-mono text-secondary" dir="ltr">{{ employee.employee_number }}</span>
-					<EmployeeStatusTag :status="employee.status" />
-				</div>
-				<div class="flex flex-wrap gap-2">
+			<EmployeeHero :name="employee.name" :employee-number="employee.employee_number" :status="employee.status" :assignment="employee.current_assignment">
+				<template #actions>
 					<n-button v-if="mayUpdate" @click="editVisible = true">
 						<template #icon><Icon name="carbon:edit" :size="16" /></template>
 						{{ t("hr.editEmployee.title") }}
@@ -28,13 +23,13 @@
 						<template #icon><Icon name="carbon:event-schedule" :size="16" /></template>
 						{{ t("hr.events.title") }}
 					</n-button>
-				</div>
-			</div>
+				</template>
+			</EmployeeHero>
 
 			<n-tabs v-model:value="tab" type="line" animated>
 				<n-tab-pane name="overview" :tab="t('hr.profile.tabs.overview')">
 					<div class="flex flex-col gap-4">
-						<n-card :title="t('hr.profile.personal')" size="small">
+						<HrPanel :title="t('hr.profile.personal')" icon="carbon:user">
 							<n-descriptions :column="narrow ? 1 : 2" label-placement="left" size="small">
 								<n-descriptions-item :label="t('hr.profile.fields.employeeNumber')">
 									<span dir="ltr">{{ employee.employee_number }}</span>
@@ -67,13 +62,13 @@
 									<template v-if="employee.termination_reason">· {{ t(`hr.terminationReason.${employee.termination_reason}`) }}</template>
 								</n-descriptions-item>
 							</n-descriptions>
-						</n-card>
+						</HrPanel>
 
 						<JobDetails :assignment="employee.current_assignment" :contract="employee.current_contract" />
 
 						<div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-							<n-card :title="t('hr.profile.contacts')" size="small">
-								<template v-if="mayUpdate" #header-extra>
+							<HrPanel :title="t('hr.profile.contacts')" icon="carbon:phone">
+								<template v-if="mayUpdate" #extra>
 									<n-button size="small" text type="primary" @click="contactsVisible = true">
 										<template #icon><Icon name="carbon:edit" :size="16" /></template>
 										{{ t("hr.common.edit") }}
@@ -85,10 +80,10 @@
 									</n-descriptions-item>
 								</n-descriptions>
 								<p v-else class="text-secondary">{{ t("hr.profile.noContacts") }}</p>
-							</n-card>
+							</HrPanel>
 
-							<n-card :title="t('hr.profile.dependents')" size="small">
-								<template v-if="mayUpdate" #header-extra>
+							<HrPanel :title="t('hr.profile.dependents')" icon="carbon:user-multiple">
+								<template v-if="mayUpdate" #extra>
 									<n-button size="small" text type="primary" @click="dependentsVisible = true">
 										<template #icon><Icon name="carbon:edit" :size="16" /></template>
 										{{ t("hr.common.edit") }}
@@ -100,7 +95,7 @@
 									</n-descriptions-item>
 								</n-descriptions>
 								<p v-else class="text-secondary">{{ t("hr.people.noDependents") }}</p>
-							</n-card>
+							</HrPanel>
 						</div>
 
 						<SensitiveDetails :employee-id :has-national-id="employee.has_national_id" :has-bank-account="employee.has_bank_account" />
@@ -153,7 +148,7 @@
 
 <script setup lang="ts">
 import type { Employee } from "@/add-os/modules/hr/types/hr"
-import { NAlert, NButton, NCard, NDescriptions, NDescriptionsItem, NSkeleton, NTabPane, NTabs } from "naive-ui"
+import { NAlert, NButton, NDescriptions, NDescriptionsItem, NSkeleton, NTabPane, NTabs } from "naive-ui"
 import { computed, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
@@ -165,10 +160,11 @@ import EmployeeDocumentsTab from "@/add-os/modules/hr/components/core/EmployeeDo
 import PeopleListModal from "@/add-os/modules/hr/components/core/PeopleListModal.vue"
 import RecordEventModal from "@/add-os/modules/hr/components/core/RecordEventModal.vue"
 import SensitiveDetails from "@/add-os/modules/hr/components/core/SensitiveDetails.vue"
-import EmployeeStatusTag from "@/add-os/modules/hr/components/EmployeeStatusTag.vue"
 import JobDetails from "@/add-os/modules/hr/components/JobDetails.vue"
 import EmployeeLeaveTab from "@/add-os/modules/hr/components/leave/EmployeeLeaveTab.vue"
 import EmployeeAttendanceTab from "@/add-os/modules/hr/components/time/EmployeeAttendanceTab.vue"
+import EmployeeHero from "@/add-os/modules/hr/components/ui/EmployeeHero.vue"
+import HrPanel from "@/add-os/modules/hr/components/ui/HrPanel.vue"
 import { useNarrowScreen } from "@/add-os/modules/hr/composables/useNarrowScreen"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
 import { ApiError } from "@/add-os/services/api"

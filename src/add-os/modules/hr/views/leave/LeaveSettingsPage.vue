@@ -1,10 +1,7 @@
 <!-- src/add-os/modules/hr/views/leave/LeaveSettingsPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.hrLeaveSettings") }}</h1>
-			<p class="max-w-3xl">{{ t("hrLeave.settings.description") }}</p>
-		</div>
+		<HrPageHeader :title="t(titleKey || 'nav.pages.hrLeaveSettings')" :description="t('hrLeave.settings.description')" />
 
 		<n-tabs v-model:value="tab" type="line" animated>
 			<n-tab-pane name="types" :tab="t('hrLeave.settings.tabs.types')" display-directive="show:lazy">
@@ -107,6 +104,7 @@ import { useI18n } from "vue-i18n"
 import { canManageHrSettings } from "@/add-os/config/permissions"
 import HrResourcePanel from "@/add-os/modules/hr/components/core/HrResourcePanel.vue"
 import LeavePolicyModal from "@/add-os/modules/hr/components/leave/LeavePolicyModal.vue"
+import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import {
 	buildCoverageColumns,
 	buildCoverageFields,

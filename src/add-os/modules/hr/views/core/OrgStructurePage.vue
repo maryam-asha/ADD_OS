@@ -1,10 +1,7 @@
 <!-- src/add-os/modules/hr/views/core/OrgStructurePage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.orgStructure") }}</h1>
-			<p>{{ t("hr.org.description") }}</p>
-		</div>
+		<HrPageHeader :title="t(titleKey || 'nav.pages.orgStructure')" :description="t('hr.org.description')" />
 
 		<n-tabs v-model:value="tab" type="line" animated>
 			<n-tab-pane name="units" :tab="t('hr.org.tabs.units')" display-directive="show:lazy">
@@ -19,7 +16,7 @@
 					<n-alert v-if="loadError" type="error" :title="t('hr.common.loadError')" />
 
 					<div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-						<n-card size="small" class="lg:col-span-1">
+						<HrPanel class="lg:col-span-1" :title="t('hr.org.tabs.units')" icon="carbon:tree-view">
 							<n-spin :show="loading">
 								<n-tree
 									v-if="treeData.length"
@@ -31,9 +28,9 @@
 								/>
 								<p v-else-if="!loading" class="text-secondary">{{ mayManage ? t("hr.org.emptyManage") : t("hr.org.empty") }}</p>
 							</n-spin>
-						</n-card>
+						</HrPanel>
 
-						<n-card size="small" class="lg:col-span-2">
+						<HrPanel class="lg:col-span-2">
 							<template v-if="selected">
 								<div class="mb-4 flex flex-wrap items-center justify-between gap-3">
 									<div class="flex flex-wrap items-center gap-3">
@@ -71,7 +68,7 @@
 								</n-data-table>
 							</template>
 							<p v-else class="text-secondary">{{ t("hr.org.selectUnit") }}</p>
-						</n-card>
+						</HrPanel>
 					</div>
 				</div>
 			</n-tab-pane>
@@ -119,7 +116,7 @@
 			</n-tab-pane>
 		</n-tabs>
 
-		<n-modal v-model:show="formVisible" preset="card" :title="editingId === null ? t('hr.org.addUnit') : t('hr.org.editUnit')" closable class="max-w-lg">
+		<HrFormModal v-model:show="formVisible" :title="editingId === null ? t('hr.org.addUnit') : t('hr.org.editUnit')" size="md" icon="carbon:tree-view">
 			<n-form ref="formRef" :model="form" :rules label-placement="top">
 				<n-form-item path="code" :label="t('hr.org.code')">
 					<n-input v-model:value="form.code" dir="ltr" />
@@ -146,7 +143,7 @@
 					</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</HrFormModal>
 
 		<PositionFormModal
 			v-if="mayManage"
@@ -164,13 +161,16 @@
 import type { DataTableColumns, FormInst, FormRules, SelectOption, TreeOption } from "naive-ui"
 import type { JobGradeForm, WorkLocationForm } from "@/add-os/modules/hr/config/core.config"
 import type { JobGrade, JobGradePayload, OrgUnit, Position, WorkLocation, WorkLocationPayload } from "@/add-os/modules/hr/types/hr"
-import { NAlert, NButton, NCard, NDataTable, NForm, NFormItem, NInput, NModal, NSelect, NSpin, NSwitch, NTabPane, NTabs, NTree, useDialog, useMessage } from "naive-ui"
+import { NAlert, NButton, NDataTable, NForm, NFormItem, NInput, NSelect, NSpin, NSwitch, NTabPane, NTabs, NTree, useDialog, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { canManageOrgStructure } from "@/add-os/config/permissions"
 import ActiveTag from "@/add-os/modules/hr/components/ActiveTag.vue"
 import HrResourcePanel from "@/add-os/modules/hr/components/core/HrResourcePanel.vue"
 import PositionFormModal from "@/add-os/modules/hr/components/core/PositionFormModal.vue"
+import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
+import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
+import HrPanel from "@/add-os/modules/hr/components/ui/HrPanel.vue"
 import {
 	buildJobGradeColumns,
 	buildJobGradeFields,

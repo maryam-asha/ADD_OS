@@ -1,18 +1,16 @@
 <!-- src/add-os/modules/hr/views/time/AttendancePage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-wrap items-start justify-between gap-3">
-			<div class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.hrAttendance") }}</h1>
-				<p class="max-w-3xl">{{ t("hrAttendance.days.description") }}</p>
-			</div>
-			<n-button v-if="mayCorrect" @click="reprocessVisible = true">
-				<template #icon><Icon name="carbon:renew" :size="16" /></template>
-				{{ t("hrAttendance.reprocess.title") }}
-			</n-button>
-		</div>
+		<HrPageHeader :title="t(titleKey || 'nav.pages.hrAttendance')" :description="t('hrAttendance.days.description')">
+			<template #actions>
+				<n-button v-if="mayCorrect" @click="reprocessVisible = true">
+					<template #icon><Icon name="carbon:renew" :size="16" /></template>
+					{{ t("hrAttendance.reprocess.title") }}
+				</n-button>
+			</template>
+		</HrPageHeader>
 
-		<div class="flex flex-wrap items-center gap-3">
+		<HrToolbar>
 			<n-date-picker :formatted-value="range" value-format="yyyy-MM-dd" type="daterange" :clearable="false" class="max-w-sm" @update:formatted-value="onRange" />
 			<n-select v-if="unitOptions.length" v-model:value="filters.org_unit_id" :options="unitOptions" :placeholder="t('hr.employees.unitFilter')" clearable filterable class="max-w-xs" />
 			<EmployeeSelect v-if="mayFindEmployees" v-model:value="filters.employee_id" include-former :placeholder="t('hrApprovals.requests.employeeFilter')" class="max-w-xs" />
@@ -21,7 +19,7 @@
 				<n-select v-model:value="filters.type" :options="typeOptions" :placeholder="t('hrAttendance.exceptions.type')" clearable class="max-w-xs" />
 				<n-select v-model:value="filters.status" :options="exceptionStatusOptions" :placeholder="t('hr.common.status')" clearable class="max-w-xs" />
 			</template>
-		</div>
+		</HrToolbar>
 
 		<n-tabs :value="filters.view ?? 'days'" type="line" @update:value="onView">
 			<n-tab-pane name="days" :tab="t('hrAttendance.days.tab')" />
@@ -46,7 +44,7 @@
 			</div>
 		</n-card>
 
-		<n-modal v-model:show="resolveVisible" preset="card" :title="t('hrAttendance.exceptions.resolveTitle')" closable class="max-w-md">
+		<HrFormModal v-model:show="resolveVisible" :title="t('hrAttendance.exceptions.resolveTitle')" size="sm" icon="carbon:task-approved">
 			<p v-if="resolving" class="mb-3 text-sm">
 				{{ translated(resolving.employee?.name) }} · {{ formatDate(resolving.work_date) }} · {{ t(`hrAttendance.exceptionType.${resolving.type}`) }}
 			</p>
@@ -62,9 +60,9 @@
 					<n-button type="primary" :disabled="!resolution" :loading="resolveSaving" @click="resolve">{{ t("hrAttendance.exceptions.resolve") }}</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</HrFormModal>
 
-		<n-modal v-model:show="reprocessVisible" preset="card" :title="t('hrAttendance.reprocess.title')" closable class="max-w-md">
+		<HrFormModal v-model:show="reprocessVisible" :title="t('hrAttendance.reprocess.title')" size="sm" icon="carbon:renew">
 			<p class="mb-4 text-sm">{{ t("hrAttendance.reprocess.hint") }}</p>
 			<n-form-item :label="t('hrLeave.request.dates')">
 				<n-date-picker v-model:formatted-value="reprocessRange" value-format="yyyy-MM-dd" type="daterange" class="w-full" />
@@ -75,7 +73,7 @@
 					<n-button type="primary" :disabled="!reprocessRange" :loading="reprocessing" @click="reprocess">{{ t("hrAttendance.reprocess.submit") }}</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</HrFormModal>
 	</div>
 </template>
 
@@ -83,12 +81,15 @@
 import type { DataTableColumns, SelectOption } from "naive-ui"
 import type { OrgUnit } from "@/add-os/modules/hr/types/hr"
 import type { AttendanceDay, AttendanceException, ExceptionResolution } from "@/add-os/modules/hr/types/time"
-import { NAlert, NButton, NCard, NDataTable, NDatePicker, NFormItem, NInput, NModal, NPagination, NSelect, NTabPane, NTabs, NTag, useMessage } from "naive-ui"
+import { NAlert, NButton, NCard, NDataTable, NDatePicker, NFormItem, NInput, NPagination, NSelect, NTabPane, NTabs, NTag, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { canCorrectAttendance, canViewEmployees } from "@/add-os/config/permissions"
 import EmployeeSelect from "@/add-os/modules/hr/components/EmployeeSelect.vue"
+import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import DayStatusTag from "@/add-os/modules/hr/components/time/DayStatusTag.vue"
+import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
+import HrToolbar from "@/add-os/modules/hr/components/ui/HrToolbar.vue"
 import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
 import { DAY_STATUSES, EXCEPTION_RESOLUTIONS, EXCEPTION_TYPES } from "@/add-os/modules/hr/types/time"
 import { employeeCell } from "@/add-os/modules/hr/utils/cells"

@@ -1,6 +1,6 @@
 <!-- src/add-os/modules/hr/components/leave/AdjustBalanceModal.vue -->
 <template>
-	<n-modal v-model:show="show" preset="card" :title="t('hrLeave.adjust.title')" closable class="max-w-lg">
+	<HrFormModal v-model:show="show" :title="t('hrLeave.adjust.title')" size="md" icon="carbon:calculator">
 		<n-form ref="formRef" :model="form" :rules label-placement="top">
 			<n-form-item path="typeId" :label="t('hrLeave.request.type')">
 				<n-select v-model:value="form.typeId" :options="typeOptions" />
@@ -40,15 +40,16 @@
 				</n-button>
 			</div>
 		</template>
-	</n-modal>
+	</HrFormModal>
 </template>
 
 <script setup lang="ts">
 import type { FormInst, FormRules, SelectOption } from "naive-ui"
 import type { LeaveTypeRef, ManualLedgerKind } from "@/add-os/modules/hr/types/leave"
-import { NButton, NDatePicker, NForm, NFormItem, NInput, NInputNumber, NModal, NSelect, useMessage } from "naive-ui"
+import { NButton, NDatePicker, NForm, NFormItem, NInput, NInputNumber, NSelect, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import { MANUAL_LEDGER_KINDS } from "@/add-os/modules/hr/types/leave"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import { translated } from "@/add-os/modules/hr/utils/translated"

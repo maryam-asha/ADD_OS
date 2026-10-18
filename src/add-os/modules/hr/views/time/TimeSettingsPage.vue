@@ -1,10 +1,7 @@
 <!-- src/add-os/modules/hr/views/time/TimeSettingsPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.hrTimeSettings") }}</h1>
-			<p class="max-w-3xl">{{ t("hrAttendance.settings.description") }}</p>
-		</div>
+		<HrPageHeader :title="t(titleKey || 'nav.pages.hrTimeSettings')" :description="t('hrAttendance.settings.description')" />
 
 		<n-tabs v-model:value="tab" type="line" animated>
 			<n-tab-pane name="shifts" :tab="t('hrAttendance.settings.tabs.shifts')" display-directive="show:lazy">
@@ -87,6 +84,7 @@ import { currentLocale } from "@/add-os/lang/currentLocale"
 import ActiveTag from "@/add-os/modules/hr/components/ActiveTag.vue"
 import HrResourcePanel from "@/add-os/modules/hr/components/core/HrResourcePanel.vue"
 import WorkPatternModal from "@/add-os/modules/hr/components/time/WorkPatternModal.vue"
+import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import {
 	buildAttendancePolicyColumns,
 	buildAttendancePolicyFields,

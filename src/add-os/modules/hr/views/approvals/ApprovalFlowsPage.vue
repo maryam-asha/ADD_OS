@@ -1,16 +1,14 @@
 <!-- src/add-os/modules/hr/views/approvals/ApprovalFlowsPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-wrap items-start justify-between gap-3">
-			<div class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.hrApprovalFlows") }}</h1>
-				<p class="max-w-3xl">{{ t("hrApprovals.flows.description") }}</p>
-			</div>
-			<n-button type="primary" :disabled="freeTypes.length === 0" @click="openFlow(null)">
-				<template #icon><Icon name="carbon:add" :size="16" /></template>
-				{{ t("hrApprovals.flows.add") }}
-			</n-button>
-		</div>
+		<HrPageHeader :title="t(titleKey || 'nav.pages.hrApprovalFlows')" :description="t('hrApprovals.flows.description')">
+			<template #actions>
+				<n-button type="primary" :disabled="freeTypes.length === 0" @click="openFlow(null)">
+					<template #icon><Icon name="carbon:add" :size="16" /></template>
+					{{ t("hrApprovals.flows.add") }}
+				</n-button>
+			</template>
+		</HrPageHeader>
 
 		<n-alert v-if="loadError" type="error" :title="t('hr.common.loadError')" />
 
@@ -34,6 +32,7 @@ import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import ActiveTag from "@/add-os/modules/hr/components/ActiveTag.vue"
 import ApprovalFlowModal from "@/add-os/modules/hr/components/approvals/ApprovalFlowModal.vue"
+import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import { abilityLabel } from "@/add-os/modules/hr/utils/approvalLabels"
 import { requestTypeLabel } from "@/add-os/modules/hr/utils/approvalSummary"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"

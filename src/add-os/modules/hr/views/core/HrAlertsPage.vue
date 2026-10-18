@@ -1,18 +1,17 @@
 <!-- src/add-os/modules/hr/views/core/HrAlertsPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.hrAlerts") }}</h1>
-			<p>{{ t("hr.alerts.description") }}</p>
-		</div>
+		<HrPageHeader :title="t(titleKey || 'nav.pages.hrAlerts')" :description="t('hr.alerts.description')" />
 
-		<ResourceStatCards v-if="!loadError && !loading && alerts.length" :cards="statCards" />
+		<div v-if="!loadError && alerts.length" class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+			<HrStatCard v-for="card in statCards" :key="card.label" :label="card.label" :value="formatNumber(card.value)" :icon="card.icon" :hint="card.hint" :loading />
+		</div>
 
 		<n-alert v-if="loadError" type="error" :title="t('hr.common.loadError')" />
 
-		<div class="flex flex-wrap items-center gap-3">
+		<HrToolbar>
 			<n-select v-model:value="filters.type" :placeholder="t('hr.alerts.typeFilter')" :options="typeOptions" clearable class="max-w-xs" />
-		</div>
+		</HrToolbar>
 
 		<n-card class="add-ledger-table">
 			<n-data-table :columns :data="rows" :loading :bordered="false" :row-props size="small" :scroll-x="820">
@@ -26,14 +25,15 @@
 
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
-import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vue"
 import type { AlertType, HrAlert } from "@/add-os/modules/hr/types/hr"
 import { NAlert, NCard, NDataTable, NSelect, NTag } from "naive-ui"
 import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
-import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import { canViewEmployees } from "@/add-os/config/permissions"
+import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
+import HrStatCard from "@/add-os/modules/hr/components/ui/HrStatCard.vue"
+import HrToolbar from "@/add-os/modules/hr/components/ui/HrToolbar.vue"
 import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
 import { ALERT_TYPES } from "@/add-os/modules/hr/types/hr"
 import { employeeCell } from "@/add-os/modules/hr/utils/cells"
@@ -86,10 +86,10 @@ const typeOptions = computed<SelectOption[]>(() =>
 	ALERT_TYPES.map(type => ({ label: `${t(`hr.alertType.${type}`)} (${formatNumber(alerts.value.filter(a => a.type === type).length)})`, value: type }))
 )
 
-const statCards = computed<StatCard[]>(() => [
-	{ label: t("hr.alerts.stats.overdue"), value: alerts.value.filter(a => a.days_left < 0).length },
-	{ label: t("hr.alerts.stats.week"), value: alerts.value.filter(a => a.days_left >= 0 && a.days_left <= 7).length },
-	{ label: t("hr.alerts.stats.total"), value: alerts.value.length }
+const statCards = computed(() => [
+	{ label: t("hr.alerts.stats.overdue"), value: alerts.value.filter(a => a.days_left < 0).length, icon: STATUS_ICONS.danger, hint: t("hr.alerts.stats.overdueHint") },
+	{ label: t("hr.alerts.stats.week"), value: alerts.value.filter(a => a.days_left >= 0 && a.days_left <= 7).length, icon: STATUS_ICONS.warning, hint: t("hr.alerts.stats.weekHint") },
+	{ label: t("hr.alerts.stats.total"), value: alerts.value.length, icon: "carbon:notification", hint: t("hr.alerts.stats.totalHint") }
 ])
 
 /** Past due or due today reads as danger, within a week as warning, the rest as information. */

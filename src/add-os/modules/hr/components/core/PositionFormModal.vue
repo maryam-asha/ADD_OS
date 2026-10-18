@@ -1,6 +1,6 @@
 <!-- src/add-os/modules/hr/components/core/PositionFormModal.vue -->
 <template>
-	<n-modal v-model:show="show" preset="card" :title="position ? t('hr.positions.edit') : t('hr.positions.add')" closable class="max-w-lg">
+	<HrFormModal v-model:show="show" :title="position ? t('hr.positions.edit') : t('hr.positions.add')" size="md" icon="carbon:id-management">
 		<n-form ref="formRef" :model="form" :rules label-placement="top">
 			<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
 				<n-form-item path="titleAr" :label="t('hr.positions.titleAr')">
@@ -41,15 +41,16 @@
 				</n-button>
 			</div>
 		</template>
-	</n-modal>
+	</HrFormModal>
 </template>
 
 <script setup lang="ts">
 import type { FormInst, FormRules, SelectOption } from "naive-ui"
 import type { JobGrade, OrgUnit, Position } from "@/add-os/modules/hr/types/hr"
-import { NButton, NForm, NFormItem, NInput, NInputNumber, NModal, NSelect, NSwitch, useMessage } from "naive-ui"
+import { NButton, NForm, NFormItem, NInput, NInputNumber, NSelect, NSwitch, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
 import { nullable } from "@/add-os/modules/hr/utils/forms"
 import { translated } from "@/add-os/modules/hr/utils/translated"

@@ -1,6 +1,6 @@
 <!-- src/add-os/modules/hr/components/core/PeopleListModal.vue -->
 <template>
-	<n-modal v-model:show="show" preset="card" :title="kind === 'contacts' ? t('hr.people.contactsTitle') : t('hr.people.dependentsTitle')" closable class="max-w-2xl">
+	<HrFormModal v-model:show="show" :title="kind === 'contacts' ? t('hr.people.contactsTitle') : t('hr.people.dependentsTitle')" size="lg" icon="carbon:phone">
 		<div class="flex flex-col gap-3">
 			<p class="text-sm text-secondary">{{ kind === "contacts" ? t("hr.people.contactsHint", { n: formatNumber(max) }) : t("hr.people.dependentsHint", { n: formatNumber(max) }) }}</p>
 
@@ -56,15 +56,16 @@
 				</n-button>
 			</div>
 		</template>
-	</n-modal>
+	</HrFormModal>
 </template>
 
 <script setup lang="ts">
 import type { ContactPayload, Dependent, DependentPayload, EmergencyContact } from "@/add-os/modules/hr/types/hr"
 import type { UpdateResult } from "@/add-os/services/hr/core"
-import { NButton, NDatePicker, NInput, NModal, useMessage } from "naive-ui"
+import { NButton, NDatePicker, NInput, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
 import { ApiError } from "@/add-os/services/api"
 import { formatNumber } from "@/add-os/utils/format"

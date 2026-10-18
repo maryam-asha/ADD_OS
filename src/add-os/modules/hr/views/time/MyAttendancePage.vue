@@ -1,22 +1,20 @@
 <!-- src/add-os/modules/hr/views/time/MyAttendancePage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-wrap items-start justify-between gap-3">
-			<div class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.hrMyAttendance") }}</h1>
-				<p>{{ t("hrAttendance.me.description") }}</p>
-			</div>
-			<div class="flex flex-wrap gap-2">
-				<n-button @click="entryVisible = true">
-					<template #icon><Icon name="carbon:time" :size="16" /></template>
-					{{ t("hrAttendance.me.addEntry") }}
-				</n-button>
-				<n-button @click="overtimeVisible = true">
-					<template #icon><Icon name="carbon:add" :size="16" /></template>
-					{{ t("hrAttendance.me.addOvertime") }}
-				</n-button>
-			</div>
-		</div>
+		<HrPageHeader :title="t(titleKey || 'nav.pages.hrMyAttendance')" :description="t('hrAttendance.me.description')">
+			<template #actions>
+				<div class="flex flex-wrap gap-2">
+					<n-button @click="entryVisible = true">
+						<template #icon><Icon name="carbon:time" :size="16" /></template>
+						{{ t("hrAttendance.me.addEntry") }}
+					</n-button>
+					<n-button @click="overtimeVisible = true">
+						<template #icon><Icon name="carbon:add" :size="16" /></template>
+						{{ t("hrAttendance.me.addOvertime") }}
+					</n-button>
+				</div>
+			</template>
+		</HrPageHeader>
 
 		<n-tabs v-model:value="tab" type="line" animated>
 			<n-tab-pane name="schedule" :tab="t('hrAttendance.me.tabs.schedule')">
@@ -42,20 +40,20 @@
 
 			<n-tab-pane name="requests" :tab="t('hrAttendance.me.tabs.requests')" display-directive="show:lazy">
 				<div class="flex flex-col gap-4">
-					<n-card :title="t('hrAttendance.requests.entries')" size="small" class="add-ledger-table">
+					<HrPanel :title="t('hrAttendance.requests.entries')" icon="carbon:time" flush class="add-ledger-table">
 						<n-data-table :columns="entryColumns" :data="entries" :loading="requestsLoading" :bordered="false" size="small" :scroll-x="640">
 							<template #empty>
 								<span class="text-secondary">{{ t("hrAttendance.me.noEntries") }}</span>
 							</template>
 						</n-data-table>
-					</n-card>
-					<n-card :title="t('hrAttendance.requests.overtime')" size="small" class="add-ledger-table">
+					</HrPanel>
+					<HrPanel :title="t('hrAttendance.requests.overtime')" icon="carbon:hourglass" flush class="add-ledger-table">
 						<n-data-table :columns="overtimeColumns" :data="overtime" :loading="requestsLoading" :bordered="false" size="small" :scroll-x="640">
 							<template #empty>
 								<span class="text-secondary">{{ t("hrAttendance.me.noOvertime") }}</span>
 							</template>
 						</n-data-table>
-					</n-card>
+					</HrPanel>
 				</div>
 			</n-tab-pane>
 
@@ -74,7 +72,7 @@
 			</n-tab-pane>
 		</n-tabs>
 
-		<n-modal v-model:show="entryVisible" preset="card" :title="t('hrAttendance.me.addEntry')" closable class="max-w-md">
+		<HrFormModal v-model:show="entryVisible" :title="t('hrAttendance.me.addEntry')" size="sm" icon="carbon:time">
 			<p class="mb-3 text-sm text-secondary">{{ t("hrAttendance.me.entryHint") }}</p>
 			<n-form-item :label="t('hrAttendance.days.date')">
 				<n-date-picker v-model:formatted-value="entry.date" value-format="yyyy-MM-dd" type="date" class="w-full" :is-date-disabled="(ts: number) => ts > Date.now()" />
@@ -96,9 +94,9 @@
 					<n-button type="primary" :disabled="!entry.date || (!entry.checkIn && !entry.checkOut)" :loading="saving" @click="sendEntry">{{ t("hrLeave.request.submit") }}</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</HrFormModal>
 
-		<n-modal v-model:show="overtimeVisible" preset="card" :title="t('hrAttendance.me.addOvertime')" closable class="max-w-md">
+		<HrFormModal v-model:show="overtimeVisible" :title="t('hrAttendance.me.addOvertime')" size="sm" icon="carbon:hourglass">
 			<p class="mb-3 text-sm text-secondary">{{ t("hrAttendance.me.overtimeHint") }}</p>
 			<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
 				<n-form-item :label="t('hrAttendance.days.date')">
@@ -117,19 +115,22 @@
 					<n-button type="primary" :disabled="!ot.date || !ot.minutes || !ot.reason.trim()" :loading="saving" @click="sendOvertime">{{ t("hrLeave.request.submit") }}</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</HrFormModal>
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns } from "naive-ui"
 import type { AttendanceDay, AttendanceEntry, MyScheduleDay, OvertimeRequest, TeamAttendance } from "@/add-os/modules/hr/types/time"
-import { NAlert, NButton, NCard, NDataTable, NDatePicker, NFormItem, NInput, NInputNumber, NModal, NTabPane, NTabs, NTimePicker, useDialog, useMessage } from "naive-ui"
+import { NAlert, NButton, NCard, NDataTable, NDatePicker, NFormItem, NInput, NInputNumber, NTabPane, NTabs, NTimePicker, useDialog, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import ApprovalStatusTag from "@/add-os/modules/hr/components/approvals/ApprovalStatusTag.vue"
+import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import DayStatusTag from "@/add-os/modules/hr/components/time/DayStatusTag.vue"
+import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
+import HrPanel from "@/add-os/modules/hr/components/ui/HrPanel.vue"
 import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
 import { nullable } from "@/add-os/modules/hr/utils/forms"
 import { monthRange, todayIso } from "@/add-os/modules/hr/utils/leave"

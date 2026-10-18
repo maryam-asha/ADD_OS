@@ -1,16 +1,13 @@
 <!-- src/add-os/modules/hr/views/time/TimeRequestsPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.hrTimeRequests") }}</h1>
-			<p class="max-w-3xl">{{ t("hrAttendance.requests.description") }}</p>
-		</div>
+		<HrPageHeader :title="t(titleKey || 'nav.pages.hrTimeRequests')" :description="t('hrAttendance.requests.description')" />
 
-		<div class="flex flex-wrap items-center gap-3">
+		<HrToolbar>
 			<n-date-picker :formatted-value="range" value-format="yyyy-MM-dd" type="daterange" :clearable="false" class="max-w-sm" @update:formatted-value="onRange" />
 			<n-select v-if="unitOptions.length" v-model:value="filters.org_unit_id" :options="unitOptions" :placeholder="t('hr.employees.unitFilter')" clearable filterable class="max-w-xs" />
 			<n-select v-model:value="filters.status" :options="statusOptions" :placeholder="t('hr.common.status')" clearable class="max-w-xs" />
-		</div>
+		</HrToolbar>
 
 		<n-tabs :value="filters.view ?? 'entries'" type="line" @update:value="(v: string) => (filters.view = v)">
 			<n-tab-pane name="entries" :tab="t('hrAttendance.requests.entries')" />
@@ -45,6 +42,8 @@ import { NAlert, NCard, NDataTable, NDatePicker, NPagination, NSelect, NTabPane,
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import ApprovalStatusTag from "@/add-os/modules/hr/components/approvals/ApprovalStatusTag.vue"
+import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
+import HrToolbar from "@/add-os/modules/hr/components/ui/HrToolbar.vue"
 import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import { todayIso } from "@/add-os/modules/hr/utils/leave"

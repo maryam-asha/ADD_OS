@@ -44,13 +44,7 @@
 		</template>
 	</HrDrawer>
 
-	<n-modal
-		v-model:show="decisionVisible"
-		preset="card"
-		:title="decision === 'approve' ? t('hrApprovals.approveTitle') : t('hrApprovals.rejectTitle')"
-		closable
-		class="max-w-md"
-	>
+	<HrFormModal v-model:show="decisionVisible" :title="decision === 'approve' ? t('hrApprovals.approveTitle') : t('hrApprovals.rejectTitle')" size="sm" icon="carbon:task-approved">
 		<p v-if="override" class="mb-3 text-sm">{{ t("hrApprovals.overrideNote") }}</p>
 		<n-input
 			v-model:value="comment"
@@ -68,18 +62,19 @@
 				</n-button>
 			</div>
 		</template>
-	</n-modal>
+	</HrFormModal>
 </template>
 
 <script setup lang="ts">
 import type { ApprovalRequest } from "@/add-os/modules/hr/types/approvals"
 import type { UpdateResult } from "@/add-os/services/hr/core"
-import { NAlert, NButton, NDescriptions, NDescriptionsItem, NInput, NModal, NSkeleton, useMessage } from "naive-ui"
+import { NAlert, NButton, NDescriptions, NDescriptionsItem, NInput, NSkeleton, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import ApprovalStatusTag from "@/add-os/modules/hr/components/approvals/ApprovalStatusTag.vue"
 import ApprovalStepsList from "@/add-os/modules/hr/components/approvals/ApprovalStepsList.vue"
 import HrDrawer from "@/add-os/modules/hr/components/HrDrawer.vue"
+import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import { requestTypeLabel, summaryRows } from "@/add-os/modules/hr/utils/approvalSummary"
 import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
 import { nullable } from "@/add-os/modules/hr/utils/forms"

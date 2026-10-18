@@ -1,23 +1,21 @@
 <!-- src/add-os/modules/hr/views/leave/MyLeavePage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-wrap items-start justify-between gap-3">
-			<div class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.hrMyLeave") }}</h1>
-				<p>{{ t("hrLeave.me.description") }}</p>
-			</div>
-			<n-button type="primary" :disabled="!balances.length" @click="requestVisible = true">
-				<template #icon><Icon name="carbon:add" :size="16" /></template>
-				{{ t("hrLeave.me.request") }}
-			</n-button>
-		</div>
+		<HrPageHeader :title="t(titleKey || 'nav.pages.hrMyLeave')" :description="t('hrLeave.me.description')">
+			<template #actions>
+				<n-button type="primary" :disabled="!balances.length" @click="requestVisible = true">
+					<template #icon><Icon name="carbon:add" :size="16" /></template>
+					{{ t("hrLeave.me.request") }}
+				</n-button>
+			</template>
+		</HrPageHeader>
 
 		<n-tabs v-model:value="tab" type="line" animated>
 			<n-tab-pane name="overview" :tab="t('hrLeave.me.tabs.overview')">
 				<div class="flex flex-col gap-4">
 					<LeaveBalances :balances :loading="balancesLoading" :error="balancesError" />
 
-					<n-card :title="t('hrLeave.me.myRequests')" size="small" class="add-ledger-table">
+					<HrPanel :title="t('hrLeave.me.myRequests')" icon="carbon:calendar" flush class="add-ledger-table">
 						<n-alert v-if="requestsError" type="error" :title="t('hr.common.loadError')" class="mb-3" />
 						<n-data-table :columns :data="requests" :loading="requestsLoading" :bordered="false" size="small" :scroll-x="720">
 							<template #empty>
@@ -27,7 +25,7 @@
 						<div v-if="lastPage > 1" class="flex justify-center pt-4">
 							<n-pagination v-model:page="page" :page-count="lastPage" :disabled="requestsLoading" />
 						</div>
-					</n-card>
+					</HrPanel>
 				</div>
 			</n-tab-pane>
 
@@ -73,6 +71,8 @@ import LeaveBalances from "@/add-os/modules/hr/components/leave/LeaveBalances.vu
 import LeaveLedgerTable from "@/add-os/modules/hr/components/leave/LeaveLedgerTable.vue"
 import LeaveMonthGrid from "@/add-os/modules/hr/components/leave/LeaveMonthGrid.vue"
 import LeaveRequestModal from "@/add-os/modules/hr/components/leave/LeaveRequestModal.vue"
+import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
+import HrPanel from "@/add-os/modules/hr/components/ui/HrPanel.vue"
 import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
 import { leaveAmount, leavePeriod, monthRange, todayIso } from "@/add-os/modules/hr/utils/leave"
 import { translated } from "@/add-os/modules/hr/utils/translated"

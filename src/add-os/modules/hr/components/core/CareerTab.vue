@@ -3,38 +3,39 @@
 	<div class="flex flex-col gap-4">
 		<n-alert v-if="loadError" type="error" :title="t('hr.common.loadError')" />
 
-		<n-card :title="t('hr.career.events')" size="small">
+		<HrPanel :title="t('hr.career.events')" icon="carbon:events">
 			<n-data-table :columns="eventColumns" :data="events" :loading :bordered="false" size="small" :scroll-x="640">
 				<template #empty>
 					<span class="text-secondary">{{ t("hr.profile.career.empty") }}</span>
 				</template>
 			</n-data-table>
-		</n-card>
+		</HrPanel>
 
-		<n-card :title="t('hr.career.assignments')" size="small">
+		<HrPanel :title="t('hr.career.assignments')" icon="carbon:id-management">
 			<n-data-table :columns="assignmentColumns" :data="assignments" :loading :bordered="false" size="small" :scroll-x="900">
 				<template #empty>
 					<span class="text-secondary">{{ t("hr.career.noAssignments") }}</span>
 				</template>
 			</n-data-table>
-		</n-card>
+		</HrPanel>
 
-		<n-card :title="t('hr.career.contracts')" size="small">
+		<HrPanel :title="t('hr.career.contracts')" icon="carbon:document-signed">
 			<n-data-table :columns="contractColumns" :data="contracts" :loading :bordered="false" size="small" :scroll-x="640">
 				<template #empty>
 					<span class="text-secondary">{{ t("hr.career.noContracts") }}</span>
 				</template>
 			</n-data-table>
-		</n-card>
+		</HrPanel>
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns } from "naive-ui"
 import type { Assignment, Contract, EmploymentEvent } from "@/add-os/modules/hr/types/hr"
-import { NAlert, NCard, NDataTable } from "naive-ui"
+import { NAlert, NDataTable } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import HrPanel from "@/add-os/modules/hr/components/ui/HrPanel.vue"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
 import { ApiError } from "@/add-os/services/api"
 import { listEmployeeAssignments, listEmployeeContracts, listEmploymentEvents } from "@/add-os/services/hr/core"

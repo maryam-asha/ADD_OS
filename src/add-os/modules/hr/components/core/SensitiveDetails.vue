@@ -1,7 +1,7 @@
 <!-- src/add-os/modules/hr/components/core/SensitiveDetails.vue -->
 <template>
-	<n-card :title="t('hr.sensitive.title')" size="small">
-		<template v-if="mayView && (hasNationalId || hasBankAccount)" #header-extra>
+	<HrPanel :title="t('hr.sensitive.title')" icon="carbon:locked">
+		<template v-if="mayView && (hasNationalId || hasBankAccount)" #extra>
 			<n-button size="small" :loading @click="revealed ? hide() : reveal()">
 				<template #icon><Icon :name="revealed ? 'carbon:view-off' : 'carbon:view'" :size="16" /></template>
 				{{ revealed ? t("hr.sensitive.hide") : t("hr.sensitive.show") }}
@@ -19,15 +19,16 @@
 			</n-descriptions-item>
 		</n-descriptions>
 		<p v-if="revealed" class="mt-2 text-xs text-secondary">{{ t("hr.sensitive.audited") }}</p>
-	</n-card>
+	</HrPanel>
 </template>
 
 <script setup lang="ts">
 import type { EmployeeSensitive } from "@/add-os/modules/hr/types/hr"
-import { NButton, NCard, NDescriptions, NDescriptionsItem, useMessage } from "naive-ui"
+import { NButton, NDescriptions, NDescriptionsItem, useMessage } from "naive-ui"
 import { onBeforeUnmount, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { canViewEmployeeSensitive } from "@/add-os/config/permissions"
+import HrPanel from "@/add-os/modules/hr/components/ui/HrPanel.vue"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import { EMPTY } from "@/add-os/modules/hr/utils/translated"
 import { getEmployeeSensitive } from "@/add-os/services/hr/core"

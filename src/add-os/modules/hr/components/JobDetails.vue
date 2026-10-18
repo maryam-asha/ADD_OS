@@ -1,7 +1,7 @@
 <!-- src/add-os/modules/hr/components/JobDetails.vue -->
 <template>
 	<div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-		<n-card :title="t('hr.profile.job')" size="small">
+		<HrPanel :title="t('hr.profile.job')" icon="carbon:portfolio">
 			<n-descriptions v-if="assignment" :column="1" label-placement="left" size="small">
 				<n-descriptions-item :label="t('hr.profile.fields.jobTitle')">{{ translated(assignment.job_title) || none }}</n-descriptions-item>
 				<n-descriptions-item :label="t('hr.profile.fields.orgUnit')">{{ translated(assignment.org_unit?.name) || none }}</n-descriptions-item>
@@ -15,9 +15,9 @@
 				<n-descriptions-item :label="t('hr.profile.fields.workMode')">{{ t(`hr.workMode.${assignment.work_mode}`) }}</n-descriptions-item>
 			</n-descriptions>
 			<p v-else class="text-secondary">{{ t("hr.profile.noAssignment") }}</p>
-		</n-card>
+		</HrPanel>
 
-		<n-card :title="t('hr.profile.contract')" size="small">
+		<HrPanel :title="t('hr.profile.contract')" icon="carbon:document-signed">
 			<n-descriptions v-if="contract" :column="1" label-placement="left" size="small">
 				<n-descriptions-item :label="t('hr.profile.fields.contractType')">{{ t(`hr.contractType.${contract.type}`) }}</n-descriptions-item>
 				<n-descriptions-item :label="t('hr.profile.fields.startsOn')">{{ formatDate(contract.starts_on) }}</n-descriptions-item>
@@ -27,14 +27,15 @@
 				</n-descriptions-item>
 			</n-descriptions>
 			<p v-else class="text-secondary">{{ t("hr.profile.noContract") }}</p>
-		</n-card>
+		</HrPanel>
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { Assignment, Contract } from "@/add-os/modules/hr/types/hr"
-import { NCard, NDescriptions, NDescriptionsItem } from "naive-ui"
+import { NDescriptions, NDescriptionsItem } from "naive-ui"
 import { useI18n } from "vue-i18n"
+import HrPanel from "@/add-os/modules/hr/components/ui/HrPanel.vue"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
 import { formatDate, formatNumber } from "@/add-os/utils/format"
 

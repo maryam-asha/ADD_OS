@@ -1,6 +1,6 @@
 <!-- src/add-os/modules/hr/components/HireEmployeeModal.vue -->
 <template>
-	<HrFormModal v-model:show="show" :title="t('hr.hire.title')">
+	<HrFormModal v-model:show="show" :title="t('hr.hire.title')" icon="carbon:user-follow">
 		<n-form ref="formRef" :model="form" :rules label-placement="top">
 			<h3 class="mb-2 font-semibold">{{ t("hr.hire.person") }}</h3>
 			<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">

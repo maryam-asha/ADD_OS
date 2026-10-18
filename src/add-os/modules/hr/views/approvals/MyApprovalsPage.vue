@@ -1,16 +1,14 @@
 <!-- src/add-os/modules/hr/views/approvals/MyApprovalsPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-wrap items-start justify-between gap-3">
-			<div class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.hrMyApprovals") }}</h1>
-				<p>{{ t("hrApprovals.inbox.description") }}</p>
-			</div>
-			<n-button v-if="tab === 'delegations'" type="primary" @click="delegationVisible = true">
-				<template #icon><Icon name="carbon:add" :size="16" /></template>
-				{{ t("hrApprovals.delegations.add") }}
-			</n-button>
-		</div>
+		<HrPageHeader :title="t(titleKey || 'nav.pages.hrMyApprovals')" :description="t('hrApprovals.inbox.description')">
+			<template #actions>
+				<n-button v-if="tab === 'delegations'" type="primary" @click="delegationVisible = true">
+					<template #icon><Icon name="carbon:add" :size="16" /></template>
+					{{ t("hrApprovals.delegations.add") }}
+				</n-button>
+			</template>
+		</HrPageHeader>
 
 		<n-tabs v-model:value="tab" type="line" animated>
 			<n-tab-pane name="inbox">
@@ -66,6 +64,7 @@ import { computed, h, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import ApprovalDetailDrawer from "@/add-os/modules/hr/components/approvals/ApprovalDetailDrawer.vue"
 import DelegationModal from "@/add-os/modules/hr/components/approvals/DelegationModal.vue"
+import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import { requestTypeLabel, summaryHeadline } from "@/add-os/modules/hr/utils/approvalSummary"
 import { employeeCell } from "@/add-os/modules/hr/utils/cells"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"

@@ -1,10 +1,7 @@
 <!-- src/add-os/modules/hr/views/time/TimePeriodsPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.hrTimePeriods") }}</h1>
-			<p class="max-w-3xl">{{ t("hrAttendance.periods.description") }}</p>
-		</div>
+		<HrPageHeader :title="t(titleKey || 'nav.pages.hrTimePeriods')" :description="t('hrAttendance.periods.description')" />
 
 		<div v-if="mayLock" class="flex flex-wrap items-center gap-3">
 			<n-date-picker v-model:formatted-value="month" value-format="yyyy-MM" type="month" :is-date-disabled="notEnded" :placeholder="t('hrAttendance.periods.pickMonth')" />
@@ -32,6 +29,7 @@ import { NAlert, NButton, NCard, NDataTable, NDatePicker, NTag, useDialog, useMe
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { canLockAttendance } from "@/add-os/config/permissions"
+import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
 import { ApiError } from "@/add-os/services/api"
 import { listTimePeriods, lockTimePeriod, unlockTimePeriod } from "@/add-os/services/hr/time"

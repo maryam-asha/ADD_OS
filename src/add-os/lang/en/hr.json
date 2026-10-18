@@ -197,7 +197,22 @@
 			"teamEmpty": "No direct reports.",
 			"notEmployee": "No employee record is linked to your account.",
 			"career": "My career",
-			"noContacts": "No emergency contacts yet. Add someone to call if needed."
+			"noContacts": "No emergency contacts yet. Add someone to call if needed.",
+			"stats": {
+				"approvals": "Waiting for my approval",
+				"approvalsHint": "Requests that need your decision",
+				"approvalsNone": "Nothing waits for you",
+				"leave": "Leave",
+				"leaveHint": "Available now",
+				"leaveNone": "No leave balance yet",
+				"today": "Today",
+				"todayHint": "No shift today",
+				"documents": "My documents",
+				"documentsComplete": "Complete",
+				"documentsCompleteHint": "Every required document is on file",
+				"documentsHint": "Missing or expired — see below",
+				"open": "Open"
+			}
 		},
 		"terminationReason": {
 			"resignation": "Resignation",
@@ -248,7 +263,10 @@
 			"stats": {
 				"overdue": "Past due",
 				"week": "Within 7 days",
-				"total": "All alerts"
+				"total": "All alerts",
+				"overdueHint": "Their date has passed",
+				"weekHint": "Due in the next seven days",
+				"totalHint": "Everything HR must decide soon"
 			}
 		},
 		"career": {

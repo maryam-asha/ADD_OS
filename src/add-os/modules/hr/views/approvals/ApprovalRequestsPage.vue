@@ -1,18 +1,15 @@
 <!-- src/add-os/modules/hr/views/approvals/ApprovalRequestsPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.hrApprovalRequests") }}</h1>
-			<p class="max-w-3xl">{{ t("hrApprovals.requests.description") }}</p>
-		</div>
+		<HrPageHeader :title="t(titleKey || 'nav.pages.hrApprovalRequests')" :description="t('hrApprovals.requests.description')" />
 
 		<n-alert v-if="loadError" type="error" :title="t('hr.common.loadError')" />
 
-		<div class="flex flex-wrap items-center gap-3">
+		<HrToolbar>
 			<n-select v-model:value="filters.status" :options="statusOptions" class="max-w-xs" :aria-label="t('hr.common.status')" />
 			<n-select v-model:value="filters.request_type" :options="typeOptions" :placeholder="t('hrApprovals.columns.type')" clearable class="max-w-xs" />
 			<EmployeeSelect v-if="mayFindEmployees" v-model:value="filters.employee_id" include-former :placeholder="t('hrApprovals.requests.employeeFilter')" class="max-w-xs" />
-		</div>
+		</HrToolbar>
 
 		<n-card class="add-ledger-table">
 			<n-data-table :columns :data="rows" :loading :bordered="false" :row-props size="small" :scroll-x="900">
@@ -47,6 +44,8 @@ import { canViewEmployees } from "@/add-os/config/permissions"
 import ApprovalDetailDrawer from "@/add-os/modules/hr/components/approvals/ApprovalDetailDrawer.vue"
 import ApprovalStatusTag from "@/add-os/modules/hr/components/approvals/ApprovalStatusTag.vue"
 import EmployeeSelect from "@/add-os/modules/hr/components/EmployeeSelect.vue"
+import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
+import HrToolbar from "@/add-os/modules/hr/components/ui/HrToolbar.vue"
 import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
 import { APPROVAL_STATUSES, KNOWN_REQUEST_TYPES } from "@/add-os/modules/hr/types/approvals"
 import { requestTypeLabel, summaryHeadline } from "@/add-os/modules/hr/utils/approvalSummary"

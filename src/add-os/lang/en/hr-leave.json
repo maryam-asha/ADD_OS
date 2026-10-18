@@ -33,7 +33,8 @@
 			"detail": "Balance {balance} · waiting for approval {pending}",
 			"maxNegative": "May go up to {n} below zero",
 			"untracked": "Not counted against a balance",
-			"pendingOnly": "Waiting for approval: {pending}"
+			"pendingOnly": "Waiting for approval: {pending}",
+			"untrackedShort": "No limit"
 		},
 		"ledger": {
 			"allTypes": "Every leave type",

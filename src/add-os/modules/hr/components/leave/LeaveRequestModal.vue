@@ -1,6 +1,6 @@
 <!-- src/add-os/modules/hr/components/leave/LeaveRequestModal.vue -->
 <template>
-	<HrFormModal v-model:show="show" :title>
+	<HrFormModal v-model:show="show" :title icon="carbon:calendar-add">
 		<n-form ref="formRef" :model="form" :rules label-placement="top">
 			<n-form-item path="typeId" :label="t('hrLeave.request.type')">
 				<n-select v-model:value="form.typeId" :options="typeOptions" />

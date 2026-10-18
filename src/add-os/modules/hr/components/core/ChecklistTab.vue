@@ -35,7 +35,7 @@
 			</ul>
 		</n-card>
 
-		<n-modal v-model:show="noteVisible" preset="card" :title="t('hr.checklist.note')" closable class="max-w-md">
+		<HrFormModal v-model:show="noteVisible" :title="t('hr.checklist.note')" size="sm" icon="carbon:add-comment">
 			<n-input v-model:value="noteText" type="textarea" :autosize="{ minRows: 3, maxRows: 6 }" :maxlength="500" show-count />
 			<template #footer>
 				<div class="flex justify-end gap-2">
@@ -46,15 +46,16 @@
 					</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</HrFormModal>
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { ChecklistKind, ChecklistTask } from "@/add-os/modules/hr/types/hr"
-import { NAlert, NButton, NCard, NCheckbox, NInput, NModal, NSkeleton, useMessage } from "naive-ui"
+import { NAlert, NButton, NCard, NCheckbox, NInput, NSkeleton, useMessage } from "naive-ui"
 import { computed, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import { CHECKLIST_KINDS } from "@/add-os/modules/hr/types/hr"
 import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
 import { nullable } from "@/add-os/modules/hr/utils/forms"

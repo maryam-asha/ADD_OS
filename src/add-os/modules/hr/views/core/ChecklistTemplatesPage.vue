@@ -1,22 +1,20 @@
 <!-- src/add-os/modules/hr/views/core/ChecklistTemplatesPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-wrap items-start justify-between gap-3">
-			<div class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.hrChecklistTemplates") }}</h1>
-				<p class="max-w-3xl">{{ t("hr.templates.description") }}</p>
-			</div>
-			<n-button type="primary" @click="openCreate">
-				<template #icon><Icon name="carbon:add" :size="16" /></template>
-				{{ t("hr.templates.add") }}
-			</n-button>
-		</div>
+		<HrPageHeader :title="t(titleKey || 'nav.pages.hrChecklistTemplates')" :description="t('hr.templates.description')">
+			<template #actions>
+				<n-button type="primary" @click="openCreate">
+					<template #icon><Icon name="carbon:add" :size="16" /></template>
+					{{ t("hr.templates.add") }}
+				</n-button>
+			</template>
+		</HrPageHeader>
 
 		<n-alert v-if="error" type="error" :title="t('hr.common.loadError')" />
 
 		<ResourceTable :columns :data :loading="isLoading" :on-edit="openEdit" :on-delete="remove" />
 
-		<HrFormModal v-model:show="formVisible" :title="editingId === null ? t('hr.templates.add') : t('hr.templates.edit')" size="lg">
+		<HrFormModal v-model:show="formVisible" :title="editingId === null ? t('hr.templates.add') : t('hr.templates.edit')" size="lg" icon="carbon:list-checked">
 			<n-form ref="formRef" :model="form" :rules label-placement="top">
 				<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
 					<n-form-item path="kind" :label="t('hr.templates.kind')">
@@ -82,6 +80,7 @@ import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import ActiveTag from "@/add-os/modules/hr/components/ActiveTag.vue"
 import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
+import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import { CHECKLIST_KINDS } from "@/add-os/modules/hr/types/hr"
 import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
 import { nullable } from "@/add-os/modules/hr/utils/forms"

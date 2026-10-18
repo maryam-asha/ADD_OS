@@ -1,24 +1,22 @@
 <!-- src/add-os/modules/hr/views/time/RosterPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-wrap items-start justify-between gap-3">
-			<div class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.hrRoster") }}</h1>
-				<p class="max-w-3xl">{{ t("hrAttendance.roster.description") }}</p>
-			</div>
-			<div v-if="mayManage" class="flex flex-wrap gap-2">
-				<n-button :disabled="!rows.length || changeCount > 0" :title="changeCount ? t('hrAttendance.roster.saveBeforeCopy') : undefined" @click="copyVisible = true">
-					<template #icon><Icon name="carbon:copy" :size="16" /></template>
-					{{ t("hrAttendance.roster.copyWeek") }}
-				</n-button>
-				<n-button type="primary" :disabled="!changeCount" :loading="saving" @click="save">
-					<template #icon><Icon name="carbon:save" :size="16" /></template>
-					{{ changeCount ? t("hrAttendance.roster.saveChanges", { n: formatNumber(changeCount) }, changeCount) : t("hr.common.save") }}
-				</n-button>
-			</div>
-		</div>
+		<HrPageHeader :title="t(titleKey || 'nav.pages.hrRoster')" :description="t('hrAttendance.roster.description')">
+			<template #actions>
+				<div v-if="mayManage" class="flex flex-wrap gap-2">
+					<n-button :disabled="!rows.length || changeCount > 0" :title="changeCount ? t('hrAttendance.roster.saveBeforeCopy') : undefined" @click="copyVisible = true">
+						<template #icon><Icon name="carbon:copy" :size="16" /></template>
+						{{ t("hrAttendance.roster.copyWeek") }}
+					</n-button>
+					<n-button type="primary" :disabled="!changeCount" :loading="saving" @click="save">
+						<template #icon><Icon name="carbon:save" :size="16" /></template>
+						{{ changeCount ? t("hrAttendance.roster.saveChanges", { n: formatNumber(changeCount) }, changeCount) : t("hr.common.save") }}
+					</n-button>
+				</div>
+			</template>
+		</HrPageHeader>
 
-		<div class="flex flex-wrap items-center gap-3">
+		<HrToolbar>
 			<n-button-group>
 				<n-button :aria-label="t('hrAttendance.roster.previousWeek')" :title="t('hrAttendance.roster.previousWeek')" @click="shiftWeek(-7)">
 					<template #icon><Icon name="carbon:chevron-left" :size="16" class="rtl:rotate-180" /></template>
@@ -38,7 +36,7 @@
 				class="max-w-xs"
 				@update:value="(v: number | null) => navigate(() => (filters.org_unit_id = v))"
 			/>
-		</div>
+		</HrToolbar>
 
 		<n-alert v-if="loadError" type="error" :title="t('hr.common.loadError')" />
 		<n-alert v-if="changeCount" type="warning" :title="t('hrAttendance.roster.unsaved', { n: formatNumber(changeCount) }, changeCount)" />
@@ -83,7 +81,7 @@
 			</n-spin>
 		</n-card>
 
-		<n-modal v-model:show="copyVisible" preset="card" :title="t('hrAttendance.roster.copyWeek')" closable class="max-w-md">
+		<HrFormModal v-model:show="copyVisible" :title="t('hrAttendance.roster.copyWeek')" size="sm" icon="carbon:copy">
 			<p class="mb-3 text-sm">{{ t("hrAttendance.roster.copyHint", { from: formatDate(start) }) }}</p>
 			<n-alert type="warning" class="mb-4" :title="t('hrAttendance.roster.copyOverwrites')" />
 			<n-form-item :label="t('hrAttendance.roster.copyTo')">
@@ -97,7 +95,7 @@
 					</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</HrFormModal>
 	</div>
 </template>
 
@@ -105,11 +103,14 @@
 import type { SelectOption } from "naive-ui"
 import type { OrgUnit } from "@/add-os/modules/hr/types/hr"
 import type { RosterChange, RosterDay, RosterRow, ShiftTemplate } from "@/add-os/modules/hr/types/time"
-import { NAlert, NButton, NButtonGroup, NCard, NDatePicker, NFormItem, NModal, NSelect, NSpin, useDialog, useMessage } from "naive-ui"
+import { NAlert, NButton, NButtonGroup, NCard, NDatePicker, NFormItem, NSelect, NSpin, useDialog, useMessage } from "naive-ui"
 import { computed, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { canManageRoster } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
+import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
+import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
+import HrToolbar from "@/add-os/modules/hr/components/ui/HrToolbar.vue"
 import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
 import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
 import { todayIso } from "@/add-os/modules/hr/utils/leave"

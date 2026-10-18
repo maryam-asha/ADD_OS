@@ -1,14 +1,11 @@
 <!-- src/add-os/modules/hr/views/leave/LeaveRequestsPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.hrLeaveRequests") }}</h1>
-			<p class="max-w-3xl">{{ t("hrLeave.requests.description") }}</p>
-		</div>
+		<HrPageHeader :title="t(titleKey || 'nav.pages.hrLeaveRequests')" :description="t('hrLeave.requests.description')" />
 
 		<n-alert v-if="loadError" type="error" :title="t('hr.common.loadError')" />
 
-		<div class="flex flex-wrap items-center gap-3">
+		<HrToolbar>
 			<n-select v-model:value="filters.status" :options="statusOptions" :placeholder="t('hr.common.status')" clearable class="max-w-xs" />
 			<n-select v-model:value="filters.leave_type_id" :options="typeOptions" :placeholder="t('hrLeave.request.type')" clearable class="max-w-xs" />
 			<EmployeeSelect v-if="mayFindEmployees" v-model:value="filters.employee_id" include-former :placeholder="t('hrApprovals.requests.employeeFilter')" class="max-w-xs" />
@@ -20,7 +17,7 @@
 				class="max-w-sm"
 				@update:formatted-value="onRange"
 			/>
-		</div>
+		</HrToolbar>
 
 		<n-card class="add-ledger-table">
 			<n-data-table :columns :data="rows" :loading :bordered="false" :row-props size="small" :scroll-x="900">
@@ -47,6 +44,8 @@ import { canManageLeave, canViewEmployees } from "@/add-os/config/permissions"
 import ApprovalStatusTag from "@/add-os/modules/hr/components/approvals/ApprovalStatusTag.vue"
 import EmployeeSelect from "@/add-os/modules/hr/components/EmployeeSelect.vue"
 import LeaveRequestDetailDrawer from "@/add-os/modules/hr/components/leave/LeaveRequestDetailDrawer.vue"
+import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
+import HrToolbar from "@/add-os/modules/hr/components/ui/HrToolbar.vue"
 import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
 import { LEAVE_REQUEST_STATUSES } from "@/add-os/modules/hr/types/leave"
 import { employeeCell } from "@/add-os/modules/hr/utils/cells"

@@ -1,20 +1,18 @@
 <!-- src/add-os/modules/hr/views/core/EmployeesPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-wrap items-start justify-between gap-3">
-			<div class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.employees") }}</h1>
-				<p>{{ t("hr.employees.description") }}</p>
-			</div>
-			<n-button v-if="mayHire" type="primary" @click="hireVisible = true">
-				<template #icon><Icon name="carbon:user-follow" :size="16" /></template>
-				{{ t("hr.employees.hire") }}
-			</n-button>
-		</div>
+		<HrPageHeader :title="t(titleKey || 'nav.pages.employees')" :description="t('hr.employees.description')">
+			<template #actions>
+				<n-button v-if="mayHire" type="primary" @click="hireVisible = true">
+					<template #icon><Icon name="carbon:user-follow" :size="16" /></template>
+					{{ t("hr.employees.hire") }}
+				</n-button>
+			</template>
+		</HrPageHeader>
 
 		<n-alert v-if="loadError" type="error" :title="t('hr.common.loadError')" />
 
-		<div class="flex flex-wrap items-center gap-3">
+		<HrToolbar>
 			<n-input v-model:value="filters.q" :placeholder="t('hr.employees.searchPlaceholder')" clearable class="min-w-[240px] flex-1">
 				<template #prefix>
 					<Icon name="carbon:search" :size="16" />
@@ -36,7 +34,7 @@
 				filterable
 				class="max-w-[240px]"
 			/>
-		</div>
+		</HrToolbar>
 
 		<n-card class="add-ledger-table">
 			<n-data-table
@@ -72,6 +70,8 @@ import { useRouter } from "vue-router"
 import { canHireEmployees } from "@/add-os/config/permissions"
 import EmployeeStatusTag from "@/add-os/modules/hr/components/EmployeeStatusTag.vue"
 import HireEmployeeModal from "@/add-os/modules/hr/components/HireEmployeeModal.vue"
+import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
+import HrToolbar from "@/add-os/modules/hr/components/ui/HrToolbar.vue"
 import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
 import { EMPLOYEE_STATUSES } from "@/add-os/modules/hr/types/hr"
 import { employeeCell } from "@/add-os/modules/hr/utils/cells"

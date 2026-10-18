@@ -1,6 +1,6 @@
 <!-- src/add-os/modules/hr/components/time/WorkPatternModal.vue -->
 <template>
-	<HrFormModal v-model:show="show" :title="pattern ? t('hrAttendance.patterns.edit') : t('hrAttendance.patterns.add')">
+	<HrFormModal v-model:show="show" :title="pattern ? t('hrAttendance.patterns.edit') : t('hrAttendance.patterns.add')" icon="carbon:calendar-settings">
 		<n-form ref="formRef" :model="form" :rules label-placement="top">
 			<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
 				<n-form-item path="nameAr" :label="t('hr.org.nameAr')">

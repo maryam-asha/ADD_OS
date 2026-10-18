@@ -33,7 +33,8 @@
 			"detail": "الرصيد {balance} · بانتظار الموافقة {pending}",
 			"maxNegative": "يمكن أن يقلّ عن الصفر حتى {n}",
 			"untracked": "لا تُخصم من رصيد",
-			"pendingOnly": "بانتظار الموافقة: {pending}"
+			"pendingOnly": "بانتظار الموافقة: {pending}",
+			"untrackedShort": "دون حد"
 		},
 		"ledger": {
 			"allTypes": "كل أنواع الإجازات",

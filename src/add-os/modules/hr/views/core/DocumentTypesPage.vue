@@ -1,7 +1,7 @@
 <!-- src/add-os/modules/hr/views/core/DocumentTypesPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.hrDocumentTypes") }}</h1>
+		<HrPageHeader :title="t(titleKey || 'nav.pages.hrDocumentTypes')" />
 		<HrResourcePanel
 			:api
 			:columns
@@ -31,6 +31,7 @@ import { computed } from "vue"
 import { useI18n } from "vue-i18n"
 import { canManageHrSettings } from "@/add-os/config/permissions"
 import HrResourcePanel from "@/add-os/modules/hr/components/core/HrResourcePanel.vue"
+import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import { buildDocumentTypeColumns, buildDocumentTypeFields, emptyDocumentTypeForm } from "@/add-os/modules/hr/config/core.config"
 import { toBilingual, toTranslatable } from "@/add-os/modules/hr/utils/forms"
 import { createDocumentType, deleteDocumentType, listDocumentTypes, updateDocumentType } from "@/add-os/services/hr/core"

@@ -1,15 +1,12 @@
 <!-- src/add-os/modules/hr/views/leave/LeaveCalendarPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.hrLeaveCalendar") }}</h1>
-			<p>{{ t("hrLeave.calendar.description") }}</p>
-		</div>
+		<HrPageHeader :title="t(titleKey || 'nav.pages.hrLeaveCalendar')" :description="t('hrLeave.calendar.description')" />
 
-		<div class="flex flex-wrap items-center gap-3">
+		<HrToolbar>
 			<n-date-picker :formatted-value="month" value-format="yyyy-MM" type="month" :clearable="false" @update:formatted-value="onMonth" />
 			<n-select v-if="unitOptions.length" v-model:value="filters.org_unit_id" :options="unitOptions" :placeholder="t('hr.employees.unitFilter')" clearable filterable class="max-w-xs" />
-		</div>
+		</HrToolbar>
 
 		<n-alert v-if="loadError" type="error" :title="t('hr.common.loadError')" />
 		<n-card>
@@ -28,6 +25,8 @@ import { NAlert, NCard, NDatePicker, NSelect, NSpin } from "naive-ui"
 import { computed, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import LeaveMonthGrid from "@/add-os/modules/hr/components/leave/LeaveMonthGrid.vue"
+import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
+import HrToolbar from "@/add-os/modules/hr/components/ui/HrToolbar.vue"
 import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
 import { monthRange, todayIso } from "@/add-os/modules/hr/utils/leave"
 import { translated } from "@/add-os/modules/hr/utils/translated"

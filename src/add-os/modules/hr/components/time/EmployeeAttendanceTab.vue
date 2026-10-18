@@ -1,8 +1,8 @@
 <!-- src/add-os/modules/hr/components/time/EmployeeAttendanceTab.vue -->
 <template>
 	<div class="flex flex-col gap-4">
-		<n-card :title="t('hrAttendance.card.title')" size="small">
-			<template v-if="mayManageCards && card" #header-extra>
+		<HrPanel :title="t('hrAttendance.card.title')" icon="carbon:qr-code">
+			<template v-if="mayManageCards && card" #extra>
 				<div class="flex gap-2">
 					<n-button v-if="card.has_card" size="small" type="error" secondary :loading="revoking" @click="confirmRevoke">
 						{{ t("hrAttendance.card.revoke") }}
@@ -16,10 +16,10 @@
 			<n-skeleton v-if="cardLoading" text :repeat="1" />
 			<p v-else-if="card?.has_card">{{ t("hrAttendance.card.active", { date: card.issued_at ? formatDateTime(card.issued_at) : none }) }}</p>
 			<p v-else class="text-secondary">{{ t("hrAttendance.card.none") }}</p>
-		</n-card>
+		</HrPanel>
 
-		<n-card :title="t('hrAttendance.punches.title')" size="small">
-			<template #header-extra>
+		<HrPanel :title="t('hrAttendance.punches.title')" icon="carbon:fingerprint-recognition">
+			<template #extra>
 				<n-button v-if="mayCorrect" size="small" @click="punchVisible = true">
 					<template #icon><Icon name="carbon:add" :size="16" /></template>
 					{{ t("hrAttendance.punches.add") }}
@@ -34,9 +34,9 @@
 					<span class="text-secondary">{{ t("hrAttendance.punches.empty") }}</span>
 				</template>
 			</n-data-table>
-		</n-card>
+		</HrPanel>
 
-		<n-modal v-model:show="qrVisible" preset="card" :title="t('hrAttendance.card.printTitle')" closable class="max-w-md" @after-leave="qrValue = null">
+		<HrFormModal v-model:show="qrVisible" :title="t('hrAttendance.card.printTitle')" size="sm" icon="carbon:qr-code" @after-leave="qrValue = null">
 			<div class="add-print-page flex flex-col items-center gap-4 p-4">
 				<span class="text-lg font-semibold">{{ employeeName }}</span>
 				<n-qr-code v-if="qrValue" :value="qrValue" :size="220" error-correction-level="M" />
@@ -51,9 +51,9 @@
 					</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</HrFormModal>
 
-		<n-modal v-model:show="punchVisible" preset="card" :title="t('hrAttendance.punches.add')" closable class="max-w-md">
+		<HrFormModal v-model:show="punchVisible" :title="t('hrAttendance.punches.add')" size="sm" icon="carbon:fingerprint-recognition">
 			<p class="mb-3 text-sm text-secondary">{{ t("hrAttendance.punches.addHint") }}</p>
 			<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
 				<n-form-item :label="t('hrAttendance.days.date')">
@@ -74,17 +74,19 @@
 					</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</HrFormModal>
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns } from "naive-ui"
 import type { AttendanceCardStatus, Punch } from "@/add-os/modules/hr/types/time"
-import { NAlert, NButton, NCard, NDataTable, NDatePicker, NFormItem, NInput, NModal, NQrCode, NSkeleton, NTimePicker, useDialog, useMessage } from "naive-ui"
+import { NAlert, NButton, NDataTable, NDatePicker, NFormItem, NInput, NQrCode, NSkeleton, NTimePicker, useDialog, useMessage } from "naive-ui"
 import { computed, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { canCorrectAttendance, canManageAttendanceCards } from "@/add-os/config/permissions"
+import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
+import HrPanel from "@/add-os/modules/hr/components/ui/HrPanel.vue"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import { todayIso } from "@/add-os/modules/hr/utils/leave"
 import { addDays, orgClock, orgDate } from "@/add-os/modules/hr/utils/time"
