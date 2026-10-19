@@ -1569,7 +1569,8 @@
 			"hr": "الموارد البشرية",
 			"myHr": "شؤوني الوظيفية",
 			"hrSettings": "إعدادات الموارد البشرية",
-			"hrTime": "الدوام والإجازات"
+			"hrTime": "الدوام والإجازات",
+			"hrPay": "الرواتب والمزايا"
 		},
 		"pages": {
 			"overview": "نظرة عامة",
@@ -1674,7 +1675,16 @@
 			"hrTimesheets": "التايم شيت",
 			"hrTimeByCostCenter": "الوقت حسب مركز التكلفة",
 			"hrCostCenters": "مراكز التكلفة",
-			"hrMyTimesheets": "التايم شيت الخاص بي"
+			"hrMyTimesheets": "التايم شيت الخاص بي",
+			"hrPayrollRuns": "دورات الرواتب",
+			"hrPayrollRun": "دورة الرواتب",
+			"hrPayslip": "قسيمة الراتب",
+			"hrLoans": "السلف",
+			"hrEndOfService": "نهاية الخدمة",
+			"hrPayComponents": "مكوّنات الأجر",
+			"hrRateTables": "جداول النسب",
+			"hrMyPay": "رواتبي وسلفي",
+			"hrMyPayslip": "قسيمة راتبي"
 		}
 	},
 	"resourceCrud": {

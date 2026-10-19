@@ -1565,7 +1565,8 @@
 			"hr": "Human resources",
 			"myHr": "My HR",
 			"hrSettings": "HR settings",
-			"hrTime": "Time and leave"
+			"hrTime": "Time and leave",
+			"hrPay": "Pay and benefits"
 		},
 		"pages": {
 			"overview": "Overview",
@@ -1670,7 +1671,16 @@
 			"hrTimesheets": "Timesheets",
 			"hrTimeByCostCenter": "Time by cost center",
 			"hrCostCenters": "Cost centers",
-			"hrMyTimesheets": "My timesheet"
+			"hrMyTimesheets": "My timesheet",
+			"hrPayrollRuns": "Payroll runs",
+			"hrPayrollRun": "Payroll run",
+			"hrPayslip": "Payslip",
+			"hrLoans": "Loans",
+			"hrEndOfService": "End of service",
+			"hrPayComponents": "Pay components",
+			"hrRateTables": "Rate tables",
+			"hrMyPay": "My pay and loans",
+			"hrMyPayslip": "My payslip"
 		}
 	},
 	"resourceCrud": {

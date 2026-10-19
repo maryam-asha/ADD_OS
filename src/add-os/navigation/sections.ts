@@ -335,6 +335,23 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		]
 	},
 	{
+		// Pay (add/hr Payroll; benefits join it). Each step of a run carries
+		// its own permission (hr.payroll.manage, .approve, .pay), checked on
+		// its page; a page here needs only to read.
+		key: "hrPay",
+		path: "/hr-pay",
+		icon: "carbon:money",
+		status: "active",
+		roles: ["all"],
+		pages: [
+			{ key: "hrPayrollRuns", path: "payroll-runs", permission: "hr.payroll.view" },
+			{ key: "hrPayrollRun", path: "payroll-runs/:id", hidden: true, permission: "hr.payroll.view" },
+			{ key: "hrPayslip", path: "payslips/:id", hidden: true, permission: "hr.payroll.view" },
+			{ key: "hrLoans", path: "loans", permission: "hr.loans.manage" },
+			{ key: "hrEndOfService", path: "end-of-service", permission: "hr.payroll.view" }
+		]
+	},
+	{
 		// HR setup. Each page needs its own setup permission (hr.settings.manage,
 		// hr.approvals.manage), so the section shows only to whoever runs HR.
 		key: "hrSettings",
@@ -348,7 +365,9 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "hrApprovalFlows", path: "approval-flows", permission: "hr.approvals.manage" },
 			{ key: "hrLeaveSettings", path: "leave", permission: "hr.leave.view" },
 			{ key: "hrTimeSettings", path: "time", permission: "hr.attendance.view" },
-			{ key: "hrCostCenters", path: "cost-centers", permission: "hr.timesheets.view" }
+			{ key: "hrCostCenters", path: "cost-centers", permission: "hr.timesheets.view" },
+			{ key: "hrPayComponents", path: "pay-components", permission: "hr.payroll.view" },
+			{ key: "hrRateTables", path: "rate-tables", permission: "hr.payroll.view" }
 		]
 	},
 	{
@@ -366,6 +385,8 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "hrMyLeave", path: "leave" },
 			{ key: "hrMyAttendance", path: "attendance" },
 			{ key: "hrMyTimesheets", path: "timesheets" },
+			{ key: "hrMyPay", path: "pay" },
+			{ key: "hrMyPayslip", path: "pay/payslips/:id", hidden: true },
 			{ key: "hrMyCertificate", path: "certificates/:kind", hidden: true }
 		]
 	},

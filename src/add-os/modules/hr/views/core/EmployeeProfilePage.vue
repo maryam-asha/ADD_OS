@@ -119,6 +119,10 @@
 					<EmployeeAttendanceTab :employee-id :employee-name="translated(employee.name)" />
 				</n-tab-pane>
 
+				<n-tab-pane v-if="mayViewPayroll" name="pay" :tab="t('hrPayroll.profile.tab')" display-directive="show:lazy">
+					<EmployeePayTab :employee-id @changed="careerTab?.load()" />
+				</n-tab-pane>
+
 				<n-tab-pane v-if="mayViewTimesheets" name="cost" :tab="t('hrTimesheets.profile.tab')" display-directive="show:lazy">
 					<EmployeeCostTab :employee-id />
 				</n-tab-pane>
@@ -163,6 +167,7 @@ import {
 	canViewAttendance,
 	canViewEmployeeDocuments,
 	canViewLeave,
+	canViewPayroll,
 	canViewTimesheets
 } from "@/add-os/config/permissions"
 import CareerTab from "@/add-os/modules/hr/components/core/CareerTab.vue"
@@ -174,6 +179,7 @@ import RecordEventModal from "@/add-os/modules/hr/components/core/RecordEventMod
 import SensitiveDetails from "@/add-os/modules/hr/components/core/SensitiveDetails.vue"
 import JobDetails from "@/add-os/modules/hr/components/JobDetails.vue"
 import EmployeeLeaveTab from "@/add-os/modules/hr/components/leave/EmployeeLeaveTab.vue"
+import EmployeePayTab from "@/add-os/modules/hr/components/payroll/EmployeePayTab.vue"
 import EmployeeAttendanceTab from "@/add-os/modules/hr/components/time/EmployeeAttendanceTab.vue"
 import EmployeeCostTab from "@/add-os/modules/hr/components/timesheets/EmployeeCostTab.vue"
 import EmployeeHero from "@/add-os/modules/hr/components/ui/EmployeeHero.vue"
@@ -199,6 +205,7 @@ const mayManageChecklists = canManageChecklists()
 const mayViewLeave = canViewLeave()
 const mayViewAttendance = canViewAttendance()
 const mayViewTimesheets = canViewTimesheets()
+const mayViewPayroll = canViewPayroll()
 const none = EMPTY
 
 const employeeId = computed(() => Number(route.params.id))
@@ -207,7 +214,7 @@ const loading = ref(true)
 const loadError = ref(false)
 const notFound = ref(false)
 /** Each tab after the first loads the first time it opens (`show:lazy`). */
-const tab = ref<"overview" | "career" | "documents" | "leave" | "attendance" | "cost" | "checklist">("overview")
+const tab = ref<"overview" | "career" | "documents" | "leave" | "attendance" | "pay" | "cost" | "checklist">("overview")
 
 const editVisible = ref(false)
 const contactsVisible = ref(false)

@@ -353,3 +353,35 @@ export function canViewTimesheets(): boolean {
 export function canManageTimesheets(): boolean {
 	return can("hr.timesheets.manage")
 }
+
+// ── HR payroll ──────────────────────────────────────────────────────────────
+
+/** Pay, runs, payslips and end-of-service figures, read only — and the pay tab on a file. Components and rate tables are changed with canManageHrSettings. */
+export function canViewPayroll(): boolean {
+	return can("hr.payroll.view")
+}
+
+/** Opening, calculating, reviewing, reconciling and adjusting a run, and throwing an unapproved one away. */
+export function canManagePayroll(): boolean {
+	return can("hr.payroll.manage")
+}
+
+/** Approving a reviewed run — never the person who calculated it or changed pay in it (the server refuses, 403). */
+export function canApprovePayroll(): boolean {
+	return can("hr.payroll.approve")
+}
+
+/** Marking an approved run paid, its journal and posting it. */
+export function canPayPayroll(): boolean {
+	return can("hr.payroll.pay")
+}
+
+/** Changing an employee's pay from a date. */
+export function canManageCompensation(): boolean {
+	return can("hr.compensation.manage")
+}
+
+/** Every loan: reading, filing one for an employee, settling one. */
+export function canManageLoans(): boolean {
+	return can("hr.loans.manage")
+}

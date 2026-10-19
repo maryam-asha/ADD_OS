@@ -1,0 +1,325 @@
+{
+	"hrPayroll": {
+		"currency": "Currency",
+		"codeRule": "Letters, digits, dashes and underscores, 32 at most.",
+		"kind": {
+			"earning": "Earning",
+			"deduction": "Deduction",
+			"employer_contribution": "Employer contribution",
+			"in_kind": "In kind"
+		},
+		"kindPlural": {
+			"earning": "Earnings",
+			"deduction": "Deductions",
+			"employer_contribution": "Employer contributions",
+			"in_kind": "Benefits in kind"
+		},
+		"calculators": {
+			"custom": "A calculator this server adds. Its settings are written as JSON.",
+			"fixed": { "name": "Fixed monthly amount", "hint": "The amount on the employee's pay, prorated by the days each line ran in the month." },
+			"per_attendance_day": { "name": "Per day present", "hint": "The amount on the employee's pay for each day attendance recorded as present." },
+			"percent_of": { "name": "Percent of other lines", "hint": "A percent of earlier lines on the slip. An amount on the employee's pay overrides the percent." },
+			"rate_table": { "name": "Legal rate table", "hint": "A rate table on a base — insurance or tax. A percent table up to its ceiling; a brackets table progressively." },
+			"overtime": { "name": "Overtime", "hint": "Approved overtime hours × the hourly rate × the multiplier." },
+			"unpaid_days": { "name": "Unpaid days", "hint": "A deduction for approved unpaid leave and days resolved as absent, at the daily rate." },
+			"loan_installment": { "name": "Loan installments", "hint": "The installments of active loans due in the month." },
+			"benefit_allowance": { "name": "Benefit allowance", "hint": "Pays the cash allowances of benefits linked to this component." }
+		},
+		"config": {
+			"prorate": "Prorate by days",
+			"prorateHint": "Off pays the latest amount in full.",
+			"percent": "Percent",
+			"components": "Of the lines",
+			"table": "Rate table",
+			"base": "Base",
+			"bases": {
+				"gross": "Gross earnings",
+				"taxable": "Taxable earnings",
+				"insurable": "Insurable earnings",
+				"components": "Chosen lines"
+			},
+			"less": "Less the lines",
+			"baseComponents": "Monthly pay from the lines",
+			"hoursPerMonth": "Hours a month",
+			"multiplier": "Multiplier",
+			"multiplierTable": "Or the multiplier from a percent table",
+			"daysPerMonth": "Days a month",
+			"raw": "Settings (JSON)",
+			"rawInvalid": "This is not valid JSON.",
+			"rawObject": "Write the settings as one JSON object."
+		},
+		"components": {
+			"description": "What a payslip is made of: each line's kind, how it is worked out, and its order — earlier lines feed later ones, so basic comes before a percent of it and the gross before a tax on it.",
+			"add": "Add component",
+			"edit": "Edit component",
+			"name": "Name",
+			"nameAr": "Name (Arabic)",
+			"nameEn": "Name (English)",
+			"kind": "Kind",
+			"calculator": "Worked out as",
+			"settings": "Settings",
+			"sort": "Order",
+			"appliesToAll": "On every payslip",
+			"appliesToAllShort": "Everyone",
+			"appliesToAllHint": "A component on every payslip is worked out for each employee; any other only for employees whose pay has it.",
+			"taxable": "Taxable",
+			"insurable": "Insurable",
+			"countsToward": "Counts toward",
+			"empty": "No pay components yet. Add basic pay first.",
+			"created": "Pay component added.",
+			"updated": "Pay component updated.",
+			"deleted": "Pay component deleted.",
+			"delete": "Delete component",
+			"deleteConfirm": "Delete {name}? A component that pay or payslips use cannot be deleted; deactivate it instead."
+		},
+		"rateTables": {
+			"description": "The legal rates payroll reads — social insurance, income tax — in dated versions, so each month is worked out with the rate of its own time. A run uses the version in force on the month's last day.",
+			"add": "Add rate table",
+			"edit": "Edit rate table",
+			"kind": "Kind",
+			"kinds": { "percent": "One rate", "brackets": "Progressive brackets" },
+			"kindHint": {
+				"percent": "One rate on the base, up to a ceiling if one is set.",
+				"brackets": "Each band of the base at its own rate."
+			},
+			"kindFixed": "The kind is fixed once the table exists.",
+			"empty": "No rate tables yet.",
+			"noVersions": "No versions yet. Add one for the rate in force.",
+			"created": "Rate table added.",
+			"updated": "Rate table updated.",
+			"deleted": "Rate table deleted.",
+			"delete": "Delete rate table",
+			"deleteConfirm": "Delete the table {code}? A table with versions stays, as part of the payroll history.",
+			"addVersion": "Add version",
+			"versionHint": "A new version of {code}. Versions never overlap: end the one in force first.",
+			"versionAdded": "Version added.",
+			"closeVersion": "End version",
+			"closeHint": "The version stops applying after this date.",
+			"from": "From",
+			"to": "To",
+			"rate": "Rate",
+			"maxBase": "Ceiling on the base",
+			"upToCeiling": "{rate} up to {max}",
+			"brackets": "Bands",
+			"upTo": "Up to",
+			"noLimit": "No limit",
+			"addBracket": "Add band",
+			"bracketsHint": "Bands rise; the last has no upper limit.",
+			"currency": "Currency of the amounts",
+			"currencyHint": "Ceilings and bands are in this currency; none means the run's.",
+			"note": "Note",
+			"inForce": "In force",
+			"problems": {
+				"rate": "Give every band a rate.",
+				"openMiddle": "Only the last band may have no upper limit.",
+				"order": "Each band's limit must be above the one before."
+			}
+		},
+		"pay": {
+			"title": "Pay",
+			"subtitle": "The employee's pay lines over time",
+			"change": "Change pay",
+			"changeHint": "The pay as it will be from the date chosen: every line running then ends the day before. The change also shows on the career tab.",
+			"effectiveFrom": "From",
+			"reason": "Reason",
+			"reasonPlaceholder": "e.g. annual raise",
+			"component": "Component",
+			"amount": "Amount",
+			"addLine": "Add line",
+			"endsPay": "No lines: the pay ends on this date.",
+			"percentHint": "For a percent component, the amount is the employee's own percent.",
+			"changed": "Pay updated.",
+			"empty": "No pay set."
+		},
+		"profile": {
+			"tab": "Pay"
+		},
+		"endOfService": {
+			"title": "End of service",
+			"subtitle": "What the employee would be owed on the date",
+			"description": "What every employee in service on the date would be owed at the end of their service, and the total by currency.",
+			"asOf": "As of",
+			"amount": "Amount",
+			"years": "Years of service",
+			"days": "Days owed",
+			"basis": "Monthly basis",
+			"employees": "Employees",
+			"totalIn": "Total in {currency}",
+			"empty": "No employees in service on this date."
+		},
+		"runKind": {
+			"regular": "Monthly payroll",
+			"off_cycle": "Off-cycle"
+		},
+		"runStatus": {
+			"open": "Open",
+			"calculated": "Calculated",
+			"reviewed": "Reviewed",
+			"approved": "Approved",
+			"paid": "Paid"
+		},
+		"steps": {
+			"open": "Opened",
+			"calculated": "Calculated",
+			"reviewed": "Reviewed",
+			"approved": "Approved",
+			"paid": "Paid",
+			"posted": "Posted"
+		},
+		"runs": {
+			"description": "Every payroll run, newest month first. Open a run to calculate, review, approve and pay it.",
+			"open": "Open payroll",
+			"opened": "Payroll opened.",
+			"month": "Month",
+			"year": "Year",
+			"kind": "Kind",
+			"kindHint": {
+				"regular": "The month's payroll, one a month, calculated once the month's attendance is locked.",
+				"off_cycle": "A correction or a one-off — a bonus, a final settlement — for the employees named, made of adjustments."
+			},
+			"employees": "Employees",
+			"parallel": "Parallel run",
+			"parallelHint": "Run beside the payroll in use; someone confirms the two match before it can be approved.",
+			"parallelShort": "Parallel",
+			"notes": "Notes",
+			"posted": "Posted",
+			"empty": "No payroll runs yet."
+		},
+		"run": {
+			"title": "Payroll — {period}",
+			"notFound": "This payroll run does not exist.",
+			"calculate": "Calculate",
+			"recalculate": "Recalculate",
+			"review": "Mark reviewed",
+			"reconcile": "Confirm match",
+			"approve": "Approve",
+			"pay": "Mark paid",
+			"post": "Mark posted",
+			"cancel": "Delete run",
+			"cancelled": "Payroll run deleted.",
+			"done": "Done.",
+			"confirm": {
+				"reconcile": "Confirm this parallel payroll matches the payroll it runs beside? Only then can it be approved.",
+				"approve": "Approve this payroll? Its payslips are issued to the employees, loan installments are deducted, and it can no longer change — a correction is an off-cycle run.",
+				"post": "Mark this payroll as posted to accounting? It is marked once.",
+				"cancel": "Delete this payroll run and its payslips? It has not been approved, so nothing has been issued."
+			},
+			"reconcileFirst": "This parallel payroll must be confirmed against the current one before it can be approved.",
+			"needsRecalculation": "An adjustment changed this payroll after it was calculated. Calculate it again before review.",
+			"warnings": "{n} with a warning | {n} with warnings",
+			"notCalculated": "Not calculated yet.",
+			"noPayslips": "No payslips in this run.",
+			"payHint": "Record that the net pay ({net}) has been paid out.",
+			"paymentReference": "Payment reference",
+			"tabs": {
+				"payslips": "Payslips",
+				"variance": "Variance",
+				"adjustments": "Adjustments",
+				"journal": "Journal"
+			}
+		},
+		"totals": {
+			"payslips": "Payslips",
+			"gross": "Gross",
+			"deductions": "Deductions",
+			"net": "Net pay",
+			"employerCost": "Employer cost"
+		},
+		"variance": {
+			"against": "Each payslip against the same employee's in the last approved monthly payroll.",
+			"noPrevious": "No earlier approved monthly payroll to compare with.",
+			"flaggedOnly": "Flagged only",
+			"change": "Change",
+			"status": {
+				"new": "New",
+				"left": "Left",
+				"continuing": "Continuing"
+			},
+			"previousNet": "Previous net",
+			"currentNet": "Net now",
+			"difference": "Difference",
+			"components": "Lines that changed",
+			"empty": "Nothing to compare yet."
+		},
+		"adjustments": {
+			"subtitle": "One-off lines on a slip, each with its reason",
+			"add": "Add adjustment",
+			"hint": "A one-off line on one employee's slip — a bonus, a correction. A calculated run goes back to open and needs calculating again.",
+			"amountHint": "A negative amount takes away.",
+			"note": "Reason",
+			"added": "Adjustment added.",
+			"remove": "Remove adjustment",
+			"removeConfirm": "Remove this adjustment? The run goes back to open and needs calculating again.",
+			"removed": "Adjustment removed.",
+			"empty": "No adjustments."
+		},
+		"journal": {
+			"title": "Journal",
+			"subtitle": "The approved run as accounting lines, each expense split by cost center",
+			"account": "Account",
+			"debit": "Debit",
+			"credit": "Credit"
+		},
+		"payslip": {
+			"title": "Payslip",
+			"issuedAt": "Issued {date}",
+			"issued": "Issued",
+			"draft": "Not issued yet",
+			"days": "Days employed",
+			"daysOf": "{n} of {of}",
+			"basis": "How",
+			"warnings": "Warnings",
+			"notFound": "This payslip does not exist or has not been issued.",
+			"footer": "This payslip was generated by ADD's HR system from the approved payroll."
+		},
+		"warnings": {
+			"negativeNet": "The deductions are larger than the pay: the net is below zero.",
+			"noRate": "No version of the rate table {code} was in force."
+		},
+		"loanStatus": {
+			"pending": "Awaiting approval",
+			"active": "Being repaid",
+			"settled": "Settled",
+			"rejected": "Rejected",
+			"cancelled": "Cancelled"
+		},
+		"installmentStatus": {
+			"due": "Due",
+			"deducted": "Deducted",
+			"settled": "Settled"
+		},
+		"loans": {
+			"description": "Every loan, newest first. A loan is approved in the approval flow, then repaid by payroll month by month.",
+			"add": "File a loan",
+			"request": "Ask for a loan",
+			"hint": "It goes for approval. One open loan at a time, up to a multiple of monthly pay; the first installment is taken from the month chosen.",
+			"amount": "Amount",
+			"installments": "Installments",
+			"firstMonth": "First installment",
+			"nextMonth": "Next month",
+			"outstanding": "Still due",
+			"detail": "Loan",
+			"schedule": "Repayment",
+			"scheduleOnApproval": "The repayment schedule is laid out once the loan is approved.",
+			"month": "Month",
+			"sent": "Loan request sent for approval.",
+			"settle": "Settle",
+			"settleHint": "What is still due ({amount}) is settled outside payroll — paid back in cash, or in a final settlement.",
+			"settleNote": "How it was settled",
+			"settled": "Loan settled.",
+			"cancel": "Cancel request",
+			"cancelConfirm": "Cancel this loan request? Its approval request is withdrawn.",
+			"cancelled": "Loan request cancelled.",
+			"empty": "No loans."
+		},
+		"mine": {
+			"description": "Your payslips, once each payroll is approved, and your loans.",
+			"payslips": "My payslips",
+			"noPayslips": "No payslips issued yet.",
+			"loans": "My loans",
+			"noLoans": "No loans.",
+			"oneOpenLoan": "You can ask for another loan once this one is repaid.",
+			"salaryCertificate": "Salary certificate"
+		}
+	}
+}
