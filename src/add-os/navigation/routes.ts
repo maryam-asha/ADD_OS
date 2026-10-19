@@ -114,15 +114,19 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"hrTime.hrRoster": () => import("@/add-os/modules/hr/views/time/RosterPage.vue"),
 	"hrTime.hrTimeRequests": () => import("@/add-os/modules/hr/views/time/TimeRequestsPage.vue"),
 	"hrTime.hrTimePeriods": () => import("@/add-os/modules/hr/views/time/TimePeriodsPage.vue"),
+	"hrTime.hrTimesheets": () => import("@/add-os/modules/hr/views/timesheets/TimesheetsPage.vue"),
+	"hrTime.hrTimeByCostCenter": () => import("@/add-os/modules/hr/views/timesheets/TimeByCostCenterPage.vue"),
 	"hrSettings.hrDocumentTypes": () => import("@/add-os/modules/hr/views/core/DocumentTypesPage.vue"),
 	"hrSettings.hrChecklistTemplates": () => import("@/add-os/modules/hr/views/core/ChecklistTemplatesPage.vue"),
 	"hrSettings.hrApprovalFlows": () => import("@/add-os/modules/hr/views/approvals/ApprovalFlowsPage.vue"),
 	"hrSettings.hrLeaveSettings": () => import("@/add-os/modules/hr/views/leave/LeaveSettingsPage.vue"),
 	"hrSettings.hrTimeSettings": () => import("@/add-os/modules/hr/views/time/TimeSettingsPage.vue"),
+	"hrSettings.hrCostCenters": () => import("@/add-os/modules/hr/views/timesheets/CostCentersPage.vue"),
 	"myHr.myProfile": () => import("@/add-os/modules/hr/views/core/MyHrPage.vue"),
 	"myHr.hrMyApprovals": () => import("@/add-os/modules/hr/views/approvals/MyApprovalsPage.vue"),
 	"myHr.hrMyLeave": () => import("@/add-os/modules/hr/views/leave/MyLeavePage.vue"),
 	"myHr.hrMyAttendance": () => import("@/add-os/modules/hr/views/time/MyAttendancePage.vue"),
+	"myHr.hrMyTimesheets": () => import("@/add-os/modules/hr/views/timesheets/MyTimesheetPage.vue"),
 	"myHr.hrMyCertificate": () => import("@/add-os/modules/hr/views/core/MyCertificatePage.vue")
 }
 

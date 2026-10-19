@@ -1666,7 +1666,11 @@
 			"hrTimeRequests": "Time entries and overtime",
 			"hrTimePeriods": "Monthly lock",
 			"hrTimeSettings": "Time settings",
-			"hrMyAttendance": "My attendance"
+			"hrMyAttendance": "My attendance",
+			"hrTimesheets": "Timesheets",
+			"hrTimeByCostCenter": "Time by cost center",
+			"hrCostCenters": "Cost centers",
+			"hrMyTimesheets": "My timesheet"
 		}
 	},
 	"resourceCrud": {

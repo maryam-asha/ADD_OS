@@ -18,6 +18,7 @@ import addOs from "./en.json"
 import hrApprovals from "./hr-approvals.json"
 import hrAttendance from "./hr-attendance.json"
 import hrLeave from "./hr-leave.json"
+import hrTimesheets from "./hr-timesheets.json"
 import hr from "./hr.json"
 
 const messages = {
@@ -26,7 +27,8 @@ const messages = {
 	...hr,
 	...hrApprovals,
 	...hrLeave,
-	...hrAttendance
+	...hrAttendance,
+	...hrTimesheets
 	// ...spread future ADD OS module bundles here (mirror ../ar/index.ts exactly)
 }
 

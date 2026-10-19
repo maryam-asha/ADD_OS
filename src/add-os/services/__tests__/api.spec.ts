@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { setCurrentLocale } from "@/add-os/lang/currentLocale"
 import { DEFAULT_LOCALE } from "@/add-os/lang/locales"
 import { DEFAULT_CURRENCY } from "@/add-os/utils/format/currency"
-import { del, get, patch, post, put } from "../api"
+import { del, downloadFile, get, patch, post, put } from "../api"
 
 vi.mock("@/add-os/config/env", () => ({
 	apiUrl: () => "http://api.test"
@@ -204,5 +204,51 @@ describe("default headers (lang/currency)", () => {
 				headers: expect.objectContaining({ currency: "USD", lang: DEFAULT_LOCALE })
 			})
 		)
+	})
+})
+
+describe("downloadFile", () => {
+	beforeEach(() => {
+		vi.stubGlobal("fetch", vi.fn())
+		URL.createObjectURL = vi.fn(() => "report-object-url")
+		URL.revokeObjectURL = vi.fn()
+	})
+
+	afterEach(() => {
+		vi.restoreAllMocks()
+	})
+
+	it("saves the body under the name the server gives, with the query and the language header", async () => {
+		const clicked: string[] = []
+		vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (this: HTMLAnchorElement) {
+			clicked.push(this.download)
+		})
+		vi.mocked(fetch).mockResolvedValue(
+			new Response("code,hours", { status: 200, headers: { "content-type": "text/csv", "content-disposition": "attachment; filename=time-2026.csv" } })
+		)
+		setCurrentLocale("en")
+
+		await downloadFile("/api/v1/hr/reports/time-by-cost-center", { from: "2026-10-01", format: "csv", cost_center_id: null }, "fallback.csv")
+
+		expect(fetch).toHaveBeenCalledWith(
+			"http://api.test/api/v1/hr/reports/time-by-cost-center?from=2026-10-01&format=csv",
+			expect.objectContaining({ method: "GET", credentials: "include", headers: expect.objectContaining({ lang: "en" }) })
+		)
+		expect(clicked).toEqual(["time-2026.csv"])
+		expect(URL.revokeObjectURL).toHaveBeenCalledWith("report-object-url")
+		setCurrentLocale(DEFAULT_LOCALE)
+	})
+
+	it("falls back to the given name and throws ApiError on a refusal", async () => {
+		const clicked: string[] = []
+		vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (this: HTMLAnchorElement) {
+			clicked.push(this.download)
+		})
+		vi.mocked(fetch).mockResolvedValueOnce(new Response("a,b", { status: 200 }))
+		await downloadFile("/r", undefined, "fallback.csv")
+		expect(clicked).toEqual(["fallback.csv"])
+
+		vi.mocked(fetch).mockResolvedValueOnce(new Response(JSON.stringify({ message: "The to field must be a date before or equal to 2027-10-02." }), { status: 422 }))
+		await expect(downloadFile("/r", undefined, "fallback.csv")).rejects.toMatchObject({ status: 422, data: { message: "The to field must be a date before or equal to 2027-10-02." } })
 	})
 })

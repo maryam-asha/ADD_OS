@@ -1,0 +1,125 @@
+{
+	"hrTimesheets": {
+		"hours": "{n} h",
+		"week": "Week",
+		"totalHours": "Total hours",
+		"hoursColumn": "Hours",
+		"costCenter": "Cost center",
+		"status": {
+			"draft": "Draft",
+			"submitted": "Awaiting approval",
+			"approved": "Approved",
+			"rejected": "Rejected"
+		},
+		"weekPicker": {
+			"previous": "Previous week",
+			"next": "Next week",
+			"range": "{from} – {to}",
+			"thisWeek": "This week"
+		},
+		"detail": {
+			"title": "Timesheet",
+			"submittedAt": "Submitted",
+			"entries": "Hours logged",
+			"noEntries": "No hours logged this week.",
+			"decidedWhere": "Approving or rejecting this timesheet happens in the approval requests."
+		},
+		"reconciliation": {
+			"title": "Compared with attendance",
+			"logged": "Logged",
+			"attended": "Attended",
+			"difference": "Difference",
+			"differenceHint": "Logged hours less the hours attendance recorded"
+		},
+		"list": {
+			"tab": "Timesheets",
+			"description": "Every timesheet, newest week first. Open one to read its hours and how they compare with attendance; it is decided in the approval requests.",
+			"empty": "No timesheets match."
+		},
+		"compliance": {
+			"tab": "Not handed in",
+			"title": "Not handed in",
+			"subtitle": "Employed during the week with no timesheet submitted or approved for it",
+			"missing": "{n} employee | {n} employees",
+			"empty": "Everyone has handed in this week.",
+			"notStarted": "Not started"
+		},
+		"report": {
+			"description": "Approved hours by cost center over a range of a year at most, each employee's hours split by their cost allocation. The download is the same report as a CSV file.",
+			"download": "Download CSV",
+			"downloadError": "The report could not be downloaded.",
+			"rangeTooLong": "Choose a range of a year at most.",
+			"totalHours": "Approved hours",
+			"centers": "Cost centers",
+			"employees": "Employees",
+			"byCenter": "By cost center",
+			"byEmployee": "By employee",
+			"byEmployeeHint": "Each employee's approved hours on each cost center",
+			"empty": "No approved hours in this range."
+		},
+		"centers": {
+			"name": "Name",
+			"description": "What staff time is charged to — a project, a grant, a department. Employees log hours against the active ones, and each employee's cost split points at them. One with hours or splits charged to it cannot be deleted; deactivate it instead.",
+			"codeRule": "Letters, digits, dashes and underscores, 32 at most.",
+			"add": "Add cost center",
+			"edit": "Edit cost center",
+			"created": "Cost center added.",
+			"updated": "Cost center updated.",
+			"deleted": "Cost center deleted.",
+			"deleteWarning": "Delete this cost center? One with hours or splits charged to it cannot be deleted."
+		},
+		"allocation": {
+			"title": "Cost split",
+			"subtitle": "Which cost centers this employee's cost is charged to, and from when",
+			"change": "Change split",
+			"hint": "The new split starts on the date chosen and the current one ends the day before. Each cost center once; together they make 100%.",
+			"effectiveFrom": "Starts on",
+			"percent": "Share",
+			"addLine": "Add cost center",
+			"total": "Total {n}%",
+			"saved": "Cost split updated.",
+			"empty": "No cost split set.",
+			"from": "From",
+			"to": "To",
+			"current": "Current",
+			"planned": "Planned"
+		},
+		"profile": {
+			"tab": "Cost and timesheets"
+		},
+		"mine": {
+			"description": "Your hours each week by cost center. Save as you go, then submit the week for approval; you can recall it while it waits.",
+			"hours": "Hours",
+			"hoursHint": "Hours by day, in steps of {step}, at most 24 a day",
+			"notePlaceholder": "What the hours were for (optional)",
+			"empty": "No hours this week.",
+			"dayTotal": "Day total",
+			"addLine": "Add cost center",
+			"unsaved": "Unsaved changes",
+			"noCenters": "There are no active cost centers to log hours against yet.",
+			"inactiveCenter": "Inactive cost center",
+			"reconciliationSaved": "As last saved",
+			"weeks": "My weeks",
+			"saved": "Timesheet saved.",
+			"submit": "Submit",
+			"submitTitle": "Submit the week",
+			"submitConfirm": "Submit {hours} for approval? It cannot change while it waits, unless you recall it.",
+			"submitted": "Timesheet submitted for approval.",
+			"recall": "Recall",
+			"recallTitle": "Recall the week",
+			"recallConfirm": "Take this timesheet back to draft? Its approval request is withdrawn.",
+			"recalled": "The timesheet is back in draft.",
+			"rejected": "This week was rejected. Change it and submit it again.",
+			"waiting": "This week is awaiting approval. Recall it to change it.",
+			"approved": "This week is approved.",
+			"leaveTitle": "Unsaved hours",
+			"leaveConfirm": "This week has hours that are not saved. Leave it and lose them?",
+			"discard": "Leave without saving",
+			"problems": {
+				"increment": "Hours are entered in steps of {step}.",
+				"dayOver24": "A day cannot have more than 24 hours.",
+				"noCenter": "Choose a cost center for every line with hours."
+			}
+		}
+	}
+}

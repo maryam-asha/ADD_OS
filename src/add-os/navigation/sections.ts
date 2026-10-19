@@ -329,7 +329,9 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "hrAttendance", path: "attendance", permission: "hr.attendance.view" },
 			{ key: "hrRoster", path: "roster", permission: "hr.attendance.view" },
 			{ key: "hrTimeRequests", path: "time-requests", permission: "hr.attendance.view" },
-			{ key: "hrTimePeriods", path: "time-periods", permission: "hr.attendance.view" }
+			{ key: "hrTimePeriods", path: "time-periods", permission: "hr.attendance.view" },
+			{ key: "hrTimesheets", path: "timesheets", permission: "hr.timesheets.view" },
+			{ key: "hrTimeByCostCenter", path: "time-by-cost-center", permission: "hr.timesheets.view" }
 		]
 	},
 	{
@@ -345,7 +347,8 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "hrChecklistTemplates", path: "checklist-templates", permission: "hr.settings.manage" },
 			{ key: "hrApprovalFlows", path: "approval-flows", permission: "hr.approvals.manage" },
 			{ key: "hrLeaveSettings", path: "leave", permission: "hr.leave.view" },
-			{ key: "hrTimeSettings", path: "time", permission: "hr.attendance.view" }
+			{ key: "hrTimeSettings", path: "time", permission: "hr.attendance.view" },
+			{ key: "hrCostCenters", path: "cost-centers", permission: "hr.timesheets.view" }
 		]
 	},
 	{
@@ -362,6 +365,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "hrMyApprovals", path: "approvals" },
 			{ key: "hrMyLeave", path: "leave" },
 			{ key: "hrMyAttendance", path: "attendance" },
+			{ key: "hrMyTimesheets", path: "timesheets" },
 			{ key: "hrMyCertificate", path: "certificates/:kind", hidden: true }
 		]
 	},

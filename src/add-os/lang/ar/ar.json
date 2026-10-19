@@ -1670,7 +1670,11 @@
 			"hrTimeRequests": "القيود والعمل الإضافي",
 			"hrTimePeriods": "قفل الشهر",
 			"hrTimeSettings": "إعدادات الدوام",
-			"hrMyAttendance": "حضوري"
+			"hrMyAttendance": "حضوري",
+			"hrTimesheets": "التايم شيت",
+			"hrTimeByCostCenter": "الوقت حسب مركز التكلفة",
+			"hrCostCenters": "مراكز التكلفة",
+			"hrMyTimesheets": "التايم شيت الخاص بي"
 		}
 	},
 	"resourceCrud": {

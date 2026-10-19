@@ -243,4 +243,52 @@ export async function uploadFile<T>(
 	}
 }
 
+/** The file name a `Content-Disposition` header gives, plain or RFC 5987 encoded. */
+function dispositionFileName(header: string | null): string | null {
+	if (!header) return null
+	const encoded = /filename\*=(?:UTF-8'')?([^;]+)/i.exec(header)
+	if (encoded) {
+		try {
+			return decodeURIComponent(encoded[1].trim().replace(/^"|"$/g, ""))
+		} catch {
+			/* malformed — fall through to the plain name */
+		}
+	}
+	const plain = /filename="?([^";]+)"?/i.exec(header)
+	return plain ? plain[1].trim() : null
+}
+
+/**
+ * A GET that answers a file (a CSV export, a report) saved by the browser
+ * under the name the server gives it, or `fallbackName` when it gives none.
+ * It carries the same session, `lang` and `currency` as every other
+ * request, so a server-side export is in the reader's language; a refusal
+ * throws ApiError like any request.
+ */
+export async function downloadFile(path: string, query: Record<string, unknown> | undefined, fallbackName: string): Promise<void> {
+	const headers = buildDefaultHeaders()
+	headers.Accept = "text/csv, application/octet-stream, application/json"
+	delete headers["Content-Type"]
+
+	const res = await fetch(buildUrl(path, query), { method: "GET", headers, credentials: "include" })
+	if (!res.ok) {
+		const text = await res.text()
+		if (res.status === 401) {
+			useAuthStore().setLogout()
+			redirectToLoginIfProtected()
+		}
+		throw new ApiError(res.status, text || res.statusText)
+	}
+
+	const blob = await res.blob()
+	const url = URL.createObjectURL(blob)
+	const link = document.createElement("a")
+	link.href = url
+	link.download = dispositionFileName(res.headers.get("content-disposition")) ?? fallbackName
+	document.body.appendChild(link)
+	link.click()
+	link.remove()
+	URL.revokeObjectURL(url)
+}
+
 export { ApiError }

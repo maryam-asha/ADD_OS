@@ -341,3 +341,15 @@ export function canManageAttendanceCards(): boolean {
 export function canManageRoster(): boolean {
 	return can("hr.roster.manage")
 }
+
+// ── HR timesheets and cost ──────────────────────────────────────────────────
+
+/** Timesheets, compliance, the time-by-cost-center report, cost centers and an employee's cost split — and the cost tab on a file. */
+export function canViewTimesheets(): boolean {
+	return can("hr.timesheets.view")
+}
+
+/** Setting an employee's cost split. Cost centers themselves are settings (canManageHrSettings). */
+export function canManageTimesheets(): boolean {
+	return can("hr.timesheets.manage")
+}
