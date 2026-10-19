@@ -3,7 +3,7 @@
 	<div class="flex flex-col gap-5">
 		<HrPageHeader :title="t(titleKey || 'nav.pages.employees')" :description="t('hr.employees.description')">
 			<template #actions>
-				<n-button v-if="mayHire" type="primary" @click="hireVisible = true">
+				<n-button v-if="mayHire" type="primary" @click="openHire(null)">
 					<template #icon><Icon name="carbon:user-follow" :size="16" /></template>
 					{{ t("hr.employees.hire") }}
 				</n-button>
@@ -56,13 +56,13 @@
 			</div>
 		</n-card>
 
-		<HireEmployeeModal v-if="mayHire" v-model:show="hireVisible" :units @hired="onHired" />
+		<HireEmployeeModal v-if="mayHire" v-model:show="hireVisible" :units :account="hireAccount" @hired="onHired" />
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
-import type { EmployeeStatus, EmployeeSummary, OrgUnit } from "@/add-os/modules/hr/types/hr"
+import type { AccountMatch, EmployeeStatus, EmployeeSummary, OrgUnit } from "@/add-os/modules/hr/types/hr"
 import { NAlert, NButton, NCard, NDataTable, NInput, NPagination, NSelect } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
@@ -87,6 +87,24 @@ const { t } = useI18n()
 const router = useRouter()
 const mayHire = canHireEmployees()
 const hireVisible = ref(false)
+const hireAccount = ref<AccountMatch | null>(null)
+
+function openHire(account: AccountMatch | null) {
+	hireAccount.value = account
+	hireVisible.value = true
+}
+
+/**
+ * The Users page's "Hire" arrives with the account in the history state, not
+ * the URL (no phone or email in an address); taken once, so a reload or a
+ * back button does not reopen the form.
+ */
+function takeHireRequest() {
+	const account = (window.history.state as { hireAccount?: AccountMatch } | null)?.hireAccount
+	if (!account || !mayHire) return
+	window.history.replaceState({ ...window.history.state, hireAccount: undefined }, "")
+	openHire(account)
+}
 
 // ── Data ────────────────────────────────────────────────────────────────────
 const rows = ref<EmployeeSummary[]>([])
@@ -129,7 +147,10 @@ async function loadUnits() {
 	}
 }
 
-onMounted(loadUnits)
+onMounted(() => {
+	void loadUnits()
+	takeHireRequest()
+})
 
 // ── Options ─────────────────────────────────────────────────────────────────
 const statusOptions = computed<SelectOption[]>(() => EMPLOYEE_STATUSES.map(s => ({ label: t(`hr.status.${s}`), value: s })))

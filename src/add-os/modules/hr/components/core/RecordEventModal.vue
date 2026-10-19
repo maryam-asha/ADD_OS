@@ -256,7 +256,7 @@ const positionOptions = computed<SelectOption[]>(() =>
 		.map(p => ({ label: `${translated(p.title)} (${p.occupied}/${p.headcount})`, value: p.id, disabled: p.occupied >= p.headcount && p.id !== form.value.positionId }))
 )
 const gradeOptions = computed<SelectOption[]>(() => grades.value.map(g => ({ label: `${g.code} · ${translated(g.name)}`, value: g.id })))
-const locationOptions = computed<SelectOption[]>(() => locations.value.filter(l => l.is_active || l.id === form.value.workLocationId).map(l => ({ label: translated(l.name), value: l.id })))
+const locationOptions = computed<SelectOption[]>(() => locations.value.map(l => ({ label: translated(l.name), value: l.id })))
 
 watch(show, visible => {
 	if (!visible) return

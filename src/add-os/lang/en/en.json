@@ -302,6 +302,9 @@
 		"empty": "No users found.",
 		"stats": {
 			"total": "Total users"
+		},
+		"hire": {
+			"button": "Hire"
 		}
 	},
 	"branches": {

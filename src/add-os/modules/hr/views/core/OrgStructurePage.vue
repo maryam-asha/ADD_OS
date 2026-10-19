@@ -93,27 +93,6 @@
 					}"
 				/>
 			</n-tab-pane>
-
-			<n-tab-pane name="locations" :tab="t('hr.org.tabs.locations')" display-directive="show:lazy">
-				<HrResourcePanel
-					:api="locationsApi"
-					:columns="locationColumns"
-					:fields="locationFields"
-					:empty-form="emptyWorkLocationForm"
-					:to-form="locationToForm"
-					:to-payload="locationToPayload"
-					:can-manage="mayManage"
-					:description="t('hr.locations.description')"
-					:labels="{
-						add: t('hr.locations.add'),
-						createTitle: t('hr.locations.add'),
-						editTitle: t('hr.locations.edit'),
-						created: t('hr.locations.created'),
-						updated: t('hr.locations.updated'),
-						deleted: t('hr.locations.deleted')
-					}"
-				/>
-			</n-tab-pane>
 		</n-tabs>
 
 		<HrFormModal v-model:show="formVisible" :title="editingId === null ? t('hr.org.addUnit') : t('hr.org.editUnit')" size="md" icon="carbon:tree-view">
@@ -159,8 +138,8 @@
 
 <script setup lang="ts">
 import type { DataTableColumns, FormInst, FormRules, SelectOption, TreeOption } from "naive-ui"
-import type { JobGradeForm, WorkLocationForm } from "@/add-os/modules/hr/config/core.config"
-import type { JobGrade, JobGradePayload, OrgUnit, Position, WorkLocation, WorkLocationPayload } from "@/add-os/modules/hr/types/hr"
+import type { JobGradeForm } from "@/add-os/modules/hr/config/core.config"
+import type { JobGrade, JobGradePayload, OrgUnit, Position } from "@/add-os/modules/hr/types/hr"
 import { NAlert, NButton, NDataTable, NForm, NFormItem, NInput, NSelect, NSpin, NSwitch, NTabPane, NTabs, NTree, useDialog, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
@@ -171,14 +150,7 @@ import PositionFormModal from "@/add-os/modules/hr/components/core/PositionFormM
 import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import HrPanel from "@/add-os/modules/hr/components/ui/HrPanel.vue"
-import {
-	buildJobGradeColumns,
-	buildJobGradeFields,
-	buildWorkLocationColumns,
-	buildWorkLocationFields,
-	emptyJobGradeForm,
-	emptyWorkLocationForm
-} from "@/add-os/modules/hr/config/core.config"
+import { buildJobGradeColumns, buildJobGradeFields, emptyJobGradeForm } from "@/add-os/modules/hr/config/core.config"
 import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
 import { nullable, toBilingual, toTranslatable } from "@/add-os/modules/hr/utils/forms"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
@@ -186,18 +158,14 @@ import { ApiError } from "@/add-os/services/api"
 import {
 	createJobGrade,
 	createOrgUnit,
-	createWorkLocation,
 	deleteJobGrade,
 	deleteOrgUnit,
 	deletePosition,
-	deleteWorkLocation,
 	listJobGrades,
 	listPositions,
-	listWorkLocations,
 	orgTree,
 	updateJobGrade,
-	updateOrgUnit,
-	updateWorkLocation
+	updateOrgUnit
 } from "@/add-os/services/hr/core"
 import { formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
@@ -208,7 +176,7 @@ const { t } = useI18n()
 const message = useMessage()
 const dialog = useDialog()
 const mayManage = canManageOrgStructure()
-const tab = ref<"units" | "grades" | "locations">("units")
+const tab = ref<"units" | "grades">("units")
 
 // ── Tree ────────────────────────────────────────────────────────────────────
 const tree = ref<OrgUnit[]>([])
@@ -446,7 +414,7 @@ function confirmDeleteUnit(unit: OrgUnit) {
 	})
 }
 
-// ── Grades and work locations ───────────────────────────────────────────────
+// ── Grades (work locations are ADD's branches, managed under Branches) ──────
 const gradesApi = {
 	list: listJobGrades,
 	create: createJobGrade,
@@ -457,15 +425,4 @@ const gradeColumns = computed(() => buildJobGradeColumns(t))
 const gradeFields = computed(() => buildJobGradeFields(t))
 const gradeToForm = (row: JobGrade): JobGradeForm => ({ name: toBilingual(row.name), code: row.code, rank: row.rank })
 const gradeToPayload = (f: JobGradeForm): JobGradePayload => ({ name: toTranslatable(f.name), code: f.code.trim(), rank: f.rank ?? 0 })
-
-const locationsApi = {
-	list: listWorkLocations,
-	create: createWorkLocation,
-	update: updateWorkLocation,
-	remove: deleteWorkLocation
-}
-const locationColumns = computed(() => buildWorkLocationColumns(t))
-const locationFields = computed(() => buildWorkLocationFields(t))
-const locationToForm = (row: WorkLocation): WorkLocationForm => ({ name: toBilingual(row.name), address: row.address ?? "", is_active: row.is_active })
-const locationToPayload = (f: WorkLocationForm): WorkLocationPayload => ({ name: toTranslatable(f.name), address: nullable(f.address), is_active: f.is_active })
 </script>

@@ -123,6 +123,7 @@
 <script setup lang="ts">
 import type { DataTableColumns, FormInst, FormRules, SelectOption } from "naive-ui"
 import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vue"
+import type { AccountMatch } from "@/add-os/modules/hr/types/hr"
 import type { RoleRecord } from "@/add-os/modules/system/types/role"
 import type {
 	CreateUserPayload,
@@ -135,10 +136,13 @@ import type {
 import { NAlert, NButton, NCard, NDataTable, NForm, NFormItem, NInput, NModal, NSelect, NTag, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import { useRouter } from "vue-router"
 import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
+import { canHireEmployees } from "@/add-os/config/permissions"
 import { displayRoleName } from "@/add-os/modules/system/config/roles.config"
 import { isValidPassword, isValidSyrianPhone } from "@/add-os/modules/system/utils/validation"
 import { ApiError } from "@/add-os/services/api"
+import { searchAccounts } from "@/add-os/services/hr/core"
 import { listRoleRecords } from "@/add-os/services/roles"
 import { assignRole, createUser, listUsers, updateUserProfile, updateUserStatus } from "@/add-os/services/users"
 import { STATUS_ICONS } from "@/add-os/theme/tokens"
@@ -248,10 +252,30 @@ function renderStatusTag(row: User) {
 	)
 }
 
+const router = useRouter()
+const mayHire = canHireEmployees()
+
+/**
+ * Most accounts staff create here are employees: "Hire" opens HR's hire form
+ * on this account. The account travels in the history state, never in the
+ * URL; HR's lookup says whether it is already an employee.
+ */
+async function hire(row: User) {
+	let account: AccountMatch = { id: row.id, name: row.name, phone: row.phone, email: row.email, employee_id: null }
+	try {
+		account = (await searchAccounts(row.phone)).find(match => match.id === row.id) ?? account
+	} catch (error) {
+		if (!(error instanceof ApiError)) throw error
+	}
+	const { id, name, phone, email, employee_id } = account
+	void router.push({ name: "hr.employees", state: { hireAccount: { id, name, phone, email, employee_id } } })
+}
+
 function renderActions(row: User) {
 	const editLabel = t("users.edit.button")
 	const statusLabel = t("users.changeStatus.button")
 	const roleLabel = t("users.changeRole.button")
+	const hireLabel = t("users.hire.button")
 
 	return h("div", { class: "inline-flex items-center justify-center gap-2" }, [
 		h(
@@ -268,7 +292,14 @@ function renderActions(row: User) {
 			NButton,
 			{ text: true, "aria-label": roleLabel, title: roleLabel, onClick: () => openRoleModal(row) },
 			{ icon: () => h(Icon, { name: "carbon:user-role", size: 18 }) }
-		)
+		),
+		mayHire
+			? h(
+					NButton,
+					{ text: true, type: "success", "aria-label": hireLabel, title: hireLabel, onClick: () => void hire(row) },
+					{ icon: () => h(Icon, { name: "carbon:user-follow", size: 18 }) }
+				)
+			: null
 	])
 }
 
@@ -278,7 +309,7 @@ const columns = computed<DataTableColumns<User>>(() => [
 	{ title: t("users.columns.email"), key: "email", minWidth: 180, align: "center" },
 	{ title: t("users.columns.role"), key: "roles", minWidth: 130, align: "center", render: renderRoleTag },
 	{ title: t("users.columns.status"), key: "status", minWidth: 120, align: "center", render: renderStatusTag },
-	{ title: t("users.columns.actions"), key: "actions", width: 120, align: "center", render: renderActions }
+	{ title: t("users.columns.actions"), key: "actions", width: mayHire ? 150 : 120, align: "center", render: renderActions }
 ])
 
 async function loadUsers() {

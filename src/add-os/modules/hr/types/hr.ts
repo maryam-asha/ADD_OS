@@ -258,11 +258,38 @@ export interface TeamMember {
 }
 
 /** `POST hr/employees`. ADD creates or links the dashboard account, so it needs a work email and an E.164 phone. */
-export interface HireEmployeePayload {
-	name: Translatable
-	phone: string
-	work_email: string
+/** `GET hr/accounts?q=`: an account the hire form may pick. */
+export interface AccountMatch {
+	id: number
+	name: string | null
+	phone: string | null
+	email: string | null
+	/** Set when this account is already an employee. */
+	employee_id: number | null
+}
+
+/** Personal details and the sensitive fields: kept on the person's account, all optional. */
+export interface PersonDetailsPayload {
+	gender?: Gender | null
+	date_of_birth?: string | null
+	nationality?: string | null
+	marital_status?: MaritalStatus | null
 	personal_email?: string | null
+	address?: string | null
+	national_id?: string | null
+	bank_account?: string | null
+}
+
+/**
+ * `POST hr/employees`. Either `user_id` (an existing account, whose name,
+ * phone and email it keeps — sending them is refused) or `name`, `phone`
+ * and `work_email` for a new one.
+ */
+export interface HireEmployeePayload extends PersonDetailsPayload {
+	user_id?: number
+	name?: Translatable
+	phone?: string
+	work_email?: string
 	hired_on: string
 	contract: { type: ContractType; ends_on?: string | null; probation_ends_on?: string | null }
 	assignment: {
@@ -284,11 +311,10 @@ export interface OrgUnitPayload {
 	is_active?: boolean
 }
 
+/** One of ADD's branches (`GET hr/work-locations`), listed for picking only. */
 export interface WorkLocation {
 	id: number
 	name: Translatable
-	address: string | null
-	is_active: boolean
 }
 
 /** `POST|PATCH hr/positions`. */
@@ -308,33 +334,17 @@ export interface JobGradePayload {
 	rank: number
 }
 
-/** `POST|PATCH hr/work-locations`. */
-export interface WorkLocationPayload {
-	name: Translatable
-	address: string | null
-	is_active: boolean
-}
-
 /** `GET hr/employees/{id}/sensitive`: decrypted, audited on every read, never kept. */
 export interface EmployeeSensitive {
 	national_id: string | null
 	bank_account: string | null
 }
 
-/** `PATCH hr/employees/{id}`: every field optional; `name.ar` is required when `name` is sent. */
-export interface UpdateEmployeePayload {
-	name?: Translatable
-	gender?: Gender | null
-	date_of_birth?: string | null
-	nationality?: string | null
-	marital_status?: MaritalStatus | null
-	phone?: string | null
-	personal_email?: string | null
-	work_email?: string | null
-	address?: string | null
-	national_id?: string | null
-	bank_account?: string | null
-}
+/**
+ * `PATCH hr/employees/{id}`: the personal details and sensitive fields only.
+ * The name, phone and work email are the account's and are refused here.
+ */
+export type UpdateEmployeePayload = PersonDetailsPayload
 
 export interface ContactPayload {
 	name: string

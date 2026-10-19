@@ -6,6 +6,12 @@
  * employee record. Update endpoints answer `{message}` (translated by the
  * server, shown as is); creates answer the resource; deletes answer 204.
  *
+ * The person (name, phone, email, personal details, the sensitive fields) is
+ * kept on their ADD account; HR keeps the employment. So a hire either
+ * names an existing account (`user_id`, found with `searchAccounts`) or
+ * gives what a new one is made from, and an edit never changes the name,
+ * phone or work email — those belong to the account.
+ *
  * Routes, rules and shapes read from ADD Core
  * `packages/add/hr/routes/core/{admin,self}.php`, `src/Core/Http/Requests` and
  * `src/Core/Http/Resources`.
@@ -13,6 +19,7 @@
 
 import type { Paginated, RawPaginatedResponse } from "../pagination"
 import type {
+	AccountMatch,
 	Assignment,
 	ChecklistTask,
 	ChecklistTemplate,
@@ -46,8 +53,7 @@ import type {
 	TeamMember,
 	UpdateEmployeePayload,
 	UploadDocumentPayload,
-	WorkLocation,
-	WorkLocationPayload
+	WorkLocation
 } from "@/add-os/modules/hr/types/hr"
 import { del, get, patch, post, put, uploadFile } from "../api"
 import { rowsOf, toPaginated } from "../pagination"
@@ -66,6 +72,7 @@ export interface EmployeeFilters {
 	q?: string
 	status?: EmployeeStatus | null
 	org_unit_id?: number | null
+	user_id?: number | null
 }
 
 export async function listEmployees(filters: EmployeeFilters = {}): Promise<Paginated<EmployeeSummary>> {
@@ -73,7 +80,17 @@ export async function listEmployees(filters: EmployeeFilters = {}): Promise<Pagi
 	if (filters.q) query.q = filters.q
 	if (filters.status) query.status = filters.status
 	if (filters.org_unit_id) query.org_unit_id = filters.org_unit_id
+	if (filters.user_id) query.user_id = filters.user_id
 	return toPaginated(await get<RawPaginatedResponse<EmployeeSummary>>(`${BASE}/employees`, query))
+}
+
+/**
+ * The hire form's first step: up to ten accounts whose name, phone or email
+ * contains `q` (three characters at least). `employee_id` is set when the
+ * account is already an employee.
+ */
+export async function searchAccounts(q: string): Promise<AccountMatch[]> {
+	return rowsOf<AccountMatch>((await get<{ data: AccountMatch[] }>(`${BASE}/accounts`, { q })).data)
 }
 
 export async function getEmployee(id: number): Promise<Employee> {
@@ -264,21 +281,9 @@ export async function deleteJobGrade(id: number): Promise<UpdateResult> {
 	return {}
 }
 
+/** ADD's branches, `{id, name}` only: managed under Branches, never here. */
 export async function listWorkLocations(): Promise<WorkLocation[]> {
 	return rowsOf<WorkLocation>((await get<{ data: WorkLocation[] }>(`${BASE}/work-locations`)).data)
-}
-
-export async function createWorkLocation(payload: WorkLocationPayload): Promise<WorkLocation> {
-	return (await post<{ data: WorkLocation }>(`${BASE}/work-locations`, payload)).data
-}
-
-export async function updateWorkLocation(id: number, payload: Partial<WorkLocationPayload>): Promise<UpdateResult> {
-	return patch<UpdateResult>(`${BASE}/work-locations/${id}`, payload)
-}
-
-export async function deleteWorkLocation(id: number): Promise<UpdateResult> {
-	await del<void>(`${BASE}/work-locations/${id}`)
-	return {}
 }
 
 // ── My HR (hr/me) ────────────────────────────────────────────────────────────

@@ -1,7 +1,7 @@
 import type { DataTableColumns } from "naive-ui"
 import type { ComposerTranslation } from "vue-i18n"
 import type { Bilingual, FieldDescriptor } from "@/add-os/components/resource/field-types"
-import type { ContractType, DocumentType, JobGrade, WorkLocation } from "@/add-os/modules/hr/types/hr"
+import type { ContractType, DocumentType, JobGrade } from "@/add-os/modules/hr/types/hr"
 import { h } from "vue"
 import ActiveTag from "@/add-os/modules/hr/components/ActiveTag.vue"
 import { CONTRACT_TYPES } from "@/add-os/modules/hr/types/hr"
@@ -47,34 +47,6 @@ export function buildJobGradeFields(t: ComposerTranslation): FieldDescriptor<Job
 		{ key: "name", labelKey: "hr.grades.name", type: "bilingual-text", rule: arabicRequiredRule(t, "hr.grades.name") },
 		{ key: "code", labelKey: "hr.org.code", type: "text", required: true },
 		{ key: "rank", labelKey: "hr.grades.rank", type: "number", required: true, integer: true, min: 0, hint: () => t("hr.grades.rankHint") }
-	]
-}
-
-// ── Work locations ──────────────────────────────────────────────────────────
-
-export interface WorkLocationForm extends Record<string, unknown> {
-	name: Bilingual
-	address: string
-	is_active: boolean
-}
-
-export function emptyWorkLocationForm(): WorkLocationForm {
-	return { name: { ar: "", en: "" }, address: "", is_active: true }
-}
-
-export function buildWorkLocationColumns(t: ComposerTranslation): DataTableColumns<WorkLocation> {
-	return [
-		{ title: t("hr.locations.name"), key: "name", minWidth: 180, render: row => translated(row.name) },
-		{ title: t("hr.locations.address"), key: "address", minWidth: 220, render: row => row.address || EMPTY },
-		{ title: t("hr.common.status"), key: "is_active", minWidth: 100, render: row => activeTag(row.is_active) }
-	]
-}
-
-export function buildWorkLocationFields(t: ComposerTranslation): FieldDescriptor<WorkLocationForm>[] {
-	return [
-		{ key: "name", labelKey: "hr.locations.name", type: "bilingual-text", rule: arabicRequiredRule(t, "hr.locations.name") },
-		{ key: "address", labelKey: "hr.locations.address", type: "text" },
-		{ key: "is_active", labelKey: "hr.common.active", type: "switch" }
 	]
 }
 

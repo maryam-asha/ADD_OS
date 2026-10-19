@@ -22,17 +22,13 @@ vi.mock("@/add-os/services/hr/core", () => ({
 	orgTree: orgTreeMock,
 	listPositions: listPositionsMock,
 	listJobGrades: vi.fn().mockResolvedValue([]),
-	listWorkLocations: vi.fn().mockResolvedValue([]),
 	deleteOrgUnit: deleteOrgUnitMock,
 	deletePosition: vi.fn(),
 	createOrgUnit: vi.fn(),
 	updateOrgUnit: vi.fn(),
 	createJobGrade: vi.fn(),
 	updateJobGrade: vi.fn(),
-	deleteJobGrade: vi.fn(),
-	createWorkLocation: vi.fn(),
-	updateWorkLocation: vi.fn(),
-	deleteWorkLocation: vi.fn()
+	deleteJobGrade: vi.fn()
 }))
 vi.mock("@/add-os/modules/hr/components/core/PositionFormModal.vue", () => ({ default: { name: "PositionFormModal", render: () => null } }))
 vi.mock("naive-ui", async () => {

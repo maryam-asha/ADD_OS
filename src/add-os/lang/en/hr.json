@@ -94,7 +94,19 @@
 			"contractEndsOn": "Contract end date",
 			"probationEndsOn": "Probation ends on",
 			"submit": "Hire",
-			"success": "The employee was hired and their account linked."
+			"success": "The employee was hired and their account linked.",
+			"name": "Name",
+			"existingAccount": "Existing account",
+			"newPerson": "New person",
+			"searchAccount": "Find the account",
+			"searchAccountHint": "By name, phone or email — at least three characters",
+			"noAccounts": "No matching account",
+			"accountRequired": "Choose the employee's account",
+			"alreadyEmployee": "This account is already an employee.",
+			"openProfile": "Open their file",
+			"identityFromAccount": "The name, phone and email come from the account and change on the Users page.",
+			"details": "Personal details (optional)",
+			"next": "Next"
 		},
 		"profile": {
 			"notFound": "This employee was not found.",
@@ -178,8 +190,7 @@
 			"saved": "The unit was saved.",
 			"tabs": {
 				"units": "Units",
-				"grades": "Job grades",
-				"locations": "Work locations"
+				"grades": "Job grades"
 			},
 			"emptyManage": "No unit yet. Add the first one to start the structure.",
 			"noPositionsManage": "No positions in this unit. Add one to hire into it.",
@@ -342,7 +353,8 @@
 			"address": "Address",
 			"sensitiveHint": "Stored encrypted. Leave blank to keep what is on file.",
 			"keepCurrent": "On file; leave blank to keep",
-			"saved": "Employee updated."
+			"saved": "Employee updated.",
+			"identityHint": "The name, phone and work email come from the user account; change them on the Users page, not here."
 		},
 		"sensitive": {
 			"title": "National ID and bank account",
@@ -391,16 +403,6 @@
 			"created": "Grade added.",
 			"updated": "Grade updated.",
 			"deleted": "Grade deleted."
-		},
-		"locations": {
-			"description": "Where employees work. An assignment can name one.",
-			"add": "Add work location",
-			"edit": "Edit work location",
-			"name": "Name",
-			"address": "Address",
-			"created": "Work location added.",
-			"updated": "Work location updated.",
-			"deleted": "Work location deleted."
 		},
 		"people": {
 			"contactsTitle": "Emergency contacts",

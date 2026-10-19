@@ -26,6 +26,11 @@ vi.mock("@/add-os/services/users", () => ({
 	assignRole: vi.fn()
 }))
 
+// The "Hire" action reads an HR permission from the auth store; these specs
+// are about roles, so HR is simply not granted.
+vi.mock("@/add-os/config/permissions", () => ({ canHireEmployees: () => false }))
+vi.mock("vue-router", async importOriginal => ({ ...(await importOriginal<typeof import("vue-router")>()), useRouter: () => ({ push: vi.fn() }) }))
+
 // Same pitfall every other page spec in this codebase documents: the page
 // calls useMessage() directly, which needs a provider it has no reason to
 // mount.

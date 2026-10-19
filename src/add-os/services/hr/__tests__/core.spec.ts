@@ -33,8 +33,8 @@ describe("hr core service", () => {
 		it("patches the personal details and answers the server's message", async () => {
 			patchMock.mockResolvedValue({ message: "تم تحديث بيانات الموظف." })
 
-			await expect(hr.updateEmployee(7, { phone: "+963944000000" })).resolves.toEqual({ message: "تم تحديث بيانات الموظف." })
-			expect(patchMock).toHaveBeenCalledWith(`${BASE}/employees/7`, { phone: "+963944000000" })
+			await expect(hr.updateEmployee(7, { marital_status: "married" })).resolves.toEqual({ message: "تم تحديث بيانات الموظف." })
+			expect(patchMock).toHaveBeenCalledWith(`${BASE}/employees/7`, { marital_status: "married" })
 		})
 
 		it("reads the sensitive fields from data", async () => {
@@ -156,15 +156,14 @@ describe("hr core service", () => {
 		it.each([
 			["org unit", () => hr.deleteOrgUnit(5), `${BASE}/org-units/5`],
 			["position", () => hr.deletePosition(6), `${BASE}/positions/6`],
-			["job grade", () => hr.deleteJobGrade(2), `${BASE}/job-grades/2`],
-			["work location", () => hr.deleteWorkLocation(3), `${BASE}/work-locations/3`]
+			["job grade", () => hr.deleteJobGrade(2), `${BASE}/job-grades/2`]
 		])("deletes a %s", async (_name, call, path) => {
 			delMock.mockResolvedValue(undefined)
 			await call()
 			expect(delMock).toHaveBeenCalledWith(path)
 		})
 
-		it("creates and updates positions, grades and work locations", async () => {
+		it("creates and updates positions and grades", async () => {
 			postMock.mockResolvedValue({ data: { id: 1 } })
 			patchMock.mockResolvedValue({ message: "ok" })
 			const position = { title: { ar: "محاسب", en: null }, org_unit_id: 5, job_grade_id: null, code: null, headcount: 2, is_active: true }
@@ -172,12 +171,51 @@ describe("hr core service", () => {
 			await hr.createPosition(position)
 			await hr.updatePosition(6, { headcount: 3 })
 			await hr.createJobGrade({ name: { ar: "أولى", en: null }, code: "G1", rank: 1 })
-			await hr.updateWorkLocation(3, { is_active: false })
 
 			expect(postMock).toHaveBeenNthCalledWith(1, `${BASE}/positions`, position)
 			expect(patchMock).toHaveBeenNthCalledWith(1, `${BASE}/positions/6`, { headcount: 3 })
 			expect(postMock).toHaveBeenNthCalledWith(2, `${BASE}/job-grades`, { name: { ar: "أولى", en: null }, code: "G1", rank: 1 })
-			expect(patchMock).toHaveBeenNthCalledWith(2, `${BASE}/work-locations/3`, { is_active: false })
+		})
+
+		it("lists ADD's branches as the work locations, read only", async () => {
+			getMock.mockResolvedValue({ data: [{ id: 2, name: { ar: "حلب", en: "Aleppo" } }] })
+
+			expect(await hr.listWorkLocations()).toEqual([{ id: 2, name: { ar: "حلب", en: "Aleppo" } }])
+			expect(getMock).toHaveBeenCalledWith(`${BASE}/work-locations`)
+			expect("createWorkLocation" in hr).toBe(false)
+		})
+	})
+
+	describe("the person on the account", () => {
+		it("finds accounts for the hire form", async () => {
+			const match = { id: 7, name: "سارة", phone: "+963944000001", email: "sara@add.sy", employee_id: null }
+			getMock.mockResolvedValue({ data: [match] })
+
+			expect(await hr.searchAccounts("0944")).toEqual([match])
+			expect(getMock).toHaveBeenCalledWith(`${BASE}/accounts`, { q: "0944" })
+		})
+
+		it("hires an existing account by its id alone", async () => {
+			postMock.mockResolvedValue({ data: { id: 3 } })
+			const payload = {
+				user_id: 7,
+				date_of_birth: "1995-04-02",
+				hired_on: "2026-10-01",
+				contract: { type: "open_ended" as const },
+				assignment: { org_unit_id: 1, employment_type: "full_time" as const, work_mode: "on_site" as const }
+			}
+
+			await hr.hireEmployee(payload)
+
+			expect(postMock).toHaveBeenCalledWith(`${BASE}/employees`, payload)
+		})
+
+		it("filters employees by their account", async () => {
+			getMock.mockResolvedValue({ data: [], meta: { current_page: 1, last_page: 1, per_page: 25, total: 0 } })
+
+			await hr.listEmployees({ user_id: 7 })
+
+			expect(getMock).toHaveBeenCalledWith(`${BASE}/employees`, { page: 1, user_id: 7 })
 		})
 	})
 
