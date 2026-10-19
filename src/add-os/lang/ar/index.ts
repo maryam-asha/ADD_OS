@@ -13,6 +13,7 @@
 import base from "./ar.json"
 import hrApprovals from "./hr-approvals.json"
 import hrAttendance from "./hr-attendance.json"
+import hrBenefits from "./hr-benefits.json"
 import hrLeave from "./hr-leave.json"
 import hrPayroll from "./hr-payroll.json"
 import hrTimesheets from "./hr-timesheets.json"
@@ -25,7 +26,8 @@ const messages = {
 	...hrLeave,
 	...hrAttendance,
 	...hrTimesheets,
-	...hrPayroll
+	...hrPayroll,
+	...hrBenefits
 	// ...spread future ADD OS module bundles here
 }
 

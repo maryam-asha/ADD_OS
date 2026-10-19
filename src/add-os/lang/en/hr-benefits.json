@@ -1,0 +1,129 @@
+{
+	"hrBenefits": {
+		"benefit": "Benefit",
+		"amount": "Value",
+		"employerCost": "Employer cost",
+		"kindLabel": "Kind",
+		"frequencyLabel": "Granted",
+		"points": "{n} point | {n} points",
+		"quarter": "Q{q} {year}",
+		"kind": {
+			"cash_allowance": "Cash allowance",
+			"in_kind_credit": "Wallet points",
+			"entitlement": "Entitlement"
+		},
+		"kindHint": {
+			"cash_allowance": "Money paid with the salary, as a line on the payslip.",
+			"in_kind_credit": "Points added to the employee's own member wallet.",
+			"entitlement": "Recorded for its cost only — insurance cover, a membership."
+		},
+		"frequency": {
+			"monthly": "Monthly",
+			"quarterly": "Quarterly",
+			"yearly": "Yearly",
+			"one_time": "Once"
+		},
+		"target": {
+			"employee": "An employee",
+			"grade": "A grade",
+			"org_unit": "A unit"
+		},
+		"grantStatus": {
+			"pending": "Pending",
+			"fulfilled": "Delivered",
+			"failed": "Failed",
+			"cancelled": "Cancelled"
+		},
+		"profile": {
+			"tab": "Benefits"
+		},
+		"benefits": {
+			"description": "Every benefit: what it is, how often it is granted and what it is worth. Open one to give it to employees, grades and units.",
+			"add": "Add benefit",
+			"edit": "Edit benefit",
+			"empty": "No benefits yet.",
+			"notFound": "This benefit does not exist.",
+			"descriptionAr": "Description (Arabic)",
+			"descriptionEn": "Description (English)",
+			"fixedOnceCreated": "The code, kind, frequency, currency and pay component are fixed once the benefit exists.",
+			"grantMonth": "Granted in",
+			"yearlyIn": "Yearly, in {month}",
+			"points": "Points",
+			"payComponent": "Paid through the pay component",
+			"payComponentHint": "An earning worked out as \"Benefit allowance\" and on every payslip. Add one under pay components if none is offered.",
+			"walletPocket": "Wallet pocket",
+			"expiresAfter": "Expire after (days)",
+			"endOfPeriod": "At the end of the period",
+			"walletHint": "General points never expire. An employee with no member wallet cannot receive points; the grant fails and can be retried once they have one.",
+			"costCurrency": "Cost currency",
+			"costCurrencyNeeded": "Choose the currency of the cost.",
+			"eligibleAfter": "Eligible after",
+			"days": "days",
+			"daysOfService": "{n} day of service | {n} days of service",
+			"created": "Benefit added.",
+			"updated": "Benefit updated.",
+			"deleted": "Benefit deleted.",
+			"delete": "Delete benefit",
+			"deleteConfirm": "Delete {name}? A benefit already granted cannot be deleted; deactivate it instead."
+		},
+		"assignments": {
+			"title": "Assignments",
+			"subtitle": "Who the benefit is given to, and from when",
+			"add": "Assign",
+			"hint": "Where several assignments reach an employee, the most specific decides: their own, then their grade's, then their nearest unit's.",
+			"to": "Given to",
+			"amount": "Value for this assignment",
+			"amountHint": "Leave empty to give the benefit's own value.",
+			"asBenefit": "The benefit's value",
+			"excluded": "Take the benefit away from this employee",
+			"excludedHint": "Their own assignment decides for them, so they lose a benefit their grade or unit gives.",
+			"excludedShort": "Excluded",
+			"added": "Benefit assigned.",
+			"end": "End",
+			"endHint": "An assignment ends earlier, never later; add a new one to extend it.",
+			"ended": "Assignment ended.",
+			"delete": "Delete assignment",
+			"deleteConfirm": "Delete this assignment? One with grants under it cannot be deleted; end it instead.",
+			"deleted": "Assignment deleted.",
+			"empty": "Not given to anyone yet."
+		},
+		"grants": {
+			"title": "Grants",
+			"description": "Every benefit granted, newest first. A daily job grants each month's benefits; grant now to do it at once for a month.",
+			"empty": "No grants.",
+			"period": "Period",
+			"grantedOn": "Granted on",
+			"run": "Grant now",
+			"runHint": "Grants the month's benefits now rather than waiting for the daily job. Safe to repeat: an employee is granted a period once.",
+			"ran": "{month}: {granted} granted, {fulfilled} delivered, {failed} failed.",
+			"retry": "Try again",
+			"retried": "Grant delivered.",
+			"stillFailed": "The grant failed again.",
+			"cancel": "Cancel grant",
+			"cancelConfirm": "Cancel this grant? It has not been delivered.",
+			"cancelled": "Grant cancelled."
+		},
+		"held": {
+			"title": "Benefits held",
+			"subtitle": "On the date chosen, and where each comes from",
+			"source": "From",
+			"ownAssignment": "Their own assignment",
+			"latestGrants": "The latest 50",
+			"empty": "No benefits on this date."
+		},
+		"cost": {
+			"description": "Each employee's full cost for a month: the employer cost of their approved payroll and of their benefits, by currency.",
+			"payroll": "Payroll",
+			"benefits": "Benefits",
+			"total": "Total",
+			"totalIn": "Total in {currency}",
+			"split": "Payroll {payroll} · benefits {benefits}",
+			"empty": "No approved payroll or benefits in this month."
+		},
+		"mine": {
+			"description": "Your benefits today and what you have been granted. Wallet points land on your member wallet.",
+			"none": "You have no benefits at the moment.",
+			"grants": "What I have been granted"
+		}
+	}
+}

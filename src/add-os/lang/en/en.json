@@ -1680,7 +1680,12 @@
 			"hrPayComponents": "Pay components",
 			"hrRateTables": "Rate tables",
 			"hrMyPay": "My pay and loans",
-			"hrMyPayslip": "My payslip"
+			"hrMyPayslip": "My payslip",
+			"hrBenefits": "Benefits",
+			"hrBenefit": "Benefit",
+			"hrBenefitGrants": "Benefit grants",
+			"hrEmployeeCost": "Employee cost",
+			"hrMyBenefits": "My benefits"
 		}
 	},
 	"resourceCrud": {

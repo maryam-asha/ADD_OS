@@ -348,7 +348,11 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "hrPayrollRun", path: "payroll-runs/:id", hidden: true, permission: "hr.payroll.view" },
 			{ key: "hrPayslip", path: "payslips/:id", hidden: true, permission: "hr.payroll.view" },
 			{ key: "hrLoans", path: "loans", permission: "hr.loans.manage" },
-			{ key: "hrEndOfService", path: "end-of-service", permission: "hr.payroll.view" }
+			{ key: "hrEndOfService", path: "end-of-service", permission: "hr.payroll.view" },
+			{ key: "hrBenefits", path: "benefits", permission: "hr.benefits.view" },
+			{ key: "hrBenefit", path: "benefits/:id", hidden: true, permission: "hr.benefits.view" },
+			{ key: "hrBenefitGrants", path: "benefit-grants", permission: "hr.benefits.view" },
+			{ key: "hrEmployeeCost", path: "employee-cost", permission: "hr.payroll.view" }
 		]
 	},
 	{
@@ -387,6 +391,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "hrMyTimesheets", path: "timesheets" },
 			{ key: "hrMyPay", path: "pay" },
 			{ key: "hrMyPayslip", path: "pay/payslips/:id", hidden: true },
+			{ key: "hrMyBenefits", path: "benefits" },
 			{ key: "hrMyCertificate", path: "certificates/:kind", hidden: true }
 		]
 	},

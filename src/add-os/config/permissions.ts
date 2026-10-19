@@ -385,3 +385,15 @@ export function canManageCompensation(): boolean {
 export function canManageLoans(): boolean {
 	return can("hr.loans.manage")
 }
+
+// ── HR benefits ─────────────────────────────────────────────────────────────
+
+/** Benefits, who holds them, their grants — and the benefits tab on a file. The employee cost report needs canViewPayroll. */
+export function canViewBenefits(): boolean {
+	return can("hr.benefits.view")
+}
+
+/** Benefits, assignments, and running, retrying or cancelling grants. */
+export function canManageBenefits(): boolean {
+	return can("hr.benefits.manage")
+}

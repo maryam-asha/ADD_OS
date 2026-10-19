@@ -123,6 +123,10 @@
 					<EmployeePayTab :employee-id @changed="careerTab?.load()" />
 				</n-tab-pane>
 
+				<n-tab-pane v-if="mayViewBenefits" name="benefits" :tab="t('hrBenefits.profile.tab')" display-directive="show:lazy">
+					<EmployeeBenefitsTab :employee-id />
+				</n-tab-pane>
+
 				<n-tab-pane v-if="mayViewTimesheets" name="cost" :tab="t('hrTimesheets.profile.tab')" display-directive="show:lazy">
 					<EmployeeCostTab :employee-id />
 				</n-tab-pane>
@@ -165,11 +169,13 @@ import {
 	canRecordEmploymentEvents,
 	canUpdateEmployees,
 	canViewAttendance,
+	canViewBenefits,
 	canViewEmployeeDocuments,
 	canViewLeave,
 	canViewPayroll,
 	canViewTimesheets
 } from "@/add-os/config/permissions"
+import EmployeeBenefitsTab from "@/add-os/modules/hr/components/benefits/EmployeeBenefitsTab.vue"
 import CareerTab from "@/add-os/modules/hr/components/core/CareerTab.vue"
 import ChecklistTab from "@/add-os/modules/hr/components/core/ChecklistTab.vue"
 import EditEmployeeModal from "@/add-os/modules/hr/components/core/EditEmployeeModal.vue"
@@ -206,6 +212,7 @@ const mayViewLeave = canViewLeave()
 const mayViewAttendance = canViewAttendance()
 const mayViewTimesheets = canViewTimesheets()
 const mayViewPayroll = canViewPayroll()
+const mayViewBenefits = canViewBenefits()
 const none = EMPTY
 
 const employeeId = computed(() => Number(route.params.id))
@@ -214,7 +221,7 @@ const loading = ref(true)
 const loadError = ref(false)
 const notFound = ref(false)
 /** Each tab after the first loads the first time it opens (`show:lazy`). */
-const tab = ref<"overview" | "career" | "documents" | "leave" | "attendance" | "pay" | "cost" | "checklist">("overview")
+const tab = ref<"overview" | "career" | "documents" | "leave" | "attendance" | "pay" | "benefits" | "cost" | "checklist">("overview")
 
 const editVisible = ref(false)
 const contactsVisible = ref(false)

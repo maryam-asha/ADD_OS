@@ -1684,7 +1684,12 @@
 			"hrPayComponents": "مكوّنات الأجر",
 			"hrRateTables": "جداول النسب",
 			"hrMyPay": "رواتبي وسلفي",
-			"hrMyPayslip": "قسيمة راتبي"
+			"hrMyPayslip": "قسيمة راتبي",
+			"hrBenefits": "المزايا",
+			"hrBenefit": "الميزة",
+			"hrBenefitGrants": "منح المزايا",
+			"hrEmployeeCost": "كلفة الموظف",
+			"hrMyBenefits": "مزاياي"
 		}
 	},
 	"resourceCrud": {

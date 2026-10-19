@@ -21,7 +21,8 @@ vi.mock("@/add-os/config/permissions", () => ({
 	canViewLeave: () => false,
 	canViewAttendance: () => false,
 	canViewTimesheets: () => false,
-	canViewPayroll: () => false
+	canViewPayroll: () => false,
+	canViewBenefits: () => false
 }))
 vi.mock("@/add-os/services/hr/core", () => ({
 	getEmployee: getEmployeeMock,
