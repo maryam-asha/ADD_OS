@@ -1615,6 +1615,7 @@
 			"roles": "Roles & permissions",
 			"individuals": "Individuals",
 			"companies": "Companies",
+			"companyCreate": "New company",
 			"companyProfile": "Company profile",
 			"memberships": "Memberships",
 			"arrivals": "Arrivals",
@@ -1919,27 +1920,38 @@
 			"prev": "Previous",
 			"next": "Next"
 		},
-		"createDrawer": {
+		"createPage": {
+			"stepOf": "Step {current} of {total}",
+			"termsPeriod": "Term",
+			"termsPrice": "Price and payment",
+			"subtitle": "Turn a quoted private-office request into a company: its details, the office it takes, then the lease terms.",
 			"steps": {
 				"company": "Company",
 				"office": "Office",
 				"terms": "Terms and price"
 			},
-			"cards": {
-				"request": "The request and the company",
-				"requestBadge": "Approved quote",
-				"office": "The office",
-				"officeBadge": "Location",
-				"terms": "Money and term",
-				"termsBadge": "Term and cost"
+			"stepHints": {
+				"company": "The quoted request and the company's legal details",
+				"office": "The private office it will occupy",
+				"terms": "Start, term, price and renewal"
 			},
-			"required": "Required",
-			"pickRequestHint": "Choose the quoted office request to continue.",
+			"request": {
+				"contact": "Contact",
+				"quoteRef": "Quote reference",
+				"provider": "Provider",
+				"direct": "Direct, no provider"
+			},
+			"back": "Back",
+			"next": "Next",
+			"submit": "Create company",
+			"summary": "Summary",
+			"required": "{field} is required.",
+			"amountInvalid": "Enter an amount greater than zero.",
 			"legalNamePlaceholder": "e.g. Horizon Digital Solutions",
+			"contractRefPlaceholder": "e.g. ADD-C-2026-084",
 			"contractRefHint": "As written on the signed contract",
 			"officeFallback": "Office #{id}",
 			"officeCapacity": "Private office · capacity {seats} seats",
-			"autoBadge": "Automatic",
 			"autoRenewHint": "The lease is extended by another term shortly before it ends, as long as its invoices are paid and the office is free.",
 			"loadError": "Could not load requests, offices or currencies. Try again."
 		}

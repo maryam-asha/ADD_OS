@@ -114,6 +114,9 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "individuals", path: "individuals" },
 			{ key: "memberProfile", path: "individuals/:id", hidden: true },
 			{ key: "companies", path: "companies" },
+			// Behind the permission its button already checks, so a typed URL
+			// does not reach a form whose submit the API would refuse.
+			{ key: "companyCreate", path: "companies/create", hidden: true, permission: "office-leases.create" },
 			{ key: "companyProfile", path: "companies/:id", hidden: true },
 			{ key: "memberships", path: "memberships" },
 			{ key: "officeLeases", path: "office-leases" },

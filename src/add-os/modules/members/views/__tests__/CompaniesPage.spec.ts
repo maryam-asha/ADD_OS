@@ -17,17 +17,18 @@ describe("companiesPage wiring", () => {
 		expect(source).toMatch(/quotedRequests\.value|quotedRequestOptions\(/)
 	})
 
-	it("guides to Private Office Requests instead of opening an empty dropdown when nothing is quoted", () => {
+	it("guides to Private Office Requests instead of opening an empty form when nothing is quoted", () => {
 		const source = readFileSync(FILE, "utf8")
 		expect(source).toContain("companies.create.noQuotedRequestsTitle")
-		// Never unconditionally opens the drawer as openCreate's first statement — it must
-		// sit behind the quoted-requests guard. (The brief's original regex here was
-		// `/createDrawerVisible\.value = true\s*$/m` with a bare `.not.toMatch`, which can
-		// never pass against a correctly-guarded implementation in this codebase's
-		// no-semicolon style: the assignment legitimately ends its own line inside the
-		// guarded branch, so the pattern matches the *correct* code too. Verified via a
-		// direct regex repro against the brief's own Step 1 code before changing this.)
-		expect(source).not.toMatch(/function openCreate\(\) \{\s*createDrawerVisible\.value = true/)
+		// The page is reached only past the quoted-requests guard, never as
+		// openCreate's first statement.
+		expect(source).not.toMatch(/function openCreate\(\) \{\s*router\.push/)
+	})
+
+	it("creates a company on its own page rather than in a dialog", () => {
+		const source = readFileSync(FILE, "utf8")
+		expect(source).toContain('router.push({ name: "members.companyCreate" })')
+		expect(source).not.toContain("CreateCompanyDrawer")
 	})
 
 	it("never sends a raw HTTP call — only the composables/services layer", () => {

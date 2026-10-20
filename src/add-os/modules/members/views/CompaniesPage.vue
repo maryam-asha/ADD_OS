@@ -202,12 +202,6 @@
 				</n-pagination>
 			</div>
 		</div>
-
-		<!-- Create Company Dialog Modal -->
-		<CreateCompanyDrawer
-			v-model:show="createDrawerVisible"
-			@created="onCompanyCreated"
-		/>
 	</div>
 </template>
 
@@ -222,7 +216,6 @@ import { useRouter } from "vue-router"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { canCreateOfficeLeases } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
-import CreateCompanyDrawer from "@/add-os/modules/members/components/CreateCompanyDrawer.vue"
 import { buildCompanyColumns } from "@/add-os/modules/members/config/companies.config"
 import { listBranches } from "@/add-os/services/branches"
 import { listCompaniesPaginated } from "@/add-os/services/companies"
@@ -240,7 +233,7 @@ const query = ref<any>({})
 const page = ref(1)
 
 const { data, isLoading, error, refetch: refetchCompanies, meta } = useResourceList<Company>(listCompaniesPaginated, query, page)
-const { data: requests, refetch: refetchRequests } = useResourceList<PrivateOfficeRequest>(listPrivateOfficeRequests)
+const { data: requests } = useResourceList<PrivateOfficeRequest>(listPrivateOfficeRequests)
 const { data: branches } = useResourceList(listBranches)
 const { data: providers } = useResourceList(listProviders)
 
@@ -376,8 +369,6 @@ const columns = computed<DataTableColumns<Company>>(() => {
 	]
 })
 
-const createDrawerVisible = ref(false)
-
 function openCreate() {
 	if (quotedRequests.value.length === 0) {
 		dialog.create({
@@ -390,13 +381,7 @@ function openCreate() {
 		})
 		return
 	}
-	createDrawerVisible.value = true
-}
-
-function onCompanyCreated() {
-	createDrawerVisible.value = false
-	refetchCompanies()
-	refetchRequests()
+	router.push({ name: "members.companyCreate" })
 }
 
 const statusOptions = computed<SelectOption[]>(() =>

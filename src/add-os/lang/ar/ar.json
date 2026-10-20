@@ -1619,6 +1619,7 @@
 			"roles": "الأدوار والصلاحيات",
 			"individuals": "الأفراد",
 			"companies": "الشركات",
+			"companyCreate": "شركة جديدة",
 			"companyProfile": "ملف الشركة",
 			"memberships": "العضويات",
 			"arrivals": "الوصول",
@@ -1923,27 +1924,38 @@
 			"prev": "السابق",
 			"next": "التالي"
 		},
-		"createDrawer": {
+		"createPage": {
+			"stepOf": "الخطوة {current} من {total}",
+			"termsPeriod": "المدة",
+			"termsPrice": "السعر والدفع",
+			"subtitle": "حوّل طلب مكتب خاص مسعَّراً إلى شركة: بياناتها، ثم المكتب الذي تشغله، ثم شروط العقد.",
 			"steps": {
 				"company": "بيانات الشركة",
 				"office": "تخصيص المكتب",
 				"terms": "الشروط والتسعير"
 			},
-			"cards": {
-				"request": "معلومات الطلب وتفاصيل الشركة",
-				"requestBadge": "عرض سعر معتمد",
-				"office": "بيانات المكتب",
-				"officeBadge": "الموقع",
-				"terms": "الشروط المالية والمدة",
-				"termsBadge": "المدة والتكلفة"
+			"stepHints": {
+				"company": "الطلب المسعَّر والبيانات القانونية للشركة",
+				"office": "المكتب الخاص الذي ستشغله",
+				"terms": "البداية والمدة والسعر والتجديد"
 			},
-			"required": "مطلوب",
-			"pickRequestHint": "يرجى اختيار طلب المكتب المسعَّر للمتابعة.",
+			"request": {
+				"contact": "التواصل",
+				"quoteRef": "مرجع العرض",
+				"provider": "المزوّد",
+				"direct": "مباشر، بدون مزوّد"
+			},
+			"back": "السابق",
+			"next": "التالي",
+			"submit": "إنشاء الشركة",
+			"summary": "الملخص",
+			"required": "حقل {field} مطلوب.",
+			"amountInvalid": "أدخل مبلغاً أكبر من الصفر.",
 			"legalNamePlaceholder": "مثال: شركة الأفق للحلول الرقمية",
+			"contractRefPlaceholder": "مثال: ADD-C-2026-084",
 			"contractRefHint": "كما هو مكتوب في العقد الموقَّع",
 			"officeFallback": "المكتب #{id}",
 			"officeCapacity": "مكتب خاص · السعة {seats} مقعد",
-			"autoBadge": "تلقائي",
 			"autoRenewHint": "يُمدَّد العقد لمدة مماثلة قبل انتهائه بأيام قليلة، ما دامت فواتيره مسددة والمكتب متاحاً.",
 			"loadError": "تعذّر تحميل الطلبات أو المكاتب أو العملات. حاولوا مجدداً."
 		}
