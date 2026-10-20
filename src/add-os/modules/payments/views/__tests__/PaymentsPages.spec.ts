@@ -199,6 +199,20 @@ describe("paymentMethodsPage", () => {
 		await cards[0].findAll("button").find(button => button.text() === "View its payments")!.trigger("click")
 		expect(pushMock).toHaveBeenCalledWith({ name: "payments.transactions", query: { method: "wallet" } })
 	})
+
+	it("leaves the booking extension off the purposes, supported or not", async () => {
+		methodsMock.mockResolvedValue([
+			{ ...methods[0], purposes: [{ purpose: "booking", supported: true }, { purpose: "booking_extension", supported: true }] },
+			{ ...methods[1], purposes: [{ purpose: "booking", supported: true }, { purpose: "booking_extension", supported: false }] }
+		])
+		const wrapper = mount(PaymentMethodsPage, { global: { plugins: [i18n], stubs: { Icon: true } } })
+		await flushPromises()
+
+		for (const card of wrapper.findAll("[data-test=payment-method]")) {
+			expect(card.text()).toContain(en.payments.purpose.booking)
+			expect(card.text()).not.toContain(en.payments.purpose.booking_extension)
+		}
+	})
 })
 
 // `discounts` — pinned collection 2026-10-07.

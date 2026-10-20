@@ -68,7 +68,7 @@
 							<span class="text-xs font-semibold text-stone-700">{{ t("payments.methods.purposes") }}</span>
 							<div class="flex flex-wrap gap-1.5">
 								<n-tag
-									v-for="purpose in method.purposes"
+									v-for="purpose in listedPurposes(method)"
 									:key="purpose.purpose"
 									size="small"
 									:bordered="false"
@@ -118,6 +118,17 @@ function stats(method: PaymentMethodInfo) {
 		{ label: t("payments.methods.stats.points"), value: formatNumber(method.usage.accepted_points), tone: "text-emerald-700" },
 		{ label: t("payments.methods.stats.open"), value: formatNumber(method.usage.open_count), tone: method.usage.open_count ? "text-amber-600" : undefined }
 	]
+}
+
+/**
+ * A booking extension is not something anyone pays for with a method: it is
+ * taken from the member's wallet the moment a wallet-paid booking is
+ * extended, and any other extension leaves the booking owing the difference,
+ * paid as a booking. Struck through on a card it read as "an extension
+ * cannot be paid by card", which is wrong — so it is not listed at all.
+ */
+function listedPurposes(method: PaymentMethodInfo) {
+	return method.purposes.filter(p => p.purpose !== "booking_extension")
 }
 
 function openTransactions(method: string): void {
