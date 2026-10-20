@@ -409,3 +409,15 @@ export function canViewRecruitment(): boolean {
 export function canManageRecruitment(): boolean {
 	return can("hr.recruitment.manage")
 }
+
+// ── HR performance ──────────────────────────────────────────────────────────
+
+/** Templates, cycles, reviews and goals, read only — and the performance tab on a file. */
+export function canViewPerformance(): boolean {
+	return can("hr.performance.view")
+}
+
+/** Templates, cycles and their phases, reviewers, calibration and goals. */
+export function canManagePerformance(): boolean {
+	return can("hr.performance.manage")
+}

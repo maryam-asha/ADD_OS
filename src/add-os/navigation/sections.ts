@@ -374,7 +374,10 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "hrJobOpening", path: "job-openings/:id", hidden: true, permission: "hr.recruitment.view" },
 			{ key: "hrApplication", path: "applications/:id", hidden: true, permission: "hr.recruitment.view" },
 			{ key: "hrCandidates", path: "candidates", permission: "hr.recruitment.view" },
-			{ key: "hrCandidate", path: "candidates/:id", hidden: true, permission: "hr.recruitment.view" }
+			{ key: "hrCandidate", path: "candidates/:id", hidden: true, permission: "hr.recruitment.view" },
+			{ key: "hrReviewCycles", path: "review-cycles", permission: "hr.performance.view" },
+			{ key: "hrReviewCycle", path: "review-cycles/:id", hidden: true, permission: "hr.performance.view" },
+			{ key: "hrGoals", path: "goals", permission: "hr.performance.view" }
 		]
 	},
 	{
@@ -394,7 +397,8 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "hrCostCenters", path: "cost-centers", permission: "hr.timesheets.view" },
 			{ key: "hrPayComponents", path: "pay-components", permission: "hr.payroll.view" },
 			{ key: "hrRateTables", path: "rate-tables", permission: "hr.payroll.view" },
-			{ key: "hrPipelineStages", path: "pipeline-stages", permission: "hr.recruitment.view" }
+			{ key: "hrPipelineStages", path: "pipeline-stages", permission: "hr.recruitment.view" },
+			{ key: "hrReviewTemplates", path: "review-templates", permission: "hr.performance.view" }
 		]
 	},
 	{
@@ -416,6 +420,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "hrMyPayslip", path: "pay/payslips/:id", hidden: true },
 			{ key: "hrMyBenefits", path: "benefits" },
 			{ key: "hrMyRecruitment", path: "jobs" },
+			{ key: "hrMyPerformance", path: "performance" },
 			{ key: "hrMyCertificate", path: "certificates/:kind", hidden: true }
 		]
 	},

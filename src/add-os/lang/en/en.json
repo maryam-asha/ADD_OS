@@ -1728,7 +1728,12 @@
 			"hrCandidates": "Candidates",
 			"hrCandidate": "Candidate",
 			"hrPipelineStages": "Hiring stages",
-			"hrMyRecruitment": "Jobs and hiring"
+			"hrMyRecruitment": "Jobs and hiring",
+			"hrReviewCycles": "Review cycles",
+			"hrReviewCycle": "Review cycle",
+			"hrGoals": "Goals",
+			"hrReviewTemplates": "Review templates",
+			"hrMyPerformance": "My goals and reviews"
 		}
 	},
 	"resourceCrud": {

@@ -1,0 +1,174 @@
+{
+	"hrPerformance": {
+		"status": {
+			"cycle": {
+				"draft": "Draft",
+				"goal_setting": "Goal setting",
+				"self_review": "Self review",
+				"manager_review": "Manager review",
+				"calibration": "Calibration",
+				"closed": "Closed"
+			},
+			"review": {
+				"open": "Open",
+				"self_submitted": "Self review in",
+				"manager_submitted": "Rated by reviewer",
+				"finalized": "Finalized"
+			},
+			"goal": {
+				"active": "In progress",
+				"completed": "Completed",
+				"cancelled": "Cancelled"
+			}
+		},
+		"recommendation": {
+			"none": "No change",
+			"promotion": "Promotion",
+			"compensation_change": "Pay change",
+			"improvement_plan": "Improvement plan"
+		},
+		"profile": {
+			"tab": "Performance",
+			"subtitle": "The employee's goals across review cycles"
+		},
+		"templates": {
+			"description": "What a review rates: the scale, the competencies and how much goals weigh. A cycle keeps a copy from its launch, so a change reaches only cycles launched after it.",
+			"add": "Add template",
+			"edit": "Edit template",
+			"hint": "Every review in a cycle using this template rates these competencies, and the employee's goals.",
+			"scale": "Rating scale",
+			"scaleHint": "Ratings run from 1 to this, between 3 and 10.",
+			"goalsWeight": "Weight of goals",
+			"goalsWeightHint": "The share of the overall score goals carry; competencies carry the rest.",
+			"competencies": "Competencies",
+			"addCompetency": "Add competency",
+			"weight": "Weight",
+			"weightHint": "A competency with no weight counts as much as the others.",
+			"created": "Template added.",
+			"updated": "Template updated.",
+			"empty": "No review templates yet.",
+			"problems": {
+				"competency": "Give every competency a code (letters, digits, dashes) and an Arabic name.",
+				"duplicate": "Each competency's code appears once."
+			}
+		},
+		"cycles": {
+			"description": "Every review cycle, latest period first. A cycle is launched and then moved one phase at a time on its own page.",
+			"add": "New cycle",
+			"edit": "Edit cycle",
+			"hint": "Launching it opens a review for everyone it covers, with their manager as reviewer.",
+			"namePlaceholder": "e.g. 2026 annual review",
+			"template": "Template",
+			"scope": "Covers",
+			"everyone": "Everyone",
+			"periodStart": "Period from",
+			"periodEnd": "Period to",
+			"period": "Period",
+			"deadlines": "Deadlines",
+			"goalsDue": "Goals by",
+			"selfDue": "Self reviews by",
+			"managerDue": "Manager reviews by",
+			"created": "Cycle created.",
+			"updated": "Cycle updated.",
+			"empty": "No review cycles.",
+			"notFound": "This review cycle does not exist.",
+			"draftHint": "A draft: launch it to open a review for everyone it covers.",
+			"launch": "Launch",
+			"moveTo": "Move to {phase}",
+			"confirmYes": "Yes, go ahead",
+			"confirm": {
+				"goal_setting": "Launch this cycle? A review opens for everyone it covers today, their manager as reviewer, and goal setting begins. It can no longer be edited.",
+				"self_review": "Move to self review? Goals' titles and weights become fixed, and every employee is told to fill in their self review.",
+				"manager_review": "Move to manager review? Self reviews close, and every reviewer is told to rate their reviews.",
+				"calibration": "Move to calibration? Manager reviews close; rated reviews can then be calibrated.",
+				"closed": "Close this cycle? Every review is finalized with its calibrated score, or else its reviewer's score, and employees can read their result. This cannot be undone."
+			},
+			"addEmployee": "Add employee",
+			"addEmployeeHint": "Someone the launch did not include — hired since, or moved into the unit. Their manager becomes the reviewer.",
+			"employeeAdded": "Employee added to the cycle."
+		},
+		"reviews": {
+			"title": "Reviews",
+			"detail": "Review",
+			"empty": "No reviews.",
+			"cycle": "Cycle",
+			"phase": "Phase",
+			"reviewer": "Reviewer",
+			"noReviewer": "No reviewer",
+			"competencies": "Competencies",
+			"goals": "Goals",
+			"overall": "Overall",
+			"calibrated": "Calibrated",
+			"final": "Final rating",
+			"items": "What was rated",
+			"item": "Item",
+			"kind": {
+				"competency": "Competency",
+				"goal": "Goal"
+			},
+			"self": "Self",
+			"manager": "Reviewer",
+			"comments": "Comments",
+			"selfComment": "The employee's comment",
+			"managerComment": "The reviewer's comment",
+			"recommendation": "Recommendation",
+			"recommendationHint": "A suggestion only; a promotion or pay change is still recorded by HR.",
+			"reassign": "Change reviewer",
+			"calibrate": "Calibrate",
+			"calibrateHint": "Sets the score the final rating comes from, between 1 and {max}.",
+			"calibrationNote": "Why (optional)",
+			"selfTitle": "My self review",
+			"managerTitle": "Rate the review",
+			"selfHint": "Rate yourself on each item from 1 to {max}. You may leave some unrated.",
+			"managerHint": "Rate {name} on every item from 1 to {max}. What they said is shown beside each.",
+			"theySaid": "They rated {rating}",
+			"itemComment": "Comment (optional)",
+			"overallComment": "Overall comment",
+			"rateEverything": "Rate every item before sending.",
+			"submitTitle": "Send the review",
+			"submitConfirm": "Send it? It can no longer change once sent.",
+			"submitted": "Review sent."
+		},
+		"goals": {
+			"title": "Goals",
+			"description": "Every goal, by employee, cycle and status. Choose an employee to set a goal for them.",
+			"add": "Add goal",
+			"edit": "Edit goal",
+			"titleLabel": "Goal",
+			"descriptionLabel": "Description",
+			"metric": "Measured by",
+			"metricPlaceholder": "e.g. occupancy rate",
+			"target": "Target",
+			"cycle": "Cycle",
+			"noCycle": "No cycle",
+			"weight": "Weight",
+			"weightHint": "A cycle's goals weigh 100 at most together.",
+			"progress": "Progress",
+			"dueOn": "Due",
+			"lockedHint": "The cycle has left goal setting: only progress and status can change.",
+			"pickEmployee": "Choose an employee to set a goal for them.",
+			"created": "Goal added.",
+			"updated": "Goal updated.",
+			"deleted": "Goal deleted.",
+			"delete": "Delete goal",
+			"deleteConfirm": "Delete the goal \"{title}\"?",
+			"empty": "No goals."
+		},
+		"mine": {
+			"description": "Your goals and reviews, and, as a manager, your team's goals and the reviews you conduct.",
+			"tabs": {
+				"goals": "My goals",
+				"reviews": "My reviews",
+				"team": "My team's goals",
+				"conduct": "Reviews I conduct"
+			},
+			"myGoals": "My goals",
+			"noReviews": "No reviews yet.",
+			"fillSelf": "Fill in",
+			"readResult": "Read result",
+			"pickReport": "Choose a team member",
+			"noConducting": "No reviews to conduct.",
+			"rate": "Rate"
+		}
+	}
+}

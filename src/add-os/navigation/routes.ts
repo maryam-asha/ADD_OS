@@ -133,6 +133,9 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"hrTalent.hrApplication": () => import("@/add-os/modules/hr/views/recruitment/ApplicationPage.vue"),
 	"hrTalent.hrCandidates": () => import("@/add-os/modules/hr/views/recruitment/CandidatesPage.vue"),
 	"hrTalent.hrCandidate": () => import("@/add-os/modules/hr/views/recruitment/CandidatePage.vue"),
+	"hrTalent.hrReviewCycles": () => import("@/add-os/modules/hr/views/performance/ReviewCyclesPage.vue"),
+	"hrTalent.hrReviewCycle": () => import("@/add-os/modules/hr/views/performance/ReviewCyclePage.vue"),
+	"hrTalent.hrGoals": () => import("@/add-os/modules/hr/views/performance/GoalsPage.vue"),
 	"hrSettings.hrDocumentTypes": () => import("@/add-os/modules/hr/views/core/DocumentTypesPage.vue"),
 	"hrSettings.hrChecklistTemplates": () => import("@/add-os/modules/hr/views/core/ChecklistTemplatesPage.vue"),
 	"hrSettings.hrApprovalFlows": () => import("@/add-os/modules/hr/views/approvals/ApprovalFlowsPage.vue"),
@@ -142,6 +145,7 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"hrSettings.hrPayComponents": () => import("@/add-os/modules/hr/views/payroll/PayComponentsPage.vue"),
 	"hrSettings.hrRateTables": () => import("@/add-os/modules/hr/views/payroll/RateTablesPage.vue"),
 	"hrSettings.hrPipelineStages": () => import("@/add-os/modules/hr/views/recruitment/PipelineStagesPage.vue"),
+	"hrSettings.hrReviewTemplates": () => import("@/add-os/modules/hr/views/performance/ReviewTemplatesPage.vue"),
 	"myHr.myProfile": () => import("@/add-os/modules/hr/views/core/MyHrPage.vue"),
 	"myHr.hrMyApprovals": () => import("@/add-os/modules/hr/views/approvals/MyApprovalsPage.vue"),
 	"myHr.hrMyLeave": () => import("@/add-os/modules/hr/views/leave/MyLeavePage.vue"),
@@ -151,6 +155,7 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"myHr.hrMyPayslip": () => import("@/add-os/modules/hr/views/payroll/PayslipPage.vue"),
 	"myHr.hrMyBenefits": () => import("@/add-os/modules/hr/views/benefits/MyBenefitsPage.vue"),
 	"myHr.hrMyRecruitment": () => import("@/add-os/modules/hr/views/recruitment/MyRecruitmentPage.vue"),
+	"myHr.hrMyPerformance": () => import("@/add-os/modules/hr/views/performance/MyPerformancePage.vue"),
 	"myHr.hrMyCertificate": () => import("@/add-os/modules/hr/views/core/MyCertificatePage.vue")
 }
 

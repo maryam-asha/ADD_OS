@@ -1732,7 +1732,12 @@
 			"hrCandidates": "المتقدمون",
 			"hrCandidate": "المتقدّم",
 			"hrPipelineStages": "مراحل التوظيف",
-			"hrMyRecruitment": "الوظائف الداخلية والتوظيف"
+			"hrMyRecruitment": "الوظائف الداخلية والتوظيف",
+			"hrReviewCycles": "دورات التقييم",
+			"hrReviewCycle": "دورة التقييم",
+			"hrGoals": "الأهداف",
+			"hrReviewTemplates": "نماذج التقييم",
+			"hrMyPerformance": "أهدافي وتقييماتي"
 		}
 	},
 	"resourceCrud": {
