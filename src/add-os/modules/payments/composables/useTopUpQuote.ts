@@ -12,7 +12,7 @@ import {
 	remainderBelowOnePoint,
 	toAsciiDigits
 } from "@/add-os/modules/payments/utils/top-up-math"
-import { formatNumber } from "@/add-os/utils/format"
+import { currencySymbol, formatNumber, isCurrencyCode } from "@/add-os/utils/format"
 
 /** What the operator types; the other figure is derived. Points is the default. */
 export type TopUpEntryMode = "points" | "amount"
@@ -48,7 +48,7 @@ const WHOLE_NUMBER = /^\d+$/
  * every balance read, and re-reads after a stale-quote 422.
  */
 export function useTopUpQuote(currency: Readonly<Ref<string>>) {
-	const { t } = useI18n()
+	const { t, locale } = useI18n()
 	const { formatPoints } = usePoints()
 
 	const config = ref<TopUpConfig | null>(null)
@@ -85,7 +85,10 @@ export function useTopUpQuote(currency: Readonly<Ref<string>>) {
 	const error = computed(() => result.value.error)
 
 	function cash(amount: string): string {
-		return `${formatNumber(normalizeDecimal(amount))} ${currency.value}`
+		const formatted = formatNumber(normalizeDecimal(amount))
+		const loc = (locale.value as any) ?? "ar"
+		const sym = isCurrencyCode(currency.value) ? currencySymbol(currency.value, loc) : currency.value
+		return `${formatted} ${sym}`
 	}
 
 	/** The line under the input: what to collect, or what the cash buys. */

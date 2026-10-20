@@ -179,11 +179,14 @@
 								</div>
 							</n-form-item>
 
-							<div class="min-h-5 flex flex-col gap-0.5 text-xs">
-								<span v-if="quoteErrorMessage" class="text-red-600">{{ quoteErrorMessage }}</span>
+							<div class="min-h-7 flex flex-col gap-1 text-xs">
+								<span v-if="quoteErrorMessage" class="text-red-600 font-medium">{{ quoteErrorMessage }}</span>
 								<template v-else-if="quoteSummary">
-									<span class="font-bold text-teal-700 add-numeric">{{ quoteSummary }}</span>
-									<span v-if="quoteNote" class="text-stone-500 add-numeric">{{ quoteNote }}</span>
+									<div class="inline-flex items-center gap-2 py-1.5 px-3 rounded-xl bg-teal-50/90 border border-teal-200/80 text-teal-900 w-fit shadow-2xs">
+										<Icon name="carbon:currency" :size="16" class="text-teal-700 shrink-0" />
+										<span class="font-bold font-numeric add-numeric text-xs sm:text-sm text-teal-800" dir="auto">{{ quoteSummary }}</span>
+									</div>
+									<span v-if="quoteNote" class="text-stone-500 text-[11px] font-medium add-numeric">{{ quoteNote }}</span>
 								</template>
 								<!-- The rates come with the balance read: without them nothing can be quoted, so say so and offer another try. -->
 								<div v-else-if="ratesUnavailable" class="flex items-center gap-2">
@@ -706,6 +709,9 @@ function buildRecipient(): { user_id: number } | { company_id: number } | null {
 /** The fields whose 422 message the template shows next to the input. */
 const RENDERED_ERROR_FIELDS = ["points", "amount", "user_id", "company_id"]
 
+const receiptModalVisible = ref(false)
+const lastReceipt = ref<WalletTopUp | null>(null)
+
 async function submit() {
 	try {
 		await formRef.value?.validate()
@@ -783,9 +789,6 @@ async function submit() {
 		isSubmitting.value = false
 	}
 }
-
-const receiptModalVisible = ref(false)
-const lastReceipt = ref<WalletTopUp | null>(null)
 
 function closeReceiptModal() {
 	receiptModalVisible.value = false

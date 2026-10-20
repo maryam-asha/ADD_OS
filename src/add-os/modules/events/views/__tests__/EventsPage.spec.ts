@@ -9,21 +9,24 @@ describe("eventsPage wiring", () => {
 	it("uses the events service methods and config", () => {
 		expect(source).toContain('from "@/add-os/services/events"')
 		expect(source).toContain('from "@/add-os/modules/events/config/events.config"')
-		expect(source).toContain("createEvent")
-		expect(source).toContain("updateEvent")
 		expect(source).toContain("removeEvent")
 		expect(source).toContain("listEvents")
+		expect(source).toContain("buildEventColumns")
 	})
 
-	it("renders ResourceStatCards, ResourceTable and ResourceFormDrawer", () => {
+	it("renders ResourceStatCards and ResourceTable", () => {
 		expect(source).toContain("<ResourceStatCards")
 		expect(source).toContain("<ResourceTable")
-		expect(source).toContain("<ResourceFormDrawer")
+	})
+
+	it("navigates to dedicated create and edit pages instead of opening a modal", () => {
+		expect(source).toContain('router.push("/community/events/create")')
+		expect(source).toContain("router.push(`/community/events/${" + "row.id}/edit`)")
+		expect(source).not.toContain("<ResourceFormDrawer")
 	})
 
 	it("translates titles and operations via vue-i18n", () => {
 		expect(source).toContain('t("events.create.button")')
-		expect(source).toContain("t('events.create.title')")
-		expect(source).toContain("t('events.edit.title')")
+		expect(source).toContain('t("nav.pages.eventCategories")')
 	})
 })

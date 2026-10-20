@@ -1,0 +1,26 @@
+// ── ADD OS — Tabs RTL active bar fix ─────────────────────────────────────────
+//
+// In naive-override.scss, horizontal tabs in RTL reverse flex-direction
+// (.n-tabs-nav-scroll-content, .n-tabs-wrapper, .n-tabs-tab-wrapper) so that
+// tabs read right-to-left while keeping LTR DOM layout coordinates.
+//
+// However, because .n-tabs-wrapper is `display: inline-flex` (shrink-to-fit),
+// it was pushed to the far right inside .n-tabs-nav-scroll-content. Its
+// offsetLeft was therefore > 0, while .n-tabs-bar is positioned absolutely
+// relative to .n-tabs-nav-scroll-content (offset: 0). As a result, Naive UI's
+// `barEl.style.left = tabEl.offsetLeft` placed the active indicator bar far
+// to the left instead of under the active tab.
+//
+// By setting `width: 100%` and `min-width: 100%` on .n-tabs-wrapper in RTL,
+// .n-tabs-wrapper spans the full width of .n-tabs-nav-scroll-content (wrapper.offsetLeft = 0).
+// Tab offsetLeft measurements now match the coordinate space of .n-tabs-bar exactly,
+// aligning the active indicator line directly underneath the active tab across the entire app.
+
+.direction-rtl {
+	.n-tabs:not(.n-tabs--left):not(.n-tabs--right):not(.n-tabs--segment-type) {
+		.n-tabs-wrapper {
+			width: 100%;
+			min-width: 100%;
+		}
+	}
+}

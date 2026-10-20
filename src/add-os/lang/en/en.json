@@ -910,14 +910,46 @@
 		"create": {
 			"button": "New event",
 			"title": "New event",
-			"success": "Event created."
+			"subtitle": "Create and schedule a new community event with sessions and registration settings.",
+			"success": "Event created.",
+			"sections": {
+				"basic": "Basic Details",
+				"schedule": "Schedule & Location",
+				"registration": "Registration & Capacity",
+				"pricing": "Pricing & Visibility",
+				"media": "Event Image"
+			},
+			"hints": {
+				"sessions": "Add all dates and sittings for this event. Start and end dates will be derived automatically.",
+				"internal": "Members will be able to register directly through the ADD OS member app.",
+				"external": "Members will be redirected to an external registration form.",
+				"approval": "Registrations will be placed in a queue awaiting admin approval before tickets are issued.",
+				"free": "Toggle on if this event is free of charge for attendees.",
+				"image": "Upload an event cover image (PNG, JPG, or WebP)."
+			},
+			"actions": {
+				"cancel": "Cancel",
+				"submit": "Create Event"
+			}
 		},
 		"edit": {
 			"title": "Edit event",
-			"success": "Event updated."
+			"subtitle": "Update event details, schedule, registration options, and ticket pricing.",
+			"success": "Event updated.",
+			"actions": {
+				"submit": "Save Changes"
+			}
 		},
 		"delete": {
 			"success": "Event deleted."
+		},
+		"cancel": {
+			"confirmTitle": "Cancel this event?",
+			"confirmBody": "Members will no longer be able to register for it or pay for a registration. Registrations already paid for are not refunded by this.",
+			"confirmOk": "Cancel event",
+			"confirmBack": "Keep event",
+			"success": "Event cancelled.",
+			"banner": "This event is cancelled. Members can't register for it or pay for a registration."
 		},
 		"form": {
 			"title": "Title",
@@ -1624,7 +1656,8 @@
 			"modules": "Modules",
 			"resourceTypes": "Resource Types",
 			"walletCredited": "Wallet Credited",
-			"eventCancellation": "Event Cancellation",
+			"eventCreate": "New Event",
+			"eventEdit": "Edit Event",
 			"operationsRequests": "Operations Requests",
 			"eventAttendees": "Registrations",
 			"closeSessionDetail": "End session",
@@ -2446,7 +2479,6 @@
 		}
 	},
 	"walletCredited": {
-		"transactionID": "Transaction ID",
 		"title": "Wallet Credit Receipt",
 		"receptionSubtitle": "ADD OS Reception Desk • Manual Top-Up",
 		"heroTitle": "Wallet Successfully Credited",
@@ -2490,18 +2522,6 @@
 			"arrival": "Arrived — waiting for check-in",
 			"booking": "Booking"
 		}
-	},
-	"eventCancellation": {
-		"title": "Event Cancellation Details",
-		"supportSubtitle": "ADD Events • Refund Processing",
-		"heroTitle": "This Event Has Been Cancelled",
-		"heroSubtitle": "Refunds have been processed and balances returned to attendee wallets.",
-		"opsNoteTitle": "Operations Notice",
-		"refundSummaryTitle": "Ticket Refund Summary",
-		"amountPaid": "Amount Paid",
-		"refundedTo": "Refunded To",
-		"refundStatus": "Refund Status",
-		"walletReturnedInfo": "Ticket amounts have been fully refunded to the general wallet balance of all registered attendees."
 	},
 	"members": {
 		"description": "Manage and query individual app members (wallet balances, live sessions, and account status).",

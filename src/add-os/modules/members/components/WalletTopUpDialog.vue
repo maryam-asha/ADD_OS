@@ -68,11 +68,14 @@
 					<span class="text-xs font-bold text-[var(--add-text-muted)] shrink-0 px-3 whitespace-nowrap">{{ mode === "points" ? t("points.unit") : form.currency }}</span>
 				</div>
 
-				<div class="min-h-5 flex flex-col gap-0.5 text-xs">
+				<div class="min-h-7 flex flex-col gap-1 text-xs">
 					<span v-if="errorMessage" class="text-[var(--add-danger-text)] font-medium">{{ errorMessage }}</span>
 					<template v-else-if="summary">
-						<span class="font-bold font-numeric text-[var(--add-primary-text)] add-numeric">{{ summary }}</span>
-						<span v-if="note" class="text-[var(--add-text-muted)] add-numeric">{{ note }}</span>
+						<div class="inline-flex items-center gap-2 py-1.5 px-3 rounded-xl bg-[var(--add-brand-smart-olive)]/12 border border-[var(--add-brand-smart-olive)]/30 text-[var(--add-primary-text)] w-fit shadow-2xs">
+							<Icon name="carbon:currency" :size="15" class="text-[var(--add-primary-text)] shrink-0" />
+							<span class="font-bold font-numeric add-numeric text-xs text-[var(--add-primary-text)]" dir="auto">{{ summary }}</span>
+						</div>
+						<span v-if="note" class="text-[var(--add-text-muted)] text-[11px] add-numeric">{{ note }}</span>
 					</template>
 					<!-- The rates come with the balance read: without them nothing can be quoted, so say so and offer another try. -->
 					<div v-else-if="ratesUnavailable" class="flex items-center gap-2">

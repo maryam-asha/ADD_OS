@@ -39,16 +39,7 @@
 			:loading="isLoading"
 			:on-edit="openEdit"
 			:extra-actions="registrationFormAction"
-			:on-delete="async row => { await mutations.remove(row.id) }"
-		/>
-
-		<ResourceFormDrawer
-			v-model:show="drawerVisible"
-			v-model:model="form"
-			:fields
-			:title="mode === 'create' ? t('events.create.title') : t('events.edit.title')"
-			:submitting="mutations.isSubmitting.value"
-			:on-submit="submit"
+			:on-delete="async row => { await removeEvent(row.id); refetch() }"
 		/>
 
 		<EventRegistrationFieldsDrawer
@@ -61,23 +52,18 @@
 
 <script setup lang="ts">
 import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vue"
-import type { Event, EventPayload } from "@/add-os/modules/events/types/event"
-import type { EventCategory } from "@/add-os/modules/events/types/event-category"
+import type { Event } from "@/add-os/modules/events/types/event"
 import { NAlert, NButton } from "naive-ui"
 import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
-import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.vue"
 import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
-import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import EventRegistrationFieldsDrawer from "@/add-os/modules/events/components/EventRegistrationFieldsDrawer.vue"
-import { buildEventColumns, buildEventFields, emptyEventPayload } from "@/add-os/modules/events/config/events.config"
-import { listEventCategories } from "@/add-os/services/event-categories"
-import { createEvent, getEvent, listEvents, removeEvent, updateEvent } from "@/add-os/services/events"
-import { toOffsetIso } from "@/add-os/utils/format"
+import { buildEventColumns } from "@/add-os/modules/events/config/events.config"
+import { listEvents, removeEvent } from "@/add-os/services/events"
 import Icon from "@/components/common/Icon.vue"
 
 defineProps<{ titleKey?: string }>()
@@ -86,9 +72,7 @@ const { t } = useI18n()
 const router = useRouter()
 
 const { data, isLoading, error, refetch } = useResourceList<Event>(listEvents)
-const { data: categories } = useResourceList<EventCategory>(listEventCategories)
 const columns = computed(() => buildEventColumns(t, currentLocale.value))
-const fields = computed(() => buildEventFields(categories.value, currentLocale.value, t))
 
 const statCards = computed<StatCard[]>(() => {
 	const total = data.value.length
@@ -101,33 +85,18 @@ const statCards = computed<StatCard[]>(() => {
 	]
 })
 
-const mutations = useResourceMutations({ create: createEvent, update: updateEvent, remove: removeEvent }, refetch, {
-	createSuccess: t("events.create.success"),
-	updateSuccess: t("events.edit.success"),
-	deleteSuccess: t("events.delete.success")
-})
-
-const drawerVisible = ref(false)
-const mode = ref<"create" | "edit">("create")
-const editingId = ref<number | null>(null)
-const form = ref<EventPayload>(emptyEventPayload())
-
 const fieldsDrawerVisible = ref(false)
 const fieldsEventId = ref<number | null>(null)
 
 /**
  * A per-row way into the event's own registration form. It sits here rather
- * than in the edit drawer because the fields are their own resource with
+ * than in the edit screen because the fields are their own resource with
  * their own endpoints — saving the event does not save them.
  */
 function registrationFormAction(row: Event) {
 	const label = t("events.fields.manage")
 	const attendeesLabel = t("events.approval.title")
 
-	// An externally-registered event has no roster and no questions of
-	// its own: the member never reaches our registration endpoint.
-	// An externally-registered event has no roster and no questions of
-	// its own: the member never reaches our registration endpoint.
 	if (row.external_form_url) {
 		return []
 	}
@@ -164,75 +133,10 @@ function openRegistrationFields(row: Event) {
 }
 
 function openCreate() {
-	mode.value = "create"
-	editingId.value = null
-	form.value = emptyEventPayload()
-	drawerVisible.value = true
+	router.push("/community/events/create")
 }
 
-async function openEdit(row: Event) {
-	mode.value = "edit"
-	editingId.value = row.id
-
-	// The listing does not carry the schedule, and an event edited without it
-	// would save an empty one — wiping every sitting the admin had entered.
-	let sessions = row.sessions ?? []
-
-	if (!sessions.length) {
-		try {
-			sessions = (await getEvent(row.id)).sessions ?? []
-		} catch {
-			// Fall back to the envelope below rather than blocking the edit.
-		}
-	}
-
-	form.value = {
-		category_id: row.category_id,
-		title: { ...row.title },
-		description: row.description ? { ...row.description } : { ar: "", en: "" },
-		// An event created before schedules existed has none; show its own
-		// interval as the single sitting it effectively is.
-		sessions: sessions.length
-			? sessions.map(s => ({ start_at: toOffsetIso(s.start_at), end_at: toOffsetIso(s.end_at) }))
-			: row.start_at && row.end_at
-				? [{ start_at: toOffsetIso(row.start_at), end_at: toOffsetIso(row.end_at) }]
-				: [],
-		location: row.location || "",
-		capacity: row.capacity ?? null,
-		requires_approval: row.requires_approval ?? false,
-		// Carried over so saving an external event does not show it as
-		// in-app, and so the window is edited rather than silently kept.
-		registration_source: row.external_form_url ? "external" : "internal",
-		external_form_url: row.external_form_url || "",
-		registration_opens_at: row.registration_opens_at || "",
-		registration_closes_at: row.registration_closes_at || "",
-		is_marked_full: row.is_marked_full ?? false,
-		is_free: row.is_free ?? true,
-		price_points: row.price_points ?? 0,
-		image_url: row.image_url || "",
-		status: row.status,
-		order: row.order
-	}
-	drawerVisible.value = true
-}
-
-async function submit(payload: Record<string, unknown>) {
-	const cleaned: EventPayload = { ...(payload as EventPayload) }
-	// The source is the editor's choice; the API reads it off the link. An
-	// in-app event drops any link left over from before it was switched, and
-	// an external one is already guaranteed a valid link by the form's rule.
-	cleaned.external_form_url = form.value.registration_source === "external"
-		? String(cleaned.external_form_url ?? "").trim()
-		: null
-	// Points are the only stored price; a free event carries zero of them.
-	if (cleaned.is_free) {
-		cleaned.price_points = 0
-	}
-	if (mode.value === "create") {
-		await mutations.create(cleaned)
-	} else if (editingId.value !== null) {
-		await mutations.update(editingId.value, cleaned)
-	}
-	drawerVisible.value = false
+function openEdit(row: Event) {
+	router.push(`/community/events/${row.id}/edit`)
 }
 </script>

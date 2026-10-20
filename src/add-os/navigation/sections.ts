@@ -244,8 +244,9 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		status: "active",
 		pages: [
 			{ key: "events", path: "events" },
+			{ key: "eventCreate", path: "events/create", hidden: true },
+			{ key: "eventEdit", path: "events/:id/edit", hidden: true },
 			{ key: "eventCategories", path: "event-categories" },
-			{ key: "eventCancellation", path: "event-cancellation" },
 			{ key: "eventAttendees", path: "events/:eventId/attendees", hidden: true },
 			{ key: "community", path: "directory" },
 			{ key: "cafe", path: "cafe" }
