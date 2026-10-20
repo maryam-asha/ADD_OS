@@ -1733,7 +1733,13 @@
 			"hrReviewCycle": "Review cycle",
 			"hrGoals": "Goals",
 			"hrReviewTemplates": "Review templates",
-			"hrMyPerformance": "My goals and reviews"
+			"hrMyPerformance": "My goals and reviews",
+			"hrCourses": "Courses",
+			"hrTrainingSessions": "Training sessions",
+			"hrTrainingSession": "Training session",
+			"hrCertifications": "Certifications",
+			"hrLearningBudgets": "Learning budgets",
+			"hrMyTraining": "My training"
 		}
 	},
 	"resourceCrud": {

@@ -136,6 +136,11 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"hrTalent.hrReviewCycles": () => import("@/add-os/modules/hr/views/performance/ReviewCyclesPage.vue"),
 	"hrTalent.hrReviewCycle": () => import("@/add-os/modules/hr/views/performance/ReviewCyclePage.vue"),
 	"hrTalent.hrGoals": () => import("@/add-os/modules/hr/views/performance/GoalsPage.vue"),
+	"hrTalent.hrCourses": () => import("@/add-os/modules/hr/views/training/CoursesPage.vue"),
+	"hrTalent.hrTrainingSessions": () => import("@/add-os/modules/hr/views/training/TrainingSessionsPage.vue"),
+	"hrTalent.hrTrainingSession": () => import("@/add-os/modules/hr/views/training/TrainingSessionPage.vue"),
+	"hrTalent.hrCertifications": () => import("@/add-os/modules/hr/views/training/CertificationsPage.vue"),
+	"hrTalent.hrLearningBudgets": () => import("@/add-os/modules/hr/views/training/LearningBudgetsPage.vue"),
 	"hrSettings.hrDocumentTypes": () => import("@/add-os/modules/hr/views/core/DocumentTypesPage.vue"),
 	"hrSettings.hrChecklistTemplates": () => import("@/add-os/modules/hr/views/core/ChecklistTemplatesPage.vue"),
 	"hrSettings.hrApprovalFlows": () => import("@/add-os/modules/hr/views/approvals/ApprovalFlowsPage.vue"),
@@ -156,6 +161,7 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"myHr.hrMyBenefits": () => import("@/add-os/modules/hr/views/benefits/MyBenefitsPage.vue"),
 	"myHr.hrMyRecruitment": () => import("@/add-os/modules/hr/views/recruitment/MyRecruitmentPage.vue"),
 	"myHr.hrMyPerformance": () => import("@/add-os/modules/hr/views/performance/MyPerformancePage.vue"),
+	"myHr.hrMyTraining": () => import("@/add-os/modules/hr/views/training/MyTrainingPage.vue"),
 	"myHr.hrMyCertificate": () => import("@/add-os/modules/hr/views/core/MyCertificatePage.vue")
 }
 

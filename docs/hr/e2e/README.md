@@ -17,6 +17,7 @@
 | [6.6-benefits.md](6.6-benefits.md) | المزايا | 6.5 (مكوّن بدل) |
 | [6.7-recruitment.md](6.7-recruitment.md) | التوظيف | 6.0، 6.1، 6.5 (أجر العرض) |
 | [6.8-performance.md](6.8-performance.md) | الأداء | 6.0 |
+| [6.9-training.md](6.9-training.md) | التدريب | 6.0، 6.1 (مسار طلب صرف التعلّم) |
 
 ## الحسابات المطلوبة
 

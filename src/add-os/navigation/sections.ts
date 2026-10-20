@@ -377,7 +377,12 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "hrCandidate", path: "candidates/:id", hidden: true, permission: "hr.recruitment.view" },
 			{ key: "hrReviewCycles", path: "review-cycles", permission: "hr.performance.view" },
 			{ key: "hrReviewCycle", path: "review-cycles/:id", hidden: true, permission: "hr.performance.view" },
-			{ key: "hrGoals", path: "goals", permission: "hr.performance.view" }
+			{ key: "hrGoals", path: "goals", permission: "hr.performance.view" },
+			{ key: "hrCourses", path: "courses", permission: "hr.training.view" },
+			{ key: "hrTrainingSessions", path: "training-sessions", permission: "hr.training.view" },
+			{ key: "hrTrainingSession", path: "training-sessions/:id", hidden: true, permission: "hr.training.view" },
+			{ key: "hrCertifications", path: "certifications", permission: "hr.training.view" },
+			{ key: "hrLearningBudgets", path: "learning-budgets", permission: "hr.training.view" }
 		]
 	},
 	{
@@ -421,6 +426,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "hrMyBenefits", path: "benefits" },
 			{ key: "hrMyRecruitment", path: "jobs" },
 			{ key: "hrMyPerformance", path: "performance" },
+			{ key: "hrMyTraining", path: "training" },
 			{ key: "hrMyCertificate", path: "certificates/:kind", hidden: true }
 		]
 	},

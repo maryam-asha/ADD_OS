@@ -1737,7 +1737,13 @@
 			"hrReviewCycle": "دورة التقييم",
 			"hrGoals": "الأهداف",
 			"hrReviewTemplates": "نماذج التقييم",
-			"hrMyPerformance": "أهدافي وتقييماتي"
+			"hrMyPerformance": "أهدافي وتقييماتي",
+			"hrCourses": "الدورات التدريبية",
+			"hrTrainingSessions": "جلسات التدريب",
+			"hrTrainingSession": "جلسة التدريب",
+			"hrCertifications": "الشهادات",
+			"hrLearningBudgets": "ميزانيات التعلّم",
+			"hrMyTraining": "تدريبي"
 		}
 	},
 	"resourceCrud": {

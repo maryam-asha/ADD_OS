@@ -1,0 +1,236 @@
+{
+	"hrTraining": {
+		"status": {
+			"session": {
+				"scheduled": "Scheduled",
+				"completed": "Completed",
+				"cancelled": "Cancelled"
+			},
+			"enrollment": {
+				"enrolled": "Enrolled",
+				"completed": "Completed",
+				"no_show": "Did not attend",
+				"cancelled": "Cancelled"
+			},
+			"request": {
+				"pending": "Awaiting approval",
+				"approved": "Approved",
+				"rejected": "Rejected",
+				"cancelled": "Withdrawn"
+			}
+		},
+		"delivery": {
+			"in_person": "In person",
+			"online": "Online",
+			"blended": "Blended"
+		},
+		"entryKind": {
+			"allocation": "Allocation",
+			"spend": "Spending",
+			"adjustment": "Adjustment"
+		},
+		"profile": {
+			"tab": "Training",
+			"certificationsSubtitle": "Granted by completed sessions or earned outside",
+			"budgetSubtitle": "The year's balance, what is still available, and every entry"
+		},
+		"courses": {
+			"description": "The course catalogue: what each course teaches, who gives it and how, and the certification completing it grants.",
+			"add": "New course",
+			"edit": "Edit course",
+			"created": "The course has been added.",
+			"updated": "The course has been updated.",
+			"empty": "No courses yet.",
+			"codeHint": "Letters, digits, dashes and underscores; unique.",
+			"title": "Title",
+			"titleAr": "Title (Arabic)",
+			"titleEn": "Title (English)",
+			"descriptionLabel": "Course description",
+			"descriptionAr": "Description (Arabic)",
+			"descriptionEn": "Description (English)",
+			"provider": "Provider",
+			"delivery": "Delivery",
+			"duration": "Length",
+			"hoursUnit": "hours",
+			"hoursValue": "{n} h",
+			"cost": "Cost",
+			"certification": "Certification",
+			"certificationHint": "Leave empty if completing the course does not certify. With a name, everyone who completes a session receives it.",
+			"validMonths": "Valid for (months)",
+			"validMonthsHint": "Empty: it does not expire.",
+			"sessions": "Sessions",
+			"problems": {
+				"code": "Enter a code of letters, digits, dashes or underscores (up to 32).",
+				"currency": "Choose the currency of the cost."
+			}
+		},
+		"sessions": {
+			"description": "Every training session with its seats taken. Open a session to enroll employees, complete it or cancel it.",
+			"add": "New session",
+			"edit": "Edit session",
+			"created": "The session has been scheduled.",
+			"updated": "The session has been updated.",
+			"empty": "No sessions match.",
+			"notFound": "This session was not found.",
+			"course": "Course",
+			"pickCourse": "Choose an active course.",
+			"when": "When",
+			"startsOn": "First day",
+			"endsOn": "Last day",
+			"endingFrom": "Ending on or after",
+			"location": "Location",
+			"trainer": "Trainer",
+			"capacity": "Seats",
+			"capacityHint": "Empty: no limit.",
+			"seats": "Seats taken",
+			"noLimit": "No seat limit",
+			"full": "No seats left",
+			"selfEnrollment": "Employees may enroll themselves",
+			"selfEnrollmentHint": "They see it under My training until the first day, while seats remain.",
+			"selfEnrollmentShort": "Self-enrollment",
+			"grants": "Completing this session grants: {name}",
+			"cancel": "Cancel session",
+			"cancelConfirm": "The session and its {n} active enrollments will be cancelled, and those enrolled will be told. This cannot be undone.",
+			"cancelYes": "Cancel the session",
+			"cancelled": "The session has been cancelled.",
+			"problems": {
+				"dates": "Choose the first and last day.",
+				"order": "The last day cannot be before the first."
+			}
+		},
+		"enrollments": {
+			"title": "Enrollments",
+			"empty": "Nobody is enrolled yet.",
+			"completedOn": "Completed on",
+			"cancel": "Cancel enrollment",
+			"cancelConfirm": "Cancel {name}'s enrollment? Their seat is freed.",
+			"cancelled": "The enrollment has been cancelled."
+		},
+		"enroll": {
+			"title": "Enroll employees",
+			"hint": "Each one is told. If any one cannot be enrolled, nobody is, and the reason is shown.",
+			"seatsLeft": "Seats left: {n}",
+			"confirm": "Enroll",
+			"done": "{n} enrolled."
+		},
+		"complete": {
+			"title": "Complete session",
+			"hint": "Everyone still enrolled completes on the last day, except those marked as not attending. A score out of 100 is optional.",
+			"hintCertifies": "Everyone still enrolled completes on the last day, except those marked as not attending, and receives the course's certification. A score out of 100 is optional.",
+			"nobody": "Nobody is enrolled; the session will simply be marked completed.",
+			"noShow": "Did not attend",
+			"score": "Score",
+			"confirm": "Complete the session",
+			"done": "The session has been completed.",
+			"afterEnd": "Available once the session's last day has come."
+		},
+		"certifications": {
+			"title": "Certifications",
+			"description": "Every certification on file. Filter by expiry to see what needs renewing.",
+			"add": "Record certification",
+			"addHint": "One earned outside. Its expiry, if any, will appear in the HR alerts.",
+			"edit": "Edit certification",
+			"recorded": "The certification has been recorded.",
+			"updated": "The certification has been updated.",
+			"delete": "Delete certification",
+			"deleteConfirm": "Delete \"{name}\" from the file?",
+			"deleted": "The certification has been deleted.",
+			"empty": "No certifications.",
+			"pickEmployee": "Choose an employee to record a certification for them.",
+			"name": "Certification",
+			"nameAr": "Certification name (Arabic)",
+			"nameEn": "Certification name (English)",
+			"issuer": "Issued by",
+			"reference": "Reference",
+			"issuedOn": "Issued on",
+			"expiresOn": "Expires on",
+			"expiresHint": "Empty: it does not expire.",
+			"expiringBy": "Expiring by",
+			"noExpiry": "Does not expire",
+			"expired": "Expired",
+			"course": "From course",
+			"fromCourse": "From a course",
+			"outside": "Earned outside",
+			"problems": {
+				"issued": "Choose the issue date.",
+				"order": "The expiry cannot be before the issue date."
+			}
+		},
+		"budgets": {
+			"title": "Learning budget",
+			"description": "Each employee's learning budget for a year. Open a row for its ledger and to adjust it.",
+			"balances": "Balances",
+			"search": "Name or employee number",
+			"empty": "No budget has been allocated for {year}.",
+			"year": "Year",
+			"balance": "Balance",
+			"balanceHint": "Allocations and adjustments, less spending",
+			"available": "Available",
+			"availableHint": "The balance less requests awaiting approval",
+			"amount": "Amount",
+			"when": "When",
+			"kind": "Entry",
+			"note": "Note",
+			"noEntries": "No entries this year.",
+			"ledgerTitle": "{name}: learning budget {year}",
+			"allocate": "Allocate budget",
+			"allocateHint": "Gives the same amount for the year to everyone employed today, or to the employees you choose.",
+			"amountEach": "Amount per employee",
+			"who": "To",
+			"everyone": "Everyone employed today",
+			"chosen": "Chosen employees",
+			"skipHint": "Anyone already allocated for that year is skipped, so nobody receives it twice.",
+			"allocateConfirm": "Allocate",
+			"allocated": "The budget has been allocated.",
+			"adjust": "Adjust",
+			"adjustHint": "Adds to or takes from the {year} budget. The note stays on the ledger.",
+			"adjustAmount": "Amount",
+			"adjustSign": "Positive adds, negative takes away.",
+			"adjusted": "The budget has been adjusted.",
+			"problems": {
+				"year": "Enter the year.",
+				"amount": "Enter an amount above zero.",
+				"employees": "Choose at least one employee.",
+				"nonZero": "Enter an amount other than zero.",
+				"note": "Write the reason for the adjustment."
+			}
+		},
+		"requests": {
+			"title": "Spending requests",
+			"empty": "No requests.",
+			"decidedWhere": "Requests are approved or rejected in the approvals inbox; the final approval checks the balance again.",
+			"what": "Course or activity",
+			"whatPlaceholder": "For example: a barista course at Coffee Lab",
+			"startsOn": "Starts on",
+			"askedOn": "Asked on",
+			"yearHint": "Draws on the budget of the year it starts in; without a date, this year's.",
+			"availableNow": "Available now: {amount}",
+			"add": "New request",
+			"addHint": "Ask to spend your learning budget on learning outside. It goes for approval.",
+			"send": "Send for approval",
+			"sent": "The request has been sent for approval.",
+			"withdraw": "Withdraw",
+			"withdrawConfirm": "Withdraw the request for \"{title}\"?",
+			"withdrawn": "The request has been withdrawn.",
+			"problems": {
+				"title": "Say what the learning is."
+			}
+		},
+		"mine": {
+			"description": "Sessions you can enroll in, your enrollments and certifications, and your learning budget.",
+			"tabs": {
+				"sessions": "Open sessions",
+				"enrollments": "My enrollments",
+				"certifications": "My certifications",
+				"budget": "My budget"
+			},
+			"noOpen": "No sessions are open for enrollment right now.",
+			"noEnrollments": "You have not enrolled in any session.",
+			"enroll": "Enroll",
+			"enrollConfirm": "Enroll in {course}, {when}?",
+			"enrolled": "You are enrolled.",
+			"alreadyIn": "You are enrolled",
+			"cancelConfirm": "Cancel your enrollment in {course}? Your seat is freed."
+		}
+	}
+}

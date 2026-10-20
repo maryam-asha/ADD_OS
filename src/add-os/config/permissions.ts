@@ -421,3 +421,15 @@ export function canViewPerformance(): boolean {
 export function canManagePerformance(): boolean {
 	return can("hr.performance.manage")
 }
+
+// ── HR training ─────────────────────────────────────────────────────────────
+
+/** Courses, sessions and their enrollments, certifications, learning budgets and requests, read only — and the training tab on a file. */
+export function canViewTraining(): boolean {
+	return can("hr.training.view")
+}
+
+/** Courses, sessions (enroll, complete, cancel), certifications, and allocating or adjusting budgets. */
+export function canManageTraining(): boolean {
+	return can("hr.training.manage")
+}

@@ -19,6 +19,7 @@ import hrPayroll from "./hr-payroll.json"
 import hrPerformance from "./hr-performance.json"
 import hrRecruitment from "./hr-recruitment.json"
 import hrTimesheets from "./hr-timesheets.json"
+import hrTraining from "./hr-training.json"
 import hr from "./hr.json"
 
 const messages = {
@@ -31,7 +32,8 @@ const messages = {
 	...hrPayroll,
 	...hrBenefits,
 	...hrRecruitment,
-	...hrPerformance
+	...hrPerformance,
+	...hrTraining
 	// ...spread future ADD OS module bundles here
 }
 
