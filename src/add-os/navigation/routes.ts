@@ -127,6 +127,12 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"hrPay.hrBenefit": () => import("@/add-os/modules/hr/views/benefits/BenefitPage.vue"),
 	"hrPay.hrBenefitGrants": () => import("@/add-os/modules/hr/views/benefits/BenefitGrantsPage.vue"),
 	"hrPay.hrEmployeeCost": () => import("@/add-os/modules/hr/views/benefits/EmployeeCostPage.vue"),
+	"hrTalent.hrRequisitions": () => import("@/add-os/modules/hr/views/recruitment/RequisitionsPage.vue"),
+	"hrTalent.hrJobOpenings": () => import("@/add-os/modules/hr/views/recruitment/JobOpeningsPage.vue"),
+	"hrTalent.hrJobOpening": () => import("@/add-os/modules/hr/views/recruitment/JobOpeningPage.vue"),
+	"hrTalent.hrApplication": () => import("@/add-os/modules/hr/views/recruitment/ApplicationPage.vue"),
+	"hrTalent.hrCandidates": () => import("@/add-os/modules/hr/views/recruitment/CandidatesPage.vue"),
+	"hrTalent.hrCandidate": () => import("@/add-os/modules/hr/views/recruitment/CandidatePage.vue"),
 	"hrSettings.hrDocumentTypes": () => import("@/add-os/modules/hr/views/core/DocumentTypesPage.vue"),
 	"hrSettings.hrChecklistTemplates": () => import("@/add-os/modules/hr/views/core/ChecklistTemplatesPage.vue"),
 	"hrSettings.hrApprovalFlows": () => import("@/add-os/modules/hr/views/approvals/ApprovalFlowsPage.vue"),
@@ -135,6 +141,7 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"hrSettings.hrCostCenters": () => import("@/add-os/modules/hr/views/timesheets/CostCentersPage.vue"),
 	"hrSettings.hrPayComponents": () => import("@/add-os/modules/hr/views/payroll/PayComponentsPage.vue"),
 	"hrSettings.hrRateTables": () => import("@/add-os/modules/hr/views/payroll/RateTablesPage.vue"),
+	"hrSettings.hrPipelineStages": () => import("@/add-os/modules/hr/views/recruitment/PipelineStagesPage.vue"),
 	"myHr.myProfile": () => import("@/add-os/modules/hr/views/core/MyHrPage.vue"),
 	"myHr.hrMyApprovals": () => import("@/add-os/modules/hr/views/approvals/MyApprovalsPage.vue"),
 	"myHr.hrMyLeave": () => import("@/add-os/modules/hr/views/leave/MyLeavePage.vue"),
@@ -143,6 +150,7 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"myHr.hrMyPay": () => import("@/add-os/modules/hr/views/payroll/MyPayPage.vue"),
 	"myHr.hrMyPayslip": () => import("@/add-os/modules/hr/views/payroll/PayslipPage.vue"),
 	"myHr.hrMyBenefits": () => import("@/add-os/modules/hr/views/benefits/MyBenefitsPage.vue"),
+	"myHr.hrMyRecruitment": () => import("@/add-os/modules/hr/views/recruitment/MyRecruitmentPage.vue"),
 	"myHr.hrMyCertificate": () => import("@/add-os/modules/hr/views/core/MyCertificatePage.vue")
 }
 

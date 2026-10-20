@@ -397,3 +397,15 @@ export function canViewBenefits(): boolean {
 export function canManageBenefits(): boolean {
 	return can("hr.benefits.manage")
 }
+
+// ── HR recruitment ──────────────────────────────────────────────────────────
+
+/** Requisitions, openings, candidates, applications, interviews and offers, read only. */
+export function canViewRecruitment(): boolean {
+	return can("hr.recruitment.view")
+}
+
+/** Every recruitment change. Hiring a candidate also needs canHireEmployees. */
+export function canManageRecruitment(): boolean {
+	return can("hr.recruitment.manage")
+}

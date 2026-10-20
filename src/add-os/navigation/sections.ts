@@ -360,6 +360,24 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		]
 	},
 	{
+		// Talent (add/hr Recruitment; performance and training join it).
+		// Reading needs hr.recruitment.view; every change, on its page,
+		// hr.recruitment.manage.
+		key: "hrTalent",
+		path: "/hr-talent",
+		icon: "carbon:growth",
+		status: "active",
+		roles: ["all"],
+		pages: [
+			{ key: "hrRequisitions", path: "requisitions", permission: "hr.recruitment.view" },
+			{ key: "hrJobOpenings", path: "job-openings", permission: "hr.recruitment.view" },
+			{ key: "hrJobOpening", path: "job-openings/:id", hidden: true, permission: "hr.recruitment.view" },
+			{ key: "hrApplication", path: "applications/:id", hidden: true, permission: "hr.recruitment.view" },
+			{ key: "hrCandidates", path: "candidates", permission: "hr.recruitment.view" },
+			{ key: "hrCandidate", path: "candidates/:id", hidden: true, permission: "hr.recruitment.view" }
+		]
+	},
+	{
 		// HR setup. Each page needs its own setup permission (hr.settings.manage,
 		// hr.approvals.manage), so the section shows only to whoever runs HR.
 		key: "hrSettings",
@@ -375,7 +393,8 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "hrTimeSettings", path: "time", permission: "hr.attendance.view" },
 			{ key: "hrCostCenters", path: "cost-centers", permission: "hr.timesheets.view" },
 			{ key: "hrPayComponents", path: "pay-components", permission: "hr.payroll.view" },
-			{ key: "hrRateTables", path: "rate-tables", permission: "hr.payroll.view" }
+			{ key: "hrRateTables", path: "rate-tables", permission: "hr.payroll.view" },
+			{ key: "hrPipelineStages", path: "pipeline-stages", permission: "hr.recruitment.view" }
 		]
 	},
 	{
@@ -396,6 +415,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "hrMyPay", path: "pay" },
 			{ key: "hrMyPayslip", path: "pay/payslips/:id", hidden: true },
 			{ key: "hrMyBenefits", path: "benefits" },
+			{ key: "hrMyRecruitment", path: "jobs" },
 			{ key: "hrMyCertificate", path: "certificates/:kind", hidden: true }
 		]
 	},

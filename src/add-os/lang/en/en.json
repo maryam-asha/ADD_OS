@@ -1598,7 +1598,8 @@
 			"myHr": "My HR",
 			"hrSettings": "HR settings",
 			"hrTime": "Time and leave",
-			"hrPay": "Pay and benefits"
+			"hrPay": "Pay and benefits",
+			"hrTalent": "Talent"
 		},
 		"pages": {
 			"overview": "Overview",
@@ -1719,7 +1720,15 @@
 			"hrBenefit": "Benefit",
 			"hrBenefitGrants": "Benefit grants",
 			"hrEmployeeCost": "Employee cost",
-			"hrMyBenefits": "My benefits"
+			"hrMyBenefits": "My benefits",
+			"hrRequisitions": "Requisitions",
+			"hrJobOpenings": "Job openings",
+			"hrJobOpening": "Job opening",
+			"hrApplication": "Application",
+			"hrCandidates": "Candidates",
+			"hrCandidate": "Candidate",
+			"hrPipelineStages": "Hiring stages",
+			"hrMyRecruitment": "Jobs and hiring"
 		}
 	},
 	"resourceCrud": {

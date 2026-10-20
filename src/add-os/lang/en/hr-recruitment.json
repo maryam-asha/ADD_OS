@@ -1,0 +1,268 @@
+{
+	"hrRecruitment": {
+		"employmentType": "Employment",
+		"filedOn": "Filed",
+		"reason": {
+			"new_position": "New position",
+			"replacement": "Replacement"
+		},
+		"visibility": {
+			"internal": "Internal",
+			"public": "Public"
+		},
+		"source": {
+			"label": "Source",
+			"careers": "Careers page",
+			"internal": "Employee",
+			"referral": "Referral",
+			"agency": "Agency",
+			"direct": "Entered by HR"
+		},
+		"interviewMode": {
+			"in_person": "In person",
+			"video": "Video",
+			"phone": "Phone"
+		},
+		"recommendation": {
+			"strong_yes": "Strong yes",
+			"yes": "Yes",
+			"no": "No",
+			"strong_no": "Strong no"
+		},
+		"status": {
+			"requisition": {
+				"pending": "Awaiting approval",
+				"approved": "Approved",
+				"rejected": "Rejected",
+				"filled": "Filled",
+				"closed": "Closed",
+				"cancelled": "Cancelled"
+			},
+			"opening": {
+				"draft": "Draft",
+				"open": "Open",
+				"closed": "Closed"
+			},
+			"offer": {
+				"pending": "Awaiting approval",
+				"approved": "Approved",
+				"rejected": "Rejected",
+				"accepted": "Accepted",
+				"declined": "Declined",
+				"withdrawn": "Withdrawn"
+			},
+			"interview": {
+				"scheduled": "Scheduled",
+				"completed": "Completed",
+				"cancelled": "Cancelled"
+			}
+		},
+		"requisitions": {
+			"description": "Every request to hire, newest first. A requisition is decided in the approval requests; once approved it takes job openings, and it is filled when its headcount is hired.",
+			"add": "New requisition",
+			"hint": "It goes for approval. Once approved, job openings can be added to it.",
+			"detail": "Requisition",
+			"title": "Job title",
+			"titlePlaceholder": "e.g. Community manager",
+			"position": "Position",
+			"grade": "Grade",
+			"headcount": "Headcount",
+			"hiredOf": "{hired} of {n} hired",
+			"reason": "Reason",
+			"replaces": "Replaces",
+			"hiringManager": "Hiring manager",
+			"budget": "Pay budget",
+			"budgetMin": "Budget from",
+			"budgetMax": "Budget to",
+			"sent": "Requisition sent for approval.",
+			"empty": "No requisitions.",
+			"decidedWhere": "Approving or rejecting it happens in the approval requests.",
+			"cancel": "Cancel requisition",
+			"close": "Close requisition",
+			"confirm": {
+				"cancel": "Cancel this requisition? A pending one withdraws its approval request.",
+				"close": "Close this requisition? It stops hiring, whoever is hired so far."
+			},
+			"problems": {
+				"unit": "Choose the unit.",
+				"replaces": "Choose who is being replaced.",
+				"manager": "Choose the hiring manager.",
+				"budget": "The budget's upper end is below its lower end."
+			}
+		},
+		"openings": {
+			"title": "Job openings",
+			"description": "Every job opening, newest first. An opening is added from its approved requisition and opens on its own page, with its applicants on a board by stage.",
+			"add": "Add opening",
+			"edit": "Edit opening",
+			"hint": "The advert for this requisition. Leave the title empty to use the requisition's.",
+			"untitled": "Untitled opening",
+			"titleFromRequisition": "The requisition's title",
+			"descriptionLabel": "Description",
+			"descriptionAr": "Description (Arabic)",
+			"descriptionEn": "Description (English)",
+			"fromRequisition": "As the requisition",
+			"location": "Location",
+			"visibility": "Seen by",
+			"visibilityHint": {
+				"internal": "Employees only, in their self-service.",
+				"public": "The careers page and employees."
+			},
+			"closesOn": "Closes on",
+			"closesOnDate": "Closes {date}",
+			"openNow": "Open it for applications now",
+			"open": "Open",
+			"close": "Close",
+			"created": "Opening added.",
+			"updated": "Opening updated.",
+			"empty": "No job openings.",
+			"noneYet": "No openings yet.",
+			"afterApproval": "Openings can be added once the requisition is approved.",
+			"notFound": "This job opening does not exist."
+		},
+		"board": {
+			"since": "Since {date}",
+			"emptyColumn": "Nobody here.",
+			"partial": "Showing the first {n} applications."
+		},
+		"candidates": {
+			"title": "Candidate",
+			"description": "Every candidate on file, newest first. Candidates never hired are deleted with their CVs after the retention period.",
+			"search": "Name, email or phone",
+			"name": "Name",
+			"employee": "Employee",
+			"since": "On file since",
+			"notes": "Notes",
+			"edit": "Edit candidate",
+			"erase": "Erase candidate",
+			"eraseConfirm": "Erase {name} and everything about them, CVs included? This is for a request to be forgotten and cannot be undone. An employee record made from them stays.",
+			"erased": "Candidate erased.",
+			"consented": "Agreed to their data being kept on {date}",
+			"empty": "No candidates.",
+			"notFound": "This candidate does not exist."
+		},
+		"applications": {
+			"title": "Applications",
+			"add": "Add application",
+			"added": "Application added.",
+			"who": "Candidate",
+			"newCandidate": "New person",
+			"existingCandidate": "On file",
+			"referredBy": "Referred by",
+			"coverLetter": "Cover letter",
+			"details": "Application",
+			"appliedOn": "Applied",
+			"stage": "Stage",
+			"history": "How it moved",
+			"noHistory": "No moves yet.",
+			"next": "Next steps",
+			"moveTo": "Move to stage",
+			"move": "Move",
+			"reject": "Reject",
+			"rejectHint": "The application ends. The reason is kept on it.",
+			"withdraw": "Withdraw",
+			"withdrawHint": "The candidate withdrew; the application ends.",
+			"notFound": "This application does not exist."
+		},
+		"cv": {
+			"label": "CV",
+			"choose": "Choose a CV",
+			"hint": "PDF or Word.",
+			"open": "Open CV"
+		},
+		"interviews": {
+			"title": "Interviews",
+			"schedule": "Schedule interview",
+			"scheduled": "Interview scheduled.",
+			"time": "Time",
+			"duration": "Duration",
+			"minutes": "min",
+			"mode": "How",
+			"location": "Where",
+			"link": "Meeting link",
+			"interviewers": "Interviewers",
+			"notified": "Each interviewer is told, and only they can score the interview.",
+			"scorecards": "Scorecards",
+			"noScorecards": "None yet",
+			"complete": "Completed",
+			"cancel": "Cancel interview",
+			"cancelConfirm": "Cancel this interview?",
+			"empty": "No interviews."
+		},
+		"offers": {
+			"title": "Offers",
+			"make": "Make offer",
+			"hint": "It goes to the requisition's approval before it is made, and moves the application to the offer stage.",
+			"startOn": "Starts on",
+			"expiresOn": "Stands until",
+			"pay": "Pay",
+			"payHint": "Becomes the employee's pay when they are hired.",
+			"noPayComponents": "Pay components are not available to this account; the offer carries its terms only.",
+			"terms": "Terms",
+			"made": "Offer sent for approval.",
+			"waitingApproval": "The offer is awaiting approval.",
+			"waitingCandidate": "The offer is approved. Record the candidate's answer when they give it.",
+			"accept": "Accepted",
+			"acceptConfirm": "Record that the candidate accepted this offer? They can then be hired.",
+			"decline": "Declined",
+			"declineConfirm": "Record that the candidate declined this offer?",
+			"withdraw": "Withdraw offer",
+			"withdrawConfirm": "Withdraw this offer?",
+			"empty": "No offers."
+		},
+		"hire": {
+			"title": "Hire",
+			"hint": "The candidate becomes an employee from what is already known: their name, phone and email, the requisition's unit, position, grade, manager and employment type, and the offer's start date and pay.",
+			"alreadyEmployee": "This candidate is already an employee. A move inside ADD is recorded on their file as a transfer or a promotion instead.",
+			"afterwards": "Their file opens with the onboarding tasks; anything else is completed there.",
+			"confirm": "Hire",
+			"done": "Candidate hired.",
+			"needsPermission": "Hiring needs the permission to add employees."
+		},
+		"stages": {
+			"description": "The stages an application moves through. Add and order the open ones; offer, hired, rejected and withdrawn are fixed and reached only by their own action.",
+			"add": "Add stage",
+			"edit": "Edit stage",
+			"type": "Kind",
+			"types": {
+				"open": "In progress",
+				"offer": "Offer",
+				"hired": "Hired",
+				"rejected": "Rejected",
+				"withdrawn": "Withdrawn"
+			},
+			"sortHint": "From 1 to 79: lower comes first.",
+			"created": "Stage added.",
+			"updated": "Stage updated."
+		},
+		"scorecard": {
+			"title": "Scorecard",
+			"for": "{name}, for {job}",
+			"recommendation": "Recommendation",
+			"ratings": "Ratings",
+			"criterion": "What you rated",
+			"addCriterion": "Add a rating",
+			"fill": "Fill in",
+			"saved": "Scorecard saved."
+		},
+		"mine": {
+			"description": "Open jobs you can apply to, your applications, the requisitions you file as a hiring manager, and the interviews you conduct.",
+			"tabs": {
+				"jobs": "Open jobs",
+				"applications": "My applications",
+				"requisitions": "My requisitions",
+				"interviews": "Interviews I conduct"
+			},
+			"apply": "Apply",
+			"applyTo": "Apply: {job}",
+			"applyHint": "HR sees your name and contact details from your file.",
+			"applied": "Applied",
+			"sent": "Application sent.",
+			"noJobs": "No open jobs at the moment.",
+			"noApplications": "You have not applied to any job.",
+			"requisitionsHint": "As a hiring manager, ask to hire for your team.",
+			"noRequisitions": "No requisitions.",
+			"noInterviews": "No interviews."
+		}
+	}
+}

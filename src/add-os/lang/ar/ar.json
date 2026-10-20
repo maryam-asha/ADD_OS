@@ -1602,7 +1602,8 @@
 			"myHr": "شؤوني الوظيفية",
 			"hrSettings": "إعدادات الموارد البشرية",
 			"hrTime": "الدوام والإجازات",
-			"hrPay": "الرواتب والمزايا"
+			"hrPay": "الرواتب والمزايا",
+			"hrTalent": "التوظيف والمواهب"
 		},
 		"pages": {
 			"overview": "نظرة عامة",
@@ -1723,7 +1724,15 @@
 			"hrBenefit": "الميزة",
 			"hrBenefitGrants": "منح المزايا",
 			"hrEmployeeCost": "كلفة الموظف",
-			"hrMyBenefits": "مزاياي"
+			"hrMyBenefits": "مزاياي",
+			"hrRequisitions": "طلبات التوظيف",
+			"hrJobOpenings": "الشواغر",
+			"hrJobOpening": "الشاغر",
+			"hrApplication": "طلب التقدّم",
+			"hrCandidates": "المتقدمون",
+			"hrCandidate": "المتقدّم",
+			"hrPipelineStages": "مراحل التوظيف",
+			"hrMyRecruitment": "الوظائف الداخلية والتوظيف"
 		}
 	},
 	"resourceCrud": {

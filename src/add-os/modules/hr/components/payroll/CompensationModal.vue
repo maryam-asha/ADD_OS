@@ -16,33 +16,8 @@
 			</n-form-item>
 		</div>
 
-		<div class="flex flex-col gap-2">
-			<div v-for="(line, index) in lines" :key="line.key" class="flex flex-wrap items-center gap-2">
-				<n-select
-					v-model:value="line.pay_component_id"
-					:options="optionsFor(line.pay_component_id)"
-					:placeholder="t('hrPayroll.pay.component')"
-					:aria-label="t('hrPayroll.pay.component')"
-					filterable
-					class="min-w-0 flex-1"
-				/>
-				<n-input-number v-model:value="line.amount" :min="0" :max="9999999999" :show-button="false" :aria-label="t('hrPayroll.pay.amount')" class="w-36" />
-				<div class="w-36">
-					<CurrencySelect v-model:value="line.currency" />
-				</div>
-				<n-button text type="error" :aria-label="t('hr.common.delete')" :title="t('hr.common.delete')" @click="lines.splice(index, 1)">
-					<template #icon><Icon name="carbon:trash-can" :size="18" /></template>
-				</n-button>
-			</div>
-		</div>
-
-		<div class="mt-3 flex flex-wrap items-center justify-between gap-3">
-			<n-button size="small" :disabled="lines.length >= MAX_LINES" @click="addLine">
-				<template #icon><Icon name="carbon:add" :size="16" /></template>
-				{{ t("hrPayroll.pay.addLine") }}
-			</n-button>
-			<span v-if="!lines.length" class="text-sm text-warning-text">{{ t("hrPayroll.pay.endsPay") }}</span>
-		</div>
+		<PayLinesEditor v-model:lines="lines" :components :max="MAX_LINES" />
+		<p v-if="!lines.length" class="mt-3 text-sm text-warning-text">{{ t("hrPayroll.pay.endsPay") }}</p>
 		<p class="mt-3 text-xs text-secondary">{{ t("hrPayroll.pay.percentHint") }}</p>
 
 		<template #footer>
@@ -55,20 +30,18 @@
 </template>
 
 <script setup lang="ts">
-import type { SelectOption } from "naive-ui"
+import type { PayLine } from "@/add-os/modules/hr/components/payroll/PayLinesEditor.vue"
 import type { Compensation, PayComponent } from "@/add-os/modules/hr/types/payroll"
-import { NButton, NDatePicker, NFormItem, NInput, NInputNumber, NSelect, useMessage } from "naive-ui"
+import { NButton, NDatePicker, NFormItem, NInput, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
-import CurrencySelect from "@/add-os/modules/hr/components/payroll/CurrencySelect.vue"
+import PayLinesEditor from "@/add-os/modules/hr/components/payroll/PayLinesEditor.vue"
 import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
 import { nullable } from "@/add-os/modules/hr/utils/forms"
 import { todayIso } from "@/add-os/modules/hr/utils/leave"
 import { addDays } from "@/add-os/modules/hr/utils/time"
-import { centerName } from "@/add-os/modules/hr/utils/timesheets"
 import { changeCompensation } from "@/add-os/services/hr/payroll"
-import Icon from "@/components/common/Icon.vue"
 
 /**
  * A pay change from a date: the whole pay as it will be, each active
@@ -89,17 +62,10 @@ const { t } = useI18n()
 const message = useMessage()
 const saving = ref(false)
 
-interface Line {
-	key: number
-	pay_component_id: number | null
-	amount: number | null
-	currency: string | null
-}
-
 let nextKey = 0
 const effectiveFrom = ref<string | null>(todayIso())
 const reason = ref("")
-const lines = ref<Line[]>([])
+const lines = ref<PayLine[]>([])
 
 watch(show, open => {
 	if (!open) return
@@ -119,11 +85,6 @@ function toIso(ts: number): string {
 /** A new line takes the currency the others use. */
 function addLine() {
 	lines.value.push({ key: ++nextKey, pay_component_id: null, amount: null, currency: lines.value.find(l => l.currency)?.currency ?? null })
-}
-
-function optionsFor(own: number | null): SelectOption[] {
-	const taken = new Set(lines.value.map(l => l.pay_component_id).filter(id => id !== own))
-	return props.components.filter(c => c.is_active && !taken.has(c.id)).map(c => ({ label: `${centerName(c)} · ${t(`hrPayroll.kind.${c.kind}`)}`, value: c.id }))
 }
 
 const ready = computed(() => !!effectiveFrom.value && lines.value.every(l => l.pay_component_id !== null && l.amount !== null && !!l.currency))

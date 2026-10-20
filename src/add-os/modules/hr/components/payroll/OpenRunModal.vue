@@ -17,14 +17,7 @@
 		<p class="-mt-2 mb-3 text-sm text-secondary">{{ t(`hrPayroll.runs.kindHint.${form.kind}`) }}</p>
 
 		<n-form-item v-if="form.kind === 'off_cycle'" :label="t('hrPayroll.runs.employees')">
-			<div class="flex w-full flex-col gap-2">
-				<EmployeeSelect v-model:value="picking" include-former :exclude="form.employees.map(e => e.id)" class="w-full" @update:value="addEmployee" />
-				<div v-if="form.employees.length" class="flex flex-wrap gap-2">
-					<n-tag v-for="employee in form.employees" :key="employee.id" closable round @close="removeEmployee(employee.id)">
-						{{ employee.label }}
-					</n-tag>
-				</div>
-			</div>
+			<EmployeeMultiSelect v-model:value="form.employeeIds" include-former />
 		</n-form-item>
 
 		<n-checkbox v-model:checked="form.parallel" class="mb-1">{{ t("hrPayroll.runs.parallel") }}</n-checkbox>
@@ -46,18 +39,16 @@
 <script setup lang="ts">
 import type { SelectOption } from "naive-ui"
 import type { PayrollRun, PayrollRunKind } from "@/add-os/modules/hr/types/payroll"
-import { NButton, NCheckbox, NFormItem, NInput, NInputNumber, NSelect, NTag, useMessage } from "naive-ui"
+import { NButton, NCheckbox, NFormItem, NInput, NInputNumber, NSelect, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { currentLocale } from "@/add-os/lang/currentLocale"
-import EmployeeSelect from "@/add-os/modules/hr/components/EmployeeSelect.vue"
+import EmployeeMultiSelect from "@/add-os/modules/hr/components/EmployeeMultiSelect.vue"
 import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import CurrencySelect from "@/add-os/modules/hr/components/payroll/CurrencySelect.vue"
-import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
+import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import { nullable } from "@/add-os/modules/hr/utils/forms"
 import { todayIso } from "@/add-os/modules/hr/utils/leave"
-import { translated } from "@/add-os/modules/hr/utils/translated"
-import { getEmployee } from "@/add-os/services/hr/core"
 import { openPayrollRun } from "@/add-os/services/hr/payroll"
 import { MONTHS } from "@/add-os/utils/format"
 
@@ -75,7 +66,6 @@ const show = defineModel<boolean>("show", { required: true })
 const { t } = useI18n()
 const message = useMessage()
 const saving = ref(false)
-const picking = ref<number | null>(null)
 
 function emptyForm() {
 	const [year, month] = todayIso().split("-").map(Number)
@@ -85,7 +75,7 @@ function emptyForm() {
 		kind: "regular" as PayrollRunKind,
 		currency: null as string | null,
 		parallel: false,
-		employees: [] as { id: number; label: string }[],
+		employeeIds: [] as number[],
 		notes: ""
 	}
 }
@@ -98,27 +88,7 @@ watch(show, open => {
 const monthOptions = computed<SelectOption[]>(() => MONTHS[currentLocale.value].map((name, i) => ({ label: name, value: i + 1 })))
 const kindOptions = computed<SelectOption[]>(() => (["regular", "off_cycle"] as const).map(k => ({ label: t(`hrPayroll.runKind.${k}`), value: k })))
 
-/** A chosen employee becomes a tag with their name; the picker clears for the next one. */
-function addEmployee(id: number | null) {
-	if (id === null) return
-	picking.value = null
-	if (form.value.employees.some(e => e.id === id)) return
-	const entry = { id, label: `#${id}` }
-	form.value.employees.push(entry)
-	void quietly(
-		() => getEmployee(id),
-		employee => {
-			entry.label = `${translated(employee.name)} · ${employee.employee_number}`
-			form.value.employees = [...form.value.employees]
-		}
-	)
-}
-
-function removeEmployee(id: number) {
-	form.value.employees = form.value.employees.filter(e => e.id !== id)
-}
-
-const ready = computed(() => !!form.value.year && (form.value.kind === "regular" || form.value.employees.length > 0))
+const ready = computed(() => !!form.value.year && (form.value.kind === "regular" || form.value.employeeIds.length > 0))
 
 async function save() {
 	const f = form.value
@@ -130,7 +100,7 @@ async function save() {
 			kind: f.kind,
 			currency: f.currency,
 			parallel_run: f.parallel,
-			employee_ids: f.kind === "off_cycle" ? f.employees.map(e => e.id) : null,
+			employee_ids: f.kind === "off_cycle" ? f.employeeIds : null,
 			notes: nullable(f.notes)
 		})
 		message.success(t("hrPayroll.runs.opened"))
