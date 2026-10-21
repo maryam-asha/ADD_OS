@@ -433,3 +433,20 @@ export function canViewTraining(): boolean {
 export function canManageTraining(): boolean {
 	return can("hr.training.manage")
 }
+
+// ── HR reports ──────────────────────────────────────────────────────────────
+
+/** The HR dashboard and the combined reports; money in them still needs hr.payroll.view. */
+export function canViewHrReports(): boolean {
+	return can("hr.reports.view")
+}
+
+/** The HR alerts page — for the dashboard's alert figures to open it. */
+export function canViewHrAlerts(): boolean {
+	return can("hr.alerts.view")
+}
+
+/** Every pending approval request — for the dashboard's approval figures to open them. */
+export function canManageApprovals(): boolean {
+	return can("hr.approvals.manage")
+}

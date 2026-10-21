@@ -1,0 +1,89 @@
+{
+	"hrReports": {
+		"csv": "Download CSV",
+		"csvError": "Could not download the file. Try again.",
+		"empty": "Nothing to show for this choice.",
+		"search": "Name or employee number",
+		"asOf": "As of",
+		"from": "From",
+		"to": "To",
+		"fromMonth": "From month",
+		"toMonth": "To month",
+		"pickDays": "Choose the first and last day.",
+		"rangeOrder": "The end cannot be before the start.",
+		"dashboard": {
+			"description": "The workforce and its alerts on a day, then each HR module that is turned on.",
+			"today": "Today",
+			"asOfLine": "Figures as of {date}.",
+			"sections": {
+				"workforce": "Workforce",
+				"alerts": "Alerts",
+				"approvals": "Approvals",
+				"time": "Leave and time",
+				"recruitment": "Hiring",
+				"performance": "Reviews under way",
+				"training": "Training",
+				"payroll": "Latest payroll run"
+			},
+			"employed": "Employed",
+			"hiresThisMonth": "Joined this month",
+			"leaversThisMonth": "Left this month",
+			"byStatus": "Employees by status",
+			"alertsTotal": "All alerts",
+			"approvalsPending": "Awaiting a decision",
+			"leavePending": "Leave requests awaiting approval",
+			"onLeaveToday": "On leave that day",
+			"openExceptions": "Open attendance exceptions",
+			"timesheetsAwaiting": "Timesheets awaiting approval",
+			"openRequisitions": "Approved requisitions",
+			"openOpenings": "Open job openings",
+			"byStage": "Applications by stage",
+			"noCycles": "No review cycle is under way.",
+			"upcomingSessions": "Sessions starting within 30 days",
+			"certificationsExpiring": "Certifications expiring soon",
+			"noRun": "No payroll run yet.",
+			"payslips": "Payslips",
+			"netTotal": "Net total"
+		},
+		"headcount": {
+			"description": "Headcount and turnover month by month, and where people work at the end of the range. Up to 36 months.",
+			"pickRange": "Choose the first and last month.",
+			"tooLong": "Choose {n} months at most.",
+			"chart": "Month by month",
+			"month": "Month",
+			"opening": "At the start",
+			"closing": "At the end",
+			"hires": "Joined",
+			"leavers": "Left",
+			"turnover": "Turnover",
+			"byMonth": "By month",
+			"byUnit": "By unit",
+			"byUnitHint": "Employed at the end of {month}",
+			"people": "People"
+		},
+		"exceptions": {
+			"description": "Attendance exceptions over a range: how many of each type, how many are still open, and per employee.",
+			"none": "No exceptions in this range.",
+			"type": "Exception",
+			"total": "Total",
+			"open": "Still open"
+		},
+		"compliance": {
+			"description": "Everyone employed during the week with their timesheet's status, or none at all.",
+			"missing": "No timesheet"
+		},
+		"liabilities": {
+			"description": "What is owed on a day: leave days still due and, for those who may read pay, loan installments still to deduct.",
+			"leave": "Leave days owed",
+			"leaveHint": "Leave types that track a balance; a negative balance is owed back",
+			"leaveType": "Leave type",
+			"days": "Days",
+			"noLeave": "No leave balance is owed.",
+			"loans": "Loan installments outstanding",
+			"installments": "Installments",
+			"outstanding": "Outstanding",
+			"noLoans": "No loan installments are outstanding.",
+			"loansHidden": "Loans show only to those who may read pay."
+		}
+	}
+}

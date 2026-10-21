@@ -386,6 +386,23 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		]
 	},
 	{
+		// HR reports (add/hr Reports): the dashboard and the combined reports,
+		// all behind hr.reports.view. Money in them (payroll, loans) still
+		// needs hr.payroll.view, which the server checks.
+		key: "hrReports",
+		path: "/hr-reports",
+		icon: "carbon:report",
+		status: "active",
+		roles: ["all"],
+		pages: [
+			{ key: "hrDashboard", path: "dashboard", permission: "hr.reports.view" },
+			{ key: "hrHeadcount", path: "headcount", permission: "hr.reports.view" },
+			{ key: "hrExceptionsReport", path: "attendance-exceptions", permission: "hr.reports.view" },
+			{ key: "hrTimesheetCompliance", path: "timesheet-compliance", permission: "hr.reports.view" },
+			{ key: "hrLiabilities", path: "liabilities", permission: "hr.reports.view" }
+		]
+	},
+	{
 		// HR setup. Each page needs its own setup permission (hr.settings.manage,
 		// hr.approvals.manage), so the section shows only to whoever runs HR.
 		key: "hrSettings",

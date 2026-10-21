@@ -1603,7 +1603,8 @@
 			"hrSettings": "إعدادات الموارد البشرية",
 			"hrTime": "الدوام والإجازات",
 			"hrPay": "الرواتب والمزايا",
-			"hrTalent": "التوظيف والمواهب"
+			"hrTalent": "التوظيف والمواهب",
+			"hrReports": "تقارير الموارد البشرية"
 		},
 		"pages": {
 			"overview": "نظرة عامة",
@@ -1743,7 +1744,12 @@
 			"hrTrainingSession": "جلسة التدريب",
 			"hrCertifications": "الشهادات",
 			"hrLearningBudgets": "ميزانيات التعلّم",
-			"hrMyTraining": "تدريبي"
+			"hrMyTraining": "تدريبي",
+			"hrDashboard": "لوحة قياس الموارد البشرية",
+			"hrHeadcount": "العدد والدوران",
+			"hrExceptionsReport": "استثناءات الحضور",
+			"hrTimesheetCompliance": "الالتزام بالتايم شيت",
+			"hrLiabilities": "الالتزامات"
 		}
 	},
 	"resourceCrud": {

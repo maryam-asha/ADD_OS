@@ -1599,7 +1599,8 @@
 			"hrSettings": "HR settings",
 			"hrTime": "Time and leave",
 			"hrPay": "Pay and benefits",
-			"hrTalent": "Talent"
+			"hrTalent": "Talent",
+			"hrReports": "HR reports"
 		},
 		"pages": {
 			"overview": "Overview",
@@ -1739,7 +1740,12 @@
 			"hrTrainingSession": "Training session",
 			"hrCertifications": "Certifications",
 			"hrLearningBudgets": "Learning budgets",
-			"hrMyTraining": "My training"
+			"hrMyTraining": "My training",
+			"hrDashboard": "HR dashboard",
+			"hrHeadcount": "Headcount and turnover",
+			"hrExceptionsReport": "Attendance exceptions",
+			"hrTimesheetCompliance": "Timesheet compliance",
+			"hrLiabilities": "Liabilities"
 		}
 	},
 	"resourceCrud": {
