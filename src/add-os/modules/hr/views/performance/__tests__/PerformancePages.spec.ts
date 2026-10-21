@@ -11,6 +11,7 @@ import enPayroll from "@/add-os/lang/en/hr-payroll.json"
 import enPerformance from "@/add-os/lang/en/hr-performance.json"
 import enHr from "@/add-os/lang/en/hr.json"
 import { ApiError } from "@/add-os/services/api"
+import ReviewDrawer from "../../../components/performance/ReviewDrawer.vue"
 import ReviewModal from "../../../components/performance/ReviewModal.vue"
 import ReviewCyclePage from "../ReviewCyclePage.vue"
 
@@ -26,11 +27,16 @@ const mocks = vi.hoisted(() => ({
 	success: vi.fn(),
 	error: vi.fn(),
 	dialog: vi.fn((options: { onPositiveClick: () => unknown }) => options.onPositiveClick()),
-	permissions: { manage: true },
+	permissions: { manage: true, events: true },
+	push: vi.fn(),
 	route: { params: { id: "3" } as Record<string, string>, query: {} }
 }))
 
-vi.mock("@/add-os/config/permissions", () => ({ canManagePerformance: () => mocks.permissions.manage, canViewEmployees: () => false }))
+vi.mock("@/add-os/config/permissions", () => ({
+	canManagePerformance: () => mocks.permissions.manage,
+	canViewEmployees: () => mocks.permissions.events,
+	canRecordEmploymentEvents: () => mocks.permissions.events
+}))
 vi.mock("@/add-os/services/hr/performance", () => ({
 	getCycle: mocks.getCycle,
 	listCycleReviews: mocks.listReviews,
@@ -51,7 +57,7 @@ vi.mock("naive-ui", async () => {
 })
 vi.mock("vue-router", async () => {
 	const actual = await vi.importActual<typeof import("vue-router")>("vue-router")
-	return { ...actual, useRouter: () => ({ push: vi.fn() }), useRoute: () => mocks.route }
+	return { ...actual, useRouter: () => ({ push: mocks.push }), useRoute: () => mocks.route }
 })
 
 const i18n = createI18n({ legacy: false, locale: "en", messages: { en: { ...en, ...enHr, ...enApprovals, ...enLeave, ...enPayroll, ...enPerformance } } })
@@ -109,6 +115,7 @@ describe("performance pages", () => {
 	beforeEach(() => {
 		vi.clearAllMocks()
 		mocks.permissions.manage = true
+		mocks.permissions.events = true
 		mocks.listReviews.mockResolvedValue({ data: [review()], meta: { current_page: 1, last_page: 1, per_page: 100, total: 1 } })
 		mocks.advance.mockResolvedValue({ message: "The cycle has moved to manager_review." })
 	})
@@ -210,6 +217,46 @@ describe("performance pages", () => {
 			expect(mocks.submitSelf).toHaveBeenCalledWith(40, { answers: [{ kind: "competency", key: "teamwork", rating: 4, comment: "Led the move" }, { kind: "goal", key: "12", rating: 5, comment: null }], comment: null })
 			expect(mocks.error).toHaveBeenCalledWith("The cycle is not in the phase for this review.")
 			wrapper.unmount()
+		})
+	})
+
+	describe("a recommended promotion", () => {
+		const finalized = (recommendation: "promotion" | "none") => review({ status: "finalized", recommendation, cycle: { ...review().cycle, status: "closed" } })
+
+		async function openDrawer(r: Review) {
+			const load = vi.fn().mockResolvedValue(r)
+			const wrapper = mount(ReviewDrawer, { props: { show: false, reviewId: 40, load, mayManage: true }, global: { plugins: [i18n], stubs: { Icon: true } }, attachTo: document.body } as never)
+			await wrapper.setProps({ show: true })
+			await flushPromises()
+			return wrapper
+		}
+
+		const recordButton = () => [...document.querySelectorAll("button")].find(b => b.textContent?.trim() === "Record the promotion")
+
+		it("opens the employee's file on a promotion event, and applies nothing itself", async () => {
+			const wrapper = await openDrawer(finalized("promotion"))
+
+			expect(document.body.textContent).toContain("Nothing changes until it is recorded")
+			recordButton()?.click()
+			expect(mocks.push).toHaveBeenCalledWith({ name: "hr.employeeProfile", params: { id: 9 }, query: { event: "promotion" } })
+			wrapper.unmount()
+		})
+
+		it("is offered only for a finalized promotion, to whoever may record events", async () => {
+			const none = await openDrawer(finalized("none"))
+			expect(recordButton()).toBeUndefined()
+			none.unmount()
+
+			document.body.innerHTML = ""
+			const open = await openDrawer(review({ recommendation: "promotion" }))
+			expect(recordButton()).toBeUndefined()
+			open.unmount()
+
+			document.body.innerHTML = ""
+			mocks.permissions.events = false
+			const reader = await openDrawer(finalized("promotion"))
+			expect(recordButton()).toBeUndefined()
+			reader.unmount()
 		})
 	})
 })

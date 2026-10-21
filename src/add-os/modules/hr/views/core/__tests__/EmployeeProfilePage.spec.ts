@@ -7,8 +7,10 @@ import en from "@/add-os/lang/en/en.json"
 import enHr from "@/add-os/lang/en/hr.json"
 import EmployeeProfilePage from "../EmployeeProfilePage.vue"
 
-const { getEmployeeMock, permissions } = vi.hoisted(() => ({
+const { getEmployeeMock, permissions, route, replaceMock } = vi.hoisted(() => ({
 	getEmployeeMock: vi.fn(),
+	route: { params: { id: "7" }, query: {} as Record<string, string> },
+	replaceMock: vi.fn(),
 	permissions: { update: true, events: true, documents: true, checklists: true }
 }))
 
@@ -36,14 +38,14 @@ vi.mock("@/add-os/modules/hr/components/core/ChecklistTab.vue", () => ({ default
 vi.mock("@/add-os/modules/hr/components/core/EditEmployeeModal.vue", () => ({ default: { name: "EditEmployeeModal", props: ["show", "employee"], render: () => null } }))
 vi.mock("@/add-os/modules/hr/components/core/EmployeeDocumentsTab.vue", () => ({ default: { name: "EmployeeDocumentsTab", render: () => null } }))
 vi.mock("@/add-os/modules/hr/components/core/PeopleListModal.vue", () => ({ default: { name: "PeopleListModal", render: () => null } }))
-vi.mock("@/add-os/modules/hr/components/core/RecordEventModal.vue", () => ({ default: { name: "RecordEventModal", props: ["show", "employee"], render: () => null } }))
+vi.mock("@/add-os/modules/hr/components/core/RecordEventModal.vue", () => ({ default: { name: "RecordEventModal", props: ["show", "employee", "initialType"], render: () => null } }))
 vi.mock("naive-ui", async () => {
 	const actual = await vi.importActual<typeof import("naive-ui")>("naive-ui")
 	return { ...actual, useMessage: () => ({ success: vi.fn(), error: vi.fn() }) }
 })
 vi.mock("vue-router", async () => {
 	const actual = await vi.importActual<typeof import("vue-router")>("vue-router")
-	return { ...actual, useRouter: () => ({ push: vi.fn() }), useRoute: () => ({ params: { id: "7" } }) }
+	return { ...actual, useRouter: () => ({ push: vi.fn(), replace: replaceMock }), useRoute: () => route }
 })
 
 const i18n = createI18n({ legacy: false, locale: "en", messages: { en: { ...en, ...enHr } } })
@@ -90,6 +92,7 @@ describe("employeeProfilePage", () => {
 		vi.clearAllMocks()
 		Object.assign(permissions, { update: true, events: true, documents: true, checklists: true })
 		getEmployeeMock.mockResolvedValue(employee())
+		route.query = {}
 	})
 
 	afterEach(() => {
@@ -139,5 +142,33 @@ describe("employeeProfilePage", () => {
 
 		expect(getEmployeeMock).toHaveBeenCalledWith(7)
 		wrapper.unmount()
+	})
+
+	it("opens the event form on a promotion when a review sends it here, then leaves the address", async () => {
+		route.query = { event: "promotion", tab: "career" }
+		const wrapper = mountPage()
+		await flushPromises()
+
+		const modal = wrapper.findComponent({ name: "RecordEventModal" })
+		expect(modal.props("show")).toBe(true)
+		expect(modal.props("initialType")).toBe("promotion")
+		expect(replaceMock).toHaveBeenCalledWith({ query: { tab: "career" } })
+		wrapper.unmount()
+	})
+
+	it("ignores an event it does not know, and one this account may not record", async () => {
+		route.query = { event: "hire" }
+		const unknown = mountPage()
+		await flushPromises()
+		expect(unknown.findComponent({ name: "RecordEventModal" }).props("show")).toBe(false)
+		unknown.unmount()
+
+		document.body.innerHTML = ""
+		Object.assign(permissions, { events: false })
+		route.query = { event: "promotion" }
+		const reader = mountPage()
+		await flushPromises()
+		expect(reader.findComponent({ name: "RecordEventModal" }).exists()).toBe(false)
+		reader.unmount()
 	})
 })

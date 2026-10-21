@@ -85,9 +85,15 @@
 			},
 			"addEmployee": "Add employee",
 			"addEmployeeHint": "Someone the launch did not include — hired since, or moved into the unit. Their manager becomes the reviewer.",
-			"employeeAdded": "Employee added to the cycle."
+			"employeeAdded": "Employee added to the cycle.",
+			"problems": {
+				"required": "Choose the template and the period.",
+				"period": "The period cannot end before it starts."
+			}
 		},
 		"reviews": {
+			"promotionNext": "This review recommends a promotion. Nothing changes until it is recorded on the employee's file.",
+			"recordPromotion": "Record the promotion",
 			"title": "Reviews",
 			"detail": "Review",
 			"empty": "No reviews.",

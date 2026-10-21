@@ -19,7 +19,7 @@
 						<template #icon><Icon name="carbon:edit" :size="16" /></template>
 						{{ t("hr.editEmployee.title") }}
 					</n-button>
-					<n-button v-if="mayRecordEvents" type="primary" @click="eventVisible = true">
+					<n-button v-if="mayRecordEvents" type="primary" @click="openEvent(null)">
 						<template #icon><Icon name="carbon:event-schedule" :size="16" /></template>
 						{{ t("hr.events.title") }}
 					</n-button>
@@ -161,13 +161,13 @@
 				:save-dependents="rows => replaceEmployeeDependents(employeeId, rows)"
 				@saved="load"
 			/>
-			<RecordEventModal v-if="mayRecordEvents" v-model:show="eventVisible" :employee @recorded="onEventRecorded" />
+			<RecordEventModal v-if="mayRecordEvents" v-model:show="eventVisible" :employee :initial-type="initialEvent" @recorded="onEventRecorded" />
 		</template>
 	</div>
 </template>
 
 <script setup lang="ts">
-import type { Employee } from "@/add-os/modules/hr/types/hr"
+import type { Employee, RecordableEventType } from "@/add-os/modules/hr/types/hr"
 import { NAlert, NButton, NDescriptions, NDescriptionsItem, NSkeleton, NTabPane, NTabs } from "naive-ui"
 import { computed, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
@@ -203,6 +203,7 @@ import EmployeeTrainingTab from "@/add-os/modules/hr/components/training/Employe
 import EmployeeHero from "@/add-os/modules/hr/components/ui/EmployeeHero.vue"
 import HrPanel from "@/add-os/modules/hr/components/ui/HrPanel.vue"
 import { useNarrowScreen } from "@/add-os/modules/hr/composables/useNarrowScreen"
+import { RECORDABLE_EVENT_TYPES } from "@/add-os/modules/hr/types/hr"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
 import { ApiError } from "@/add-os/services/api"
 import { getEmployee, replaceEmployeeContacts, replaceEmployeeDependents } from "@/add-os/services/hr/core"
@@ -241,6 +242,12 @@ const editVisible = ref(false)
 const contactsVisible = ref(false)
 const dependentsVisible = ref(false)
 const eventVisible = ref(false)
+const initialEvent = ref<RecordableEventType | null>(null)
+
+function openEvent(type: RecordableEventType | null) {
+	initialEvent.value = type
+	eventVisible.value = true
+}
 const careerTab = ref<InstanceType<typeof CareerTab> | null>(null)
 const checklistTab = ref<InstanceType<typeof ChecklistTab> | null>(null)
 
@@ -260,7 +267,19 @@ async function load() {
 	}
 }
 
-onMounted(load)
+/**
+ * `?event=promotion` — from a review that recommended one — opens the event
+ * form on that type once the file has loaded, then leaves the address, so
+ * a reload does not open it again.
+ */
+onMounted(async () => {
+	await load()
+	const asked = route.query?.event
+	if (!mayRecordEvents || !employee.value || typeof asked !== "string") return
+	if ((RECORDABLE_EVENT_TYPES as readonly string[]).includes(asked)) openEvent(asked as RecordableEventType)
+	const { event: _event, ...rest } = route.query
+	void router.replace({ query: rest })
+})
 
 /** An event changes status, job and contract, and a hire or termination creates checklist tasks. */
 async function onEventRecorded() {

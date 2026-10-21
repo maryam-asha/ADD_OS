@@ -55,6 +55,12 @@
 						</div>
 					</div>
 				</HrPanel>
+				<n-alert v-if="canRecordPromotion" type="info" :title="t('hrPerformance.reviews.promotionNext')">
+					<n-button size="small" type="primary" class="mt-2" @click="recordPromotion">
+						<template #icon><Icon name="carbon:event-schedule" :size="16" /></template>
+						{{ t("hrPerformance.reviews.recordPromotion") }}
+					</n-button>
+				</n-alert>
 			</template>
 		</div>
 	</HrDrawer>
@@ -66,6 +72,8 @@ import type { Review, ReviewItem } from "@/add-os/modules/hr/types/performance"
 import { NAlert, NButton, NDataTable, NDescriptions, NDescriptionsItem, NInput, NInputNumber, NSkeleton, useMessage } from "naive-ui"
 import { computed, h, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import { useRouter } from "vue-router"
+import { canRecordEmploymentEvents, canViewEmployees } from "@/add-os/config/permissions"
 import EmployeeSelect from "@/add-os/modules/hr/components/EmployeeSelect.vue"
 import HrDrawer from "@/add-os/modules/hr/components/HrDrawer.vue"
 import PerformanceStatusTag from "@/add-os/modules/hr/components/performance/PerformanceStatusTag.vue"
@@ -77,6 +85,7 @@ import { itemName, scoreLabel } from "@/add-os/modules/hr/utils/performance"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
 import { calibrateReview, reassignReviewer } from "@/add-os/services/hr/performance"
 import { formatNumber } from "@/add-os/utils/format"
+import Icon from "@/components/common/Icon.vue"
 
 /**
  * One review as its reader may see it — every item with both sides'
@@ -123,6 +132,22 @@ watch(
 )
 
 const canReassign = computed(() => !!review.value && !["manager_submitted", "finalized"].includes(review.value.status) && review.value.cycle.status !== "closed")
+/**
+ * A finalized review that recommends a promotion offers to record it: the
+ * employee's file opens with the event form on "promotion". Nothing is
+ * applied by itself — HR fills in the new grade or position and saves.
+ */
+const router = useRouter()
+const mayRecordEvents = canRecordEmploymentEvents() && canViewEmployees()
+const canRecordPromotion = computed(() => mayRecordEvents && review.value?.status === "finalized" && review.value.recommendation === "promotion" && !!review.value.employee)
+
+function recordPromotion() {
+	const employee = review.value?.employee
+	if (!employee) return
+	show.value = false
+	void router.push({ name: "hr.employeeProfile", params: { id: employee.id }, query: { event: "promotion" } })
+}
+
 const canCalibrate = computed(() => review.value?.cycle.status === "calibration" && review.value.status === "manager_submitted")
 
 async function act(key: string, call: () => Promise<{ message?: string }>) {

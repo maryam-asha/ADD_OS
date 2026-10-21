@@ -134,7 +134,7 @@ import Icon from "@/components/common/Icon.vue"
  * renewal and a rehire open a new contract; a rehire a whole new
  * assignment. A termination is confirmed first, saying what it withdraws.
  */
-const props = defineProps<{ employee: Employee }>()
+const props = defineProps<{ employee: Employee; /** Opens on this type, e.g. a promotion a review recommended. */ initialType?: RecordableEventType | null }>()
 const emit = defineEmits<{ recorded: [] }>()
 const show = defineModel<boolean>("show", { required: true })
 
@@ -168,7 +168,7 @@ interface EventForm {
 function blankForm(): EventForm {
 	const a = props.employee.current_assignment
 	return {
-		type: null,
+		type: props.initialType ?? null,
 		effectiveOn: null,
 		effectiveTo: null,
 		reason: "",
