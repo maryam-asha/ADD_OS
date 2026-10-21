@@ -163,6 +163,8 @@ export interface LearningRequest {
 }
 
 export interface LearningRequestPayload {
+	/** Optional: a course the employee can see (from their open sessions or enrollments); otherwise learning outside. */
+	course_id: number | null
 	title: string
 	provider: string | null
 	starts_on: string | null

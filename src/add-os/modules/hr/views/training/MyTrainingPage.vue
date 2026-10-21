@@ -47,7 +47,7 @@
 			</n-tab-pane>
 		</n-tabs>
 
-		<LearningRequestModal v-model:show="requestVisible" :currency="budget?.currency ?? null" :available="budget ? money(budget.available, budget.currency) : null" @sent="onRequestSent" />
+		<LearningRequestModal v-model:show="requestVisible" :currency="budget?.currency ?? null" :available="budget ? money(budget.available, budget.currency) : null" :courses="myCourses" @sent="onRequestSent" />
 	</div>
 </template>
 
@@ -153,6 +153,15 @@ function confirmCancel(enrollment: Enrollment) {
 		}
 	})
 }
+
+/** The courses I can see — of my open sessions and my enrollments — for a spending request to name. */
+const myCourses = computed(() => {
+	const seen = new Map<number, NonNullable<TrainingSession["course"]>>()
+	for (const session of [...open.value, ...enrollments.value.map(e => e.session)]) {
+		if (session?.course) seen.set(session.course.id, session.course)
+	}
+	return [...seen.values()]
+})
 
 // ── Certifications ──────────────────────────────────────────────────────────
 const certifications = ref<Certification[]>([])

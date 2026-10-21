@@ -196,6 +196,9 @@
 			}
 		},
 		"requests": {
+			"course": "Course",
+			"courseHint": "Optional: one of the courses in your sessions. Leave it empty for learning outside.",
+			"outsideCourse": "Learning outside the catalogue",
 			"title": "Spending requests",
 			"empty": "No requests.",
 			"decidedWhere": "Requests are approved or rejected in the approvals inbox; the final approval checks the balance again.",

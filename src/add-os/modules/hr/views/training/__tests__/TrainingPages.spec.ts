@@ -11,6 +11,7 @@ import enTraining from "@/add-os/lang/en/hr-training.json"
 import enHr from "@/add-os/lang/en/hr.json"
 import { ApiError } from "@/add-os/services/api"
 import CompleteSessionModal from "../../../components/training/CompleteSessionModal.vue"
+import LearningRequestModal from "../../../components/training/LearningRequestModal.vue"
 import MyTrainingPage from "../MyTrainingPage.vue"
 import TrainingSessionPage from "../TrainingSessionPage.vue"
 
@@ -23,6 +24,7 @@ const mocks = vi.hoisted(() => ({
 	openSessions: vi.fn(),
 	myEnrollments: vi.fn(),
 	enrollMe: vi.fn(),
+	requestLearning: vi.fn(),
 	success: vi.fn(),
 	error: vi.fn(),
 	dialog: vi.fn((options: { onPositiveClick: () => unknown }) => options.onPositiveClick()),
@@ -49,7 +51,7 @@ vi.mock("@/add-os/services/hr/training", () => ({
 	myBudget: vi.fn(),
 	myLearningRequests: vi.fn().mockResolvedValue([]),
 	cancelLearningRequest: vi.fn(),
-	requestLearning: vi.fn()
+	requestLearning: mocks.requestLearning
 }))
 vi.mock("@/add-os/services/hr/core", () => ({ getEmployee: vi.fn(), listEmployees: vi.fn().mockResolvedValue({ data: [], meta: { current_page: 1, last_page: 1, per_page: 25, total: 0 } }) }))
 vi.mock("naive-ui", async () => {
@@ -197,6 +199,36 @@ describe("training pages", () => {
 			expect(mocks.enrollMe).toHaveBeenCalledWith(4)
 			expect(mocks.success).toHaveBeenCalledWith("You are enrolled.")
 			wrapper.unmount()
+		})
+	})
+	describe("a spending request", () => {
+		async function openRequest(courses: (typeof COURSE)[]) {
+			const wrapper = mount(LearningRequestModal, { props: { show: false, currency: "USD", available: "$300", courses }, global: { plugins: [i18n], stubs: { Icon: true } }, attachTo: document.body } as never)
+			await wrapper.setProps({ show: true })
+			await flushPromises()
+			return { wrapper, vm: wrapper.vm as unknown as { form: { courseId: number | null; title: string; amount: number | null }; onCourse: (id: number | null) => void; save: () => Promise<void> } }
+		}
+
+		it("names a course it may link, and still goes without one", async () => {
+			mocks.requestLearning.mockResolvedValue({ id: 5 })
+			const { wrapper, vm } = await openRequest([COURSE])
+
+			expect(document.body.textContent).toContain("Optional: one of the courses in your sessions.")
+			vm.form.courseId = 1
+			vm.onCourse(1)
+			vm.form.amount = 50
+			await vm.save()
+			expect(mocks.requestLearning).toHaveBeenLastCalledWith(expect.objectContaining({ course_id: 1, title: "Barista basics", amount: 50 }))
+			wrapper.unmount()
+
+			document.body.innerHTML = ""
+			const outside = await openRequest([])
+			expect(document.body.textContent).not.toContain("Optional: one of the courses in your sessions.")
+			outside.vm.form.title = "Latte art at Coffee Lab"
+			outside.vm.form.amount = 250
+			await outside.vm.save()
+			expect(mocks.requestLearning).toHaveBeenLastCalledWith(expect.objectContaining({ course_id: null, title: "Latte art at Coffee Lab" }))
+			outside.wrapper.unmount()
 		})
 	})
 })

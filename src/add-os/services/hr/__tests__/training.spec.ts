@@ -97,7 +97,7 @@ describe("hr training service", () => {
 	it("is the employee's own side under hr/me", async () => {
 		getMock.mockResolvedValue({ data: [] })
 		postMock.mockResolvedValueOnce({ data: { id: 30 } }).mockResolvedValueOnce({ message: "ok" }).mockResolvedValueOnce({ data: { id: 5 } })
-		const request = { title: "Latte art course", provider: "Coffee Lab", starts_on: null, amount: 250, justification: null }
+		const request = { course_id: null, title: "Latte art course", provider: "Coffee Lab", starts_on: null, amount: 250, justification: null }
 
 		await hr.openSessions()
 		await hr.enrollMe(4)
