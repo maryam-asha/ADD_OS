@@ -14,6 +14,7 @@ import enRecruitment from "@/add-os/lang/en/hr-recruitment.json"
 import enTimesheets from "@/add-os/lang/en/hr-timesheets.json"
 import enHr from "@/add-os/lang/en/hr.json"
 import { ApiError } from "@/add-os/services/api"
+import HireCandidateModal from "../../../components/recruitment/HireCandidateModal.vue"
 import ApplicationPage from "../ApplicationPage.vue"
 import JobOpeningPage from "../JobOpeningPage.vue"
 
@@ -25,6 +26,7 @@ const mocks = vi.hoisted(() => {
 	move: vi.fn(),
 	reject: vi.fn(),
 	accept: vi.fn(),
+	hire: vi.fn(),
 	cvLink: vi.fn(),
 	getOpening: vi.fn(),
 	listApplications: vi.fn(),
@@ -47,6 +49,7 @@ vi.mock("@/add-os/services/hr/recruitment", () => ({
 	rejectApplication: mocks.reject,
 	withdrawApplication: vi.fn(),
 	acceptOffer: mocks.accept,
+	hireCandidate: mocks.hire,
 	declineOffer: vi.fn(),
 	withdrawOffer: vi.fn(),
 	completeInterview: vi.fn(),
@@ -221,6 +224,45 @@ describe("recruitment pages", () => {
 				["Rejected", 0],
 				["Withdrawn", 0]
 			])
+			wrapper.unmount()
+		})
+	})
+	describe("hiring", () => {
+		const candidate = (employeeId: number | null) => ({ id: 5, name: "Sara Ali", email: null, phone: null, source: "direct" as const, employee_id: employeeId, consent_at: null, notes: null, created_at: null })
+
+		async function openHire(employeeId: number | null) {
+			const wrapper = mount(HireCandidateModal, {
+				props: { show: false, applicationId: 3, candidate: candidate(employeeId), requisition: null, offer: null },
+				global: { plugins: [i18n], stubs: { Icon: true } },
+				attachTo: document.body
+			} as never)
+			await wrapper.setProps({ show: true })
+			await flushPromises()
+			const vm = wrapper.vm as unknown as { form: { hiredOn: string | null }; save: () => Promise<void> }
+			vm.form.hiredOn = "2026-11-01"
+			await flushPromises()
+			return { wrapper, vm }
+		}
+
+		const confirm = () => [...document.querySelectorAll("button")].find(b => b.textContent?.trim() === enRecruitment.hrRecruitment.hire.confirm)
+
+		it("refuses a candidate who is already an employee", async () => {
+			const { wrapper, vm } = await openHire(12)
+
+			expect(document.body.textContent).toContain("already an employee and cannot be hired again")
+			expect(confirm()?.disabled).toBe(true)
+			await vm.save()
+			expect(mocks.hire).not.toHaveBeenCalled()
+			wrapper.unmount()
+		})
+
+		it("hires anyone else", async () => {
+			mocks.hire.mockResolvedValue({ id: 40 })
+			const { wrapper, vm } = await openHire(null)
+
+			expect(confirm()?.disabled).toBe(false)
+			await vm.save()
+			expect(mocks.hire).toHaveBeenCalledWith(3, { hired_on: "2026-11-01", contract: { type: "open_ended" }, assignment: { work_mode: "on_site" } })
 			wrapper.unmount()
 		})
 	})

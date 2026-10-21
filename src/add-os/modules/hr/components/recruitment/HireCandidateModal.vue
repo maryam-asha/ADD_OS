@@ -1,7 +1,7 @@
 <template>
 	<HrFormModal v-model:show="show" :title="t('hrRecruitment.hire.title')" icon="carbon:user-admin">
 		<p class="mb-3 text-sm text-secondary">{{ t("hrRecruitment.hire.hint") }}</p>
-		<n-alert v-if="candidate?.employee_id" type="warning" :title="t('hrRecruitment.hire.alreadyEmployee')" class="mb-3" />
+		<n-alert v-if="alreadyEmployee" type="error" :title="t('hrRecruitment.hire.alreadyEmployee')" class="mb-3" />
 		<n-descriptions :column="1" label-placement="left" size="small" bordered class="mb-4">
 			<n-descriptions-item :label="t('hrRecruitment.candidates.name')">{{ candidate?.name }}</n-descriptions-item>
 			<n-descriptions-item v-if="requisition" :label="t('hr.employees.unitFilter')">{{ translated(requisition.org_unit?.name) || none }}</n-descriptions-item>
@@ -24,7 +24,7 @@
 		<template #footer>
 			<div class="flex justify-end gap-2">
 				<n-button @click="show = false">{{ t("hr.common.cancel") }}</n-button>
-				<n-button type="primary" :loading="saving" :disabled="!form.hiredOn" @click="save">{{ t("hrRecruitment.hire.confirm") }}</n-button>
+				<n-button type="primary" :loading="saving" :disabled="!form.hiredOn || alreadyEmployee" @click="save">{{ t("hrRecruitment.hire.confirm") }}</n-button>
 			</div>
 		</template>
 	</HrFormModal>
@@ -49,7 +49,9 @@ import { hireCandidate } from "@/add-os/services/hr/recruitment"
  * email, the requisition's unit, position, grade, hiring manager and
  * employment type, the offer's start date and pay — so this asks only what
  * is still open: the start date as it stands now, the contract and how
- * they will work. Needs hr.employees.create as well.
+ * they will work. Needs hr.employees.create as well. A candidate who is
+ * already an employee is not hired again: ADD Core would open a second
+ * file for the same person, so a move inside ADD is recorded on their file.
  */
 const props = defineProps<{ applicationId: number; candidate: Candidate | null; requisition: Requisition | null; offer: Offer | null }>()
 const emit = defineEmits<{ hired: [employee: Employee] }>()
@@ -59,6 +61,9 @@ const { t } = useI18n()
 const message = useMessage()
 const saving = ref(false)
 const none = EMPTY
+
+/** Never hired twice; ADD Core does not refuse it yet, so the form does. */
+const alreadyEmployee = computed(() => !!props.candidate?.employee_id)
 
 const form = ref({ hiredOn: null as string | null, contractType: "open_ended" as ContractType, workMode: "on_site" as WorkMode })
 
@@ -70,6 +75,7 @@ const contractOptions = computed<SelectOption[]>(() => CONTRACT_TYPES.map(c => (
 const workModeOptions = computed<SelectOption[]>(() => WORK_MODES.map(w => ({ label: t(`hr.workMode.${w}`), value: w })))
 
 async function save() {
+	if (alreadyEmployee.value) return
 	const f = form.value
 	saving.value = true
 	try {

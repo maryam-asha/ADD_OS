@@ -213,7 +213,7 @@
 		"hire": {
 			"title": "Hire",
 			"hint": "The candidate becomes an employee from what is already known: their name, phone and email, the requisition's unit, position, grade, manager and employment type, and the offer's start date and pay.",
-			"alreadyEmployee": "This candidate is already an employee. A move inside ADD is recorded on their file as a transfer or a promotion instead.",
+			"alreadyEmployee": "This candidate is already an employee and cannot be hired again. Record the move on their file as a transfer or a promotion.",
 			"afterwards": "Their file opens with the onboarding tasks; anything else is completed there.",
 			"confirm": "Hire",
 			"done": "Candidate hired.",
