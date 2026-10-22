@@ -313,7 +313,8 @@
 									>
 										<n-input
 											v-model:value="form.external_form_url"
-											placeholder="https://example.com/register"
+											:placeholder="t('events.form.externalFormUrlPlaceholder')"
+											dir="ltr"
 											clearable
 										>
 											<template #prefix>

@@ -967,6 +967,7 @@
 			"registrationSourceInternal": "Internal — members register in the app",
 			"registrationSourceExternal": "External — members register through a link",
 			"externalFormUrl": "External registration form (link)",
+			"externalFormUrlPlaceholder": "Paste the full registration form link",
 			"registrationOpensAt": "Registration opens (empty = on publish)",
 			"registrationClosesAt": "Registration closes (empty = when the event starts)",
 			"isMarkedFull": "Mark as full (stops registration)",

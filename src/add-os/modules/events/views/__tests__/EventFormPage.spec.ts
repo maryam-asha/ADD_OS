@@ -49,7 +49,7 @@ vi.mock("@/add-os/services/event-categories", () => ({
 }))
 
 vi.mock("@/add-os/services/media", () => ({
-	uploadMedia: vi.fn().mockResolvedValue({ url: "https://example.com/banner.png" })
+	uploadMedia: vi.fn().mockResolvedValue({ url: "https://api.test/banner.png" })
 }))
 
 vi.mock("vue-router", async () => {

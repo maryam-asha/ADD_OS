@@ -971,6 +971,7 @@
 			"registrationSourceInternal": "داخلي — يسجّل الأعضاء من التطبيق",
 			"registrationSourceExternal": "خارجي — يسجّل الأعضاء عبر رابط",
 			"externalFormUrl": "فورم تسجيل خارجية (رابط)",
+			"externalFormUrlPlaceholder": "الصق رابط فورم التسجيل الكامل",
 			"registrationOpensAt": "بداية التسجيل (فارغ = عند النشر)",
 			"registrationClosesAt": "إغلاق فورم التسجيل (فارغ = عند بدء الفعالية)",
 			"isMarkedFull": "تحديد كممتلئ (يوقف التسجيل)",
