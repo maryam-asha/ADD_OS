@@ -66,7 +66,9 @@ Then report, per spec file, pass/fail and what it protects:
   role, an employee with no role, a member who is an employee, a provider): every page the
   sidebar offers passes `authGuard`, "/" (`homePath`) lands on a page it passes (so a refusal
   cannot loop), and `Navbar/items.tsx` lists exactly the sections `navigation/access.ts`
-  allows — the modules inside a group entry (HR's, since 2026-10-22) counted as sections. Before, a custom role and an employee with no role were offered every admin page,
+  allows — the modules inside a group entry (HR's, since 2026-10-22) counted as sections —
+  less the `accountMenu` ones (My HR), which the avatar menu lists instead; every section the
+  account sees is in one or the other. Before, a custom role and an employee with no role were offered every admin page,
   each a 403, and "/" sent them to `/spatial/branches`.
 - `theme/__tests__/tokens.spec.ts` — WCAG ratios, ΔE separations, and "guideline p.15 strict
   rule stays disengaged" (Antique Copper in no semantic and no component token).

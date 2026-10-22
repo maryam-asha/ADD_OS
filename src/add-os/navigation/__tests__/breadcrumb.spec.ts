@@ -40,8 +40,9 @@ function crumbsFor(url: string) {
 	return buildCrumbs(router.resolve(url), path => router.resolve(path))
 }
 
+/** Routed pages. A section's own record is none, even with a frame to render (My HR's tabs). */
 function pages(): RouteRecordNormalized[] {
-	return router.getRoutes().filter(record => record.components && !record.path.includes("pathMatch"))
+	return router.getRoutes().filter(record => record.components && !record.children.length && !record.path.includes("pathMatch"))
 }
 
 describe("toolbar breadcrumb", () => {

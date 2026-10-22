@@ -223,7 +223,7 @@ describe("sidebar groups", () => {
 		return ((item as { children?: MenuMixedOption[] } | undefined)?.children ?? []).map(child => String(child.key))
 	}
 
-	it("tags exactly HR's six admin sections, in a row, and leaves My HR its own entry", () => {
+	it("tags exactly HR's six admin sections, in a row, and leaves My HR out of the group", () => {
 		const tagged = NAV_SECTIONS.map((section, index) => ({ key: section.key, group: section.group, index })).filter(entry => entry.group === "hr")
 		expect(tagged.map(entry => entry.key)).toEqual(["hr", "hrTime", "hrPay", "hrTalent", "hrReports", "hrSettings"])
 		expect(tagged.at(-1)!.index - tagged[0].index).toBe(tagged.length - 1)
@@ -232,7 +232,7 @@ describe("sidebar groups", () => {
 
 	it("gives HR one sidebar entry holding a module per section, each opening to its pages", () => {
 		const items = menuFor({ roles: ["hr_manager"], permissions: HR_ALL, employee })
-		expect(items.map(item => String(item.key))).toEqual(["dashboard.overview", "hrGroup", "myHr"])
+		expect(items.map(item => String(item.key))).toEqual(["dashboard.overview", "hrGroup"])
 
 		const group = items.find(item => item.key === "hrGroup")
 		expect(childKeys(group)).toEqual(["hr", "hrTime", "hrPay", "hrTalent", "hrReports", "hrSettings"])

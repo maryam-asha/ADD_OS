@@ -84,6 +84,13 @@ export interface NavSection {
 	 * section keeps its own path, route names and access rules.
 	 */
 	group?: NavGroupKey
+	/**
+	 * Listed in the avatar menu instead of the sidebar: the account's own
+	 * pages rather than work done on the dashboard. The sidebar still lists it
+	 * when it is all the account may open, rather than stand empty. Menu only:
+	 * the section keeps its own path, route names and access rules.
+	 */
+	accountMenu?: boolean
 }
 
 export type NavGroupKey = "hr"
@@ -99,9 +106,9 @@ export interface NavGroup {
  * Sidebar entries that hold several sections as modules. HR administration
  * filled six top-level rows of the sidebar (about forty pages); since
  * 2026-10-22 it is one "Human resources" entry with a module for each:
- * people, time, pay, talent, reports and setup. My HR stays its own entry:
- * it is every employee's self-service, not HR's work, and an employee with
- * nothing else would otherwise open a group to reach a single module.
+ * people, time, pay, talent, reports and setup. My HR is not in it: it is
+ * every employee's self-service, not HR's work, and sits in the avatar menu
+ * (`accountMenu`, since 2026-10-22).
  */
 export const NAV_GROUPS: Readonly<Record<NavGroupKey, NavGroup>> = {
 	hr: { key: "hr", icon: "carbon:identification" }
@@ -472,25 +479,27 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 	},
 	{
 		// The signed-in employee's own HR file — operations, sales, the café:
-		// being an employee is an HR record, not a role.
+		// being an employee is an HR record, not a role. Opened from the avatar
+		// menu; its pages share a tab bar (MyHrLayout.vue) to move between them.
 		key: "myHr",
 		path: "/my-hr",
 		icon: "carbon:user-profile",
 		status: "active",
 		roles: ["all"],
 		employee: true,
+		accountMenu: true,
 		pages: [
-			{ key: "myProfile", path: "profile" },
-			{ key: "hrMyApprovals", path: "approvals" },
-			{ key: "hrMyLeave", path: "leave" },
-			{ key: "hrMyAttendance", path: "attendance" },
-			{ key: "hrMyTimesheets", path: "timesheets" },
-			{ key: "hrMyPay", path: "pay" },
+			{ key: "myProfile", path: "profile", icon: "carbon:user-profile" },
+			{ key: "hrMyApprovals", path: "approvals", icon: "carbon:task-approved" },
+			{ key: "hrMyLeave", path: "leave", icon: "carbon:calendar" },
+			{ key: "hrMyAttendance", path: "attendance", icon: "carbon:time" },
+			{ key: "hrMyTimesheets", path: "timesheets", icon: "carbon:event-schedule" },
+			{ key: "hrMyPay", path: "pay", icon: "carbon:money" },
 			{ key: "hrMyPayslip", path: "pay/payslips/:id", hidden: true },
-			{ key: "hrMyBenefits", path: "benefits" },
-			{ key: "hrMyRecruitment", path: "jobs" },
-			{ key: "hrMyPerformance", path: "performance" },
-			{ key: "hrMyTraining", path: "training" },
+			{ key: "hrMyBenefits", path: "benefits", icon: "carbon:gift" },
+			{ key: "hrMyRecruitment", path: "jobs", icon: "carbon:portfolio" },
+			{ key: "hrMyPerformance", path: "performance", icon: "carbon:growth" },
+			{ key: "hrMyTraining", path: "training", icon: "carbon:education" },
 			{ key: "hrMyCertificate", path: "certificates/:kind", hidden: true }
 		]
 	},

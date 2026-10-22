@@ -3,7 +3,8 @@ import type { RouteLocationNormalized, RouteRecordRaw } from "vue-router"
 import type { AdminUser } from "@/types/auth.d"
 import { createPinia, setActivePinia } from "pinia"
 import { beforeEach, describe, expect, it } from "vitest"
-import { homePath, maySeeSection, menuPages } from "@/add-os/navigation/access"
+import { accountMenuSections, homePath, maySeeSection, menuPages, sidebarSections } from "@/add-os/navigation/access"
+import { accountMenuOptions } from "@/add-os/navigation/accountMenu"
 import { authGuard } from "@/add-os/navigation/authGuard"
 import { createAddOsRoutes } from "@/add-os/navigation/routes"
 import { NAV_GROUPS, NAV_SECTIONS, navGroupMenuKey, navRoutePath } from "@/add-os/navigation/sections"
@@ -87,10 +88,18 @@ describe("sidebar, route guard and \"/\" agree", () => {
 			expect(authGuard(PAGES.get(home)!)).toBeUndefined()
 		})
 
-		it("builds the sidebar from the same rules", () => {
+		it("builds the sidebar and the avatar menu from the same rules", () => {
 			signIn(account)
 			const fromMenu = menuSections(getItems({ mode: "vertical", collapsed: false }))
-			expect(fromMenu).toEqual(NAV_SECTIONS.filter(maySeeSection).map(section => section.key))
+			expect(fromMenu).toEqual(sidebarSections().map(section => section.key))
+			const fromAvatar = accountMenuOptions(key => key).map(option => String(option.key))
+			expect(fromAvatar).toEqual(accountMenuSections().map(section => section.key))
+		})
+
+		it("lists every section it sees in the sidebar or the avatar menu", () => {
+			signIn(account)
+			const listed = new Set([...sidebarSections(), ...accountMenuSections()].map(section => section.key))
+			expect([...listed].sort()).toEqual(NAV_SECTIONS.filter(maySeeSection).map(section => section.key).sort())
 		})
 	})
 
@@ -104,6 +113,23 @@ describe("sidebar, route guard and \"/\" agree", () => {
 		signIn(ACCOUNTS["an employee with no role"])
 		expect(NAV_SECTIONS.filter(maySeeSection).map(section => section.key)).toEqual(["myHr"])
 		expect(homePath()).toBe("/my-hr/profile")
+	})
+
+	it("moves My HR to the avatar menu, out of a sidebar that has other work in it", () => {
+		signIn(ACCOUNTS["an HR role"])
+		expect(sidebarSections().map(section => section.key)).not.toContain("myHr")
+		expect(accountMenuSections().map(section => section.key)).toEqual(["myHr"])
+	})
+
+	it("keeps My HR in the sidebar of an employee who has nothing else, rather than leave it empty", () => {
+		signIn(ACCOUNTS["an employee with no role"])
+		expect(sidebarSections().map(section => section.key)).toEqual(["myHr"])
+		expect(accountMenuSections().map(section => section.key)).toEqual(["myHr"])
+	})
+
+	it("offers no My HR to an account with no employee record", () => {
+		signIn(ACCOUNTS.admin)
+		expect(accountMenuSections()).toEqual([])
 	})
 
 	it("offers a custom role the admin pages its permissions open, and only those", () => {

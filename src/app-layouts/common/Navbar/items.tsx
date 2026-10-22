@@ -4,8 +4,8 @@ import { NTag } from "naive-ui"
 import { h } from "vue"
 import { RouterLink } from "vue-router"
 import { currentLocale } from "@/add-os/lang/currentLocale"
-import { maySeeSection, menuPages } from "@/add-os/navigation/access"
-import { NAV_GROUPS, NAV_SECTIONS, navGroupMenuKey, navGroupTitleKey, navPageTitleKey, navRouteName, navSectionTitleKey } from "@/add-os/navigation/sections"
+import { menuPages, sidebarSections } from "@/add-os/navigation/access"
+import { NAV_GROUPS, navGroupMenuKey, navGroupTitleKey, navPageTitleKey, navRouteName, navSectionTitleKey } from "@/add-os/navigation/sections"
 import { i18nGlobal } from "@/lang"
 import { renderIcon } from "@/utils"
 
@@ -20,7 +20,9 @@ import { renderIcon } from "@/utils"
  * This file holds RENDERING only. What the menu contains lives in `sections.ts`,
  * which the router reads too, so a menu entry cannot point at a route that does
  * not exist. Sections sharing a `group` there render as modules under one entry
- * (HR's six admin sections, since 2026-10-22): entry → module → page.
+ * (HR's six admin sections, since 2026-10-22): entry → module → page. An
+ * `accountMenu` section (My HR) is the avatar menu's, not this one's — see
+ * `sidebarSections()`.
  *
  * ── Labels re-translate on language change ──────────────────────────────────
  * Reading `currentLocale.value` below registers a dependency in the caller's
@@ -156,7 +158,7 @@ export default function getItems(args: { mode: "vertical" | "horizontal"; collap
 
 	// Who sees what is `navigation/access.ts`'s call, shared with the route
 	// guard and the "/" redirect so the menu never offers a refused page.
-	const visible = NAV_SECTIONS.filter(maySeeSection)
+	const visible = sidebarSections()
 	const options: MenuMixedOption[] = []
 
 	for (const section of visible) {

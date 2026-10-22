@@ -47,6 +47,22 @@ export function maySeeSection(section: NavSection): boolean {
 	return menuPages(section).length > 0
 }
 
+/**
+ * The sections the sidebar lists for this account: those it sees, less the
+ * ones the avatar menu carries (`accountMenu`) — unless those are all it sees,
+ * as for an employee with no role, whose sidebar would otherwise stand empty.
+ */
+export function sidebarSections(): NavSection[] {
+	const visible = NAV_SECTIONS.filter(maySeeSection)
+	const work = visible.filter(section => !section.accountMenu)
+	return work.length ? work : visible
+}
+
+/** The sections the avatar menu lists for this account. */
+export function accountMenuSections(): NavSection[] {
+	return NAV_SECTIONS.filter(section => section.accountMenu && maySeeSection(section))
+}
+
 /** The first page in sidebar order this account may open, if any. */
 function firstOpenPage(skip?: string): string | null {
 	for (const section of NAV_SECTIONS) {

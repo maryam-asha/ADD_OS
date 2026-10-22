@@ -170,12 +170,23 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"myHr.hrMyCertificate": () => import("@/add-os/modules/hr/views/core/MyCertificatePage.vue")
 }
 
+/**
+ * Sections whose pages render inside a shared frame, as a nested route view.
+ * My HR's pages share a tab bar to move between them, since 2026-10-22 when
+ * the section left the sidebar for the avatar menu. Lazy, as pages are.
+ */
+const SECTION_LAYOUTS: Record<string, () => Promise<unknown>> = {
+	myHr: () => import("@/add-os/modules/hr/views/core/MyHrLayout.vue")
+}
+
 export function createAddOsRoutes(): RouteRecordRaw[] {
 	return NAV_SECTIONS.map(section => {
 		const [firstPage] = section.pages
+		const layout = SECTION_LAYOUTS[section.key]
 
 		return {
 			path: section.path,
+			...(layout ? { component: layout } : {}),
 			redirect: navRoutePath(section, firstPage),
 			meta: {
 				auth: true,

@@ -9,6 +9,7 @@ import { NAvatar, NDropdown, useMessage } from "naive-ui"
 import { computed } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
+import { accountMenuOptions } from "@/add-os/navigation/accountMenu"
 import { logout } from "@/add-os/services/auth"
 import { useAuthStore } from "@/stores/auth"
 import { renderIcon } from "@/utils"
@@ -34,12 +35,16 @@ const { t } = useI18n()
 const authStore = useAuthStore()
 const message = useMessage()
 
+// ADD OS: My HR's pages sit here, between the profile and logout, rather than
+// in the sidebar — see `accountMenuOptions`.
 const options = computed(() => [
 	{
 		label: t("account.profile.title", "الملف الشخصي"),
 		key: "route-settings.accountSecurity",
 		icon: renderIcon(ProfileIcon)
 	},
+	...accountMenuOptions(t).flatMap(group => [{ type: "divider", key: `${group.key}-divider` }, group]),
+	{ type: "divider", key: "logout-divider" },
 	{
 		label: t("common.logout"),
 		key: "route-Logout",
