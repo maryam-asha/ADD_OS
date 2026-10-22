@@ -1575,6 +1575,9 @@
 		"title": "Shortcuts"
 	},
 	"nav": {
+		"groups": {
+			"hr": "Human resources"
+		},
 		"sections": {
 			"dashboard": "Dashboard",
 			"spatial": "Spatial structure",
@@ -1594,7 +1597,7 @@
 			"provider": "Provider Portal",
 			"providerPortal": "Provider Portal",
 			"reports": "Reports",
-			"hr": "Human resources",
+			"hr": "People and organization",
 			"myHr": "My HR",
 			"hrSettings": "HR settings",
 			"hrTime": "Time and leave",

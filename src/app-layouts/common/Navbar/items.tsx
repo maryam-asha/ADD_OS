@@ -1,11 +1,11 @@
 import type { MenuMixedOption } from "naive-ui/es/menu/src/interface"
-import type { NavPage, NavSection } from "@/add-os/navigation/sections"
+import type { NavGroup, NavPage, NavSection } from "@/add-os/navigation/sections"
 import { NTag } from "naive-ui"
 import { h } from "vue"
 import { RouterLink } from "vue-router"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import { maySeeSection, menuPages } from "@/add-os/navigation/access"
-import { NAV_SECTIONS, navPageTitleKey, navRouteName, navSectionTitleKey } from "@/add-os/navigation/sections"
+import { NAV_GROUPS, NAV_SECTIONS, navGroupMenuKey, navGroupTitleKey, navPageTitleKey, navRouteName, navSectionTitleKey } from "@/add-os/navigation/sections"
 import { i18nGlobal } from "@/lang"
 import { renderIcon } from "@/utils"
 
@@ -19,7 +19,8 @@ import { renderIcon } from "@/utils"
  *
  * This file holds RENDERING only. What the menu contains lives in `sections.ts`,
  * which the router reads too, so a menu entry cannot point at a route that does
- * not exist.
+ * not exist. Sections sharing a `group` there render as modules under one entry
+ * (HR's six admin sections, since 2026-10-22): entry → module → page.
  *
  * ── Labels re-translate on language change ──────────────────────────────────
  * Reading `currentLocale.value` below registers a dependency in the caller's
@@ -123,27 +124,53 @@ function directSectionOption(section: NavSection, page: NavPage, collapsed: bool
 	}
 }
 
+function sectionOption(section: NavSection, collapsed: boolean): MenuMixedOption {
+	const visiblePages = menuPages(section)
+
+	// When a section has only one page (like Dashboard), render it as a direct link instead of a dropdown
+	if (visiblePages.length === 1) {
+		return directSectionOption(section, visiblePages[0], collapsed)
+	}
+
+	return {
+		key: section.key,
+		label: sectionLabel(section, collapsed),
+		icon: sectionIcon(section),
+		children: visiblePages.map(page => pageOption(section, page))
+	}
+}
+
+/** One entry holding a group's sections, each a module that opens to its pages. */
+function groupOption(group: NavGroup, modules: MenuMixedOption[]): MenuMixedOption {
+	return {
+		key: navGroupMenuKey(group),
+		label: () => t(navGroupTitleKey(group)),
+		icon: renderIcon(group.icon),
+		children: modules
+	}
+}
+
 export default function getItems(args: { mode: "vertical" | "horizontal"; collapsed: boolean }): MenuMixedOption[] {
 	// Dependency on the active language — see the note above. Do not remove.
 	void currentLocale.value
 
 	// Who sees what is `navigation/access.ts`'s call, shared with the route
 	// guard and the "/" redirect so the menu never offers a refused page.
-	return NAV_SECTIONS
-		.filter(maySeeSection)
-		.map<MenuMixedOption>(section => {
-			const visiblePages = menuPages(section)
+	const visible = NAV_SECTIONS.filter(maySeeSection)
+	const options: MenuMixedOption[] = []
 
-			// When a section has only one page (like Dashboard), render it as a direct link instead of a dropdown
-			if (visiblePages.length === 1) {
-				return directSectionOption(section, visiblePages[0], args.collapsed)
-			}
+	for (const section of visible) {
+		const group = section.group
+		const modules = group ? visible.filter(other => other.group === group) : []
 
-			return {
-				key: section.key,
-				label: sectionLabel(section, args.collapsed),
-				icon: sectionIcon(section),
-				children: visiblePages.map(page => pageOption(section, page))
-			}
-		})
+		// A group this account sees one section of shows that section as it
+		// stands: a parent with a single child is a click for nothing.
+		if (!group || modules.length < 2) {
+			options.push(sectionOption(section, args.collapsed))
+		} else if (modules[0] === section) {
+			options.push(groupOption(NAV_GROUPS[group], modules.map(module => sectionOption(module, args.collapsed))))
+		}
+	}
+
+	return options
 }

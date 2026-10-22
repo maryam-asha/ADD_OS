@@ -1,4 +1,6 @@
+import type { MenuMixedOption } from "naive-ui/es/menu/src/interface"
 import type { RouteRecordRaw } from "vue-router"
+import type { AdminUser } from "@/types/auth.d"
 import { createPinia, setActivePinia } from "pinia"
 import { describe, expect, it } from "vitest"
 import ComingSoon from "@/add-os/views/ComingSoon.vue"
@@ -7,7 +9,7 @@ import { useAuthStore } from "@/stores/auth"
 import ar from "../../lang/ar"
 import en from "../../lang/en"
 import { createAddOsRoutes } from "../routes"
-import { HOME_REDIRECT, NAV_SECTIONS, navRouteName, navRoutePath } from "../sections"
+import { HOME_REDIRECT, NAV_GROUPS, NAV_SECTIONS, navGroupTitleKey, navRouteName, navRoutePath } from "../sections"
 
 /**
  * ADD OS — keeps the menu, the routes, and the translations in agreement.
@@ -169,6 +171,18 @@ describe("translations", () => {
 		expect(missing).toEqual([])
 	})
 
+	it("translates every group title in both languages", () => {
+		const missing: string[] = []
+
+		for (const group of Object.values(NAV_GROUPS)) {
+			const key = navGroupTitleKey(group)
+			if (typeof messagesAt(ar, key) !== "string") missing.push(`ar → ${key}`)
+			if (typeof messagesAt(en, key) !== "string") missing.push(`en → ${key}`)
+		}
+
+		expect(missing).toEqual([])
+	})
+
 	it("carries the badge text used by coming-soon sections", () => {
 		expect(messagesAt(ar, "common.comingSoon")).toBe("قريباً")
 		expect(typeof messagesAt(en, "common.comingSoon")).toBe("string")
@@ -192,5 +206,45 @@ describe("sidebar menu items", () => {
 		const spatialItem = items.find(item => item.key === "spatial")
 		expect(spatialItem).toBeDefined()
 		expect((spatialItem as { children?: unknown[] }).children?.length).toBeGreaterThan(0)
+	})
+})
+
+describe("sidebar groups", () => {
+	const HR_ALL = ["hr.employees.view", "hr.org.view", "hr.alerts.view", "hr.approvals.manage", "hr.leave.view", "hr.attendance.view", "hr.timesheets.view", "hr.payroll.view", "hr.recruitment.view", "hr.performance.view", "hr.training.view", "hr.benefits.view", "hr.loans.manage", "hr.reports.view", "hr.settings.manage"]
+	const employee = { id: 9, employee_number: "ADD-0009", name: { ar: "يزن دبس", en: "Yazan Dibs" }, status: "active" } as AdminUser["employee"]
+
+	function menuFor(account: Partial<AdminUser>): MenuMixedOption[] {
+		setActivePinia(createPinia())
+		useAuthStore().setLogged({ id: 1, name: "Account", email: "account@test.local", roles: [], ...account } as AdminUser)
+		return getItems({ mode: "vertical", collapsed: false })
+	}
+
+	function childKeys(item: MenuMixedOption | undefined): string[] {
+		return ((item as { children?: MenuMixedOption[] } | undefined)?.children ?? []).map(child => String(child.key))
+	}
+
+	it("tags exactly HR's six admin sections, in a row, and leaves My HR its own entry", () => {
+		const tagged = NAV_SECTIONS.map((section, index) => ({ key: section.key, group: section.group, index })).filter(entry => entry.group === "hr")
+		expect(tagged.map(entry => entry.key)).toEqual(["hr", "hrTime", "hrPay", "hrTalent", "hrReports", "hrSettings"])
+		expect(tagged.at(-1)!.index - tagged[0].index).toBe(tagged.length - 1)
+		expect(NAV_SECTIONS.find(section => section.key === "myHr")?.group).toBeUndefined()
+	})
+
+	it("gives HR one sidebar entry holding a module per section, each opening to its pages", () => {
+		const items = menuFor({ roles: ["hr_manager"], permissions: HR_ALL, employee })
+		expect(items.map(item => String(item.key))).toEqual(["dashboard.overview", "hrGroup", "myHr"])
+
+		const group = items.find(item => item.key === "hrGroup")
+		expect(childKeys(group)).toEqual(["hr", "hrTime", "hrPay", "hrTalent", "hrReports", "hrSettings"])
+
+		const time = (group as { children: MenuMixedOption[] }).children.find(child => child.key === "hrTime")
+		expect(childKeys(time)).toContain("hrTime.hrLeaveRequests")
+	})
+
+	it("shows a group's only visible section as it stands, not inside a group of one", () => {
+		const items = menuFor({ roles: ["hr_qa_reports"], permissions: ["hr.reports.view"] })
+		const keys = items.map(item => String(item.key))
+		expect(keys).toContain("hrReports")
+		expect(keys).not.toContain("hrGroup")
 	})
 })

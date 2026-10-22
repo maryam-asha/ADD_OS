@@ -27,10 +27,10 @@
 import type { MenuInst } from "naive-ui"
 import type { MenuMixedOption } from "naive-ui/es/menu/src/interface"
 import type { RouteRecordNormalized } from "vue-router"
-import _uniq from "lodash/uniq"
 import { NMenu } from "naive-ui"
 import { computed, onBeforeMount, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
+import { expandedKeysAfter } from "@/add-os/navigation/menuExpansion"
 import { useThemeStore } from "@/stores/theme"
 import getItems from "./items"
 
@@ -76,18 +76,10 @@ onBeforeMount(() => {
 	})
 })
 
-// handler to simulate the accordion behavior in a specific submenu
+// ADD OS: one module open at a time inside a group entry — see menuExpansion.ts.
+// (The template's version did this for its "components" demo menu, now gone.)
 function handleUpdateExpandedKeys(value: string[]) {
-	const submenu = "components"
-
-	if (value?.length && value.includes(submenu)) {
-		const lastKey = value.pop()
-		if (lastKey) {
-			expandedKeys.value = _uniq([submenu, lastKey])
-		}
-	} else {
-		expandedKeys.value = undefined
-	}
+	expandedKeys.value = expandedKeysAfter(value ?? [])
 }
 
 function handleUpdateValue(key: string) {

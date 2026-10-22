@@ -1,3 +1,4 @@
+import type { MenuMixedOption } from "naive-ui/es/menu/src/interface"
 import type { RouteLocationNormalized, RouteRecordRaw } from "vue-router"
 import type { AdminUser } from "@/types/auth.d"
 import { createPinia, setActivePinia } from "pinia"
@@ -5,7 +6,7 @@ import { beforeEach, describe, expect, it } from "vitest"
 import { homePath, maySeeSection, menuPages } from "@/add-os/navigation/access"
 import { authGuard } from "@/add-os/navigation/authGuard"
 import { createAddOsRoutes } from "@/add-os/navigation/routes"
-import { NAV_SECTIONS, navRoutePath } from "@/add-os/navigation/sections"
+import { NAV_GROUPS, NAV_SECTIONS, navGroupMenuKey, navRoutePath } from "@/add-os/navigation/sections"
 import getItems from "@/app-layouts/common/Navbar/items"
 import { useAuthStore } from "@/stores/auth"
 
@@ -46,6 +47,14 @@ for (const parent of createAddOsRoutes()) {
 	}
 }
 
+/** The sections the sidebar lists, in order — a group's modules count as their own sections. */
+function menuSections(items: MenuMixedOption[]): string[] {
+	const groups = new Set(Object.values(NAV_GROUPS).map(navGroupMenuKey))
+	return items
+		.flatMap(item => (groups.has(String(item.key)) ? ((item as { children?: MenuMixedOption[] }).children ?? []) : [item]))
+		.map(item => String(item.key).split(".")[0])
+}
+
 function signIn(account: Partial<AdminUser>) {
 	useAuthStore().setLogged({ id: 1, name: "Account", email: "account@test.local", roles: [], ...account } as AdminUser)
 }
@@ -80,7 +89,7 @@ describe("sidebar, route guard and \"/\" agree", () => {
 
 		it("builds the sidebar from the same rules", () => {
 			signIn(account)
-			const fromMenu = getItems({ mode: "vertical", collapsed: false }).map(item => String(item.key).split(".")[0])
+			const fromMenu = menuSections(getItems({ mode: "vertical", collapsed: false }))
 			expect(fromMenu).toEqual(NAV_SECTIONS.filter(maySeeSection).map(section => section.key))
 		})
 	})

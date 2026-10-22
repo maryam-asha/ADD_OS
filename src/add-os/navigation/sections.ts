@@ -78,6 +78,33 @@ export interface NavSection {
 	/** Shown and routable only for accounts with an HR employee record. */
 	employee?: boolean
 	permission?: string
+	/**
+	 * Folds the section into one sidebar entry with the other sections of the
+	 * same group, where it reads as a module under that entry. Menu only: the
+	 * section keeps its own path, route names and access rules.
+	 */
+	group?: NavGroupKey
+}
+
+export type NavGroupKey = "hr"
+
+export interface NavGroup {
+	/** i18n key under `nav.groups`. */
+	key: NavGroupKey
+	/** Iconify name — must exist in the locally bundled sets. */
+	icon: string
+}
+
+/**
+ * Sidebar entries that hold several sections as modules. HR administration
+ * filled six top-level rows of the sidebar (about forty pages); since
+ * 2026-10-22 it is one "Human resources" entry with a module for each:
+ * people, time, pay, talent, reports and setup. My HR stays its own entry:
+ * it is every employee's self-service, not HR's work, and an employee with
+ * nothing else would otherwise open a group to reach a single module.
+ */
+export const NAV_GROUPS: Readonly<Record<NavGroupKey, NavGroup>> = {
+	hr: { key: "hr", icon: "carbon:identification" }
 }
 
 export const NAV_SECTIONS: readonly NavSection[] = [
@@ -321,6 +348,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		// own hr.* permission, so a custom HR role works without
 		// admin|operations, as on the backend.
 		key: "hr",
+		group: "hr",
 		path: "/hr",
 		icon: "carbon:user-multiple",
 		status: "active",
@@ -337,6 +365,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		// Time and leave (add/hr Leave; attendance and timesheets join it).
 		// Every page carries its own hr.* permission, as on the backend.
 		key: "hrTime",
+		group: "hr",
 		path: "/hr-time",
 		icon: "carbon:calendar",
 		status: "active",
@@ -357,6 +386,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		// its own permission (hr.payroll.manage, .approve, .pay), checked on
 		// its page; a page here needs only to read.
 		key: "hrPay",
+		group: "hr",
 		path: "/hr-pay",
 		icon: "carbon:money",
 		status: "active",
@@ -378,6 +408,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		// Reading needs hr.recruitment.view; every change, on its page,
 		// hr.recruitment.manage.
 		key: "hrTalent",
+		group: "hr",
 		path: "/hr-talent",
 		icon: "carbon:growth",
 		status: "active",
@@ -404,6 +435,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		// all behind hr.reports.view. Money in them (payroll, loans) still
 		// needs hr.payroll.view, which the server checks.
 		key: "hrReports",
+		group: "hr",
 		path: "/hr-reports",
 		icon: "carbon:report",
 		status: "active",
@@ -420,6 +452,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		// HR setup. Each page needs its own setup permission (hr.settings.manage,
 		// hr.approvals.manage), so the section shows only to whoever runs HR.
 		key: "hrSettings",
+		group: "hr",
 		path: "/hr-settings",
 		icon: "carbon:settings-adjust",
 		status: "active",
@@ -492,6 +525,16 @@ export function navPageTitleKey(page: NavPage): string {
 /** i18n key for a section title. */
 export function navSectionTitleKey(section: NavSection): string {
 	return `nav.sections.${section.key}`
+}
+
+/** i18n key for a group title. */
+export function navGroupTitleKey(group: NavGroup): string {
+	return `nav.groups.${group.key}`
+}
+
+/** The group's sidebar key, e.g. "hrGroup" — apart from section keys and route names. */
+export function navGroupMenuKey(group: NavGroup): string {
+	return `${group.key}Group`
 }
 
 /**
