@@ -35,15 +35,15 @@ const { t } = useI18n()
 const authStore = useAuthStore()
 const message = useMessage()
 
-// ADD OS: My HR's pages sit here, between the profile and logout, rather than
-// in the sidebar — see `accountMenuOptions`.
+// ADD OS: My HR opens from here, under the profile, rather than from the
+// sidebar — see `accountMenuOptions`.
 const options = computed(() => [
 	{
 		label: t("account.profile.title", "الملف الشخصي"),
 		key: "route-settings.accountSecurity",
 		icon: renderIcon(ProfileIcon)
 	},
-	...accountMenuOptions(t).flatMap(group => [{ type: "divider", key: `${group.key}-divider` }, group]),
+	...accountMenuOptions(t),
 	{ type: "divider", key: "logout-divider" },
 	{
 		label: t("common.logout"),

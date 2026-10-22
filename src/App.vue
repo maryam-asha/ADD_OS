@@ -18,7 +18,7 @@
 						Please note:
 						Keep in mind that third-party components might not handle this behavior.
 					-->
-					<component :is="RouterComponent" id="app-page" :key="routeName + forceRefresh" />
+					<component :is="RouterComponent" id="app-page" :key="routePageKey + forceRefresh" />
 				</transition>
 			</RouterView>
 		</component>
@@ -34,6 +34,7 @@ import type { RouteLocationNormalized } from "vue-router"
 import type { Layout, RouterTransition, ThemeNameEnum } from "@/types/theme.d"
 import { computed, onBeforeMount, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
+import { pageKey } from "@/add-os/navigation/pageKey"
 import Blank from "@/app-layouts/Blank"
 import Provider from "@/app-layouts/common/Provider.vue"
 import SplashScreen from "@/app-layouts/common/SplashScreen.vue"
@@ -61,6 +62,8 @@ const authStore = useAuthStore()
 const currencyStore = useCurrencyStore()
 
 const routeName = computed<string>(() => route?.name?.toString() || "")
+// ADD OS: a section's frame (My HR's menu) stays mounted across its pages — see pageKey.ts.
+const routePageKey = computed<string>(() => pageKey(route))
 const forceRefresh = computed<number>(() => mainStore.forceRefresh)
 const forceLayout = ref<Layout | null>(null)
 const layout = computed<Layout>(() => themeStore.layout)

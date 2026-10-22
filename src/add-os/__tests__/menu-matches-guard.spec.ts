@@ -7,7 +7,7 @@ import { accountMenuSections, homePath, maySeeSection, menuPages, sidebarSection
 import { accountMenuOptions } from "@/add-os/navigation/accountMenu"
 import { authGuard } from "@/add-os/navigation/authGuard"
 import { createAddOsRoutes } from "@/add-os/navigation/routes"
-import { NAV_GROUPS, NAV_SECTIONS, navGroupMenuKey, navRoutePath } from "@/add-os/navigation/sections"
+import { NAV_GROUPS, NAV_SECTIONS, navGroupMenuKey, navRouteName, navRoutePath } from "@/add-os/navigation/sections"
 import getItems from "@/app-layouts/common/Navbar/items"
 import { useAuthStore } from "@/stores/auth"
 
@@ -93,7 +93,7 @@ describe("sidebar, route guard and \"/\" agree", () => {
 			const fromMenu = menuSections(getItems({ mode: "vertical", collapsed: false }))
 			expect(fromMenu).toEqual(sidebarSections().map(section => section.key))
 			const fromAvatar = accountMenuOptions(key => key).map(option => String(option.key))
-			expect(fromAvatar).toEqual(accountMenuSections().map(section => section.key))
+			expect(fromAvatar).toEqual(accountMenuSections().map(section => `route-${navRouteName(section, menuPages(section)[0])}`))
 		})
 
 		it("lists every section it sees in the sidebar or the avatar menu", () => {

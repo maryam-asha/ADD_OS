@@ -479,8 +479,8 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 	},
 	{
 		// The signed-in employee's own HR file — operations, sales, the café:
-		// being an employee is an HR record, not a role. Opened from the avatar
-		// menu; its pages share a tab bar (MyHrLayout.vue) to move between them.
+		// being an employee is an HR record, not a role. Opened from one entry
+		// in the avatar menu; its pages share a vertical menu (MyHrLayout.vue).
 		key: "myHr",
 		path: "/my-hr",
 		icon: "carbon:user-profile",
