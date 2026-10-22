@@ -59,7 +59,7 @@
 					</n-form-item>
 				</div>
 				<n-form-item path="phone" :label="t('hr.hire.phone')" :feedback="t('hr.hire.phoneHint')">
-					<n-input v-model:value="form.phone" dir="ltr" />
+					<n-input v-model:value="form.phone" dir="ltr" @blur="form.phone = toInternationalPhone(form.phone)" />
 				</n-form-item>
 				<n-form-item path="workEmail" :label="t('hr.hire.workEmail')" :feedback="t('hr.hire.workEmailHint')">
 					<n-input v-model:value="form.workEmail" dir="ltr" />
@@ -213,6 +213,7 @@ import { nullable } from "@/add-os/modules/hr/utils/forms"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
 import { ApiError } from "@/add-os/services/api"
 import { hireEmployee, listJobGrades, listPositions, listWorkLocations, searchAccounts } from "@/add-os/services/hr/core"
+import { isValidPhone, toInternationalPhone } from "@/add-os/utils/phone"
 import Icon from "@/components/common/Icon.vue"
 
 /**
@@ -299,6 +300,7 @@ const submitting = ref(false)
 
 const required = { required: true, message: () => t("hr.common.required"), trigger: ["blur", "change"] }
 const email = { type: "email" as const, message: () => t("hr.common.invalidEmail"), trigger: ["blur"] }
+const phone = { validator: (_rule: unknown, value: string) => !value || isValidPhone(value), message: () => t("hr.hire.phoneInvalid"), trigger: ["blur"] }
 const personRules = computed<FormRules>(() => {
 	const details: FormRules = {
 		nationality: { pattern: /^[A-Z]{2}$/, message: () => t("hr.editEmployee.nationalityHint"), trigger: ["blur"] },
@@ -307,7 +309,7 @@ const personRules = computed<FormRules>(() => {
 	if (form.value.mode === "existing") {
 		return { ...details, accountId: { required: true, type: "number", message: () => t("hr.hire.accountRequired"), trigger: ["change", "blur"] } }
 	}
-	return { ...details, nameAr: required, phone: required, workEmail: [required, email] }
+	return { ...details, nameAr: required, phone: [required, phone], workEmail: [required, email] }
 })
 const jobRules = computed<FormRules>(() => ({
 	hiredOn: required,
@@ -408,7 +410,7 @@ function payload(): HireEmployeePayload {
 	const person =
 		f.mode === "existing"
 			? { user_id: f.accountId as number }
-			: { name: { ar: f.nameAr.trim(), en: nullable(f.nameEn) }, phone: f.phone.trim(), work_email: f.workEmail.trim() }
+			: { name: { ar: f.nameAr.trim(), en: nullable(f.nameEn) }, phone: toInternationalPhone(f.phone), work_email: f.workEmail.trim() }
 
 	return {
 		...person,

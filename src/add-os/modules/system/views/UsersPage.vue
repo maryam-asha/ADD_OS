@@ -44,7 +44,12 @@
 					<n-input v-model:value="form.name" />
 				</n-form-item>
 				<n-form-item path="phone" :label="t('users.form.phone')">
-					<n-input v-model:value="form.phone" :placeholder="t('users.form.phonePlaceholder')" />
+					<n-input
+						v-model:value="form.phone"
+						:placeholder="t('users.form.phonePlaceholder')"
+						dir="ltr"
+						@blur="form.phone = toInternationalPhone(form.phone)"
+					/>
 				</n-form-item>
 				<n-form-item path="email" :label="t('users.form.email')">
 					<n-input v-model:value="form.email" />
@@ -140,12 +145,13 @@ import { useRouter } from "vue-router"
 import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import { canHireEmployees } from "@/add-os/config/permissions"
 import { displayRoleName } from "@/add-os/modules/system/config/roles.config"
-import { isValidPassword, isValidSyrianPhone } from "@/add-os/modules/system/utils/validation"
+import { isValidPassword } from "@/add-os/modules/system/utils/validation"
 import { ApiError } from "@/add-os/services/api"
 import { searchAccounts } from "@/add-os/services/hr/core"
 import { listRoleRecords } from "@/add-os/services/roles"
 import { assignRole, createUser, listUsers, updateUserProfile, updateUserStatus } from "@/add-os/services/users"
 import { STATUS_ICONS } from "@/add-os/theme/tokens"
+import { isValidPhone, toInternationalPhone } from "@/add-os/utils/phone"
 import Icon from "@/components/common/Icon.vue"
 
 defineProps<{ titleKey?: string }>()
@@ -364,7 +370,7 @@ const rules = computed<FormRules>(() => ({
 	phone: [
 		{ required: true, message: t("users.validation.phoneRequired"), trigger: ["blur", "input"] },
 		{
-			validator: (_rule, value: string) => isValidSyrianPhone(value),
+			validator: (_rule, value: string) => isValidPhone(value),
 			message: t("users.validation.phoneInvalid"),
 			trigger: ["blur", "input"]
 		}
@@ -423,7 +429,7 @@ async function submitCreate() {
 
 	submitting.value = true
 	try {
-		await createUser(form.value)
+		await createUser({ ...form.value, phone: toInternationalPhone(form.value.phone) })
 		message.success(t("users.create.success"))
 		drawerVisible.value = false
 		await loadUsers()
@@ -444,7 +450,7 @@ async function submitEdit() {
 
 	if (editingUserId.value === null) return
 
-	const payload: UpdateUserProfilePayload = { name: form.value.name, phone: form.value.phone, email: form.value.email }
+	const payload: UpdateUserProfilePayload = { name: form.value.name, phone: toInternationalPhone(form.value.phone), email: form.value.email }
 
 	submitting.value = true
 	try {

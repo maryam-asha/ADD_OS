@@ -138,7 +138,7 @@ describe("usersPage custom role display (final-review fix)", () => {
 					form: {
 						name: "Full name",
 						phone: "Phone",
-						phonePlaceholder: "09XXXXXXXX",
+						phonePlaceholder: "+963991234567",
 						email: "Email",
 						password: "Password",
 						passwordConfirmation: "Confirm password",
@@ -150,7 +150,7 @@ describe("usersPage custom role display (final-review fix)", () => {
 					validation: {
 						nameRequired: "Name is required.",
 						phoneRequired: "Phone is required.",
-						phoneInvalid: "Enter a valid Syrian mobile number (09XXXXXXXX).",
+						phoneInvalid: "Enter a valid phone number in international form (+963991234567) or a Syrian local mobile (09XXXXXXXX).",
 						emailRequired: "Email is required.",
 						emailInvalid: "Enter a valid email address.",
 						passwordRequired: "Password is required.",

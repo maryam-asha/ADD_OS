@@ -322,6 +322,7 @@
 									placeholder="+9639XXXXXXXX"
 									dir="ltr"
 									class="rounded-lg font-mono"
+									@blur="account.phone = toInternationalPhone(account.phone)"
 								>
 									<template #prefix>
 										<Icon name="carbon:phone" :size="16" class="text-[var(--add-text-muted,#5A606B)]" />
@@ -533,6 +534,7 @@ import { ApiError } from "@/add-os/services/api"
 import { createProvider, getProvider, linkProviderUser, listProviders, unlinkProviderUser, updateProvider, updateProviderStatus } from "@/add-os/services/providers"
 import { listUsers } from "@/add-os/services/users"
 import { formatNumber } from "@/add-os/utils/format"
+import { isValidPhone, toInternationalPhone } from "@/add-os/utils/phone"
 import Icon from "@/components/common/Icon.vue"
 
 const { t } = useI18n()
@@ -779,7 +781,11 @@ const rules = computed<FormRules>(() => ({
 				],
 				"account.phone": [
 					requiredRule,
-					{ pattern: /^\+?\d{8,15}$/, message: t("providerRequests.create.phoneInvalid", "رقم الهاتف غير صالح"), trigger: ["blur"] }
+					{
+						validator: (_rule: unknown, value: string) => isValidPhone(value),
+						message: t("providerRequests.create.phoneInvalid", "رقم الهاتف غير صالح"),
+						trigger: ["blur"]
+					}
 				],
 				"account.password": [
 					requiredRule,
@@ -823,7 +829,7 @@ async function submitForm() {
 			await updateProvider(editingId.value, { ...form.value })
 			message.success(t("providers.updated", "تم تحديث المزوّد بنجاح"))
 		} else {
-			await createProvider({ ...form.value, account: { ...account.value } })
+			await createProvider({ ...form.value, account: { ...account.value, phone: toInternationalPhone(account.value.phone) } })
 			message.success(t("providers.created", "تم إنشاء المزوّد بنجاح"))
 		}
 		showForm.value = false

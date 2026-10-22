@@ -282,7 +282,7 @@
 		"form": {
 			"name": "الاسم الكامل",
 			"phone": "رقم الهاتف",
-			"phonePlaceholder": "مثال: 09XXXXXXXX",
+			"phonePlaceholder": "مثال: ‎+963991234567",
 			"email": "البريد الإلكتروني",
 			"password": "كلمة المرور",
 			"passwordConfirmation": "تأكيد كلمة المرور",
@@ -294,7 +294,7 @@
 		"validation": {
 			"nameRequired": "الاسم مطلوب.",
 			"phoneRequired": "رقم الهاتف مطلوب.",
-			"phoneInvalid": "أدخل رقم هاتف سوري صحيح (09XXXXXXXX).",
+			"phoneInvalid": "أدخل رقم هاتف صحيحًا بالصيغة الدولية (‎+963991234567) أو رقمًا سوريًا محليًا (09XXXXXXXX).",
 			"emailRequired": "البريد الإلكتروني مطلوب.",
 			"emailInvalid": "أدخل بريداً إلكترونياً صحيحاً.",
 			"passwordRequired": "كلمة المرور مطلوبة.",

@@ -62,7 +62,7 @@
 						<n-input v-model:value="form.name" />
 					</n-form-item>
 					<n-form-item path="phone" :label="t('providerRequests.fields.phone')">
-						<n-input v-model:value="form.phone" placeholder="+9639XXXXXXXX" dir="ltr" />
+						<n-input v-model:value="form.phone" placeholder="+9639XXXXXXXX" dir="ltr" @blur="form.phone = toInternationalPhone(form.phone)" />
 					</n-form-item>
 					<n-form-item :label="t('providerRequests.fields.doorAccess')">
 						<n-switch v-model:value="form.door_access_enabled" />
@@ -158,6 +158,7 @@ import {
 } from "@/add-os/services/provider-portal"
 import { formatReportMoney as formatMoney } from "@/add-os/services/reports"
 import { formatDateTime } from "@/add-os/utils/format"
+import { isValidPhone, toInternationalPhone } from "@/add-os/utils/phone"
 import Icon from "@/components/common/Icon.vue"
 
 const { t } = useI18n()
@@ -283,7 +284,14 @@ const rules: FormRules = {
 	points: required(["wallet_top_up"], "number"),
 	payer: required(["plan_assignment", "wallet_top_up"]),
 	name: required(["company_member"]),
-	phone: [required(["company_member"]), { pattern: /^\+?\d{8,15}$/, message: t("providerRequests.create.phoneInvalid"), trigger: ["blur"] }],
+	phone: [
+		required(["company_member"]),
+		{
+			validator: (_rule, value: string) => form.value.type !== "company_member" || isValidPhone(value),
+			message: t("providerRequests.create.phoneInvalid"),
+			trigger: ["blur"]
+		}
+	],
 	user_id: required(["company_admin"], "number"),
 	plan_name_ar: required(["plan_design"]),
 	plan_name_en: required(["plan_design"]),
@@ -335,7 +343,7 @@ function buildPayload(): Record<string, unknown> {
 		case "wallet_top_up":
 			return { type: f.type, company_id: f.company_id, points: f.points, payer: f.payer }
 		case "company_member":
-			return { type: f.type, company_id: f.company_id, name: f.name.trim(), phone: f.phone.trim(), door_access_enabled: f.door_access_enabled }
+			return { type: f.type, company_id: f.company_id, name: f.name.trim(), phone: toInternationalPhone(f.phone), door_access_enabled: f.door_access_enabled }
 		case "company_admin":
 			return { type: f.type, company_id: f.company_id, user_id: f.user_id }
 		case "plan_design":
