@@ -27,7 +27,7 @@
  * locally — run `npm run icons` after changing one, or the icon guard fails.
  */
 
-import type { Roles } from "@/types/auth.d"
+import type { OpenedBy, Roles } from "@/types/auth.d"
 
 export type SectionStatus = "active" | "coming-soon"
 
@@ -44,6 +44,19 @@ export interface NavPage {
 	 */
 	hidden?: boolean
 	permission?: string
+	/**
+	 * For a page behind the admin gate (a section with no `roles`, or
+	 * admin|operations): what opens it to a role besides admin and operations.
+	 * ADD Core keeps most admin routes for `role:admin|operations`, so absent
+	 * means those two only. A list names the permissions ADD Core serves the
+	 * page's routes on without that role check (`routes/api/v1/admin.php`);
+	 * admin and operations need one of them too, as the server asks. `"any"`
+	 * opens it to every dashboard role, for a page that asks the server only
+	 * for what the account's own permissions allow. Added 2026-10-21: until
+	 * then a custom role (an HR role, say) saw every admin page and met a 403
+	 * on each.
+	 */
+	openedBy?: OpenedBy
 	/**
 	 * Iconify name drawn beside the page in the sidebar. Optional: most pages
 	 * carry none and read by their label alone; it marks pages a quick glance
@@ -75,8 +88,9 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		status: "active",
 		// No section-level permission: the page shows one panel per
 		// `dashboard.*` permission the account holds (config/permissions.ts),
-		// and says so when it holds none.
-		pages: [{ key: "overview", path: "overview" }]
+		// and says so when it holds none — so it opens to every dashboard
+		// role, custom ones included.
+		pages: [{ key: "overview", path: "overview", openedBy: "any" }]
 	},
 	{
 		key: "spatial",
@@ -84,7 +98,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		icon: "carbon:building",
 		status: "active",
 		pages: [
-			{ key: "branches", path: "branches" },
+			{ key: "branches", path: "branches", openedBy: ["branches.view"] },
 			{ key: "buildings", path: "buildings" },
 			{ key: "floors", path: "floors" },
 			{ key: "zones", path: "zones" },
@@ -119,8 +133,8 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "companyCreate", path: "companies/create", hidden: true, permission: "office-leases.create" },
 			{ key: "companyProfile", path: "companies/:id", hidden: true },
 			{ key: "memberships", path: "memberships" },
-			{ key: "officeLeases", path: "office-leases" },
-			{ key: "stoppedRenewals", path: "stopped-renewals" }
+			{ key: "officeLeases", path: "office-leases", openedBy: ["office-leases.view"] },
+			{ key: "stoppedRenewals", path: "stopped-renewals", openedBy: ["renewals.manage"] }
 		]
 	},
 	{
@@ -129,8 +143,8 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		icon: "carbon:partnership",
 		status: "active",
 		pages: [
-			{ key: "list", path: "list" },
-			{ key: "requests", path: "requests" }
+			{ key: "list", path: "list", openedBy: ["providers.view"] },
+			{ key: "requests", path: "requests", openedBy: ["provider-requests.view"] }
 		],
 		roles: ["admin", "operations"]
 	},
@@ -221,7 +235,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "exchangeRates", path: "exchange-rates" },
 			{ key: "walletTopUps", path: "wallet-top-ups" },
 			{ key: "cashRegister", path: "cash-register" },
-			{ key: "invoices", path: "invoices" }
+			{ key: "invoices", path: "invoices", openedBy: ["invoices.view"] }
 		]
 	},
 	{
@@ -230,12 +244,12 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		icon: "carbon:chart-line",
 		status: "active",
 		pages: [
-			{ key: "providersReport", path: "providers" },
-			{ key: "revenueReport", path: "revenue" },
+			{ key: "providersReport", path: "providers", openedBy: ["reports.view"] },
+			{ key: "revenueReport", path: "revenue", openedBy: ["reports.view"] },
 			// The figures the dashboard sums up, in full; each behind the
 			// permission of the dashboard section it expands.
-			{ key: "spacesReport", path: "spaces", permission: "dashboard.spaces" },
-			{ key: "collectionsReport", path: "collections", permission: "dashboard.finance" }
+			{ key: "spacesReport", path: "spaces", permission: "dashboard.spaces", openedBy: ["dashboard.spaces"] },
+			{ key: "collectionsReport", path: "collections", permission: "dashboard.finance", openedBy: ["dashboard.finance"] }
 		],
 		roles: ["admin", "operations"],
 		permission: "reports.view"
@@ -454,7 +468,8 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		status: "active",
 		pages: [
 			{ key: "systemSettings", path: "system" },
-			{ key: "accountSecurity", path: "account", hidden: true }
+			// Fortify's own two-factor routes: every signed-in account's.
+			{ key: "accountSecurity", path: "account", hidden: true, openedBy: "any" }
 		]
 	}
 ]

@@ -20,7 +20,8 @@
 				<n-descriptions-item :label="t('hrLeave.request.reason')">{{ leave.reason || none }}</n-descriptions-item>
 				<n-descriptions-item :label="t('hrLeave.request.attachment')">{{ leave.document_id ? t("hr.common.yes") : t("hr.common.no") }}</n-descriptions-item>
 				<n-descriptions-item v-if="leave.approval" :label="t('hrLeave.detail.approval')">
-					{{ t(`hrApprovals.status.${leave.approval.status}`) }} · {{ t("hrApprovals.step", { n: formatNumber(leave.approval.current_step) }) }}
+					{{ t(`hrApprovals.status.${leave.approval.status}`) }}
+					<template v-if="leave.approval.current_step !== null">· {{ t("hrApprovals.step", { n: formatNumber(leave.approval.current_step) }) }}</template>
 				</n-descriptions-item>
 				<n-descriptions-item v-if="leave.created_at" :label="t('hrLeave.detail.submittedAt')">{{ formatDateTime(leave.created_at) }}</n-descriptions-item>
 				<n-descriptions-item v-if="leave.cancelled_at" :label="t('hrLeave.detail.cancelledAt')">{{ formatDateTime(leave.cancelled_at) }}</n-descriptions-item>
@@ -59,6 +60,11 @@ import Icon from "@/components/common/Icon.vue"
  * approved one gives its days back to the balance, and only before its first
  * day — once started the server refuses, for HR too (a balance adjustment
  * is the way then).
+ *
+ * The approval's step shows only while one is open: ADD Core sends
+ * `current_step: null` once the request is decided or withdrawn, and
+ * formatting that null threw inside the render, leaving every decided
+ * request blank and its Cancel button unreachable (live HR run, 2026-10-21).
  */
 const props = defineProps<{
 	requestId: number | null

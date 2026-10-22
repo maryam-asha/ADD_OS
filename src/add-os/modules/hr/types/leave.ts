@@ -137,7 +137,8 @@ export interface LeaveRequest {
 	reason: string | null
 	document_id: number | null
 	status: LeaveRequestStatus
-	approval: { id: number; status: string; current_step: number } | null
+	/** `current_step` is null once the approval is decided or withdrawn. */
+	approval: { id: number; status: string; current_step: number | null } | null
 	created_at: string | null
 	cancelled_at: string | null
 }

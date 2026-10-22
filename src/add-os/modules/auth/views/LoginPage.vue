@@ -84,7 +84,7 @@ import AuthShell from "@/add-os/modules/auth/components/AuthShell.vue"
 import { REDIRECT_QUERY, safeRedirect } from "@/add-os/navigation/authGuard"
 import { ApiError } from "@/add-os/services/api"
 import { getCsrfCookie, getMe, login, logout, twoFactorChallenge } from "@/add-os/services/auth"
-import { useAuthStore } from "@/stores/auth"
+import { mayUseDashboard, useAuthStore } from "@/stores/auth"
 
 type Step = "signin" | "twofactor"
 
@@ -142,13 +142,16 @@ function backToSignIn() {
 
 /**
  * Both steps end the same way: verify user from GET /api/v1/auth/me,
- * route providers to portal, admins to dashboard, and reject member-only accounts.
+ * route providers to portal, everyone else home ("/"), and turn away an account
+ * with nothing here (`mayUseDashboard`): member-only and not an employee, or no
+ * role and no employee record.
  */
 async function completeSession() {
 	const user = await getMe()
 
-	const isMemberOnly = Boolean(user.roles?.length && user.roles.every(r => r === "member"))
-	if (isMemberOnly) {
+	// The store's rule, not a copy of it: the copy here forgot the employee
+	// record and turned away every member who is also an employee (2026-10-21).
+	if (!mayUseDashboard(user)) {
 		try {
 			await logout()
 		} catch {

@@ -4,9 +4,9 @@ import { NTag } from "naive-ui"
 import { h } from "vue"
 import { RouterLink } from "vue-router"
 import { currentLocale } from "@/add-os/lang/currentLocale"
+import { maySeeSection, menuPages } from "@/add-os/navigation/access"
 import { NAV_SECTIONS, navPageTitleKey, navRouteName, navSectionTitleKey } from "@/add-os/navigation/sections"
 import { i18nGlobal } from "@/lang"
-import { useAuthStore } from "@/stores/auth"
 import { renderIcon } from "@/utils"
 
 /**
@@ -127,33 +127,12 @@ export default function getItems(args: { mode: "vertical" | "horizontal"; collap
 	// Dependency on the active language — see the note above. Do not remove.
 	void currentLocale.value
 
-	const authStore = useAuthStore()
-
+	// Who sees what is `navigation/access.ts`'s call, shared with the route
+	// guard and the "/" redirect so the menu never offers a refused page.
 	return NAV_SECTIONS
-		.filter(section => {
-			if (authStore.isProvider) {
-				// Provider portal account only ever sees providerPortal sections
-				if (section.key !== "providerPortal" && !section.roles?.includes("provider")) {
-					return false
-				}
-			} else {
-				// Admin / operations account never sees provider portal sections
-				if (section.key === "providerPortal" || section.roles?.includes("provider")) {
-					return false
-				}
-			}
-
-			if (!authStore.isRoleGranted(section.roles ?? ["admin", "operations"])) return false
-			if (section.permission && !authStore.hasPermission(section.permission)) return false
-			// My HR: accounts with an employee record only.
-			if (section.employee && !authStore.isEmployee) return false
-			// A section whose every page needs a permission the account lacks would open empty.
-			return section.pages.some(page => !page.hidden && (!page.permission || authStore.hasPermission(page.permission)))
-		})
+		.filter(maySeeSection)
 		.map<MenuMixedOption>(section => {
-			const visiblePages = section.pages
-				.filter(page => !page.hidden)
-				.filter(page => !page.permission || authStore.hasPermission(page.permission))
+			const visiblePages = menuPages(section)
 
 			// When a section has only one page (like Dashboard), render it as a direct link instead of a dropdown
 			if (visiblePages.length === 1) {

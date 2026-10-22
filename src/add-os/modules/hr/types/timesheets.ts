@@ -16,8 +16,14 @@ export const TIMESHEET_STATUSES: readonly TimesheetStatus[] = ["draft", "submitt
  * and `timesheets.increment_hours`, which no endpoint exposes: change them
  * together with the server's, or every week is refused as "not the first
  * day of a timesheet week".
+ *
+ * Sunday (7), not the package's Monday default: ADD works Sunday to Thursday,
+ * and ADD Core's own `config/hr.php` overrides the package with 7. This was 1
+ * until 2026-10-21, and every week was refused on a real server (the live HR
+ * run that day); `timesheet-week-matches-core.spec.ts` now compares both
+ * values with the ADD Core checkout beside this one.
  */
-export const TIMESHEET_WEEK_STARTS_ON = 1
+export const TIMESHEET_WEEK_STARTS_ON = 7
 export const TIMESHEET_INCREMENT_HOURS = 0.5
 
 export interface CostCenter {

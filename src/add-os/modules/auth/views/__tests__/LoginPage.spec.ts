@@ -7,11 +7,12 @@ import { ApiError } from "@/add-os/services/api"
 import { useAuthStore } from "@/stores/auth"
 import LoginPage from "../LoginPage.vue"
 
-const { loginMock, twoFactorChallengeMock, getMeMock, getCsrfCookieMock, pushMock, currentQuery } = vi.hoisted(() => ({
+const { loginMock, twoFactorChallengeMock, getMeMock, getCsrfCookieMock, logoutMock, pushMock, currentQuery } = vi.hoisted(() => ({
 	loginMock: vi.fn(),
 	twoFactorChallengeMock: vi.fn(),
 	getMeMock: vi.fn(),
 	getCsrfCookieMock: vi.fn(),
+	logoutMock: vi.fn(),
 	pushMock: vi.fn(),
 	// The `/login` route's query, writable so a test can arrive with `?redirect=`.
 	currentQuery: { value: {} as Record<string, string> }
@@ -21,7 +22,8 @@ vi.mock("@/add-os/services/auth", () => ({
 	login: loginMock,
 	twoFactorChallenge: twoFactorChallengeMock,
 	getMe: getMeMock,
-	getCsrfCookie: getCsrfCookieMock
+	getCsrfCookie: getCsrfCookieMock,
+	logout: logoutMock
 }))
 
 // Partial mock, not a replacement: `services/api.ts` imports `src/router`, which
@@ -51,7 +53,8 @@ const messages = {
 				passwordRequired: "Password is required.",
 				forgotLink: "Forgot your password?",
 				submit: "Sign in",
-				genericError: "Couldn't sign in."
+				genericError: "Couldn't sign in.",
+				memberNotAuthorized: "This account is not authorized to access the dashboard."
 			},
 			twoFactor: {
 				title: "Two-step verification",
@@ -131,6 +134,47 @@ describe("loginPage", () => {
 		expect(loginMock).toHaveBeenCalledWith("m@add.sy", "correct-horse")
 		expect(useAuthStore().isLogged).toBe(true)
 		expect(pushMock).toHaveBeenCalledWith({ path: "/", replace: true })
+	})
+
+	/**
+	 * Sign-in kept its own copy of the member-only rule, without the employee
+	 * record, so a member who is also an employee was signed straight back out
+	 * and never reached My HR (live HR run, 2026-10-21). It now asks the store.
+	 */
+	describe("who may use the dashboard", () => {
+		const employee = { id: 8, employee_number: "ADD-0008", name: { ar: "لينا عبيد", en: "Lina Obeid" }, status: "probation" }
+
+		it("lets in a member who is also an employee, for My HR", async () => {
+			loginMock.mockResolvedValue({ two_factor: false })
+			getMeMock.mockResolvedValue({ ...adminUser, roles: ["member"], employee })
+
+			const wrapper = mountPage()
+			await flushPromises()
+			await fillCredentials(wrapper)
+			await clickSubmit(wrapper, "Sign in")
+
+			expect(useAuthStore().isLogged).toBe(true)
+			expect(logoutMock).not.toHaveBeenCalled()
+			expect(pushMock).toHaveBeenCalledWith({ path: "/", replace: true })
+		})
+
+		it.each([
+			["a member-only account", { roles: ["member"] }],
+			["an account with no role and no employee record", { roles: [] }]
+		])("turns away %s, signing the session out", async (_label, account) => {
+			loginMock.mockResolvedValue({ two_factor: false })
+			getMeMock.mockResolvedValue({ ...adminUser, ...account, employee: null })
+
+			const wrapper = mountPage()
+			await flushPromises()
+			await fillCredentials(wrapper)
+			await clickSubmit(wrapper, "Sign in")
+
+			expect(useAuthStore().isLogged).toBe(false)
+			expect(logoutMock).toHaveBeenCalledTimes(1)
+			expect(pushMock).not.toHaveBeenCalled()
+			expect(wrapper.text()).toContain("This account is not authorized to access the dashboard.")
+		})
 	})
 
 	it("lands on the page it was sent away from", async () => {

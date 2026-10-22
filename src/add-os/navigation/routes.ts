@@ -192,7 +192,8 @@ export function createAddOsRoutes(): RouteRecordRaw[] {
 				meta: {
 					title: navPageTitleKey(page),
 					permission: page.permission ?? section.permission,
-					employee: section.employee
+					employee: section.employee,
+					openedBy: page.openedBy
 				}
 			}))
 		}

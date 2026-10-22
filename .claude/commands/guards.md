@@ -49,6 +49,25 @@ Then report, per spec file, pass/fail and what it protects:
   `services/private-office-requests.ts`, and `services/company-members.ts` may reference
   the `/admin/companies` or `/admin/private-office-requests` HTTP paths; every other file
   under `src/add-os` must go through them.
+- `timesheet-week-matches-core.spec.ts` — `TIMESHEET_WEEK_STARTS_ON` and
+  `TIMESHEET_INCREMENT_HOURS` (`modules/hr/types/timesheets.ts`) equal ADD Core's
+  `hr.timesheets.week_starts_on` / `increment_hours`, read from the ADDCore checkout beside
+  this repo (app `config/hr.php` first, then the package's). No endpoint exposes them; when
+  the copy said Monday and ADD Core Sunday, every timesheet week was refused and every mocked
+  spec stayed green (live HR run, 2026-10-21). The comparison is **skipped** where the ADDCore
+  checkout is absent; the parser's own checks (other blocks' keys, comments) always run.
+- `one-dashboard-door.spec.ts` — `mayUseDashboard` (`src/stores/auth.ts`) is the only rule for
+  who may use the dashboard at all; no other file under `src/` judges an account with
+  `roles.every(`, and sign-in, session restore and the route guard each call it. Sign-in's
+  own copy lacked the employee record and turned away every member who is also an employee.
+  Carries a negative control.
+- `menu-matches-guard.spec.ts` — for ten kinds of account (admin, operations with and without
+  branch permissions, an HR role, a reports-only role, a custom invoices role, an empty custom
+  role, an employee with no role, a member who is an employee, a provider): every page the
+  sidebar offers passes `authGuard`, "/" (`homePath`) lands on a page it passes (so a refusal
+  cannot loop), and `Navbar/items.tsx` lists exactly the sections `navigation/access.ts`
+  allows. Before, a custom role and an employee with no role were offered every admin page,
+  each a 403, and "/" sent them to `/spatial/branches`.
 - `theme/__tests__/tokens.spec.ts` — WCAG ratios, ΔE separations, and "guideline p.15 strict
   rule stays disengaged" (Antique Copper in no semantic and no component token).
 

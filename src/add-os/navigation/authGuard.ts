@@ -1,5 +1,6 @@
 import type { RouteLocationNormalized, RouteLocationRaw } from "vue-router"
 import type { RouteMetaAuth } from "@/types/auth.d"
+import { isAdminGated } from "@/add-os/navigation/access"
 import { useAuthStore } from "@/stores/auth"
 
 /** Where an employee without dashboard access lands: their own HR page. */
@@ -40,12 +41,14 @@ export function safeRedirect(raw: unknown): string {
  * straight back to it and loop.
  */
 export function authGuard(route: RouteLocationNormalized): RouteLocationRaw | void {
-	const { checkAuth, authRedirect, auth, roles, permission, employee }: RouteMetaAuth = route.meta
+	const { checkAuth, authRedirect, auth, roles, permission, employee, openedBy }: RouteMetaAuth = route.meta
 	const authStore = useAuthStore()
 
 	if (route.redirectedFrom?.name === "Logout") authStore.setLogout()
 
-	if (authStore.isLogged && authStore.isMemberOnly) {
+	// A member-only account that is not an employee, or one with no role and no
+	// employee record: nothing here is theirs (`mayUseDashboard`).
+	if (authStore.isLogged && !authStore.mayUseDashboard) {
 		authStore.setLogout()
 		return { path: "/login" }
 	}
@@ -79,6 +82,11 @@ export function authGuard(route: RouteLocationNormalized): RouteLocationRaw | vo
 		if (permission && !authStore.hasPermission(permission)) {
 			return authStore.isProvider ? { path: "/provider/summary" } : { path: "/" }
 		}
+
+		// Behind the admin gate a custom role reaches only the pages ADD Core
+		// serves it (`mayOpenAdminPage`). "/" then lands on one it may open
+		// (`homePath`), so this never loops.
+		if (isAdminGated(roles) && !authStore.mayOpenAdminPage(openedBy)) return { path: "/" }
 
 		return
 	}

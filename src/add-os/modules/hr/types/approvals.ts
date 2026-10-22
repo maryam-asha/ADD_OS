@@ -109,7 +109,8 @@ export interface ApprovalRequest {
 	status: ApprovalStatus
 	employee: { id: number; employee_number: string; name: Translatable }
 	submitted_by: number | null
-	current_step: number
+	/** Null once the request is decided or withdrawn. */
+	current_step: number | null
 	subject: Record<string, unknown> | null
 	steps: ApprovalStep[]
 	created_at: string | null

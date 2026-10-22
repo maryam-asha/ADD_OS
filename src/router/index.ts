@@ -1,12 +1,10 @@
 import { watch } from "vue"
 import { createRouter, createWebHistory } from "vue-router"
-import { canViewDashboard } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
+import { homePath } from "@/add-os/navigation/access"
 import { authGuard } from "@/add-os/navigation/authGuard"
 import { createAddOsRoutes } from "@/add-os/navigation/routes"
-import { DASHBOARD_HOME, HOME_REDIRECT } from "@/add-os/navigation/sections"
 import { i18nGlobal } from "@/lang"
-import { useAuthStore } from "@/stores/auth"
 import { Layout } from "@/types/theme.d"
 
 /**
@@ -27,12 +25,10 @@ const router = createRouter({
 	routes: [
 		{
 			path: "/",
-			// ADD OS: provider portal summary for providers; for staff, the dashboard
-			// when they may see any of it, else HOME_REDIRECT.
-			redirect: () => {
-				if (useAuthStore().isProvider) return "/provider/summary"
-				return canViewDashboard() ? DASHBOARD_HOME : HOME_REDIRECT
-			}
+			// ADD OS: the provider portal for providers; the dashboard for anyone
+			// with a panel on it; else HOME_REDIRECT for admin and operations, and
+			// the first page they may open for anyone else (`navigation/access.ts`).
+			redirect: () => homePath()
 		},
 
 		...createAddOsRoutes(),

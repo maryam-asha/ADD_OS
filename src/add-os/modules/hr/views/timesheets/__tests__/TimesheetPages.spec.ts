@@ -65,7 +65,7 @@ const mountPage = (component: object) => mount(component, { global: { plugins: [
 const reconciliation = { days: [], timesheet_hours: 0, attendance_hours: 0, difference_hours: 0 }
 
 function week(status: string, entries: unknown[] = []) {
-	return { timesheet: { id: status === "draft" && !entries.length ? null : 9, week_start: "2026-10-12", week_end: "2026-10-18", status, total_hours: "0", entries }, reconciliation }
+	return { timesheet: { id: status === "draft" && !entries.length ? null : 9, week_start: "2026-10-11", week_end: "2026-10-17", status, total_hours: "0", entries }, reconciliation }
 }
 
 interface MineVm {
@@ -102,7 +102,7 @@ describe("timesheet pages", () => {
 	})
 
 	describe("my timesheet", () => {
-		it("opens the week the URL names on its Monday, one line per cost center", async () => {
+		it("opens the week the URL names on its Sunday, one line per cost center", async () => {
 			mocks.getMine.mockResolvedValue(
 				week("draft", [
 					{ id: 1, cost_center_id: 1, work_date: "2026-10-12", hours: "7.50", note: null },
@@ -112,7 +112,7 @@ describe("timesheet pages", () => {
 			const wrapper = mountPage(MyTimesheetPage)
 			await flushPromises()
 
-			expect(mocks.getMine).toHaveBeenCalledWith("2026-10-12")
+			expect(mocks.getMine).toHaveBeenCalledWith("2026-10-11")
 			const vm = wrapper.vm as unknown as MineVm
 			expect(vm.rows.map(r => r.cost_center_id)).toEqual([1, 2])
 			expect(vm.rows[0].hours["2026-10-12"]).toBe(7.5)
@@ -134,12 +134,12 @@ describe("timesheet pages", () => {
 			await vm.save()
 			await flushPromises()
 
-			expect(mocks.save).toHaveBeenCalledWith("2026-10-12", [
+			expect(mocks.save).toHaveBeenCalledWith("2026-10-11", [
 				{ cost_center_id: 1, work_date: "2026-10-12", hours: 6, note: null },
 				{ cost_center_id: 1, work_date: "2026-10-13", hours: 2.5, note: null }
 			])
 			expect(mocks.success).toHaveBeenCalledWith("Timesheet saved.")
-			expect(mocks.getMine).toHaveBeenCalledWith("2026-10-12")
+			expect(mocks.getMine).toHaveBeenCalledWith("2026-10-11")
 			wrapper.unmount()
 		})
 
@@ -168,8 +168,8 @@ describe("timesheet pages", () => {
 			;(wrapper.vm as unknown as MineVm).confirmSubmit()
 			await flushPromises()
 
-			expect(mocks.save).toHaveBeenCalledWith("2026-10-12", [{ cost_center_id: 1, work_date: "2026-10-12", hours: 8, note: null }])
-			expect(mocks.submit).toHaveBeenCalledWith("2026-10-12")
+			expect(mocks.save).toHaveBeenCalledWith("2026-10-11", [{ cost_center_id: 1, work_date: "2026-10-12", hours: 8, note: null }])
+			expect(mocks.submit).toHaveBeenCalledWith("2026-10-11")
 			expect(mocks.save.mock.invocationCallOrder[0]).toBeLessThan(mocks.submit.mock.invocationCallOrder[0])
 			expect(mocks.success).toHaveBeenCalledWith("The timesheet has been submitted for approval.")
 			wrapper.unmount()
@@ -201,7 +201,7 @@ describe("timesheet pages", () => {
 			;(wrapper.vm as unknown as MineVm).confirmRecall()
 			await flushPromises()
 
-			expect(mocks.recall).toHaveBeenCalledWith("2026-10-12")
+			expect(mocks.recall).toHaveBeenCalledWith("2026-10-11")
 			expect(mocks.success).toHaveBeenCalledWith("The timesheet is back in draft.")
 			wrapper.unmount()
 		})
@@ -209,12 +209,12 @@ describe("timesheet pages", () => {
 
 	describe("timesheets and compliance", () => {
 		it("lists with the week, status and employee from the URL", async () => {
-			mocks.route.query = { week: "2026-10-12", status: "submitted" }
+			mocks.route.query = { week: "2026-10-11", status: "submitted" }
 			mocks.list.mockResolvedValue({ data: [], meta: { current_page: 1, last_page: 1, per_page: 50, total: 0 } })
 			const wrapper = mountPage(TimesheetsPage)
 			await flushPromises()
 
-			expect(mocks.list).toHaveBeenCalledWith({ page: 1, week_start: "2026-10-12", status: "submitted", employee_id: null })
+			expect(mocks.list).toHaveBeenCalledWith({ page: 1, week_start: "2026-10-11", status: "submitted", employee_id: null })
 			expect(mocks.compliance).not.toHaveBeenCalled()
 			wrapper.unmount()
 		})
@@ -222,7 +222,7 @@ describe("timesheet pages", () => {
 		it("reads compliance for this week when none is chosen", async () => {
 			mocks.route.query = { view: "compliance" }
 			mocks.compliance.mockResolvedValue({
-				week_start: "2026-10-12",
+				week_start: "2026-10-11",
 				missing: [{ id: 7, employee_number: "E-7", name: { ar: "سارة", en: "Sara" }, status: null }]
 			})
 			const wrapper = mountPage(TimesheetsPage)

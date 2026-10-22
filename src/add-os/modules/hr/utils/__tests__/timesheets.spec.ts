@@ -3,18 +3,25 @@ import { setCurrentLocale } from "@/add-os/lang/currentLocale"
 import { EMPTY } from "@/add-os/modules/hr/utils/translated"
 import { centerName, dayTotal, emptyGridRow, entriesToGrid, gridToEntries, onIncrement, weekDays, weekStartOf } from "../timesheets"
 
-const WEEK = weekDays("2026-10-12")
+const WEEK = weekDays("2026-10-11")
 
 describe("timesheet weeks", () => {
-	it("lands any day on the Monday that starts its week", () => {
-		expect(weekStartOf("2026-10-12")).toBe("2026-10-12")
-		expect(weekStartOf("2026-10-15")).toBe("2026-10-12")
-		expect(weekStartOf("2026-10-18")).toBe("2026-10-12")
-		expect(weekStartOf("2026-11-01")).toBe("2026-10-26")
+	it("lands any day on the Sunday that starts its week, as ADD Core does", () => {
+		expect(weekStartOf("2026-10-11")).toBe("2026-10-11")
+		expect(weekStartOf("2026-10-15")).toBe("2026-10-11")
+		expect(weekStartOf("2026-10-17")).toBe("2026-10-11")
+		expect(weekStartOf("2026-10-18")).toBe("2026-10-18")
+		expect(weekStartOf("2026-11-01")).toBe("2026-11-01")
+		expect(weekStartOf("2026-10-31")).toBe("2026-10-25")
+	})
+
+	it("never lands on a Monday — the server refuses one as a week start", () => {
+		expect(weekStartOf("2026-10-19")).toBe("2026-10-18")
 	})
 
 	it("lists the seven days across a month end", () => {
-		expect(weekDays("2026-10-26")).toEqual(["2026-10-26", "2026-10-27", "2026-10-28", "2026-10-29", "2026-10-30", "2026-10-31", "2026-11-01"])
+		expect(weekDays("2026-10-25")).toEqual(["2026-10-25", "2026-10-26", "2026-10-27", "2026-10-28", "2026-10-29", "2026-10-30", "2026-10-31"])
+		expect(weekDays("2026-11-29")).toEqual(["2026-11-29", "2026-11-30", "2026-12-01", "2026-12-02", "2026-12-03", "2026-12-04", "2026-12-05"])
 	})
 
 	it("accepts hours only in half-hour steps", () => {
