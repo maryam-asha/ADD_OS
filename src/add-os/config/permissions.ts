@@ -451,3 +451,52 @@ export function canViewHrAlerts(): boolean {
 export function canManageApprovals(): boolean {
 	return can("hr.approvals.manage")
 }
+
+// ── Inventory ───────────────────────────────────────────────────────────────
+//
+// ADD Core's inventory package (`packages/add/inventory`): every route
+// carries its own `can:inventory.*`, assignable to any role, so these are
+// permissions, never roles. Each mirrors the middleware on its route in
+// `packages/add/inventory/routes/admin.php`.
+
+/** Categories, their fields, units and items. */
+export function canManageInventoryCatalog(): boolean {
+	return can("inventory.catalog.manage")
+}
+
+/** Registering, editing, moving and changing the status of assets. */
+export function canManageAssets(): boolean {
+	return can("inventory.assets.manage")
+}
+
+/** Handing assets over and taking them back. */
+export function canManageCustody(): boolean {
+	return can("inventory.assets.custody")
+}
+
+/** Repairs, servicing and maintenance schedules. */
+export function canManageMaintenance(): boolean {
+	return can("inventory.assets.maintenance")
+}
+
+export function canDisposeAssets(): boolean {
+	return can("inventory.assets.dispose")
+}
+
+export function canReceiveStock(): boolean {
+	return can("inventory.stock.receive")
+}
+
+/** Issuing stock by hand (internal use, damaged, expired). */
+export function canIssueStock(): boolean {
+	return can("inventory.stock.issue")
+}
+
+export function canTransferStock(): boolean {
+	return can("inventory.stock.transfer")
+}
+
+/** Recording a physical count. */
+export function canCountStock(): boolean {
+	return can("inventory.stock.adjust")
+}

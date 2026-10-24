@@ -31,7 +31,7 @@ function childrenOf(route: RouteRecordRaw): RouteRecordRaw[] {
 
 describe("section list", () => {
 	it("covers all operational sections", () => {
-		expect(NAV_SECTIONS).toHaveLength(24)
+		expect(NAV_SECTIONS).toHaveLength(25)
 	})
 
 	it("marks exactly the built sections as active", () => {
@@ -47,6 +47,7 @@ describe("section list", () => {
 			"bookings",
 			"plans",
 			"payments",
+			"inventory",
 			"reports",
 			"community",
 			"address",

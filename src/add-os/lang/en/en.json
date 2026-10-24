@@ -1578,7 +1578,8 @@
 			"hrTime": "Time and leave",
 			"hrPay": "Pay and benefits",
 			"hrTalent": "Talent",
-			"hrReports": "HR reports"
+			"hrReports": "HR reports",
+			"inventory": "Inventory"
 		},
 		"pages": {
 			"overview": "Overview",
@@ -1723,7 +1724,15 @@
 			"hrExceptionsReport": "Attendance exceptions",
 			"hrTimesheetCompliance": "Timesheet compliance",
 			"hrLiabilities": "Liabilities",
-			"amenities": "Amenity Catalog"
+			"amenities": "Amenity Catalog",
+			"inventoryAssets": "Assets",
+			"inventoryAsset": "Asset",
+			"inventoryStock": "Stock",
+			"inventoryMaintenance": "Maintenance",
+			"inventoryCustody": "Custody",
+			"inventoryItems": "Items",
+			"inventoryCatalog": "Categories & units",
+			"inventoryReports": "Inventory reports"
 		}
 	},
 	"resourceCrud": {

@@ -1582,7 +1582,8 @@
 			"hrTime": "الدوام والإجازات",
 			"hrPay": "الرواتب والمزايا",
 			"hrTalent": "التوظيف والمواهب",
-			"hrReports": "تقارير الموارد البشرية"
+			"hrReports": "تقارير الموارد البشرية",
+			"inventory": "المخزون والأصول"
 		},
 		"pages": {
 			"overview": "نظرة عامة",
@@ -1727,7 +1728,15 @@
 			"hrExceptionsReport": "استثناءات الحضور",
 			"hrTimesheetCompliance": "الالتزام بالتايم شيت",
 			"hrLiabilities": "الالتزامات",
-			"amenities": "كتالوج المزايا"
+			"amenities": "كتالوج المزايا",
+			"inventoryAssets": "الأصول",
+			"inventoryAsset": "الأصل",
+			"inventoryStock": "المخزون",
+			"inventoryMaintenance": "الصيانة",
+			"inventoryCustody": "العهدة",
+			"inventoryItems": "المواد",
+			"inventoryCatalog": "التصنيفات والوحدات",
+			"inventoryReports": "تقارير المخزون"
 		}
 	},
 	"resourceCrud": {
