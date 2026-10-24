@@ -25,7 +25,6 @@ describe("permissions", () => {
 		expect(Object.keys(SPATIAL_RESOURCE_DELETE_ROLE).sort()).toEqual([
 			"buildings",
 			"floors",
-			"resources",
 			"seatsDesks",
 			"spaces",
 			"zones"
@@ -34,7 +33,6 @@ describe("permissions", () => {
 
 	it("marks exactly branches/buildings/floors/zones/spaces as cascading, per the collection's cascade wording", () => {
 		expect([...CASCADING_SPATIAL_RESOURCES].sort()).toEqual(["branches", "buildings", "floors", "spaces", "zones"])
-		expect(CASCADING_SPATIAL_RESOURCES.has("resources")).toBe(false)
 		expect(CASCADING_SPATIAL_RESOURCES.has("seatsDesks")).toBe(false)
 	})
 
@@ -112,7 +110,6 @@ describe("cascade-delete warning copy", () => {
 
 	it("does not add cascadeWarning to non-cascading resources", () => {
 		const enBundle = en as Record<string, { delete?: { cascadeWarning?: string } }>
-		expect(enBundle.resources?.delete?.cascadeWarning).toBeUndefined()
 		expect(enBundle.seatsDesks?.delete?.cascadeWarning).toBeUndefined()
 	})
 })

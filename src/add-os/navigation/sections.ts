@@ -136,9 +136,12 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "buildings", path: "buildings" },
 			{ key: "floors", path: "floors" },
 			{ key: "zones", path: "zones" },
+			// The amenity catalog, then which a space type may offer. Equipment in
+			// a space is an inventory asset (the Inventory section) since
+			// 2026-10-24, when ADD Core retired `resources`.
+			{ key: "amenities", path: "amenities" },
 			{ key: "spaceTypeAmenities", path: "space-type-amenities" },
 			{ key: "spaces", path: "spaces" },
-			{ key: "resources", path: "resources" },
 			{ key: "seatsDesks", path: "seats-desks" },
 			{ key: "businessHours", path: "business-hours" }
 		]

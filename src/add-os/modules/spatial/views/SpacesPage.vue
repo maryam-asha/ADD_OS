@@ -57,7 +57,6 @@
 
 <script setup lang="ts">
 import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vue"
-import type { AmenityType } from "@/add-os/modules/spatial/types/amenity"
 import type { Branch } from "@/add-os/modules/spatial/types/branch"
 import type { Building } from "@/add-os/modules/spatial/types/building"
 import type { OperationalStatus } from "@/add-os/modules/spatial/types/operational-status"
@@ -213,8 +212,8 @@ async function submitStatusChange(payload: Record<string, unknown>) {
 const amenitiesDrawerVisible = ref(false)
 const amenitiesSubmitting = ref(false)
 const amenitiesTargetId = ref<number | null>(null)
-const amenitiesForm = ref<{ space_type: SpaceType; amenities: AmenityType[] }>({ space_type: "co_space", amenities: [] })
-const amenitiesFields = computed(() => buildSpaceAmenitiesFields(t))
+const amenitiesForm = ref<{ space_type: SpaceType; amenities: string[] }>({ space_type: "co_space", amenities: [] })
+const amenitiesFields = computed(() => buildSpaceAmenitiesFields(currentLocale.value))
 
 function openAmenitiesDrawer(row: Space) {
 	amenitiesTargetId.value = row.id

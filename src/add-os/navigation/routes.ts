@@ -38,7 +38,7 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"spatial.floors": () => import("@/add-os/modules/spatial/views/FloorsPage.vue"),
 	"spatial.zones": () => import("@/add-os/modules/spatial/views/ZonesPage.vue"),
 	"spatial.spaces": () => import("@/add-os/modules/spatial/views/SpacesPage.vue"),
-	"spatial.resources": () => import("@/add-os/modules/spatial/views/ResourcesPage.vue"),
+	"spatial.amenities": () => import("@/add-os/modules/spatial/views/AmenitiesPage.vue"),
 	"spatial.spaceTypeAmenities": () => import("@/add-os/modules/spatial/views/SpaceTypeAmenitiesPage.vue"),
 	"spatial.seatsDesks": () => import("@/add-os/modules/spatial/views/SeatsDesksPage.vue"),
 	"spatial.businessHours": () => import("@/add-os/modules/spatial/views/BusinessHoursPage.vue"),

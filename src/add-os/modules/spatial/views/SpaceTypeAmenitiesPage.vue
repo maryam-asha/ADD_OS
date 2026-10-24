@@ -15,13 +15,14 @@
 		<n-modal v-model:show="dialogVisible" preset="card" :title="dialogTitle" class="max-w-md">
 			<div class="flex flex-col gap-1">
 				<div
-					v-for="amenity in AMENITY_TYPES"
-					:key="amenity"
+					v-for="amenity in selectable"
+					:key="amenity.key"
 					class="flex items-center justify-between gap-3 py-1"
 				>
-					<span class="text-sm">{{ t(`amenities.types.${amenity}`) }}</span>
-					<n-switch :value="editingAmenities.includes(amenity)" @update:value="(checked: boolean) => toggle(amenity, checked)" />
+					<span class="text-sm">{{ amenity.name[currentLocale] }}</span>
+					<n-switch :value="editingAmenities.includes(amenity.key)" @update:value="(checked: boolean) => toggle(amenity.key, checked)" />
 				</div>
+				<span v-if="selectable.length === 0" class="text-sm text-secondary">{{ t("amenities.manage.catalogEmpty") }}</span>
 			</div>
 
 			<template #footer>
@@ -36,24 +37,28 @@
 
 <script setup lang="ts">
 import type { DataTableColumns } from "naive-ui"
-import type { AmenityType, SpaceTypeAmenities } from "@/add-os/modules/spatial/types/amenity"
+import type { Amenity, SpaceTypeAmenities } from "@/add-os/modules/spatial/types/amenity"
 import { NAlert, NButton, NCard, NDataTable, NModal, NSwitch, NTag, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
-import { AMENITY_TYPES } from "@/add-os/modules/spatial/types/amenity"
+import { currentLocale } from "@/add-os/lang/currentLocale"
+import { amenityLabel, listAmenities } from "@/add-os/services/amenities"
 import { listSpaceTypeAmenities, updateSpaceTypeAmenities } from "@/add-os/services/space-type-amenities"
 
 const { t } = useI18n()
 const message = useMessage()
 
 const rows = ref<SpaceTypeAmenities[]>([])
+/** The amenity catalog (Amenities page); only active ones may be switched on. */
+const catalog = ref<Amenity[]>([])
+const selectable = computed(() => catalog.value.filter(amenity => amenity.is_active))
 const isLoading = ref(false)
 const error = ref(false)
 
 const dialogVisible = ref(false)
 const isSaving = ref(false)
 const editingType = ref<string | null>(null)
-const editingAmenities = ref<AmenityType[]>([])
+const editingAmenities = ref<string[]>([])
 
 const dialogTitle = computed(() =>
 	t("amenities.manage.dialogTitle", { type: editingType.value ? t(`spaces.spaceType.${editingType.value}`) : "" })
@@ -78,7 +83,7 @@ const columns = computed<DataTableColumns<SpaceTypeAmenities>>(() => [
 				: h(
 						"div",
 						{ class: "inline-flex flex-wrap items-center justify-center gap-1" },
-						row.amenities.map(amenity => h(NTag, { size: "small", round: true, key: amenity }, { default: () => t(`amenities.types.${amenity}`) }))
+						row.amenities.map(amenity => h(NTag, { size: "small", round: true, key: amenity }, { default: () => amenityLabel(amenity, catalog.value, currentLocale.value) }))
 					)
 	},
 	{
@@ -101,7 +106,7 @@ function openEdit(row: SpaceTypeAmenities) {
 	dialogVisible.value = true
 }
 
-function toggle(amenity: AmenityType, checked: boolean) {
+function toggle(amenity: string, checked: boolean) {
 	if (checked) {
 		if (!editingAmenities.value.includes(amenity)) editingAmenities.value.push(amenity)
 	} else {
@@ -128,7 +133,7 @@ async function fetchData() {
 	isLoading.value = true
 	error.value = false
 	try {
-		rows.value = await listSpaceTypeAmenities()
+		;[rows.value, catalog.value] = await Promise.all([listSpaceTypeAmenities(), listAmenities()])
 	} catch {
 		error.value = true
 	} finally {

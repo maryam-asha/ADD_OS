@@ -460,7 +460,7 @@
 		},
 		"delete": {
 			"success": "Space deleted.",
-			"cascadeWarning": "Deleting this space also deletes every resource and seat/desk under it."
+			"cascadeWarning": "Deleting this space also deletes every seat/desk under it."
 		},
 		"changeStatus": {
 			"button": "Change status",
@@ -497,16 +497,6 @@
 		}
 	},
 	"amenities": {
-		"types": {
-			"wifi": "Wi-Fi",
-			"power_outlet": "Power Outlets",
-			"printing": "Printing Access",
-			"ergonomic_chairs": "Ergonomic Chairs",
-			"locker": "Locker",
-			"cafe_access": "Cafe Access",
-			"ac": "Air Conditioning",
-			"stage": "Stage"
-		},
 		"manage": {
 			"title": "Space Types",
 			"description": "Choose which amenities are available for each space type. A specific space can only toggle amenities from its own type's list here.",
@@ -522,56 +512,40 @@
 			"cancel": "Cancel",
 			"saveSuccess": "Amenities updated.",
 			"saveError": "Couldn't save amenities.",
-			"loadError": "Couldn't load the amenities matrix. You may not have permission to view this page."
-		}
-	},
-	"resources": {
-		"columns": {
-			"space": "Space",
-			"general": "General (no space)",
-			"name": "Name",
-			"category": "Category",
-			"quantity": "Quantity",
-			"status": "Status"
+			"loadError": "Couldn't load the amenities matrix. You may not have permission to view this page.",
+			"catalogEmpty": "No active amenities in the catalog yet."
 		},
-		"category": {
-			"projector": "Projector",
-			"mic": "Microphone",
-			"screen": "Screen",
-			"whiteboard": "Whiteboard",
-			"other": "Other"
-		},
-		"create": {
-			"button": "New resource",
-			"title": "New resource",
-			"success": "Resource created."
-		},
-		"edit": {
-			"title": "Edit resource",
-			"success": "Resource updated."
-		},
-		"delete": {
-			"success": "Resource deleted."
-		},
-		"changeStatus": {
-			"button": "Change status",
-			"title": "Change status",
-			"statusLabel": "Status",
-			"reasonLabel": "Reason (optional)",
-			"success": "Status updated."
-		},
-		"form": {
-			"branch": "Branch",
-			"building": "Building",
-			"zone": "Zone (optional)",
-			"space": "Space (optional — leave empty for general inventory)",
-			"name": "Name",
-			"category": "Category",
-			"quantity": "Quantity"
-		},
-		"loadError": "Couldn't load resources. You may not have permission to view this page.",
-		"stats": {
-			"total": "Total resources"
+		"catalog": {
+			"description": "What a space offers without being a thing to track: Wi-Fi, café access, a stage. A new amenity becomes selectable on the Space Types page, then on a space. Physical equipment in a space is an asset in the Inventory section.",
+			"columns": {
+				"name": "Name",
+				"key": "Key",
+				"icon": "Icon",
+				"order": "Order",
+				"status": "Status"
+			},
+			"active": "Active",
+			"inactive": "Inactive",
+			"create": {
+				"button": "New amenity",
+				"title": "New amenity",
+				"success": "Amenity added."
+			},
+			"edit": {
+				"title": "Edit amenity",
+				"success": "Amenity updated."
+			},
+			"delete": {
+				"success": "Amenity deleted and turned off everywhere it was on."
+			},
+			"form": {
+				"name": "Name",
+				"key": "Key (leave empty to derive it from the English name; fixed once created)",
+				"icon": "Carbon icon name (e.g. wifi)",
+				"order": "Order",
+				"isActive": "Active"
+			},
+			"loadError": "Couldn't load the amenity catalog."
 		}
 	},
 	"seatsDesks": {
@@ -1613,7 +1587,6 @@
 			"floors": "Floors",
 			"zones": "Zones",
 			"spaces": "Spaces",
-			"resources": "Resources",
 			"spaceTypeAmenities": "Space Types",
 			"seatsDesks": "Seats & Desks",
 			"businessHours": "Business Hours",
@@ -1749,7 +1722,8 @@
 			"hrHeadcount": "Headcount and turnover",
 			"hrExceptionsReport": "Attendance exceptions",
 			"hrTimesheetCompliance": "Timesheet compliance",
-			"hrLiabilities": "Liabilities"
+			"hrLiabilities": "Liabilities",
+			"amenities": "Amenity Catalog"
 		}
 	},
 	"resourceCrud": {
