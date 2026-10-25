@@ -1,4 +1,4 @@
-import type { DataTableColumns } from "naive-ui"
+import type { DataTableColumns, SelectOption } from "naive-ui"
 import type { ComposerTranslation } from "vue-i18n"
 import type { FieldDescriptor } from "@/add-os/components/resource/field-types"
 import type { SupportedLocale } from "@/add-os/lang/locales"
@@ -49,14 +49,31 @@ export function buildResourceTypeColumns(t: ComposerTranslation, locale: Support
 	]
 }
 
-export const resourceTypeFields: FieldDescriptor<ResourceTypePayload>[] = [
-	{ key: "name", labelKey: "packages.form.name", type: "bilingual-text", required: true },
-	{ key: "slug", labelKey: "packages.resourceTypes.form.slug", type: "text" },
-	{ key: "unit_label", labelKey: "packages.resourceTypes.form.unitLabel", type: "bilingual-text", required: true },
-	{ key: "icon", labelKey: "packages.resourceTypes.form.icon", type: "text" },
-	{ key: "order", labelKey: "packages.form.order", type: "number" },
-	{ key: "is_active", labelKey: "packages.form.isActive", type: "switch" }
-]
+/**
+ * `stockItems` are the inventory's stock items: a type may name the one it
+ * uses up (printing: paper), so recording consumption at reception issues
+ * `stock_units_per_unit` of it per unit — ADD Core refuses the consumption
+ * when the shelf cannot cover it.
+ */
+export function buildResourceTypeFields(stockItems: SelectOption[]): FieldDescriptor<ResourceTypePayload>[] {
+	return [
+		{ key: "name", labelKey: "packages.form.name", type: "bilingual-text", required: true },
+		{ key: "slug", labelKey: "packages.resourceTypes.form.slug", type: "text" },
+		{ key: "unit_label", labelKey: "packages.resourceTypes.form.unitLabel", type: "bilingual-text", required: true },
+		{ key: "icon", labelKey: "packages.resourceTypes.form.icon", type: "text" },
+		{ key: "inventory_item_id", labelKey: "packages.resourceTypes.form.stockItem", type: "select", options: stockItems },
+		{
+			key: "stock_units_per_unit",
+			labelKey: "packages.resourceTypes.form.stockUnitsPerUnit",
+			type: "number",
+			min: 0.001,
+			step: 0.5,
+			hiddenWhen: model => !model.inventory_item_id
+		},
+		{ key: "order", labelKey: "packages.form.order", type: "number" },
+		{ key: "is_active", labelKey: "packages.form.isActive", type: "switch" }
+	]
+}
 
 export function emptyResourceTypePayload(): ResourceTypePayload {
 	return {
@@ -64,6 +81,8 @@ export function emptyResourceTypePayload(): ResourceTypePayload {
 		slug: "",
 		unit_label: { ar: "", en: "" },
 		icon: "",
+		inventory_item_id: null,
+		stock_units_per_unit: 1,
 		order: 1,
 		is_active: true
 	}

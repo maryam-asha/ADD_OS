@@ -861,6 +861,13 @@
 			"columns": {
 				"slug": "Slug",
 				"unitLabel": "Unit Label"
+			},
+			"form": {
+				"stockItem": "Stock it uses up",
+				"stockUnitsPerUnit": "Stock per unit consumed",
+				"slug": "Slug",
+				"unitLabel": "Unit label",
+				"icon": "Icon"
 			}
 		}
 	},
@@ -1732,7 +1739,9 @@
 			"inventoryCustody": "Custody",
 			"inventoryItems": "Items",
 			"inventoryCatalog": "Categories & units",
-			"inventoryReports": "Inventory reports"
+			"inventoryReports": "Inventory reports",
+			"itemSales": "Item Sales",
+			"saleItems": "Sale Items"
 		}
 	},
 	"resourceCrud": {
@@ -4329,5 +4338,49 @@
 		"lastUpdated": "Last updated",
 		"arPlaceholder": "Write the privacy policy clauses in Arabic using Markdown formatting...",
 		"enPlaceholder": "Write the privacy policy clauses in English using Markdown formatting..."
+	},
+	"retail": {
+		"loadError": "Couldn't load.",
+		"points": "{n} points",
+		"saleItems": {
+			"description": "What reception may sell and its price in points. Only stock items can be sold, and selling issues them from the shelf; stock is received and counted on the Inventory section's Stock page.",
+			"add": "New sale item",
+			"edit": "Edit sale item",
+			"item": "Item",
+			"price": "Price in points",
+			"active": "On sale",
+			"onSale": "On sale",
+			"offSale": "Off sale",
+			"created": "Sale item added.",
+			"updated": "Sale item updated.",
+			"deleted": "Sale item deleted."
+		},
+		"sell": {
+			"description": "Selling to a member at the desk, from their points or with money at today's price. Stock leaves the branch of your open cash register unless you name another place. Points short or a shelf short refuse the whole sale; nothing is recorded.",
+			"title": "New sale",
+			"member": "Member",
+			"pickMember": "Pick a member",
+			"paymentMethod": "Payment",
+			"cash": "Cash",
+			"wallet": "From points",
+			"currency": "Currency",
+			"lines": "Items",
+			"pickItem": "Pick an item",
+			"addLine": "Another item",
+			"removeLine": "Remove",
+			"stockLocation": "Taken from",
+			"stockLocationHint": "Leave empty to take it from the branch of your open cash register.",
+			"total": "Total",
+			"confirm": "Sell",
+			"done": "Sold for {n} points.",
+			"error": "Couldn't complete the sale."
+		},
+		"sales": {
+			"title": "Sales",
+			"empty": "No sales yet.",
+			"when": "When",
+			"method": "Paid by",
+			"soldBy": "Sold by"
+		}
 	}
 }

@@ -69,6 +69,8 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"plans.discountReport": () => import("@/add-os/modules/pricing/views/DiscountReportPage.vue"),
 	"plans.offerReport": () => import("@/add-os/modules/pricing/views/OfferReportPage.vue"),
 	"plans.planPurchases": () => import("@/add-os/modules/plans/views/PlanPurchasesPage.vue"),
+	"plans.itemSales": () => import("@/add-os/modules/plans/views/ItemSalesPage.vue"),
+	"plans.saleItems": () => import("@/add-os/modules/plans/views/SaleItemsPage.vue"),
 	"payments.transactions": () => import("@/add-os/modules/payments/views/PaymentTransactionsPage.vue"),
 	"payments.paymentMethods": () => import("@/add-os/modules/payments/views/PaymentMethodsPage.vue"),
 	"payments.currencies": () => import("@/add-os/modules/payments/views/CurrenciesPage.vue"),

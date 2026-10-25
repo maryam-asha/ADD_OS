@@ -43,10 +43,11 @@
 </template>
 
 <script setup lang="ts">
+import type { SelectOption } from "naive-ui"
 import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vue"
 import type { ResourceType, ResourceTypePayload } from "@/add-os/modules/plans/types/resource-type"
 import { NAlert, NButton, useMessage } from "naive-ui"
-import { computed, ref } from "vue"
+import { computed, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.vue"
 import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
@@ -54,8 +55,11 @@ import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
 import { currentLocale } from "@/add-os/lang/currentLocale"
-import { buildResourceTypeColumns, emptyResourceTypePayload, resourceTypeFields } from "@/add-os/modules/plans/config/resource-types.config"
+import { quietly } from "@/add-os/modules/hr/utils/errors"
+import { localized } from "@/add-os/modules/inventory/utils/display"
+import { buildResourceTypeColumns, buildResourceTypeFields, emptyResourceTypePayload } from "@/add-os/modules/plans/config/resource-types.config"
 import { ApiError } from "@/add-os/services/api"
+import { listItems } from "@/add-os/services/inventory"
 import { createResourceType, listResourceTypes, removeResourceType, updateResourceType } from "@/add-os/services/resource-types"
 import Icon from "@/components/common/Icon.vue"
 
@@ -64,6 +68,11 @@ const message = useMessage()
 
 const { data, isLoading, error, refetch } = useResourceList<ResourceType>(listResourceTypes)
 const columns = computed(() => buildResourceTypeColumns(t, currentLocale.value))
+
+/** Stock items a type may use up; read quietly — an account without inventory.catalog.view sees none and links nothing. */
+const stockItems = ref<SelectOption[]>([])
+const resourceTypeFields = computed(() => buildResourceTypeFields(stockItems.value))
+onMounted(() => void quietly(() => listItems({ kind: "stock", per_page: 100 }), result => (stockItems.value = result.data.map(item => ({ label: `${localized(item.name)} · ${item.sku}`, value: item.id })))))
 
 const statCards = computed<StatCard[]>(() => {
 	const total = data.value.length
@@ -100,6 +109,8 @@ function openEdit(row: ResourceType) {
 		slug: row.slug ?? "",
 		unit_label: { ...row.unit_label },
 		icon: row.icon ?? "",
+		inventory_item_id: row.inventory_item_id,
+		stock_units_per_unit: row.stock_units_per_unit === null ? 1 : Number(row.stock_units_per_unit),
 		order: row.order,
 		is_active: row.is_active
 	}

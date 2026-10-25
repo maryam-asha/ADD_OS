@@ -247,7 +247,11 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "coupons", path: "coupons" },
 			{ key: "discountReport", path: "discount-report" },
 			{ key: "offerReport", path: "offer-report" },
-			{ key: "planPurchases", path: "plan-purchases" }
+			{ key: "planPurchases", path: "plan-purchases" },
+			// Selling stock at reception (2026-10-24): the sale, beside the
+			// plan sale above, and what may be sold at what price.
+			{ key: "itemSales", path: "item-sales" },
+			{ key: "saleItems", path: "sale-items" }
 		]
 	},
 	{
