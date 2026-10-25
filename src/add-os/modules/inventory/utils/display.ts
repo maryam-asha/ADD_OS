@@ -1,8 +1,11 @@
 import type { VNode } from "vue"
+import type { DataTableColumn } from "naive-ui"
 import type { AttributeDefinition, Bilingual, Category, CustodianDescription, PlaceDescription, PropertyValue } from "@/add-os/modules/inventory/types/inventory"
+import { NButton, NTooltip } from "naive-ui"
 import { h } from "vue"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import { formatCurrency, formatDate, formatNumber, isCurrencyCode } from "@/add-os/utils/format"
+import Icon from "@/components/common/Icon.vue"
 
 /** Shown where a value is missing: a mark, not a word, so it needs no translation. */
 export const EMPTY = "—"
@@ -117,6 +120,58 @@ export const PLACE_COLUMN = { width: 240, ellipsis: { tooltip: true } } as const
 export function nameCell(name: string, sub: string, options: { code?: boolean } = {}): VNode {
 	return h("div", { class: "flex min-w-0 flex-col gap-0.5" }, [
 		h("span", { class: "truncate font-semibold", title: name }, name),
-		options.code ? h("span", { class: "font-mono text-xs text-secondary", dir: "ltr" }, sub) : h("span", { class: "truncate text-xs text-secondary", title: sub }, sub)
+		options.code
+			? h(
+					"span",
+					{ class: "inline-block w-fit font-mono text-[11px] text-slate-500 dark:text-slate-400", dir: "ltr" },
+					sub
+				)
+			: h("span", { class: "truncate text-xs text-secondary", title: sub }, sub)
 	])
+}
+
+/** A styled monospace code chip for asset codes, SKUs, or serial numbers. */
+export function codeChip(code: string | null | undefined): VNode {
+	if (!code) return h("span", { class: "text-secondary" }, EMPTY)
+	return h(
+		"span",
+		{
+			class: "inline-flex items-center rounded-md border border-slate-200/80 bg-slate-100/80 px-2 py-0.5 font-mono text-xs font-semibold text-slate-700 dark:border-slate-700/60 dark:bg-slate-800/80 dark:text-slate-300",
+			dir: "ltr"
+		},
+		code
+	)
+}
+
+/** Action column helper that renders a subtle, clean view chevron button */
+export function viewActionColumn<T>(onView: (row: T) => void, tooltipText = "معاينة"): DataTableColumn<T> {
+	return {
+		title: "",
+		key: "_actions",
+		width: 52,
+		align: "center",
+		render: row =>
+			h(
+				NTooltip,
+				{ trigger: "hover" },
+				{
+					trigger: () =>
+						h(
+							NButton,
+							{
+								size: "tiny",
+								quaternary: true,
+								circle: true,
+								class: "text-slate-400 hover:text-primary transition-colors",
+								onClick: (e: MouseEvent) => {
+									e.stopPropagation()
+									onView(row)
+								}
+							},
+							{ icon: () => h(Icon, { name: "carbon:chevron-right", class: "rtl:rotate-180", size: 16 }) }
+						),
+					default: () => tooltipText
+				}
+			)
+	}
 }

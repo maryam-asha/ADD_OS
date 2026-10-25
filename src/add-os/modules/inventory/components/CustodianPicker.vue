@@ -1,11 +1,13 @@
 <!-- src/add-os/modules/inventory/components/CustodianPicker.vue -->
 <template>
-	<div class="flex flex-col gap-2">
+	<div :class="inline ? 'flex flex-wrap items-center gap-2' : 'flex flex-col gap-2'">
 		<n-radio-group v-model:value="type" size="small">
 			<n-radio-button v-for="option in CUSTODIAN_TYPES" :key="option" :value="option">{{ t(`inventory.custodianType.${option}`) }}</n-radio-button>
 		</n-radio-group>
-		<EmployeeSelect v-if="type === 'hr_employee'" v-model:value="employeeId" :placeholder="t('inventory.custody.pickEmployee')" />
-		<n-select v-else v-model:value="otherId" :options="type === 'member' ? memberOptions : companyOptions" :loading filterable clearable :placeholder="t(`inventory.custody.pick.${type}`)" />
+		<div :class="inline ? 'w-full sm:w-64' : 'w-full'">
+			<EmployeeSelect v-if="type === 'hr_employee'" v-model:value="employeeId" :placeholder="t('inventory.custody.pickEmployee')" />
+			<n-select v-else v-model:value="otherId" :options="type === 'member' ? memberOptions : companyOptions" :loading filterable clearable :placeholder="t(`inventory.custody.pick.${type}`)" />
+		</div>
 	</div>
 </template>
 
@@ -26,6 +28,7 @@ import { listMembers } from "@/add-os/services/members"
  * hr.employees.view), a member, or a company — the three custodians ADD
  * Core's resolver knows. The value is its `{type, id}`.
  */
+const props = defineProps<{ inline?: boolean }>()
 const value = defineModel<CustodianRef | null>("value", { required: true })
 
 const { t } = useI18n()
@@ -54,5 +57,12 @@ watch(type, () => {
 watch([type, employeeId, otherId], () => {
 	const id = type.value === "hr_employee" ? employeeId.value : otherId.value
 	value.value = id ? { type: type.value, id } : null
+})
+
+watch(value, newVal => {
+	if (!newVal) {
+		employeeId.value = null
+		otherId.value = null
+	}
 })
 </script>

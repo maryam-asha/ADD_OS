@@ -18,7 +18,11 @@
 			"nameEn": "Name in English",
 			"note": "Note",
 			"yes": "Yes",
-			"no": "No"
+			"no": "No",
+			"resetFilters": "Reset",
+			"all": "All",
+			"view": "View",
+			"actions": "Actions"
 		},
 		"place": {
 			"branch": "Branch",
@@ -235,6 +239,7 @@
 		"custody": {
 			"description": "Who holds what: every asset in someone's custody, or everything one employee, member or company holds (what an employee leaving hands back).",
 			"includeReturned": "Include returned",
+			"allCustodians": "All custodians",
 			"empty": "No custody.",
 			"pickEmployee": "Search for an employee",
 			"pick": {
@@ -320,6 +325,7 @@
 		"catalog": {
 			"description": "The category tree: a branch is either assets or stock, and each category has fields its items, and those below it, answer. And the units items are counted in.",
 			"categories": "Categories",
+			"searchTree": "Search categories...",
 			"empty": "No categories yet.",
 			"pick": "Pick a category to see its fields.",
 			"addRoot": "New root category",

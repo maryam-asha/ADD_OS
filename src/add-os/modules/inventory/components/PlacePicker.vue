@@ -1,11 +1,11 @@
 <!-- src/add-os/modules/inventory/components/PlacePicker.vue -->
 <template>
-	<div :class="inline ? 'contents' : 'grid grid-cols-1 gap-2 sm:grid-cols-2'">
-		<n-select v-model:value="branchId" :options="branchOptions" :placeholder="t('inventory.place.branch')" filterable clearable :class="inlineField" :disabled />
-		<n-select v-if="!inline || branchId" v-model:value="buildingId" :options="buildingOptions" :placeholder="t('inventory.place.building')" filterable clearable :class="inlineField" :disabled="disabled || !branchId" />
-		<n-select v-if="!inline || buildingId" v-model:value="floorId" :options="floorOptions" :placeholder="t('inventory.place.floor')" filterable clearable :class="inlineField" :disabled="disabled || !buildingId" />
-		<n-select v-if="!inline || floorId" v-model:value="zoneId" :options="zoneOptions" :placeholder="t('inventory.place.zone')" filterable clearable :class="inlineField" :disabled="disabled || !floorId" />
-		<n-select v-if="!inline || buildingId" v-model:value="spaceId" :options="spaceOptions" :placeholder="t('inventory.place.space')" filterable clearable :class="inline ? inlineField : 'sm:col-span-2'" :disabled="disabled || !buildingId" />
+	<div :class="inline ? 'flex flex-wrap sm:flex-nowrap items-center gap-2 w-full' : 'grid grid-cols-1 gap-2 sm:grid-cols-2'">
+		<n-select v-model:value="branchId" :options="branchOptions" :placeholder="t('inventory.place.branch')" filterable clearable class="w-full flex-1 min-w-[130px]" :disabled />
+		<n-select v-if="!inline || branchId" v-model:value="buildingId" :options="buildingOptions" :placeholder="t('inventory.place.building')" filterable clearable class="w-full flex-1 min-w-[130px]" :disabled="disabled || !branchId" />
+		<n-select v-if="!inline || buildingId" v-model:value="floorId" :options="floorOptions" :placeholder="t('inventory.place.floor')" filterable clearable class="w-full flex-1 min-w-[110px]" :disabled="disabled || !buildingId" />
+		<n-select v-if="!inline || floorId" v-model:value="zoneId" :options="zoneOptions" :placeholder="t('inventory.place.zone')" filterable clearable class="w-full flex-1 min-w-[110px]" :disabled="disabled || !floorId" />
+		<n-select v-if="!inline || buildingId" v-model:value="spaceId" :options="spaceOptions" :placeholder="t('inventory.place.space')" filterable clearable class="w-full flex-1 min-w-[130px]" :disabled="disabled || !buildingId" />
 	</div>
 </template>
 
@@ -13,7 +13,7 @@
 import type { SelectOption } from "naive-ui"
 import type { PlaceRef } from "@/add-os/modules/inventory/types/inventory"
 import { NSelect } from "naive-ui"
-import { computed, onMounted, ref, watch } from "vue"
+import { onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { quietly } from "@/add-os/modules/hr/utils/errors"
 import { localized } from "@/add-os/modules/inventory/utils/display"
@@ -35,11 +35,10 @@ import { listZones } from "@/add-os/services/zones"
  * four greyed-out selects said nothing and pushed the list off the screen.
  * A form keeps every level in view, so the path being built is visible.
  */
-const props = defineProps<{ disabled?: boolean; inline?: boolean }>()
+defineProps<{ disabled?: boolean; inline?: boolean }>()
 const value = defineModel<PlaceRef | null>("value", { required: true })
 
 const { t } = useI18n()
-const inlineField = computed(() => (props.inline ? "w-full sm:w-44" : undefined))
 
 const branchId = ref<number | null>(null)
 const buildingId = ref<number | null>(null)
@@ -85,6 +84,16 @@ watch(zoneId, () => {
 })
 
 watch(spaceId, () => emit())
+
+watch(value, newVal => {
+	if (!newVal) {
+		branchId.value = null
+		buildingId.value = null
+		floorId.value = null
+		zoneId.value = null
+		spaceId.value = null
+	}
+})
 
 function loadSpaces() {
 	spaceOptions.value = []
