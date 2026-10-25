@@ -4,8 +4,10 @@
 		v-model:show="show"
 		preset="card"
 		closable
+		class="hr-form-modal"
+		:segmented="{ content: true, footer: true }"
 		:style="{ maxWidth: WIDTHS[size], width: '95vw' }"
-		content-style="max-height: 75vh; overflow-y: auto"
+		content-style="flex: 1 1 auto; min-height: 0; overflow-y: auto;"
 	>
 		<template #header>
 			<div class="flex items-center gap-3">

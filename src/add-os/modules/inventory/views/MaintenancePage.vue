@@ -94,7 +94,7 @@
 					</n-radio-group>
 				</div>
 			</template>
-			<n-data-table :columns="recordColumns" :data="records" :loading="loading" :bordered="false" :row-props="row => assetRowProps(row.asset_id)" size="small" :scroll-x="1080">
+			<n-data-table :columns="recordColumns" :data="records" :loading="loading" :bordered="false" :row-props="row => assetRowProps(row.asset_id)" size="small" :scroll-x="1180">
 				<template #empty>
 					<div class="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-500">
 						<Icon name="carbon:tool-kit" :size="40" class="mb-2 opacity-50" />
@@ -121,7 +121,7 @@ import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import { codeChip, EMPTY, localized, money, nameCell, viewActionColumn } from "@/add-os/modules/inventory/utils/display"
 import { listDueSchedules, listMaintenance } from "@/add-os/services/inventory"
 import { countKey, formatNumber } from "@/add-os/utils/format"
-import { formatDate, formatDateTime } from "@/add-os/utils/format/dates"
+import { formatDate, formatDateTime, formatTime } from "@/add-os/utils/format/dates"
 import Icon from "@/components/common/Icon.vue"
 
 /**
@@ -190,7 +190,7 @@ const dueColumns = computed<DataTableColumns<MaintenanceSchedule>>(() => [
 		width: 130,
 		render: row => codeChip(row.asset?.code ?? `#${row.asset_id}`)
 	},
-	{ title: t("inventory.schedules.title"), key: "title", minWidth: 200 },
+	{ title: t("inventory.schedules.title"), key: "title", minWidth: 200, ellipsis: { tooltip: true } },
 	{
 		title: t("inventory.schedules.frequency"),
 		key: "interval_months",
@@ -215,6 +215,8 @@ const recordColumns = computed<DataTableColumns<MaintenanceRecord>>(() => [
 		title: t("inventory.assets.item"),
 		key: "asset",
 		minWidth: 200,
+		width: 220,
+		ellipsis: { tooltip: true },
 		render: row =>
 			nameCell(row.asset ? localized(row.asset.item.name) : EMPTY, row.asset?.code ?? `#${row.asset_id}`, { code: true })
 	},
@@ -232,19 +234,35 @@ const recordColumns = computed<DataTableColumns<MaintenanceRecord>>(() => [
 	},
 	{ title: t("inventory.maintenance.description"), key: "description", minWidth: 200, ellipsis: { tooltip: true } },
 	{ title: t("inventory.maintenance.vendor"), key: "vendor", width: 140, ellipsis: { tooltip: true }, render: row => row.vendor ?? EMPTY },
-	{ title: t("inventory.history.opened"), key: "opened_at", minWidth: 140, render: row => formatDateTime(row.opened_at) },
+	{
+		title: t("inventory.history.opened"),
+		key: "opened_at",
+		width: 160,
+		render: row => {
+			if (!row.opened_at) return EMPTY
+			return h("div", { class: "flex flex-col gap-0.5 leading-tight" }, [
+				h("span", { class: "font-medium text-xs whitespace-nowrap text-slate-800 dark:text-slate-200" }, formatDate(row.opened_at)),
+				h("span", { class: "text-[11px] text-slate-400 font-mono whitespace-nowrap mt-0.5" }, formatTime(row.opened_at))
+			])
+		}
+	},
 	{
 		title: t("inventory.history.closed"),
 		key: "closed_at",
-		minWidth: 140,
+		width: 140,
+		align: "center",
 		render: row =>
 			row.closed_at
-				? h("span", { class: "text-slate-600 dark:text-slate-400" }, formatDateTime(row.closed_at))
+				? h("div", { class: "flex flex-col gap-0.5 leading-tight items-center" }, [
+						h("span", { class: "font-medium text-xs whitespace-nowrap text-slate-600 dark:text-slate-400" }, formatDate(row.closed_at)),
+						h("span", { class: "text-[11px] text-slate-400 font-mono whitespace-nowrap mt-0.5" }, formatTime(row.closed_at))
+				  ])
 				: h(NTag, { size: "small", round: true, type: "warning" }, () => t("inventory.maintenance.open"))
 	},
 	{
 		title: t("inventory.maintenance.cost"),
 		key: "cost",
+		width: 120,
 		minWidth: 110,
 		align: "end",
 		render: row => h("span", { class: "add-numeric font-semibold" }, money(row.cost, row.currency))

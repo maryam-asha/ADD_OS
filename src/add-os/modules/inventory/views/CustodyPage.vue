@@ -63,7 +63,7 @@
 
 		<!-- Table Card -->
 		<n-card class="add-ledger-table rounded-2xl border border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900" :bordered="false" size="small">
-			<n-data-table :columns="columns" :data="rows" :loading="loading" :bordered="false" :row-props="rowProps" size="small" :scroll-x="960">
+			<n-data-table :columns="columns" :data="rows" :loading="loading" :bordered="false" :row-props="rowProps" size="small" :scroll-x="980">
 				<template #empty>
 					<div class="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-500">
 						<Icon name="carbon:user-follow" :size="40" class="mb-2 opacity-50" />
@@ -95,7 +95,7 @@ import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import CustodianPicker from "@/add-os/modules/inventory/components/CustodianPicker.vue"
 import { custodianLabel, EMPTY, localized, nameCell, viewActionColumn } from "@/add-os/modules/inventory/utils/display"
 import { listCustody } from "@/add-os/services/inventory"
-import { formatDateTime } from "@/add-os/utils/format/dates"
+import { formatDate, formatDateTime, formatTime } from "@/add-os/utils/format/dates"
 import Icon from "@/components/common/Icon.vue"
 
 /**
@@ -170,7 +170,9 @@ const columns = computed<DataTableColumns<AssetAssignment>>(() => [
 	{
 		title: t("inventory.assets.item"),
 		key: "asset",
-		minWidth: 220,
+		minWidth: 200,
+		width: 220,
+		ellipsis: { tooltip: true },
 		render: row =>
 			nameCell(row.asset ? localized(row.asset.item.name) : EMPTY, row.asset?.code ?? `#${row.asset_id}`, { code: true })
 	},
@@ -178,29 +180,43 @@ const columns = computed<DataTableColumns<AssetAssignment>>(() => [
 		title: t("inventory.assets.custodian"),
 		key: "custodian",
 		minWidth: 190,
+		width: 210,
+		ellipsis: { tooltip: true },
 		render: row =>
-			h("div", { class: "inline-flex flex-wrap items-center gap-1.5" }, [
-				h("span", { class: "font-semibold" }, custodianLabel(row.custodian)),
-				h(
-					NTag,
-					{ size: "small", round: true, type: CUSTODIAN_TAG_TYPES[row.custodian.type] },
-					() => t(`inventory.custodianType.${row.custodian.type}`)
-				)
+			h("div", { class: "flex min-w-0 flex-col gap-1 leading-tight" }, [
+				h("span", { class: "truncate font-semibold", title: custodianLabel(row.custodian) }, custodianLabel(row.custodian)),
+				h("div", [
+					h(
+						NTag,
+						{ size: "small", round: true, type: CUSTODIAN_TAG_TYPES[row.custodian.type] },
+						() => t(`inventory.custodianType.${row.custodian.type}`)
+					)
+				])
 			])
 	},
 	{
 		title: t("inventory.history.handedOver"),
 		key: "assigned_at",
-		minWidth: 140,
-		render: row => formatDateTime(row.assigned_at)
+		width: 160,
+		render: row => {
+			if (!row.assigned_at) return EMPTY
+			return h("div", { class: "flex flex-col gap-0.5 leading-tight" }, [
+				h("span", { class: "font-medium text-xs whitespace-nowrap" }, formatDate(row.assigned_at)),
+				h("span", { class: "text-[11px] text-slate-400 font-mono whitespace-nowrap" }, formatTime(row.assigned_at))
+			])
+		}
 	},
 	{
 		title: t("inventory.history.returned"),
 		key: "returned_at",
-		minWidth: 140,
+		width: 140,
+		align: "center",
 		render: row =>
 			row.returned_at
-				? h("span", { class: "text-slate-600 dark:text-slate-400" }, formatDateTime(row.returned_at))
+				? h("div", { class: "flex flex-col gap-0.5 leading-tight" }, [
+						h("span", { class: "font-medium text-xs text-slate-600 dark:text-slate-400 whitespace-nowrap" }, formatDate(row.returned_at)),
+						h("span", { class: "text-[11px] text-slate-400 font-mono whitespace-nowrap" }, formatTime(row.returned_at))
+					])
 				: h(NTag, { size: "small", round: true, type: "warning" }, () => t("inventory.history.stillHeld"))
 	},
 	{

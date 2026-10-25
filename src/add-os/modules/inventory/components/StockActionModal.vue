@@ -11,7 +11,7 @@
 		<n-form-item v-if="mode === 'transfer'" :label="t('inventory.stock.to')" required>
 			<PlacePicker v-model:value="to" />
 		</n-form-item>
-		<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+		<div :class="['grid grid-cols-1 gap-x-4', mode === 'transfer' ? '' : 'sm:grid-cols-2']">
 			<n-form-item :label="mode === 'count' ? t('inventory.stock.counted') : t('inventory.stock.quantity')" required>
 				<n-input-number v-model:value="amount" :min="mode === 'count' ? 0 : 0.001" :precision="fractions ? 3 : 0" class="w-full" dir="ltr">
 					<template v-if="picked" #suffix>{{ localized(picked.unit.name) }}</template>
@@ -25,12 +25,12 @@
 			</n-form-item>
 		</div>
 		<n-form-item :label="t('inventory.common.note')">
-			<n-input v-model:value="note" type="textarea" :maxlength="2000" :autosize="{ minRows: 1, maxRows: 4 }" />
+			<n-input v-model:value="note" type="textarea" :maxlength="2000" :autosize="{ minRows: 2, maxRows: 4 }" />
 		</n-form-item>
-		<p v-if="problem" class="text-sm text-error">{{ problem }}</p>
+		<p v-if="problem" class="rounded-xl bg-rose-50 p-2.5 text-sm font-medium text-rose-600 dark:bg-rose-950/40 dark:text-rose-400">{{ problem }}</p>
 
 		<template #footer>
-			<div class="flex justify-end gap-2">
+			<div class="flex items-center justify-end gap-2.5">
 				<n-button @click="show = false">{{ t("inventory.common.cancel") }}</n-button>
 				<n-button type="primary" :loading="saving" :disabled="!ready" @click="save">{{ t(`inventory.stockAction.${mode}.confirm`) }}</n-button>
 			</div>

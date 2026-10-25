@@ -230,7 +230,7 @@ import ScheduleModal from "@/add-os/modules/inventory/components/ScheduleModal.v
 import { custodianLabel, EMPTY, isolate, localized, money, PLACE_COLUMN, placeLabel } from "@/add-os/modules/inventory/utils/display"
 import { getAsset, removeSchedule } from "@/add-os/services/inventory"
 import { countKey, formatNumber } from "@/add-os/utils/format"
-import { formatDate, formatDateTime } from "@/add-os/utils/format/dates"
+import { formatDate, formatDateTime, formatTime } from "@/add-os/utils/format/dates"
 import Icon from "@/components/common/Icon.vue"
 
 /**
@@ -293,7 +293,16 @@ const months = (n: number) => t(countKey("inventory.assets.months", n), { n: for
 const every = (n: number) => t(countKey("inventory.schedules.every", n), { n: formatNumber(n) })
 
 const movementColumns = computed<DataTableColumns<AssetMovement>>(() => [
-	{ title: t("inventory.history.when"), key: "moved_at", minWidth: 150, render: row => formatDateTime(row.moved_at) },
+	{
+		title: t("inventory.history.when"),
+		key: "moved_at",
+		width: 150,
+		render: row =>
+			h("div", { class: "inline-flex flex-col text-xs leading-tight" }, [
+				h("span", { class: "font-medium text-slate-800 dark:text-slate-200" }, formatDate(row.moved_at)),
+				h("span", { class: "text-slate-500 text-[11px] add-numeric mt-0.5" }, formatTime(row.moved_at))
+			])
+	},
 	{ title: t("inventory.history.from"), key: "from", ...PLACE_COLUMN, render: row => (row.from ? placeLabel(row.from) : t("inventory.history.registered")) },
 	{ title: t("inventory.history.to"), key: "to", ...PLACE_COLUMN, render: row => placeLabel(row.to) },
 	{ title: t("inventory.common.note"), key: "note", minWidth: 160, render: row => row.note ?? EMPTY },
@@ -302,8 +311,29 @@ const movementColumns = computed<DataTableColumns<AssetMovement>>(() => [
 
 const custodyColumns = computed<DataTableColumns<AssetAssignment>>(() => [
 	{ title: t("inventory.assets.custodian"), key: "custodian", minWidth: 180, render: row => custodianLabel(row.custodian) },
-	{ title: t("inventory.history.handedOver"), key: "assigned_at", minWidth: 150, render: row => formatDateTime(row.assigned_at) },
-	{ title: t("inventory.history.returned"), key: "returned_at", minWidth: 150, render: row => (row.returned_at ? formatDateTime(row.returned_at) : h(NTag, { size: "small", round: true, type: "warning" }, () => t("inventory.history.stillHeld"))) },
+	{
+		title: t("inventory.history.handedOver"),
+		key: "assigned_at",
+		width: 150,
+		render: row =>
+			h("div", { class: "inline-flex flex-col text-xs leading-tight" }, [
+				h("span", { class: "font-medium text-slate-800 dark:text-slate-200" }, formatDate(row.assigned_at)),
+				h("span", { class: "text-slate-500 text-[11px] add-numeric mt-0.5" }, formatTime(row.assigned_at))
+			])
+	},
+	{
+		title: t("inventory.history.returned"),
+		key: "returned_at",
+		width: 140,
+		align: "center",
+		render: row =>
+			row.returned_at
+				? h("div", { class: "inline-flex flex-col text-xs leading-tight items-center" }, [
+						h("span", { class: "font-medium text-slate-800 dark:text-slate-200" }, formatDate(row.returned_at)),
+						h("span", { class: "text-slate-500 text-[11px] add-numeric mt-0.5" }, formatTime(row.returned_at))
+				  ])
+				: h(NTag, { size: "small", round: true, type: "warning" }, () => t("inventory.history.stillHeld"))
+	},
 	{ title: t("inventory.common.note"), key: "note", minWidth: 160, render: row => [row.note, row.return_note].filter(Boolean).join(" · ") || EMPTY }
 ])
 
@@ -321,8 +351,29 @@ const maintenanceColumns = computed<DataTableColumns<MaintenanceRecord>>(() => [
 			)
 	},
 	{ title: t("inventory.maintenance.description"), key: "description", minWidth: 220 },
-	{ title: t("inventory.history.opened"), key: "opened_at", minWidth: 150, render: row => formatDateTime(row.opened_at) },
-	{ title: t("inventory.history.closed"), key: "closed_at", minWidth: 150, render: row => (row.closed_at ? formatDateTime(row.closed_at) : h(NTag, { size: "small", round: true, type: "warning" }, () => t("inventory.maintenance.open"))) },
+	{
+		title: t("inventory.history.opened"),
+		key: "opened_at",
+		width: 150,
+		render: row =>
+			h("div", { class: "inline-flex flex-col text-xs leading-tight" }, [
+				h("span", { class: "font-medium text-slate-800 dark:text-slate-200" }, formatDate(row.opened_at)),
+				h("span", { class: "text-slate-500 text-[11px] add-numeric mt-0.5" }, formatTime(row.opened_at))
+			])
+	},
+	{
+		title: t("inventory.history.closed"),
+		key: "closed_at",
+		width: 140,
+		align: "center",
+		render: row =>
+			row.closed_at
+				? h("div", { class: "inline-flex flex-col text-xs leading-tight items-center" }, [
+						h("span", { class: "font-medium text-slate-800 dark:text-slate-200" }, formatDate(row.closed_at)),
+						h("span", { class: "text-slate-500 text-[11px] add-numeric mt-0.5" }, formatTime(row.closed_at))
+				  ])
+				: h(NTag, { size: "small", round: true, type: "warning" }, () => t("inventory.maintenance.open"))
+	},
 	{
 		title: t("inventory.maintenance.cost"),
 		key: "cost",

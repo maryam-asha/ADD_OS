@@ -46,3 +46,57 @@
 .n-dialog.n-dialog {
 	background-color: var(--add-surface-raised);
 }
+
+// ── Fixed header & footer with scrollable body ──────────────────────────────
+//
+// For dialogs using HrFormModal (.hr-form-modal):
+// Pins the header at the top and the footer at the bottom while allowing the
+// body content in between to scroll smoothly. Prevents the whole modal from
+// exceeding the viewport and pushing the header or footer off screen.
+
+.n-modal-container .n-modal.n-card.hr-form-modal {
+	display: flex !important;
+	flex-direction: column !important;
+	max-height: calc(100vh - 3.5rem) !important;
+	margin: 1.75rem auto !important;
+	overflow: hidden !important;
+
+	> .n-card-header {
+		flex-shrink: 0 !important;
+	}
+
+	> .n-card__content,
+	> .n-card-content {
+		flex: 1 1 auto !important;
+		min-height: 0 !important;
+		overflow-y: auto !important;
+
+		&::-webkit-scrollbar {
+			width: 6px;
+		}
+		&::-webkit-scrollbar-track {
+			background: transparent;
+		}
+		&::-webkit-scrollbar-thumb {
+			background-color: rgba(156, 163, 175, 0.4);
+			border-radius: 9999px;
+			&:hover {
+				background-color: rgba(156, 163, 175, 0.7);
+			}
+		}
+	}
+
+	> .n-card__footer,
+	> .n-card-footer {
+		flex-shrink: 0 !important;
+		background-color: var(--add-surface-raised) !important;
+	}
+}
+
+@media (max-width: 640px) {
+	.n-modal-container .n-modal.n-card.hr-form-modal {
+		max-height: calc(100vh - 1.5rem) !important;
+		margin: 0.75rem auto !important;
+	}
+}
+
