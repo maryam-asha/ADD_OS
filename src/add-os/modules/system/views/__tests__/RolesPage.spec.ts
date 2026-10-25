@@ -82,7 +82,7 @@ const i18n = createI18n({
 				create: { button: "New role", title: "New role", success: "Role created." },
 				edit: { title: "Edit role", button: "Edit", success: "Role updated." },
 				delete: { button: "Delete", success: "Role deleted." },
-				form: { name: "Name", permissions: "Permissions", selectAll: "Select all", submit: "Save", cancel: "Cancel" },
+				form: { name: "Name", permissions: "Permissions", selectAll: "Select all", submit: "Save", cancel: "Cancel", viewRuleHint: "Granting any permission also grants its view." },
 				validation: { nameRequired: "Name is required." }
 			},
 			resourceCrud: {
@@ -316,6 +316,50 @@ describe("rolesPage", () => {
 			page.vm.toggleModule(branchesModule, false)
 
 			expect(page.vm.form.permissions).toEqual(["users.view"])
+			wrapper.unmount()
+		})
+
+		it("selects an action's view with it, on the row and on its checkbox alike", async () => {
+			const wrapper = mountPage()
+			await flushPromises()
+			const page = findPage(wrapper)
+
+			page.vm.openCreate()
+			await nextTick()
+			page.vm.toggleAction("branches.update")
+			expect([...page.vm.form.permissions].sort()).toEqual(["branches.update", "branches.view"])
+
+			// The checkbox inside n-checkbox-group reaches the selection through the group.
+			page.vm.form.permissions = []
+			page.vm.setPermissions(["branches.delete"])
+			expect([...page.vm.form.permissions].sort()).toEqual(["branches.delete", "branches.view"])
+			wrapper.unmount()
+		})
+
+		it("takes a module's actions away with its view", async () => {
+			const wrapper = mountPage()
+			await flushPromises()
+			const page = findPage(wrapper)
+
+			page.vm.openCreate()
+			await nextTick()
+			page.vm.form.permissions = ["branches.view", "branches.update"]
+			page.vm.toggleAction("branches.view")
+			expect(page.vm.form.permissions).toEqual([])
+			wrapper.unmount()
+		})
+
+		it("saves a role from before the rule with the views its actions need", async () => {
+			const wrapper = mountPage()
+			await flushPromises()
+			const page = findPage(wrapper)
+
+			page.vm.openEdit({ id: 6, name: "approver", protected: false, permissions: ["branches.update"] })
+			await nextTick()
+			await page.vm.submitEdit()
+			await flushPromises()
+
+			expect(updateRoleMock).toHaveBeenCalledWith(6, { name: "approver", permissions: ["branches.update", "branches.view"] })
 			wrapper.unmount()
 		})
 

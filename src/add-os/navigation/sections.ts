@@ -43,12 +43,27 @@ export interface NavPage {
 	 * the page stay defined in one place, which is the point of this file.
 	 */
 	hidden?: boolean
+	/**
+	 * Required of every account, admin and operations included: the page is
+	 * neither listed nor routable without it. On a page behind the admin gate
+	 * it is the `<module>.view` permission ADD Core registers for the
+	 * resource the page lists (`PermissionSyncService`), so an operations
+	 * account sees only the screens its role was granted on the Roles page —
+	 * admin holds every permission, so loses none. Added 2026-10-25. ADD Core
+	 * still serves most of those routes on `role:admin|operations` alone, so
+	 * this narrows the menu, not the API; and unlike `openedBy` it opens
+	 * nothing to a custom role. A page whose resource has no permission in
+	 * ADD Core (reception, currencies, memberships…) carries none, and so
+	 * opens to admin only (`mayOpenAdminPage`): operations reaches it once
+	 * ADD Core registers a permission for it and this page names it.
+	 */
 	permission?: string
 	/**
 	 * For a page behind the admin gate (a section with no `roles`, or
 	 * admin|operations): what opens it to a role besides admin and operations.
 	 * ADD Core keeps most admin routes for `role:admin|operations`, so absent
-	 * means those two only. A list names the permissions ADD Core serves the
+	 * means those two only — and operations, since 2026-10-25, only with the
+	 * page's `permission`. A list names the permissions ADD Core serves the
 	 * page's routes on without that role check (`routes/api/v1/admin.php`);
 	 * admin and operations need one of them too, as the server asks. `"any"`
 	 * opens it to every dashboard role, for a page that asks the server only
@@ -133,17 +148,17 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		status: "active",
 		pages: [
 			{ key: "branches", path: "branches", openedBy: ["branches.view"] },
-			{ key: "buildings", path: "buildings" },
-			{ key: "floors", path: "floors" },
-			{ key: "zones", path: "zones" },
+			{ key: "buildings", path: "buildings", permission: "buildings.view" },
+			{ key: "floors", path: "floors", permission: "floors.view" },
+			{ key: "zones", path: "zones", permission: "zones.view" },
 			// The amenity catalog, then which a space type may offer. Equipment in
 			// a space is an inventory asset (the Inventory section) since
 			// 2026-10-24, when ADD Core retired `resources`.
-			{ key: "amenities", path: "amenities" },
-			{ key: "spaceTypeAmenities", path: "space-type-amenities" },
-			{ key: "spaces", path: "spaces" },
-			{ key: "seatsDesks", path: "seats-desks" },
-			{ key: "businessHours", path: "business-hours" }
+			{ key: "amenities", path: "amenities", permission: "amenities.view" },
+			{ key: "spaceTypeAmenities", path: "space-type-amenities", permission: "amenities.view" },
+			{ key: "spaces", path: "spaces", permission: "spaces.view" },
+			{ key: "seatsDesks", path: "seats-desks", permission: "seats-desks.view" },
+			{ key: "businessHours", path: "business-hours", permission: "business-hours.view" }
 		]
 	},
 	{
@@ -152,8 +167,8 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		icon: "carbon:user-admin",
 		status: "active",
 		pages: [
-			{ key: "users", path: "users" },
-			{ key: "roles", path: "roles" }
+			{ key: "users", path: "users", permission: "users.view" },
+			{ key: "roles", path: "roles", permission: "roles.view" }
 		]
 	},
 	{
@@ -240,18 +255,18 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		icon: "carbon:license",
 		status: "active",
 		pages: [
-			{ key: "packages", path: "packages" },
-			{ key: "modules", path: "modules" },
-			{ key: "resourceTypes", path: "resource-types" },
+			{ key: "packages", path: "packages", permission: "plans.view" },
+			{ key: "modules", path: "modules", permission: "plan-modules.view" },
+			{ key: "resourceTypes", path: "resource-types", permission: "resource-types.view" },
 			{ key: "wallet", path: "wallet" },
-			{ key: "coupons", path: "coupons" },
+			{ key: "coupons", path: "coupons", permission: "coupons.view" },
 			{ key: "discountReport", path: "discount-report" },
 			{ key: "offerReport", path: "offer-report" },
 			{ key: "planPurchases", path: "plan-purchases" },
 			// Selling stock at reception (2026-10-24): the sale, beside the
 			// plan sale above, and what may be sold at what price.
 			{ key: "itemSales", path: "item-sales" },
-			{ key: "saleItems", path: "sale-items" }
+			{ key: "saleItems", path: "sale-items", permission: "sale-items.view" }
 		]
 	},
 	{
@@ -270,7 +285,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		icon: "carbon:currency",
 		status: "active",
 		pages: [
-			{ key: "transactions", path: "transactions" },
+			{ key: "transactions", path: "transactions", permission: "payments.view" },
 			{ key: "paymentMethods", path: "methods" },
 			{ key: "currencies", path: "currencies" },
 			{ key: "exchangeRates", path: "exchange-rates" },
@@ -323,12 +338,12 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		icon: "carbon:events",
 		status: "active",
 		pages: [
-			{ key: "events", path: "events" },
-			{ key: "eventCreate", path: "events/create", hidden: true },
-			{ key: "eventEdit", path: "events/:id/edit", hidden: true },
-			{ key: "eventCategories", path: "event-categories" },
-			{ key: "eventAttendees", path: "events/:eventId/attendees", hidden: true },
-			{ key: "community", path: "directory" },
+			{ key: "events", path: "events", permission: "events.view" },
+			{ key: "eventCreate", path: "events/create", hidden: true, permission: "events.view" },
+			{ key: "eventEdit", path: "events/:id/edit", hidden: true, permission: "events.view" },
+			{ key: "eventCategories", path: "event-categories", permission: "event-categories.view" },
+			{ key: "eventAttendees", path: "events/:eventId/attendees", hidden: true, permission: "events.view" },
+			{ key: "community", path: "directory", permission: "community-members.view" },
 			{ key: "cafe", path: "cafe" }
 		]
 	},
@@ -349,7 +364,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		icon: "carbon:enterprise",
 		status: "active",
 		pages: [
-			{ key: "privateOfficeRequests", path: "private-office-requests" },
+			{ key: "privateOfficeRequests", path: "private-office-requests", permission: "private-office-requests.view" },
 			{ key: "operationsRequests", path: "operations-requests" }
 		]
 	},
@@ -359,10 +374,10 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		icon: "carbon:document",
 		status: "active",
 		pages: [
-			{ key: "announcements", path: "announcements" },
-			{ key: "partners", path: "partners" },
-			{ key: "founders", path: "founders" },
-			{ key: "contactLinks", path: "contact-links" },
+			{ key: "announcements", path: "announcements", permission: "announcements.view" },
+			{ key: "partners", path: "partners", permission: "partners.view" },
+			{ key: "founders", path: "founders", permission: "founders.view" },
+			{ key: "contactLinks", path: "contact-links", permission: "contact-links.view" },
 			{ key: "notifications", path: "notifications" }
 		]
 	},
@@ -538,7 +553,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		icon: "carbon:settings",
 		status: "active",
 		pages: [
-			{ key: "systemSettings", path: "system" },
+			{ key: "systemSettings", path: "system", permission: "settings.view" },
 			// Fortify's own two-factor routes: every signed-in account's.
 			{ key: "accountSecurity", path: "account", hidden: true, openedBy: "any" }
 		]

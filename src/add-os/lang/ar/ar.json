@@ -85,6 +85,7 @@
 			"selectAll": "تحديد الكل",
 			"deselectAll": "إلغاء التحديد",
 			"selectAllPermissions": "تحديد كل الصلاحيات",
+			"viewRuleHint": "منح أي صلاحية يمنح معها صلاحية العرض في الوحدة نفسها، وإلغاء العرض يلغي صلاحياتها الأخرى.",
 			"searchModules": "بحث في الوحدات والصلاحيات...",
 			"noModulesFound": "لا توجد صلاحيات تطابق البحث.",
 			"selectedCount": "{selected} من {total} محددة",

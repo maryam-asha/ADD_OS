@@ -41,6 +41,9 @@
 				<!-- Permissions Section -->
 				<n-form-item :label="t('roles.form.permissions')">
 					<div class="flex flex-col gap-3 w-full">
+						<p class="text-xs text-neutral-500 dark:text-neutral-400">
+							{{ t("roles.form.viewRuleHint") }}
+						</p>
 						<!-- Permissions Toolbar: count + select/clear all -->
 						<div class="flex items-center justify-between gap-2 pb-1">
 							<div class="flex items-center gap-2">
@@ -73,7 +76,7 @@
 						</n-input>
 
 						<!-- Modules List -->
-						<n-checkbox-group v-model:value="form.permissions" class="w-full">
+						<n-checkbox-group :value="form.permissions" class="w-full" @update:value="setPermissions">
 							<div
 								v-for="group in filteredModules"
 								:key="group.module"
@@ -170,6 +173,7 @@ import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { canManageRoles } from "@/add-os/config/permissions"
 import {
+	applyViewRule,
 	displayActionName,
 	displayModuleName,
 	displayRoleName,
@@ -339,6 +343,18 @@ const filteredModules = computed(() => {
 		.filter((g): g is PermissionModule => g !== null)
 })
 
+const grantable = computed(() => new Set(permissionModules.value.flatMap(group => group.actions.map(a => a.name))))
+
+/**
+ * Every change to the selection comes through here — the row, its checkbox
+ * (which `n-checkbox-group` updates without calling the row's handler), a
+ * module's "select all" and the toolbar's — so no action is ever selected
+ * without its view (`applyViewRule`).
+ */
+function setPermissions(next: (string | number)[]) {
+	form.value.permissions = applyViewRule(form.value.permissions, next.map(String), grantable.value)
+}
+
 function toggleAction(name: string) {
 	const set = new Set(form.value.permissions)
 	if (set.has(name)) {
@@ -346,21 +362,20 @@ function toggleAction(name: string) {
 	} else {
 		set.add(name)
 	}
-	form.value.permissions = [...set]
+	setPermissions([...set])
 }
 
 function toggleAllPermissions() {
 	if (allPermissionsSelected.value) {
-		form.value.permissions = []
+		setPermissions([])
 	} else {
-		const all: string[] = []
-		for (const group of permissionModules.value) {
-			for (const a of group.actions) {
-				all.push(a.name)
-			}
-		}
-		form.value.permissions = all
+		setPermissions([...grantable.value])
 	}
+}
+
+/** The selection as saved: a role from before the view rule gains its missing views. */
+function permissionsToSave(): string[] {
+	return applyViewRule([], form.value.permissions, grantable.value)
 }
 
 /**
@@ -375,7 +390,7 @@ function toggleModule(group: PermissionModule, checked: boolean) {
 		if (checked) next.add(action.name)
 		else next.delete(action.name)
 	}
-	form.value.permissions = [...next]
+	setPermissions([...next])
 }
 
 function openCreate() {
@@ -409,7 +424,7 @@ async function submitCreate() {
 
 	submitting.value = true
 	try {
-		await createRole({ name: form.value.name, permissions: form.value.permissions })
+		await createRole({ name: form.value.name, permissions: permissionsToSave() })
 		message.success(t("roles.create.success"))
 		modalVisible.value = false
 		await loadRoles()
@@ -432,7 +447,7 @@ async function submitEdit() {
 
 	submitting.value = true
 	try {
-		await updateRole(editingRole.value.id, { name: form.value.name, permissions: form.value.permissions })
+		await updateRole(editingRole.value.id, { name: form.value.name, permissions: permissionsToSave() })
 		message.success(t("roles.edit.success"))
 		modalVisible.value = false
 		await loadRoles()
@@ -486,6 +501,8 @@ defineExpose({
 	submitCreate,
 	submitEdit,
 	toggleModule,
+	toggleAction,
+	setPermissions,
 	loadRoles
 })
 </script>

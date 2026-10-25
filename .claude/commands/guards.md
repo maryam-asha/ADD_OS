@@ -69,7 +69,9 @@ Then report, per spec file, pass/fail and what it protects:
   allows — the modules inside a group entry (HR's, since 2026-10-22) counted as sections —
   less the `accountMenu` ones (My HR), which the avatar menu lists instead; every section the
   account sees is in one or the other. Before, a custom role and an employee with no role were offered every admin page,
-  each a 403, and "/" sent them to `/spatial/branches`.
+  each a 403, and "/" sent them to `/spatial/branches`. Since 2026-10-25 it also checks that
+  operations is offered only the screens whose `<module>.view` permission `/me` returns
+  (`NavPage.permission`), beside the ones ADD Core names no permission for.
 - `theme/__tests__/tokens.spec.ts` — WCAG ratios, ΔE separations, and "guideline p.15 strict
   rule stays disengaged" (Antique Copper in no semantic and no component token).
 

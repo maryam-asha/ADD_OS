@@ -160,17 +160,29 @@ export const useAuthStore = defineStore("auth", {
 		/**
 		 * Whether a page behind the admin gate opens for this account. ADD Core
 		 * keeps most admin routes for `role:admin|operations`; a few it serves on
-		 * a permission alone, to any role. So admin and operations reach every
-		 * page except one tagged with permissions they do not hold (the server
+		 * a permission alone, to any role. So admin reaches every page except
+		 * one tagged with permissions it does not hold (the server
 		 * would refuse them too), and any other dashboard role reaches only
 		 * pages tagged "any" or with a permission it holds — not, as before,
 		 * every admin page, each failing on 403.
+		 *
+		 * Operations, since 2026-10-25, reaches only what the permissions `/me`
+		 * returns for it open: a page tagged "any", one whose `openedBy` it
+		 * holds, or one whose `permission` it holds. A page naming no
+		 * permission is admin's alone — so its menu follows what its role is
+		 * granted on the Roles page, not every screen admin sees. ADD Core
+		 * still serves most of those routes on `role:admin|operations`, so this
+		 * narrows the dashboard, not the API.
 		 */
 		mayOpenAdminPage(state) {
-			return (openedBy?: OpenedBy) => {
+			return (openedBy?: OpenedBy, permission?: string) => {
 				const roles = rolesOf(state)
-				const held = (list: readonly string[]) => list.some(permission => state.permissions.includes(permission))
-				if (roles.some(role => STAFF_ROLES.includes(role))) return !Array.isArray(openedBy) || held(openedBy)
+				const held = (list: readonly string[]) => list.some(name => state.permissions.includes(name))
+				if (roles.includes("admin")) return !Array.isArray(openedBy) || held(openedBy)
+				if (roles.includes("operations")) {
+					if (Array.isArray(openedBy)) return held(openedBy)
+					return openedBy === "any" || (permission !== undefined && held([permission]))
+				}
 				if (!roles.some(role => !NON_DASHBOARD_ROLES.includes(role))) return false
 				return openedBy === "any" || (Array.isArray(openedBy) && held(openedBy))
 			}

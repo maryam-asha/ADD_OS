@@ -144,6 +144,30 @@ describe("sidebar, route guard and \"/\" agree", () => {
 		expect(homePath()).toBe("/spatial/branches")
 	})
 
+	it("offers operations only the screens its permissions from /me open", () => {
+		// The live account of 2026-10-25 (reception.lead@staff.demo): every tab was listed.
+		signIn({ roles: ["operations"], permissions: ["branches.view", "branches.create", "branches.update"] })
+		const offered = NAV_SECTIONS.filter(maySeeSection).flatMap(section => menuPages(section).map(page => navRoutePath(section, page)))
+		expect(offered).toEqual(["/dashboard/overview", "/spatial/branches"])
+		// A typed URL meets the same rule — a page naming no permission is admin's.
+		expect(authGuard(PAGES.get("/spatial/buildings")!)).toEqual({ path: "/" })
+		expect(authGuard(PAGES.get("/bookings/reception-desk")!)).toEqual({ path: "/" })
+	})
+
+	it("adds a screen to operations' menu as its role is granted the permission", () => {
+		signIn({ roles: ["operations"], permissions: ["branches.view", "spaces.view", "events.view"] })
+		const offered = NAV_SECTIONS.filter(maySeeSection).flatMap(section => menuPages(section).map(page => navRoutePath(section, page)))
+		expect(offered).toEqual(["/dashboard/overview", "/spatial/branches", "/spatial/spaces", "/community/events"])
+		expect(authGuard(PAGES.get("/community/events/create")!)).toBeUndefined()
+	})
+
+	it("still offers admin the screens that name no permission", () => {
+		signIn(ACCOUNTS.admin)
+		const offered = NAV_SECTIONS.filter(maySeeSection).flatMap(section => menuPages(section).map(page => navRoutePath(section, page)))
+		expect(offered).toContain("/bookings/reception-desk")
+		expect(offered).toContain("/members/memberships")
+	})
+
 	it("moves operations off a landing it may not open", () => {
 		signIn(ACCOUNTS["operations, nothing"])
 		const home = homePath()

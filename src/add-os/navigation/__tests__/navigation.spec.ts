@@ -196,6 +196,8 @@ describe("sidebar menu items", () => {
 		const authStore = useAuthStore()
 		authStore.logged = true
 		authStore.role = "admin"
+		// As `/me` returns them for admin: spatial pages need their own `.view`.
+		authStore.permissions = ["branches.view", "buildings.view", "spaces.view"]
 
 		const items = getItems({ mode: "vertical", collapsed: false })
 		const dashboardItem = items.find(item => item.key === "dashboard.overview")

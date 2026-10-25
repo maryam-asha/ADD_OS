@@ -115,8 +115,14 @@ describe("authGuard", () => {
 		it("turns operations away from a page whose permission the server asks of it too", () => {
 			useAuthStore().setLogged({ id: 50, name: "Mazen", email: "mazen@test.local", roles: ["operations"], permissions: ["branches.view"] })
 			expect(authGuard(adminPage("/spatial/branches", ["branches.view"]))).toBeUndefined()
-			expect(authGuard(adminPage("/members/individuals"))).toBeUndefined()
 			expect(authGuard(adminPage("/providers/list", ["providers.view"]))).toEqual({ path: "/" })
+		})
+
+		it("turns operations away from a page naming no permission, since 2026-10-25 — admin's alone", () => {
+			useAuthStore().setLogged({ id: 50, name: "Mazen", email: "mazen@test.local", roles: ["operations"], permissions: ["branches.view"] })
+			expect(authGuard(adminPage("/members/individuals"))).toEqual({ path: "/" })
+			useAuthStore().setLogged({ id: 1, name: "Admin", email: "admin@test.local", roles: ["admin"], permissions: [] })
+			expect(authGuard(adminPage("/members/individuals"))).toBeUndefined()
 		})
 	})
 })

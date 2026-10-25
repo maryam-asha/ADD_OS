@@ -86,7 +86,7 @@ export function authGuard(route: RouteLocationNormalized): RouteLocationRaw | vo
 		// Behind the admin gate a custom role reaches only the pages ADD Core
 		// serves it (`mayOpenAdminPage`). "/" then lands on one it may open
 		// (`homePath`), so this never loops.
-		if (isAdminGated(roles) && !authStore.mayOpenAdminPage(openedBy)) return { path: "/" }
+		if (isAdminGated(roles) && !authStore.mayOpenAdminPage(openedBy, permission)) return { path: "/" }
 
 		return
 	}

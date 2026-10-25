@@ -2,12 +2,44 @@
 import type { PermissionModule, RoleRecord } from "@/add-os/modules/system/types/role"
 import { describe, expect, it } from "vitest"
 import {
+	applyViewRule,
 	displayActionName,
 	displayModuleName,
 	displayRoleName,
 	isModuleFullySelected,
-	isModulePartiallySelected
+	isModulePartiallySelected,
+	viewPermissionOf
 } from "../roles.config"
+
+describe("the view rule — no action without its view", () => {
+	const grantable = new Set(["spaces.view", "spaces.create", "spaces.update", "hr.payroll.view", "hr.payroll.approve", "hr.roster.manage", "renewals.manage", "dashboard.finance"])
+
+	it("finds an action's view by its last segment, also under a module of several resources", () => {
+		expect(viewPermissionOf("spaces.create", grantable)).toBe("spaces.view")
+		expect(viewPermissionOf("hr.payroll.approve", grantable)).toBe("hr.payroll.view")
+	})
+
+	it("finds none for a view, nor for an action with no view to grant beside it", () => {
+		expect(viewPermissionOf("spaces.view", grantable)).toBeNull()
+		expect(viewPermissionOf("renewals.manage", grantable)).toBeNull()
+		expect(viewPermissionOf("dashboard.finance", grantable)).toBeNull()
+		expect(viewPermissionOf("hr.roster.manage", grantable)).toBeNull()
+	})
+
+	it("adds the view of an action selected", () => {
+		expect(applyViewRule([], ["spaces.update"], grantable).sort()).toEqual(["spaces.update", "spaces.view"])
+		expect(applyViewRule(["spaces.view"], ["spaces.view", "hr.payroll.approve"], grantable).sort()).toEqual(["hr.payroll.approve", "hr.payroll.view", "spaces.view"])
+	})
+
+	it("takes away the actions of a view taken away, and nothing else", () => {
+		const before = ["spaces.view", "spaces.create", "hr.payroll.view", "hr.payroll.approve"]
+		expect(applyViewRule(before, ["spaces.create", "hr.payroll.view", "hr.payroll.approve"], grantable).sort()).toEqual(["hr.payroll.approve", "hr.payroll.view"])
+	})
+
+	it("leaves an action with no view alone", () => {
+		expect(applyViewRule([], ["renewals.manage"], grantable)).toEqual(["renewals.manage"])
+	})
+})
 
 const branchesModule: PermissionModule = {
 	module: "branches",

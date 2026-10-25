@@ -81,6 +81,7 @@
 			"selectAll": "Select all",
 			"deselectAll": "Clear all",
 			"selectAllPermissions": "Select all permissions",
+			"viewRuleHint": "Granting any permission also grants its view; removing a view removes the permissions that need it.",
 			"searchModules": "Search modules and permissions...",
 			"noModulesFound": "No permissions match your search.",
 			"selectedCount": "{selected} of {total} selected",

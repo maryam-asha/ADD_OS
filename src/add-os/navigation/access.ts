@@ -24,8 +24,9 @@ export function isAdminGated(roles: Roles | undefined): boolean {
 /** Whether the signed-in account may open a page of a section. */
 export function mayOpenPage(section: NavSection, page: NavPage): boolean {
 	const auth = useAuthStore()
+	const permission = page.permission ?? section.permission
 	if (page.permission && !auth.hasPermission(page.permission)) return false
-	return !isAdminGated(section.roles ?? ADMIN_GATE) || auth.mayOpenAdminPage(page.openedBy)
+	return !isAdminGated(section.roles ?? ADMIN_GATE) || auth.mayOpenAdminPage(page.openedBy, permission)
 }
 
 /** The pages of a section the sidebar lists for this account. */

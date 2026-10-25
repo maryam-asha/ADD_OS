@@ -161,11 +161,23 @@ describe("who reaches what", () => {
 	})
 
 	describe("mayOpenAdminPage", () => {
-		it("opens every untagged page to admin and operations, and a tagged one only with its permission", () => {
+		it("opens every untagged page to admin, and a tagged one only with its permission", () => {
 			const store = useAuthStore()
-			store.setLogged(sampleUser({ roles: ["operations"], permissions: ["branches.view"] }))
+			store.setLogged(sampleUser({ roles: ["admin"], permissions: ["branches.view"] }))
 
 			expect(store.mayOpenAdminPage(undefined)).toBe(true)
+			expect(store.mayOpenAdminPage("any")).toBe(true)
+			expect(store.mayOpenAdminPage(["branches.view"])).toBe(true)
+			expect(store.mayOpenAdminPage(["invoices.view"])).toBe(false)
+		})
+
+		it("opens to operations only the pages its permissions from /me open — none that names no permission", () => {
+			const store = useAuthStore()
+			store.setLogged(sampleUser({ roles: ["operations"], permissions: ["branches.view", "branches.create", "branches.update"] }))
+
+			expect(store.mayOpenAdminPage(undefined)).toBe(false)
+			expect(store.mayOpenAdminPage(undefined, "spaces.view")).toBe(false)
+			expect(store.mayOpenAdminPage(undefined, "branches.view")).toBe(true)
 			expect(store.mayOpenAdminPage("any")).toBe(true)
 			expect(store.mayOpenAdminPage(["branches.view"])).toBe(true)
 			expect(store.mayOpenAdminPage(["invoices.view"])).toBe(false)
