@@ -1,6 +1,5 @@
 import type { OperationalStatus } from "./operational-status"
 import type { Bilingual } from "@/add-os/components/resource/field-types"
-import type { AmenityType } from "@/add-os/modules/spatial/types/amenity"
 // src/add-os/modules/spatial/types/space.ts
 
 export type SpaceType = "co_space" | "room" | "business" | "event_hall"
@@ -64,7 +63,7 @@ export interface Space {
 	main_image?: string | null
 	images?: string[] | null
 	/** Which of this space's own `space_type` applicable amenities are turned on. */
-	amenities: AmenityType[]
+	amenities: string[]
 }
 
 /**
@@ -136,5 +135,5 @@ export interface SpaceStatusPayload {
  * configured set as switches in the first place.
  */
 export interface SpaceAmenitiesPayload {
-	amenities: AmenityType[]
+	amenities: string[]
 }

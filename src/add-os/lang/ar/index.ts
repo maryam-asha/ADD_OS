@@ -22,6 +22,7 @@ import hrReports from "./hr-reports.json"
 import hrTimesheets from "./hr-timesheets.json"
 import hrTraining from "./hr-training.json"
 import hr from "./hr.json"
+import inventory from "./inventory.json"
 
 const messages = {
 	...base,
@@ -35,7 +36,8 @@ const messages = {
 	...hrRecruitment,
 	...hrPerformance,
 	...hrTraining,
-	...hrReports
+	...hrReports,
+	...inventory
 	// ...spread future ADD OS module bundles here
 }
 

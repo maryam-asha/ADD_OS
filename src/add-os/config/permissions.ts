@@ -10,7 +10,7 @@ import { useAuthStore } from "@/stores/auth"
  *   `canManageRoles`) — check the account's single primary role via the auth
  *   store's `isRoleGranted`. This is the original mechanism and still covers
  *   every resource below except Branches: buildings/floors/zones/spaces/
- *   resources/seatsDesks delete, Business Hours delete, and Role management
+ *   seatsDesks delete, Business Hours delete, and Role management
  *   (`RoleController`'s routes still run on `role:admin` middleware).
  * - The permission-based gate (`can`) — checks the account's actual granted
  *   permissions (from `GET /api/v1/admin/me`) via the auth store's
@@ -29,9 +29,11 @@ import { useAuthStore } from "@/stores/auth"
 /**
  * Single source for "which role may delete which spatial resource" — sourced
  * verbatim from each DELETE endpoint's description in
- * ADD-OS.postman_collection.json, not from inference. Every one of these six
+ * ADD-OS.postman_collection.json, not from inference. Every one of these five
  * spatial resources reads literally "Admin-only (not operations)." there
- * (Delete Building/Floor/Zone/Space/Resource/Seat-Desk). Branches is not in
+ * (Delete Building/Floor/Zone/Space/Seat-Desk; Resource left with ADD Core's
+ * `resources`, retired 2026-10-24 for amenities and inventory assets).
+ * Branches is not in
  * this map — its delete decision is permission-gated now, via `can()` below;
  * see `LegacyGatedSpatialResourceKey`.
  *
@@ -50,7 +52,6 @@ export const SPATIAL_RESOURCE_DELETE_ROLE = {
 	floors: "admin",
 	zones: "admin",
 	spaces: "admin",
-	resources: "admin",
 	seatsDesks: "admin"
 } as const satisfies Partial<Record<SpatialResourceKey, Role>>
 
@@ -61,7 +62,7 @@ export const SPATIAL_RESOURCE_DELETE_ROLE = {
  * `CASCADING_SPATIAL_RESOURCES` — which still legitimately needs Branches —
  * has a type to be declared against.
  */
-export type SpatialResourceKey = "branches" | "buildings" | "floors" | "zones" | "spaces" | "resources" | "seatsDesks"
+export type SpatialResourceKey = "branches" | "buildings" | "floors" | "zones" | "spaces" | "seatsDesks"
 
 /**
  * The subset of `SpatialResourceKey` still on the legacy role-based delete
@@ -83,9 +84,9 @@ export type LegacyGatedSpatialResourceKey = keyof typeof SPATIAL_RESOURCE_DELETE
  *   buildings → Floor/Zone/Space/Resource/SeatDesk
  *   floors    → Zone/Space
  *   zones     → Space
- *   spaces    → Resource/SeatDesk
- * `resources` and `seatsDesks` carry no cascade wording in the collection —
- * they have no children to cascade through.
+ *   spaces    → SeatDesk
+ * `seatsDesks` carry no cascade wording in the collection — they have no
+ * children to cascade through.
  */
 export const CASCADING_SPATIAL_RESOURCES: ReadonlySet<SpatialResourceKey> = new Set([
 	"branches",
@@ -99,7 +100,7 @@ export const CASCADING_SPATIAL_RESOURCES: ReadonlySet<SpatialResourceKey> = new 
  * The gate itself — routed through the EXISTING auth store's
  * `isRoleGranted`, never re-implemented. This is the only place in the
  * codebase that should call `isRoleGranted` for a delete decision; the
- * six remaining role-gated spatial views ask this function, not the store
+ * five remaining role-gated spatial views ask this function, not the store
  * directly, so no view carries its own role comparison (enforced by
  * no-inline-role-checks.spec.ts). Branches no longer calls this — see
  * `LegacyGatedSpatialResourceKey` for why `resource` can't be `"branches"`
@@ -449,4 +450,53 @@ export function canViewHrAlerts(): boolean {
 /** Every pending approval request — for the dashboard's approval figures to open them. */
 export function canManageApprovals(): boolean {
 	return can("hr.approvals.manage")
+}
+
+// ── Inventory ───────────────────────────────────────────────────────────────
+//
+// ADD Core's inventory package (`packages/add/inventory`): every route
+// carries its own `can:inventory.*`, assignable to any role, so these are
+// permissions, never roles. Each mirrors the middleware on its route in
+// `packages/add/inventory/routes/admin.php`.
+
+/** Categories, their fields, units and items. */
+export function canManageInventoryCatalog(): boolean {
+	return can("inventory.catalog.manage")
+}
+
+/** Registering, editing, moving and changing the status of assets. */
+export function canManageAssets(): boolean {
+	return can("inventory.assets.manage")
+}
+
+/** Handing assets over and taking them back. */
+export function canManageCustody(): boolean {
+	return can("inventory.assets.custody")
+}
+
+/** Repairs, servicing and maintenance schedules. */
+export function canManageMaintenance(): boolean {
+	return can("inventory.assets.maintenance")
+}
+
+export function canDisposeAssets(): boolean {
+	return can("inventory.assets.dispose")
+}
+
+export function canReceiveStock(): boolean {
+	return can("inventory.stock.receive")
+}
+
+/** Issuing stock by hand (internal use, damaged, expired). */
+export function canIssueStock(): boolean {
+	return can("inventory.stock.issue")
+}
+
+export function canTransferStock(): boolean {
+	return can("inventory.stock.transfer")
+}
+
+/** Recording a physical count. */
+export function canCountStock(): boolean {
+	return can("inventory.stock.adjust")
 }

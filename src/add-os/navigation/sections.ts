@@ -136,9 +136,12 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "buildings", path: "buildings" },
 			{ key: "floors", path: "floors" },
 			{ key: "zones", path: "zones" },
+			// The amenity catalog, then which a space type may offer. Equipment in
+			// a space is an inventory asset (the Inventory section) since
+			// 2026-10-24, when ADD Core retired `resources`.
+			{ key: "amenities", path: "amenities" },
 			{ key: "spaceTypeAmenities", path: "space-type-amenities" },
 			{ key: "spaces", path: "spaces" },
-			{ key: "resources", path: "resources" },
 			{ key: "seatsDesks", path: "seats-desks" },
 			{ key: "businessHours", path: "business-hours" }
 		]
@@ -244,7 +247,11 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "coupons", path: "coupons" },
 			{ key: "discountReport", path: "discount-report" },
 			{ key: "offerReport", path: "offer-report" },
-			{ key: "planPurchases", path: "plan-purchases" }
+			{ key: "planPurchases", path: "plan-purchases" },
+			// Selling stock at reception (2026-10-24): the sale, beside the
+			// plan sale above, and what may be sold at what price.
+			{ key: "itemSales", path: "item-sales" },
+			{ key: "saleItems", path: "sale-items" }
 		]
 	},
 	{
@@ -270,6 +277,28 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "walletTopUps", path: "wallet-top-ups" },
 			{ key: "cashRegister", path: "cash-register" },
 			{ key: "invoices", path: "invoices", openedBy: ["invoices.view"] }
+		]
+	},
+	{
+		// Inventory (ADD Core's add/inventory package, 2026-10-24): assets
+		// tracked one by one, consumable stock per place, and their catalog.
+		// No role gate: every page carries its own inventory.* permission, as
+		// every route does on the backend, so a store keeper's custom role
+		// works without admin|operations.
+		key: "inventory",
+		path: "/inventory",
+		icon: "carbon:box",
+		status: "active",
+		roles: ["all"],
+		pages: [
+			{ key: "inventoryAssets", path: "assets", permission: "inventory.assets.view" },
+			{ key: "inventoryAsset", path: "assets/:id", hidden: true, permission: "inventory.assets.view" },
+			{ key: "inventoryStock", path: "stock", permission: "inventory.stock.view" },
+			{ key: "inventoryMaintenance", path: "maintenance", permission: "inventory.assets.view" },
+			{ key: "inventoryCustody", path: "custody", permission: "inventory.assets.view" },
+			{ key: "inventoryItems", path: "items", permission: "inventory.catalog.view" },
+			{ key: "inventoryCatalog", path: "catalog", permission: "inventory.catalog.view" },
+			{ key: "inventoryReports", path: "reports", permission: "inventory.reports.view" }
 		]
 	},
 	{

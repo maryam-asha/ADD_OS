@@ -1,0 +1,334 @@
+{
+	"inventory": {
+		"common": {
+			"active": "Active",
+			"inactive": "Inactive",
+			"cancel": "Cancel",
+			"save": "Save",
+			"saved": "Saved.",
+			"saveError": "Couldn't save.",
+			"loadError": "Couldn't load. You may not have permission for this page.",
+			"delete": "Delete",
+			"deleted": "Deleted.",
+			"edit": "Edit",
+			"status": "Status",
+			"category": "Category",
+			"name": "Name",
+			"nameAr": "Name in Arabic",
+			"nameEn": "Name in English",
+			"note": "Note",
+			"yes": "Yes",
+			"no": "No"
+		},
+		"place": {
+			"branch": "Branch",
+			"building": "Building",
+			"floor": "Floor",
+			"zone": "Zone",
+			"space": "Space"
+		},
+		"custodianType": {
+			"hr_employee": "Employee",
+			"member": "Member",
+			"company": "Company"
+		},
+		"kind": {
+			"asset": "Assets",
+			"stock": "Stock"
+		},
+		"assetStatus": {
+			"in_service": "In service",
+			"in_maintenance": "In maintenance",
+			"retired": "Retired",
+			"lost": "Lost",
+			"disposed": "Disposed"
+		},
+		"maintenanceType": {
+			"corrective": "Repair",
+			"preventive": "Servicing"
+		},
+		"movementType": {
+			"receipt": "Receipt",
+			"issue": "Issue",
+			"transfer_out": "Transfer out",
+			"transfer_in": "Transfer in",
+			"adjustment": "Count adjustment"
+		},
+		"issueReason": {
+			"internal_use": "Internal use",
+			"damaged": "Damaged",
+			"expired": "Expired",
+			"other": "Other",
+			"consumption": "Plan consumption",
+			"sale": "Sale"
+		},
+		"fieldType": {
+			"text": "Text",
+			"number": "Number",
+			"boolean": "Yes/No",
+			"date": "Date",
+			"select": "Choice from a list"
+		},
+		"assets": {
+			"description": "Every asset is one thing with its own code and QR: where it is, who holds it, its status. Pick a place to see everything in it and below it.",
+			"register": "Register assets",
+			"registered": "{n} asset(s) registered.",
+			"search": "Code or serial number",
+			"empty": "No assets here yet.",
+			"code": "Code",
+			"item": "Item",
+			"location": "Location",
+			"custodian": "Custodian",
+			"count": "How many",
+			"countHint": "Identical ones bought together; each gets its own code.",
+			"serial": "Serial number",
+			"purchasedOn": "Purchased on",
+			"supplier": "Supplier",
+			"cost": "Cost",
+			"currency": "Currency",
+			"life": "Useful life",
+			"lifeHint": "In months, for straight-line depreciation.",
+			"salvage": "Salvage value",
+			"warrantyUntil": "Warranty until",
+			"notes": "Notes",
+			"back": "All assets",
+			"editDetails": "Edit details",
+			"whereAndWho": "Where and who",
+			"qr": "QR token",
+			"money": "Purchase",
+			"depreciation": "Depreciation",
+			"noDepreciation": "Depreciation needs a cost, a purchase date and a useful life.",
+			"monthly": "Per month",
+			"accumulated": "Accumulated",
+			"bookValue": "Book value",
+			"elapsed": "Elapsed",
+			"months": "{n} months"
+		},
+		"actions": {
+			"move": {
+				"title": "Move",
+				"hint": "Where it came from is kept in its movements.",
+				"confirm": "Move",
+				"success": "Asset moved."
+			},
+			"assign": {
+				"title": "Hand over",
+				"hint": "To an employee, a member or a company. The asset must be in service and held by no one.",
+				"confirm": "Hand over",
+				"success": "Asset handed over."
+			},
+			"return": {
+				"title": "Take back",
+				"hint": "Closes this asset's open custody.",
+				"confirm": "Take back",
+				"success": "Asset taken back."
+			},
+			"status": {
+				"title": "Change status",
+				"hint": "In service, retired or lost. Maintenance and disposal have their own actions.",
+				"confirm": "Save",
+				"success": "Status changed."
+			},
+			"maintenance": {
+				"title": "Open maintenance",
+				"hint": "The asset stays in maintenance until it is closed: no custody, no disposal.",
+				"confirm": "Open",
+				"success": "Maintenance opened."
+			},
+			"close": {
+				"title": "Close maintenance",
+				"hint": "The asset returns to service, and a scheduled servicing moves on to its next date.",
+				"confirm": "Close",
+				"success": "Maintenance closed."
+			},
+			"dispose": {
+				"title": "Dispose",
+				"hint": "Final: the asset becomes read only. It must be back from custody and out of maintenance.",
+				"confirm": "Dispose",
+				"success": "Asset disposed of."
+			}
+		},
+		"disposal": {
+			"method": "Method",
+			"on": "On",
+			"proceeds": "Proceeds",
+			"methods": {
+				"sold": "Sold",
+				"scrapped": "Scrapped",
+				"donated": "Donated"
+			}
+		},
+		"history": {
+			"movements": "Movements",
+			"custody": "Custody",
+			"maintenance": "Maintenance",
+			"schedules": "Servicing schedules",
+			"when": "When",
+			"from": "From",
+			"to": "To",
+			"by": "By",
+			"registered": "Registered",
+			"handedOver": "Handed over",
+			"returned": "Returned",
+			"stillHeld": "Still held",
+			"opened": "Opened",
+			"closed": "Closed"
+		},
+		"maintenance": {
+			"pageDescription": "What needs looking after: servicing coming due, and the repairs and servicing on record. A row opens its asset.",
+			"due": "Servicing coming due",
+			"withinDays": "Within {n} days",
+			"noneDue": "Nothing due.",
+			"openOnes": "Open",
+			"all": "All",
+			"empty": "No maintenance on record.",
+			"type": "Type",
+			"schedule": "From schedule",
+			"description": "Description",
+			"vendor": "Vendor",
+			"cost": "Cost",
+			"resolution": "Resolution",
+			"open": "Open",
+			"openNow": "In maintenance now"
+		},
+		"schedules": {
+			"add": "New schedule",
+			"edit": "Edit schedule",
+			"title": "Title",
+			"interval": "Every",
+			"months": "months",
+			"nextDue": "Next due",
+			"overdue": "Overdue",
+			"deleted": "Schedule deleted.",
+			"confirmDelete": "Delete this schedule?"
+		},
+		"custody": {
+			"description": "Who holds what: every asset in someone's custody, or everything one employee, member or company holds (what an employee leaving hands back).",
+			"includeReturned": "Include returned",
+			"empty": "No custody.",
+			"pickEmployee": "Search for an employee",
+			"pick": {
+				"member": "Pick a member",
+				"company": "Pick a company",
+				"hr_employee": "Search for an employee"
+			}
+		},
+		"stock": {
+			"description": "Consumables: what is on hand where and its value at average cost, and the ledger every quantity is counted from.",
+			"allItems": "All items",
+			"balances": "On hand",
+			"movements": "Movements",
+			"emptyBalances": "Nothing on hand here.",
+			"emptyMovements": "No movements.",
+			"item": "Item",
+			"location": "Location",
+			"from": "From",
+			"to": "To",
+			"onHand": "On hand",
+			"averageCost": "Average cost",
+			"value": "Value",
+			"type": "Movement",
+			"quantity": "Quantity",
+			"counted": "Counted",
+			"after": "After",
+			"unitCost": "Unit cost",
+			"unitCostCountHint": "For stock found beyond the book only; otherwise the average cost.",
+			"reason": "Reason"
+		},
+		"stockAction": {
+			"receive": {
+				"title": "Receive",
+				"hint": "A unit cost re-averages the cost at this place.",
+				"confirm": "Receive",
+				"success": "Stock received."
+			},
+			"issue": {
+				"title": "Issue",
+				"hint": "Internal use, damaged or expired. Sales and plan consumption issue on their own.",
+				"confirm": "Issue",
+				"success": "Stock issued."
+			},
+			"transfer": {
+				"title": "Transfer",
+				"hint": "What arrives keeps the cost it left at.",
+				"confirm": "Transfer",
+				"success": "Stock transferred."
+			},
+			"count": {
+				"title": "Count",
+				"hint": "The balance becomes what was counted; the difference is recorded as an adjustment.",
+				"confirm": "Record count",
+				"success": "Count recorded."
+			}
+		},
+		"items": {
+			"description": "The catalog's items: how many assets each has, or how much is on hand for stock. An item with history is deactivated, not deleted.",
+			"add": "New item",
+			"edit": "Edit item",
+			"search": "Name or SKU",
+			"empty": "No items yet.",
+			"pick": "Search for an item",
+			"unit": "Unit",
+			"sku": "SKU",
+			"skuHint": "Generated when left empty.",
+			"descriptionLabel": "Description",
+			"properties": "Properties",
+			"propertiesHint": "The fields of its category and the ones above it.",
+			"held": "Held",
+			"assetsCount": "{n} assets",
+			"confirmDelete": "Delete this item?"
+		},
+		"catalog": {
+			"description": "The category tree: a branch is either assets or stock, and each category has fields its items, and those below it, answer. And the units items are counted in.",
+			"categories": "Categories",
+			"empty": "No categories yet.",
+			"pick": "Pick a category to see its fields.",
+			"addRoot": "New root category",
+			"addChild": "Add a subcategory",
+			"addCategory": "New category",
+			"editCategory": "Edit category",
+			"confirmDelete": "Delete this category? It must be empty.",
+			"parent": "Parent",
+			"parentHint": "Empty for a root category.",
+			"kind": "Kind",
+			"kindHint": "Assets tracked one by one, or stock counted by quantity.",
+			"kindFollowsParent": "Takes its parent's kind.",
+			"icon": "Icon (Carbon name)",
+			"order": "Order",
+			"showToMembers": "Shown to members",
+			"showToMembersHint": "Its assets in service show to members in a space's details (a projector, two mics).",
+			"shownToMembers": "Shown to members"
+		},
+		"fields": {
+			"description": "The fields this category's items answer, inherited ones included.",
+			"add": "New field",
+			"edit": "Edit field",
+			"empty": "No fields.",
+			"label": "Field",
+			"key": "Key",
+			"keyHint": "Lowercase letters, digits and _; fixed once created.",
+			"type": "Type",
+			"options": "Options",
+			"unit": "Unit",
+			"required": "Required",
+			"inherited": "Inherited",
+			"confirmDelete": "Delete this field? Answers items gave stay stored."
+		},
+		"units": {
+			"title": "Units",
+			"add": "New unit",
+			"edit": "Edit unit",
+			"code": "Code",
+			"codeHint": "Lowercase letters, digits and _.",
+			"fractions": "Allows fractions",
+			"confirmDelete": "Delete this unit?"
+		},
+		"reports": {
+			"description": "Stock on hand at average cost per place, and every asset with its book value today, totalled per currency.",
+			"stockValuation": "Stock valuation",
+			"assetRegister": "Asset register",
+			"includeDisposed": "Include disposed",
+			"items": "Items"
+		}
+	}
+}

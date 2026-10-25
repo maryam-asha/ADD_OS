@@ -2,7 +2,6 @@ import type { DataTableColumns, SelectOption } from "naive-ui"
 import type { ComposerTranslation } from "vue-i18n"
 import type { FieldDescriptor } from "@/add-os/components/resource/field-types"
 import type { SupportedLocale } from "@/add-os/lang/locales"
-import type { AmenityType } from "@/add-os/modules/spatial/types/amenity"
 import type { Branch } from "@/add-os/modules/spatial/types/branch"
 import type { Building } from "@/add-os/modules/spatial/types/building"
 import type { Space, SpacePayload, SpaceType } from "@/add-os/modules/spatial/types/space"
@@ -12,6 +11,7 @@ import { h } from "vue"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import { buildOperationalStatusOptions, renderOperationalStatusTag } from "@/add-os/modules/spatial/types/operational-status"
 import { SPACE_TYPES } from "@/add-os/modules/spatial/types/space"
+import { amenityLabel, listAmenities } from "@/add-os/services/amenities"
 import { listBuildings } from "@/add-os/services/buildings"
 import { listFloors } from "@/add-os/services/floors"
 import { listSpaceTypeAmenities } from "@/add-os/services/space-type-amenities"
@@ -235,7 +235,7 @@ export function buildSpaceStatusFields(t: ComposerTranslation): FieldDescriptor<
  * (it's fixed for whichever space this action is opened for) but still has
  * to be on the model `optionsFrom` reads via its `dependsOn`.
  */
-export function buildSpaceAmenitiesFields(t: ComposerTranslation): FieldDescriptor<{ space_type: SpaceType; amenities: AmenityType[] }>[] {
+export function buildSpaceAmenitiesFields(locale: SupportedLocale): FieldDescriptor<{ space_type: SpaceType; amenities: string[] }>[] {
 	return [
 		{
 			key: "amenities",
@@ -243,9 +243,11 @@ export function buildSpaceAmenitiesFields(t: ComposerTranslation): FieldDescript
 			type: "switch-group",
 			dependsOn: "space_type",
 			optionsFrom: async ({ space_type }) => {
-				const matrix = await listSpaceTypeAmenities()
+				// Named from the catalog (Amenities page), which an admin may
+				// grow at any time.
+				const [matrix, catalog] = await Promise.all([listSpaceTypeAmenities(), listAmenities()])
 				const forType = matrix.find(row => row.space_type === space_type)
-				return (forType?.amenities ?? []).map(amenity => ({ label: t(`amenities.types.${amenity}`), value: amenity }))
+				return (forType?.amenities ?? []).map(amenity => ({ label: amenityLabel(amenity, catalog, locale), value: amenity }))
 			}
 		}
 	]
