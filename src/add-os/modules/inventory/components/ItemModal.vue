@@ -15,7 +15,7 @@
 				<n-select v-model:value="form.unitId" :options="unitOptions" filterable />
 			</n-form-item>
 			<n-form-item :label="t('inventory.items.sku')" :feedback="item ? undefined : t('inventory.items.skuHint')">
-				<n-input v-model:value="form.sku" dir="ltr" :maxlength="40" class="font-mono" />
+				<n-input v-model:value="form.sku" dir="ltr" :maxlength="40" :class="{ 'font-mono': form.sku }" />
 			</n-form-item>
 			<n-form-item :label="t('inventory.common.status')">
 				<n-checkbox v-model:checked="form.active">{{ t("inventory.common.active") }}</n-checkbox>
@@ -29,7 +29,14 @@
 			<span class="mb-1 block text-sm font-semibold">{{ t("inventory.items.properties") }}</span>
 			<p class="mb-3 text-sm text-secondary">{{ t("inventory.items.propertiesHint") }}</p>
 			<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
-				<n-form-item v-for="field in fields" :key="field.key" :label="fieldLabel(field)" :required="field.is_required">
+				<n-form-item
+					v-for="field in fields"
+					:key="field.key"
+					:label="fieldLabel(field)"
+					:required="field.is_required"
+					:validation-status="propertyErrors[field.key] ? 'error' : undefined"
+					:feedback="propertyErrors[field.key]"
+				>
 					<n-input-number v-if="field.type === 'number'" :value="numberOf(field.key)" clearable class="w-full" dir="ltr" @update:value="(v: number | null) => (properties[field.key] = v)" />
 					<n-switch v-else-if="field.type === 'boolean'" :value="properties[field.key] === true" @update:value="(v: boolean) => (properties[field.key] = v)" />
 					<n-date-picker v-else-if="field.type === 'date'" :formatted-value="stringOf(field.key)" value-format="yyyy-MM-dd" type="date" clearable class="w-full" @update:formatted-value="(v: string | null) => (properties[field.key] = v)" />
@@ -57,7 +64,8 @@ import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
-import { localized } from "@/add-os/modules/inventory/utils/display"
+import { categoryPaths, localized } from "@/add-os/modules/inventory/utils/display"
+import { ApiError } from "@/add-os/services/api"
 import { createItem, getCategory, updateItem } from "@/add-os/services/inventory"
 
 /**
@@ -79,13 +87,16 @@ const fields = ref<AttributeDefinition[]>([])
 const fieldsLoading = ref(false)
 const saving = ref(false)
 const problem = ref("")
+/** Per field key: shown under that field — a required one left empty, or one ADD Core refused. */
+const propertyErrors = ref<Record<string, string>>({})
 
-const categoryOptions = computed<SelectOption[]>(() => props.categories.map(c => ({ label: `${localized(c.name)} · ${t(`inventory.kind.${c.kind}`)}`, value: c.id })))
+const categoryOptions = computed<SelectOption[]>(() => categoryPaths(props.categories).map(({ category, path }) => ({ label: `${path} · ${t(`inventory.kind.${category.kind}`)}`, value: category.id })))
 const unitOptions = computed<SelectOption[]>(() => props.units.map(u => ({ label: localized(u.name), value: u.id })))
 
 const fieldLabel = (field: AttributeDefinition) => (field.unit ? `${localized(field.label)} (${field.unit})` : localized(field.label))
 const numberOf = (key: string) => (typeof properties.value[key] === "number" ? (properties.value[key] as number) : properties.value[key] ? Number(properties.value[key]) : null)
 const stringOf = (key: string) => (properties.value[key] === null || properties.value[key] === undefined ? null : String(properties.value[key]))
+const answered = (key: string) => properties.value[key] !== null && properties.value[key] !== undefined && properties.value[key] !== ""
 
 watch(
 	() => form.value.categoryId,
@@ -98,6 +109,16 @@ watch(
 	}
 )
 
+// Changing an answer clears that field's error; the next save checks again.
+watch(
+	() => ({ ...properties.value }),
+	(now, before) => {
+		for (const key of Object.keys(propertyErrors.value)) {
+			if (now[key] !== before[key]) delete propertyErrors.value[key]
+		}
+	}
+)
+
 watch(show, open => {
 	if (!open) return
 	const i = props.item
@@ -106,21 +127,24 @@ watch(show, open => {
 		: { nameAr: "", nameEn: "", categoryId: null, unitId: null, sku: "", description: "", active: true }
 	properties.value = { ...(i?.properties ?? {}) }
 	problem.value = ""
+	propertyErrors.value = {}
 })
 
 async function save() {
-	saving.value = true
 	problem.value = ""
+	propertyErrors.value = Object.fromEntries(fields.value.filter(field => field.is_required && !answered(field.key)).map(field => [field.key, t("inventory.items.propertyRequired")]))
+	if (Object.keys(propertyErrors.value).length) return
+	saving.value = true
 	const f = form.value
 	// Only the category's own fields, and only the ones answered.
-	const answered = Object.fromEntries(fields.value.map(field => [field.key, properties.value[field.key] ?? null]).filter(([, value]) => value !== null && value !== ""))
+	const answers = Object.fromEntries(fields.value.filter(field => answered(field.key)).map(field => [field.key, properties.value[field.key]]))
 	const payload = {
 		name: { ar: f.nameAr.trim(), en: f.nameEn.trim() || null },
 		category_id: f.categoryId!,
 		unit_id: f.unitId!,
 		description: f.description.trim() || null,
 		is_active: f.active,
-		properties: answered,
+		properties: answers,
 		...(f.sku.trim() ? { sku: f.sku.trim() } : {})
 	}
 	try {
@@ -130,7 +154,14 @@ async function save() {
 		show.value = false
 		emit("saved")
 	} catch (e) {
-		problem.value = apiErrorMessage(e, t("inventory.common.saveError"))
+		// ADD Core names a property by its key ("properties.ram_gb"), which means nothing to the
+		// person filling the form: the error goes under that field, in our words.
+		const errors = e instanceof ApiError ? (e.data?.errors ?? {}) : {}
+		const refused = Object.keys(errors).filter(key => key.startsWith("properties.")).map(key => key.slice("properties.".length))
+		propertyErrors.value = Object.fromEntries(refused.map(key => [key, t("inventory.items.propertyInvalid")]))
+		const other = Object.entries(errors).find(([key]) => !key.startsWith("properties."))
+		if (other) problem.value = other[1][0] ?? t("inventory.common.saveError")
+		else if (!refused.length) problem.value = apiErrorMessage(e, t("inventory.common.saveError"))
 	} finally {
 		saving.value = false
 	}

@@ -9,8 +9,8 @@
 			<template #header-extra>
 				<span v-if="valuation" class="add-numeric text-base font-bold">{{ money(valuation.total, valuation.currency) }}</span>
 			</template>
-			<div class="mb-3 max-w-2xl">
-				<PlacePicker v-model:value="place" />
+			<div class="mb-3 flex flex-wrap items-center gap-3">
+				<PlacePicker v-model:value="place" inline />
 			</div>
 			<n-data-table :columns="valuationColumns" :data="valuation?.locations ?? []" :loading :bordered="false" size="small" :scroll-x="600">
 				<template #empty>
@@ -46,7 +46,7 @@ import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import AssetStatusTag from "@/add-os/modules/inventory/components/AssetStatusTag.vue"
 import PlacePicker from "@/add-os/modules/inventory/components/PlacePicker.vue"
-import { EMPTY, localized, money, placeLabel } from "@/add-os/modules/inventory/utils/display"
+import { EMPTY, localized, money, nameCell, PLACE_COLUMN, placeLabel } from "@/add-os/modules/inventory/utils/display"
 import { assetRegister, stockValuation } from "@/add-os/services/inventory"
 import { formatNumber } from "@/add-os/utils/format"
 import { formatDate } from "@/add-os/utils/format/dates"
@@ -85,15 +85,20 @@ async function load() {
 type ValuationRow = StockValuation["locations"][number]
 
 const valuationColumns = computed<DataTableColumns<ValuationRow>>(() => [
-	{ title: t("inventory.stock.location"), key: "location", minWidth: 260, render: row => placeLabel(row.location) },
+	{ title: t("inventory.stock.location"), key: "location", ...PLACE_COLUMN, render: row => placeLabel(row.location) },
 	{ title: t("inventory.reports.items"), key: "items", minWidth: 90, render: row => formatNumber(row.items) },
 	{ title: t("inventory.stock.value"), key: "value", minWidth: 120, render: row => h("span", { class: "add-numeric font-semibold" }, money(row.value, valuation.value?.currency)) }
 ])
 
 const registerColumns = computed<DataTableColumns<AssetRegisterRow>>(() => [
-	{ title: t("inventory.assets.code"), key: "code", minWidth: 110, render: row => h("span", { class: "font-mono text-xs", dir: "ltr" }, row.code) },
-	{ title: t("inventory.assets.item"), key: "item", minWidth: 200, render: row => localized(row.item.name) },
-	{ title: t("inventory.assets.location"), key: "location", minWidth: 220, render: row => placeLabel(row.location) },
+	{
+		title: t("inventory.assets.item"),
+		key: "item",
+		minWidth: 200,
+		render: row =>
+			nameCell(localized(row.item.name), row.code, { code: true })
+	},
+	{ title: t("inventory.assets.location"), key: "location", ...PLACE_COLUMN, render: row => placeLabel(row.location) },
 	{ title: t("inventory.common.status"), key: "status", minWidth: 110, render: row => h(AssetStatusTag, { status: row.status }) },
 	{ title: t("inventory.assets.purchasedOn"), key: "purchased_on", minWidth: 110, render: row => (row.purchased_on ? formatDate(row.purchased_on) : EMPTY) },
 	{ title: t("inventory.assets.cost"), key: "purchase_cost", minWidth: 110, render: row => h("span", { class: "add-numeric" }, money(row.purchase_cost, row.currency)) },

@@ -5,7 +5,7 @@
 		<n-spin v-else-if="!asset" class="py-16" />
 
 		<template v-else>
-			<HrPageHeader :title="`${asset.code} · ${localized(asset.item.name)}`" :description="localized(asset.item.category.name)" :eyebrow="t('nav.pages.inventoryAssets')">
+			<HrPageHeader :title="`${isolate(asset.code)} · ${isolate(localized(asset.item.name))}`" :description="localized(asset.item.category.name)" :eyebrow="t('nav.pages.inventoryAssets')">
 				<template #actions>
 					<AssetStatusTag :status="asset.status" />
 					<router-link :to="{ name: 'inventory.inventoryAssets' }">
@@ -56,8 +56,11 @@
 							<dt class="text-secondary">{{ t("inventory.assets.custodian") }}</dt>
 							<dd>{{ custodianLabel(asset.custodian) }}<span v-if="asset.custodian" class="text-secondary"> · {{ formatDate(asset.custodian.since) }}</span></dd>
 						</div>
-						<div><dt class="text-secondary">{{ t("inventory.assets.serial") }}</dt><dd dir="ltr" class="font-mono">{{ asset.serial_number ?? EMPTY }}</dd></div>
-						<div><dt class="text-secondary">{{ t("inventory.assets.qr") }}</dt><dd dir="ltr" class="break-all font-mono text-xs">{{ asset.qr_token }}</dd></div>
+						<div>
+							<dt class="text-secondary">{{ t("inventory.assets.serial") }}</dt>
+							<dd><span v-if="asset.serial_number" dir="ltr" class="font-mono">{{ asset.serial_number }}</span><template v-else>{{ EMPTY }}</template></dd>
+						</div>
+						<div><dt class="text-secondary">{{ t("inventory.assets.qr") }}</dt><dd class="break-all"><span dir="ltr" class="font-mono text-xs">{{ asset.qr_token }}</span></dd></div>
 						<div><dt class="text-secondary">{{ t("inventory.assets.warrantyUntil") }}</dt><dd>{{ asset.warranty_until ? formatDate(asset.warranty_until) : EMPTY }}</dd></div>
 					</dl>
 				</n-card>
@@ -66,7 +69,7 @@
 						<div><dt class="text-secondary">{{ t("inventory.assets.purchasedOn") }}</dt><dd>{{ asset.purchased_on ? formatDate(asset.purchased_on) : EMPTY }}</dd></div>
 						<div><dt class="text-secondary">{{ t("inventory.assets.cost") }}</dt><dd class="add-numeric">{{ money(asset.purchase_cost, asset.currency) }}</dd></div>
 						<div><dt class="text-secondary">{{ t("inventory.assets.supplier") }}</dt><dd>{{ asset.supplier ?? EMPTY }}</dd></div>
-						<div><dt class="text-secondary">{{ t("inventory.assets.life") }}</dt><dd>{{ asset.useful_life_months ? t("inventory.assets.months", { n: asset.useful_life_months }) : EMPTY }}</dd></div>
+						<div><dt class="text-secondary">{{ t("inventory.assets.life") }}</dt><dd>{{ asset.useful_life_months ? months(asset.useful_life_months) : EMPTY }}</dd></div>
 						<div><dt class="text-secondary">{{ t("inventory.assets.salvage") }}</dt><dd class="add-numeric">{{ money(asset.salvage_value, asset.currency) }}</dd></div>
 					</dl>
 				</n-card>
@@ -76,7 +79,7 @@
 						<div><dt class="text-secondary">{{ t("inventory.assets.monthly") }}</dt><dd class="add-numeric">{{ money(asset.depreciation.monthly, asset.currency) }}</dd></div>
 						<div><dt class="text-secondary">{{ t("inventory.assets.accumulated") }}</dt><dd class="add-numeric">{{ money(asset.depreciation.accumulated, asset.currency) }}</dd></div>
 						<div><dt class="text-secondary">{{ t("inventory.assets.bookValue") }}</dt><dd class="add-numeric font-semibold">{{ money(asset.depreciation.book_value, asset.currency) }}</dd></div>
-						<div><dt class="text-secondary">{{ t("inventory.assets.elapsed") }}</dt><dd>{{ t("inventory.assets.months", { n: asset.depreciation.months_elapsed }) }}</dd></div>
+						<div><dt class="text-secondary">{{ t("inventory.assets.elapsed") }}</dt><dd>{{ months(asset.depreciation.months_elapsed) }}</dd></div>
 					</dl>
 					<div v-if="asset.disposal" class="mt-3 border-t border-[var(--add-border)] pt-3 text-sm">
 						<span class="font-semibold">{{ t(`inventory.disposal.methods.${asset.disposal.method}`) }}</span>
@@ -131,8 +134,9 @@ import AssetActionModal from "@/add-os/modules/inventory/components/AssetActionM
 import AssetDetailsModal from "@/add-os/modules/inventory/components/AssetDetailsModal.vue"
 import AssetStatusTag from "@/add-os/modules/inventory/components/AssetStatusTag.vue"
 import ScheduleModal from "@/add-os/modules/inventory/components/ScheduleModal.vue"
-import { custodianLabel, EMPTY, localized, money, placeLabel } from "@/add-os/modules/inventory/utils/display"
+import { custodianLabel, EMPTY, isolate, localized, money, PLACE_COLUMN, placeLabel } from "@/add-os/modules/inventory/utils/display"
 import { getAsset, removeSchedule } from "@/add-os/services/inventory"
+import { countKey, formatNumber } from "@/add-os/utils/format"
 import { formatDate, formatDateTime } from "@/add-os/utils/format/dates"
 import Icon from "@/components/common/Icon.vue"
 
@@ -192,11 +196,13 @@ async function deleteSchedule(schedule: MaintenanceSchedule) {
 }
 
 const actorName = (actor: { name: string | null } | null) => actor?.name ?? EMPTY
+const months = (n: number) => t(countKey("inventory.assets.months", n), { n: formatNumber(n) })
+const every = (n: number) => t(countKey("inventory.schedules.every", n), { n: formatNumber(n) })
 
 const movementColumns = computed<DataTableColumns<AssetMovement>>(() => [
 	{ title: t("inventory.history.when"), key: "moved_at", minWidth: 150, render: row => formatDateTime(row.moved_at) },
-	{ title: t("inventory.history.from"), key: "from", minWidth: 200, render: row => (row.from ? placeLabel(row.from) : t("inventory.history.registered")) },
-	{ title: t("inventory.history.to"), key: "to", minWidth: 200, render: row => placeLabel(row.to) },
+	{ title: t("inventory.history.from"), key: "from", ...PLACE_COLUMN, render: row => (row.from ? placeLabel(row.from) : t("inventory.history.registered")) },
+	{ title: t("inventory.history.to"), key: "to", ...PLACE_COLUMN, render: row => placeLabel(row.to) },
 	{ title: t("inventory.common.note"), key: "note", minWidth: 160, render: row => row.note ?? EMPTY },
 	{ title: t("inventory.history.by"), key: "actor", minWidth: 120, render: row => actorName(row.actor) }
 ])
@@ -219,7 +225,7 @@ const maintenanceColumns = computed<DataTableColumns<MaintenanceRecord>>(() => [
 
 const scheduleColumns = computed<DataTableColumns<MaintenanceSchedule>>(() => [
 	{ title: t("inventory.schedules.title"), key: "title", minWidth: 180 },
-	{ title: t("inventory.schedules.interval"), key: "interval_months", minWidth: 110, render: row => t("inventory.assets.months", { n: row.interval_months }) },
+	{ title: t("inventory.schedules.frequency"), key: "interval_months", minWidth: 120, render: row => every(row.interval_months) },
 	{
 		title: t("inventory.schedules.nextDue"),
 		key: "next_due_on",

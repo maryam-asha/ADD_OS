@@ -151,9 +151,11 @@ const tree = computed<TreeOption[]>(() => {
 	return categories.value.filter(c => c.parent_id === null).map(node)
 })
 
+/** Clicking the open category again keeps it open: an empty selection would hide its panel for nothing. */
 async function select(keys: Array<string | number>) {
 	const id = keys[0]
-	selected.value = id === undefined ? null : await getCategory(Number(id))
+	if (id === undefined) return
+	selected.value = await getCategory(Number(id))
 }
 
 function editCategory(category: Category | null, parentId: number | null) {

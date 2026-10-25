@@ -45,7 +45,7 @@ import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
-import { localized } from "@/add-os/modules/inventory/utils/display"
+import { categoryPaths } from "@/add-os/modules/inventory/utils/display"
 import { createCategory, updateCategory } from "@/add-os/services/inventory"
 
 /**
@@ -73,7 +73,9 @@ const parentOptions = computed<SelectOption[]>(() => {
 		}
 		walk(props.category.id)
 	}
-	return props.categories.filter(c => !blocked.has(c.id)).map(c => ({ label: `${localized(c.name)} · ${t(`inventory.kind.${c.kind}`)}`, value: c.id }))
+	return categoryPaths(props.categories)
+		.filter(({ category }) => !blocked.has(category.id))
+		.map(({ category, path }) => ({ label: `${path} · ${t(`inventory.kind.${category.kind}`)}`, value: category.id }))
 })
 
 watch(

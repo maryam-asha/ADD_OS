@@ -44,9 +44,9 @@ import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
-import { EMPTY, localized, money } from "@/add-os/modules/inventory/utils/display"
+import { EMPTY, localized, money, nameCell } from "@/add-os/modules/inventory/utils/display"
 import { listDueSchedules, listMaintenance } from "@/add-os/services/inventory"
-import { formatNumber } from "@/add-os/utils/format"
+import { countKey, formatNumber } from "@/add-os/utils/format"
 import { formatDate, formatDateTime } from "@/add-os/utils/format/dates"
 
 /**
@@ -91,7 +91,7 @@ async function load() {
 	}
 }
 
-const dayOptions = computed<SelectOption[]>(() => [7, 30, 90].map(n => ({ label: t("inventory.maintenance.withinDays", { n: formatNumber(n) }), value: n })))
+const dayOptions = computed<SelectOption[]>(() => [7, 30, 90].map(n => ({ label: t(countKey("inventory.maintenance.withinDays", n), { n: formatNumber(n) }), value: n })))
 
 function assetRow(assetId: number) {
 	return { class: "cursor-pointer", onClick: () => void router.push({ name: "inventory.inventoryAsset", params: { id: assetId } }) }
@@ -100,7 +100,7 @@ function assetRow(assetId: number) {
 const dueColumns = computed<DataTableColumns<MaintenanceSchedule>>(() => [
 	{ title: t("inventory.assets.code"), key: "asset", minWidth: 120, render: row => h("span", { class: "font-mono text-xs", dir: "ltr" }, row.asset?.code ?? `#${row.asset_id}`) },
 	{ title: t("inventory.schedules.title"), key: "title", minWidth: 200 },
-	{ title: t("inventory.schedules.interval"), key: "interval_months", minWidth: 110, render: row => t("inventory.assets.months", { n: row.interval_months }) },
+	{ title: t("inventory.schedules.frequency"), key: "interval_months", minWidth: 120, render: row => t(countKey("inventory.schedules.every", row.interval_months), { n: formatNumber(row.interval_months) }) },
 	{
 		title: t("inventory.schedules.nextDue"),
 		key: "next_due_on",
@@ -113,16 +113,13 @@ const recordColumns = computed<DataTableColumns<MaintenanceRecord>>(() => [
 	{
 		title: t("inventory.assets.item"),
 		key: "asset",
-		minWidth: 220,
+		minWidth: 190,
 		render: row =>
-			h("div", { class: "flex flex-col gap-0.5" }, [
-				h("span", { class: "font-semibold" }, row.asset ? localized(row.asset.item.name) : EMPTY),
-				h("span", { class: "font-mono text-xs text-secondary", dir: "ltr" }, row.asset?.code ?? `#${row.asset_id}`)
-			])
+			nameCell(row.asset ? localized(row.asset.item.name) : EMPTY, row.asset?.code ?? `#${row.asset_id}`, { code: true })
 	},
-	{ title: t("inventory.maintenance.type"), key: "type", minWidth: 110, render: row => t(`inventory.maintenanceType.${row.type}`) },
-	{ title: t("inventory.maintenance.description"), key: "description", minWidth: 220 },
-	{ title: t("inventory.maintenance.vendor"), key: "vendor", minWidth: 140, render: row => row.vendor ?? EMPTY },
+	{ title: t("inventory.maintenance.type"), key: "type", minWidth: 100, render: row => t(`inventory.maintenanceType.${row.type}`) },
+	{ title: t("inventory.maintenance.description"), key: "description", width: 200, ellipsis: { tooltip: true } },
+	{ title: t("inventory.maintenance.vendor"), key: "vendor", width: 130, ellipsis: { tooltip: true }, render: row => row.vendor ?? EMPTY },
 	{ title: t("inventory.history.opened"), key: "opened_at", minWidth: 150, render: row => formatDateTime(row.opened_at) },
 	{
 		title: t("inventory.history.closed"),
@@ -130,6 +127,6 @@ const recordColumns = computed<DataTableColumns<MaintenanceRecord>>(() => [
 		minWidth: 150,
 		render: row => (row.closed_at ? formatDateTime(row.closed_at) : h(NTag, { size: "small", round: true, type: "warning" }, () => t("inventory.maintenance.open")))
 	},
-	{ title: t("inventory.maintenance.cost"), key: "cost", minWidth: 110, render: row => h("span", { class: "add-numeric" }, money(row.cost, row.currency)) }
+	{ title: t("inventory.maintenance.cost"), key: "cost", minWidth: 100, render: row => h("span", { class: "add-numeric" }, money(row.cost, row.currency)) }
 ])
 </script>

@@ -61,6 +61,7 @@ import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import ItemSelect from "@/add-os/modules/inventory/components/ItemSelect.vue"
 import PlacePicker from "@/add-os/modules/inventory/components/PlacePicker.vue"
 import { registerAssets } from "@/add-os/services/inventory"
+import { countKey, formatNumber } from "@/add-os/utils/format"
 
 const emit = defineEmits<{ saved: [] }>()
 /**
@@ -121,7 +122,7 @@ async function save() {
 			warranty_until: f.warranty_until,
 			notes: f.notes || null
 		})
-		message.success(t("inventory.assets.registered", { n: assets.length }))
+		message.success(t(countKey("inventory.assets.registered", assets.length), { n: formatNumber(assets.length) }))
 		show.value = false
 		emit("saved")
 	} catch (e) {

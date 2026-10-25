@@ -24,6 +24,11 @@
 	.n-form-item-feedback-wrapper:not(:empty) {
 		transform: none;
 		padding: var(--n-feedback-padding) !important;
+		// A hint or message fills the whole feedback slot, so it sat flush
+		// against the next field's label and read as that field's caption
+		// (seen on the inventory forms, 2026-10-25). Only a field that shows
+		// one gets the room; an empty slot keeps its height.
+		padding-bottom: var(--add-space-4) !important;
 
 		.n-form-item-feedback {
 			font-size: inherit;

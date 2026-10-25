@@ -14,10 +14,8 @@
 			<n-input v-model:value="filters.search" :placeholder="t('inventory.assets.search')" clearable class="max-w-xs" />
 			<n-select v-model:value="filters.status" :options="statusOptions" :placeholder="t('inventory.common.status')" clearable class="max-w-[12rem]" />
 			<n-select v-model:value="filters.category_id" :options="categoryOptions" :placeholder="t('inventory.common.category')" clearable filterable class="max-w-xs" />
+			<PlacePicker v-model:value="place" inline />
 		</HrToolbar>
-		<div class="max-w-2xl">
-			<PlacePicker v-model:value="place" />
-		</div>
 
 		<n-alert v-if="loadError" type="error" :title="loadError" />
 
@@ -52,7 +50,7 @@ import AssetStatusTag from "@/add-os/modules/inventory/components/AssetStatusTag
 import PlacePicker from "@/add-os/modules/inventory/components/PlacePicker.vue"
 import RegisterAssetModal from "@/add-os/modules/inventory/components/RegisterAssetModal.vue"
 import { ASSET_STATUSES } from "@/add-os/modules/inventory/types/inventory"
-import { custodianLabel, localized, placeLabel } from "@/add-os/modules/inventory/utils/display"
+import { categoryPaths, custodianLabel, localized, nameCell, PLACE_COLUMN, placeLabel } from "@/add-os/modules/inventory/utils/display"
 import { listAssets, listCategories } from "@/add-os/services/inventory"
 import Icon from "@/components/common/Icon.vue"
 
@@ -107,7 +105,7 @@ async function load() {
 }
 
 const statusOptions = computed<SelectOption[]>(() => ASSET_STATUSES.map(s => ({ label: t(`inventory.assetStatus.${s}`), value: s })))
-const categoryOptions = computed<SelectOption[]>(() => categories.value.map(c => ({ label: localized(c.name), value: c.id })))
+const categoryOptions = computed<SelectOption[]>(() => categoryPaths(categories.value).map(({ category, path }) => ({ label: path, value: category.id })))
 
 function rowProps(row: Asset) {
 	return { class: "cursor-pointer", onClick: () => void router.push({ name: "inventory.inventoryAsset", params: { id: row.id } }) }
@@ -118,14 +116,11 @@ const columns = computed<DataTableColumns<Asset>>(() => [
 	{
 		title: t("inventory.assets.item"),
 		key: "item",
-		minWidth: 220,
+		minWidth: 240,
 		render: row =>
-			h("div", { class: "flex flex-col gap-0.5" }, [
-				h("span", { class: "font-semibold" }, localized(row.item.name)),
-				h("span", { class: "text-xs text-secondary" }, localized(row.item.category.name))
-			])
+			nameCell(localized(row.item.name), localized(row.item.category.name))
 	},
-	{ title: t("inventory.assets.location"), key: "location", minWidth: 240, render: row => placeLabel(row.location) },
+	{ title: t("inventory.assets.location"), key: "location", ...PLACE_COLUMN, render: row => placeLabel(row.location) },
 	{ title: t("inventory.assets.custodian"), key: "custodian", minWidth: 160, render: row => custodianLabel(row.custodian) },
 	{ title: t("inventory.common.status"), key: "status", minWidth: 120, render: row => h(AssetStatusTag, { status: row.status }) }
 ])

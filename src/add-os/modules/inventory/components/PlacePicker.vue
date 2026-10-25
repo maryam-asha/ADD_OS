@@ -1,11 +1,11 @@
 <!-- src/add-os/modules/inventory/components/PlacePicker.vue -->
 <template>
-	<div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
-		<n-select v-model:value="branchId" :options="branchOptions" :placeholder="t('inventory.place.branch')" filterable clearable :disabled />
-		<n-select v-model:value="buildingId" :options="buildingOptions" :placeholder="t('inventory.place.building')" filterable clearable :disabled="disabled || !branchId" />
-		<n-select v-model:value="floorId" :options="floorOptions" :placeholder="t('inventory.place.floor')" filterable clearable :disabled="disabled || !buildingId" />
-		<n-select v-model:value="zoneId" :options="zoneOptions" :placeholder="t('inventory.place.zone')" filterable clearable :disabled="disabled || !floorId" />
-		<n-select v-model:value="spaceId" :options="spaceOptions" :placeholder="t('inventory.place.space')" filterable clearable class="sm:col-span-2" :disabled="disabled || !buildingId" />
+	<div :class="inline ? 'contents' : 'grid grid-cols-1 gap-2 sm:grid-cols-2'">
+		<n-select v-model:value="branchId" :options="branchOptions" :placeholder="t('inventory.place.branch')" filterable clearable :class="inlineField" :disabled />
+		<n-select v-if="!inline || branchId" v-model:value="buildingId" :options="buildingOptions" :placeholder="t('inventory.place.building')" filterable clearable :class="inlineField" :disabled="disabled || !branchId" />
+		<n-select v-if="!inline || buildingId" v-model:value="floorId" :options="floorOptions" :placeholder="t('inventory.place.floor')" filterable clearable :class="inlineField" :disabled="disabled || !buildingId" />
+		<n-select v-if="!inline || floorId" v-model:value="zoneId" :options="zoneOptions" :placeholder="t('inventory.place.zone')" filterable clearable :class="inlineField" :disabled="disabled || !floorId" />
+		<n-select v-if="!inline || buildingId" v-model:value="spaceId" :options="spaceOptions" :placeholder="t('inventory.place.space')" filterable clearable :class="inline ? inlineField : 'sm:col-span-2'" :disabled="disabled || !buildingId" />
 	</div>
 </template>
 
@@ -13,7 +13,7 @@
 import type { SelectOption } from "naive-ui"
 import type { PlaceRef } from "@/add-os/modules/inventory/types/inventory"
 import { NSelect } from "naive-ui"
-import { onMounted, ref, watch } from "vue"
+import { computed, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { quietly } from "@/add-os/modules/hr/utils/errors"
 import { localized } from "@/add-os/modules/inventory/utils/display"
@@ -29,11 +29,17 @@ import { listZones } from "@/add-os/services/zones"
  * is the deepest one chosen, as ADD Core's `{type, id}`; a space can be
  * picked straight from its building, since a space need not be zoned.
  * Clearing a level clears every level below it.
+ *
+ * `inline` is for a list's filter bar: the selects become the bar's own
+ * items, and a level shows only once the one above it is chosen — a bar of
+ * four greyed-out selects said nothing and pushed the list off the screen.
+ * A form keeps every level in view, so the path being built is visible.
  */
-defineProps<{ disabled?: boolean }>()
+const props = defineProps<{ disabled?: boolean; inline?: boolean }>()
 const value = defineModel<PlaceRef | null>("value", { required: true })
 
 const { t } = useI18n()
+const inlineField = computed(() => (props.inline ? "w-full sm:w-44" : undefined))
 
 const branchId = ref<number | null>(null)
 const buildingId = ref<number | null>(null)

@@ -34,7 +34,7 @@
 
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
-import type { Category, Item, ItemKind, Unit } from "@/add-os/modules/inventory/types/inventory"
+import type { AttributeDefinition, Category, Item, ItemKind, Unit } from "@/add-os/modules/inventory/types/inventory"
 import { NAlert, NButton, NCard, NDataTable, NInput, NPagination, NPopconfirm, NSelect, NTag, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
@@ -44,9 +44,9 @@ import HrToolbar from "@/add-os/modules/hr/components/ui/HrToolbar.vue"
 import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
 import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
 import ItemModal from "@/add-os/modules/inventory/components/ItemModal.vue"
-import { EMPTY, localized, quantity } from "@/add-os/modules/inventory/utils/display"
-import { listCategories, listItems, listUnits, removeItem } from "@/add-os/services/inventory"
-import { formatNumber } from "@/add-os/utils/format"
+import { categoryPaths, localized, nameCell, propertySummary, quantity } from "@/add-os/modules/inventory/utils/display"
+import { getCategory, listCategories, listItems, listUnits, removeItem } from "@/add-os/services/inventory"
+import { countKey, formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
 /**
@@ -69,6 +69,8 @@ const loadError = ref("")
 const lastPage = ref(1)
 const editorVisible = ref(false)
 const editing = ref<Item | null>(null)
+/** Each category's fields, read once, so a property shows under its label rather than its key. */
+const fieldsByCategory = ref(new Map<number, AttributeDefinition[]>())
 
 const { filters, applied, page } = useRouteFilters({ search: "string", kind: "string", category_id: "number" }, () => void load(), { debounced: ["search"] })
 
@@ -84,11 +86,17 @@ async function load() {
 		const result = await listItems({ page: page.value, search: applied.value.search, kind: applied.value.kind as ItemKind | null, category_id: applied.value.category_id })
 		items.value = result.data
 		lastPage.value = result.meta.last_page
+		void loadFields(result.data)
 	} catch (e) {
 		loadError.value = apiErrorMessage(e, t("inventory.common.loadError"))
 	} finally {
 		loading.value = false
 	}
+}
+
+async function loadFields(rows: Item[]) {
+	const missing = [...new Set(rows.filter(row => Object.keys(row.properties).length).map(row => row.category.id))].filter(id => !fieldsByCategory.value.has(id))
+	await Promise.all(missing.map(id => quietly(() => getCategory(id), category => fieldsByCategory.value.set(id, category.fields ?? []))))
 }
 
 function edit(item: Item | null) {
@@ -107,7 +115,7 @@ async function remove(item: Item) {
 }
 
 const kindOptions = computed<SelectOption[]>(() => (["asset", "stock"] as const).map(kind => ({ label: t(`inventory.kind.${kind}`), value: kind })))
-const categoryOptions = computed<SelectOption[]>(() => categories.value.map(c => ({ label: localized(c.name), value: c.id })))
+const categoryOptions = computed<SelectOption[]>(() => categoryPaths(categories.value).map(({ category, path }) => ({ label: path, value: category.id })))
 
 const columns = computed<DataTableColumns<Item>>(() => [
 	{
@@ -115,29 +123,27 @@ const columns = computed<DataTableColumns<Item>>(() => [
 		key: "name",
 		minWidth: 220,
 		render: row =>
-			h("div", { class: "flex flex-col gap-0.5" }, [
-				h("span", { class: "font-semibold" }, localized(row.name)),
-				h("span", { class: "font-mono text-xs text-secondary", dir: "ltr" }, row.sku)
-			])
+			nameCell(localized(row.name), row.sku, { code: true })
 	},
-	{ title: t("inventory.common.category"), key: "category", minWidth: 160, render: row => localized(row.category.name) },
+	{ title: t("inventory.common.category"), key: "category", minWidth: 140, render: row => localized(row.category.name) },
 	{ title: t("inventory.catalog.kind"), key: "kind", minWidth: 90, render: row => h(NTag, { size: "small", round: true, type: row.kind === "asset" ? "info" : "default" }, () => t(`inventory.kind.${row.kind}`)) },
 	{
 		title: t("inventory.items.held"),
 		key: "held",
-		minWidth: 140,
+		minWidth: 110,
 		render: row =>
 			h(
 				"span",
 				{ class: "add-numeric" },
-				row.kind === "asset" ? t("inventory.items.assetsCount", { n: formatNumber(row.assets_count ?? 0) }) : `${quantity(row.on_hand ?? "0")} ${localized(row.unit.name)}`
+				row.kind === "asset" ? t(countKey("inventory.items.assetsCount", row.assets_count ?? 0), { n: formatNumber(row.assets_count ?? 0) }) : `${quantity(row.on_hand ?? "0")} ${localized(row.unit.name)}`
 			)
 	},
 	{
 		title: t("inventory.items.properties"),
 		key: "properties",
-		minWidth: 200,
-		render: row => Object.entries(row.properties).map(([key, value]) => `${key}: ${String(value)}`).join(" · ") || EMPTY
+		width: 220,
+		ellipsis: { tooltip: true },
+		render: row => propertySummary(row.properties, fieldsByCategory.value.get(row.category.id), { yes: t("inventory.common.yes"), no: t("inventory.common.no") })
 	},
 	{ title: t("inventory.common.status"), key: "is_active", minWidth: 90, render: row => t(row.is_active ? "inventory.common.active" : "inventory.common.inactive") },
 	{

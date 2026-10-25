@@ -44,6 +44,8 @@
  *   formatCurrency(1234.56, { fractionDigits: 0 }) → "1,235 ل.س"    (rounding asked for)
  *   formatDate(new Date(2026, 7, 2))          → "2 آب 2026" · "2 August 2026"
  *   formatDate(d, { style: "long" })          → "الأحد، 2 آب 2026"
+ *   t(countKey("inventory.items.assetsCount", n), { n: formatNumber(n) })
+ *                                             → "أصلان" · "11 أصلاً" · "2 assets"  (see ./plural.ts)
  */
 
 export { MONTHS, MONTHS_SHORT, WEEKDAYS, WEEKDAYS_SHORT } from "./calendar"
@@ -55,3 +57,5 @@ export type { DateFormatOptions, DateInput, DateStyle } from "./dates"
 export { applyArabicCalendar } from "./dayjsArabic"
 export type { NumberFormatOptions } from "./numbers"
 export { formatNumber, hasFraction } from "./numbers"
+export type { PluralCategory } from "./plural"
+export { countKey, PLURAL_CATEGORIES, pluralCategory } from "./plural"

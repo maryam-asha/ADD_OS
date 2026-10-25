@@ -3,10 +3,10 @@
 	<div class="flex flex-col gap-5">
 		<HrPageHeader :title="t(titleKey || 'nav.pages.inventoryCustody')" :description="t('inventory.custody.description')" />
 
-		<div class="flex max-w-3xl flex-col gap-2">
-			<CustodianPicker v-model:value="custodian" />
-			<n-checkbox v-model:checked="includeReturned">{{ t("inventory.custody.includeReturned") }}</n-checkbox>
-		</div>
+		<HrToolbar>
+			<CustodianPicker v-model:value="custodian" class="w-full sm:w-96" />
+			<n-checkbox v-model:checked="includeReturned" class="self-end">{{ t("inventory.custody.includeReturned") }}</n-checkbox>
+		</HrToolbar>
 
 		<n-alert v-if="loadError" type="error" :title="loadError" />
 
@@ -31,9 +31,10 @@ import { computed, h, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
+import HrToolbar from "@/add-os/modules/hr/components/ui/HrToolbar.vue"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import CustodianPicker from "@/add-os/modules/inventory/components/CustodianPicker.vue"
-import { custodianLabel, EMPTY, localized } from "@/add-os/modules/inventory/utils/display"
+import { custodianLabel, EMPTY, localized, nameCell } from "@/add-os/modules/inventory/utils/display"
 import { listCustody } from "@/add-os/services/inventory"
 import { formatDateTime } from "@/add-os/utils/format/dates"
 
@@ -86,10 +87,7 @@ const columns = computed<DataTableColumns<AssetAssignment>>(() => [
 		key: "asset",
 		minWidth: 220,
 		render: row =>
-			h("div", { class: "flex flex-col gap-0.5" }, [
-				h("span", { class: "font-semibold" }, row.asset ? localized(row.asset.item.name) : EMPTY),
-				h("span", { class: "font-mono text-xs text-secondary", dir: "ltr" }, row.asset?.code ?? `#${row.asset_id}`)
-			])
+			nameCell(row.asset ? localized(row.asset.item.name) : EMPTY, row.asset?.code ?? `#${row.asset_id}`, { code: true })
 	},
 	{ title: t("inventory.assets.custodian"), key: "custodian", minWidth: 180, render: row => [custodianLabel(row.custodian), " · ", t(`inventory.custodianType.${row.custodian.type}`)].join("") },
 	{ title: t("inventory.history.handedOver"), key: "assigned_at", minWidth: 150, render: row => formatDateTime(row.assigned_at) },
@@ -99,6 +97,6 @@ const columns = computed<DataTableColumns<AssetAssignment>>(() => [
 		minWidth: 150,
 		render: row => (row.returned_at ? formatDateTime(row.returned_at) : h(NTag, { size: "small", round: true, type: "warning" }, () => t("inventory.history.stillHeld")))
 	},
-	{ title: t("inventory.common.note"), key: "note", minWidth: 160, render: row => row.note ?? EMPTY }
+	{ title: t("inventory.common.note"), key: "note", width: 200, ellipsis: { tooltip: true }, render: row => row.note ?? EMPTY }
 ])
 </script>

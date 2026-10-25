@@ -77,7 +77,7 @@ import { useI18n } from "vue-i18n"
 import CurrencySelect from "@/add-os/modules/hr/components/payroll/CurrencySelect.vue"
 import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
 import PlacePicker from "@/add-os/modules/inventory/components/PlacePicker.vue"
-import { localized, placeLabel } from "@/add-os/modules/inventory/utils/display"
+import { localized, PLACE_COLUMN, placeLabel } from "@/add-os/modules/inventory/utils/display"
 import { listMembers } from "@/add-os/services/members"
 import { listItemSales, listSaleItems, sellItems } from "@/add-os/services/retail"
 import { formatNumber } from "@/add-os/utils/format"
@@ -187,7 +187,7 @@ const columns = computed<DataTableColumns<ItemSale>>(() => [
 	},
 	{ title: t("retail.sell.total"), key: "total_points", minWidth: 110, render: row => h("span", { class: "add-numeric font-semibold" }, t("retail.points", { n: formatNumber(row.total_points) })) },
 	{ title: t("retail.sales.method"), key: "method", minWidth: 90, render: row => (row.payment ? t(row.payment.method === "wallet" ? "retail.sell.wallet" : "retail.sell.cash") : "") },
-	{ title: t("retail.sell.stockLocation"), key: "stock_location", minWidth: 200, render: row => placeLabel(row.stock_location) },
+	{ title: t("retail.sell.stockLocation"), key: "stock_location", ...PLACE_COLUMN, render: row => placeLabel(row.stock_location) },
 	{ title: t("retail.sales.soldBy"), key: "sold_by", minWidth: 130, render: row => row.sold_by?.name ?? "" }
 ])
 </script>

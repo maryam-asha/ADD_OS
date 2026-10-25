@@ -72,7 +72,14 @@
 		"assets": {
 			"description": "Every asset is one thing with its own code and QR: where it is, who holds it, its status. Pick a place to see everything in it and below it.",
 			"register": "Register assets",
-			"registered": "{n} asset(s) registered.",
+			"registered": {
+				"zero": "{n} assets registered.",
+				"one": "{n} asset registered.",
+				"two": "{n} assets registered.",
+				"few": "{n} assets registered.",
+				"many": "{n} assets registered.",
+				"other": "{n} assets registered."
+			},
 			"search": "Code or serial number",
 			"empty": "No assets here yet.",
 			"code": "Code",
@@ -102,7 +109,14 @@
 			"accumulated": "Accumulated",
 			"bookValue": "Book value",
 			"elapsed": "Elapsed",
-			"months": "{n} months"
+			"months": {
+				"zero": "{n} months",
+				"one": "{n} month",
+				"two": "{n} months",
+				"few": "{n} months",
+				"many": "{n} months",
+				"other": "{n} months"
+			}
 		},
 		"actions": {
 			"move": {
@@ -177,7 +191,14 @@
 		"maintenance": {
 			"pageDescription": "What needs looking after: servicing coming due, and the repairs and servicing on record. A row opens its asset.",
 			"due": "Servicing coming due",
-			"withinDays": "Within {n} days",
+			"withinDays": {
+				"zero": "Within {n} days",
+				"one": "Within {n} day",
+				"two": "Within {n} days",
+				"few": "Within {n} days",
+				"many": "Within {n} days",
+				"other": "Within {n} days"
+			},
 			"noneDue": "Nothing due.",
 			"openOnes": "Open",
 			"all": "All",
@@ -200,7 +221,16 @@
 			"nextDue": "Next due",
 			"overdue": "Overdue",
 			"deleted": "Schedule deleted.",
-			"confirmDelete": "Delete this schedule?"
+			"confirmDelete": "Delete this schedule?",
+			"every": {
+				"zero": "Every {n} months",
+				"one": "Every month",
+				"two": "Every {n} months",
+				"few": "Every {n} months",
+				"many": "Every {n} months",
+				"other": "Every {n} months"
+			},
+			"frequency": "Frequency"
 		},
 		"custody": {
 			"description": "Who holds what: every asset in someone's custody, or everything one employee, member or company holds (what an employee leaving hands back).",
@@ -275,8 +305,17 @@
 			"properties": "Properties",
 			"propertiesHint": "The fields of its category and the ones above it.",
 			"held": "Held",
-			"assetsCount": "{n} assets",
-			"confirmDelete": "Delete this item?"
+			"assetsCount": {
+				"zero": "{n} assets",
+				"one": "{n} asset",
+				"two": "{n} assets",
+				"few": "{n} assets",
+				"many": "{n} assets",
+				"other": "{n} assets"
+			},
+			"confirmDelete": "Delete this item?",
+			"propertyRequired": "This field is required.",
+			"propertyInvalid": "This value wasn't accepted."
 		},
 		"catalog": {
 			"description": "The category tree: a branch is either assets or stock, and each category has fields its items, and those below it, answer. And the units items are counted in.",
