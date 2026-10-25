@@ -87,7 +87,7 @@ import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import AssetStatusTag from "@/add-os/modules/inventory/components/AssetStatusTag.vue"
 import PlacePicker from "@/add-os/modules/inventory/components/PlacePicker.vue"
-import { codeChip, EMPTY, localized, money, nameCell, PLACE_COLUMN, placeLabel } from "@/add-os/modules/inventory/utils/display"
+import { ALIGN_END, codeChip, EMPTY, localized, money, nameCell, PLACE_COLUMN, placeLabel } from "@/add-os/modules/inventory/utils/display"
 import { assetRegister, stockValuation } from "@/add-os/services/inventory"
 import { formatNumber } from "@/add-os/utils/format"
 import { formatDate } from "@/add-os/utils/format/dates"
@@ -132,14 +132,14 @@ const valuationColumns = computed<DataTableColumns<ValuationRow>>(() => [
 		title: t("inventory.reports.items"),
 		key: "items",
 		width: 120,
-		align: "end",
+		align: ALIGN_END,
 		render: row => h("span", { class: "add-numeric font-medium" }, formatNumber(row.items))
 	},
 	{
 		title: t("inventory.stock.value"),
 		key: "value",
 		width: 160,
-		align: "end",
+		align: ALIGN_END,
 		render: row => h("span", { class: "add-numeric font-semibold text-emerald-600 dark:text-emerald-400" }, money(row.value, valuation.value?.currency))
 	}
 ])
@@ -175,21 +175,21 @@ const registerColumns = computed<DataTableColumns<AssetRegisterRow>>(() => [
 		title: t("inventory.assets.cost"),
 		key: "purchase_cost",
 		width: 130,
-		align: "end",
+		align: ALIGN_END,
 		render: row => h("span", { class: "add-numeric font-medium" }, money(row.purchase_cost, row.currency))
 	},
 	{
 		title: t("inventory.assets.accumulated"),
 		key: "accumulated",
 		width: 130,
-		align: "end",
+		align: ALIGN_END,
 		render: row => h("span", { class: "add-numeric text-amber-600 dark:text-amber-400" }, money(row.accumulated, row.currency))
 	},
 	{
 		title: t("inventory.assets.bookValue"),
 		key: "book_value",
 		width: 140,
-		align: "end",
+		align: ALIGN_END,
 		render: row => h("span", { class: "add-numeric font-semibold text-emerald-600 dark:text-emerald-400" }, money(row.book_value, row.currency))
 	}
 ])

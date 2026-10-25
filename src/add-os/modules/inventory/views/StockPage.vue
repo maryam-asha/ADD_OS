@@ -134,15 +134,14 @@ import { computed, h, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { canCountStock, canIssueStock, canReceiveStock, canTransferStock } from "@/add-os/config/permissions"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
-import HrToolbar from "@/add-os/modules/hr/components/ui/HrToolbar.vue"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import ItemSelect from "@/add-os/modules/inventory/components/ItemSelect.vue"
 import PlacePicker from "@/add-os/modules/inventory/components/PlacePicker.vue"
 import StockActionModal from "@/add-os/modules/inventory/components/StockActionModal.vue"
 import { STOCK_MOVEMENT_TYPES } from "@/add-os/modules/inventory/types/inventory"
-import { EMPTY, localized, money, nameCell, PLACE_COLUMN, placeLabel, quantity } from "@/add-os/modules/inventory/utils/display"
+import { ALIGN_END, EMPTY, localized, money, nameCell, PLACE_COLUMN, placeLabel, quantity } from "@/add-os/modules/inventory/utils/display"
 import { listBalances, listStockMovements } from "@/add-os/services/inventory"
-import { formatDate, formatDateTime, formatTime } from "@/add-os/utils/format/dates"
+import { formatDate, formatTime } from "@/add-os/utils/format/dates"
 import Icon from "@/components/common/Icon.vue"
 
 /**
@@ -244,21 +243,21 @@ const balanceColumns = computed<DataTableColumns<StockBalance>>(() => [
 		title: t("inventory.stock.onHand"),
 		key: "quantity",
 		width: 130,
-		align: "end",
+		align: ALIGN_END,
 		render: row => h("span", { class: "add-numeric font-semibold" }, `${quantity(row.quantity)} ${localized(row.item.unit.name)}`)
 	},
 	{
 		title: t("inventory.stock.averageCost"),
 		key: "average_cost",
 		width: 130,
-		align: "end",
+		align: ALIGN_END,
 		render: row => h("span", { class: "add-numeric" }, money(row.average_cost, row.currency))
 	},
 	{
 		title: t("inventory.stock.value"),
 		key: "value",
 		width: 130,
-		align: "end",
+		align: ALIGN_END,
 		render: row => h("span", { class: "add-numeric font-semibold text-emerald-600 dark:text-emerald-400" }, money(row.value, row.currency))
 	}
 ])
@@ -307,7 +306,7 @@ const movementColumns = computed<DataTableColumns<StockMovement>>(() => [
 		title: t("inventory.stock.quantity"),
 		key: "quantity",
 		width: 100,
-		align: "end",
+		align: ALIGN_END,
 		render: row => {
 			const isNegative = String(row.quantity).startsWith("-")
 			const displayQty = (isNegative ? "" : "+") + quantity(row.quantity)
@@ -325,14 +324,14 @@ const movementColumns = computed<DataTableColumns<StockMovement>>(() => [
 		title: t("inventory.stock.after"),
 		key: "quantity_after",
 		width: 90,
-		align: "end",
+		align: ALIGN_END,
 		render: row => h("span", { class: "add-numeric font-medium" }, quantity(row.quantity_after))
 	},
 	{
 		title: t("inventory.stock.unitCost"),
 		key: "unit_cost",
 		width: 110,
-		align: "end",
+		align: ALIGN_END,
 		render: row => h("span", { class: "add-numeric text-xs text-slate-500" }, row.unit_cost ? quantity(row.unit_cost) : EMPTY)
 	},
 	{

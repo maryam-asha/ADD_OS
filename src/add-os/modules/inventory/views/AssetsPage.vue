@@ -132,7 +132,6 @@ import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import { canManageAssets } from "@/add-os/config/permissions"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
-import HrToolbar from "@/add-os/modules/hr/components/ui/HrToolbar.vue"
 import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
 import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
 import AssetStatusTag from "@/add-os/modules/inventory/components/AssetStatusTag.vue"
@@ -165,12 +164,12 @@ const place = ref<PlaceRef | null>(null)
 
 const { filters, applied, page } = useRouteFilters({ search: "string", status: "string", category_id: "number" }, () => void load(), { debounced: ["search"] })
 
-const hasActiveFilters = computed(() => Boolean(filters.search || filters.status || filters.category_id || place.value))
+const hasActiveFilters = computed(() => Boolean(filters.value.search || filters.value.status || filters.value.category_id || place.value))
 
 function resetFilters() {
-	filters.search = ""
-	filters.status = null
-	filters.category_id = null
+	filters.value.search = ""
+	filters.value.status = null
+	filters.value.category_id = null
 	place.value = null
 }
 

@@ -118,10 +118,10 @@ import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
-import { codeChip, EMPTY, localized, money, nameCell, viewActionColumn } from "@/add-os/modules/inventory/utils/display"
+import { ALIGN_END, codeChip, EMPTY, localized, money, nameCell, viewActionColumn } from "@/add-os/modules/inventory/utils/display"
 import { listDueSchedules, listMaintenance } from "@/add-os/services/inventory"
 import { countKey, formatNumber } from "@/add-os/utils/format"
-import { formatDate, formatDateTime, formatTime } from "@/add-os/utils/format/dates"
+import { formatDate, formatTime } from "@/add-os/utils/format/dates"
 import Icon from "@/components/common/Icon.vue"
 
 /**
@@ -145,7 +145,7 @@ const loadError = ref("")
 
 const overdueCount = computed(() => due.value.filter(s => s.overdue).length)
 const openRecordsCount = computed(() => records.value.filter(r => !r.closed_at).length)
-const totalMaintenanceCost = computed(() => records.value.reduce((sum, r) => sum + (parseFloat(r.cost) || 0), 0))
+const totalMaintenanceCost = computed(() => records.value.reduce((sum, r) => sum + (parseFloat(r.cost ?? "") || 0), 0))
 
 onMounted(load)
 watch(days, () => void load())
@@ -264,7 +264,7 @@ const recordColumns = computed<DataTableColumns<MaintenanceRecord>>(() => [
 		key: "cost",
 		width: 120,
 		minWidth: 110,
-		align: "end",
+		align: ALIGN_END,
 		render: row => h("span", { class: "add-numeric font-semibold" }, money(row.cost, row.currency))
 	},
 	viewActionColumn<MaintenanceRecord>(row => openAsset(row.asset_id), t("inventory.common.view"))

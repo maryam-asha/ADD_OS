@@ -113,6 +113,13 @@ export function categoryPaths(categories: Category[]): { category: Category; pat
 export const PLACE_COLUMN = { width: 240, ellipsis: { tooltip: true } } as const
 
 /**
+ * A numeric column's alignment. Naive hands `align` to `text-align` as it
+ * is, so the logical "end" lands on the right in English and the left in
+ * Arabic; its type lists only the physical values, which would not flip.
+ */
+export const ALIGN_END = "end" as unknown as NonNullable<DataTableColumn["align"]>
+
+/**
  * A name over a smaller line — its code, SKU or category — for a table
  * cell. The name is cut to the column with the whole of it on hover: next
  * to a fixed-width column, a long English name ran on into its neighbour.

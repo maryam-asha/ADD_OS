@@ -129,7 +129,6 @@ import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { canManageInventoryCatalog } from "@/add-os/config/permissions"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
-import HrToolbar from "@/add-os/modules/hr/components/ui/HrToolbar.vue"
 import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
 import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
 import ItemModal from "@/add-os/modules/inventory/components/ItemModal.vue"
@@ -164,13 +163,13 @@ const fieldsByCategory = ref(new Map<number, AttributeDefinition[]>())
 
 const { filters, applied, page } = useRouteFilters({ search: "string", kind: "string", category_id: "number", active: "string" }, () => void load(), { debounced: ["search"] })
 
-const hasActiveFilters = computed(() => Boolean(filters.search || filters.kind || filters.category_id || filters.active))
+const hasActiveFilters = computed(() => Boolean(filters.value.search || filters.value.kind || filters.value.category_id || filters.value.active))
 
 function resetFilters() {
-	filters.search = ""
-	filters.kind = null
-	filters.category_id = null
-	filters.active = null
+	filters.value.search = ""
+	filters.value.kind = null
+	filters.value.category_id = null
+	filters.value.active = null
 }
 
 const activeFilterOptions = computed<SelectOption[]>(() => [

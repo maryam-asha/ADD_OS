@@ -227,7 +227,7 @@ import AssetActionModal from "@/add-os/modules/inventory/components/AssetActionM
 import AssetDetailsModal from "@/add-os/modules/inventory/components/AssetDetailsModal.vue"
 import AssetStatusTag from "@/add-os/modules/inventory/components/AssetStatusTag.vue"
 import ScheduleModal from "@/add-os/modules/inventory/components/ScheduleModal.vue"
-import { custodianLabel, EMPTY, isolate, localized, money, PLACE_COLUMN, placeLabel } from "@/add-os/modules/inventory/utils/display"
+import { ALIGN_END, custodianLabel, EMPTY, isolate, localized, money, PLACE_COLUMN, placeLabel } from "@/add-os/modules/inventory/utils/display"
 import { getAsset, removeSchedule } from "@/add-os/services/inventory"
 import { countKey, formatNumber } from "@/add-os/utils/format"
 import { formatDate, formatDateTime, formatTime } from "@/add-os/utils/format/dates"
@@ -378,7 +378,7 @@ const maintenanceColumns = computed<DataTableColumns<MaintenanceRecord>>(() => [
 		title: t("inventory.maintenance.cost"),
 		key: "cost",
 		minWidth: 110,
-		align: "end",
+		align: ALIGN_END,
 		render: row => h("span", { class: "add-numeric font-semibold" }, money(row.cost, row.currency))
 	},
 	{ title: t("inventory.maintenance.resolution"), key: "resolution", minWidth: 180, render: row => row.resolution ?? EMPTY }

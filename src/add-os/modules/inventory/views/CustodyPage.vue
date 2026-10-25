@@ -90,12 +90,11 @@ import { computed, h, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
-import HrToolbar from "@/add-os/modules/hr/components/ui/HrToolbar.vue"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import CustodianPicker from "@/add-os/modules/inventory/components/CustodianPicker.vue"
 import { custodianLabel, EMPTY, localized, nameCell, viewActionColumn } from "@/add-os/modules/inventory/utils/display"
 import { listCustody } from "@/add-os/services/inventory"
-import { formatDate, formatDateTime, formatTime } from "@/add-os/utils/format/dates"
+import { formatDate, formatTime } from "@/add-os/utils/format/dates"
 import Icon from "@/components/common/Icon.vue"
 
 /**
