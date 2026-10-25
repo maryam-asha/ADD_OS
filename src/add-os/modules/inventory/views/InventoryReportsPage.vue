@@ -12,7 +12,7 @@
 			<div class="mb-3 flex flex-wrap items-center gap-3">
 				<PlacePicker v-model:value="place" inline />
 			</div>
-			<n-data-table :columns="valuationColumns" :data="valuation?.locations ?? []" :loading :bordered="false" size="small" :scroll-x="600">
+			<n-data-table :columns="valuationColumns" :data="valuation?.locations ?? []" :loading :bordered="false" size="small" :scroll-x="tableWidth(valuationColumns)">
 				<template #empty>
 					<span class="text-secondary">{{ t("inventory.stock.emptyBalances") }}</span>
 				</template>
@@ -31,7 +31,7 @@
 					<div class="font-semibold">{{ t("inventory.assets.bookValue") }}: <span class="add-numeric">{{ money(total.book_value, total.currency) }}</span></div>
 				</div>
 			</div>
-			<n-data-table :columns="registerColumns" :data="register?.assets ?? []" :loading :bordered="false" size="small" :scroll-x="1000" :pagination="{ pageSize: 25 }" />
+			<n-data-table :columns="registerColumns" :data="register?.assets ?? []" :loading :bordered="false" size="small" :scroll-x="tableWidth(registerColumns)" :pagination="{ pageSize: 25 }" />
 		</n-card>
 	</div>
 </template>
@@ -46,7 +46,7 @@ import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import AssetStatusTag from "@/add-os/modules/inventory/components/AssetStatusTag.vue"
 import PlacePicker from "@/add-os/modules/inventory/components/PlacePicker.vue"
-import { EMPTY, localized, money, nameCell, PLACE_COLUMN, placeLabel } from "@/add-os/modules/inventory/utils/display"
+import { COLUMN, EMPTY, localized, money, nameCell, placeLabel, tableWidth } from "@/add-os/modules/inventory/utils/display"
 import { assetRegister, stockValuation } from "@/add-os/services/inventory"
 import { formatNumber } from "@/add-os/utils/format"
 import { formatDate } from "@/add-os/utils/format/dates"
@@ -85,24 +85,24 @@ async function load() {
 type ValuationRow = StockValuation["locations"][number]
 
 const valuationColumns = computed<DataTableColumns<ValuationRow>>(() => [
-	{ title: t("inventory.stock.location"), key: "location", ...PLACE_COLUMN, render: row => placeLabel(row.location) },
-	{ title: t("inventory.reports.items"), key: "items", minWidth: 90, render: row => formatNumber(row.items) },
-	{ title: t("inventory.stock.value"), key: "value", minWidth: 120, render: row => h("span", { class: "add-numeric font-semibold" }, money(row.value, valuation.value?.currency)) }
+	{ title: t("inventory.stock.location"), key: "location", ...COLUMN.place, render: row => placeLabel(row.location) },
+	{ title: t("inventory.reports.items"), key: "items", ...COLUMN.count, render: row => h("span", { class: "add-numeric" }, formatNumber(row.items)) },
+	{ title: t("inventory.stock.value"), key: "value", ...COLUMN.money, render: row => h("span", { class: "add-numeric font-semibold" }, money(row.value, valuation.value?.currency)) }
 ])
 
 const registerColumns = computed<DataTableColumns<AssetRegisterRow>>(() => [
 	{
 		title: t("inventory.assets.item"),
 		key: "item",
-		minWidth: 200,
+		...COLUMN.name,
 		render: row =>
 			nameCell(localized(row.item.name), row.code, { code: true })
 	},
-	{ title: t("inventory.assets.location"), key: "location", ...PLACE_COLUMN, render: row => placeLabel(row.location) },
-	{ title: t("inventory.common.status"), key: "status", minWidth: 110, render: row => h(AssetStatusTag, { status: row.status }) },
-	{ title: t("inventory.assets.purchasedOn"), key: "purchased_on", minWidth: 110, render: row => (row.purchased_on ? formatDate(row.purchased_on) : EMPTY) },
-	{ title: t("inventory.assets.cost"), key: "purchase_cost", minWidth: 110, render: row => h("span", { class: "add-numeric" }, money(row.purchase_cost, row.currency)) },
-	{ title: t("inventory.assets.accumulated"), key: "accumulated", minWidth: 110, render: row => h("span", { class: "add-numeric" }, money(row.accumulated, row.currency)) },
-	{ title: t("inventory.assets.bookValue"), key: "book_value", minWidth: 110, render: row => h("span", { class: "add-numeric font-semibold" }, money(row.book_value, row.currency)) }
+	{ title: t("inventory.assets.location"), key: "location", ...COLUMN.place, render: row => placeLabel(row.location) },
+	{ title: t("inventory.common.status"), key: "status", ...COLUMN.status, render: row => h(AssetStatusTag, { status: row.status }) },
+	{ title: t("inventory.assets.purchasedOn"), key: "purchased_on", ...COLUMN.date, render: row => (row.purchased_on ? formatDate(row.purchased_on) : EMPTY) },
+	{ title: t("inventory.assets.cost"), key: "purchase_cost", ...COLUMN.money, render: row => h("span", { class: "add-numeric" }, money(row.purchase_cost, row.currency)) },
+	{ title: t("inventory.assets.accumulated"), key: "accumulated", ...COLUMN.money, render: row => h("span", { class: "add-numeric" }, money(row.accumulated, row.currency)) },
+	{ title: t("inventory.assets.bookValue"), key: "book_value", ...COLUMN.money, render: row => h("span", { class: "add-numeric font-semibold" }, money(row.book_value, row.currency)) }
 ])
 </script>

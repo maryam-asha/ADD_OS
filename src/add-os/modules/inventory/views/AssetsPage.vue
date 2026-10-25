@@ -11,16 +11,17 @@
 		</HrPageHeader>
 
 		<HrToolbar>
-			<n-input v-model:value="filters.search" :placeholder="t('inventory.assets.search')" clearable class="max-w-xs" />
-			<n-select v-model:value="filters.status" :options="statusOptions" :placeholder="t('inventory.common.status')" clearable class="max-w-[12rem]" />
-			<n-select v-model:value="filters.category_id" :options="categoryOptions" :placeholder="t('inventory.common.category')" clearable filterable class="max-w-xs" />
+			<!-- Widths carry "!": Naive's runtime CSS outranks Tailwind's layer (see PlacePicker). -->
+			<n-input v-model:value="filters.search" :placeholder="t('inventory.assets.search')" clearable class="sm:w-72!" />
+			<n-select v-model:value="filters.status" :options="statusOptions" :placeholder="t('inventory.common.status')" clearable class="sm:w-44!" />
+			<n-select v-model:value="filters.category_id" :options="categoryOptions" :placeholder="t('inventory.common.category')" clearable filterable class="sm:w-60!" />
 			<PlacePicker v-model:value="place" inline />
 		</HrToolbar>
 
 		<n-alert v-if="loadError" type="error" :title="loadError" />
 
 		<n-card class="add-ledger-table">
-			<n-data-table :columns :data="assets" :loading :bordered="false" :row-props size="small" :scroll-x="980">
+			<n-data-table :columns :data="assets" :loading :bordered="false" :row-props size="small" :scroll-x="tableWidth(columns)">
 				<template #empty>
 					<span class="text-secondary">{{ t("inventory.assets.empty") }}</span>
 				</template>
@@ -50,7 +51,7 @@ import AssetStatusTag from "@/add-os/modules/inventory/components/AssetStatusTag
 import PlacePicker from "@/add-os/modules/inventory/components/PlacePicker.vue"
 import RegisterAssetModal from "@/add-os/modules/inventory/components/RegisterAssetModal.vue"
 import { ASSET_STATUSES } from "@/add-os/modules/inventory/types/inventory"
-import { categoryPaths, custodianLabel, localized, nameCell, PLACE_COLUMN, placeLabel } from "@/add-os/modules/inventory/utils/display"
+import { categoryPaths, COLUMN, custodianLabel, localized, nameCell, placeLabel, tableWidth } from "@/add-os/modules/inventory/utils/display"
 import { listAssets, listCategories } from "@/add-os/services/inventory"
 import Icon from "@/components/common/Icon.vue"
 
@@ -112,16 +113,16 @@ function rowProps(row: Asset) {
 }
 
 const columns = computed<DataTableColumns<Asset>>(() => [
-	{ title: t("inventory.assets.code"), key: "code", minWidth: 120, render: row => h("span", { class: "font-mono text-xs", dir: "ltr" }, row.code) },
+	{ title: t("inventory.assets.code"), key: "code", ...COLUMN.code, render: row => h("span", { class: "font-mono text-xs", dir: "ltr" }, row.code) },
 	{
 		title: t("inventory.assets.item"),
 		key: "item",
-		minWidth: 240,
+		...COLUMN.name,
 		render: row =>
 			nameCell(localized(row.item.name), localized(row.item.category.name))
 	},
-	{ title: t("inventory.assets.location"), key: "location", ...PLACE_COLUMN, render: row => placeLabel(row.location) },
-	{ title: t("inventory.assets.custodian"), key: "custodian", minWidth: 160, render: row => custodianLabel(row.custodian) },
-	{ title: t("inventory.common.status"), key: "status", minWidth: 120, render: row => h(AssetStatusTag, { status: row.status }) }
+	{ title: t("inventory.assets.location"), key: "location", ...COLUMN.place, render: row => placeLabel(row.location) },
+	{ title: t("inventory.assets.custodian"), key: "custodian", ...COLUMN.person, render: row => custodianLabel(row.custodian) },
+	{ title: t("inventory.common.status"), key: "status", ...COLUMN.status, render: row => h(AssetStatusTag, { status: row.status }) }
 ])
 </script>

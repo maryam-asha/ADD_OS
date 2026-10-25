@@ -24,7 +24,7 @@
 						</n-spin>
 					</n-card>
 
-					<n-card v-if="selected" size="small" class="lg:col-span-3" :title="localized(selected.name)">
+					<n-card v-if="selected" size="small" class="add-ledger-table lg:col-span-3" :title="localized(selected.name)">
 						<template #header-extra>
 							<div class="flex items-center gap-2">
 								<n-tag size="small" round>{{ t(`inventory.kind.${selected.kind}`) }}</n-tag>
@@ -51,7 +51,7 @@
 							</n-popconfirm>
 						</div>
 						<p class="mb-2 text-sm text-secondary">{{ t("inventory.fields.description") }}</p>
-						<n-data-table :columns="fieldColumns" :data="selected.fields ?? []" :bordered="false" size="small" :scroll-x="640">
+						<n-data-table :columns="fieldColumns" :data="selected.fields ?? []" :bordered="false" size="small" :scroll-x="tableWidth(fieldColumns)">
 							<template #empty>
 								<span class="text-secondary">{{ t("inventory.fields.empty") }}</span>
 							</template>
@@ -65,7 +65,7 @@
 
 			<n-tab-pane name="units" :tab="t('inventory.units.title')">
 				<n-card size="small" class="add-ledger-table">
-					<n-data-table :columns="unitColumns" :data="units" :loading :bordered="false" size="small" :scroll-x="560" />
+					<n-data-table :columns="unitColumns" :data="units" :loading :bordered="false" size="small" :scroll-x="tableWidth(unitColumns)" />
 				</n-card>
 			</n-tab-pane>
 		</n-tabs>
@@ -90,7 +90,7 @@ import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import CategoryModal from "@/add-os/modules/inventory/components/CategoryModal.vue"
 import FieldModal from "@/add-os/modules/inventory/components/FieldModal.vue"
 import UnitModal from "@/add-os/modules/inventory/components/UnitModal.vue"
-import { EMPTY, localized } from "@/add-os/modules/inventory/utils/display"
+import { COLUMN, EMPTY, localized, tableWidth } from "@/add-os/modules/inventory/utils/display"
 import { getCategory, listCategories, listUnits, removeCategory, removeField, removeUnit } from "@/add-os/services/inventory"
 import { formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
@@ -211,16 +211,16 @@ const fieldColumns = computed<DataTableColumns<AttributeDefinition>>(() => [
 	{
 		title: t("inventory.fields.label"),
 		key: "label",
-		minWidth: 180,
+		...COLUMN.name,
 		render: row =>
 			h("div", { class: "flex flex-col gap-0.5" }, [
 				h("span", { class: "font-semibold" }, localized(row.label)),
 				h("span", { class: "font-mono text-xs text-secondary", dir: "ltr" }, row.key)
 			])
 	},
-	{ title: t("inventory.fields.type"), key: "type", minWidth: 110, render: row => [t(`inventory.fieldType.${row.type}`), row.unit ? ` (${row.unit})` : ""].join("") },
-	{ title: t("inventory.fields.options"), key: "options", minWidth: 150, render: row => row.options?.join(" · ") || EMPTY },
-	{ title: t("inventory.fields.required"), key: "is_required", minWidth: 90, render: row => t(row.is_required ? "inventory.common.yes" : "inventory.common.no") },
+	{ title: t("inventory.fields.type"), key: "type", width: 140, render: row => [t(`inventory.fieldType.${row.type}`), row.unit ? ` (${row.unit})` : ""].join("") },
+	{ title: t("inventory.fields.options"), key: "options", ...COLUMN.text, minWidth: 150, render: row => row.options?.join(" · ") || EMPTY },
+	{ title: t("inventory.fields.required"), key: "is_required", ...COLUMN.flag, render: row => t(row.is_required ? "inventory.common.yes" : "inventory.common.no") },
 	{
 		title: "",
 		key: "actions",
@@ -240,9 +240,9 @@ const fieldColumns = computed<DataTableColumns<AttributeDefinition>>(() => [
 ])
 
 const unitColumns = computed<DataTableColumns<Unit>>(() => [
-	{ title: t("inventory.units.code"), key: "code", minWidth: 110, render: row => h("span", { class: "font-mono text-xs", dir: "ltr" }, row.code) },
-	{ title: t("inventory.common.name"), key: "name", minWidth: 160, render: row => localized(row.name) },
-	{ title: t("inventory.units.fractions"), key: "allows_fractions", minWidth: 140, render: row => t(row.allows_fractions ? "inventory.common.yes" : "inventory.common.no") },
+	{ title: t("inventory.units.code"), key: "code", ...COLUMN.code, render: row => h("span", { class: "font-mono text-xs", dir: "ltr" }, row.code) },
+	{ title: t("inventory.common.name"), key: "name", ...COLUMN.name, minWidth: 160, render: row => localized(row.name) },
+	{ title: t("inventory.units.fractions"), key: "allows_fractions", width: 160, render: row => t(row.allows_fractions ? "inventory.common.yes" : "inventory.common.no") },
 	{
 		title: "",
 		key: "actions",

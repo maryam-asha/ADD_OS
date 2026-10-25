@@ -91,16 +91,16 @@
 
 			<p v-if="asset.notes" class="whitespace-pre-line text-sm text-secondary">{{ asset.notes }}</p>
 
-			<n-card size="small">
+			<n-card size="small" class="add-ledger-table">
 				<n-tabs type="line" animated>
 					<n-tab-pane name="movements" :tab="t('inventory.history.movements')">
-						<n-data-table :columns="movementColumns" :data="asset.movements ?? []" :bordered="false" size="small" :scroll-x="760" />
+						<n-data-table :columns="movementColumns" :data="asset.movements ?? []" :bordered="false" size="small" :scroll-x="tableWidth(movementColumns)" />
 					</n-tab-pane>
 					<n-tab-pane name="custody" :tab="t('inventory.history.custody')">
-						<n-data-table :columns="custodyColumns" :data="asset.assignments ?? []" :bordered="false" size="small" :scroll-x="760" />
+						<n-data-table :columns="custodyColumns" :data="asset.assignments ?? []" :bordered="false" size="small" :scroll-x="tableWidth(custodyColumns)" />
 					</n-tab-pane>
 					<n-tab-pane name="maintenance" :tab="t('inventory.history.maintenance')">
-						<n-data-table :columns="maintenanceColumns" :data="asset.maintenance ?? []" :bordered="false" size="small" :scroll-x="860" />
+						<n-data-table :columns="maintenanceColumns" :data="asset.maintenance ?? []" :bordered="false" size="small" :scroll-x="tableWidth(maintenanceColumns)" />
 					</n-tab-pane>
 					<n-tab-pane name="schedules" :tab="t('inventory.history.schedules')">
 						<div v-if="may.maintenance && !disposed" class="mb-3 flex justify-end">
@@ -108,7 +108,7 @@
 								<template #icon><Icon name="carbon:add" :size="16" /></template>{{ t("inventory.schedules.add") }}
 							</n-button>
 						</div>
-						<n-data-table :columns="scheduleColumns" :data="asset.maintenance_schedules ?? []" :bordered="false" size="small" :scroll-x="640" />
+						<n-data-table :columns="scheduleColumns" :data="asset.maintenance_schedules ?? []" :bordered="false" size="small" :scroll-x="tableWidth(scheduleColumns)" />
 					</n-tab-pane>
 				</n-tabs>
 			</n-card>
@@ -134,7 +134,7 @@ import AssetActionModal from "@/add-os/modules/inventory/components/AssetActionM
 import AssetDetailsModal from "@/add-os/modules/inventory/components/AssetDetailsModal.vue"
 import AssetStatusTag from "@/add-os/modules/inventory/components/AssetStatusTag.vue"
 import ScheduleModal from "@/add-os/modules/inventory/components/ScheduleModal.vue"
-import { custodianLabel, EMPTY, isolate, localized, money, PLACE_COLUMN, placeLabel } from "@/add-os/modules/inventory/utils/display"
+import { COLUMN, custodianLabel, EMPTY, isolate, localized, money, placeLabel, tableWidth } from "@/add-os/modules/inventory/utils/display"
 import { getAsset, removeSchedule } from "@/add-os/services/inventory"
 import { countKey, formatNumber } from "@/add-os/utils/format"
 import { formatDate, formatDateTime } from "@/add-os/utils/format/dates"
@@ -200,43 +200,43 @@ const months = (n: number) => t(countKey("inventory.assets.months", n), { n: for
 const every = (n: number) => t(countKey("inventory.schedules.every", n), { n: formatNumber(n) })
 
 const movementColumns = computed<DataTableColumns<AssetMovement>>(() => [
-	{ title: t("inventory.history.when"), key: "moved_at", minWidth: 150, render: row => formatDateTime(row.moved_at) },
-	{ title: t("inventory.history.from"), key: "from", ...PLACE_COLUMN, render: row => (row.from ? placeLabel(row.from) : t("inventory.history.registered")) },
-	{ title: t("inventory.history.to"), key: "to", ...PLACE_COLUMN, render: row => placeLabel(row.to) },
-	{ title: t("inventory.common.note"), key: "note", minWidth: 160, render: row => row.note ?? EMPTY },
-	{ title: t("inventory.history.by"), key: "actor", minWidth: 120, render: row => actorName(row.actor) }
+	{ title: t("inventory.history.when"), key: "moved_at", ...COLUMN.dateTime, render: row => formatDateTime(row.moved_at) },
+	{ title: t("inventory.history.from"), key: "from", ...COLUMN.place, render: row => (row.from ? placeLabel(row.from) : t("inventory.history.registered")) },
+	{ title: t("inventory.history.to"), key: "to", ...COLUMN.place, render: row => placeLabel(row.to) },
+	{ title: t("inventory.common.note"), key: "note", ...COLUMN.text, render: row => row.note ?? EMPTY },
+	{ title: t("inventory.history.by"), key: "actor", ...COLUMN.person, render: row => actorName(row.actor) }
 ])
 
 const custodyColumns = computed<DataTableColumns<AssetAssignment>>(() => [
-	{ title: t("inventory.assets.custodian"), key: "custodian", minWidth: 180, render: row => custodianLabel(row.custodian) },
-	{ title: t("inventory.history.handedOver"), key: "assigned_at", minWidth: 150, render: row => formatDateTime(row.assigned_at) },
-	{ title: t("inventory.history.returned"), key: "returned_at", minWidth: 150, render: row => (row.returned_at ? formatDateTime(row.returned_at) : h(NTag, { size: "small", round: true, type: "warning" }, () => t("inventory.history.stillHeld"))) },
-	{ title: t("inventory.common.note"), key: "note", minWidth: 160, render: row => [row.note, row.return_note].filter(Boolean).join(" · ") || EMPTY }
+	{ title: t("inventory.assets.custodian"), key: "custodian", ...COLUMN.person, render: row => custodianLabel(row.custodian) },
+	{ title: t("inventory.history.handedOver"), key: "assigned_at", ...COLUMN.dateTime, render: row => formatDateTime(row.assigned_at) },
+	{ title: t("inventory.history.returned"), key: "returned_at", ...COLUMN.dateTime, render: row => (row.returned_at ? formatDateTime(row.returned_at) : h(NTag, { size: "small", round: true, type: "warning" }, () => t("inventory.history.stillHeld"))) },
+	{ title: t("inventory.common.note"), key: "note", ...COLUMN.text, render: row => [row.note, row.return_note].filter(Boolean).join(" · ") || EMPTY }
 ])
 
 const maintenanceColumns = computed<DataTableColumns<MaintenanceRecord>>(() => [
-	{ title: t("inventory.maintenance.type"), key: "type", minWidth: 110, render: row => t(`inventory.maintenanceType.${row.type}`) },
-	{ title: t("inventory.maintenance.description"), key: "description", minWidth: 220 },
-	{ title: t("inventory.history.opened"), key: "opened_at", minWidth: 150, render: row => formatDateTime(row.opened_at) },
-	{ title: t("inventory.history.closed"), key: "closed_at", minWidth: 150, render: row => (row.closed_at ? formatDateTime(row.closed_at) : h(NTag, { size: "small", round: true, type: "warning" }, () => t("inventory.maintenance.open"))) },
-	{ title: t("inventory.maintenance.cost"), key: "cost", minWidth: 110, render: row => h("span", { class: "add-numeric" }, money(row.cost, row.currency)) },
-	{ title: t("inventory.maintenance.resolution"), key: "resolution", minWidth: 180, render: row => row.resolution ?? EMPTY }
+	{ title: t("inventory.maintenance.type"), key: "type", ...COLUMN.flag, render: row => t(`inventory.maintenanceType.${row.type}`) },
+	{ title: t("inventory.maintenance.description"), key: "description", ...COLUMN.text, minWidth: 220 },
+	{ title: t("inventory.history.opened"), key: "opened_at", ...COLUMN.dateTime, render: row => formatDateTime(row.opened_at) },
+	{ title: t("inventory.history.closed"), key: "closed_at", ...COLUMN.dateTime, render: row => (row.closed_at ? formatDateTime(row.closed_at) : h(NTag, { size: "small", round: true, type: "warning" }, () => t("inventory.maintenance.open"))) },
+	{ title: t("inventory.maintenance.cost"), key: "cost", ...COLUMN.money, render: row => h("span", { class: "add-numeric" }, money(row.cost, row.currency)) },
+	{ title: t("inventory.maintenance.resolution"), key: "resolution", ...COLUMN.text, render: row => row.resolution ?? EMPTY }
 ])
 
 const scheduleColumns = computed<DataTableColumns<MaintenanceSchedule>>(() => [
-	{ title: t("inventory.schedules.title"), key: "title", minWidth: 180 },
-	{ title: t("inventory.schedules.frequency"), key: "interval_months", minWidth: 120, render: row => every(row.interval_months) },
+	{ title: t("inventory.schedules.title"), key: "title", ...COLUMN.text },
+	{ title: t("inventory.schedules.frequency"), key: "interval_months", width: 150, render: row => every(row.interval_months) },
 	{
 		title: t("inventory.schedules.nextDue"),
 		key: "next_due_on",
-		minWidth: 140,
+		...COLUMN.date,
 		render: row => h("span", { class: row.overdue ? "text-error font-semibold" : "" }, formatDate(row.next_due_on))
 	},
-	{ title: t("inventory.common.status"), key: "is_active", minWidth: 90, render: row => t(row.is_active ? "inventory.common.active" : "inventory.common.inactive") },
+	{ title: t("inventory.common.status"), key: "is_active", ...COLUMN.flag, render: row => t(row.is_active ? "inventory.common.active" : "inventory.common.inactive") },
 	{
 		title: "",
 		key: "actions",
-		width: 110,
+		...COLUMN.actions,
 		render: row =>
 			may.maintenance && !disposed.value
 				? h("div", { class: "flex items-center justify-end gap-3" }, [

@@ -1,6 +1,6 @@
 <!-- src/add-os/modules/inventory/components/PlacePicker.vue -->
 <template>
-	<div :class="inline ? 'contents' : 'grid grid-cols-1 gap-2 sm:grid-cols-2'">
+	<div :class="inline ? 'contents' : 'grid w-full grid-cols-1 gap-2 sm:grid-cols-2'">
 		<n-select v-model:value="branchId" :options="branchOptions" :placeholder="t('inventory.place.branch')" filterable clearable :class="inlineField" :disabled />
 		<n-select v-if="!inline || branchId" v-model:value="buildingId" :options="buildingOptions" :placeholder="t('inventory.place.building')" filterable clearable :class="inlineField" :disabled="disabled || !branchId" />
 		<n-select v-if="!inline || buildingId" v-model:value="floorId" :options="floorOptions" :placeholder="t('inventory.place.floor')" filterable clearable :class="inlineField" :disabled="disabled || !buildingId" />
@@ -34,12 +34,23 @@ import { listZones } from "@/add-os/services/zones"
  * items, and a level shows only once the one above it is chosen — a bar of
  * four greyed-out selects said nothing and pushed the list off the screen.
  * A form keeps every level in view, so the path being built is visible.
+ *
+ * The inline widths carry Tailwind's `!`, as do the other filters beside
+ * them: Naive injects its component CSS at runtime, unlayered, and an
+ * unlayered rule outranks anything in Tailwind v4's `@layer utilities`
+ * whatever its specificity — `.n-select { width: 100% }` silently beat
+ * `sm:w-44`, and `.n-input { max-width: 100% }` beat `max-w-xs`, so each
+ * filter took a whole row of a wide screen (live QA, 2026-10-25). An
+ * `!important` layered declaration is the one that outranks it.
+ *
+ * In a form the grid is `w-full`: it sits in the form item's flex row,
+ * where it shrank to its selects (440px of a 673px field).
  */
 const props = defineProps<{ disabled?: boolean; inline?: boolean }>()
 const value = defineModel<PlaceRef | null>("value", { required: true })
 
 const { t } = useI18n()
-const inlineField = computed(() => (props.inline ? "w-full sm:w-44" : undefined))
+const inlineField = computed(() => (props.inline ? "sm:w-44!" : undefined))
 
 const branchId = ref<number | null>(null)
 const buildingId = ref<number | null>(null)

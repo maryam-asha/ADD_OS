@@ -1,0 +1,20 @@
+// ── ADD OS — DataTable column alignment ─────────────────────────────────────
+//
+// Amounts and quantities line up at the END of their cell — the left in
+// Arabic, the right in English — so a column's digits stand under each other
+// and the eye can run down it (inventory live QA, 2026-10-25: every number
+// sat at the start, beside its header like a word).
+//
+// Naive's column `align` cannot do this: it writes `text-align: right` inline,
+// a physical side that RTL does not flip, so an Arabic money column would end
+// up on the wrong edge. A column opts in with `className: "add-col-end"`
+// (inventory's `COLUMN.money` / `quantity` / `count` in modules/inventory/
+// utils/display.ts) and this logical `end` follows the page's direction.
+//
+// Three classes for the same reason as _resource-table.scss: naive injects its
+// `.n-data-table .n-data-table-td` rule at runtime, after this sheet, and a
+// two-class rule here would tie and lose on source order.
+.n-data-table .n-data-table-td.add-col-end,
+.n-data-table .n-data-table-th.add-col-end {
+	text-align: end;
+}

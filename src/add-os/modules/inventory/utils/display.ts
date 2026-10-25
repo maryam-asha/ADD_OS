@@ -102,12 +102,50 @@ export function categoryPaths(categories: Category[]): { category: Category; pat
 }
 
 /**
- * A table column showing a place. Cells never wrap in this dashboard, so a
- * deep path ("Room 1 · District › Building › Ground Floor › Zone A - …")
- * stretched its table until the columns after it — status, value — left the
- * screen. It is cut to one width instead, the whole path in a tooltip.
+ * What a column holds decides its width, so every inventory table spends its
+ * room the same way (live QA at 1440px, 2026-10-25). Naive keeps a `width`
+ * column at that width and shares whatever the table has left between the
+ * `minWidth` ones — so a column of short, same-length values (a code, a
+ * status tag, a date, an amount) is fixed, and the columns that can use
+ * room (a name, a place path, a person, a note) grow into it. Before, every
+ * column took `minWidth` and the spare room went to all of them alike: a
+ * ten-character code got 252px while the place beside it was cut at 240.
+ * Naive shares that room equally, not by need, so a person — a name and a
+ * code at most, often "—" — is fixed too, and cut with a tooltip.
+ *
+ * A place or a free text never wraps in this dashboard, so it is cut at its
+ * column with the whole of it in a tooltip; a deep path otherwise stretched
+ * its table until status and value left the screen.
+ *
+ * `end` columns — amounts and quantities — line up at the cell's end (the
+ * left in Arabic) so the digits of a column stand under each other; the
+ * class is styled in theme-overrides/_table-columns.scss, since Naive's own
+ * `align` writes a physical `text-align` that RTL does not flip.
  */
-export const PLACE_COLUMN = { width: 240, ellipsis: { tooltip: true } } as const
+export const COLUMN = {
+	code: { width: 140 },
+	status: { width: 130 },
+	date: { width: 130 },
+	dateTime: { width: 170 },
+	money: { width: 150, className: "add-col-end" },
+	quantity: { width: 130, className: "add-col-end" },
+	count: { width: 100, className: "add-col-end" },
+	flag: { width: 110 },
+	actions: { width: 100 },
+	person: { width: 200, ellipsis: { tooltip: true } },
+	name: { minWidth: 220 },
+	place: { minWidth: 280, ellipsis: { tooltip: true } },
+	text: { minWidth: 180, ellipsis: { tooltip: true } }
+} as const
+
+/**
+ * The width a table scrolls at: the sum of its columns' least widths, so a
+ * narrow screen scrolls exactly when the columns no longer fit, rather than
+ * at a number guessed per page that drifted from its columns.
+ */
+export function tableWidth(columns: readonly { width?: number | string; minWidth?: number | string }[]): number {
+	return columns.reduce((sum, column) => sum + (Number(column.width ?? column.minWidth) || 0), 0)
+}
 
 /**
  * A name over a smaller line — its code, SKU or category — for a table

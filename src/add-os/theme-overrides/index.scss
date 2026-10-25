@@ -23,6 +23,9 @@
 // injects its own header CSS at runtime, after this sheet.
 @import "./resource-table";
 
+// DataTable columns — amounts and quantities aligned to the cell's logical end
+@import "./table-columns";
+
 // Form validation feedback — undoes the vendor's attached "flap" that
 // overlaps a required field's own input at ADD OS's font metrics
 @import "./form-feedback";

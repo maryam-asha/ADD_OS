@@ -19,16 +19,17 @@
 		</HrPageHeader>
 
 		<HrToolbar>
-			<ItemSelect v-model:value="itemId" kind="stock" :placeholder="t('inventory.stock.allItems')" class="w-full sm:w-64" />
+			<!-- Width carries "!": Naive's runtime CSS outranks Tailwind's layer (see PlacePicker). -->
+			<ItemSelect v-model:value="itemId" kind="stock" :placeholder="t('inventory.stock.allItems')" class="sm:w-64!" />
 			<PlacePicker v-model:value="place" inline />
 		</HrToolbar>
 
 		<n-alert v-if="loadError" type="error" :title="loadError" />
 
-		<n-card size="small">
+		<n-card size="small" class="add-ledger-table">
 			<n-tabs v-model:value="tab" type="line" animated>
 				<n-tab-pane name="balances" :tab="t('inventory.stock.balances')">
-					<n-data-table :columns="balanceColumns" :data="balances" :loading :bordered="false" size="small" :scroll-x="900">
+					<n-data-table :columns="balanceColumns" :data="balances" :loading :bordered="false" size="small" :scroll-x="tableWidth(balanceColumns)">
 						<template #empty>
 							<span class="text-secondary">{{ t("inventory.stock.emptyBalances") }}</span>
 						</template>
@@ -36,7 +37,7 @@
 				</n-tab-pane>
 				<n-tab-pane name="movements" :tab="t('inventory.stock.movements')">
 					<n-select v-model:value="movementType" :options="typeOptions" :placeholder="t('inventory.stock.type')" clearable class="mb-3 max-w-xs" />
-					<n-data-table :columns="movementColumns" :data="movements" :loading :bordered="false" size="small" :scroll-x="1100">
+					<n-data-table :columns="movementColumns" :data="movements" :loading :bordered="false" size="small" :scroll-x="tableWidth(movementColumns)">
 						<template #empty>
 							<span class="text-secondary">{{ t("inventory.stock.emptyMovements") }}</span>
 						</template>
@@ -66,7 +67,7 @@ import ItemSelect from "@/add-os/modules/inventory/components/ItemSelect.vue"
 import PlacePicker from "@/add-os/modules/inventory/components/PlacePicker.vue"
 import StockActionModal from "@/add-os/modules/inventory/components/StockActionModal.vue"
 import { STOCK_MOVEMENT_TYPES } from "@/add-os/modules/inventory/types/inventory"
-import { EMPTY, localized, money, nameCell, PLACE_COLUMN, placeLabel, quantity } from "@/add-os/modules/inventory/utils/display"
+import { COLUMN, EMPTY, localized, money, nameCell, placeLabel, quantity, tableWidth } from "@/add-os/modules/inventory/utils/display"
 import { listBalances, listStockMovements } from "@/add-os/services/inventory"
 import { formatDateTime } from "@/add-os/utils/format/dates"
 import Icon from "@/components/common/Icon.vue"
@@ -137,32 +138,32 @@ function itemCell(item: { name: { ar: string; en?: string | null }; sku: string 
 }
 
 const balanceColumns = computed<DataTableColumns<StockBalance>>(() => [
-	{ title: t("inventory.stock.item"), key: "item", minWidth: 220, render: row => itemCell(row.item) },
-	{ title: t("inventory.stock.location"), key: "location", ...PLACE_COLUMN, render: row => placeLabel(row.location) },
-	{ title: t("inventory.stock.onHand"), key: "quantity", minWidth: 120, render: row => h("span", { class: "add-numeric font-semibold" }, `${quantity(row.quantity)} ${localized(row.item.unit.name)}`) },
-	{ title: t("inventory.stock.averageCost"), key: "average_cost", minWidth: 120, render: row => h("span", { class: "add-numeric" }, money(row.average_cost, row.currency)) },
-	{ title: t("inventory.stock.value"), key: "value", minWidth: 120, render: row => h("span", { class: "add-numeric" }, money(row.value, row.currency)) }
+	{ title: t("inventory.stock.item"), key: "item", ...COLUMN.name, render: row => itemCell(row.item) },
+	{ title: t("inventory.stock.location"), key: "location", ...COLUMN.place, render: row => placeLabel(row.location) },
+	{ title: t("inventory.stock.onHand"), key: "quantity", ...COLUMN.quantity, render: row => h("span", { class: "add-numeric font-semibold" }, `${quantity(row.quantity)} ${localized(row.item.unit.name)}`) },
+	{ title: t("inventory.stock.averageCost"), key: "average_cost", ...COLUMN.money, render: row => h("span", { class: "add-numeric" }, money(row.average_cost, row.currency)) },
+	{ title: t("inventory.stock.value"), key: "value", ...COLUMN.money, render: row => h("span", { class: "add-numeric" }, money(row.value, row.currency)) }
 ])
 
 const movementColumns = computed<DataTableColumns<StockMovement>>(() => [
-	{ title: t("inventory.history.when"), key: "created_at", minWidth: 150, render: row => (row.created_at ? formatDateTime(row.created_at) : EMPTY) },
-	{ title: t("inventory.stock.item"), key: "item", minWidth: 200, render: row => itemCell(row.item) },
-	{ title: t("inventory.stock.location"), key: "location", ...PLACE_COLUMN, render: row => placeLabel(row.location) },
+	{ title: t("inventory.history.when"), key: "created_at", ...COLUMN.dateTime, render: row => (row.created_at ? formatDateTime(row.created_at) : EMPTY) },
+	{ title: t("inventory.stock.item"), key: "item", ...COLUMN.name, render: row => itemCell(row.item) },
+	{ title: t("inventory.stock.location"), key: "location", ...COLUMN.place, render: row => placeLabel(row.location) },
 	{
 		title: t("inventory.stock.type"),
 		key: "type",
-		minWidth: 150,
+		width: 170,
 		render: row => [t(`inventory.movementType.${row.type}`), row.reason ? ` · ${t(`inventory.issueReason.${row.reason}`)}` : ""].join("")
 	},
 	{
 		title: t("inventory.stock.quantity"),
 		key: "quantity",
-		minWidth: 100,
+		...COLUMN.quantity,
 		render: row => h("span", { class: `add-numeric font-semibold ${row.quantity.startsWith("-") ? "text-error" : "text-success"}`, dir: "ltr" }, quantity(row.quantity))
 	},
-	{ title: t("inventory.stock.after"), key: "quantity_after", minWidth: 90, render: row => h("span", { class: "add-numeric" }, quantity(row.quantity_after)) },
-	{ title: t("inventory.stock.unitCost"), key: "unit_cost", minWidth: 110, render: row => h("span", { class: "add-numeric" }, quantity(row.unit_cost)) },
-	{ title: t("inventory.common.note"), key: "note", width: 160, ellipsis: { tooltip: true }, render: row => row.note ?? EMPTY },
-	{ title: t("inventory.history.by"), key: "actor", minWidth: 120, render: row => row.actor?.name ?? EMPTY }
+	{ title: t("inventory.stock.after"), key: "quantity_after", ...COLUMN.quantity, render: row => h("span", { class: "add-numeric" }, quantity(row.quantity_after)) },
+	{ title: t("inventory.stock.unitCost"), key: "unit_cost", ...COLUMN.money, render: row => h("span", { class: "add-numeric" }, quantity(row.unit_cost)) },
+	{ title: t("inventory.common.note"), key: "note", ...COLUMN.text, render: row => row.note ?? EMPTY },
+	{ title: t("inventory.history.by"), key: "actor", ...COLUMN.person, render: row => row.actor?.name ?? EMPTY }
 ])
 </script>

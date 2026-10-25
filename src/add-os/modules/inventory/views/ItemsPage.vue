@@ -10,15 +10,16 @@
 		</HrPageHeader>
 
 		<HrToolbar>
-			<n-input v-model:value="filters.search" :placeholder="t('inventory.items.search')" clearable class="max-w-xs" />
-			<n-select v-model:value="filters.kind" :options="kindOptions" :placeholder="t('inventory.catalog.kind')" clearable class="max-w-[10rem]" />
-			<n-select v-model:value="filters.category_id" :options="categoryOptions" :placeholder="t('inventory.common.category')" clearable filterable class="max-w-xs" />
+			<!-- Widths carry "!": Naive's runtime CSS outranks Tailwind's layer (see PlacePicker). -->
+			<n-input v-model:value="filters.search" :placeholder="t('inventory.items.search')" clearable class="sm:w-72!" />
+			<n-select v-model:value="filters.kind" :options="kindOptions" :placeholder="t('inventory.catalog.kind')" clearable class="sm:w-40!" />
+			<n-select v-model:value="filters.category_id" :options="categoryOptions" :placeholder="t('inventory.common.category')" clearable filterable class="sm:w-60!" />
 		</HrToolbar>
 
 		<n-alert v-if="loadError" type="error" :title="loadError" />
 
 		<n-card class="add-ledger-table">
-			<n-data-table :columns :data="items" :loading :bordered="false" size="small" :scroll-x="980">
+			<n-data-table :columns :data="items" :loading :bordered="false" size="small" :scroll-x="tableWidth(columns)">
 				<template #empty>
 					<span class="text-secondary">{{ t("inventory.items.empty") }}</span>
 				</template>
@@ -44,7 +45,7 @@ import HrToolbar from "@/add-os/modules/hr/components/ui/HrToolbar.vue"
 import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
 import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
 import ItemModal from "@/add-os/modules/inventory/components/ItemModal.vue"
-import { categoryPaths, localized, nameCell, propertySummary, quantity } from "@/add-os/modules/inventory/utils/display"
+import { categoryPaths, COLUMN, localized, nameCell, propertySummary, quantity, tableWidth } from "@/add-os/modules/inventory/utils/display"
 import { getCategory, listCategories, listItems, listUnits, removeItem } from "@/add-os/services/inventory"
 import { countKey, formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
@@ -121,16 +122,16 @@ const columns = computed<DataTableColumns<Item>>(() => [
 	{
 		title: t("inventory.common.name"),
 		key: "name",
-		minWidth: 220,
+		...COLUMN.name,
 		render: row =>
 			nameCell(localized(row.name), row.sku, { code: true })
 	},
-	{ title: t("inventory.common.category"), key: "category", minWidth: 140, render: row => localized(row.category.name) },
-	{ title: t("inventory.catalog.kind"), key: "kind", minWidth: 90, render: row => h(NTag, { size: "small", round: true, type: row.kind === "asset" ? "info" : "default" }, () => t(`inventory.kind.${row.kind}`)) },
+	{ title: t("inventory.common.category"), key: "category", ...COLUMN.person, render: row => localized(row.category.name) },
+	{ title: t("inventory.catalog.kind"), key: "kind", ...COLUMN.flag, render: row => h(NTag, { size: "small", round: true, type: row.kind === "asset" ? "info" : "default" }, () => t(`inventory.kind.${row.kind}`)) },
 	{
 		title: t("inventory.items.held"),
 		key: "held",
-		minWidth: 110,
+		...COLUMN.quantity,
 		render: row =>
 			h(
 				"span",
@@ -141,15 +142,15 @@ const columns = computed<DataTableColumns<Item>>(() => [
 	{
 		title: t("inventory.items.properties"),
 		key: "properties",
-		width: 220,
-		ellipsis: { tooltip: true },
+		...COLUMN.text,
+		minWidth: 240,
 		render: row => propertySummary(row.properties, fieldsByCategory.value.get(row.category.id), { yes: t("inventory.common.yes"), no: t("inventory.common.no") })
 	},
-	{ title: t("inventory.common.status"), key: "is_active", minWidth: 90, render: row => t(row.is_active ? "inventory.common.active" : "inventory.common.inactive") },
+	{ title: t("inventory.common.status"), key: "is_active", ...COLUMN.flag, render: row => t(row.is_active ? "inventory.common.active" : "inventory.common.inactive") },
 	{
 		title: "",
 		key: "actions",
-		width: 100,
+		...COLUMN.actions,
 		render: row =>
 			mayManage
 				? h("div", { class: "flex items-center justify-end gap-3" }, [
