@@ -46,7 +46,7 @@ import type { DataTableColumns, SelectOption } from "naive-ui"
 import type { AdminBooking } from "@/add-os/modules/booking/types/calendar"
 import type { ArrivalRequest } from "@/add-os/modules/booking/types/reception"
 import type { Space } from "@/add-os/modules/spatial/types/space"
-import { NAlert, NButton, NCard, NDataTable, NModal, NSelect, NTag } from "naive-ui"
+import { NAlert, NAvatar, NButton, NCard, NDataTable, NModal, NSelect, NTag } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
@@ -65,7 +65,9 @@ import Icon from "@/components/common/Icon.vue"
  * with the QR, or the desk activating the door code, checks it in — but a
  * door opened by keypad tells the server nothing, and a room may have no lock.
  * So: today's bookings still waiting for their member, each with a check-in,
- * and the members who pressed "I have arrived" in the app.
+ * and the members who scanned the kiosk. A co-working scan starts nothing on
+ * its own: the session (or the co-working booking's check-in) starts when the
+ * desk confirms it here, on the kiosk's space, billed from that moment.
  *
  * Check-in goes through the same endpoint and rules as everywhere else (no
  * earlier than 15 minutes before the start, within business hours, approved
@@ -210,6 +212,12 @@ const coSpaceOptions = computed<SelectOption[]>(() =>
 )
 
 async function confirm(request: ArrivalRequest): Promise<void> {
+	// A co-working scan: its space is the kiosk's, so there is nothing to choose.
+	if (request.purpose === "coworking_start") {
+		await action.run(() => confirmArrivalRequest(request.id), t("arrivals.requests.sessionStarted"))
+		return
+	}
+
 	if (request.matched_booking) {
 		await action.run(() => confirmArrivalRequest(request.id), t("arrivals.requests.confirmed"))
 		return
@@ -243,8 +251,31 @@ async function reject(request: ArrivalRequest): Promise<void> {
 	await action.run(() => rejectArrivalRequest(request.id), t("arrivals.requests.rejected"))
 }
 
+function initials(name: string | null | undefined): string {
+	return (name ?? "?").split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join("").toUpperCase()
+}
+
+/** The plan picture a co-working scan was shown: covered by the plan, or the hourly rate the member agreed to. */
+function coverageTag(row: ArrivalRequest) {
+	if (row.purpose !== "coworking_start" || !row.coverage) return null
+	if (row.coverage.status === "covered") {
+		const plan = row.coverage.plan?.name
+		return h(NTag, { size: "small", round: true, type: "success" }, { default: () => plan ? t("arrivals.requests.coveredBy", { plan }) : t("arrivals.requests.covered") })
+	}
+	return h(NTag, { size: "small", round: true, type: "warning" }, { default: () => t("arrivals.requests.paysHourly") })
+}
+
 const requestColumns = computed<DataTableColumns<ArrivalRequest>>(() => [
-	{ title: t("arrivals.columns.member"), key: "user", minWidth: 160, render: row => row.user?.name ?? "—" },
+	{
+		title: t("arrivals.columns.member"),
+		key: "user",
+		minWidth: 180,
+		// The photo, so the desk can see it is the person standing there.
+		render: row => h("div", { class: "flex items-center gap-2" }, [
+			h(NAvatar, { round: true, size: 28, src: row.user?.avatar_url ?? undefined, class: "bg-amber-700 text-white font-bold text-xs" }, { default: () => initials(row.user?.name) }),
+			h("span", row.user?.name ?? "—")
+		])
+	},
 	{
 		title: t("arrivals.columns.requestedAt"),
 		key: "requested_at",
@@ -257,10 +288,23 @@ const requestColumns = computed<DataTableColumns<ArrivalRequest>>(() => [
 		minWidth: 200,
 		render: (row) => {
 			const booking = row.matched_booking
+			const time = (start: string, end: string) => h("bdi", { dir: "ltr", class: "font-mono text-xs" }, `${formatTime(start)} – ${formatTime(end)}`)
+
+			if (row.purpose === "coworking_start") {
+				const kind = h(NTag, { size: "small", round: true, type: "info" }, { default: () => t("arrivals.requests.coworkingStart") })
+				const space = row.space?.name ?? (row.space ? `#${row.space.id}` : "—")
+				if (booking) return h("span", { class: "flex flex-wrap items-center gap-1" }, [kind, space, " · ", time(booking.start_at, booking.end_at)])
+				if (row.upcoming_booking) {
+					return h("span", { class: "flex flex-wrap items-center gap-1" }, [kind, space, " · ", t("arrivals.requests.waitsForBooking"), " ", time(row.upcoming_booking.start_at, row.upcoming_booking.end_at)])
+				}
+				return h("span", { class: "flex flex-wrap items-center gap-1" }, [kind, space, " · ", t("arrivals.requests.walkIn")])
+			}
+
 			if (!booking) return h(NTag, { size: "small", round: true }, { default: () => t("arrivals.requests.noBooking") })
-			return h("span", [booking.space_name ?? `#${booking.space_id}`, " · ", h("bdi", { dir: "ltr", class: "font-mono text-xs" }, `${formatTime(booking.start_at)} – ${formatTime(booking.end_at)}`)])
+			return h("span", [booking.space_name ?? `#${booking.space_id}`, " · ", time(booking.start_at, booking.end_at)])
 		}
 	},
+	{ title: t("arrivals.columns.plan"), key: "coverage", minWidth: 150, render: row => coverageTag(row) ?? "—" },
 	{
 		title: t("activeSessions.columns.actions"),
 		key: "actions",

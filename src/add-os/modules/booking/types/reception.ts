@@ -251,17 +251,44 @@ export interface SettlePaymentPayload {
 /** How a session began: the desk (or its activating the door code), the kiosk scan, or the member opening the booked room's door. */
 export type SessionStartSource = "reception" | "scan" | "door"
 
+/** Whether a member's plan covers a co-working session (ADDCore `SessionCoverageResource`). */
+export interface SessionCoverage {
+	status: "covered" | "not_covered"
+	/** Why not, when not covered. */
+	reason: "no_plan" | "plan_expired" | "plan_without_hours" | "hours_exhausted" | "outside_window" | null
+	plan: { id: number, name: string | null } | null
+	hours_total: number | null
+	hours_remaining: number | null
+	window: { start: string, end: string } | null
+	/** When the plan stops covering it: the window's end or the hours running out. */
+	covered_until: string | null
+}
+
 /**
- * A member's "I have arrived" from the app (`GET reception/arrival-requests`).
- * With a matched booking, confirming checks that booking in; without one the
- * desk names the co-working space and a walk-in starts there.
+ * A member's kiosk scan waiting for the desk (`GET reception/arrival-requests`).
+ *
+ * - `arrival`: "I have arrived" for a booking the desk checks in. With a
+ *   matched booking, confirming checks it in; without one the desk names the
+ *   co-working space and a walk-in starts there.
+ * - `coworking_start`: a co-working session the member scanned for. Nothing
+ *   has started: confirming starts it, now, on `space` — the kiosk's — with
+ *   nothing to choose; it checks the matched booking in when there is one.
  */
 export interface ArrivalRequest {
 	id: number
+	purpose: "arrival" | "coworking_start"
 	status: "pending" | "confirmed" | "rejected" | "expired"
 	requested_at: string
 	matched_booking_id: number | null
-	user: { id: number, name: string, phone: string | null }
+	/** `coworking_start` only: the kiosk's co-working space. */
+	space: { id: number, name: string | null } | null
+	/** `coworking_start` only: what the member was shown about their plan at the kiosk. */
+	coverage: SessionCoverage | null
+	/** `coworking_start` only: the member agreed to pay the hourly rate. */
+	accepted_uncovered: boolean
+	/** `coworking_start` only: an early arrival — the walk-in becomes this booking when it begins. */
+	upcoming_booking: { id: number, start_at: string, end_at: string } | null
+	user: { id: number, name: string, phone: string | null, avatar_url: string | null }
 	matched_booking: {
 		id: number
 		space_id: number

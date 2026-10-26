@@ -2781,7 +2781,7 @@
 		}
 	},
 	"arrivals": {
-		"description": "Today's bookings not yet checked in, and arrival requests from the member app. A booked room starts by itself when its door is opened by QR or its code is activated; anything else starts here.",
+		"description": "Today's bookings not yet checked in, and kiosk scans waiting for the desk. A co-working session starts only when you confirm it here, and is billed from then. A booked room starts by itself when its door is opened by QR or its code is activated; anything else starts here.",
 		"loadError": "Couldn't load.",
 		"columns": {
 			"member": "Member",
@@ -2789,7 +2789,8 @@
 			"time": "Time",
 			"payment": "Payment",
 			"requestedAt": "Requested",
-			"booking": "Booking"
+			"booking": "Booking",
+			"plan": "Plan"
 		},
 		"expected": {
 			"title": "Today's bookings waiting",
@@ -2808,7 +2809,14 @@
 			"rejected": "Request rejected.",
 			"walkInTitle": "Start a co-working session",
 			"walkInBody": "This member has no booking today. Choose the co-working space they sit in.",
-			"spacePlaceholder": "Choose a space"
+			"spacePlaceholder": "Choose a space",
+			"sessionStarted": "Session started.",
+			"coworkingStart": "Co-working",
+			"walkIn": "Walk-in",
+			"waitsForBooking": "until their booking",
+			"covered": "Covered by plan",
+			"coveredBy": "Covered: {plan}",
+			"paysHourly": "Pays hourly"
 		}
 	},
 	"memberProfile": {

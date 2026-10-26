@@ -59,13 +59,21 @@ function booking(id: number, start: string, end: string, checkedInAt: string | n
 	}
 }
 
-function request(id: number, matched: boolean) {
+function request(id: number, matched: boolean, purpose: "arrival" | "coworking_start" = "arrival") {
+	const coworking = purpose === "coworking_start"
 	return {
 		id,
+		purpose,
 		status: "pending",
 		requested_at: at(9, 55),
 		matched_booking_id: matched ? 1 : null,
-		user: { id: 3, name: "Layla", phone: null },
+		space: coworking ? { id: 9, name: "Open Space" } : null,
+		coverage: coworking
+			? { status: "covered", reason: null, plan: { id: 1, name: "Flex 40" }, hours_total: 40, hours_remaining: 40, window: null, covered_until: null }
+			: null,
+		accepted_uncovered: false,
+		upcoming_booking: null,
+		user: { id: 3, name: "Layla", phone: null, avatar_url: null },
 		matched_booking: matched ? { id: 1, space_id: 5, space_type: "room", space_name: "Room A", start_at: at(10), end_at: at(12) } : null
 	}
 }
@@ -154,6 +162,30 @@ describe("arrivalsPage", () => {
 
 		expect(confirmArrivalRequestMock).toHaveBeenCalledWith(8, 9)
 		expect(vm.spaceModalVisible).toBe(false)
+		wrapper.unmount()
+	})
+
+	it("starts a co-working scan at once, on the kiosk's space, without asking for one", async () => {
+		const { wrapper, vm } = await mountPage()
+
+		await vm.confirm(request(9, false, "coworking_start"))
+		await flushPromises()
+
+		expect(confirmArrivalRequestMock).toHaveBeenCalledWith(9)
+		expect(vm.spaceModalVisible).toBe(false)
+		expect(listSpacesMock).not.toHaveBeenCalled()
+		expect(listArrivalRequestsMock).toHaveBeenCalledTimes(2)
+		wrapper.unmount()
+	})
+
+	it("shows a co-working scan's kind, space and plan in the requests table", async () => {
+		listArrivalRequestsMock.mockResolvedValue({ data: [request(9, false, "coworking_start")], meta: { current_page: 1, last_page: 1, total: 1 } })
+		const { wrapper } = await mountPage()
+
+		const text = wrapper.text()
+		expect(text).toContain("arrivals.requests.coworkingStart")
+		expect(text).toContain("Open Space")
+		expect(text).toContain("arrivals.requests.coveredBy")
 		wrapper.unmount()
 	})
 })
