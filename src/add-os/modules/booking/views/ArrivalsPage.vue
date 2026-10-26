@@ -52,6 +52,7 @@ import { useI18n } from "vue-i18n"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import { useReceptionAction } from "@/add-os/modules/booking/composables/useReceptionAction"
+import { useReceptionRealtime } from "@/add-os/modules/booking/composables/useReceptionRealtime"
 import { ApiError } from "@/add-os/services/api"
 import { listBookings } from "@/add-os/services/booking-calendar"
 import { checkInBooking, confirmArrivalRequest, listArrivalRequests, rejectArrivalRequest } from "@/add-os/services/reception"
@@ -73,6 +74,10 @@ import Icon from "@/components/common/Icon.vue"
  * earlier than 15 minutes before the start, within business hours, approved
  * and paid-for); the button is greyed until the window opens, and any other
  * refusal comes back as the server's own message.
+ *
+ * A new scan, or a request another desk (or the expiry sweep) has dealt with,
+ * reloads the page by itself — `arrival_request.*` on `private-reception`, with
+ * a 30 s poll only while that socket is down (useReceptionRealtime).
  */
 
 defineProps<{ titleKey?: string }>()
@@ -145,6 +150,8 @@ async function refetchAll(): Promise<void> {
 }
 
 onMounted(refetchAll)
+
+useReceptionRealtime(refetchAll, { events: ["arrival_request.created", "arrival_request.resolved"] })
 
 const action = useReceptionAction(refetchAll)
 

@@ -25,6 +25,20 @@ vi.mock("@/add-os/services/reception", () => ({
 	getReceptionSummary: getReceptionSummaryMock
 }))
 
+// The desk channel, captured: a test plays an event through it.
+const { realtimeSubscriptions } = vi.hoisted(() => ({
+	realtimeSubscriptions: [] as Array<{ handler: (event: string, payload: Record<string, unknown>) => void; events: readonly string[] }>
+}))
+
+vi.mock("@/add-os/services/realtime", () => ({
+	RECEPTION_EVENTS: ["arrival_request.created", "arrival_request.resolved", "session_end_request.created", "session_end_request.cancelled", "session_end_request.resolved"],
+	isRealtimeConnected: () => true,
+	subscribeReception: (handler: (event: string, payload: Record<string, unknown>) => void, events: readonly string[]) => {
+		realtimeSubscriptions.push({ handler, events })
+		return () => {}
+	}
+}))
+
 vi.mock("@/add-os/modules/payments/components/CollectPaymentModal.vue", () => ({ default: { name: "CollectPaymentModal", props: ["show", "userId", "focus"], emits: ["update:show"], render: () => null } }))
 
 vi.mock("vue-router", async () => {
@@ -93,6 +107,22 @@ describe("end requests", () => {
 	beforeEach(() => {
 		vi.clearAllMocks()
 		confirmSessionEndMock.mockResolvedValue({ message: "Session ended and paid.", data: { payment_state: "paid", price_points: 200, amount_owed: "20.00" } })
+	})
+
+	it("shows a member's new end request without a reload", async () => {
+		listActiveSessionsMock.mockResolvedValue([session(1, null)])
+		const wrapper = mountWith(CloseSessionPage)
+		await flushPromises()
+		const subscription = realtimeSubscriptions.at(-1)!
+		expect(subscription.events).toEqual(["session_end_request.created", "session_end_request.cancelled", "session_end_request.resolved"])
+
+		listActiveSessionsMock.mockResolvedValue([session(1, endRequest(12, "cash"))])
+		subscription.handler("session_end_request.created", { session_end_request_id: 12, session_type: "walkin", session_id: 1, status: "pending" })
+		await flushPromises()
+
+		const vm = wrapper.vm as unknown as { requests: { id: number }[] }
+		expect(vm.requests.map(row => row.id)).toEqual([1])
+		wrapper.unmount()
 	})
 
 	it("lists only the sessions waiting to end, oldest press first", async () => {

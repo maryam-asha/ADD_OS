@@ -128,6 +128,7 @@ import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useReceptionAction } from "@/add-os/modules/booking/composables/useReceptionAction"
+import { useReceptionRealtime } from "@/add-os/modules/booking/composables/useReceptionRealtime"
 import { buildSessionColumns } from "@/add-os/modules/booking/config/active-sessions.config"
 import CollectPaymentModal from "@/add-os/modules/payments/components/CollectPaymentModal.vue"
 import { PAYMENT_METHODS } from "@/add-os/modules/payments/types/wallet-top-up"
@@ -145,12 +146,16 @@ import Icon from "@/components/common/Icon.vue"
  * The live reception board — everyone checked in and not yet checked out,
  * bookings and walk-ins in one table.
  *
- * ── Refresh, not polling ────────────────────────────────────────────────────
- * There is a refresh button and no timer. A poll on a screen whose rows carry
- * destructive buttons is worse than a stale row: `n-data-table` re-renders on
- * new data, and an operator halfway through choosing an action would have the
- * row move under the cursor. Every action refetches on completion, so the board
- * is current after anything that changes it — which is when it matters.
+ * ── Refresh on news, not on a clock ─────────────────────────────────────────
+ * A steady poll on a screen whose rows carry destructive buttons is worse than
+ * a stale row: `n-data-table` re-renders on new data, and an operator halfway
+ * through choosing an action would have the row move under the cursor. So the
+ * board reloads when something it shows has changed — every action of its own
+ * refetches on completion, and the API's `private-reception` events (a start
+ * confirmed at Arrivals, a member asking to end, an end confirmed) reload it
+ * too (useReceptionRealtime). Those are rare and are exactly the moments the
+ * board is wrong. Only while that socket is down does it fall back to a 30 s
+ * poll, the price of not being told.
  *
  * ── Settlement lives inside check-out ───────────────────────────────────────
  * Not a separate row button. The API refuses to settle a session that has not
@@ -177,6 +182,8 @@ const router = useRouter()
 const { data: rows, isLoading, error, refetch } = useResourceList<ActiveSession>(listActiveSessions)
 
 const action = useReceptionAction(refetch)
+
+useReceptionRealtime(refetch)
 
 /** The session's own page: live timer, bill so far, and its end request if any. */
 function openDetails(row: ActiveSession): void {

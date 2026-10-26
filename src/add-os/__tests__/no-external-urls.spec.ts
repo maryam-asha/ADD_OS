@@ -116,6 +116,14 @@ const ALLOWED: readonly AllowedHost[] = [
 		host: "scripts.sil.org",
 		why: "The SIL Open Font License text shipped with the self-hosted Poppins files (add-os/assets/fonts/en/OFL.txt). The URL is prose inside a licence the font's terms require us to keep; a .txt under assets/ is never imported by the app, so the bundler never emits it. Deleting the line would breach the licence it appears in.",
 		sourceOnly: true
+	},
+	{
+		host: "js.pusher.com",
+		why: "pusher-js's CDN base for its SockJS/XHR fallback transports, a string in the library. Never fetched: src/add-os/services/realtime.ts pins enabledTransports to WebSockets, so no fallback script is ever loaded. The socket itself (ws-<cluster>.pusher.com, built at runtime) is the real-time host decided on 2026-10-26 — the production host cannot run a socket server."
+	},
+	{
+		host: "pusher.com",
+		why: "pusher-js error and warning strings link to its docs (pusher.com/docs/...). Text in a console message; no request."
 	}
 	// `api.org` was here — the Pinx placeholder VITE_API_URL. Removed from the
 	// allowlist because it is no longer in the build: the variable was emptied and

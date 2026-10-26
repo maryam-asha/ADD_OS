@@ -21,6 +21,20 @@ vi.mock("@/add-os/services/reception", () => ({
 	getExtensionOptions: getExtensionOptionsMock
 }))
 
+// The desk channel, captured: a test plays an event through it.
+const { realtimeSubscriptions } = vi.hoisted(() => ({
+	realtimeSubscriptions: [] as Array<{ handler: (event: string, payload: Record<string, unknown>) => void; events: readonly string[] }>
+}))
+
+vi.mock("@/add-os/services/realtime", () => ({
+	RECEPTION_EVENTS: ["arrival_request.created", "arrival_request.resolved", "session_end_request.created", "session_end_request.cancelled", "session_end_request.resolved"],
+	isRealtimeConnected: () => true,
+	subscribeReception: (handler: (event: string, payload: Record<string, unknown>) => void, events: readonly string[]) => {
+		realtimeSubscriptions.push({ handler, events })
+		return () => {}
+	}
+}))
+
 vi.mock("@/add-os/modules/payments/components/CollectPaymentModal.vue", () => ({ default: { name: "CollectPaymentModal", render: () => null } }))
 
 /** What `GET .../extension-options` answers for a booking with two hours free after it. */
@@ -141,6 +155,20 @@ describe("activeSessionsPage", () => {
 		cancelBookingMock.mockResolvedValue({ message: "Cancelled." })
 		extendBookingMock.mockResolvedValue({ message: "Extended." })
 		getExtensionOptionsMock.mockResolvedValue(extensionOptions())
+	})
+
+	it("reloads the board on any desk event", async () => {
+		const wrapper = mountPage()
+		await flushPromises()
+		const subscription = realtimeSubscriptions.at(-1)!
+		expect(subscription.events).toHaveLength(5)
+
+		listActiveSessionsMock.mockClear()
+		subscription.handler("session_end_request.resolved", { session_end_request_id: 4, session_type: "walkin", session_id: 2, status: "confirmed" })
+		await flushPromises()
+
+		expect(listActiveSessionsMock).toHaveBeenCalledOnce()
+		wrapper.unmount()
 	})
 
 	/**

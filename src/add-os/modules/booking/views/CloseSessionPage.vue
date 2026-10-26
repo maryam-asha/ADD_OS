@@ -60,6 +60,7 @@ import { NAvatar, NButton, NCard, NSpin, NTag, useMessage } from "naive-ui"
 import { computed, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
+import { useReceptionRealtime } from "@/add-os/modules/booking/composables/useReceptionRealtime"
 import { ApiError } from "@/add-os/services/api"
 import { listActiveSessions } from "@/add-os/services/reception"
 import { formatTime } from "@/add-os/utils/format"
@@ -104,6 +105,10 @@ async function load(): Promise<void> {
 }
 
 onMounted(load)
+
+// A member pressing "end session", withdrawing it, or another desk ending it
+// shows here without a reload; a 30 s poll stands in while the socket is down.
+useReceptionRealtime(load, { events: ["session_end_request.created", "session_end_request.cancelled", "session_end_request.resolved"] })
 
 defineExpose({ requests, load })
 </script>

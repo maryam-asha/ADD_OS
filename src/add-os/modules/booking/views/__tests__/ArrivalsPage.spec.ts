@@ -22,6 +22,20 @@ vi.mock("@/add-os/services/reception", () => ({
 	rejectArrivalRequest: rejectArrivalRequestMock
 }))
 
+// The desk channel, captured: a test plays an event through it.
+const { realtimeSubscriptions } = vi.hoisted(() => ({
+	realtimeSubscriptions: [] as Array<{ handler: (event: string, payload: Record<string, unknown>) => void; events: readonly string[] }>
+}))
+
+vi.mock("@/add-os/services/realtime", () => ({
+	RECEPTION_EVENTS: ["arrival_request.created", "arrival_request.resolved", "session_end_request.created", "session_end_request.cancelled", "session_end_request.resolved"],
+	isRealtimeConnected: () => true,
+	subscribeReception: (handler: (event: string, payload: Record<string, unknown>) => void, events: readonly string[]) => {
+		realtimeSubscriptions.push({ handler, events })
+		return () => {}
+	}
+}))
+
 vi.mock("naive-ui", async () => {
 	const actual = await vi.importActual<typeof import("naive-ui")>("naive-ui")
 	return { ...actual, useMessage: () => ({ success: vi.fn(), error: vi.fn() }) }
@@ -115,6 +129,21 @@ describe("arrivalsPage", () => {
 
 	afterEach(() => {
 		vi.useRealTimers()
+	})
+
+	it("reloads by itself when a member scans or another desk answers", async () => {
+		const { wrapper } = await mountPage()
+		const subscription = realtimeSubscriptions.at(-1)!
+		expect(subscription.events).toEqual(["arrival_request.created", "arrival_request.resolved"])
+
+		listArrivalRequestsMock.mockClear()
+		listBookingsMock.mockClear()
+		subscription.handler("arrival_request.created", { arrival_request_id: 9, purpose: "coworking_start", status: "pending" })
+		await flushPromises()
+
+		expect(listArrivalRequestsMock).toHaveBeenCalledOnce()
+		expect(listBookingsMock).toHaveBeenCalledOnce()
+		wrapper.unmount()
 	})
 
 	it("lists today's confirmed bookings still waiting for their member, soonest first", async () => {
