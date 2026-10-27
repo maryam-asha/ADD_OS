@@ -38,8 +38,9 @@ Then report, per spec file, pass/fail and what it protects:
 - `no-secrets.spec.ts` — committed env files declare secret-shaped keys empty; `.gitignore`
   asserts `.env`, `.env.*`, `!.env.example` as patterns; `.env.sample` absent; allowlist
   entries justified.
-- `no-inline-role-checks.spec.ts` — guards two gating mechanisms that coexist during the
-  in-progress role -> permission migration: only `config/permissions.ts` may call
+- `no-inline-role-checks.spec.ts` — guards two gating mechanisms that coexisted during the
+  role -> permission migration (since 2026-10-27 `config/permissions.ts` holds permission
+  gates only, so the role half now guards against a role gate coming back): only `config/permissions.ts` may call
   `isRoleGranted` or compare a role against a literal for a destroy decision, and likewise
   only `config/permissions.ts` may call `hasPermission` or compare a `permission`/
   `permissions` variable against a permission-string literal; scans `src/add-os/modules/**`
@@ -57,7 +58,8 @@ Then report, per spec file, pass/fail and what it protects:
   spec stayed green (live HR run, 2026-10-21). The comparison is **skipped** where the ADDCore
   checkout is absent; the parser's own checks (other blocks' keys, comments) always run.
 - `one-dashboard-door.spec.ts` — `mayUseDashboard` (`src/stores/auth.ts`) is the only rule for
-  who may use the dashboard at all; no other file under `src/` judges an account with
+  who may use the dashboard at all (since 2026-10-27: a provider, an account holding at least
+  one permission, or an employee — no longer "any role besides member and provider"); no other file under `src/` judges an account with
   `roles.every(`, and sign-in, session restore and the route guard each call it. Sign-in's
   own copy lacked the employee record and turned away every member who is also an employee.
   Carries a negative control.
@@ -72,6 +74,16 @@ Then report, per spec file, pass/fail and what it protects:
   each a 403, and "/" sent them to `/spatial/branches`. Since 2026-10-25 it also checks that
   operations is offered only the screens whose `<module>.view` permission `/me` returns
   (`NavPage.permission`), beside the ones ADD Core names no permission for.
+  **Since 2026-10-27** (permission-only access; `openedBy` and the admin gate are gone) the
+  accounts are admin holding every permission, operations with branches only, an HR role, a
+  reports-only HR role, a custom invoices role, a custom role holding only `amenities.view`,
+  an employee with no role, a member who is an employee, and a provider — each also checked
+  that the guard refuses every page the sidebar does not list — plus three accounts holding
+  nothing (operations granted nothing, an empty custom role, a member) that the guard signs out
+  from every page. It also asserts that every staff page (outside the provider portal and My
+  HR) carries exactly one of `permission` or `allStaff`, that `allStaff` sits only on
+  ComingSoon placeholders and the two named no-API screens (dashboard overview, account
+  security), and that no staff section names a role.
 - `theme/__tests__/tokens.spec.ts` — WCAG ratios, ΔE separations, and "guideline p.15 strict
   rule stays disengaged" (Antique Copper in no semantic and no component token).
 

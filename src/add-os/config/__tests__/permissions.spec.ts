@@ -1,34 +1,51 @@
-import { describe, expect, it, vi } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import ar from "@/add-os/lang/ar"
 import en from "@/add-os/lang/en"
 
-const state = { role: null as string | null, permissions: [] as string[] }
+const state = { permissions: [] as string[] }
 
 vi.mock("@/stores/auth", () => ({
 	useAuthStore: () => ({
-		isRoleGranted: (roles?: string | string[]) => {
-			if (!roles) return true
-			const arr = Array.isArray(roles) ? roles : [roles]
-			if (arr.includes("all")) return true
-			return state.role !== null && arr.includes(state.role)
-		},
 		hasPermission: (permission: string) => state.permissions.includes(permission)
 	})
 }))
 
-const { canDeleteSpatialResource, canDeleteBusinessHours, can, canManageCoupons, canManageRoles, COUPON_MANAGEMENT_ROLE, CASCADING_SPATIAL_RESOURCES, SPATIAL_RESOURCE_DELETE_ROLE, BUSINESS_HOURS_DELETE_ROLE } = await import("../permissions")
+const {
+	can,
+	canActivateMemberships,
+	canCreateCoupons,
+	canCreateRoles,
+	canDeleteBusinessHourExceptions,
+	canDeleteBusinessHours,
+	canDeleteCoupons,
+	canDeleteRoles,
+	canDeleteSpatialResource,
+	canUpdateCoupons,
+	canUpdateRoles,
+	CASCADING_SPATIAL_RESOURCES,
+	SPATIAL_RESOURCE_DELETE_PERMISSION
+} = await import("../permissions")
 
-describe("permissions", () => {
-	it("maps every spatial resource to admin, per the collection's Admin-only annotation", () => {
-		expect(Object.values(SPATIAL_RESOURCE_DELETE_ROLE).every(role => role === "admin")).toBe(true)
-		expect(Object.keys(SPATIAL_RESOURCE_DELETE_ROLE).sort()).toEqual([
-			"buildings",
-			"floors",
-			"seatsDesks",
-			"spaces",
-			"zones"
-		])
+beforeEach(() => {
+	state.permissions = []
+})
+
+/**
+ * Since 2026-10-27 every gate here is the permission ADD Core guards its route
+ * with — no role name. Each case grants a custom role exactly the permission
+ * and checks the gate opens, and that the role's NAME would not open it: the
+ * store mock has no roles at all.
+ */
+describe("spatial delete", () => {
+	it("asks each spatial resource's own <module>.delete, the module being the route's URI segment", () => {
+		expect(SPATIAL_RESOURCE_DELETE_PERMISSION).toEqual({
+			buildings: "buildings.delete",
+			floors: "floors.delete",
+			zones: "zones.delete",
+			spaces: "spaces.delete",
+			seatsDesks: "seats-desks.delete"
+		})
 	})
 
 	it("marks exactly branches/buildings/floors/zones/spaces as cascading, per the collection's cascade wording", () => {
@@ -36,22 +53,23 @@ describe("permissions", () => {
 		expect(CASCADING_SPATIAL_RESOURCES.has("seatsDesks")).toBe(false)
 	})
 
-	it("grants delete to admin on every spatial resource", () => {
-		state.role = "admin"
-		for (const resource of Object.keys(SPATIAL_RESOURCE_DELETE_ROLE) as (keyof typeof SPATIAL_RESOURCE_DELETE_ROLE)[]) {
+	it("opens delete for an account holding the permission, whatever its role", () => {
+		state.permissions = Object.values(SPATIAL_RESOURCE_DELETE_PERMISSION)
+		for (const resource of Object.keys(SPATIAL_RESOURCE_DELETE_PERMISSION) as (keyof typeof SPATIAL_RESOURCE_DELETE_PERMISSION)[]) {
 			expect(canDeleteSpatialResource(resource)).toBe(true)
 		}
 	})
 
-	it("denies delete to operations on every spatial resource", () => {
-		state.role = "operations"
-		for (const resource of Object.keys(SPATIAL_RESOURCE_DELETE_ROLE) as (keyof typeof SPATIAL_RESOURCE_DELETE_ROLE)[]) {
+	it("keeps delete closed to an account holding only the view", () => {
+		state.permissions = ["buildings.view", "floors.view", "zones.view", "spaces.view", "seats-desks.view"]
+		for (const resource of Object.keys(SPATIAL_RESOURCE_DELETE_PERMISSION) as (keyof typeof SPATIAL_RESOURCE_DELETE_PERMISSION)[]) {
 			expect(canDeleteSpatialResource(resource)).toBe(false)
 		}
 	})
 
-	it("denies delete when there is no role", () => {
-		state.role = null
+	it("gives one resource's delete no reach into another's", () => {
+		state.permissions = ["spaces.delete"]
+		expect(canDeleteSpatialResource("spaces")).toBe(true)
 		expect(canDeleteSpatialResource("buildings")).toBe(false)
 	})
 })
@@ -65,31 +83,22 @@ describe("permission-based gate", () => {
 		expect(can("branches.delete")).toBe(false)
 	})
 
-	it("grants when the permission is present", () => {
-		state.permissions = ["branches.delete"]
-		expect(can("branches.delete")).toBe(true)
-	})
-
 	it("denies when there are no permissions", () => {
-		state.permissions = []
 		expect(can("branches.delete")).toBe(false)
 	})
 })
 
-describe("role management permissions", () => {
-	it("grants role management to admin", () => {
-		state.role = "admin"
-		expect(canManageRoles()).toBe(true)
-	})
+describe("role management", () => {
+	it("gives each action its own permission", () => {
+		state.permissions = ["roles.view", "roles.update"]
+		expect(canCreateRoles()).toBe(false)
+		expect(canUpdateRoles()).toBe(true)
+		expect(canDeleteRoles()).toBe(false)
 
-	it("denies role management to operations", () => {
-		state.role = "operations"
-		expect(canManageRoles()).toBe(false)
-	})
-
-	it("denies role management when there is no role", () => {
-		state.role = null
-		expect(canManageRoles()).toBe(false)
+		state.permissions = ["roles.view", "roles.create", "roles.delete"]
+		expect(canCreateRoles()).toBe(true)
+		expect(canUpdateRoles()).toBe(false)
+		expect(canDeleteRoles()).toBe(true)
 	})
 })
 
@@ -114,39 +123,34 @@ describe("cascade-delete warning copy", () => {
 	})
 })
 
-describe("business hours permissions", () => {
-	it("is admin-only, per the collection's Admin-only annotation on both delete endpoints", () => {
-		expect(BUSINESS_HOURS_DELETE_ROLE).toBe("admin")
-	})
-
-	it("grants delete to admin", () => {
-		state.role = "admin"
+describe("business hours", () => {
+	it("gates hours and their exceptions on their own delete permissions", () => {
+		state.permissions = ["business-hours.delete"]
 		expect(canDeleteBusinessHours()).toBe(true)
-	})
+		expect(canDeleteBusinessHourExceptions()).toBe(false)
 
-	it("denies delete to operations", () => {
-		state.role = "operations"
+		state.permissions = ["business-hour-exceptions.delete"]
 		expect(canDeleteBusinessHours()).toBe(false)
-	})
-
-	it("denies delete when there is no role", () => {
-		state.role = null
-		expect(canDeleteBusinessHours()).toBe(false)
+		expect(canDeleteBusinessHourExceptions()).toBe(true)
 	})
 })
 
-describe("canManageCoupons", () => {
-	it("is admin-only, per the role:admin group around the coupon writes", () => {
-		expect(COUPON_MANAGEMENT_ROLE).toBe("admin")
+describe("memberships", () => {
+	it("opens activation on memberships.create", () => {
+		state.permissions = ["memberships.view"]
+		expect(canActivateMemberships()).toBe(false)
+		state.permissions = ["memberships.view", "memberships.create"]
+		expect(canActivateMemberships()).toBe(true)
 	})
+})
 
-	it("grants admin", () => {
-		state.role = "admin"
-		expect(canManageCoupons()).toBe(true)
-	})
-
-	it("denies operations, who may still read", () => {
-		state.role = "operations"
-		expect(canManageCoupons()).toBe(false)
+describe("coupons", () => {
+	it("gates create, update and delete apiece", () => {
+		state.permissions = ["coupons.view"]
+		expect([canCreateCoupons(), canUpdateCoupons(), canDeleteCoupons()]).toEqual([false, false, false])
+		state.permissions = ["coupons.view", "coupons.update"]
+		expect([canCreateCoupons(), canUpdateCoupons(), canDeleteCoupons()]).toEqual([false, true, false])
+		state.permissions = ["coupons.view", "coupons.create", "coupons.delete"]
+		expect([canCreateCoupons(), canUpdateCoupons(), canDeleteCoupons()]).toEqual([true, false, true])
 	})
 })

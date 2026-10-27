@@ -1,3 +1,4 @@
+import type { AdminUser } from "@/types/auth.d"
 import { flushPromises, mount } from "@vue/test-utils"
 import { createPinia, setActivePinia } from "pinia"
 import { describe, expect, it } from "vitest"
@@ -7,6 +8,7 @@ import { createMemoryHistory, createRouter, RouterView } from "vue-router"
 import en from "@/add-os/lang/en/en.json"
 import { pageKey } from "@/add-os/navigation/pageKey"
 import { NAV_SECTIONS, navRouteName } from "@/add-os/navigation/sections"
+import { useAuthStore } from "@/stores/auth"
 import MyHrLayout from "../MyHrLayout.vue"
 
 /**
@@ -15,6 +17,7 @@ import MyHrLayout from "../MyHrLayout.vue"
  */
 
 const myHr = NAV_SECTIONS.find(section => section.key === "myHr")!
+const employee = { id: 9, employee_number: "ADD-0009", name: { ar: "يزن دبس", en: "Yazan Dibs" }, status: "active" } as AdminUser["employee"]
 const i18n = createI18n({ legacy: false, locale: "en", messages: { en } })
 
 async function mountAt(path: string) {
@@ -28,6 +31,8 @@ async function mountAt(path: string) {
 	})
 	await router.push(path)
 	setActivePinia(createPinia())
+	// My HR is an employee's, whatever the role: one with no role sees all of it.
+	useAuthStore().setLogged({ id: 1, name: "Employee", email: "employee@test.local", roles: [], permissions: [], employee } as AdminUser)
 	// Mounted from a root view keyed as App.vue keys it: the layout is the route's.
 	const root = { render: () => h(RouterView, null, { default: ({ Component, route }: { Component: unknown, route: Parameters<typeof pageKey>[0] }) => h(Component as never, { key: pageKey(route) }) }) }
 	const wrapper = mount(root, { global: { plugins: [i18n, router], stubs: { Icon: true } } })

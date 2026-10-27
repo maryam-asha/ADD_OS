@@ -27,7 +27,7 @@
  * locally — run `npm run icons` after changing one, or the icon guard fails.
  */
 
-import type { OpenedBy, Roles } from "@/types/auth.d"
+import type { Roles } from "@/types/auth.d"
 
 export type SectionStatus = "active" | "coming-soon"
 
@@ -44,34 +44,39 @@ export interface NavPage {
 	 */
 	hidden?: boolean
 	/**
-	 * Required of every account, admin and operations included: the page is
-	 * neither listed nor routable without it. On a page behind the admin gate
-	 * it is the `<module>.view` permission ADD Core registers for the
-	 * resource the page lists (`PermissionSyncService`), so an operations
-	 * account sees only the screens its role was granted on the Roles page —
-	 * admin holds every permission, so loses none. Added 2026-10-25. ADD Core
-	 * still serves most of those routes on `role:admin|operations` alone, so
-	 * this narrows the menu, not the API; and unlike `openedBy` it opens
-	 * nothing to a custom role. A page whose resource has no permission in
-	 * ADD Core (reception, currencies, memberships…) carries none, and so
-	 * opens to admin only (`mayOpenAdminPage`): operations reaches it once
-	 * ADD Core registers a permission for it and this page names it.
+	 * A staff page is listed in the sidebar and routable if and only if the
+	 * signed-in account holds this permission (from `/me`'s `permissions`) —
+	 * whatever its roles are called, admin and operations included. It is the
+	 * permission ADD Core guards the first route the page reads with (for a
+	 * write-only page, the one it writes); a hidden detail page carries its
+	 * list page's. `navigation/access.ts` is the one place that reads it.
+	 *
+	 * Every staff page carries exactly one of `permission` or `allStaff`
+	 * (`__tests__/menu-matches-guard.spec.ts`). The provider portal
+	 * (`roles: ["provider"]`) and My HR (`employee`) carry neither: they keep
+	 * their own audience rules.
+	 *
+	 * History. 2026-10-21: `openedBy` was added so a custom role reached only
+	 * the admin pages ADD Core served it on a permission. 2026-10-25: this
+	 * field was added as well, to narrow operations' menu to what its role was
+	 * granted, while the server still served most routes on
+	 * `role:admin|operations`. 2026-10-27: ADD Core dropped that role check
+	 * and guards every admin route by permission alone
+	 * (`2026-10-27-permission-only-dashboard-access-design.md`), so `openedBy`
+	 * and the admin gate went, and this is the whole rule for staff pages —
+	 * a custom role granted `amenities.view` now sees Amenities, which neither
+	 * earlier rule allowed.
 	 */
 	permission?: string
 	/**
-	 * For a page behind the admin gate (a section with no `roles`, or
-	 * admin|operations): what opens it to a role besides admin and operations.
-	 * ADD Core keeps most admin routes for `role:admin|operations`, so absent
-	 * means those two only — and operations, since 2026-10-25, only with the
-	 * page's `permission`. A list names the permissions ADD Core serves the
-	 * page's routes on without that role check (`routes/api/v1/admin.php`);
-	 * admin and operations need one of them too, as the server asks. `"any"`
-	 * opens it to every dashboard role, for a page that asks the server only
-	 * for what the account's own permissions allow. Added 2026-10-21: until
-	 * then a custom role (an HR role, say) saw every admin page and met a 403
-	 * on each.
+	 * A staff page with no API of its own — the dashboard home (its panels
+	 * each ask for their own `dashboard.*`), the account's own security, a
+	 * ComingSoon placeholder: open to every staff account, i.e. any account
+	 * holding at least one permission and not a provider (`isStaff`). The same
+	 * accounts ADD Core admits to `me` and `media/upload`. Never set it on a
+	 * page that reads an API: that page names the API's `permission`.
 	 */
-	openedBy?: OpenedBy
+	allStaff?: true
 	/**
 	 * Iconify name drawn beside the page in the sidebar. Optional: most pages
 	 * carry none and read by their label alone; it marks pages a quick glance
@@ -89,10 +94,14 @@ export interface NavSection {
 	icon: string
 	status: SectionStatus
 	pages: NavPage[]
+	/**
+	 * An audience, not a staff gate: `["provider"]` marks the provider
+	 * portal, the only pages a provider sees and the only ones nobody else
+	 * does. A staff section carries none — its pages carry permissions.
+	 */
 	roles?: Roles
 	/** Shown and routable only for accounts with an HR employee record. */
 	employee?: boolean
-	permission?: string
 	/**
 	 * Folds the section into one sidebar entry with the other sections of the
 	 * same group, where it reads as a module under that entry. Menu only: the
@@ -135,11 +144,10 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		path: "/dashboard",
 		icon: "carbon:dashboard",
 		status: "active",
-		// No section-level permission: the page shows one panel per
+		// No permission of its own: the page shows one panel per
 		// `dashboard.*` permission the account holds (config/permissions.ts),
-		// and says so when it holds none — so it opens to every dashboard
-		// role, custom ones included.
-		pages: [{ key: "overview", path: "overview", openedBy: "any" }]
+		// and says so when it holds none — so it opens to every staff account.
+		pages: [{ key: "overview", path: "overview", allStaff: true }]
 	},
 	{
 		key: "spatial",
@@ -147,7 +155,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		icon: "carbon:building",
 		status: "active",
 		pages: [
-			{ key: "branches", path: "branches", openedBy: ["branches.view"] },
+			{ key: "branches", path: "branches", permission: "branches.view" },
 			{ key: "buildings", path: "buildings", permission: "buildings.view" },
 			{ key: "floors", path: "floors", permission: "floors.view" },
 			{ key: "zones", path: "zones", permission: "zones.view" },
@@ -177,16 +185,16 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		icon: "carbon:user-multiple",
 		status: "active",
 		pages: [
-			{ key: "individuals", path: "individuals" },
-			{ key: "memberProfile", path: "individuals/:id", hidden: true },
-			{ key: "companies", path: "companies" },
+			{ key: "individuals", path: "individuals", permission: "members.view" },
+			{ key: "memberProfile", path: "individuals/:id", hidden: true, permission: "members.view" },
+			{ key: "companies", path: "companies", permission: "companies.view" },
 			// Behind the permission its button already checks, so a typed URL
 			// does not reach a form whose submit the API would refuse.
 			{ key: "companyCreate", path: "companies/create", hidden: true, permission: "office-leases.create" },
-			{ key: "companyProfile", path: "companies/:id", hidden: true },
-			{ key: "memberships", path: "memberships" },
-			{ key: "officeLeases", path: "office-leases", openedBy: ["office-leases.view"] },
-			{ key: "stoppedRenewals", path: "stopped-renewals", openedBy: ["renewals.manage"] }
+			{ key: "companyProfile", path: "companies/:id", hidden: true, permission: "companies.view" },
+			{ key: "memberships", path: "memberships", permission: "memberships.view" },
+			{ key: "officeLeases", path: "office-leases", permission: "office-leases.view" },
+			{ key: "stoppedRenewals", path: "stopped-renewals", permission: "renewals.manage" }
 		]
 	},
 	{
@@ -195,10 +203,9 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		icon: "carbon:partnership",
 		status: "active",
 		pages: [
-			{ key: "list", path: "list", openedBy: ["providers.view"] },
-			{ key: "requests", path: "requests", openedBy: ["provider-requests.view"] }
-		],
-		roles: ["admin", "operations"]
+			{ key: "list", path: "list", permission: "providers.view" },
+			{ key: "requests", path: "requests", permission: "provider-requests.view" }
+		]
 	},
 	{
 		key: "providerPortal",
@@ -238,15 +245,15 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		 * horizontal-nav note in `.claude/rules/shell-and-controls.md`.
 		 */
 		pages: [
-			{ key: "receptionDesk", path: "reception-desk" },
-			{ key: "arrivals", path: "arrivals" },
-			{ key: "approvalQueue", path: "approval-queue" },
-			{ key: "activeSessions", path: "active-sessions" },
-			{ key: "activeSessionDetail", path: "active-sessions/:type/:id", hidden: true },
-			{ key: "closeSession", path: "close-session" },
-			{ key: "closeSessionDetail", path: "close-session/:type/:id", hidden: true },
-			{ key: "allBookings", path: "all" },
-			{ key: "calendar", path: "calendar" }
+			{ key: "receptionDesk", path: "reception-desk", permission: "reception.view" },
+			{ key: "arrivals", path: "arrivals", permission: "reception.view" },
+			{ key: "approvalQueue", path: "approval-queue", permission: "reception.view" },
+			{ key: "activeSessions", path: "active-sessions", permission: "reception.view" },
+			{ key: "activeSessionDetail", path: "active-sessions/:type/:id", hidden: true, permission: "reception.view" },
+			{ key: "closeSession", path: "close-session", permission: "reception.view" },
+			{ key: "closeSessionDetail", path: "close-session/:type/:id", hidden: true, permission: "reception.view" },
+			{ key: "allBookings", path: "all", permission: "bookings.view" },
+			{ key: "calendar", path: "calendar", permission: "bookings.view" }
 		]
 	},
 	{
@@ -258,14 +265,16 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "packages", path: "packages", permission: "plans.view" },
 			{ key: "modules", path: "modules", permission: "plan-modules.view" },
 			{ key: "resourceTypes", path: "resource-types", permission: "resource-types.view" },
-			{ key: "wallet", path: "wallet" },
+			// ComingSoon: no API yet.
+			{ key: "wallet", path: "wallet", allStaff: true },
 			{ key: "coupons", path: "coupons", permission: "coupons.view" },
-			{ key: "discountReport", path: "discount-report" },
-			{ key: "offerReport", path: "offer-report" },
-			{ key: "planPurchases", path: "plan-purchases" },
+			{ key: "discountReport", path: "discount-report", permission: "reports.view" },
+			{ key: "offerReport", path: "offer-report", permission: "reports.view" },
+			// Write-only: the sale it makes.
+			{ key: "planPurchases", path: "plan-purchases", permission: "plan-purchases.create" },
 			// Selling stock at reception (2026-10-24): the sale, beside the
 			// plan sale above, and what may be sold at what price.
-			{ key: "itemSales", path: "item-sales" },
+			{ key: "itemSales", path: "item-sales", permission: "item-sales.view" },
 			{ key: "saleItems", path: "sale-items", permission: "sale-items.view" }
 		]
 	},
@@ -275,8 +284,9 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		icon: "carbon:locked",
 		status: "coming-soon",
 		pages: [
-			{ key: "locks", path: "locks" },
-			{ key: "accessLogs", path: "logs" }
+			// ComingSoon: no API yet.
+			{ key: "locks", path: "locks", allStaff: true },
+			{ key: "accessLogs", path: "logs", allStaff: true }
 		]
 	},
 	{
@@ -286,25 +296,23 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		status: "active",
 		pages: [
 			{ key: "transactions", path: "transactions", permission: "payments.view" },
-			{ key: "paymentMethods", path: "methods" },
-			{ key: "currencies", path: "currencies" },
-			{ key: "exchangeRates", path: "exchange-rates" },
-			{ key: "walletTopUps", path: "wallet-top-ups" },
-			{ key: "cashRegister", path: "cash-register" },
-			{ key: "invoices", path: "invoices", openedBy: ["invoices.view"] }
+			{ key: "paymentMethods", path: "methods", permission: "payment-methods.view" },
+			{ key: "currencies", path: "currencies", permission: "currencies.view" },
+			{ key: "exchangeRates", path: "exchange-rates", permission: "exchange-rates.view" },
+			{ key: "walletTopUps", path: "wallet-top-ups", permission: "wallet-top-ups.view" },
+			{ key: "cashRegister", path: "cash-register", permission: "cash-register.view" },
+			{ key: "invoices", path: "invoices", permission: "invoices.view" }
 		]
 	},
 	{
 		// Inventory (ADD Core's add/inventory package, 2026-10-24): assets
 		// tracked one by one, consumable stock per place, and their catalog.
-		// No role gate: every page carries its own inventory.* permission, as
-		// every route does on the backend, so a store keeper's custom role
-		// works without admin|operations.
+		// Every page carries its own inventory.* permission, as every route
+		// does on the backend, so a store keeper's custom role works.
 		key: "inventory",
 		path: "/inventory",
 		icon: "carbon:box",
 		status: "active",
-		roles: ["all"],
 		pages: [
 			{ key: "inventoryAssets", path: "assets", permission: "inventory.assets.view" },
 			{ key: "inventoryAsset", path: "assets/:id", hidden: true, permission: "inventory.assets.view" },
@@ -322,15 +330,15 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		icon: "carbon:chart-line",
 		status: "active",
 		pages: [
-			{ key: "providersReport", path: "providers", openedBy: ["reports.view"] },
-			{ key: "revenueReport", path: "revenue", openedBy: ["reports.view"] },
+			{ key: "providersReport", path: "providers", permission: "reports.view" },
+			{ key: "revenueReport", path: "revenue", permission: "reports.view" },
 			// The figures the dashboard sums up, in full; each behind the
-			// permission of the dashboard section it expands.
-			{ key: "spacesReport", path: "spaces", permission: "dashboard.spaces", openedBy: ["dashboard.spaces"] },
-			{ key: "collectionsReport", path: "collections", permission: "dashboard.finance", openedBy: ["dashboard.finance"] }
-		],
-		roles: ["admin", "operations"],
-		permission: "reports.view"
+			// permission of the dashboard section it expands. Until 2026-10-27
+			// the section also asked for `reports.view`, which neither page's
+			// API (`admin/dashboard/*`) asks for.
+			{ key: "spacesReport", path: "spaces", permission: "dashboard.spaces" },
+			{ key: "collectionsReport", path: "collections", permission: "dashboard.finance" }
+		]
 	},
 	{
 		key: "community",
@@ -344,7 +352,8 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "eventCategories", path: "event-categories", permission: "event-categories.view" },
 			{ key: "eventAttendees", path: "events/:eventId/attendees", hidden: true, permission: "events.view" },
 			{ key: "community", path: "directory", permission: "community-members.view" },
-			{ key: "cafe", path: "cafe" }
+			// ComingSoon: no API yet.
+			{ key: "cafe", path: "cafe", allStaff: true }
 		]
 	},
 	{
@@ -353,9 +362,10 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		icon: "carbon:rocket",
 		status: "coming-soon",
 		pages: [
-			{ key: "incubate", path: "incubate" },
-			{ key: "accelerate", path: "accelerate" },
-			{ key: "mentors", path: "mentors" }
+			// ComingSoon: no API yet.
+			{ key: "incubate", path: "incubate", allStaff: true },
+			{ key: "accelerate", path: "accelerate", allStaff: true },
+			{ key: "mentors", path: "mentors", allStaff: true }
 		]
 	},
 	{
@@ -365,7 +375,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		status: "active",
 		pages: [
 			{ key: "privateOfficeRequests", path: "private-office-requests", permission: "private-office-requests.view" },
-			{ key: "operationsRequests", path: "operations-requests" }
+			{ key: "operationsRequests", path: "operations-requests", permission: "service-requests.view" }
 		]
 	},
 	{
@@ -378,7 +388,8 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "partners", path: "partners", permission: "partners.view" },
 			{ key: "founders", path: "founders", permission: "founders.view" },
 			{ key: "contactLinks", path: "contact-links", permission: "contact-links.view" },
-			{ key: "notifications", path: "notifications" }
+			// Write-only: the broadcast it sends.
+			{ key: "notifications", path: "notifications", permission: "notifications.broadcast" }
 		]
 	},
 	{
@@ -389,21 +400,19 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		icon: "carbon:application-mobile",
 		status: "active",
 		pages: [
-			{ key: "privacyPolicy", path: "privacy-policy", icon: "carbon:security" },
-			{ key: "termsOfUse", path: "terms-of-use", icon: "carbon:document-tasks" },
-			{ key: "helpSupport", path: "help-support", icon: "carbon:help" }
+			{ key: "privacyPolicy", path: "privacy-policy", icon: "carbon:security", permission: "app-content.view" },
+			{ key: "termsOfUse", path: "terms-of-use", icon: "carbon:document-tasks", permission: "app-content.view" },
+			{ key: "helpSupport", path: "help-support", icon: "carbon:help", permission: "app-content.view" }
 		]
 	},
 	{
-		// HR administration (add/hr). No role gate: every page carries its
-		// own hr.* permission, so a custom HR role works without
-		// admin|operations, as on the backend.
+		// HR administration (add/hr). Every page carries its own hr.*
+		// permission, so a custom HR role works, as on the backend.
 		key: "hr",
 		group: "hr",
 		path: "/hr",
 		icon: "carbon:user-multiple",
 		status: "active",
-		roles: ["all"],
 		pages: [
 			{ key: "employees", path: "employees", permission: "hr.employees.view" },
 			{ key: "employeeProfile", path: "employees/:id", hidden: true, permission: "hr.employees.view" },
@@ -420,7 +429,6 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		path: "/hr-time",
 		icon: "carbon:calendar",
 		status: "active",
-		roles: ["all"],
 		pages: [
 			{ key: "hrLeaveRequests", path: "leave-requests", permission: "hr.leave.view" },
 			{ key: "hrLeaveCalendar", path: "leave-calendar", permission: "hr.leave.view" },
@@ -441,7 +449,6 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		path: "/hr-pay",
 		icon: "carbon:money",
 		status: "active",
-		roles: ["all"],
 		pages: [
 			{ key: "hrPayrollRuns", path: "payroll-runs", permission: "hr.payroll.view" },
 			{ key: "hrPayrollRun", path: "payroll-runs/:id", hidden: true, permission: "hr.payroll.view" },
@@ -463,7 +470,6 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		path: "/hr-talent",
 		icon: "carbon:growth",
 		status: "active",
-		roles: ["all"],
 		pages: [
 			{ key: "hrRequisitions", path: "requisitions", permission: "hr.recruitment.view" },
 			{ key: "hrJobOpenings", path: "job-openings", permission: "hr.recruitment.view" },
@@ -490,7 +496,6 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		path: "/hr-reports",
 		icon: "carbon:report",
 		status: "active",
-		roles: ["all"],
 		pages: [
 			{ key: "hrDashboard", path: "dashboard", permission: "hr.reports.view" },
 			{ key: "hrHeadcount", path: "headcount", permission: "hr.reports.view" },
@@ -507,7 +512,6 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		path: "/hr-settings",
 		icon: "carbon:settings-adjust",
 		status: "active",
-		roles: ["all"],
 		pages: [
 			{ key: "hrDocumentTypes", path: "document-types", permission: "hr.settings.manage" },
 			{ key: "hrChecklistTemplates", path: "checklist-templates", permission: "hr.settings.manage" },
@@ -529,7 +533,6 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		path: "/my-hr",
 		icon: "carbon:user-profile",
 		status: "active",
-		roles: ["all"],
 		employee: true,
 		accountMenu: true,
 		pages: [
@@ -554,8 +557,8 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		status: "active",
 		pages: [
 			{ key: "systemSettings", path: "system", permission: "settings.view" },
-			// Fortify's own two-factor routes: every signed-in account's.
-			{ key: "accountSecurity", path: "account", hidden: true, openedBy: "any" }
+			// Fortify's own two-factor routes: every staff account's.
+			{ key: "accountSecurity", path: "account", hidden: true, allStaff: true }
 		]
 	}
 ]
@@ -591,20 +594,18 @@ export function navGroupMenuKey(group: NavGroup): string {
 }
 
 /**
- * Where "/" lands.
+ * Where "/" lands for a staff account holding at least one `dashboard.*`
+ * permission (`homePath()` in `navigation/access.ts`).
  *
- * Deliberately the first ACTIVE section rather than the dashboard: the dashboard
- * is scheduled last, so pointing home at it would leave the landing page saying
- * "coming soon" for most of the build. This becomes genuinely useful the moment
- * the first real screen ships. Revisit once the dashboard exists.
- */
-export const HOME_REDIRECT = "/spatial/branches"
-
-/**
- * The dashboard now exists (2026-10-13), so "/" lands on it for any staff
- * account holding at least one `dashboard.*` permission (`src/router/index.ts`).
- * HOME_REDIRECT above is kept, unchanged, as the landing page for an account
- * holding none — sending it to a dashboard with nothing to show would trade a
- * useful first screen for an empty one.
+ * History. "/" first landed on HOME_REDIRECT, `/spatial/branches` —
+ * deliberately the first ACTIVE section rather than the dashboard, which was
+ * scheduled last and would have said "coming soon" for most of the build. The
+ * dashboard existed from 2026-10-13, and HOME_REDIRECT was kept for an account
+ * holding no dashboard panel — sending it to a dashboard with nothing to show
+ * would trade a useful first screen for an empty one. 2026-10-27: HOME_REDIRECT
+ * went. That account now lands on the first screen in sidebar order whose
+ * permission it holds — `/spatial/branches` for admin and for operations as
+ * before, but the account's own first screen for any other role, where the
+ * fixed path was a page it might not hold.
  */
 export const DASHBOARD_HOME = "/dashboard/overview"

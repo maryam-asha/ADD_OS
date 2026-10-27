@@ -1,6 +1,7 @@
 // src/add-os/modules/system/config/__tests__/roles.config.spec.ts
 import type { PermissionModule, RoleRecord } from "@/add-os/modules/system/types/role"
 import { describe, expect, it } from "vitest"
+import { KNOWN_PERMISSIONS } from "../known-permissions"
 import {
 	applyViewRule,
 	displayActionName,
@@ -38,6 +39,57 @@ describe("the view rule — no action without its view", () => {
 
 	it("leaves an action with no view alone", () => {
 		expect(applyViewRule([], ["renewals.manage"], grantable)).toEqual(["renewals.manage"])
+	})
+})
+
+describe("the view rule over every permission ADD Core can return (2026-10-27)", () => {
+	const known = new Set(KNOWN_PERMISSIONS)
+
+	it.each([
+		["reception.check_in", "reception.view"],
+		["reception.book", "reception.view"],
+		["reception.approve", "reception.view"],
+		["reception.settle_payment", "reception.view"],
+		["reception.record_consumption", "reception.view"],
+		["companies.update_status", "companies.view"],
+		["companies.manage_members", "companies.view"],
+		["kiosks.pair", "kiosks.view"],
+		["cash-register.manage", "cash-register.view"],
+		["events.manage_attendees", "events.view"],
+		["wallet-top-ups.create", "wallet-top-ups.view"],
+		["item-sales.create", "item-sales.view"],
+		["exchange-rates.create", "exchange-rates.view"],
+		["app-content.update", "app-content.view"],
+		["site-inquiries.update", "site-inquiries.view"],
+		["service-requests.update", "service-requests.view"],
+		["coupons.delete", "coupons.view"],
+		["memberships.create", "memberships.view"],
+		["users.assign_role", "users.view"],
+		["providers.transfer_company", "providers.view"],
+		["invoices.void_payment", "invoices.view"],
+		["hr.employees.view_sensitive", "hr.employees.view"],
+		["inventory.stock.adjust", "inventory.stock.view"]
+	])("%s brings %s with it, and taking the view away takes it back", (action, view) => {
+		expect(viewPermissionOf(action, known)).toBe(view)
+		expect(applyViewRule([], [action], known).sort()).toEqual([action, view].sort())
+		expect(applyViewRule([action, view], [action], known)).toEqual([])
+	})
+
+	it.each([
+		"plan-purchases.create",
+		"notifications.broadcast",
+		"renewals.manage",
+		"dashboard.finance",
+		"hr.roster.manage",
+		"hr.lifecycle.manage"
+	])("%s has no view beside it, so it stays alone", action => {
+		expect(viewPermissionOf(action, known)).toBeNull()
+		expect(applyViewRule([], [action], known)).toEqual([action])
+	})
+
+	it("repairs a whole saved selection without adding a view the API never offers", () => {
+		const repaired = applyViewRule([], ["plan-purchases.create", "notifications.broadcast", "kiosks.pair"], known)
+		expect(repaired.sort()).toEqual(["kiosks.pair", "kiosks.view", "notifications.broadcast", "plan-purchases.create"])
 	})
 })
 

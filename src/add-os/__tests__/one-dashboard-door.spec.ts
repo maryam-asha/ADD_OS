@@ -5,8 +5,9 @@ import { describe, expect, it } from "vitest"
 /**
  * ADD OS — one rule decides who may use the dashboard at all.
  *
- * `mayUseDashboard` in `src/stores/auth.ts`: a provider, any role besides
- * member and provider, or an employee. Sign-in used to keep its own copy —
+ * `mayUseDashboard` in `src/stores/auth.ts`: a provider, an account holding
+ * at least one permission (until 2026-10-27: any role besides member and
+ * provider), or an employee. Sign-in used to keep its own copy —
  * `user.roles.every(r => r === "member")` — written before HR, so it never
  * learned about the employee record the store's copy had gained, and every
  * member who is also an employee was signed straight back out (live HR run,

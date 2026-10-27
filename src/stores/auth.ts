@@ -1,34 +1,28 @@
-import type { AdminUser, OpenedBy, Role, Roles } from "@/types/auth.d"
+import type { AdminUser, Role, Roles } from "@/types/auth.d"
 import _castArray from "lodash/castArray"
 import { acceptHMRUpdate, defineStore } from "pinia"
 import { hasApiUrl } from "@/add-os/config/env"
 import { getMe } from "@/add-os/services/auth"
 
-/** The two roles ADD Core lets into every admin route (`role:admin|operations`). */
-const STAFF_ROLES: readonly string[] = ["admin", "operations"]
-
-/** Roles that never open this dashboard's admin side: the member app, and the provider portal. */
-const NON_DASHBOARD_ROLES: readonly string[] = ["member", "provider"]
-
 /**
- * Who may use this dashboard at all: a provider (its portal), an account with
- * any role besides member and provider (admin, operations, or one made on the
- * Roles page), or an employee (My HR, whatever the role). The one rule for
- * sign-in, session restore and the route guard — sign-in kept its own copy,
- * without the employee, and refused every member who is also an employee
- * (live HR run, 2026-10-21).
+ * Who may use this dashboard at all: a provider (its portal), a staff account
+ * — one holding at least one permission, whatever its roles are called — or
+ * an employee (My HR, whatever the role). The one rule for sign-in, session
+ * restore and the route guard — sign-in kept its own copy, without the
+ * employee, and refused every member who is also an employee (live HR run,
+ * 2026-10-21).
+ *
+ * 2026-10-27: a staff account is one holding a permission, not one holding a
+ * role besides member and provider. ADD Core now guards every admin route by
+ * permission alone and admits to `me` and `media/upload` any account holding
+ * at least one, so a role granted nothing reaches nothing there; before, it
+ * was let in here to a dashboard every page of which the server refused.
  */
-export function mayUseDashboard(user: Pick<AdminUser, "roles" | "employee">): boolean {
-	const roles = user.roles ?? []
-	return roles.includes("provider") || roles.some(role => !NON_DASHBOARD_ROLES.includes(role)) || Boolean(user.employee)
+export function mayUseDashboard(user: Pick<AdminUser, "roles" | "permissions" | "employee">): boolean {
+	return Boolean(user.roles?.includes("provider")) || Boolean(user.permissions?.length) || Boolean(user.employee)
 }
 
-/** The account's roles: the signed-in user's, else the one kept across a reload until `/me` answers. */
-function rolesOf(state: { role: Role | null; user: Partial<AdminUser> }): string[] {
-	return state.user?.roles ?? (state.role ? [state.role] : [])
-}
-
-/** ADD OS primary role: provider, admin, operations, moderator, or custom. */
+/** ADD OS primary role: provider, admin, operations, moderator, or custom. Display and the provider audience only — never staff access. */
 function primaryRole(roles: string[] | undefined): Role | null {
 	if (roles?.includes("provider")) return "provider"
 	if (roles?.includes("admin")) return "admin"
@@ -93,25 +87,29 @@ export const useAuthStore = defineStore("auth", {
 		 * then, and refusing early would sign out an employee with no role.
 		 */
 		mayUseDashboard(state) {
-			return !state.user?.roles || mayUseDashboard(state.user as AdminUser)
+			return !state.user?.roles || mayUseDashboard({ ...state.user, permissions: state.permissions } as AdminUser)
 		},
-		/** Holds admin or operations: every admin route, as on the server. */
-		isStaff(state) {
-			return rolesOf(state).some(role => STAFF_ROLES.includes(role))
-		},
-		/** Holds a role that opens the admin side at all: admin, operations or a custom role — not member, provider or none. */
-		hasDashboardRole(state) {
-			return rolesOf(state).some(role => !NON_DASHBOARD_ROLES.includes(role))
+		/**
+		 * A staff account: not a provider, and holding at least one permission —
+		 * whatever its roles are called. Opens the pages marked `allStaff`; every
+		 * other staff page asks for its own permission (`navigation/access.ts`).
+		 * Until 2026-10-27 this meant "holds admin or operations", and those two
+		 * role names decided staff access; nothing checks a role name for it now.
+		 */
+		isStaff(state): boolean {
+			const isProvider = Boolean(state.user?.roles?.includes("provider") || state.role === "provider")
+			return !isProvider && state.permissions.length > 0
 		},
 		/** Has an HR employee record: reaches My HR whatever the role. */
 		isEmployee(state) {
 			return Boolean(state.user?.employee)
 		},
-		isAdmin(state) {
-			const isProv = Boolean(state.user?.roles?.includes("provider") || state.role === "provider")
-			const isMember = Boolean(state.user?.roles?.length && state.user.roles.every(r => r === "member"))
-			return state.logged && !isProv && !isMember
-		},
+		/**
+		 * Whether the account holds one of `roles`. An audience check — the
+		 * provider portal's `["provider"]` — never a staff gate: since 2026-10-27
+		 * staff pages ask for a permission (`navigation/access.ts`), and the
+		 * admin|operations branch that stood here for them is gone.
+		 */
 		isRoleGranted(state) {
 			return (roles?: Roles) => {
 				if (!roles) {
@@ -127,65 +125,19 @@ export const useAuthStore = defineStore("auth", {
 					return true
 				}
 
-				const isProv = Boolean(state.user?.roles?.includes("provider") || state.role === "provider")
-				const isMember = Boolean(state.user?.roles?.length && state.user.roles.every(r => r === "member"))
-
 				if (arrRoles.includes("provider")) {
-					return isProv
-				}
-
-				// The general admin gate: admin, operations, or a custom role — which
-				// pages a custom role then reaches is `mayOpenAdminPage`'s call. An
-				// account with no role used to pass here (it is neither provider nor
-				// member), so an employee without dashboard access landed on admin
-				// pages the server refused, not on My HR.
-				if (arrRoles.includes("admin") && arrRoles.includes("operations")) {
-					return !isProv && !isMember && rolesOf(state).some(role => !NON_DASHBOARD_ROLES.includes(role))
+					return Boolean(state.user?.roles?.includes("provider") || state.role === "provider")
 				}
 
 				if (state.role && arrRoles.includes(state.role)) {
 					return true
 				}
 
-				if (state.user?.roles?.some(r => arrRoles.includes(r as Role))) {
-					return true
-				}
-
-				return false
+				return Boolean(state.user?.roles?.some(r => arrRoles.includes(r as Role)))
 			}
 		},
 		hasPermission(state) {
 			return (permission: string) => state.permissions.includes(permission)
-		},
-		/**
-		 * Whether a page behind the admin gate opens for this account. ADD Core
-		 * keeps most admin routes for `role:admin|operations`; a few it serves on
-		 * a permission alone, to any role. So admin reaches every page except
-		 * one tagged with permissions it does not hold (the server
-		 * would refuse them too), and any other dashboard role reaches only
-		 * pages tagged "any" or with a permission it holds — not, as before,
-		 * every admin page, each failing on 403.
-		 *
-		 * Operations, since 2026-10-25, reaches only what the permissions `/me`
-		 * returns for it open: a page tagged "any", one whose `openedBy` it
-		 * holds, or one whose `permission` it holds. A page naming no
-		 * permission is admin's alone — so its menu follows what its role is
-		 * granted on the Roles page, not every screen admin sees. ADD Core
-		 * still serves most of those routes on `role:admin|operations`, so this
-		 * narrows the dashboard, not the API.
-		 */
-		mayOpenAdminPage(state) {
-			return (openedBy?: OpenedBy, permission?: string) => {
-				const roles = rolesOf(state)
-				const held = (list: readonly string[]) => list.some(name => state.permissions.includes(name))
-				if (roles.includes("admin")) return !Array.isArray(openedBy) || held(openedBy)
-				if (roles.includes("operations")) {
-					if (Array.isArray(openedBy)) return held(openedBy)
-					return openedBy === "any" || (permission !== undefined && held([permission]))
-				}
-				if (!roles.some(role => !NON_DASHBOARD_ROLES.includes(role))) return false
-				return openedBy === "any" || (Array.isArray(openedBy) && held(openedBy))
-			}
 		}
 	},
 	persist: {

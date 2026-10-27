@@ -34,7 +34,7 @@ vi.mock("vue-router", async importOriginal => {
 	return { ...actual, useRouter: () => ({ push: pushMock }), useRoute: () => ({ query: currentQuery.value }) }
 })
 
-const adminUser = { id: 1, name: "Maryam", email: "m@add.sy", roles: ["admin"] }
+const adminUser = { id: 1, name: "Maryam", email: "m@add.sy", roles: ["admin"], permissions: ["branches.view"] }
 
 const messages = {
 	en: {
@@ -146,7 +146,7 @@ describe("loginPage", () => {
 
 		it("lets in a member who is also an employee, for My HR", async () => {
 			loginMock.mockResolvedValue({ two_factor: false })
-			getMeMock.mockResolvedValue({ ...adminUser, roles: ["member"], employee })
+			getMeMock.mockResolvedValue({ ...adminUser, roles: ["member"], permissions: [], employee })
 
 			const wrapper = mountPage()
 			await flushPromises()
@@ -159,8 +159,10 @@ describe("loginPage", () => {
 		})
 
 		it.each([
-			["a member-only account", { roles: ["member"] }],
-			["an account with no role and no employee record", { roles: [] }]
+			["a member-only account", { roles: ["member"], permissions: [] }],
+			// Since 2026-10-27 a staff account is one holding a permission, whatever its role is called.
+			["a role granted no permission", { roles: ["empty_role"], permissions: [] }],
+			["an account with no role and no employee record", { roles: [], permissions: [] }]
 		])("turns away %s, signing the session out", async (_label, account) => {
 			loginMock.mockResolvedValue({ two_factor: false })
 			getMeMock.mockResolvedValue({ ...adminUser, ...account, employee: null })

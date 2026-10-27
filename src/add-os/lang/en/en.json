@@ -97,9 +97,127 @@
 			"update": "Update",
 			"delete": "Delete",
 			"update_status": "Update status",
-			"assign_role": "Assign role"
+			"assign_role": "Assign role",
+			"check_in": "Check in and out",
+			"book": "Book",
+			"approve": "Approve",
+			"reject": "Reject",
+			"settle_payment": "Settle payment",
+			"record_consumption": "Record consumption",
+			"manage_members": "Manage members",
+			"manage_attendees": "Manage registrations",
+			"manage": "Manage",
+			"broadcast": "Send broadcast",
+			"pair": "Pair device",
+			"reverse": "Reverse at the bank",
+			"cancel": "Cancel",
+			"record_payment": "Record payment",
+			"void_payment": "Void payment",
+			"status": "Change status",
+			"transfer_company": "Transfer company",
+			"terminate": "Terminate early",
+			"operations": "Operations section",
+			"finance": "Finance section",
+			"members": "Members section",
+			"spaces": "Spaces section",
+			"org": {
+				"view": "View org structure",
+				"manage": "Manage org structure"
+			},
+			"employees": {
+				"view": "View employees",
+				"create": "Add employees",
+				"update": "Edit employees",
+				"view_sensitive": "View sensitive data"
+			},
+			"lifecycle": {
+				"manage": "Manage joining and leaving"
+			},
+			"documents": {
+				"view": "View documents",
+				"manage": "Manage documents"
+			},
+			"checklists": {
+				"manage": "Manage checklists"
+			},
+			"alerts": {
+				"view": "View alerts"
+			},
+			"settings": {
+				"manage": "Manage HR settings"
+			},
+			"approvals": {
+				"manage": "Manage approvals"
+			},
+			"leave": {
+				"view": "View leave",
+				"manage": "Manage leave"
+			},
+			"attendance": {
+				"view": "View attendance",
+				"correct": "Correct attendance",
+				"lock": "Lock months",
+				"cards": "Issue attendance cards"
+			},
+			"roster": {
+				"manage": "Manage roster"
+			},
+			"timesheets": {
+				"view": "View timesheets",
+				"manage": "Manage cost splits"
+			},
+			"payroll": {
+				"view": "View payroll",
+				"manage": "Run payroll",
+				"approve": "Approve payroll",
+				"pay": "Pay payroll"
+			},
+			"compensation": {
+				"manage": "Manage pay"
+			},
+			"loans": {
+				"manage": "Manage loans"
+			},
+			"benefits": {
+				"view": "View benefits",
+				"manage": "Manage benefits"
+			},
+			"recruitment": {
+				"view": "View recruitment",
+				"manage": "Manage recruitment"
+			},
+			"performance": {
+				"view": "View performance",
+				"manage": "Manage performance"
+			},
+			"training": {
+				"view": "View training",
+				"manage": "Manage training"
+			},
+			"reports": {
+				"view": "View reports"
+			},
+			"catalog": {
+				"view": "View categories and items",
+				"manage": "Manage categories and items"
+			},
+			"assets": {
+				"view": "View assets",
+				"manage": "Manage assets",
+				"custody": "Hand over and take back",
+				"maintenance": "Manage maintenance",
+				"dispose": "Dispose of assets"
+			},
+			"stock": {
+				"view": "View stock",
+				"receive": "Receive stock",
+				"issue": "Issue stock",
+				"transfer": "Transfer stock",
+				"adjust": "Record stock counts"
+			}
 		},
 		"modules": {
+			"amenities": "Amenities",
 			"announcements": "Announcements",
 			"branches": "Branches",
 			"buildings": "Buildings",
@@ -122,7 +240,40 @@
 			"users": "Users",
 			"error-logs": "Error Logs",
 			"roles": "Roles & Permissions",
-			"settings": "Settings"
+			"settings": "Settings",
+			"app-content": "App Content",
+			"bookings": "Bookings",
+			"cash-register": "Cash Register",
+			"companies": "Companies",
+			"coupons": "Coupons",
+			"currencies": "Currencies",
+			"dashboard": "Dashboard",
+			"event-categories": "Event Categories",
+			"exchange-rates": "Exchange Rates",
+			"hr": "Human Resources",
+			"inventory": "Inventory & Assets",
+			"invoices": "Invoices",
+			"item-sales": "Item Sales",
+			"kiosks": "Reception Kiosks",
+			"members": "Members",
+			"memberships": "Memberships",
+			"notifications": "Notifications",
+			"office-leases": "Office Leases",
+			"payment-methods": "Payment Methods",
+			"payments": "Payments",
+			"plan-modules": "Plan Modules",
+			"plan-purchases": "Plan Purchases",
+			"provider-requests": "Provider Requests",
+			"providers": "Providers",
+			"reception": "Reception",
+			"renewals": "Renewals",
+			"reports": "Reports",
+			"resource-types": "Resource Types",
+			"sale-items": "Sale Items",
+			"service-requests": "Service Requests",
+			"service-types": "Service Types",
+			"site-inquiries": "Website Inquiries",
+			"wallet-top-ups": "Wallet Top-ups"
 		}
 	},
 	"auth": {
@@ -2703,7 +2854,7 @@
 	},
 	"memberships": {
 		"description": "Activate a plan for a member or a company without charging their wallet.",
-		"adminOnly": "Only an admin can activate memberships.",
+		"activationNotGranted": "Activating memberships needs the permission to activate them, which your role does not hold.",
 		"loadError": "Couldn't load plans or members. You may not have permission to view this page.",
 		"desks": {
 			"title": "Dedicated desks",

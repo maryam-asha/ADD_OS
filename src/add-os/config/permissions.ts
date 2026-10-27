@@ -1,80 +1,68 @@
-import type { Role } from "@/types/auth.d"
 import { useAuthStore } from "@/stores/auth"
 
 /**
- * ADD OS's admin dashboard gates UI controls through two mechanisms that
- * deliberately coexist in this one file during an in-progress backend
- * migration (`docs/decisions/rbac-permission-pilot.md` in ADD Core):
+ * ADD OS's admin dashboard decides which controls to show from the account's
+ * granted permissions (from `GET /api/v1/auth/me`), never from a role name.
+ * Every gate below names the permission ADD Core guards the action's route
+ * with, so a custom role made on the Roles page sees exactly the controls its
+ * permissions make work — and admin, which holds every permission, sees all.
  *
- * - Role-based gates (`canDeleteSpatialResource`, `canDeleteBusinessHours`,
- *   `canManageRoles`) — check the account's single primary role via the auth
- *   store's `isRoleGranted`. This is the original mechanism and still covers
- *   every resource below except Branches: buildings/floors/zones/spaces/
- *   seatsDesks delete, Business Hours delete, and Role management
- *   (`RoleController`'s routes still run on `role:admin` middleware).
- * - The permission-based gate (`can`) — checks the account's actual granted
- *   permissions (from `GET /api/v1/admin/me`) via the auth store's
- *   `hasPermission`. Only Branches uses this today: its backend routes were
- *   migrated to `permission:branches.view|create|update|delete` middleware as
- *   a pilot, so a role check can no longer correctly express who's allowed —
- *   a custom role could hold `branches.delete` without being `"admin"`.
- *
- * This split is temporary migration state, not drift between two competing
- * patterns: as more resources' backend enforcement converts from role- to
- * permission-based middleware in follow-up work, they move from the first
- * list to the second. Use whichever mechanism matches the resource's actual
- * current backend middleware — check the route file, don't guess.
+ * History. Until 2026-10-27 this file held two mechanisms side by side during
+ * a migration (`docs/decisions/rbac-permission-pilot.md` in ADD Core):
+ * role-based gates through the store's `isRoleGranted` (spatial and Business
+ * Hours deletes, Role management, membership activation, coupon writes — the
+ * routes ADD Core kept in its `role:admin` group) and this permission gate,
+ * which Branches piloted. ADD Core then guarded every admin route by
+ * permission alone (`2026-10-27-permission-only-dashboard-access-design.md`),
+ * so each role gate became the permission of its route and the role
+ * mechanism went. What was given up: "admin only" no longer holds by
+ * construction — a role is shown a delete exactly when it is granted
+ * `<module>.delete`, so the Roles page is now where that decision lives.
  */
 
 /**
- * Single source for "which role may delete which spatial resource" — sourced
- * verbatim from each DELETE endpoint's description in
- * ADD-OS.postman_collection.json, not from inference. Every one of these five
- * spatial resources reads literally "Admin-only (not operations)." there
- * (Delete Building/Floor/Zone/Space/Seat-Desk; Resource left with ADD Core's
- * `resources`, retired 2026-10-24 for amenities and inventory assets).
- * Branches is not in
- * this map — its delete decision is permission-gated now, via `can()` below;
- * see `LegacyGatedSpatialResourceKey`.
+ * The generic permission-based gate — checks the current user's actual
+ * granted permissions, not a role name. Every gate in this file goes through
+ * it; `no-inline-role-checks.spec.ts` keeps views from reimplementing it.
  *
- * `users` and `roles` have no entries here. Users: settled, not an open
- * question — the collection has no DELETE endpoint for the resource at all;
- * users are deactivated via `PATCH /api/v1/admin/users/{id}/status` (see
- * `UsersPage.vue`'s change-status modal), never hard-deleted. Roles: the
- * backend gained full Role CRUD in a prior task, so this claim used to be
- * true but no longer is — `GET /api/v1/admin/roles` is not read-only any
- * more. Role management is gated by `canManageRoles()` below instead of an
- * entry in this map, since it isn't a delete-only decision and isn't a
- * spatial resource.
+ * IMPORTANT: a gate only decides whether to SHOW a control. It is NOT an
+ * authorization boundary — the backend still rejects the request with 403
+ * regardless of what this returns. Read a `true` as "this request isn't
+ * expected to be rejected," not as "this request will succeed."
  */
-export const SPATIAL_RESOURCE_DELETE_ROLE = {
-	buildings: "admin",
-	floors: "admin",
-	zones: "admin",
-	spaces: "admin",
-	seatsDesks: "admin"
-} as const satisfies Partial<Record<SpatialResourceKey, Role>>
+export function can(permission: string): boolean {
+	return useAuthStore().hasPermission(permission)
+}
 
 /**
- * The full set of spatial resources, independent of which gating mechanism
- * currently covers each one. Kept separate from
- * `SPATIAL_RESOURCE_DELETE_ROLE`'s keys (which now exclude Branches) so
- * `CASCADING_SPATIAL_RESOURCES` — which still legitimately needs Branches —
- * has a type to be declared against.
+ * The full set of spatial resources, independent of how each one's delete is
+ * gated. `CASCADING_SPATIAL_RESOURCES` needs Branches too.
  */
 export type SpatialResourceKey = "branches" | "buildings" | "floors" | "zones" | "spaces" | "seatsDesks"
 
 /**
- * The subset of `SpatialResourceKey` still on the legacy role-based delete
- * gate — i.e. everything except Branches. Narrowing
- * `canDeleteSpatialResource`'s parameter to this type (instead of the full
- * `SpatialResourceKey`) makes `canDeleteSpatialResource("branches")` a
- * compile-time error: a permanent guardrail against ever reverting
- * `BranchesPage.vue` back to this now-stale check, since Branches' delete
- * decision must reflect its actual granted permission, which this role-based
- * map can no longer express correctly.
+ * Which permission ADD Core's DELETE route asks for, per spatial resource:
+ * `<module>.delete`, the module being the route's URI segment. Until
+ * 2026-10-27 each was "admin" (the collection's "Admin-only (not
+ * operations)."); see the file-level note. Branches is not in this map — its
+ * page asks `can("branches.delete")` itself, as the permission pilot left it;
+ * see `DeleteGatedSpatialResourceKey`.
  */
-export type LegacyGatedSpatialResourceKey = keyof typeof SPATIAL_RESOURCE_DELETE_ROLE
+export const SPATIAL_RESOURCE_DELETE_PERMISSION = {
+	buildings: "buildings.delete",
+	floors: "floors.delete",
+	zones: "zones.delete",
+	spaces: "spaces.delete",
+	seatsDesks: "seats-desks.delete"
+} as const satisfies Partial<Record<SpatialResourceKey, string>>
+
+/**
+ * The spatial resources whose delete goes through `canDeleteSpatialResource`
+ * — every one except Branches. Narrowing the parameter to this type makes
+ * `canDeleteSpatialResource("branches")` a compile-time error, so
+ * `BranchesPage.vue` keeps its own `can("branches.delete")`.
+ */
+export type DeleteGatedSpatialResourceKey = keyof typeof SPATIAL_RESOURCE_DELETE_PERMISSION
 
 /**
  * Resources whose DELETE endpoint description in the collection says the
@@ -96,101 +84,77 @@ export const CASCADING_SPATIAL_RESOURCES: ReadonlySet<SpatialResourceKey> = new 
 	"spaces"
 ])
 
-/**
- * The gate itself — routed through the EXISTING auth store's
- * `isRoleGranted`, never re-implemented. This is the only place in the
- * codebase that should call `isRoleGranted` for a delete decision; the
- * five remaining role-gated spatial views ask this function, not the store
- * directly, so no view carries its own role comparison (enforced by
- * no-inline-role-checks.spec.ts). Branches no longer calls this — see
- * `LegacyGatedSpatialResourceKey` for why `resource` can't be `"branches"`
- * any more.
- *
- * IMPORTANT: this only decides whether to SHOW the delete control. It is
- * NOT an authorization boundary — the backend still rejects the request
- * with 403 regardless of what this returns. Do not read a `true` here as
- * "this request will succeed"; read it as "this request isn't expected to
- * be rejected," which is exactly the class of surprise this exists to
- * prevent.
- */
-export function canDeleteSpatialResource(resource: LegacyGatedSpatialResourceKey): boolean {
-	return useAuthStore().isRoleGranted(SPATIAL_RESOURCE_DELETE_ROLE[resource])
+/** Whether to show a spatial resource's delete control. */
+export function canDeleteSpatialResource(resource: DeleteGatedSpatialResourceKey): boolean {
+	return can(SPATIAL_RESOURCE_DELETE_PERMISSION[resource])
 }
 
 /**
- * Business Hours delete + Business Hour Exception delete are both "Admin-only
- * (not operations)." per the collection — same rule, so one shared constant and
- * one function cover both endpoints rather than duplicating
- * `SPATIAL_RESOURCE_DELETE_ROLE`'s per-resource map for a single value. Kept
- * separate from that map: Business Hours isn't a spatial resource, it just
- * lives in that nav section.
+ * Business Hours delete (`DELETE business-hours/{id}`). Its exceptions are a
+ * resource of their own on the server, with their own permission — see
+ * `canDeleteBusinessHourExceptions`. Until 2026-10-27 both shared one
+ * "admin" role gate.
  */
-export const BUSINESS_HOURS_DELETE_ROLE: Role = "admin"
-
 export function canDeleteBusinessHours(): boolean {
-	return useAuthStore().isRoleGranted(BUSINESS_HOURS_DELETE_ROLE)
+	return can("business-hours.delete")
+}
+
+/** Business Hour Exception delete (`DELETE business-hour-exceptions/{id}`). */
+export function canDeleteBusinessHourExceptions(): boolean {
+	return can("business-hour-exceptions.delete")
 }
 
 /**
- * The generic permission-based gate — checks the current user's actual
- * granted permissions (from GET /api/v1/admin/me), not a role name. Use this
- * for any resource whose backend enforcement has moved to permission:
- * middleware. Today that's Branches only (`branches.view/create/update/delete`)
- * — every other resource in this file still uses the older role-based gates
- * above, because their backend enforcement hasn't moved yet. Both mechanisms
- * are expected to coexist here during the migration; see the file-level
- * comment for which resource uses which.
+ * Role management, one gate per action (`RolesPage.vue`). Until 2026-10-27
+ * a single `canManageRoles()` asked for the "admin" role (`role:admin` on
+ * `RoleController`'s routes) and showed create, edit and delete alike.
  */
-export function can(permission: string): boolean {
-	return useAuthStore().hasPermission(permission)
+
+/** Creating a role (`POST /api/v1/admin/roles`). */
+export function canCreateRoles(): boolean {
+	return can("roles.create")
 }
 
-/**
- * Role management stays role-gated, not permission-gated: `RoleController`'s
- * routes are still behind `role:admin` middleware in this pilot (Branches is
- * the only resource whose backend moved to permission-based enforcement so
- * far). `RolesPage.vue` is a separate, later task's concern — this export
- * just makes the gate available to it.
- */
-export const ROLE_MANAGEMENT_ROLE: Role = "admin"
+/** Renaming a role or changing its permissions (`PUT|PATCH /api/v1/admin/roles/{role}`). */
+export function canUpdateRoles(): boolean {
+	return can("roles.update")
+}
 
-export function canManageRoles(): boolean {
-	return useAuthStore().isRoleGranted(ROLE_MANAGEMENT_ROLE)
+/** Deleting a role (`DELETE /api/v1/admin/roles/{role}`). */
+export function canDeleteRoles(): boolean {
+	return can("roles.delete")
 }
 
 /**
  * Activating a plan for someone without charging their wallet
- * (`POST /api/v1/admin/memberships`).
- *
- * Role-gated for the same reason as role management: the backend route sits
- * inside `admin.php`'s narrower `role:admin` group, not the shared
- * `admin|operations` block that covers most of this dashboard — granting a
- * paid subscription for free is money-adjacent, so operations is excluded
- * there and must be excluded here. Not permission-gated, because no
- * `memberships.*` permission exists: `PermissionSyncService` only derives
- * permissions for `AdminResourceController` subclasses plus a short manual
- * list, and the membership controller is in neither.
+ * (`POST /api/v1/admin/memberships`), which ADD Core guards with
+ * `memberships.create`. Until 2026-10-27 it was role-gated: the route sat in
+ * `admin.php`'s `role:admin` group (granting a paid subscription for free is
+ * money-adjacent) and no `memberships.*` permission existed. The Roles page
+ * now decides who holds it.
  */
-export const MEMBERSHIP_ACTIVATION_ROLE: Role = "admin"
-
 export function canActivateMemberships(): boolean {
-	return useAuthStore().isRoleGranted(MEMBERSHIP_ACTIVATION_ROLE)
+	return can("memberships.create")
 }
 
 /**
  * Creating, changing and deleting a discount coupon
- * (`POST`/`PUT|PATCH`/`DELETE /api/v1/admin/coupons`).
- *
- * Role-gated: ADDCore puts those three routes in `admin.php`'s `role:admin`
- * group ("a code is money off"), while the list, detail and redemption log
- * stay in the shared `admin|operations` block — so operations reads the page
- * and sees no write control. Like every gate here, this only decides what is
- * shown; the server's 403 is the boundary.
+ * (`POST`/`PUT|PATCH`/`DELETE /api/v1/admin/coupons`), each on its own
+ * permission. Until 2026-10-27 all three were the "admin" role (the routes
+ * sat in `admin.php`'s `role:admin` group, "a code is money off"), and
+ * operations read the page with no write control. Switching a coupon on or
+ * off is an update.
  */
-export const COUPON_MANAGEMENT_ROLE: Role = "admin"
+export function canCreateCoupons(): boolean {
+	return can("coupons.create")
+}
 
-export function canManageCoupons(): boolean {
-	return useAuthStore().isRoleGranted(COUPON_MANAGEMENT_ROLE)
+export function canUpdateCoupons(): boolean {
+	return can("coupons.update")
+}
+
+export function canDeleteCoupons(): boolean {
+	return can("coupons.delete")
 }
 
 export function canViewOfficeLeases(): boolean {

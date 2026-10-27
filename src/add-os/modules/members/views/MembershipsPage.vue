@@ -7,11 +7,12 @@
 		</div>
 
 		<!--
-			Activation is admin-only on the backend (`role:admin`, not the shared
-			`admin|operations` group). Saying so here is better than letting an
-			operations account fill the form and collect a 403 on submit.
+			Activation needs `memberships.create` on the backend (until 2026-10-27
+			it was `role:admin`, outside the shared `admin|operations` group).
+			Saying so here is better than letting an account without it fill the
+			form and collect a 403 on submit.
 		-->
-		<n-alert v-if="!canActivate" type="warning" :title="t('memberships.adminOnly')" />
+		<n-alert v-if="!canActivate" type="warning" :title="t('memberships.activationNotGranted')" />
 
 		<template v-else>
 			<n-alert v-if="loadError" type="error" :title="t('memberships.loadError')" />

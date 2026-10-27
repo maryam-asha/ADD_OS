@@ -165,7 +165,7 @@
 						:data="exceptions"
 						:loading="exceptionsLoading"
 						:on-edit="openEditException"
-						:on-delete="canDeleteHours ? (async row => { await exceptionMutations.remove(row.id) }) : undefined"
+						:on-delete="canDeleteExceptions ? (async row => { await exceptionMutations.remove(row.id) }) : undefined"
 					/>
 				</div>
 
@@ -268,7 +268,7 @@ import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
-import { canDeleteBusinessHours } from "@/add-os/config/permissions"
+import { canDeleteBusinessHourExceptions, canDeleteBusinessHours } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import {
 	DAYS_OF_WEEK_ORDERED,
@@ -301,6 +301,7 @@ const { t } = useI18n()
 const message = useMessage()
 
 const canDeleteHours = computed(() => canDeleteBusinessHours())
+const canDeleteExceptions = computed(() => canDeleteBusinessHourExceptions())
 
 const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/

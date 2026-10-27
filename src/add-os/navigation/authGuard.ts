@@ -1,6 +1,6 @@
 import type { RouteLocationNormalized, RouteLocationRaw } from "vue-router"
 import type { RouteMetaAuth } from "@/types/auth.d"
-import { isAdminGated } from "@/add-os/navigation/access"
+import { mayOpenStaffPage } from "@/add-os/navigation/access"
 import { useAuthStore } from "@/stores/auth"
 
 /** Where an employee without dashboard access lands: their own HR page. */
@@ -41,13 +41,13 @@ export function safeRedirect(raw: unknown): string {
  * straight back to it and loop.
  */
 export function authGuard(route: RouteLocationNormalized): RouteLocationRaw | void {
-	const { checkAuth, authRedirect, auth, roles, permission, employee, openedBy }: RouteMetaAuth = route.meta
+	const { checkAuth, authRedirect, auth, roles, permission, allStaff, employee }: RouteMetaAuth = route.meta
 	const authStore = useAuthStore()
 
 	if (route.redirectedFrom?.name === "Logout") authStore.setLogout()
 
-	// A member-only account that is not an employee, or one with no role and no
-	// employee record: nothing here is theirs (`mayUseDashboard`).
+	// Not a provider, holding no permission and no employee record — a
+	// member, or a role granted nothing: nothing here is theirs (`mayUseDashboard`).
 	if (authStore.isLogged && !authStore.mayUseDashboard) {
 		authStore.setLogout()
 		return { path: "/login" }
@@ -73,20 +73,22 @@ export function authGuard(route: RouteLocationNormalized): RouteLocationRaw | vo
 		// My HR is for accounts with an employee record, whatever their role.
 		if (employee && !authStore.isEmployee) return { path: "/" }
 
+		// An audience the route names (the provider portal's).
 		if (roles && !authStore.isRoleGranted(roles)) {
 			if (authStore.isProvider) return { path: "/provider/summary" }
-			// A café or sales employee with no dashboard role still has My HR.
+			// A café or sales employee with no permission still has My HR.
 			return authStore.isEmployee ? { path: MY_HR_PATH } : { path: "/login" }
 		}
 
-		if (permission && !authStore.hasPermission(permission)) {
-			return authStore.isProvider ? { path: "/provider/summary" } : { path: "/" }
+		// A staff page: open iff the account holds its permission, or — for a
+		// page with no API (`allStaff`) — is a staff account at all
+		// (`mayOpenStaffPage`). No role name decides it, since 2026-10-27. A
+		// staff account turned away goes to "/", which lands on a page it may
+		// open (`homePath`), so this never loops; an employee with no
+		// permission goes to My HR.
+		if (!employee && !isProviderRoute && !mayOpenStaffPage({ permission, allStaff })) {
+			return authStore.isStaff ? { path: "/" } : { path: MY_HR_PATH }
 		}
-
-		// Behind the admin gate a custom role reaches only the pages ADD Core
-		// serves it (`mayOpenAdminPage`). "/" then lands on one it may open
-		// (`homePath`), so this never loops.
-		if (isAdminGated(roles) && !authStore.mayOpenAdminPage(openedBy, permission)) return { path: "/" }
 
 		return
 	}

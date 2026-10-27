@@ -5,8 +5,10 @@ import { toPaginated } from "./pagination"
 
 /**
  * Discount coupons — collection pinned 2026-10-05, `Admin (Dashboard) /
- * Coupons`. Reads are open to admin and operations; writes are admin-only
- * on the server (`role:admin`), gated in the UI by `canManageCoupons()`.
+ * Coupons`. Each call needs its permission on the server — `coupons.view`,
+ * `.create`, `.update`, `.delete` — since 2026-10-27 (before, reads were
+ * admin|operations and writes `role:admin`); gated in the UI by
+ * `canCreateCoupons()` / `canUpdateCoupons()` / `canDeleteCoupons()`.
  */
 const BASE = "/api/v1/admin/coupons"
 

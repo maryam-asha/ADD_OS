@@ -7,10 +7,12 @@ const FILE = path.resolve(__dirname, "..", "BusinessHoursPage.vue")
 const source = readFileSync(FILE, "utf8")
 
 describe("businessHoursPage wiring", () => {
-	it("gates both tabs' delete actions behind canDeleteBusinessHours, not an inline role check", () => {
+	it("gates each tab's delete on its own permission gate, not an inline check", () => {
 		expect(source).toContain('from "@/add-os/config/permissions"')
+		expect(source).toContain("const canDeleteHours = computed(() => canDeleteBusinessHours())")
+		expect(source).toContain("const canDeleteExceptions = computed(() => canDeleteBusinessHourExceptions())")
 		expect(source).toContain("canDeleteHours ? (async row => { await hourMutations.remove(row.id) }) : undefined")
-		expect(source).toContain("canDeleteHours ? (async row => { await exceptionMutations.remove(row.id) }) : undefined")
+		expect(source).toContain("canDeleteExceptions ? (async row => { await exceptionMutations.remove(row.id) }) : undefined")
 	})
 
 	it("clears open_time/close_time when an exception is submitted as closed, per the backend's is_closed=true contract", () => {

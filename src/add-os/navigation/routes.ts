@@ -200,8 +200,10 @@ export function createAddOsRoutes(): RouteRecordRaw[] {
 			redirect: navRoutePath(section, firstPage),
 			meta: {
 				auth: true,
-				roles: section.roles ?? ["admin", "operations"],
-				permission: section.permission,
+				// An audience (the provider portal), never a staff gate: staff
+				// pages carry their own `permission` / `allStaff` below. Until
+				// 2026-10-27 a section without `roles` got admin|operations here.
+				roles: section.roles,
 				employee: section.employee,
 				titleKey: navSectionTitleKey(section)
 			},
@@ -212,9 +214,9 @@ export function createAddOsRoutes(): RouteRecordRaw[] {
 				props: { titleKey: navPageTitleKey(page) },
 				meta: {
 					title: navPageTitleKey(page),
-					permission: page.permission ?? section.permission,
-					employee: section.employee,
-					openedBy: page.openedBy
+					permission: page.permission,
+					allStaff: page.allStaff,
+					employee: section.employee
 				}
 			}))
 		}

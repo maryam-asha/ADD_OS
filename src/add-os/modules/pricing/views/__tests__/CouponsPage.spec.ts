@@ -11,12 +11,12 @@ const { listMock, deleteMock, activeMock, gate, dialogs } = vi.hoisted(() => ({
 	listMock: vi.fn(),
 	deleteMock: vi.fn(),
 	activeMock: vi.fn(),
-	gate: { admin: true },
+	gate: { create: true, update: true, delete: true },
 	dialogs: [] as RecordedDialog[]
 }))
 
 vi.mock("@/add-os/services/coupons", () => ({ listCoupons: listMock, deleteCoupon: deleteMock, setCouponActive: activeMock }))
-vi.mock("@/add-os/config/permissions", () => ({ canManageCoupons: () => gate.admin }))
+vi.mock("@/add-os/config/permissions", () => ({ canCreateCoupons: () => gate.create, canUpdateCoupons: () => gate.update, canDeleteCoupons: () => gate.delete }))
 vi.mock("@/add-os/modules/pricing/components/CouponFormDrawer.vue", () => ({ default: { render: () => null } }))
 vi.mock("@/add-os/modules/pricing/components/CouponDetailDrawer.vue", () => ({ default: { render: () => null } }))
 // Dialogs are recorded; a test decides whether to "click" the positive button.
@@ -48,7 +48,7 @@ async function mountPage() {
 describe("couponsPage", () => {
 	beforeEach(() => {
 		dialogs.length = 0
-		gate.admin = true
+		Object.assign(gate, { create: true, update: true, delete: true })
 		listMock.mockReset()
 		listMock.mockResolvedValue(page([row(), row({ id: 8, code: "OPEN", usage_limit: null, used: 5 })]))
 		deleteMock.mockReset()
@@ -62,12 +62,29 @@ describe("couponsPage", () => {
 		expect(text).toContain("5 / ∞")
 	})
 
-	it("gives operations no write control", async () => {
-		gate.admin = false
+	it("gives a role holding only coupons.view no write control", async () => {
+		Object.assign(gate, { create: false, update: false, delete: false })
 		const wrapper = await mountPage()
 		expect(wrapper.find("[data-test='coupon-new']").exists()).toBe(false)
 		expect(wrapper.find("[data-test='coupon-delete']").exists()).toBe(false)
+		expect(wrapper.find("[aria-label='Edit']").exists()).toBe(false)
 		expect(wrapper.find("[data-test='coupon-active-switch']").exists()).toBe(false)
+	})
+
+	it("shows each write control on its own permission, not on a role (2026-10-27)", async () => {
+		Object.assign(gate, { create: false, update: false, delete: true })
+		const wrapper = await mountPage()
+		expect(wrapper.find("[data-test='coupon-new']").exists()).toBe(false)
+		expect(wrapper.find("[aria-label='Edit']").exists()).toBe(false)
+		expect(wrapper.find("[data-test='coupon-active-switch']").exists()).toBe(false)
+		expect(wrapper.find("[data-test='coupon-delete']").exists()).toBe(true)
+
+		Object.assign(gate, { create: true, update: true, delete: false })
+		const writer = await mountPage()
+		expect(writer.find("[data-test='coupon-new']").exists()).toBe(true)
+		expect(writer.find("[aria-label='Edit']").exists()).toBe(true)
+		expect(writer.find("[data-test='coupon-active-switch']").exists()).toBe(true)
+		expect(writer.find("[data-test='coupon-delete']").exists()).toBe(false)
 	})
 
 	it("leaves a locked (used) coupon only its switch", async () => {

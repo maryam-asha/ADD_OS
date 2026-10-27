@@ -9,7 +9,7 @@ import { useAuthStore } from "@/stores/auth"
 import ar from "../../lang/ar"
 import en from "../../lang/en"
 import { createAddOsRoutes } from "../routes"
-import { HOME_REDIRECT, NAV_GROUPS, NAV_SECTIONS, navGroupTitleKey, navRouteName, navRoutePath } from "../sections"
+import { DASHBOARD_HOME, NAV_GROUPS, NAV_SECTIONS, navGroupTitleKey, navRouteName, navRoutePath } from "../sections"
 
 /**
  * ADD OS — keeps the menu, the routes, and the translations in agreement.
@@ -131,17 +131,17 @@ describe("routes", () => {
 		expect(placeholderOnly).toEqual([])
 	})
 
-	it("points the home redirect at a page that exists", () => {
-		const allPaths = NAV_SECTIONS.flatMap(section => section.pages.map(page => navRoutePath(section, page)))
+	/**
+	 * HOME_REDIRECT (`/spatial/branches`) was retired 2026-10-27: an account
+	 * with no dashboard panel now lands on the first screen it holds the
+	 * permission for (`homePath`, checked per account in
+	 * `menu-matches-guard.spec.ts`). The dashboard home stays a fixed path.
+	 */
+	it("points the dashboard home at a real page of an active section", () => {
+		const index = NAV_SECTIONS.findIndex(section => section.status === "active" && section.pages.some(page => navRoutePath(section, page) === DASHBOARD_HOME))
 
-		expect(allPaths).toContain(HOME_REDIRECT)
-	})
-
-	it("lands home on an active section, not a placeholder-only one", () => {
-		const active = NAV_SECTIONS.filter(section => section.status === "active")
-		const activePaths = active.flatMap(section => section.pages.map(page => navRoutePath(section, page)))
-
-		expect(activePaths).toContain(HOME_REDIRECT)
+		expect(index).toBeGreaterThanOrEqual(0)
+		expect(childrenOf(routes[index]).find(child => `${routes[index].path}/${child.path}` === DASHBOARD_HOME)?.component).not.toBe(ComingSoon)
 	})
 })
 
@@ -235,7 +235,9 @@ describe("sidebar groups", () => {
 
 	it("gives HR one sidebar entry holding a module per section, each opening to its pages", () => {
 		const items = menuFor({ roles: ["hr_manager"], permissions: HR_ALL, employee })
-		expect(items.map(item => String(item.key))).toEqual(["dashboard.overview", "hrGroup"])
+		// Beside HR: the dashboard home and the ComingSoon placeholders, open to
+		// every staff account since 2026-10-27 (`allStaff`).
+		expect(items.map(item => String(item.key))).toEqual(["dashboard.overview", "plans.wallet", "access", "community.cafe", "incubation", "hrGroup"])
 
 		const group = items.find(item => item.key === "hrGroup")
 		expect(childKeys(group)).toEqual(["hr", "hrTime", "hrPay", "hrTalent", "hrReports", "hrSettings"])

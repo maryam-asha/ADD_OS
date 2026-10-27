@@ -1,17 +1,17 @@
 import type { RouteLocationNormalized } from "vue-router"
-import type { AdminUser, OpenedBy } from "@/types/auth.d"
+import type { AdminUser } from "@/types/auth.d"
 import { createPinia, setActivePinia } from "pinia"
 import { beforeEach, describe, expect, it } from "vitest"
 import { useAuthStore } from "@/stores/auth"
 import { authGuard, MY_HR_PATH, safeRedirect } from "../authGuard"
 
-const adminUser = { id: 1, name: "Maryam", email: "m@add.sy", roles: ["admin"] }
+const adminUser = { id: 1, name: "Maryam", email: "m@add.sy", roles: ["admin"], permissions: ["members.view", "branches.view"] }
 
 function route(fullPath: string, meta: RouteLocationNormalized["meta"], query: Record<string, string> = {}) {
 	return { fullPath, path: fullPath.split("?")[0], meta, query } as unknown as RouteLocationNormalized
 }
 
-const protectedPage = (fullPath: string) => route(fullPath, { auth: true, roles: "all" })
+const protectedPage = (fullPath: string) => route(fullPath, { auth: true, permission: "members.view" })
 const loginPage = (query: Record<string, string> = {}) => route("/login", { checkAuth: true }, query)
 
 describe("authGuard", () => {
@@ -76,53 +76,54 @@ describe("authGuard", () => {
 		expect(store.isLogged).toBe(false)
 	})
 
-	describe("behind the admin gate (live HR run, 2026-10-21)", () => {
+	describe("staff pages, by permission alone (live HR run 2026-10-21; one rule since 2026-10-27)", () => {
 		const employee = { id: 9, employee_number: "ADD-0009", name: { ar: "يزن دبس", en: "Yazan Dibs" }, status: "probation" } as AdminUser["employee"]
-		const adminPage = (fullPath: string, openedBy?: OpenedBy) => route(fullPath, { auth: true, roles: ["admin", "operations"], openedBy })
+		const staffPage = (fullPath: string, permission: string) => route(fullPath, { auth: true, permission })
+		const openPage = (fullPath: string) => route(fullPath, { auth: true, allStaff: true })
 
-		it("keeps a member who is also an employee signed in, and sends them to My HR from an admin page", () => {
+		it("keeps a member who is also an employee signed in, and sends them to My HR from a staff page", () => {
 			const store = useAuthStore()
-			store.setLogged({ id: 8, name: "Lina", email: "lina@test.local", roles: ["member"], employee })
-			expect(authGuard(adminPage("/members/individuals"))).toEqual({ path: MY_HR_PATH })
+			store.setLogged({ id: 8, name: "Lina", email: "lina@test.local", roles: ["member"], permissions: [], employee })
+			expect(authGuard(staffPage("/members/individuals", "members.view"))).toEqual({ path: MY_HR_PATH })
 			expect(store.isLogged).toBe(true)
 		})
 
-		it("sends an employee with no role to My HR, not onto admin pages", () => {
-			useAuthStore().setLogged({ id: 9, name: "Yazan", email: "yazan@test.local", roles: [], employee })
-			expect(authGuard(adminPage("/spatial/branches", ["branches.view"]))).toEqual({ path: MY_HR_PATH })
-			expect(authGuard(adminPage("/dashboard/overview", "any"))).toEqual({ path: MY_HR_PATH })
+		it("sends an employee with no permission to My HR, even from a page open to every staff account", () => {
+			useAuthStore().setLogged({ id: 9, name: "Yazan", email: "yazan@test.local", roles: [], permissions: [], employee })
+			expect(authGuard(staffPage("/spatial/branches", "branches.view"))).toEqual({ path: MY_HR_PATH })
+			expect(authGuard(openPage("/dashboard/overview"))).toEqual({ path: MY_HR_PATH })
 		})
 
-		it("signs out an account with no role and no employee record", () => {
-			const store = useAuthStore()
-			store.setLogged({ id: 10, name: "Nobody", email: "nobody@test.local", roles: [] })
-			expect(authGuard(adminPage("/members/individuals"))).toEqual({ path: "/login" })
-			expect(store.isLogged).toBe(false)
+		it("signs out an account with no permission and no employee record, whatever its role", () => {
+			for (const roles of [[], ["empty_role"], ["operations"]]) {
+				const store = useAuthStore()
+				store.setLogged({ id: 10, name: "Nobody", email: "nobody@test.local", roles, permissions: [] })
+				expect(authGuard(openPage("/dashboard/overview"))).toEqual({ path: "/login" })
+				expect(store.isLogged).toBe(false)
+			}
 		})
 
-		it("turns a custom role away from an admin page the server keeps for admin and operations", () => {
-			useAuthStore().setLogged({ id: 48, name: "Dana", email: "dana@test.local", roles: ["hr_manager"], permissions: ["hr.employees.view"] })
-			expect(authGuard(adminPage("/members/individuals"))).toEqual({ path: "/" })
-			expect(authGuard(adminPage("/payments/invoices", ["invoices.view"]))).toEqual({ path: "/" })
+		it("lets a custom role into the page its permission opens and the pages open to all staff, and nothing else", () => {
+			useAuthStore().setLogged({ id: 49, name: "Rana", email: "rana@test.local", roles: ["stack_holder"], permissions: ["amenities.view"] })
+			expect(authGuard(staffPage("/spatial/amenities", "amenities.view"))).toBeUndefined()
+			expect(authGuard(openPage("/dashboard/overview"))).toBeUndefined()
+			expect(authGuard(staffPage("/spatial/buildings", "buildings.view"))).toEqual({ path: "/" })
 		})
 
-		it("lets a custom role into an admin page its permission opens, and the dashboard home", () => {
-			useAuthStore().setLogged({ id: 49, name: "Rana", email: "rana@test.local", roles: ["finance_clerk"], permissions: ["invoices.view"] })
-			expect(authGuard(adminPage("/payments/invoices", ["invoices.view"]))).toBeUndefined()
-			expect(authGuard(adminPage("/dashboard/overview", "any"))).toBeUndefined()
-		})
-
-		it("turns operations away from a page whose permission the server asks of it too", () => {
+		it("turns operations away from a page whose permission it does not hold", () => {
 			useAuthStore().setLogged({ id: 50, name: "Mazen", email: "mazen@test.local", roles: ["operations"], permissions: ["branches.view"] })
-			expect(authGuard(adminPage("/spatial/branches", ["branches.view"]))).toBeUndefined()
-			expect(authGuard(adminPage("/providers/list", ["providers.view"]))).toEqual({ path: "/" })
+			expect(authGuard(staffPage("/spatial/branches", "branches.view"))).toBeUndefined()
+			expect(authGuard(staffPage("/bookings/reception-desk", "reception.view"))).toEqual({ path: "/" })
 		})
 
-		it("turns operations away from a page naming no permission, since 2026-10-25 — admin's alone", () => {
-			useAuthStore().setLogged({ id: 50, name: "Mazen", email: "mazen@test.local", roles: ["operations"], permissions: ["branches.view"] })
-			expect(authGuard(adminPage("/members/individuals"))).toEqual({ path: "/" })
-			useAuthStore().setLogged({ id: 1, name: "Admin", email: "admin@test.local", roles: ["admin"], permissions: [] })
-			expect(authGuard(adminPage("/members/individuals"))).toBeUndefined()
+		it("turns admin away from a page whose permission /me does not list — the name opens nothing", () => {
+			useAuthStore().setLogged({ id: 1, name: "Admin", email: "admin@test.local", roles: ["admin"], permissions: ["branches.view"] })
+			expect(authGuard(staffPage("/members/individuals", "members.view"))).toEqual({ path: "/" })
+		})
+
+		it("refuses a staff page that names neither a permission nor allStaff — closed, not open", () => {
+			useAuthStore().setLogged({ id: 1, name: "Admin", email: "admin@test.local", roles: ["admin"], permissions: ["branches.view"] })
+			expect(authGuard(route("/somewhere", { auth: true }))).toEqual({ path: "/" })
 		})
 	})
 })

@@ -101,9 +101,127 @@
 			"update": "تعديل",
 			"delete": "حذف",
 			"update_status": "تعديل الحالة",
-			"assign_role": "تعيين الأدوار"
+			"assign_role": "تعيين الأدوار",
+			"check_in": "تسجيل الدخول والخروج",
+			"book": "الحجز",
+			"approve": "الموافقة",
+			"reject": "الرفض",
+			"settle_payment": "تسوية الدفع",
+			"record_consumption": "تسجيل الاستهلاك",
+			"manage_members": "إدارة الأعضاء",
+			"manage_attendees": "إدارة التسجيلات",
+			"manage": "إدارة",
+			"broadcast": "إرسال إشعار عام",
+			"pair": "ربط الجهاز",
+			"reverse": "الاسترجاع من البنك",
+			"cancel": "إلغاء",
+			"record_payment": "تسجيل دفعة",
+			"void_payment": "إبطال دفعة",
+			"status": "تغيير الحالة",
+			"transfer_company": "نقل شركة",
+			"terminate": "إنهاء استثنائي",
+			"operations": "قسم التشغيل",
+			"finance": "القسم المالي",
+			"members": "قسم الأعضاء",
+			"spaces": "قسم المساحات",
+			"org": {
+				"view": "عرض الهيكل التنظيمي",
+				"manage": "إدارة الهيكل التنظيمي"
+			},
+			"employees": {
+				"view": "عرض الموظفين",
+				"create": "إضافة موظفين",
+				"update": "تعديل بيانات الموظفين",
+				"view_sensitive": "عرض البيانات الحساسة"
+			},
+			"lifecycle": {
+				"manage": "إدارة التعيين وترك العمل"
+			},
+			"documents": {
+				"view": "عرض الوثائق",
+				"manage": "إدارة الوثائق"
+			},
+			"checklists": {
+				"manage": "إدارة قوائم المهام"
+			},
+			"alerts": {
+				"view": "عرض التنبيهات"
+			},
+			"settings": {
+				"manage": "إدارة إعدادات الموارد البشرية"
+			},
+			"approvals": {
+				"manage": "إدارة الموافقات"
+			},
+			"leave": {
+				"view": "عرض الإجازات",
+				"manage": "إدارة الإجازات"
+			},
+			"attendance": {
+				"view": "عرض الحضور",
+				"correct": "تصحيح الحضور",
+				"lock": "قفل الشهر",
+				"cards": "إصدار بطاقات الحضور"
+			},
+			"roster": {
+				"manage": "إدارة جدول الشيفتات"
+			},
+			"timesheets": {
+				"view": "عرض التايم شيت",
+				"manage": "إدارة توزيع التكلفة"
+			},
+			"payroll": {
+				"view": "عرض الرواتب",
+				"manage": "إعداد دورات الرواتب",
+				"approve": "اعتماد الرواتب",
+				"pay": "صرف الرواتب"
+			},
+			"compensation": {
+				"manage": "إدارة الأجور"
+			},
+			"loans": {
+				"manage": "إدارة السلف"
+			},
+			"benefits": {
+				"view": "عرض المزايا",
+				"manage": "إدارة المزايا"
+			},
+			"recruitment": {
+				"view": "عرض التوظيف",
+				"manage": "إدارة التوظيف"
+			},
+			"performance": {
+				"view": "عرض تقييم الأداء",
+				"manage": "إدارة تقييم الأداء"
+			},
+			"training": {
+				"view": "عرض التدريب",
+				"manage": "إدارة التدريب"
+			},
+			"reports": {
+				"view": "عرض التقارير"
+			},
+			"catalog": {
+				"view": "عرض التصنيفات والمواد",
+				"manage": "إدارة التصنيفات والمواد"
+			},
+			"assets": {
+				"view": "عرض الأصول",
+				"manage": "إدارة الأصول",
+				"custody": "تسليم العهدة واستلامها",
+				"maintenance": "إدارة الصيانة",
+				"dispose": "استبعاد الأصول"
+			},
+			"stock": {
+				"view": "عرض المخزون",
+				"receive": "استلام المخزون",
+				"issue": "صرف المخزون",
+				"transfer": "نقل المخزون",
+				"adjust": "تسجيل الجرد"
+			}
 		},
 		"modules": {
+			"amenities": "المرافق",
 			"announcements": "الإعلانات",
 			"branches": "الفروع",
 			"buildings": "المباني",
@@ -126,7 +244,40 @@
 			"users": "المستخدمون",
 			"error-logs": "سجلات الأخطاء",
 			"roles": "الأدوار والصلاحيات",
-			"settings": "الإعدادات"
+			"settings": "الإعدادات",
+			"app-content": "محتوى التطبيق",
+			"bookings": "الحجوزات",
+			"cash-register": "صندوق النقد",
+			"companies": "الشركات",
+			"coupons": "الكوبونات",
+			"currencies": "العملات",
+			"dashboard": "لوحة القيادة",
+			"event-categories": "فئات الفعاليات",
+			"exchange-rates": "أسعار الصرف",
+			"hr": "الموارد البشرية",
+			"inventory": "المخزون والأصول",
+			"invoices": "الفواتير",
+			"item-sales": "بيع المواد",
+			"kiosks": "شاشات الاستقبال",
+			"members": "الأعضاء",
+			"memberships": "العضويات",
+			"notifications": "الإشعارات",
+			"office-leases": "عقود إيجار المكاتب",
+			"payment-methods": "طرق الدفع",
+			"payments": "المدفوعات",
+			"plan-modules": "وحدات الاشتراكات",
+			"plan-purchases": "شحن الخطط",
+			"provider-requests": "طلبات المزوّدين",
+			"providers": "المزوّدون",
+			"reception": "الاستقبال",
+			"renewals": "التجديدات",
+			"reports": "التقارير",
+			"resource-types": "أنواع الموارد",
+			"sale-items": "مواد البيع",
+			"service-requests": "طلبات الخدمات",
+			"service-types": "أنواع الخدمات",
+			"site-inquiries": "استفسارات الموقع",
+			"wallet-top-ups": "شحن المحافظ"
 		}
 	},
 	"auth": {
@@ -2708,7 +2859,7 @@
 	},
 	"memberships": {
 		"description": "فعّل باقة لعضو أو شركة دون خصم أي رصيد من محفظتهم.",
-		"adminOnly": "تفعيل الاشتراكات متاح للمدير فقط.",
+		"activationNotGranted": "تفعيل الاشتراكات يحتاج صلاحية تفعيل الاشتراكات، ودورك لا يملكها.",
 		"loadError": "تعذّر تحميل الباقات أو الأعضاء. قد لا تملك صلاحية عرض هذه الصفحة.",
 		"desks": {
 			"title": "المكاتب المخصصة",

@@ -141,9 +141,9 @@ describe("Reports Permissions & Navigation Gating", () => {
 	it("admin reports section includes providers and revenue report pages", () => {
 		const reportsSection = NAV_SECTIONS.find(s => s.key === "reports")
 		expect(reportsSection).toBeDefined()
-		expect(reportsSection?.permission).toBe("reports.view")
-		const pageKeys = reportsSection?.pages.map(p => p.key)
-		expect(pageKeys).toContain("providersReport")
-		expect(pageKeys).toContain("revenueReport")
+		// Since 2026-10-27 each page names its permission; the section no longer does.
+		const pages = reportsSection?.pages ?? []
+		expect(pages.find(p => p.key === "providersReport")?.permission).toBe("reports.view")
+		expect(pages.find(p => p.key === "revenueReport")?.permission).toBe("reports.view")
 	})
 })

@@ -1,8 +1,7 @@
 import type { NavPage, NavSection } from "@/add-os/navigation/sections"
-import type { Roles } from "@/types/auth.d"
-import _castArray from "lodash/castArray"
+import type { RouteMetaAuth } from "@/types/auth.d"
 import { canViewDashboard } from "@/add-os/config/permissions"
-import { DASHBOARD_HOME, HOME_REDIRECT, NAV_SECTIONS, navRoutePath } from "@/add-os/navigation/sections"
+import { DASHBOARD_HOME, NAV_SECTIONS, navRoutePath } from "@/add-os/navigation/sections"
 import { useAuthStore } from "@/stores/auth"
 
 /**
@@ -10,23 +9,35 @@ import { useAuthStore } from "@/stores/auth"
  * (`Navbar/items.tsx`), the route guard (`authGuard.ts`) and where "/" lands
  * (`src/router/index.ts`). They read the same rules so the menu never offers a
  * page the guard turns away, and "/" never lands on one.
+ *
+ * Since 2026-10-27 there is one rule for staff pages: a page is listed and
+ * routable if and only if the account holds its `permission`, or — for a page
+ * with no API, marked `allStaff` — is a staff account at all. No role name
+ * decides it; ADD Core guards every admin route by permission alone. Two
+ * audiences keep rules of their own: the provider portal (`roles:
+ * ["provider"]`), and My HR (`employee`).
  */
 
-/** A section with no `roles` sits behind the admin gate, as `routes.ts` gives it. */
-const ADMIN_GATE: Roles = ["admin", "operations"]
+/** Whether the signed-in account may open a staff page: by its permission, or as any staff account. */
+export function mayOpenStaffPage(page: Pick<RouteMetaAuth, "permission" | "allStaff">): boolean {
+	const auth = useAuthStore()
+	if (!auth.isStaff) return false
+	if (page.permission) return auth.hasPermission(page.permission)
+	return page.allStaff === true
+}
 
-/** The general admin gate: admin|operations, the way ADD Core's admin routes are guarded. */
-export function isAdminGated(roles: Roles | undefined): boolean {
-	const list = _castArray(roles ?? [])
-	return list.includes("admin") && list.includes("operations")
+/** The provider portal: a provider sees only it, and nobody else ever does. */
+function isProviderPortal(section: NavSection): boolean {
+	return section.key === "providerPortal" || Boolean(section.roles?.includes("provider"))
 }
 
 /** Whether the signed-in account may open a page of a section. */
 export function mayOpenPage(section: NavSection, page: NavPage): boolean {
 	const auth = useAuthStore()
-	const permission = page.permission ?? section.permission
-	if (page.permission && !auth.hasPermission(page.permission)) return false
-	return !isAdminGated(section.roles ?? ADMIN_GATE) || auth.mayOpenAdminPage(page.openedBy, permission)
+	if (isProviderPortal(section)) return auth.isProvider
+	// My HR: accounts with an employee record only, whatever their role.
+	if (section.employee) return auth.isEmployee
+	return mayOpenStaffPage(page)
 }
 
 /** The pages of a section the sidebar lists for this account. */
@@ -37,13 +48,8 @@ export function menuPages(section: NavSection): NavPage[] {
 /** Whether the sidebar shows a section to this account. */
 export function maySeeSection(section: NavSection): boolean {
 	const auth = useAuthStore()
-	const isPortal = section.key === "providerPortal" || Boolean(section.roles?.includes("provider"))
 	// A provider sees only its portal; nobody else ever sees the portal.
-	if (auth.isProvider !== isPortal) return false
-	if (!auth.isRoleGranted(section.roles ?? ADMIN_GATE)) return false
-	if (section.permission && !auth.hasPermission(section.permission)) return false
-	// My HR: accounts with an employee record only.
-	if (section.employee && !auth.isEmployee) return false
+	if (auth.isProvider !== isProviderPortal(section)) return false
 	// A section with no page this account may open would open empty.
 	return menuPages(section).length > 0
 }
@@ -51,7 +57,7 @@ export function maySeeSection(section: NavSection): boolean {
 /**
  * The sections the sidebar lists for this account: those it sees, less the
  * ones the avatar menu carries (`accountMenu`) — unless those are all it sees,
- * as for an employee with no role, whose sidebar would otherwise stand empty.
+ * as for an employee with no permission, whose sidebar would otherwise stand empty.
  */
 export function sidebarSections(): NavSection[] {
 	const visible = NAV_SECTIONS.filter(maySeeSection)
@@ -64,33 +70,33 @@ export function accountMenuSections(): NavSection[] {
 	return NAV_SECTIONS.filter(section => section.accountMenu && maySeeSection(section))
 }
 
-/** The first page in sidebar order this account may open, if any. */
-function firstOpenPage(skip?: string): string | null {
+/** The first page in sidebar order this account may open that matches `accept`, if any. */
+function firstOpenPage(accept: (section: NavSection, page: NavPage) => boolean): string | null {
 	for (const section of NAV_SECTIONS) {
 		if (!maySeeSection(section)) continue
-		const page = menuPages(section).find(candidate => navRoutePath(section, candidate) !== skip)
+		const page = menuPages(section).find(candidate => accept(section, candidate))
 		if (page) return navRoutePath(section, page)
 	}
 	return null
 }
 
-function mayOpenPath(path: string): boolean {
-	return NAV_SECTIONS.some(section => maySeeSection(section) && menuPages(section).some(page => navRoutePath(section, page) === path))
-}
-
 /**
- * Where "/" lands. A provider: its portal. Anyone with a dashboard panel: the
- * dashboard. Admin and operations without one: HOME_REDIRECT, as before, when
- * they may open it. Anyone else — a custom role, an employee with no role —
- * the first page in the sidebar they may open, before the dashboard's
- * empty home; an employee with nothing else lands on My HR that way. Every
- * answer is a page the guard lets this account into, so a refusal that sends
- * them to "/" cannot loop.
+ * Where "/" lands. A provider: its portal. A staff account with a dashboard
+ * panel: the dashboard. Any other staff account: the first screen in sidebar
+ * order whose permission it holds — a real screen, ahead of the placeholders
+ * every staff account may open — else the dashboard home, which is every staff
+ * account's and says it has nothing to show. An employee with nothing else:
+ * My HR, its first page. Anyone else — signed out, or about to be signed out
+ * by the guard — the dashboard home, which sends them to sign in. Every answer
+ * for a signed-in account is a page the guard lets it into, so a refusal that
+ * sends it to "/" cannot loop.
  */
 export function homePath(): string {
 	const auth = useAuthStore()
 	if (auth.isProvider) return "/provider/summary"
-	if (canViewDashboard()) return DASHBOARD_HOME
-	if (auth.isStaff && mayOpenPath(HOME_REDIRECT)) return HOME_REDIRECT
-	return firstOpenPage(DASHBOARD_HOME) ?? DASHBOARD_HOME
+	if (auth.isStaff) {
+		if (canViewDashboard()) return DASHBOARD_HOME
+		return firstOpenPage((_section, page) => Boolean(page.permission)) ?? DASHBOARD_HOME
+	}
+	return firstOpenPage(() => true) ?? DASHBOARD_HOME
 }

@@ -26,8 +26,8 @@ const router = createRouter({
 		{
 			path: "/",
 			// ADD OS: the provider portal for providers; the dashboard for anyone
-			// with a panel on it; else HOME_REDIRECT for admin and operations, and
-			// the first page they may open for anyone else (`navigation/access.ts`).
+			// with a panel on it; else the first screen whose permission the
+			// account holds, or My HR for an employee with none (`navigation/access.ts`).
 			redirect: () => homePath()
 		},
 

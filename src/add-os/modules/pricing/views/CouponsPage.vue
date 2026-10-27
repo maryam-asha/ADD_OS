@@ -1,8 +1,10 @@
 <!-- src/add-os/modules/pricing/views/CouponsPage.vue -->
 <!--
-	Every discount code, paged by the server. Operations reads; only an admin
-	sees the controls that change one. Deleting a used code is refused by the
-	server (409) — the admin is offered deactivation, and decides.
+	Every discount code, paged by the server. `coupons.view` reads; each
+	control that changes one shows on its own permission (`coupons.create`,
+	`.update`, `.delete` — since 2026-10-27; before, the admin role). Deleting
+	a used code is refused by the server (409) — the user is offered
+	deactivation, and decides.
 
 	Two tabs on the same endpoint: typed coupons (`is_automatic=0`) and
 	automatic offers (`is_automatic=1`), which have no code and apply
@@ -20,7 +22,7 @@
 					<template #icon><Icon name="carbon:renew" :size="16" /></template>
 					{{ t("coupons.page.refresh") }}
 				</n-button>
-				<n-button v-if="canWrite" type="primary" size="small" data-test="coupon-new" @click="openForm(null)">
+				<n-button v-if="canCreate" type="primary" size="small" data-test="coupon-new" @click="openForm(null)">
 					<template #icon><Icon name="carbon:add" :size="16" /></template>
 					{{ t(automatic ? "coupons.page.newOffer" : "coupons.page.new") }}
 				</n-button>
@@ -60,7 +62,7 @@ import { NAlert, NButton, NCard, NDataTable, NInput, NSwitch, NTag, useDialog, u
 import { computed, h, reactive, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
-import { canManageCoupons } from "@/add-os/config/permissions"
+import { canCreateCoupons, canDeleteCoupons, canUpdateCoupons } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import CouponDetailDrawer from "@/add-os/modules/pricing/components/CouponDetailDrawer.vue"
 import CouponFormDrawer from "@/add-os/modules/pricing/components/CouponFormDrawer.vue"
@@ -78,7 +80,9 @@ defineProps<{ titleKey?: string }>()
 const { t } = useI18n()
 const message = useMessage()
 const dialog = useDialog()
-const canWrite = canManageCoupons()
+const canCreate = canCreateCoupons()
+const canUpdate = canUpdateCoupons()
+const canDelete = canDeleteCoupons()
 
 const PAGE_SIZE = 20
 const TABS = ["coupons", "offers"] as const
@@ -161,11 +165,11 @@ const columns = computed<DataTableColumns<Coupon>>(() => [
 		filterMultiple: false,
 		filterOptionValue: filters.is_active,
 		filterOptions: activeOptions.value,
-		render: row => (canWrite
+		render: row => (canUpdate
 			? h("span", { "data-test": "coupon-active-switch", "onClick": only(() => void toggle(row)) }, [h(NSwitch, { value: row.is_active, loading: toggling.value === row.id, size: "small" })])
 			: h(NTag, { size: "small", round: true, bordered: false, type: row.is_active ? "success" : "default" }, { default: () => t(row.is_active ? "coupons.filters.activeYes" : "coupons.filters.activeNo") }))
 	},
-	...(canWrite
+	...(canUpdate || canDelete
 		? [{
 				title: t("coupons.columns.actions"),
 				key: "actions",
@@ -175,8 +179,8 @@ const columns = computed<DataTableColumns<Coupon>>(() => [
 				render: (row: Coupon) => row.locked
 					? null
 					: h("div", { class: "inline-flex items-center justify-center gap-3" }, [
-					h(NButton, { text: true, type: "primary", "aria-label": t("coupons.edit"), title: t("coupons.edit"), onClick: only(() => openForm(row.id)) }, { icon: () => h(Icon, { name: "carbon:edit", size: 18 }) }),
-					h(NButton, { text: true, type: "error", "data-test": "coupon-delete", "aria-label": t("coupons.delete.action"), title: t("coupons.delete.action"), onClick: only(() => confirmDelete(row)) }, { icon: () => h(Icon, { name: "carbon:trash-can", size: 18 }) })
+					canUpdate ? h(NButton, { text: true, type: "primary", "aria-label": t("coupons.edit"), title: t("coupons.edit"), onClick: only(() => openForm(row.id)) }, { icon: () => h(Icon, { name: "carbon:edit", size: 18 }) }) : null,
+					canDelete ? h(NButton, { text: true, type: "error", "data-test": "coupon-delete", "aria-label": t("coupons.delete.action"), title: t("coupons.delete.action"), onClick: only(() => confirmDelete(row)) }, { icon: () => h(Icon, { name: "carbon:trash-can", size: 18 }) }) : null
 				])
 			}]
 		: [])

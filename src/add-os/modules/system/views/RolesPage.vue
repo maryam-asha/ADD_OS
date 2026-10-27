@@ -171,7 +171,7 @@ import {
 } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
-import { canManageRoles } from "@/add-os/config/permissions"
+import { canCreateRoles, canDeleteRoles, canUpdateRoles } from "@/add-os/config/permissions"
 import {
 	applyViewRule,
 	displayActionName,
@@ -191,7 +191,7 @@ const { t, te } = useI18n()
 const message = useMessage()
 const dialog = useDialog()
 
-const canCreate = computed(() => canManageRoles())
+const canCreate = computed(() => canCreateRoles())
 
 const roles = ref<RoleRecord[]>([])
 const permissionModules = ref<PermissionModule[]>([])
@@ -220,17 +220,17 @@ function renderNameCell(row: RoleRecord) {
  * backend rejects any `permissions` key sent for it with a 422 regardless of
  * protected status (`api.role.member_out_of_scope`). Delete stays gated on
  * `protected` alone, since that's the flag the backend actually keys its
- * rename/delete rejection on. Both are also gated on `canManageRoles()`,
- * same defense-in-depth the Create button already has.
+ * rename/delete rejection on. Each is also gated on its own permission —
+ * Edit on `roles.update`, Delete on `roles.delete` — as Create is on
+ * `roles.create`. Until 2026-10-27 all three asked one `canManageRoles()`,
+ * the "admin" role.
  */
 function renderActions(row: RoleRecord) {
-	if (!canManageRoles()) return h("div", { class: "inline-flex items-center justify-center gap-2" })
-
 	const editLabel = t("roles.edit.button")
 	const deleteLabel = t("roles.delete.button")
 
 	const buttons = []
-	if (row.name !== "member") {
+	if (row.name !== "member" && canUpdateRoles()) {
 		buttons.push(
 			h(
 				NButton,
@@ -239,7 +239,7 @@ function renderActions(row: RoleRecord) {
 			)
 		)
 	}
-	if (!row.protected) {
+	if (!row.protected && canDeleteRoles()) {
 		buttons.push(
 			h(
 				NButton,

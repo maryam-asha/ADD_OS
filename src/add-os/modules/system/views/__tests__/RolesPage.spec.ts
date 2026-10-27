@@ -15,7 +15,7 @@ const {
 	createRoleMock,
 	updateRoleMock,
 	removeRoleMock,
-	canManageRolesMock,
+	rolesGate,
 	messageMock
 } = vi.hoisted(() => ({
 	listRoleRecordsMock: vi.fn(),
@@ -23,7 +23,7 @@ const {
 	createRoleMock: vi.fn(),
 	updateRoleMock: vi.fn(),
 	removeRoleMock: vi.fn(),
-	canManageRolesMock: vi.fn(),
+	rolesGate: { create: true, update: true, delete: true },
 	messageMock: { success: vi.fn(), error: vi.fn() }
 }))
 
@@ -39,7 +39,9 @@ vi.mock("@/add-os/services/permissions", () => ({
 }))
 
 vi.mock("@/add-os/config/permissions", () => ({
-	canManageRoles: canManageRolesMock
+	canCreateRoles: () => rolesGate.create,
+	canUpdateRoles: () => rolesGate.update,
+	canDeleteRoles: () => rolesGate.delete
 }))
 
 // Same pitfall every other page spec in this codebase documents: the page
@@ -114,7 +116,7 @@ function findPage(wrapper: ReturnType<typeof mountPage>) {
 describe("rolesPage", () => {
 	beforeEach(() => {
 		vi.clearAllMocks()
-		canManageRolesMock.mockReturnValue(true)
+		Object.assign(rolesGate, { create: true, update: true, delete: true })
 		listRoleRecordsMock.mockResolvedValue([memberRole, operationsRole, adminRole, customRole])
 		listPermissionModulesMock.mockResolvedValue([branchesModule])
 		createRoleMock.mockResolvedValue({ id: 5, name: "front-desk-2", protected: false, permissions: [] })
@@ -194,13 +196,13 @@ describe("rolesPage", () => {
 
 		/**
 		 * Final-review fix: renderActions() previously only checked
-		 * row.protected/row.name, with no canManageRoles() check of its own —
+		 * row.protected/row.name, with no permission check of its own —
 		 * only the top-of-page Create button was gated on it. Same
 		 * defense-in-depth as the Create button now applies to every row's
 		 * Edit/Delete, even a custom role that would otherwise qualify for both.
 		 */
 		it("renders no Edit and no Delete button for any row when the user cannot manage roles", async () => {
-			canManageRolesMock.mockReturnValue(false)
+			Object.assign(rolesGate, { create: false, update: false, delete: false })
 			const wrapper = mountPage()
 			await flushPromises()
 
@@ -216,6 +218,27 @@ describe("rolesPage", () => {
 		})
 	})
 
+	describe("per-action gates (2026-10-27)", () => {
+		it("shows Delete on roles.delete and Edit on roles.update, each without the other", async () => {
+			Object.assign(rolesGate, { create: false, update: false, delete: true })
+			const wrapper = mountPage()
+			await flushPromises()
+			const customRow = wrapper.findAll("tbody tr").find(row => row.text().includes("front-desk"))
+			expect(customRow?.find('[aria-label="Edit"]').exists()).toBe(false)
+			expect(customRow?.find('[aria-label="Delete"]').exists()).toBe(true)
+			expect(wrapper.findAll("button").some(b => b.text().includes("New role"))).toBe(false)
+			wrapper.unmount()
+
+			Object.assign(rolesGate, { create: false, update: true, delete: false })
+			const editor = mountPage()
+			await flushPromises()
+			const editableRow = editor.findAll("tbody tr").find(row => row.text().includes("front-desk"))
+			expect(editableRow?.find('[aria-label="Edit"]').exists()).toBe(true)
+			expect(editableRow?.find('[aria-label="Delete"]').exists()).toBe(false)
+			editor.unmount()
+		})
+	})
+
 	describe("create button gating", () => {
 		it("shows the create button when the user can manage roles", async () => {
 			const wrapper = mountPage()
@@ -226,7 +249,7 @@ describe("rolesPage", () => {
 		})
 
 		it("hides the create button when the user cannot manage roles", async () => {
-			canManageRolesMock.mockReturnValue(false)
+			Object.assign(rolesGate, { create: false, update: false, delete: false })
 			const wrapper = mountPage()
 			await flushPromises()
 
