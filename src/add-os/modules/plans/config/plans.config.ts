@@ -218,6 +218,9 @@ export function emptyPlanPayload(): PlanPayload {
 		reference_space_id: null,
 		reference_units: null,
 		duration_days: 30,
+		coworking_seat: "flexible",
+		coworking_hours: null,
+		allowance_cycle: "period",
 		access_window_start: null,
 		access_window_end: null,
 		is_active: true,
@@ -226,6 +229,7 @@ export function emptyPlanPayload(): PlanPayload {
 		balances: [],
 		features: [],
 		discounts: [],
+		space_hours: [],
 		resource_grants: []
 	}
 }

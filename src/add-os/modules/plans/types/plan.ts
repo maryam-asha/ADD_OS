@@ -54,6 +54,31 @@ export interface PlanDiscountItem {
 }
 
 /**
+ * Whether and how a plan includes coworking (ADDCore, 2026-11-02): none; a
+ * flexible seat the branch pool holds; or a dedicated desk (always unlimited).
+ */
+export type CoworkingSeat = "none" | "flexible" | "dedicated"
+
+/** How hours and discount use-limits run: once for the period, or afresh each month. */
+export type AllowanceCycle = "period" | "monthly"
+
+/**
+ * Free hours on one space or one space type — the other per-space benefit
+ * beside a discount; a target takes one or the other. The server sends
+ * `hours` as a decimal string ("5"); the page reads it into a number.
+ */
+export interface PlanSpaceHourItem {
+	id?: number
+	hours: number
+	space_id?: number | null
+	space_type?: SpaceType | null
+	description?: { ar: string; en: string } | null
+	order?: number
+	/** Form-only, never sent: which kind of target the row is set to. */
+	targetMode?: "space" | "space_type"
+}
+
+/**
  * A structured, natural-unit quota grant — the sibling of PlanBalance's
  * point-denominated grants and PlanDiscount's percentage grants. `quantity`
  * is a decimal (backend validates `numeric`, not `integer` — e.g. 5.5 hours
@@ -157,6 +182,11 @@ export interface Plan extends PlanReference {
 	order: number
 	balances?: PlanBalanceItem[]
 	features?: PlanFeatureItem[]
+	coworking_seat?: CoworkingSeat
+	/** Decimal string, null when unlimited or not coworking. */
+	coworking_hours?: string | null
+	allowance_cycle?: AllowanceCycle
+	space_hours?: PlanSpaceHourItem[]
 	discounts?: PlanDiscountItem[]
 	resource_grants?: PlanResourceGrantItem[]
 	created_at: string
@@ -183,6 +213,10 @@ export interface PlanPayload extends Record<string, unknown>, Partial<PlanRefere
 	 * validates them as a pair (`required_with` each way), so sending one
 	 * alone is a 422 by design.
 	 */
+	coworking_seat: CoworkingSeat
+	/** Null is unlimited; only a flexible seat counts hours. */
+	coworking_hours: number | string | null
+	allowance_cycle: AllowanceCycle
 	access_window_start: string | null
 	access_window_end: string | null
 	is_active: boolean
@@ -191,5 +225,6 @@ export interface PlanPayload extends Record<string, unknown>, Partial<PlanRefere
 	balances?: PlanBalanceItem[]
 	features?: PlanFeatureItem[]
 	discounts?: PlanDiscountItem[]
+	space_hours?: PlanSpaceHourItem[]
 	resource_grants?: PlanResourceGrantItem[]
 }

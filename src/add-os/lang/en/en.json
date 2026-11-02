@@ -742,7 +742,13 @@
 			"accessWindowStart": "From",
 			"accessWindowEnd": "To",
 			"accessWindowHint": "Hours inside this window are drawn from the plan. Hours outside it are charged at the standard rate.",
-			"accessWindowWraps": "This window runs past midnight and ends the following day."
+			"accessWindowWraps": "This window runs past midnight and ends the following day.",
+			"allowanceCycle": {
+				"label": "Hours and discount limits renew",
+				"period": "Once for the whole period",
+				"monthly": "Every month from the subscription date",
+				"hint": "Unused hours do not carry over."
+			}
 		},
 		"loadError": "Couldn't load plans. You may not have permission to view this page.",
 		"stats": {
@@ -753,10 +759,35 @@
 		"noModule": "No Module",
 		"tabs": {
 			"basic": "Basic Info",
+			"coworking": "Coworking",
 			"balances": "Included Balances",
 			"features": "Features",
 			"discounts": "Discounts",
+			"benefits": "Space benefits",
 			"resources": "Resources"
+		},
+		"coworking": {
+			"title": "Does this plan include coworking?",
+			"none": { "title": "No coworking", "hint": "No seat is held. You can still give a coworking benefit under Space benefits." },
+			"flexible": { "title": "Flexible seat", "hint": "A seat is held for the member in the branch pool; they sit at any free desk." },
+			"dedicated": { "title": "Dedicated desk", "hint": "A named desk staff tie to the subscription. Always unlimited." },
+			"hoursTitle": "Coworking hours",
+			"unlimited": "Unlimited",
+			"hours": "Hours",
+			"dedicatedUnlimited": "A dedicated desk has no hour limit.",
+			"hoursHint": "When the hours run out, the seat is released and extra time is billed at the normal rate.",
+			"allDay": "All day",
+			"windowTitle": "Daily access"
+		},
+		"benefits": {
+			"description": "Each space or space type takes one benefit: free hours or a discount.",
+			"hoursTitle": "Free hours",
+			"addHours": "Add free hours",
+			"hoursEmpty": "No free hours on any space",
+			"hours": "Hours",
+			"target": "Applies to",
+			"duplicateTarget": "This space or space type already has a benefit.",
+			"coworkingOnCoworkingPlan": "A coworking plan already includes coworking."
 		},
 		"sections": {
 			"basicInfo": "Basic Information",
@@ -2026,6 +2057,14 @@
 			"booking_buffer_minutes": {
 				"label": "Gap between bookings (minutes)",
 				"hint": "Free time kept between two bookings of the same space to prepare it. Does not apply to shared co-working spaces. A space can set its own value."
+			},
+			"coworking_no_show_release_percent": {
+				"label": "Release unpaid coworking bookings after (%)",
+				"hint": "An unpaid coworking booking is cancelled and its seat freed once this share of its time passes without the member. The member is notified."
+			},
+			"coworking_late_arrival_billing": {
+				"label": "Bill a late arrival from",
+				"hint": "For unpaid coworking bookings: arrival or booking_start. Paid bookings are never refunded for arriving late."
 			},
 			"booking_cancellation_window_minutes": {
 				"label": "Cancellation window (minutes)",
