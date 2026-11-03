@@ -335,7 +335,9 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			// The figures the dashboard sums up, in full; each behind the
 			// permission of the dashboard section it expands. Until 2026-10-27
 			// the section also asked for `reports.view`, which neither page's
-			// API (`admin/dashboard/*`) asks for.
+			// API (the `admin/dashboard/…` routes) asks for. (No slash-star here:
+			// scripts/build-icons.js would read it as a block comment and drop the
+			// icons below it from the bundle.)
 			{ key: "spacesReport", path: "spaces", permission: "dashboard.spaces" },
 			{ key: "collectionsReport", path: "collections", permission: "dashboard.finance" }
 		]
