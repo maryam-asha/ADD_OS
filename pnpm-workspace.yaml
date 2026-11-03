@@ -1,9 +1,14 @@
 allowBuilds:
+  # Firebase's install scripts are not needed: @firebase/util's writes auto-init
+  # defaults ADD OS never uses (it passes its config explicitly), protobufjs's
+  # only checks its own version.
+  "@firebase/util": false
   "@parcel/watcher": true
   "@scarf/scarf": true
   "@tailwindcss/oxide": true
   cypress: true
   esbuild: true
+  protobufjs: false
   unrs-resolver: true
 
 minimumReleaseAge: 0

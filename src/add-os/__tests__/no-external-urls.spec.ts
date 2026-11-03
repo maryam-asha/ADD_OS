@@ -124,6 +124,14 @@ const ALLOWED: readonly AllowedHost[] = [
 	{
 		host: "pusher.com",
 		why: "pusher-js error and warning strings link to its docs (pusher.com/docs/...). Text in a console message; no request."
+	},
+	{
+		host: "firebaseinstallations.googleapis.com",
+		why: "Firebase Installations — called by the firebase SDK when a staff or provider account clicks \"enable browser notifications\" (src/add-os/notifications/browserPush.ts). Browser notifications were decided with the product owner on 2026-11-03; the member app already uses the same Firebase project. Never loaded unless all five VITE_FIREBASE_* values are set (dynamic import)."
+	},
+	{
+		host: "fcmregistrations.googleapis.com",
+		why: "Firebase Cloud Messaging's registration API — exchanges this browser's Web Push subscription for the FCM token ADD Core pushes to. Same feature, same opt-in and the same dynamic import as firebaseinstallations.googleapis.com. The pushes themselves arrive through the browser's own push service, not through a host in this build."
 	}
 	// `api.org` was here — the Pinx placeholder VITE_API_URL. Removed from the
 	// allowlist because it is no longer in the build: the variable was emptied and

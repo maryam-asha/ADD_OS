@@ -43,7 +43,42 @@
 	"notifications": {
 		"title": "Notifications",
 		"setAsRead": "Set as read",
-		"markAllAsRead": "Mark all as read"
+		"markAllAsRead": "Mark all as read",
+		"empty": "No notifications yet",
+		"loadMore": "Load more",
+		"browser": {
+			"enable": "Enable browser notifications",
+			"enabled": "Browser notifications are on",
+			"blocked": "Browser notifications are blocked in this browser's settings",
+			"failed": "Browser notifications could not be enabled"
+		},
+		"time": {
+			"now": "Just now",
+			"minutes": {
+				"zero": "{n} minutes ago",
+				"one": "{n} minute ago",
+				"two": "{n} minutes ago",
+				"few": "{n} minutes ago",
+				"many": "{n} minutes ago",
+				"other": "{n} minutes ago"
+			},
+			"hours": {
+				"zero": "{n} hours ago",
+				"one": "{n} hour ago",
+				"two": "{n} hours ago",
+				"few": "{n} hours ago",
+				"many": "{n} hours ago",
+				"other": "{n} hours ago"
+			},
+			"days": {
+				"zero": "{n} days ago",
+				"one": "{n} day ago",
+				"two": "{n} days ago",
+				"few": "{n} days ago",
+				"many": "{n} days ago",
+				"other": "{n} days ago"
+			}
+		}
 	},
 	"roles": {
 		"description": "Manage roles and the admin-dashboard permissions each one grants.",

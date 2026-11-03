@@ -45,12 +45,19 @@ export const useAuthStore = defineStore("auth", {
 			this.permissions = user.permissions ?? []
 			this.user = user
 		},
-		/** Clears local state only — callers that need the server session revoked call logout() first. */
+		/**
+		 * Clears local state only — callers that need the server session revoked call logout() first.
+		 * Every sign-out passes here, a session that ended on its own (a 401) included, so this
+		 * browser also stops receiving the account's push notifications.
+		 */
 		setLogout() {
 			this.logged = false
 			this.role = null
 			this.permissions = []
 			this.user = {}
+			void import("@/add-os/notifications/browserPush")
+				.then(push => push.forgetBrowserPushLocally())
+				.catch(() => {})
 		},
 		/**
 		 * Verifies the Fortify session cookie against the API at app boot, rather than

@@ -199,6 +199,11 @@ export async function del<T>(path: string, query?: Record<string, unknown>, head
 	return request<T>("DELETE", path, { query, headers, credentials })
 }
 
+/** DELETE with a JSON body — for a value that must not travel in the URL, where server logs keep it (a push token). */
+export async function delWithBody<T>(path: string, body: unknown): Promise<T> {
+	return request<T>("DELETE", path, { body })
+}
+
 export async function uploadFile<T>(
 	path: string,
 	file: File,

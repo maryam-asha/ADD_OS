@@ -87,13 +87,13 @@ describe("realtime", () => {
 			withoutInterceptors: true
 		})
 
-		postMock.mockResolvedValue({ auth: "app-key:signature" })
+		postMock.mockResolvedValue({ auth: "app-key:SIGNATURE" })
 		const callback = vi.fn()
 		options.channelAuthorization.customHandler({ socketId: "1.2", channelName: "private-reception" }, callback)
 		await settle()
 
 		expect(postMock).toHaveBeenCalledWith("/api/broadcasting/auth", { socket_id: "1.2", channel_name: "private-reception" })
-		expect(callback).toHaveBeenCalledWith(null, { auth: "app-key:signature" })
+		expect(callback).toHaveBeenCalledWith(null, { auth: "app-key:SIGNATURE" })
 	})
 
 	it("hands a refused authorization back to pusher as an error", async () => {
@@ -148,6 +148,24 @@ describe("realtime", () => {
 		await settle()
 
 		expect(channel.listen).not.toHaveBeenCalled()
+	})
+
+	it("nudges the account's own dashboard inbox and leaves its channel on stop", async () => {
+		const realtime = await load()
+		const handler = vi.fn()
+		const stop = realtime.subscribeDashboardNotifications(7, handler)
+		await settle()
+
+		expect(instances[0].private).toHaveBeenCalledWith("dashboard.7")
+		const [name, callback] = channel.listen.mock.calls[0]
+		expect(name).toBe(".notification.created")
+
+		callback({ audience: "staff" })
+		expect(handler).toHaveBeenCalledTimes(1)
+
+		stop()
+		expect(channel.stopListening).toHaveBeenCalledWith(".notification.created", callback)
+		expect(instances[0].leave).toHaveBeenCalledWith("dashboard.7")
 	})
 
 	it("follows the socket's connection state", async () => {

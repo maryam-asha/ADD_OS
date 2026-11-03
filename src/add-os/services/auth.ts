@@ -56,9 +56,18 @@ export async function getMe(): Promise<AdminUser> {
 }
 
 /**
- * Logout the current session.
+ * Logout the current session — after telling the server to stop pushing to
+ * this browser, which it can only be asked while the session still exists.
+ * Never blocks the sign-out itself.
  */
 export async function logout(): Promise<void> {
+	try {
+		const [{ useAuthStore }, { removeBrowserPush }] = await Promise.all([import("@/stores/auth"), import("@/add-os/notifications/browserPush")])
+		const auth = useAuthStore()
+		await removeBrowserPush(auth.isProvider ? "provider" : auth.isStaff ? "staff" : null)
+	} catch {
+		// Browser notifications are a convenience; signing out is not.
+	}
 	return post<void>("/logout")
 }
 
