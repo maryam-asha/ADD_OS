@@ -127,8 +127,9 @@ import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
 import { PAYMENT_PURPOSES, PAYMENT_STATUSES } from "@/add-os/modules/payments/types/payment"
 import AppliedDiscountList from "@/add-os/modules/pricing/components/AppliedDiscountList.vue"
+import { useOpenRecord } from "@/add-os/notifications/useOpenRecord"
 import { ApiError } from "@/add-os/services/api"
-import { getPaymentsSummary, listPaymentMethods, listPayments, reversePayment } from "@/add-os/services/payments"
+import { getPayment, getPaymentsSummary, listPaymentMethods, listPayments, reversePayment } from "@/add-os/services/payments"
 import { formatCurrency, formatDateTime, formatNumber, isCurrencyCode } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
@@ -410,6 +411,12 @@ function openDetail(payment: AdminPayment): void {
 	selected.value = payment
 	detailVisible.value = true
 }
+
+// A notification's link (`?open=<id>`) opens that payment's details here,
+// fetched on its own: it need not be on the page the filters show.
+useOpenRecord(id => {
+	void getPayment(id).then(openDetail).catch(() => {})
+})
 
 const detailFields = computed(() => {
 	const p = selected.value

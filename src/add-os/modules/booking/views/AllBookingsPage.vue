@@ -90,7 +90,7 @@
 		</section>
 
 		<n-card class="add-ledger-table">
-			<n-data-table v-if="rows.length > 0 || isLoading" :columns :data="rows" :loading="isLoading" :bordered="false" :row-key size="small" :scroll-x="1050" />
+			<n-data-table v-if="rows.length > 0 || isLoading" :columns :data="rows" :loading="isLoading" :bordered="false" :row-key :row-class-name="rowClassName" size="small" :scroll-x="1050" />
 
 			<!-- An empty result and an empty district are different facts, and an
 			     operator who filtered their way into nothing needs the way out,
@@ -119,6 +119,7 @@ import { useI18n } from "vue-i18n"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { buildAllBookingsColumns } from "@/add-os/modules/booking/config/all-bookings.config"
 import { BOOKING_PAYMENT_STATES, BOOKING_STATUSES } from "@/add-os/modules/booking/types/calendar"
+import { useOpenRecord } from "@/add-os/notifications/useOpenRecord"
 import { listBookings } from "@/add-os/services/booking-calendar"
 import { formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
@@ -177,6 +178,8 @@ const query = computed<Record<string, unknown>>(() => ({
 const hasFilters = computed(() => Object.keys(query.value).length > 0)
 
 const { data: rows, isLoading, error, meta } = useResourceList<AdminBooking>(listBookings, query, page)
+// A notification's link (`?open=<id>`) picks out that booking's row.
+const { rowClassName } = useOpenRecord(undefined, () => rows.value)
 
 // Any filter change invalidates the current page number: page 3 of an
 // unfiltered list is rarely page 3 of a filtered one, and leaving it would

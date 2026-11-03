@@ -147,7 +147,12 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		// No permission of its own: the page shows one panel per
 		// `dashboard.*` permission the account holds (config/permissions.ts),
 		// and says so when it holds none — so it opens to every staff account.
-		pages: [{ key: "overview", path: "overview", allStaff: true }]
+		pages: [
+			{ key: "overview", path: "overview", allStaff: true },
+			// The account's own notifications, in full: what the bell's
+			// "view all" opens. Every staff account has an inbox.
+			{ key: "myNotifications", path: "notifications", hidden: true, allStaff: true }
+		]
 	},
 	{
 		key: "spatial",
@@ -220,7 +225,9 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "requests", path: "requests" },
 			{ key: "officeRequests", path: "office-requests" },
 			{ key: "officeLeases", path: "office-leases" },
-			{ key: "invoices", path: "invoices" }
+			{ key: "invoices", path: "invoices" },
+			// The provider's own notifications, in full: what the bell's "view all" opens.
+			{ key: "myNotifications", path: "notifications", hidden: true }
 		],
 		roles: ["provider"]
 	},

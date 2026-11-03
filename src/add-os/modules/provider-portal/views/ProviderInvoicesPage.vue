@@ -94,6 +94,7 @@ import { NAlert, NButton, NCard, NDataTable, NModal, NSelect, NSpin, NTag } from
 import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useResourceList } from "@/add-os/composables/useResourceList"
+import { useOpenRecord } from "@/add-os/notifications/useOpenRecord"
 import { ApiError } from "@/add-os/services/api"
 import { getPortalInvoice, listPortalInvoices } from "@/add-os/services/provider-portal"
 import { formatReportMoney as formatMoney } from "@/add-os/services/reports"
@@ -126,6 +127,9 @@ const isLoadingDetail = ref(false)
 const invoiceDetail = ref<Invoice | null>(null)
 const isNotFound = ref(false)
 const detailError = ref<string | null>(null)
+
+// A notification's link (`?open=<id>`) opens that invoice's details here.
+useOpenRecord(id => void openDetail(id))
 
 async function openDetail(id: number) {
 	detailVisible.value = true

@@ -44,10 +44,26 @@
 		"title": "Notifications",
 		"setAsRead": "Set as read",
 		"markAllAsRead": "Mark all as read",
+		"newCount": "{n} new",
+		"viewAll": "View all notifications",
+		"pageDescription": "Everything you've been notified about, newest first.",
 		"empty": "No notifications yet",
+		"emptyHint": "Notices about the bookings, requests and invoices that concern you arrive here.",
+		"emptyUnread": "You've read all your notifications",
 		"loadMore": "Load more",
+		"filters": {
+			"all": "All",
+			"unread": "Unread"
+		},
+		"days": {
+			"today": "Today",
+			"yesterday": "Yesterday",
+			"week": "This week",
+			"older": "Older"
+		},
 		"browser": {
-			"enable": "Enable browser notifications",
+			"prompt": "Turn on browser notifications to get them even with the dashboard closed.",
+			"turnOn": "Turn on",
 			"enabled": "Browser notifications are on",
 			"blocked": "Browser notifications are blocked in this browser's settings",
 			"failed": "Browser notifications could not be enabled"
@@ -1808,6 +1824,7 @@
 		},
 		"pages": {
 			"overview": "Overview",
+			"myNotifications": "Notifications",
 			"branches": "Branches",
 			"buildings": "Buildings",
 			"floors": "Floors",

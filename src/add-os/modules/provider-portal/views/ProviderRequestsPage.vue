@@ -146,6 +146,7 @@ import { pickLocalized } from "@/add-os/components/resource/field-types"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import ProviderRequestSummary from "@/add-os/modules/providers/components/ProviderRequestSummary.vue"
+import { useOpenRecord } from "@/add-os/notifications/useOpenRecord"
 import { ApiError } from "@/add-os/services/api"
 import {
 	cancelPortalRequest,
@@ -385,6 +386,9 @@ const detailError = ref<string | null>(null)
 const detailTitle = computed(() =>
 	requestDetail.value ? `${t(`providerRequests.typeOptions.${requestDetail.value.type}`)} #${requestDetail.value.id}` : t("providerPortal.requests")
 )
+
+// A notification's link (`?open=<id>`) opens that request's details here.
+useOpenRecord(id => void openDetail(id))
 
 async function openDetail(id: number) {
 	detailVisible.value = true

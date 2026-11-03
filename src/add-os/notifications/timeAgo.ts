@@ -11,6 +11,22 @@ const MINUTE = 60_000
 const HOUR = 60 * MINUTE
 const DAY = 24 * HOUR
 
+/**
+ * The heading a notice sits under on the inbox page, by calendar day in the
+ * reader's time zone: today, yesterday, earlier in the last seven days, older.
+ */
+export type DayGroup = "today" | "yesterday" | "week" | "older"
+
+export function dayGroup(value: string | Date, now: number = Date.now()): DayGroup {
+	const startOfDay = (time: number) => new Date(time).setHours(0, 0, 0, 0)
+	const days = Math.round((startOfDay(now) - startOfDay(new Date(value).getTime())) / DAY)
+
+	if (Number.isNaN(days) || days <= 0) return "today"
+	if (days === 1) return "yesterday"
+	if (days < 7) return "week"
+	return "older"
+}
+
 export function timeAgo(value: string | Date, now: number = Date.now()): TimeAgo {
 	const elapsed = now - new Date(value).getTime()
 

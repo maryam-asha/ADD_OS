@@ -123,6 +123,7 @@ import { useResourceList } from "@/add-os/composables/useResourceList"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import ProviderRequestDetail from "@/add-os/modules/providers/components/ProviderRequestDetail.vue"
 import { daysWaiting, REQUEST_TYPE_ICON, requestSummary, waitLevel } from "@/add-os/modules/providers/utils/request-headline"
+import { useOpenRecord } from "@/add-os/notifications/useOpenRecord"
 import { listCompanies } from "@/add-os/services/companies"
 import { listCurrencies } from "@/add-os/services/currencies"
 import { listPlans } from "@/add-os/services/plans"
@@ -224,6 +225,9 @@ function rowKey(row: ProviderRequest) {
 function rowProps(row: ProviderRequest) {
 	return { class: "cursor-pointer", onClick: () => (selectedId.value = row.id) }
 }
+
+// A notification's link (`?open=<id>`) opens that request in the review dialog.
+useOpenRecord(id => (selectedId.value = id))
 
 const columns = computed<DataTableColumns<ProviderRequest>>(() => [
 	{

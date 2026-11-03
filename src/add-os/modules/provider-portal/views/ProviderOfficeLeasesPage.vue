@@ -81,6 +81,7 @@ import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import ProviderOfficeLeaseDetailModal from "@/add-os/modules/provider-portal/components/ProviderOfficeLeaseDetailModal.vue"
+import { useOpenRecord } from "@/add-os/notifications/useOpenRecord"
 import { ApiError } from "@/add-os/services/api"
 import { listProviderCompanies, listProviderOfficeLeases, setProviderOfficeLeaseAutoRenew } from "@/add-os/services/provider-portal"
 import Icon from "@/components/common/Icon.vue"
@@ -135,6 +136,12 @@ function openDetail(row: OfficeLease) {
 	selectedLeaseId.value = row.id
 	detailModalVisible.value = true
 }
+
+// A notification's link (`?open=<id>`) opens that lease's details here.
+useOpenRecord(id => {
+	selectedLeaseId.value = id
+	detailModalVisible.value = true
+})
 
 async function handleToggleAutoRenew(row: OfficeLease, value: boolean) {
 	try {

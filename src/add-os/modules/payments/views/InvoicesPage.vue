@@ -18,6 +18,7 @@
 				:scroll-x="1350"
 				size="small"
 				:row-key="(row: Invoice) => row.id"
+				:row-class-name="rowClassName"
 				:pagination="{ itemCount: meta?.total, page: meta?.current_page, pageSize: meta?.per_page, onChange: (p: number) => (page = p) }"
 			/>
 		</n-card>
@@ -77,6 +78,7 @@ import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { canCancelInvoice, canRecordInvoicePayment } from "@/add-os/config/permissions"
+import { useOpenRecord } from "@/add-os/notifications/useOpenRecord"
 import { ApiError } from "@/add-os/services/api"
 import { listCurrencies } from "@/add-os/services/currencies"
 import { cancelInvoice, listInvoices, recordInvoicePayment } from "@/add-os/services/invoices"
@@ -89,6 +91,8 @@ const message = useMessage()
 const query = ref<Record<string, string | number | undefined>>({})
 const page = ref(1)
 const { data, isLoading, meta, refetch } = useResourceList<Invoice>(listInvoices, query, page)
+// A notification's link (`?open=<id>`) picks out that invoice's row.
+const { rowClassName } = useOpenRecord(undefined, () => data.value)
 const { data: providers } = useResourceList(listProviders)
 const { data: currencies } = useResourceList(listCurrencies)
 

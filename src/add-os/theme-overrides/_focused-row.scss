@@ -1,0 +1,24 @@
+// ── The record a link opened ────────────────────────────────────────────────
+//
+// A notification leads to a list page with `?open=<id>` (src/add-os/
+// notifications/useOpenRecord.ts). Where the page has no detail view of its
+// own, the row is picked out instead: a wash of the brand colour, kept on hover
+// so it does not vanish under the pointer. naive paints cells from its
+// `--n-merged-td-color*` variables, so the row redefines them for its cells.
+
+.n-data-table .n-data-table-tr.add-row-focused {
+	--n-merged-td-color: color-mix(in srgb, var(--add-primary) 12%, var(--add-surface-raised));
+	--n-merged-td-color-hover: color-mix(in srgb, var(--add-primary) 16%, var(--add-surface-raised));
+
+	> .n-data-table-td {
+		background-color: var(--n-merged-td-color);
+	}
+
+	> .n-data-table-td:first-child {
+		box-shadow: inset 3px 0 0 var(--add-primary);
+	}
+}
+
+.direction-rtl .n-data-table .n-data-table-tr.add-row-focused > .n-data-table-td:first-child {
+	box-shadow: inset -3px 0 0 var(--add-primary);
+}

@@ -279,7 +279,7 @@ describe("useInbox", () => {
 		await settle()
 
 		expect(mocks.markNotificationRead).toHaveBeenCalledWith("staff", "zzz")
-		expect(mocks.push).toHaveBeenCalledWith("/payments/invoices")
+		expect(mocks.push).toHaveBeenCalledWith({ path: "/payments/invoices", query: { open: "3" } })
 		expect(inbox.unreadCount.value).toBe(1)
 	})
 

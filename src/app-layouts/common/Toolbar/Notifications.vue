@@ -1,54 +1,63 @@
 <template>
-	<template v-if="audience">
-		<n-popover :show-arrow="false" placement="bottom" content-class="w-80 p-0!">
-			<template #trigger>
+	<n-popover
+		v-if="audience"
+		v-model:show="open"
+		trigger="click"
+		:show-arrow="false"
+		:placement="themeStore.isRTL ? 'bottom-start' : 'bottom-end'"
+		:style="{ padding: 0, overflow: 'hidden' }"
+	>
+		<template #trigger>
+			<button type="button" class="bell" :aria-label="t('notifications.title')">
 				<n-badge :value="unreadCount" :max="99" :show="unreadCount > 0" :color="primaryColor">
 					<Icon :name="BellIcon" :size="21" class="text-default" />
 				</n-badge>
-			</template>
-			<template #header>
-				<div class="font-semibold">{{ t("notifications.title") }}</div>
-			</template>
-			<template #default>
-				<NotificationsList :max-items="MAX_ITEMS" class="max-h-[50vh]">
-					<template #last>
-						<div v-if="items.length > 0" class="flex justify-center p-4">
-							<n-button text @click="showDrawer = true">{{ t("common.viewAll") }}</n-button>
-						</div>
-					</template>
-				</NotificationsList>
-			</template>
-			<template #footer>
-				<NotificationsToolbar />
-			</template>
-		</n-popover>
+			</button>
+		</template>
 
-		<n-drawer v-model:show="showDrawer" :width="400" class="max-w-[90vw]" :trap-focus="false">
-			<n-drawer-content :title="t('notifications.title')" closable body-content-class="p-0!">
-				<NotificationsList>
-					<template #last>
-						<div v-if="hasMore" class="flex justify-center p-4">
-							<n-button text :loading @click="loadMore()">{{ t("notifications.loadMore") }}</n-button>
-						</div>
+		<div class="flex w-[380px] max-w-[calc(100vw-32px)] flex-col">
+			<header class="flex items-center justify-between gap-3 border-b border-[var(--add-border)]/40 px-4 py-3">
+				<div class="flex items-center gap-2">
+					<h2 class="m-0 text-sm font-bold text-[var(--add-text-primary)]">{{ t("notifications.title") }}</h2>
+					<span v-if="unreadCount > 0" class="rounded-full bg-[var(--add-primary)]/12 px-2 py-0.5 text-xs font-semibold text-[var(--add-primary-text)]">
+						{{ t("notifications.newCount", { n: formatNumber(unreadCount) }) }}
+					</span>
+				</div>
+				<n-button v-if="unreadCount > 0" text size="small" type="primary" @click="markAllRead()">
+					<template #icon>
+						<Icon name="carbon:checkmark-outline" :size="16" />
 					</template>
-				</NotificationsList>
-				<template #footer>
-					<NotificationsToolbar />
-				</template>
-			</n-drawer-content>
-		</n-drawer>
-	</template>
+					{{ t("notifications.markAllAsRead") }}
+				</n-button>
+			</header>
+
+			<NotificationsList :max-items="MAX_ITEMS" class="max-h-[min(60vh,480px)]" @opened="open = false" />
+
+			<BrowserPushPrompt />
+
+			<RouterLink
+				:to="inboxPagePath(audience)"
+				class="block border-t border-[var(--add-border)]/40 px-4 py-3 text-center text-sm font-semibold text-[var(--add-primary-text)] no-underline transition-colors hover:bg-[var(--add-surface-sunken)] focus-visible:bg-[var(--add-surface-sunken)] focus-visible:outline-none"
+				@click="open = false"
+			>
+				{{ t("notifications.viewAll") }}
+			</RouterLink>
+		</div>
+	</n-popover>
 </template>
 
 <script lang="ts" setup>
 import type { InboxAudience } from "@/add-os/services/notifications"
-import { NBadge, NButton, NDrawer, NDrawerContent, NPopover } from "naive-ui"
+import { NBadge, NButton, NPopover } from "naive-ui"
 import { computed, onBeforeUnmount, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import { RouterLink } from "vue-router"
+import BrowserPushPrompt from "@/add-os/notifications/components/BrowserPushPrompt.vue"
 import { useInbox } from "@/add-os/notifications/inbox"
+import { inboxPagePath } from "@/add-os/notifications/targets"
+import { formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 import NotificationsList from "@/components/common/Notifications/List.vue"
-import NotificationsToolbar from "@/components/common/Notifications/Toolbar.vue"
 import { useAuthStore } from "@/stores/auth"
 import { useThemeStore } from "@/stores/theme"
 
@@ -58,14 +67,15 @@ const { t } = useI18n()
 const themeStore = useThemeStore()
 const authStore = useAuthStore()
 const primaryColor = computed(() => themeStore.style["primary-color"])
-const showDrawer = ref(false)
-const { items, unreadCount, hasMore, loading, start, stop, loadMore } = useInbox()
+const open = ref(false)
+const { unreadCount, start, stop, markAllRead } = useInbox()
 
 /*
  * ADD OS: the bell reads the signed-in account's own inbox — a provider's
  * provider notices, a staff account's staff notices. An account that is
  * neither (an employee with no permission, who uses only My HR) has no
- * dashboard inbox and no bell; its notices go to the member app.
+ * dashboard inbox and no bell; its notices go to the member app. The full
+ * list is a page of its own (`inboxPagePath`), not a drawer.
  *
  * Removed earlier: the template pushed an unsolicited advert ten seconds
  * after mount (VENDOR-MANIFEST §3.13 / §3.18).
@@ -84,3 +94,20 @@ watch(
 
 onBeforeUnmount(stop)
 </script>
+
+<style scoped>
+.bell {
+	display: flex;
+	align-items: center;
+	border: 0;
+	padding: 0;
+	background: transparent;
+	cursor: pointer;
+}
+
+.bell:focus-visible {
+	outline: 2px solid var(--add-primary);
+	outline-offset: 4px;
+	border-radius: 6px;
+}
+</style>

@@ -178,6 +178,7 @@ import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import ProviderCompanyDetailModal from "@/add-os/modules/provider-portal/components/ProviderCompanyDetailModal.vue"
+import { useOpenRecord } from "@/add-os/notifications/useOpenRecord"
 import { listProviderCompanies } from "@/add-os/services/provider-portal"
 import { formatReportMoney } from "@/add-os/services/reports"
 import { formatDate } from "@/add-os/utils/format/dates"
@@ -204,6 +205,12 @@ function openDetail(row: Company) {
 	selectedCompanyId.value = row.id
 	detailModalVisible.value = true
 }
+
+// A notification's link (`?open=<id>`) opens that company's details here.
+useOpenRecord(id => {
+	selectedCompanyId.value = id
+	detailModalVisible.value = true
+})
 
 function rowKey(row: Company) {
 	return row.id

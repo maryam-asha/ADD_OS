@@ -69,6 +69,7 @@ import { requestTypeLabel, summaryHeadline } from "@/add-os/modules/hr/utils/app
 import { employeeCell } from "@/add-os/modules/hr/utils/cells"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
+import { useOpenRecord } from "@/add-os/notifications/useOpenRecord"
 import { ApiError } from "@/add-os/services/api"
 import { approveMyApproval, deleteDelegation, getMyApproval, listMyApprovals, listMyDelegations, rejectMyApproval } from "@/add-os/services/hr/approvals"
 import { formatDate, formatDateTime } from "@/add-os/utils/format"
@@ -123,6 +124,12 @@ function open(row: ApprovalRequest) {
 	openId.value = row.id
 	detailVisible.value = true
 }
+
+// A notification's link (`?open=<id>`) opens that request's details here.
+useOpenRecord(id => {
+	openId.value = id
+	detailVisible.value = true
+})
 
 function rowProps(row: ApprovalRequest) {
 	return { class: "cursor-pointer", onClick: () => open(row) }

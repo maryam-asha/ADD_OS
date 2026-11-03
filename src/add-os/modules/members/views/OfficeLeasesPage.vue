@@ -358,6 +358,7 @@ import { useResourceList } from "@/add-os/composables/useResourceList"
 import { canCreateOfficeLeases, canViewOfficeLeases } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import OfficeLeaseDetailModal from "@/add-os/modules/members/components/OfficeLeaseDetailModal.vue"
+import { useOpenRecord } from "@/add-os/notifications/useOpenRecord"
 import { listBranches } from "@/add-os/services/branches"
 import { listOfficeLeases } from "@/add-os/services/office-leases"
 import { formatReportMoney } from "@/add-os/services/reports"
@@ -545,6 +546,12 @@ function openDetail(row: OfficeLease) {
 	selectedLeaseId.value = row.id
 	detailModalVisible.value = true
 }
+
+// A notification's link (`?open=<id>`) opens that lease's details here.
+useOpenRecord(id => {
+	selectedLeaseId.value = id
+	detailModalVisible.value = true
+})
 
 function handleCreateLease() {
 	message.info(t("officeLeases.create.notice", "لإنشاء عقد إيجار جديد، اختر طلباً من قائمة طلبات المكاتب الخاصة أو أنشئ طلباً جديداً."))

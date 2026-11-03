@@ -333,8 +333,9 @@ import type { Branch } from "@/add-os/modules/spatial/types/branch"
 import { NButton, NCard, NSelect, NSpin, NTag, useDialog, useMessage } from "naive-ui"
 import { computed, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import { useOpenRecord } from "@/add-os/notifications/useOpenRecord"
 import { listBranches } from "@/add-os/services/branches"
-import { listServiceRequests, updateServiceRequestStatus } from "@/add-os/services/service-requests"
+import { getServiceRequest, listServiceRequests, updateServiceRequestStatus } from "@/add-os/services/service-requests"
 import { listServiceTypes, removeServiceType, updateServiceType } from "@/add-os/services/service-types"
 import Icon from "@/components/common/Icon.vue"
 import ServiceRequestDetailModal from "../components/ServiceRequestDetailModal.vue"
@@ -461,6 +462,12 @@ function openDetails(req: ServiceRequest) {
 	selectedRequest.value = req
 	showDetailModal.value = true
 }
+
+// A notification's link (`?open=<id>`) opens that request's details here,
+// fetched on its own: it need not be in the tab or branch on screen.
+useOpenRecord(id => {
+	void getServiceRequest(id).then(openDetails).catch(() => {})
+})
 
 function openStatusModal(req: ServiceRequest) {
 	selectedRequest.value = req
