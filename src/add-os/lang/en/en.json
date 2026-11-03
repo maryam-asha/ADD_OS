@@ -1037,7 +1037,9 @@
 		},
 		"actions": {
 			"cancel": "Cancel",
-			"save": "Save"
+			"save": "Save",
+			"back": "Back",
+			"next": "Next"
 		},
 		"modules": {
 			"title": "Plan Modules",

@@ -39,13 +39,37 @@
 				</button>
 			</div>
 
+			<!-- Steps: any one can be opened; the plan is saved on the last -->
+			<div v-if="!showTemplatePicker" class="flex items-center gap-1.5 px-5 py-2.5 border-b border-neutral-100 bg-white shrink-0 overflow-x-auto">
+				<template v-for="(name, i) in PLAN_STEPS" :key="name">
+					<span v-if="i > 0" class="h-px w-4 md:w-8 bg-neutral-200 shrink-0" />
+					<button
+						type="button"
+						:data-test="`plan-step-${name}`"
+						:aria-current="step === i ? 'step' : undefined"
+						class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer shrink-0"
+						:class="step === i ? 'bg-[#f0f7ee] text-[#4d783f]' : 'text-neutral-500 hover:bg-neutral-50'"
+						@click="step = i"
+					>
+						<span
+							class="w-5 h-5 rounded-full text-[11px] font-bold flex items-center justify-center add-numeric"
+							:class="step === i ? 'bg-[#557e46] text-white' : step > i ? 'bg-[#dcebd7] text-[#4d783f]' : 'bg-neutral-100 text-neutral-500'"
+						>
+							<Icon v-if="step > i" name="carbon:checkmark" :size="12" />
+							<template v-else>{{ i + 1 }}</template>
+						</span>
+						{{ t(`packages.sections.${name}`) }}
+					</button>
+				</template>
+			</div>
+
 			<!-- Scrollable Content Area -->
 			<div class="overflow-y-auto flex-1 p-4 md:p-5 bg-[#faf9f8] flex flex-col gap-3.5">
 				<PlanTemplatePicker v-if="showTemplatePicker" v-model="templateKey" @choose="chooseTemplate" />
 
 				<div v-else class="flex flex-col md:flex-row gap-4 items-start">
 					<div class="flex-1 min-w-0 flex flex-col gap-3.5">
-						<section data-test="plan-section-basics" class="flex flex-col gap-3.5">
+						<section v-show="step === 0" data-test="plan-section-basics" class="flex flex-col gap-3.5">
 							<div class="flex items-center gap-2 px-1">
 								<span class="w-6 h-6 rounded-full bg-[#557e46] text-white text-xs font-bold flex items-center justify-center shrink-0 add-numeric">1</span>
 								<Icon name="carbon:tag" :size="16" class="text-[#4d783f]" />
@@ -170,7 +194,7 @@
 							</div>
 						</section>
 
-						<section data-test="plan-section-workspace" class="flex flex-col gap-3.5">
+						<section v-show="step === 1" data-test="plan-section-workspace" class="flex flex-col gap-3.5">
 							<div class="flex items-center gap-2 px-1">
 								<span class="w-6 h-6 rounded-full bg-[#557e46] text-white text-xs font-bold flex items-center justify-center shrink-0 add-numeric">2</span>
 								<Icon name="carbon:workspace" :size="16" class="text-[#4d783f]" />
@@ -299,7 +323,7 @@
 							</div>
 						</section>
 
-						<section data-test="plan-section-benefits" class="flex flex-col gap-3">
+						<section v-show="step === 2" data-test="plan-section-benefits" class="flex flex-col gap-3">
 							<div class="flex items-center gap-2 px-1">
 								<span class="w-6 h-6 rounded-full bg-[#557e46] text-white text-xs font-bold flex items-center justify-center shrink-0 add-numeric">3</span>
 								<Icon name="carbon:gift" :size="16" class="text-[#4d783f]" />
@@ -610,7 +634,7 @@
 							</div>
 						</section>
 
-						<section data-test="plan-section-display" class="flex flex-col gap-3">
+						<section v-show="step === 3" data-test="plan-section-display" class="flex flex-col gap-3">
 							<div class="flex items-center gap-2 px-1">
 								<span class="w-6 h-6 rounded-full bg-[#557e46] text-white text-xs font-bold flex items-center justify-center shrink-0 add-numeric">4</span>
 								<Icon name="carbon:mobile" :size="16" class="text-[#4d783f]" />
@@ -815,15 +839,27 @@
 					{{ t('packages.actions.cancel') }}
 				</button>
 
-				<button
-					type="button"
-					:disabled="submitting"
-					class="h-9 px-6 rounded-lg bg-[#557e46] hover:bg-[#476a3a] text-white text-xs md:text-sm font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 min-w-[130px]"
-					@click="handleSubmit"
-				>
-					<Icon v-if="submitting" name="carbon:circle-dash" class="animate-spin" :size="16" />
-					<span>{{ t('packages.actions.save') }}</span>
-				</button>
+				<div v-if="!showTemplatePicker" class="flex items-center gap-2">
+					<button v-if="step > 0" type="button" data-test="plan-step-back" class="h-9 px-5 rounded-lg border border-neutral-200 text-xs md:text-sm font-semibold text-neutral-700 hover:bg-neutral-50 transition-colors cursor-pointer flex items-center gap-1.5" @click="step--">
+						<Icon name="carbon:arrow-left" :size="14" class="rtl:rotate-180" />
+						<span>{{ t('packages.actions.back') }}</span>
+					</button>
+					<button v-if="step < PLAN_STEPS.length - 1" type="button" data-test="plan-step-next" class="h-9 px-6 rounded-lg bg-[#557e46] hover:bg-[#476a3a] text-white text-xs md:text-sm font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 min-w-[130px]" @click="step++">
+						<span>{{ t('packages.actions.next') }}</span>
+						<Icon name="carbon:arrow-right" :size="14" class="rtl:rotate-180" />
+					</button>
+					<button
+						v-else
+						type="button"
+						data-test="plan-save"
+						:disabled="submitting"
+						class="h-9 px-6 rounded-lg bg-[#557e46] hover:bg-[#476a3a] text-white text-xs md:text-sm font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 min-w-[130px]"
+						@click="handleSubmit"
+					>
+						<Icon v-if="submitting" name="carbon:circle-dash" class="animate-spin" :size="16" />
+						<span>{{ t('packages.actions.save') }}</span>
+					</button>
+				</div>
 			</div>
 		</div>
 	</n-modal>
@@ -885,6 +921,21 @@ const message = useMessage()
 /** A new plan opens on its template; editing goes straight to the form. */
 const templateKey = ref<PlanTemplateKey | null>(null)
 const showTemplatePicker = ref(false)
+
+/** The form's four steps, in order; the plan is saved from the last. */
+const PLAN_STEPS = ["basics", "workspace", "benefits", "display"] as const
+const step = ref(0)
+
+/** The step holding a field the server or the form refused. */
+function stepOf(field: string): number {
+	if (/^(?:coworking_|access_window_|allowance_cycle)/.test(field))
+		return 1
+	if (/^(?:discounts|space_hours|balances|resource_grants)\b/.test(field))
+		return 2
+	if (/^(?:features|is_active|is_public|is_subscription|order)\b/.test(field))
+		return 3
+	return 0
+}
 const benefitMenuOpen = ref(false)
 
 function chooseTemplate(key: PlanTemplateKey): void {
@@ -1008,6 +1059,7 @@ function openOnTemplate(): void {
 	isCreateMode.value = !((model.value as { id?: number }).id || model.value.name?.ar?.trim())
 	templateKey.value = null
 	benefitMenuOpen.value = false
+	step.value = 0
 	showTemplatePicker.value = isCreateMode.value
 }
 
@@ -1540,11 +1592,13 @@ async function handleSubmit() {
 		if (!model.value.name?.ar?.trim()) errors.value["name.ar"] = [t("resourceCrud.validation.required", { field: t("packages.form.name") })]
 		if (!model.value.name?.en?.trim()) errors.value["name.en"] = [t("resourceCrud.validation.required", { field: t("packages.form.name") })]
 		message.error(t("resourceCrud.validation.required", { field: t("packages.form.name") }))
+		step.value = 0
 		return
 	}
 
 	if (Object.keys(benefitErrors.value).length > 0) {
 		message.error(Object.values(benefitErrors.value)[0])
+		step.value = 2
 		return
 	}
 
@@ -1617,6 +1671,9 @@ async function handleSubmit() {
 	} catch (caught) {
 		if (caught instanceof ApiError && caught.status === 422 && caught.data?.errors) {
 			errors.value = caught.data.errors
+			const firstField = Object.keys(caught.data.errors)[0]
+			if (firstField)
+				step.value = stepOf(firstField)
 			const firstError = Object.values(caught.data.errors)[0]?.[0]
 			if (firstError) {
 				message.error(firstError)

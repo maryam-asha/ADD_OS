@@ -37,12 +37,19 @@ function visibleSections(wrapper: Awaited<ReturnType<typeof open>>["wrapper"]): 
 	return SECTIONS.filter(name => wrapper.find(`[data-test=plan-section-${name}]`).exists() && wrapper.get(`[data-test=plan-section-${name}]`).isVisible())
 }
 
+/** Shows step `name` by clicking its number in the step bar. */
+async function goTo(wrapper: Awaited<ReturnType<typeof open>>["wrapper"], name: string): Promise<void> {
+	await wrapper.get(`[data-test=plan-step-${name}]`).trigger("click")
+	await flushPromises()
+}
+
 /**
- * One page of four sections in place of six tabs, every benefit added from
- * one menu, and a new plan opened on its template first (ADDCore, 2026-11-03).
+ * Four steps in place of six tabs, moved between freely and saved at the
+ * end, every benefit added from one menu, and a new plan opened on its
+ * template first (ADDCore, 2026-11-03).
  */
-describe("planFormDrawer as one page", () => {
-	it("create shows the picker first, then all four sections without tabs", async () => {
+describe("planFormDrawer as steps", () => {
+	it("create shows the picker first, then the first step", async () => {
 		const { wrapper } = await open(emptyPlanPayload())
 
 		expect(wrapper.find("[data-test=plan-template-picker]").exists()).toBe(true)
@@ -53,7 +60,7 @@ describe("planFormDrawer as one page", () => {
 		await flushPromises()
 
 		expect(wrapper.find("[data-test=plan-template-picker]").exists()).toBe(false)
-		expect(visibleSections(wrapper)).toEqual(SECTIONS)
+		expect(visibleSections(wrapper)).toEqual(["basics"])
 		expect(wrapper.get("[data-test=plan-template-change]").text()).toContain("Change")
 
 		await wrapper.get("[data-test=plan-template-change]").trigger("click")
@@ -73,17 +80,56 @@ describe("planFormDrawer as one page", () => {
 		wrapper.unmount()
 	})
 
-	it("edit opens straight on the sections", async () => {
+	it("edit opens straight on the first step", async () => {
 		const { wrapper } = await open({ ...emptyPlanPayload(), id: 4, name: { ar: "باقة", en: "Plan" } })
 
 		expect(wrapper.find("[data-test=plan-template-picker]").exists()).toBe(false)
-		expect(visibleSections(wrapper)).toEqual(SECTIONS)
+		expect(visibleSections(wrapper)).toEqual(["basics"])
+		wrapper.unmount()
+	})
+
+	it("next and back walk the steps, and only the last one saves", async () => {
+		const { wrapper } = await open({ ...emptyPlanPayload(), id: 4, name: { ar: "باقة", en: "Plan" } })
+
+		for (const name of SECTIONS) {
+			expect(visibleSections(wrapper)).toEqual([name])
+			expect(wrapper.find("[data-test=plan-save]").exists()).toBe(name === "display")
+			expect(wrapper.find("[data-test=plan-step-back]").exists()).toBe(name !== "basics")
+			if (name !== "display")
+				await wrapper.get("[data-test=plan-step-next]").trigger("click")
+		}
+
+		await wrapper.get("[data-test=plan-step-back]").trigger("click")
+		expect(visibleSections(wrapper)).toEqual(["benefits"])
+		wrapper.unmount()
+	})
+
+	it("any step can be opened from the step bar", async () => {
+		const { wrapper } = await open({ ...emptyPlanPayload(), id: 4, name: { ar: "باقة", en: "Plan" } })
+
+		await goTo(wrapper, "benefits")
+		expect(visibleSections(wrapper)).toEqual(["benefits"])
+		await goTo(wrapper, "basics")
+		expect(visibleSections(wrapper)).toEqual(["basics"])
+		wrapper.unmount()
+	})
+
+	it("a failed save opens the step with the error", async () => {
+		const discount = { percentage: 10, space_type: "room", usage_limit: null, is_active: true, targetMode: "space_type" }
+		const { wrapper, onSubmit } = await open({ ...emptyPlanPayload(), id: 4, name: { ar: "باقة", en: "Plan" }, discounts: [{ ...discount }, { ...discount, percentage: 20 }] })
+
+		await (wrapper.vm as unknown as DrawerVm).handleSubmit()
+		await flushPromises()
+
+		expect(onSubmit).not.toHaveBeenCalled()
+		expect(visibleSections(wrapper)).toEqual(["benefits"])
 		wrapper.unmount()
 	})
 
 	it("the add-benefit menu offers discount, free hours, balance and resource, and each adds a row", async () => {
 		const model = reactive({ ...emptyPlanPayload(), id: 4, name: { ar: "باقة", en: "Plan" } })
 		const { wrapper, onSubmit } = await open(model)
+		await goTo(wrapper, "benefits")
 
 		for (const [kind, rows] of [["discount", 1], ["hours", 2], ["balance", 3], ["resource", 4]] as const) {
 			await wrapper.get("[data-test=plan-benefit-add]").trigger("click")
