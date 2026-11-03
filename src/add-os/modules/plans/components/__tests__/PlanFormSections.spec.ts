@@ -88,6 +88,15 @@ describe("planFormDrawer as steps", () => {
 		wrapper.unmount()
 	})
 
+	it("the seat is chosen once: no separate module field, and the header names the seat", async () => {
+		const { wrapper } = await open({ ...emptyPlanPayload(), id: 4, name: { ar: "Desk", en: "Desk" }, coworking_seat: "dedicated" })
+
+		expect(wrapper.get("[data-test=plan-section-basics]").text()).not.toContain("Assigned Module")
+		expect(wrapper.text()).toContain("Desk · Dedicated desk")
+		expect(wrapper.get("[data-test=plan-section-basics]").text()).toContain("Price & duration")
+		wrapper.unmount()
+	})
+
 	it("next and back walk the steps, and only the last one saves", async () => {
 		const { wrapper } = await open({ ...emptyPlanPayload(), id: 4, name: { ar: "باقة", en: "Plan" } })
 
