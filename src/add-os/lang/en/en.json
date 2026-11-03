@@ -779,6 +779,19 @@
 			"allDay": "All day",
 			"windowTitle": "Daily access"
 		},
+		"preview": {
+			"title": "As the member sees it",
+			"untitled": "Untitled plan",
+			"price": "{points} pts / {days} days",
+			"period": "Plan period",
+			"hours": "Shared workspace hours",
+			"freeHours": "Free hours",
+			"discount": "{percent}% off",
+			"balance": "Balance",
+			"resource": "Resource",
+			"unlimited": "Unlimited",
+			"sample": "Usage figures here are a sample."
+		},
 		"templates": {
 			"title": "Where does this plan start?",
 			"subtitle": "Pick the closest one; everything can be changed afterwards.",

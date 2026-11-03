@@ -4,6 +4,7 @@ import { reactive } from "vue"
 import { createI18n } from "vue-i18n"
 import en from "@/add-os/lang/en/en.json"
 import { emptyPlanPayload } from "@/add-os/modules/plans/config/plans.config"
+import { formatNumber } from "@/add-os/utils/format"
 import PlanFormDrawer from "../PlanFormDrawer.vue"
 
 vi.mock("@/add-os/services/plan-modules", () => ({ listPlanModules: vi.fn().mockResolvedValue([]) }))
@@ -89,6 +90,19 @@ describe("planFormDrawer as one page", () => {
 		expect(payload.space_hours).toHaveLength(1)
 		expect(payload.balances).toHaveLength(1)
 		expect(payload.resource_grants).toHaveLength(1)
+		wrapper.unmount()
+	})
+
+	it("the preview card updates when the price changes", async () => {
+		const model = reactive({ ...emptyPlanPayload(), id: 4, name: { ar: "Monthly", en: "Monthly" }, price_points: 1500 })
+		const { wrapper } = await open(model)
+
+		expect(wrapper.get("[data-test=plan-preview]").text()).toContain("Monthly")
+		expect(wrapper.get("[data-test=plan-preview]").text()).toContain(formatNumber(1500))
+
+		model.price_points = 2750
+		await flushPromises()
+		expect(wrapper.get("[data-test=plan-preview]").text()).toContain(formatNumber(2750))
 		wrapper.unmount()
 	})
 
