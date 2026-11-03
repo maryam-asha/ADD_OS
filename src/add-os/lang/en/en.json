@@ -936,7 +936,7 @@
 		"noModule": "No Module",
 		"tabs": {
 			"basic": "Basic Info",
-			"coworking": "Coworking",
+			"coworking": "Shared workspace",
 			"balances": "Included Balances",
 			"features": "Features",
 			"discounts": "Discounts",
@@ -944,17 +944,42 @@
 			"resources": "Resources"
 		},
 		"coworking": {
-			"title": "Does this plan include coworking?",
-			"none": { "title": "No coworking", "hint": "No seat is held. You can still give a coworking benefit under Space benefits." },
+			"title": "Does this plan include the shared workspace?",
+			"none": { "title": "No seat", "hint": "No seat is held. You can still give a shared-workspace benefit under Benefits." },
 			"flexible": { "title": "Flexible seat", "hint": "A seat is held for the member in the branch pool; they sit at any free desk." },
 			"dedicated": { "title": "Dedicated desk", "hint": "A named desk staff tie to the subscription. Always unlimited." },
-			"hoursTitle": "Coworking hours",
+			"hoursTitle": "Usage hours",
 			"unlimited": "Unlimited",
 			"hours": "Hours",
 			"dedicatedUnlimited": "A dedicated desk has no hour limit.",
 			"hoursHint": "When the hours run out, the seat is released and extra time is billed at the normal rate.",
 			"allDay": "All day",
 			"windowTitle": "Daily access"
+		},
+		"preview": {
+			"title": "As the member sees it",
+			"untitled": "Untitled plan",
+			"price": "{points} pts / {days} days",
+			"period": "Plan period",
+			"hours": "Shared workspace hours",
+			"freeHours": "Free hours",
+			"discount": "{percent}% off",
+			"balance": "Balance",
+			"resource": "Resource",
+			"unlimited": "Unlimited",
+			"sample": "Usage figures here are a sample."
+		},
+		"templates": {
+			"title": "Where does this plan start?",
+			"subtitle": "Pick the closest one; everything can be changed afterwards.",
+			"mostUsed": "Most used",
+			"continue": "Continue",
+			"change": "Change",
+			"current": "Template",
+			"monthlyUnlimited": { "title": "Monthly unlimited", "hint": "Flexible seat · 30 days · any hours" },
+			"setHours": { "title": "Set hours", "hint": "Flexible seat · hours per month" },
+			"dedicatedDesk": { "title": "Dedicated desk", "hint": "A fixed desk tied to the member" },
+			"noSeat": { "title": "No seat", "hint": "Discounts and benefits only" }
 		},
 		"benefits": {
 			"description": "Each space or space type takes one benefit: free hours or a discount.",
@@ -964,9 +989,16 @@
 			"hours": "Hours",
 			"target": "Applies to",
 			"duplicateTarget": "This space or space type already has a benefit.",
-			"coworkingOnCoworkingPlan": "A coworking plan already includes coworking."
+			"coworkingOnCoworkingPlan": "A shared-workspace plan already includes it.",
+			"add": "Add benefit",
+			"empty": "No benefits yet. Add a discount, free hours, a balance or a resource.",
+			"menu": { "discount": "Discount on a space", "hours": "Free hours on a space", "balance": "Balance", "resource": "Resource (printing, locker…)" }
 		},
 		"sections": {
+			"basics": "Basics",
+			"workspace": "Shared workspace",
+			"benefits": "Benefits",
+			"display": "Shown in the app",
 			"basicInfo": "Basic Information",
 			"pricing": "Pricing & Module",
 			"displaySettings": "Display Settings",
@@ -2297,12 +2329,12 @@
 				"hint": "Free time kept between two bookings of the same space to prepare it. Does not apply to shared co-working spaces. A space can set its own value."
 			},
 			"coworking_no_show_release_percent": {
-				"label": "Release unpaid coworking bookings after (%)",
-				"hint": "An unpaid coworking booking is cancelled and its seat freed once this share of its time passes without the member. The member is notified."
+				"label": "Release unpaid shared-workspace bookings after (%)",
+				"hint": "An unpaid shared-workspace booking is cancelled and its seat freed once this share of its time passes without the member. The member is notified."
 			},
 			"coworking_late_arrival_billing": {
 				"label": "Bill a late arrival from",
-				"hint": "For unpaid coworking bookings: arrival or booking_start. Paid bookings are never refunded for arriving late."
+				"hint": "For unpaid shared-workspace bookings: arrival or booking_start. Paid bookings are never refunded for arriving late."
 			},
 			"booking_cancellation_window_minutes": {
 				"label": "Cancellation window (minutes)",

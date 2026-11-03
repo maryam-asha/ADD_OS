@@ -233,3 +233,23 @@ export function emptyPlanPayload(): PlanPayload {
 		resource_grants: []
 	}
 }
+
+export type PlanTemplateKey = "monthlyUnlimited" | "setHours" | "dedicatedDesk" | "noSeat"
+
+/** The order the picker shows them in; nine plans in ten are the first. */
+export const planTemplateKeys: PlanTemplateKey[] = ["monthlyUnlimited", "setHours", "dedicatedDesk", "noSeat"]
+
+const noWindow = { access_window_start: null, access_window_end: null }
+
+/** What each template sets: the shared-workspace terms, the length, and that it is sold as a subscription. */
+export const planTemplates: Record<PlanTemplateKey, Partial<PlanPayload>> = {
+	monthlyUnlimited: { coworking_seat: "flexible", coworking_hours: null, allowance_cycle: "period", ...noWindow, duration_days: 30, is_subscription: true },
+	setHours: { coworking_seat: "flexible", coworking_hours: 20, allowance_cycle: "monthly", ...noWindow, duration_days: 30, is_subscription: true },
+	dedicatedDesk: { coworking_seat: "dedicated", coworking_hours: null, allowance_cycle: "period", ...noWindow, duration_days: 30, is_subscription: true },
+	noSeat: { coworking_seat: "none", coworking_hours: null, allowance_cycle: "period", ...noWindow, duration_days: 30, is_subscription: true }
+}
+
+/** The payload with a template's terms; the name, price, benefits and display settings stay as they are. */
+export function applyTemplate(payload: PlanPayload, key: PlanTemplateKey): PlanPayload {
+	return { ...payload, ...planTemplates[key] }
+}
