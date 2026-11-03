@@ -124,6 +124,10 @@ function openEdit(row: Plan) {
 		reference_space_id: row.reference_space_id ?? null,
 		reference_units: row.reference_units ?? null,
 		duration_days: row.duration_days,
+		// A plan saved before plans stated their coworking terms reads as none.
+		coworking_seat: row.coworking_seat ?? "none",
+		coworking_hours: row.coworking_hours != null ? Number(row.coworking_hours) : null,
+		allowance_cycle: row.allowance_cycle ?? "period",
 		// Wall-clock strings, copied across untouched — they are not instants,
 		// so there is nothing here to parse, format or convert.
 		access_window_start: row.access_window_start ?? null,
@@ -156,6 +160,15 @@ function openEdit(row: Plan) {
 			is_active: d.is_active,
 			order: d.order ?? 0,
 			targetMode: d.space_id != null ? "space" : d.space_type != null ? "space_type" : "all"
+		})),
+		space_hours: (row.space_hours ?? []).map(h => ({
+			id: h.id,
+			hours: Number(h.hours),
+			space_id: h.space_id ?? null,
+			space_type: h.space_type ?? null,
+			description: h.description ? { ...h.description } : { ar: "", en: "" },
+			order: h.order ?? 0,
+			targetMode: h.space_id != null ? "space" : "space_type"
 		})),
 		resource_grants: (row.resource_grants ?? []).map(g => ({
 			resource_type_id: g.resource_type_id,

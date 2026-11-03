@@ -50,6 +50,19 @@
 
 				<button
 					type="button"
+					@click="activeTab = 'coworking'"
+					:class="[
+						'pb-2.5 px-1 text-xs md:text-sm font-semibold transition-all cursor-pointer border-b-2 flex items-center gap-1.5',
+						activeTab === 'coworking'
+							? 'border-[#557e46] text-[#557e46]'
+							: 'border-transparent text-neutral-500 hover:text-neutral-800'
+					]"
+				>
+					{{ t('packages.tabs.coworking') }}
+				</button>
+
+				<button
+					type="button"
 					@click="activeTab = 'balances'"
 					:class="[
 						'pb-2.5 px-1 text-xs md:text-sm font-semibold transition-all cursor-pointer border-b-2 flex items-center gap-1.5',
@@ -82,17 +95,17 @@
 
 				<button
 					type="button"
-					@click="activeTab = 'discounts'"
+					@click="activeTab = 'benefits'"
 					:class="[
 						'pb-2.5 px-1 text-xs md:text-sm font-semibold transition-all cursor-pointer border-b-2 flex items-center gap-1.5',
-						activeTab === 'discounts'
+						activeTab === 'benefits'
 							? 'border-[#557e46] text-[#557e46]'
 							: 'border-transparent text-neutral-500 hover:text-neutral-800'
 					]"
 				>
-					<span>{{ t('packages.tabs.discounts') }}</span>
+					<span>{{ t('packages.tabs.benefits') }}</span>
 					<span class="px-2 py-0.5 text-[11px] rounded-full bg-[#eef7ec] text-[#47743b] font-bold leading-none">
-						{{ discountsList.length }}
+						{{ discountsList.length + spaceHoursList.length }}
 					</span>
 				</button>
 
@@ -206,6 +219,11 @@
 								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.durationDays') }} *</span>
 								<PlanStepper v-model="model.duration_days" :min="1" :step="1" />
 							</div>
+							<div class="flex flex-col gap-1">
+								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.allowanceCycle.label') }}</span>
+								<n-select v-model:value="model.allowance_cycle" :options="allowanceCycleOptions" size="small" />
+								<span class="text-[11px] text-neutral-500">{{ t('packages.form.allowanceCycle.hint') }}</span>
+							</div>
 						</div>
 
 						<!-- Saving reference: a plan or a space's hourly rate, times units — one or neither. -->
@@ -267,62 +285,123 @@
 						</div>
 					</div>
 
-					<!-- Card 4: وقت الباقة -->
+				</div>
+
+				<!-- TAB: الكوركينغ -->
+				<div v-show="activeTab === 'coworking'" class="flex flex-col gap-3.5" data-test="plan-coworking">
 					<div class="border border-neutral-200/70 rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs">
 						<div class="flex items-center gap-2 text-xs md:text-sm font-bold text-neutral-800">
-							<div class="w-6 h-6 rounded-md bg-[#eef2fb] text-[#3f5b8f] flex items-center justify-center shrink-0">
-								<Icon name="carbon:time" :size="14" />
+							<div class="w-6 h-6 rounded-md bg-[#eef7ec] text-[#4d783f] flex items-center justify-center shrink-0">
+								<Icon name="carbon:workspace" :size="14" />
 							</div>
-							<span>{{ t('packages.sections.accessWindow') }}</span>
+							<span>{{ t('packages.coworking.title') }}</span>
 						</div>
 
-						<div class="flex items-center justify-between gap-2 p-2 px-3 bg-neutral-50 rounded-lg border border-neutral-100">
-							<span class="text-xs font-semibold text-neutral-700">{{ t('packages.form.hasAccessWindow') }}</span>
-							<n-switch :value="hasAccessWindow" :rail-style="railStyle" size="small" @update:value="toggleAccessWindow" />
+						<div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+							<button
+								v-for="option in coworkingSeatOptions"
+								:key="option.value"
+								type="button"
+								:data-test="`coworking-seat-${option.value}`"
+								:class="[
+									'text-start rounded-lg border p-3 flex flex-col gap-1 transition-colors cursor-pointer',
+									model.coworking_seat === option.value
+										? 'border-[#557e46] bg-[#f0f7ee]'
+										: 'border-neutral-200 bg-white hover:border-neutral-300'
+								]"
+								@click="setCoworkingSeat(option.value)"
+							>
+								<span class="flex items-center gap-1.5 text-xs md:text-sm font-bold text-neutral-800">
+									<Icon :name="option.icon" :size="15" />
+									{{ t(`packages.coworking.${option.value}.title`) }}
+								</span>
+								<span class="text-[11px] text-neutral-500">{{ t(`packages.coworking.${option.value}.hint`) }}</span>
+							</button>
+						</div>
+						<span v-if="errors['coworking_seat']" class="text-xs text-red-500">{{ errors['coworking_seat'][0] }}</span>
+					</div>
+
+					<div v-if="model.coworking_seat !== 'none'" class="border border-neutral-200/70 rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs">
+						<div class="flex items-center gap-2 text-xs md:text-sm font-bold text-neutral-800">
+							<div class="w-6 h-6 rounded-md bg-[#fdf3e9] text-[#c26d25] flex items-center justify-center shrink-0">
+								<Icon name="carbon:hourglass" :size="14" />
+							</div>
+							<span>{{ t('packages.coworking.hoursTitle') }}</span>
 						</div>
 
-						<template v-if="hasAccessWindow">
-							<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-								<div class="flex flex-col gap-1">
-									<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.accessWindowStart') }} *</span>
-									<n-time-picker
-										:formatted-value="toPickerTimeValue(model.access_window_start)"
-										format="hh:mm a" use-12-hours
-										value-format="HH:mm"
-										class="w-full"
-										size="small"
-										@update:formatted-value="(value: string | null) => (model.access_window_start = value)"
-									/>
-									<span v-if="errors['access_window_start']" class="text-xs text-red-500">{{ errors['access_window_start'][0] }}</span>
-								</div>
-								<div class="flex flex-col gap-1">
-									<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.accessWindowEnd') }} *</span>
-									<n-time-picker
-										:formatted-value="toPickerTimeValue(model.access_window_end)"
-										format="hh:mm a" use-12-hours
-										value-format="HH:mm"
-										class="w-full"
-										size="small"
-										@update:formatted-value="(value: string | null) => (model.access_window_end = value)"
-									/>
-									<span v-if="errors['access_window_end']" class="text-xs text-red-500">{{ errors['access_window_end'][0] }}</span>
-								</div>
+						<span v-if="model.coworking_seat === 'dedicated'" class="text-xs text-neutral-600">{{ t('packages.coworking.dedicatedUnlimited') }}</span>
+						<template v-else>
+							<div class="flex items-center justify-between gap-2 p-2 px-3 bg-neutral-50 rounded-lg border border-neutral-100">
+								<span class="text-xs font-semibold text-neutral-700">{{ t('packages.coworking.unlimited') }}</span>
+								<n-switch :value="coworkingHoursUnlimited" :rail-style="railStyle" size="small" @update:value="setCoworkingHoursUnlimited" />
 							</div>
-
-							<!--
-								An end at or before the start is legal, not an error: the
-								window wraps past midnight, which is exactly the evening
-								package this field exists for. So this explains the
-								consequence instead of warning about a mistake.
-							-->
-							<div v-if="accessWindowWraps" class="flex items-start gap-2 p-2 px-3 bg-[#eef2fb] rounded-lg border border-[#d9e2f4] text-[11px] text-[#3f5b8f]">
-								<Icon name="carbon:information" :size="14" class="shrink-0 mt-px" />
-								<span>{{ t('packages.form.accessWindowWraps') }}</span>
+							<div v-if="!coworkingHoursUnlimited" class="flex flex-col gap-1">
+								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.coworking.hours') }}</span>
+								<PlanStepper v-model="coworkingHoursValue" :min="1" :step="1" />
+								<span v-if="errors['coworking_hours']" class="text-xs text-red-500">{{ errors['coworking_hours'][0] }}</span>
 							</div>
-
-							<span class="text-[11px] text-neutral-500">{{ t('packages.form.accessWindowHint') }}</span>
+							<span class="text-[11px] text-neutral-500">{{ t('packages.coworking.hoursHint') }}</span>
 						</template>
 					</div>
+
+					<template v-if="model.coworking_seat !== 'none'">
+						<!-- Card 4: وقت الباقة -->
+						<div class="border border-neutral-200/70 rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs">
+							<div class="flex items-center gap-2 text-xs md:text-sm font-bold text-neutral-800">
+								<div class="w-6 h-6 rounded-md bg-[#eef2fb] text-[#3f5b8f] flex items-center justify-center shrink-0">
+									<Icon name="carbon:time" :size="14" />
+								</div>
+								<span>{{ t('packages.coworking.windowTitle') }}</span>
+							</div>
+
+							<div class="flex items-center justify-between gap-2 p-2 px-3 bg-neutral-50 rounded-lg border border-neutral-100">
+								<span class="text-xs font-semibold text-neutral-700">{{ t('packages.coworking.allDay') }}</span>
+								<n-switch :value="!hasAccessWindow" :rail-style="railStyle" size="small" @update:value="(allDay: boolean) => toggleAccessWindow(!allDay)" />
+							</div>
+
+							<template v-if="hasAccessWindow">
+								<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+									<div class="flex flex-col gap-1">
+										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.accessWindowStart') }} *</span>
+										<n-time-picker
+											:formatted-value="toPickerTimeValue(model.access_window_start)"
+											format="hh:mm a" use-12-hours
+											value-format="HH:mm"
+											class="w-full"
+											size="small"
+											@update:formatted-value="(value: string | null) => (model.access_window_start = value)"
+										/>
+										<span v-if="errors['access_window_start']" class="text-xs text-red-500">{{ errors['access_window_start'][0] }}</span>
+									</div>
+									<div class="flex flex-col gap-1">
+										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.accessWindowEnd') }} *</span>
+										<n-time-picker
+											:formatted-value="toPickerTimeValue(model.access_window_end)"
+											format="hh:mm a" use-12-hours
+											value-format="HH:mm"
+											class="w-full"
+											size="small"
+											@update:formatted-value="(value: string | null) => (model.access_window_end = value)"
+										/>
+										<span v-if="errors['access_window_end']" class="text-xs text-red-500">{{ errors['access_window_end'][0] }}</span>
+									</div>
+								</div>
+
+								<!--
+									An end at or before the start is legal, not an error: the
+									window wraps past midnight, which is exactly the evening
+									package this field exists for. So this explains the
+									consequence instead of warning about a mistake.
+								-->
+								<div v-if="accessWindowWraps" class="flex items-start gap-2 p-2 px-3 bg-[#eef2fb] rounded-lg border border-[#d9e2f4] text-[11px] text-[#3f5b8f]">
+									<Icon name="carbon:information" :size="14" class="shrink-0 mt-px" />
+									<span>{{ t('packages.form.accessWindowWraps') }}</span>
+								</div>
+
+								<span class="text-[11px] text-neutral-500">{{ t('packages.form.accessWindowHint') }}</span>
+							</template>
+						</div>
+					</template>
 				</div>
 
 				<!-- TAB 2: الأرصدة -->
@@ -576,10 +655,10 @@
 					</div>
 				</div>
 				<!-- TAB 4: الحسومات -->
-				<div v-show="activeTab === 'discounts'" class="flex flex-col gap-3">
+				<div v-show="activeTab === 'benefits'" class="flex flex-col gap-3">
 					<!-- Top Action Bar -->
 					<div class="flex items-center justify-between">
-						<span class="text-xs font-semibold text-neutral-500">{{ t('packages.discounts.description') }}</span>
+						<span class="text-xs font-semibold text-neutral-500">{{ t('packages.benefits.description') }}</span>
 						<button
 							type="button"
 							@click="addDiscount"
@@ -634,14 +713,15 @@
 
 							<div v-if="discount.targetMode === 'space'" class="flex flex-col gap-1">
 								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.discounts.selectSpace') }}</span>
-								<n-select v-model:value="discount.space_id" :options="spaceOptions" :placeholder="t('packages.discounts.selectSpace')" size="small" clearable />
+								<n-select v-model:value="discount.space_id" :options="benefitSpaceOptions" :placeholder="t('packages.discounts.selectSpace')" size="small" clearable />
 							</div>
 
 							<div v-else-if="discount.targetMode === 'space_type'" class="flex flex-col gap-1">
 								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.discounts.selectSpaceType') }}</span>
-								<n-select v-model:value="discount.space_type" :options="spaceTypeOptions" :placeholder="t('packages.discounts.selectSpaceType')" size="small" clearable />
+								<n-select v-model:value="discount.space_type" :options="benefitSpaceTypeOptions" :placeholder="t('packages.discounts.selectSpaceType')" size="small" clearable />
 							</div>
 						</div>
+						<span v-if="benefitErrors[`discounts.${idx}`]" class="text-xs text-red-500">{{ benefitErrors[`discounts.${idx}`] }}</span>
 
 						<!-- Row 2: Usage limit toggle (+ count), Active toggle -->
 						<div :class="['grid gap-3 items-center', discountUsageLimited(discount).value ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2']">
@@ -681,6 +761,66 @@
 								/>
 							</div>
 						</div>
+					</div>
+
+					<!-- Free hours: the other benefit a space can take -->
+					<div class="flex items-center justify-between border-t border-neutral-100 pt-3" data-test="plan-space-hours">
+						<span class="text-xs font-semibold text-neutral-500">{{ t('packages.benefits.hoursTitle') }}</span>
+						<button
+							type="button"
+							@click="addSpaceHours"
+							class="h-8 px-3 text-xs font-semibold rounded-lg bg-[#f0f7ee] hover:bg-[#e4f1e1] text-[#4d783f] border border-[#d6e8d2] flex items-center gap-1.5 transition-colors cursor-pointer"
+						>
+							<Icon name="carbon:add" :size="14" />
+							<span>{{ t('packages.benefits.addHours') }}</span>
+						</button>
+					</div>
+
+					<div v-if="spaceHoursList.length === 0" class="py-6 text-center text-neutral-400 bg-white rounded-xl border border-dashed border-neutral-200 text-xs">
+						{{ t('packages.benefits.hoursEmpty') }}
+					</div>
+
+					<div
+						v-for="(row, idx) in spaceHoursList"
+						:key="`hours-${idx}`"
+						class="border border-neutral-200/80 rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs"
+					>
+						<div class="flex items-center justify-between">
+							<div class="flex items-center gap-2">
+								<div class="w-7 h-7 rounded-lg flex items-center justify-center border text-xs shrink-0 bg-[#eef2fb] text-[#3f5b8f] border-[#d9e2f4]">
+									<Icon name="carbon:time" :size="15" />
+								</div>
+								<span class="font-bold text-xs md:text-sm text-neutral-800">{{ getBenefitTargetLabel(row) }}</span>
+							</div>
+							<button
+								type="button"
+								@click="removeSpaceHours(idx)"
+								class="w-7 h-7 rounded-lg bg-[#fef1f1] hover:bg-[#fde2e2] text-[#e04545] border border-[#fbd4d4] flex items-center justify-center transition-colors cursor-pointer"
+								title="Remove"
+							>
+								<Icon name="carbon:trash-can" :size="14" />
+							</button>
+						</div>
+
+						<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+							<div class="flex flex-col gap-1">
+								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.benefits.hours') }}</span>
+								<PlanStepper v-model="row.hours" :min="1" :step="1" />
+							</div>
+							<div class="flex flex-col gap-1">
+								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.benefits.target') }}</span>
+								<n-select :value="row.targetMode ?? 'space_type'" :options="hoursTargetModeOptions" size="small" @update:value="(mode: 'space' | 'space_type') => setSpaceHoursTarget(row, mode)" />
+							</div>
+							<div v-if="row.targetMode === 'space'" class="flex flex-col gap-1">
+								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.discounts.selectSpace') }}</span>
+								<n-select v-model:value="row.space_id" :options="benefitSpaceOptions" :placeholder="t('packages.discounts.selectSpace')" size="small" clearable />
+							</div>
+							<div v-else class="flex flex-col gap-1">
+								<span class="text-xs font-semibold text-neutral-600">{{ t('packages.discounts.selectSpaceType') }}</span>
+								<n-select v-model:value="row.space_type" :options="benefitSpaceTypeOptions" :placeholder="t('packages.discounts.selectSpaceType')" size="small" clearable />
+							</div>
+						</div>
+						<span v-if="benefitErrors[`space_hours.${idx}`]" class="text-xs text-red-500">{{ benefitErrors[`space_hours.${idx}`] }}</span>
 					</div>
 				</div>
 				<!-- TAB 5: الموارد -->
@@ -795,7 +935,7 @@
 
 <script setup lang="ts">
 import type { SelectOption } from "naive-ui"
-import type { PlanBalanceItem, PlanDiscountItem, PlanFeatureItem, PlanPayload, PlanResourceGrantItem, PlanSaving } from "@/add-os/modules/plans/types/plan"
+import type { CoworkingSeat, PlanBalanceItem, PlanDiscountItem, PlanFeatureItem, PlanPayload, PlanResourceGrantItem, PlanSaving, PlanSpaceHourItem } from "@/add-os/modules/plans/types/plan"
 import type { SpaceType } from "@/add-os/modules/spatial/types/space"
 import { NInputNumber, NModal, NRadio, NRadioGroup, NSelect, NSwitch, NTimePicker, useMessage } from "naive-ui"
 import { computed, onMounted, ref, watch } from "vue"
@@ -842,7 +982,7 @@ const model = defineModel<PlanPayload>("model", { required: true })
 const { t } = useI18n()
 const message = useMessage()
 
-const activeTab = ref<"basic" | "balances" | "features" | "discounts" | "resources">("basic")
+const activeTab = ref<"basic" | "coworking" | "balances" | "features" | "benefits" | "resources">("basic")
 const errors = ref<Record<string, string[]>>({})
 const moduleOptions = ref<SelectOption[]>([])
 const spaceOptions = ref<SelectOption[]>([])
@@ -1028,6 +1168,120 @@ const discountsList = computed<PlanDiscountItem[]>({
 	set: val => {
 		model.value.discounts = val
 	}
+})
+
+const spaceHoursList = computed<PlanSpaceHourItem[]>({
+	get: () => {
+		if (!model.value.space_hours) model.value.space_hours = []
+		return model.value.space_hours
+	},
+	set: val => {
+		model.value.space_hours = val
+	}
+})
+
+const coworkingSeatOptions: { value: CoworkingSeat, icon: string }[] = [
+	{ value: "none", icon: "carbon:close-outline" },
+	{ value: "flexible", icon: "carbon:workspace" },
+	{ value: "dedicated", icon: "carbon:user-identification" }
+]
+
+const allowanceCycleOptions = computed<SelectOption[]>(() => [
+	{ label: t("packages.form.allowanceCycle.period"), value: "period" },
+	{ label: t("packages.form.allowanceCycle.monthly"), value: "monthly" }
+])
+
+const hoursTargetModeOptions = computed<SelectOption[]>(() => [
+	{ label: t("packages.discounts.target.space"), value: "space" },
+	{ label: t("packages.discounts.target.spaceType"), value: "space_type" }
+])
+
+/** A coworking plan already includes coworking, so it gives no benefit on it. */
+const isCoworkingPlan = computed(() => (model.value.coworking_seat ?? "none") !== "none")
+
+const benefitSpaceTypeOptions = computed<SelectOption[]>(() =>
+	spaceTypeOptions.value.map(o => ({ ...o, disabled: isCoworkingPlan.value && o.value === "co_space" }))
+)
+
+const benefitSpaceOptions = computed<SelectOption[]>(() =>
+	spaceOptions.value.map(o => ({ ...o, disabled: isCoworkingPlan.value && rawSpaces.value.find(s => s.id === o.value)?.space_type === "co_space" }))
+)
+
+/**
+ * Switching the seat clears what the new choice cannot carry, as the backend
+ * would refuse it: no hours or window without coworking, no hours on a
+ * dedicated desk (always unlimited).
+ */
+function setCoworkingSeat(seat: CoworkingSeat) {
+	model.value.coworking_seat = seat
+	if (seat !== "flexible") model.value.coworking_hours = null
+	if (seat === "none") {
+		model.value.access_window_start = null
+		model.value.access_window_end = null
+	}
+}
+
+const coworkingHoursUnlimited = computed(() => model.value.coworking_hours == null || model.value.coworking_hours === "")
+
+function setCoworkingHoursUnlimited(unlimited: boolean) {
+	model.value.coworking_hours = unlimited ? null : 20
+}
+
+const coworkingHoursValue = computed<number>({
+	get: () => Number(model.value.coworking_hours ?? 0),
+	set: val => {
+		model.value.coworking_hours = val
+	}
+})
+
+function addSpaceHours() {
+	if (!model.value.space_hours) model.value.space_hours = []
+	model.value.space_hours.push({ hours: 5, space_id: null, space_type: null, description: { ar: "", en: "" }, order: model.value.space_hours.length + 1, targetMode: "space_type" })
+}
+
+function removeSpaceHours(index: number) {
+	model.value.space_hours?.splice(index, 1)
+}
+
+function setSpaceHoursTarget(row: PlanSpaceHourItem, mode: "space" | "space_type") {
+	row.targetMode = mode
+	if (mode !== "space") row.space_id = null
+	if (mode !== "space_type") row.space_type = null
+}
+
+function getBenefitTargetLabel(row: { space_id?: number | null, space_type?: string | null }): string {
+	return getDiscountTargetLabel(row as PlanDiscountItem)
+}
+
+/**
+ * One benefit per target, as the backend's PlanBenefitTargets decides: a
+ * space, a space type or the whole plan, once across discounts and free
+ * hours; and nothing on coworking for a coworking plan. Keyed by row
+ * (`discounts.0`, `space_hours.1`).
+ */
+const benefitErrors = computed<Record<string, string>>(() => {
+	const found: Record<string, string> = {}
+	const seen = new Set<string>()
+	const coworkingSpaceIds = new Set(rawSpaces.value.filter(s => s.space_type === "co_space").map(s => s.id))
+	const lists: [string, { space_id?: number | null, space_type?: string | null }[]][] = [
+		["discounts", model.value.discounts ?? []],
+		["space_hours", model.value.space_hours ?? []]
+	]
+
+	for (const [list, rows] of lists) {
+		rows.forEach((row, i) => {
+			const key = `${list}.${i}`
+			if (isCoworkingPlan.value && (row.space_type === "co_space" || (row.space_id != null && coworkingSpaceIds.has(row.space_id)))) {
+				found[key] = t("packages.benefits.coworkingOnCoworkingPlan")
+				return
+			}
+			const target = row.space_id != null ? `space:${row.space_id}` : row.space_type ? `type:${row.space_type}` : "plan"
+			if (seen.has(target)) found[key] = t("packages.benefits.duplicateTarget")
+			seen.add(target)
+		})
+	}
+
+	return found
 })
 
 const resourceGrantsList = computed<PlanResourceGrantItem[]>({
@@ -1312,8 +1566,9 @@ async function loadOptions() {
 			label: `#${s.id} - ${t(`spaces.spaceType.${s.space_type}`)}`,
 			value: s.id
 		}))
-		rawResourceTypes.value = resourceTypes.map(rt => ({ id: rt.id, name: rt.name, unit_label: rt.unit_label }))
-		resourceTypeOptions.value = resourceTypes.map(rt => ({
+		const grantable = resourceTypes.filter(rt => (rt as { slug?: string }).slug !== "space-hours")
+		rawResourceTypes.value = grantable.map(rt => ({ id: rt.id, name: rt.name, unit_label: rt.unit_label }))
+		resourceTypeOptions.value = grantable.map(rt => ({
 			label: `${pickLocalized(rt.name, currentLocale.value)} (${pickLocalized(rt.unit_label, currentLocale.value)})`,
 			value: rt.id
 		}))
@@ -1350,6 +1605,14 @@ async function handleSubmit() {
 		return
 	}
 
+	if (Object.keys(benefitErrors.value).length > 0) {
+		message.error(Object.values(benefitErrors.value)[0])
+		activeTab.value = "benefits"
+		return
+	}
+
+	const seat = model.value.coworking_seat ?? "none"
+
 	// Clean payload before submitting
 	const payload: PlanPayload = {
 		...model.value,
@@ -1358,6 +1621,21 @@ async function handleSubmit() {
 		reference_space_id: model.value.reference_space_id ?? null,
 		reference_units: model.value.reference_units ?? null,
 		subtitle: model.value.subtitle?.ar || model.value.subtitle?.en ? model.value.subtitle : null,
+		coworking_seat: seat,
+		// Null is unlimited; only a flexible seat counts hours.
+		coworking_hours: seat === "flexible" && model.value.coworking_hours != null && model.value.coworking_hours !== "" ? Number(model.value.coworking_hours) : null,
+		allowance_cycle: model.value.allowance_cycle ?? "period",
+		access_window_start: seat === "none" ? null : model.value.access_window_start ?? null,
+		access_window_end: seat === "none" ? null : model.value.access_window_end ?? null,
+		space_hours: (model.value.space_hours ?? []).map(h => ({
+			// Kept by id on the server, so its spent hours stay counted against it.
+			...(h.id != null ? { id: h.id } : {}),
+			space_id: h.space_id ?? null,
+			space_type: h.space_type ?? null,
+			hours: Number(h.hours),
+			description: h.description?.ar || h.description?.en ? h.description : null,
+			order: h.order ?? 0
+		})),
 		balances: (model.value.balances ?? []).map(b => ({
 			category: b.category,
 			// The backend validates `integer` on this: a fractional point count
