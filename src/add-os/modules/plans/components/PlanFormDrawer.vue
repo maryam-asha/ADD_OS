@@ -152,14 +152,7 @@
 										</span>
 										<span v-if="errors.price_points" class="text-xs text-red-500">{{ errors.price_points[0] }}</span>
 									</div>
-									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.module') }}</span>
-										<n-select v-model:value="model.plan_module_id" :options="moduleOptions" :placeholder="t('packages.form.selectModule')" size="small" clearable />
-									</div>
-								</div>
-
-								<!-- Row 2: Duration -->
-								<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+									<!-- The module follows the seat (ADDCore PlanModule::slugForSeat()); staff choose the seat only. -->
 									<div class="flex flex-col gap-1">
 										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.durationDays') }} *</span>
 										<PlanStepper v-model="model.duration_days" :min="1" :step="1" />
@@ -882,7 +875,6 @@ import PlanTemplatePicker from "@/add-os/modules/plans/components/PlanTemplatePi
 import { applyTemplate } from "@/add-os/modules/plans/config/plans.config"
 import { SPACE_TYPES } from "@/add-os/modules/spatial/types/space"
 import { ApiError } from "@/add-os/services/api"
-import { listPlanModules } from "@/add-os/services/plan-modules"
 import { listResourceTypes } from "@/add-os/services/resource-types"
 import { listSpaces } from "@/add-os/services/spaces"
 import { formatNumber } from "@/add-os/utils/format"
@@ -945,10 +937,8 @@ function chooseTemplate(key: PlanTemplateKey): void {
 }
 
 const errors = ref<Record<string, string[]>>({})
-const moduleOptions = ref<SelectOption[]>([])
 const spaceOptions = ref<SelectOption[]>([])
 const resourceTypeOptions = ref<SelectOption[]>([])
-const rawModules = ref<{ id: number; name: { ar: string; en: string } }[]>([])
 const rawSpaces = ref<{ id: number; space_type: SpaceType }[]>([])
 const rawResourceTypes = ref<{ id: number; name: { ar: string; en: string }; unit_label: { ar: string; en: string } }[]>([])
 
@@ -1067,19 +1057,10 @@ const modeTitle = computed(() => {
 	return isCreateMode.value ? t("packages.create.title") : t("packages.edit.title")
 })
 
-const selectedModuleName = computed(() => {
-	if (!model.value.plan_module_id) return ""
-	const found = rawModules.value.find(m => m.id === model.value.plan_module_id)
-	return found ? pickLocalized(found.name, currentLocale.value) : ""
-})
-
 const headerSubtitle = computed(() => {
 	const planName = pickLocalized(model.value.name, currentLocale.value)
-	const modName = selectedModuleName.value || t("packages.noModule")
-	if (planName.trim()) {
-		return `${planName} · ${modName}`
-	}
-	return `${t("packages.create.title")} · ${modName}`
+	const seat = t(`packages.coworking.${model.value.coworking_seat ?? "none"}.title`)
+	return `${planName.trim() || t("packages.create.title")} · ${seat}`
 })
 
 const categoryOptions = computed<SelectOption[]>(() => [
@@ -1545,12 +1526,7 @@ function getFeatureSubtitleText(feature: PlanFeatureItem): string {
 
 async function loadOptions() {
 	try {
-		const [modules, spaces, resourceTypes] = await Promise.all([listPlanModules(), listSpaces(), listResourceTypes()])
-		rawModules.value = modules
-		moduleOptions.value = modules.map(m => ({
-			label: pickLocalized(m.name, currentLocale.value),
-			value: m.id
-		}))
+		const [spaces, resourceTypes] = await Promise.all([listSpaces(), listResourceTypes()])
 		rawSpaces.value = spaces.map(s => ({ id: s.id, space_type: s.space_type }))
 		spaceOptions.value = spaces.map(s => ({
 			label: `#${s.id} - ${t(`spaces.spaceType.${s.space_type}`)}`,
