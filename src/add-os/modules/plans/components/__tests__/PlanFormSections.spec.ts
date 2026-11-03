@@ -61,6 +61,18 @@ describe("planFormDrawer as one page", () => {
 		wrapper.unmount()
 	})
 
+	it("typing a name keeps the plan a new one, so its template can still be changed", async () => {
+		const { wrapper } = await open(reactive(emptyPlanPayload()))
+		await wrapper.get("[data-test=plan-template-continue]").trigger("click")
+		await flushPromises()
+
+		await wrapper.get("[data-test=plan-section-basics] input").setValue("باقة شهرية")
+		await flushPromises()
+
+		expect(wrapper.find("[data-test=plan-template-change]").exists()).toBe(true)
+		wrapper.unmount()
+	})
+
 	it("edit opens straight on the sections", async () => {
 		const { wrapper } = await open({ ...emptyPlanPayload(), id: 4, name: { ar: "باقة", en: "Plan" } })
 

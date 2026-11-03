@@ -998,9 +998,14 @@ const accessWindowWraps = computed(() => {
 	return toMinutes(end) <= toMinutes(start)
 })
 
-const isCreateMode = computed(() => !((model.value as { id?: number }).id || model.value.name?.ar?.trim()))
+/**
+ * Decided once, when the drawer opens: a new plan stays new while its name
+ * is typed, so its template can still be changed.
+ */
+const isCreateMode = ref(false)
 
 function openOnTemplate(): void {
+	isCreateMode.value = !((model.value as { id?: number }).id || model.value.name?.ar?.trim())
 	templateKey.value = null
 	benefitMenuOpen.value = false
 	showTemplatePicker.value = isCreateMode.value
