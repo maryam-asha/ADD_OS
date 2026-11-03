@@ -12,7 +12,7 @@
 			<template #default>
 				<NotificationsList :max-items="MAX_ITEMS" class="max-h-[50vh]">
 					<template #last>
-						<div v-if="items.length > MAX_ITEMS || hasMore" class="flex justify-center p-4">
+						<div v-if="items.length > 0" class="flex justify-center p-4">
 							<n-button text @click="showDrawer = true">{{ t("common.viewAll") }}</n-button>
 						</div>
 					</template>
