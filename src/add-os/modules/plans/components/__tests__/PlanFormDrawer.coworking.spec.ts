@@ -76,6 +76,16 @@ describe("planFormDrawer coworking terms", () => {
 		wrapper.unmount()
 	})
 
+	// Kept by id, so the hours already spent on a row stay counted against it.
+	it("sends a saved free-hours row back with its id", async () => {
+		const { wrapper, onSubmit } = await submit(plan({
+			coworking_seat: "none",
+			space_hours: [{ id: 7, space_type: "room", hours: 5, targetMode: "space_type" }]
+		}))
+		expect(onSubmit.mock.calls[0][0].space_hours[0]).toMatchObject({ id: 7, space_type: "room", hours: 5 })
+		wrapper.unmount()
+	})
+
 	it("refuses one space type given both free hours and a discount", async () => {
 		const { wrapper, onSubmit } = await submit(plan({
 			space_hours: [{ space_type: "room", hours: 5, targetMode: "space_type" }],

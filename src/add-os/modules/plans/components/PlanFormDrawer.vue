@@ -1628,6 +1628,8 @@ async function handleSubmit() {
 		access_window_start: seat === "none" ? null : model.value.access_window_start ?? null,
 		access_window_end: seat === "none" ? null : model.value.access_window_end ?? null,
 		space_hours: (model.value.space_hours ?? []).map(h => ({
+			// Kept by id on the server, so its spent hours stay counted against it.
+			...(h.id != null ? { id: h.id } : {}),
 			space_id: h.space_id ?? null,
 			space_type: h.space_type ?? null,
 			hours: Number(h.hours),
