@@ -9,6 +9,9 @@ export const DASHBOARD_PRESETS = ["today", "last7Days", "thisMonth", "thisYear"]
 
 export type DashboardPreset = (typeof DASHBOARD_PRESETS)[number]
 
+/** The period the dashboard opens on; the period button marks any other. */
+export const DASHBOARD_DEFAULT_PRESET: DashboardPreset = "thisMonth"
+
 export interface DashboardPeriod {
 	from: string
 	to: string

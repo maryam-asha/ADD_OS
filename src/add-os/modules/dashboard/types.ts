@@ -4,6 +4,8 @@ import type { Tone } from "@/add-os/modules/dashboard/config/tones"
 export interface AttentionItem {
 	key: string
 	label: string
+	/** What kind of thing is waiting, at a glance. */
+	icon: string
 	count: number
 	/** The screen that lists these; none when the dashboard has no such screen yet. */
 	to?: string

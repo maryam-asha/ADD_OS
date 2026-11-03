@@ -9,6 +9,7 @@ import { currentLocale } from "@/add-os/lang/currentLocale"
 import en from "@/add-os/lang/en"
 import AttentionList from "@/add-os/modules/dashboard/components/AttentionList.vue"
 import DashboardPanel from "@/add-os/modules/dashboard/components/DashboardPanel.vue"
+import DashboardTabBar from "@/add-os/modules/dashboard/components/DashboardTabBar.vue"
 import InvoiceTotalsCards from "@/add-os/modules/dashboard/components/InvoiceTotalsCards.vue"
 import PeakHeatmap from "@/add-os/modules/dashboard/components/PeakHeatmap.vue"
 import ReceivablesAging from "@/add-os/modules/dashboard/components/ReceivablesAging.vue"
@@ -18,7 +19,7 @@ import StatusTiles from "@/add-os/modules/dashboard/components/stats/StatusTiles
 import StatTile from "@/add-os/modules/dashboard/components/StatTile.vue"
 import { useOverview } from "@/add-os/modules/dashboard/composables/useOverview"
 import { addAmounts, amountIn, currenciesOf } from "@/add-os/modules/dashboard/config/money"
-import { localDay, matchPreset, presetPeriod, previousPeriod } from "@/add-os/modules/dashboard/config/period"
+import { DASHBOARD_DEFAULT_PRESET, localDay, matchPreset, presetPeriod, previousPeriod } from "@/add-os/modules/dashboard/config/period"
 import { NAV_SECTIONS } from "@/add-os/navigation/sections"
 import * as api from "@/add-os/services/api"
 import { getAppUsers, getBookingsByStatus, getDailyBookings, getDailyMembers, getFinanceOverview, getMembersOverview, getOperationsOverview, getServiceRequestStats, getSpacesOverview } from "@/add-os/services/dashboard"
@@ -175,9 +176,9 @@ describe("attentionList", () => {
 		const wrapper = mount(AttentionList, {
 			props: {
 				items: [
-					{ key: "a", label: "Bookings awaiting approval", count: 2 },
-					{ key: "b", label: "Open service requests", count: 0 },
-					{ key: "c", label: "New website inquiries", count: 5 }
+					{ key: "a", label: "Bookings awaiting approval", icon: "carbon:hourglass", count: 2 },
+					{ key: "b", label: "Open service requests", icon: "carbon:document-tasks", count: 0 },
+					{ key: "c", label: "New website inquiries", icon: "carbon:chat", count: 5 }
 				]
 			},
 			global: { plugins: [i18n()] }
@@ -192,7 +193,7 @@ describe("attentionList", () => {
 
 	it("says when nothing is waiting", () => {
 		const wrapper = mount(AttentionList, {
-			props: { items: [{ key: "b", label: "Open service requests", count: 0 }] },
+			props: { items: [{ key: "b", label: "Open service requests", icon: "carbon:document-tasks", count: 0 }] },
 			global: { plugins: [i18n()] }
 		})
 
@@ -269,6 +270,55 @@ describe("dashboardPanel", () => {
 		expect(again.get("button").attributes("aria-expanded")).toBe("false")
 		again.unmount()
 		localStorage.clear()
+	})
+})
+
+describe("dashboardTabBar", () => {
+	const tabs = [{ key: "overview", label: "Overview" }, { key: "finance", label: "Finance" }]
+	const mountBar = (props: Record<string, unknown> = {}) => mount(DashboardTabBar, {
+		props: { tabs, tab: "overview", period: presetPeriod("thisMonth"), ...props },
+		global: { plugins: [i18n()] }
+	})
+
+	it("marks the chosen tab and asks for another when it is clicked", async () => {
+		const wrapper = mountBar()
+		const [overview, finance] = wrapper.findAll("[role=tab]")
+
+		expect(overview.attributes("aria-selected")).toBe("true")
+		expect(finance.attributes("aria-selected")).toBe("false")
+		expect(finance.attributes("aria-controls")).toBe("dashboard-tabpanel-finance")
+		await finance.trigger("click")
+		expect(wrapper.emitted("update:tab")).toEqual([["finance"]])
+		wrapper.unmount()
+	})
+
+	it("offers a branch only where it is given branches to offer", () => {
+		const without = mountBar()
+		expect(without.find("[aria-label=Branch]").exists()).toBe(false)
+		without.unmount()
+
+		const withBranches = mountBar({ branchOptions: [{ label: "Main", value: 1 }] })
+		expect(withBranches.find("[aria-label=Branch]").exists()).toBe(true)
+		withBranches.unmount()
+	})
+
+	it("dots a filter only once it is moved off its default", () => {
+		const options = [{ label: "Main", value: 1 }]
+
+		const resting = mountBar({ branchOptions: options, branchId: null, period: presetPeriod(DASHBOARD_DEFAULT_PRESET) })
+		expect(resting.findAll(".n-badge-sup")).toHaveLength(0)
+		resting.unmount()
+
+		const moved = mountBar({ branchOptions: options, branchId: 1, period: presetPeriod("today") })
+		expect(moved.findAll(".n-badge-sup")).toHaveLength(2)
+		moved.unmount()
+	})
+
+	it("asks for a refresh", async () => {
+		const wrapper = mountBar()
+		await wrapper.get("[aria-label=Refresh]").trigger("click")
+		expect(wrapper.emitted("refresh")).toHaveLength(1)
+		wrapper.unmount()
 	})
 })
 

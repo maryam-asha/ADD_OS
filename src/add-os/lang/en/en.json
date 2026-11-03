@@ -4184,6 +4184,14 @@
 		"description": "Statistics for the chosen period at a glance — every card narrows further with its own filters.",
 		"refresh": "Refresh",
 		"allBranches": "All branches",
+		"tabs": {
+			"label": "Dashboard sections",
+			"overview": "Overview"
+		},
+		"filters": {
+			"period": "Period",
+			"branch": "Branch"
+		},
 		"presets": {
 			"today": "Today",
 			"last7Days": "Last 7 days",
