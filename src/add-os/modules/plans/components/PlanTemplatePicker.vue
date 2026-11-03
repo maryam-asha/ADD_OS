@@ -9,12 +9,12 @@
 		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
 			<button
 				v-for="key in planTemplateKeys"
-				:key="key"
+				:key
 				type="button"
 				:data-test="`plan-template-${key}`"
 				:aria-pressed="selected === key"
+				class="text-start rounded-xl border p-3.5 flex flex-col gap-1.5 transition-colors cursor-pointer"
 				:class="[
-					'text-start rounded-xl border p-3.5 flex flex-col gap-1.5 transition-colors cursor-pointer',
 					selected === key ? 'border-[#557e46] bg-[#f0f7ee]' : 'border-neutral-200 bg-white hover:border-neutral-300',
 					key === 'noSeat' ? 'opacity-80' : ''
 				]"

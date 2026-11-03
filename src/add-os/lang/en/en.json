@@ -799,9 +799,16 @@
 			"hours": "Hours",
 			"target": "Applies to",
 			"duplicateTarget": "This space or space type already has a benefit.",
-			"coworkingOnCoworkingPlan": "A shared-workspace plan already includes it."
+			"coworkingOnCoworkingPlan": "A shared-workspace plan already includes it.",
+			"add": "Add benefit",
+			"empty": "No benefits yet. Add a discount, free hours, a balance or a resource.",
+			"menu": { "discount": "Discount on a space", "hours": "Free hours on a space", "balance": "Balance", "resource": "Resource (printing, locker…)" }
 		},
 		"sections": {
+			"basics": "Basics",
+			"workspace": "Shared workspace",
+			"benefits": "Benefits",
+			"display": "Shown in the app",
 			"basicInfo": "Basic Information",
 			"pricing": "Pricing & Module",
 			"displaySettings": "Display Settings",

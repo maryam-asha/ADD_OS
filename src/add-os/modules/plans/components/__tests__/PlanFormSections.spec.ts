@@ -1,0 +1,102 @@
+import { flushPromises, mount } from "@vue/test-utils"
+import { describe, expect, it, vi } from "vitest"
+import { reactive } from "vue"
+import { createI18n } from "vue-i18n"
+import en from "@/add-os/lang/en/en.json"
+import { emptyPlanPayload } from "@/add-os/modules/plans/config/plans.config"
+import PlanFormDrawer from "../PlanFormDrawer.vue"
+
+vi.mock("@/add-os/services/plan-modules", () => ({ listPlanModules: vi.fn().mockResolvedValue([]) }))
+vi.mock("@/add-os/services/resource-types", () => ({ listResourceTypes: vi.fn().mockResolvedValue([{ id: 3, name: { ar: "طباعة", en: "Printing" }, unit_label: { ar: "صفحة", en: "page" } }]) }))
+vi.mock("@/add-os/services/spaces", () => ({ listSpaces: vi.fn().mockResolvedValue([{ id: 5, space_type: "room" }, { id: 9, space_type: "co_space" }]) }))
+vi.mock("naive-ui", async () => {
+	const actual = await vi.importActual<typeof import("naive-ui")>("naive-ui")
+	const { defineComponent, h } = await vi.importActual<typeof import("vue")>("vue")
+	const InPlace = defineComponent((_props, { slots }) => () => h("div", slots.default?.()))
+	return { ...actual, NModal: InPlace, useMessage: () => ({ success: vi.fn(), error: vi.fn() }) }
+})
+
+const i18n = createI18n({ legacy: false, locale: "en", messages: { en } })
+const SECTIONS = ["basics", "workspace", "benefits", "display"]
+
+interface DrawerVm { handleSubmit: () => Promise<void> }
+
+async function open(model: Record<string, unknown>) {
+	const onSubmit = vi.fn().mockResolvedValue(undefined)
+	const wrapper = mount(PlanFormDrawer, {
+		props: { "show": true, "model": model as never, "title": "Plan", "submitting": false, onSubmit, "onUpdate:model": () => {}, "onUpdate:show": () => {} },
+		global: { plugins: [i18n] },
+		attachTo: document.body
+	})
+	await flushPromises()
+	return { wrapper, onSubmit }
+}
+
+function visibleSections(wrapper: Awaited<ReturnType<typeof open>>["wrapper"]): string[] {
+	return SECTIONS.filter(name => wrapper.find(`[data-test=plan-section-${name}]`).exists() && wrapper.get(`[data-test=plan-section-${name}]`).isVisible())
+}
+
+/**
+ * One page of four sections in place of six tabs, every benefit added from
+ * one menu, and a new plan opened on its template first (ADDCore, 2026-11-03).
+ */
+describe("planFormDrawer as one page", () => {
+	it("create shows the picker first, then all four sections without tabs", async () => {
+		const { wrapper } = await open(emptyPlanPayload())
+
+		expect(wrapper.find("[data-test=plan-template-picker]").exists()).toBe(true)
+		expect(visibleSections(wrapper)).toEqual([])
+
+		await wrapper.get("[data-test=plan-template-setHours]").trigger("click")
+		await wrapper.get("[data-test=plan-template-continue]").trigger("click")
+		await flushPromises()
+
+		expect(wrapper.find("[data-test=plan-template-picker]").exists()).toBe(false)
+		expect(visibleSections(wrapper)).toEqual(SECTIONS)
+		expect(wrapper.get("[data-test=plan-template-change]").text()).toContain("Change")
+
+		await wrapper.get("[data-test=plan-template-change]").trigger("click")
+		expect(wrapper.find("[data-test=plan-template-picker]").exists()).toBe(true)
+		wrapper.unmount()
+	})
+
+	it("edit opens straight on the sections", async () => {
+		const { wrapper } = await open({ ...emptyPlanPayload(), id: 4, name: { ar: "باقة", en: "Plan" } })
+
+		expect(wrapper.find("[data-test=plan-template-picker]").exists()).toBe(false)
+		expect(visibleSections(wrapper)).toEqual(SECTIONS)
+		wrapper.unmount()
+	})
+
+	it("the add-benefit menu offers discount, free hours, balance and resource, and each adds a row", async () => {
+		const model = reactive({ ...emptyPlanPayload(), id: 4, name: { ar: "باقة", en: "Plan" } })
+		const { wrapper, onSubmit } = await open(model)
+
+		for (const [kind, rows] of [["discount", 1], ["hours", 2], ["balance", 3], ["resource", 4]] as const) {
+			await wrapper.get("[data-test=plan-benefit-add]").trigger("click")
+			await wrapper.get(`[data-test=plan-benefit-add-${kind}]`).trigger("click")
+			expect(wrapper.findAll("[data-test=plan-benefit-row]")).toHaveLength(rows)
+		}
+
+		// One benefit per target: give the two new rows different ones.
+		const rows = model as unknown as { discounts: { space_type: string | null }[], space_hours: { space_type: string | null }[] }
+		rows.discounts[0].space_type = "room"
+		rows.space_hours[0].space_type = "event_hall"
+		await (wrapper.vm as unknown as DrawerVm).handleSubmit()
+		await flushPromises()
+		const payload = onSubmit.mock.calls[0][0]
+		expect(payload.discounts).toHaveLength(1)
+		expect(payload.space_hours).toHaveLength(1)
+		expect(payload.balances).toHaveLength(1)
+		expect(payload.resource_grants).toHaveLength(1)
+		wrapper.unmount()
+	})
+
+	it("a second discount on the same space type shows the duplicate error", async () => {
+		const discount = { percentage: 10, space_type: "room", usage_limit: null, is_active: true, targetMode: "space_type" }
+		const { wrapper } = await open({ ...emptyPlanPayload(), id: 4, name: { ar: "باقة", en: "Plan" }, discounts: [{ ...discount }, { ...discount, percentage: 20 }] })
+
+		expect(wrapper.get("[data-test=plan-section-benefits]").text()).toContain("This space or space type already has a benefit.")
+		wrapper.unmount()
+	})
+})
