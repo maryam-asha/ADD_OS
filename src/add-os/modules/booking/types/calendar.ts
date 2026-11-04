@@ -288,6 +288,45 @@ export interface AdminBooking {
 	discounts?: AppliedDiscount[]
 }
 
+/** A money figure of the detail's breakdown, already formatted by the server. */
+export interface BookingMoney {
+	points: number
+	amount: string
+	formatted: string
+}
+
+/**
+ * `GET /api/v1/admin/bookings/{id}`: the list row without its window and
+ * rejection reason, plus the blocks the member sees on their own copy —
+ * `when` (the window in the district's time), the price `breakdown`, the
+ * approval `request_status` (which carries the rejection reason) and
+ * `actions` (whether it can still be cancelled, and until when).
+ */
+export interface AdminBookingDetail extends Omit<AdminBooking, "start_at" | "end_at" | "rejection_reason"> {
+	when: {
+		date: string
+		start_at: string
+		end_at: string
+		range: string
+		duration_label: string
+	}
+	breakdown: {
+		lines: { key: string, label: string, points: number, formatted: string }[]
+		subtotal: BookingMoney
+		vat: BookingMoney & { rate_percent: number, label: string }
+		total: BookingMoney
+	}
+	request_status: {
+		steps: { key: string, label: string, state: "complete" | "current" | "upcoming", at: string | null }[]
+		rejection_reason: string | null
+	}
+	actions: {
+		can_cancel: boolean
+		cancel_deadline_at: string | null
+		cancel_note: string
+	}
+}
+
 /** Query accepted by `GET /api/v1/admin/bookings`. Every field is optional. */
 export interface AdminBookingFilters {
 	status?: BookingStatus

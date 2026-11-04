@@ -1804,7 +1804,8 @@
 			"status": "الحالة",
 			"payment": "الدفع",
 			"amount": "المبلغ",
-			"discounts": "الخصومات"
+			"discounts": "الخصومات",
+			"actions": "الإجراءات"
 		},
 		"status": {
 			"confirmed": "مؤكد",
@@ -1820,10 +1821,37 @@
 		},
 		"paymentSource": {
 			"wallet": "المحفظة",
-			"cash": "نقداً"
+			"cash": "نقداً",
+			"plan": "ساعات الباقة",
+			"gateway": "بطاقة"
 		},
 		"notSettled": "لم تتم التسوية بعد",
-		"resultCount": "حجز"
+		"resultCount": "حجز",
+		"detail": {
+			"button": "التفاصيل",
+			"title": "تفاصيل الحجز",
+			"loadError": "تعذّر تحميل هذا الحجز.",
+			"phone": "الهاتف",
+			"date": "التاريخ",
+			"time": "الوقت",
+			"checkedIn": "تسجيل الدخول",
+			"checkedOut": "تسجيل الخروج",
+			"createdAt": "تاريخ الحجز",
+			"price": "السعر",
+			"total": "الإجمالي",
+			"points": "نقطة",
+			"progress": "مراحل الحجز",
+			"note": "ملاحظة"
+		},
+		"cancel": {
+			"button": "إلغاء الحجز",
+			"unavailable": "لم يعد بالإمكان إلغاء هذا الحجز.",
+			"confirmTitle": "إلغاء هذا الحجز؟",
+			"confirmText": "سيصل العضو إشعار، ويُعاد أي مبلغ دفعه إلى محفظته.",
+			"confirmOk": "إلغاء الحجز",
+			"confirmBack": "تراجع",
+			"success": "تم إلغاء الحجز."
+		}
 	},
 	"shortcuts": {
 		"title": "الاختصارات"

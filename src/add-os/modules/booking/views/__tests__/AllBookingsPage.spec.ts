@@ -5,9 +5,31 @@ import { createI18n } from "vue-i18n"
 import { ApiError } from "@/add-os/services/api"
 import AllBookingsPage from "../AllBookingsPage.vue"
 
-const { listBookingsMock } = vi.hoisted(() => ({ listBookingsMock: vi.fn() }))
+const { listBookingsMock, getBookingMock, cancelBookingMock, dialogWarningMock, granted } = vi.hoisted(() => ({
+	listBookingsMock: vi.fn(),
+	getBookingMock: vi.fn(),
+	cancelBookingMock: vi.fn(),
+	dialogWarningMock: vi.fn(),
+	granted: new Set<string>()
+}))
 
-vi.mock("@/add-os/services/booking-calendar", () => ({ listBookings: listBookingsMock }))
+vi.mock("@/add-os/services/booking-calendar", () => ({ listBookings: listBookingsMock, getBooking: getBookingMock }))
+vi.mock("@/add-os/services/reception", () => ({ cancelBooking: cancelBookingMock }))
+
+vi.mock("naive-ui", async () => {
+	const actual = await vi.importActual<typeof import("naive-ui")>("naive-ui")
+	return {
+		...actual,
+		useMessage: () => ({ success: vi.fn(), error: vi.fn() }),
+		useDialog: () => ({ warning: dialogWarningMock })
+	}
+})
+
+// Cancelling is `reception.book`; each test says whether this account holds it.
+vi.mock("@/add-os/config/permissions", async importOriginal => ({
+	...await importOriginal<typeof import("@/add-os/config/permissions")>(),
+	canBookAtReception: () => granted.has("reception.book")
+}))
 
 // The page reads `?payment_state` as its starting filter; mounted here without a router.
 vi.mock("vue-router", async () => {
@@ -65,7 +87,9 @@ const i18n = createI18n({
 					dateRange: "Date range",
 					legend: "Filter bookings"
 				},
-				columns: { member: "Member", space: "Space", when: "Booked for", status: "Status", payment: "Payment", amount: "Amount" },
+				columns: { member: "Member", space: "Space", when: "Booked for", status: "Status", payment: "Payment", amount: "Amount", actions: "Actions" },
+				detail: { button: "Details", title: "Booking details" },
+				cancel: { button: "Cancel booking", success: "Booking cancelled." },
 				status: {
 					confirmed: "Confirmed",
 					pending: "Under review",
@@ -362,5 +386,83 @@ describe("allBookingsPage discounts", () => {
 		const cell = wrapper.get("[data-test='applied-discount']").text()
 		expect(cell).toContain("Rooms week")
 		expect(cell).toContain("−20")
+	})
+})
+
+describe("allBookingsPage details and cancel", () => {
+	beforeEach(() => {
+		vi.clearAllMocks()
+		granted.clear()
+		listBookingsMock.mockResolvedValue(pageOf([
+			booking({ id: 1, status: "confirmed", status_label: "Confirmed" }),
+			booking({ id: 2, status: "completed", status_label: "Completed" }),
+			booking({ id: 3, status: "confirmed", status_label: "Confirmed", checked_in_at: "2026-08-17T11:00:00+00:00" })
+		]))
+		cancelBookingMock.mockResolvedValue({ message: "Cancelled." })
+	})
+
+	function actionButtons(wrapper: ReturnType<typeof mountPage>, label: string) {
+		return wrapper.findAll(`button[aria-label='${label}']`)
+	}
+
+	it("offers every row its details", async () => {
+		const wrapper = mountPage()
+		await flushPromises()
+
+		expect(actionButtons(wrapper, "Details")).toHaveLength(3)
+	})
+
+	it("opens the drawer on the row's booking", async () => {
+		getBookingMock.mockReturnValue(new Promise(() => {}))
+		const wrapper = mountPage()
+		await flushPromises()
+
+		await actionButtons(wrapper, "Details")[1].trigger("click")
+		await flushPromises()
+
+		expect(getBookingMock).toHaveBeenCalledWith(2)
+	})
+
+	it("offers cancel only on a booking still to happen, and only to an account that may book", async () => {
+		const withoutPermission = mountPage()
+		await flushPromises()
+		expect(actionButtons(withoutPermission, "Cancel booking")).toHaveLength(0)
+		withoutPermission.unmount()
+
+		granted.add("reception.book")
+		const wrapper = mountPage()
+		await flushPromises()
+
+		// Row 1 only: row 2 played out, row 3 is checked in.
+		expect(actionButtons(wrapper, "Cancel booking")).toHaveLength(1)
+	})
+
+	it("asks before cancelling, then cancels and reloads the list", async () => {
+		granted.add("reception.book")
+		const wrapper = mountPage()
+		await flushPromises()
+
+		await actionButtons(wrapper, "Cancel booking")[0].trigger("click")
+		expect(cancelBookingMock).not.toHaveBeenCalled()
+		expect(dialogWarningMock).toHaveBeenCalledTimes(1)
+
+		await dialogWarningMock.mock.calls[0][0].onPositiveClick()
+		await flushPromises()
+
+		expect(cancelBookingMock).toHaveBeenCalledWith(1)
+		expect(listBookingsMock).toHaveBeenCalledTimes(2)
+	})
+
+	it("keeps the list as it was when the server refuses", async () => {
+		granted.add("reception.book")
+		cancelBookingMock.mockRejectedValue(new ApiError(422, JSON.stringify({ message: "This booking is past its cancellation window." })))
+		const wrapper = mountPage()
+		await flushPromises()
+
+		await actionButtons(wrapper, "Cancel booking")[0].trigger("click")
+		await dialogWarningMock.mock.calls[0][0].onPositiveClick()
+		await flushPromises()
+
+		expect(listBookingsMock).toHaveBeenCalledTimes(1)
 	})
 })

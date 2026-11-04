@@ -90,7 +90,7 @@
 		</section>
 
 		<n-card class="add-ledger-table">
-			<n-data-table v-if="rows.length > 0 || isLoading" :columns :data="rows" :loading="isLoading" :bordered="false" :row-key :row-class-name="rowClassName" size="small" :scroll-x="1050" />
+			<n-data-table v-if="rows.length > 0 || isLoading" :columns :data="rows" :loading="isLoading" :bordered="false" :row-key :row-class-name size="small" :scroll-x="1220" />
 
 			<!-- An empty result and an empty district are different facts, and an
 			     operator who filtered their way into nothing needs the way out,
@@ -107,30 +107,45 @@
 				<n-pagination v-model:page="page" :page-count="meta.last_page" :disabled="isLoading" />
 			</div>
 		</n-card>
+
+		<BookingDetailDrawer
+			ref="detailDrawer"
+			v-model:show="detailVisible"
+			:booking-id="detailId"
+			:may-cancel
+			@cancel="confirmCancel"
+		/>
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { SelectOption } from "naive-ui"
 import type { AdminBooking, BookingPaymentState, BookingStatus } from "@/add-os/modules/booking/types/calendar"
-import { NAlert, NButton, NCard, NDataTable, NDatePicker, NInput, NPagination, NSelect } from "naive-ui"
-import { computed, ref, watch } from "vue"
+import { NAlert, NButton, NCard, NDataTable, NDatePicker, NInput, NPagination, NSelect, useDialog } from "naive-ui"
+import { computed, ref, useTemplateRef, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute } from "vue-router"
 import { useResourceList } from "@/add-os/composables/useResourceList"
+import { canBookAtReception } from "@/add-os/config/permissions"
+import BookingDetailDrawer from "@/add-os/modules/booking/components/BookingDetailDrawer.vue"
+import { useReceptionAction } from "@/add-os/modules/booking/composables/useReceptionAction"
 import { buildAllBookingsColumns } from "@/add-os/modules/booking/config/all-bookings.config"
 import { BOOKING_PAYMENT_STATES, BOOKING_STATUSES } from "@/add-os/modules/booking/types/calendar"
 import { useOpenRecord } from "@/add-os/notifications/useOpenRecord"
 import { listBookings } from "@/add-os/services/booking-calendar"
+import { cancelBooking } from "@/add-os/services/reception"
 import { formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
 /**
  * Every booking in the district, filterable.
  *
- * Read-only for the same reason the calendar is: approve, reject, cancel and
- * settle all live on the reception screens, and putting a second copy of those
- * buttons here would mean two places to keep the rules straight.
+ * Each row opens the booking's details (a drawer reading `admin/bookings/{id}`)
+ * and, for an account that may book at the desk (`reception.book`), cancels a
+ * booking that has not played out — the reception desk's own cancel endpoint,
+ * so its rules (the cancellation window, nobody checked in) stay in one place
+ * and its refusals are shown as the server words them. Approving, rejecting
+ * and settling still live on the reception screens.
  *
  * Filtering is server-side, not a client filter over a fetched page. A client
  * filter would search only the 25 rows currently loaded and silently report
@@ -190,7 +205,7 @@ const query = computed<Record<string, unknown>>(() => ({
 
 const hasFilters = computed(() => Object.keys(query.value).length > 0)
 
-const { data: rows, isLoading, error, meta } = useResourceList<AdminBooking>(listBookings, query, page)
+const { data: rows, isLoading, error, meta, refetch } = useResourceList<AdminBooking>(listBookings, query, page)
 // A notification's link (`?open=<id>`) picks out that booking's row.
 const { rowClassName } = useOpenRecord(undefined, () => rows.value)
 
@@ -201,7 +216,44 @@ watch(query, () => {
 	page.value = 1
 })
 
-const columns = computed(() => buildAllBookingsColumns(t))
+/* ── Details and cancel ──────────────────────────────────────────────────── */
+
+const dialog = useDialog()
+const action = useReceptionAction(refetch)
+const mayCancel = canBookAtReception()
+
+const detailVisible = ref(false)
+const detailId = ref<number | null>(null)
+const detailDrawer = useTemplateRef<InstanceType<typeof BookingDetailDrawer>>("detailDrawer")
+
+function openDetails(row: AdminBooking): void {
+	detailId.value = row.id
+	detailVisible.value = true
+}
+
+function confirmCancel(id: number): void {
+	dialog.warning({
+		title: t("allBookings.cancel.confirmTitle"),
+		content: t("allBookings.cancel.confirmText"),
+		positiveText: t("allBookings.cancel.confirmOk"),
+		negativeText: t("allBookings.cancel.confirmBack"),
+		onPositiveClick: () => cancel(id)
+	})
+}
+
+/** Cancels, refreshes the list, and the open drawer if it shows this booking. */
+async function cancel(id: number): Promise<void> {
+	const succeeded = await action.run(() => cancelBooking(id), t("allBookings.cancel.success"))
+
+	if (succeeded && detailVisible.value && detailId.value === id) {
+		await detailDrawer.value?.reload()
+	}
+}
+
+const columns = computed(() => buildAllBookingsColumns(t, {
+	onDetails: openDetails,
+	onCancel: mayCancel ? row => confirmCancel(row.id) : undefined
+}))
 
 /** The chip row: "All" first, then one per status, in the enum's own order. */
 const statusChips = computed<{ value: BookingStatus | null, label: string }[]>(() => [

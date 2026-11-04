@@ -1800,7 +1800,8 @@
 			"status": "Status",
 			"payment": "Payment",
 			"amount": "Amount",
-			"discounts": "Discounts"
+			"discounts": "Discounts",
+			"actions": "Actions"
 		},
 		"status": {
 			"confirmed": "Confirmed",
@@ -1816,10 +1817,37 @@
 		},
 		"paymentSource": {
 			"wallet": "Wallet",
-			"cash": "Cash"
+			"cash": "Cash",
+			"plan": "Plan hours",
+			"gateway": "Card"
 		},
 		"notSettled": "Not settled yet",
-		"resultCount": "bookings"
+		"resultCount": "bookings",
+		"detail": {
+			"button": "Details",
+			"title": "Booking details",
+			"loadError": "Couldn't load this booking.",
+			"phone": "Phone",
+			"date": "Date",
+			"time": "Time",
+			"checkedIn": "Checked in",
+			"checkedOut": "Checked out",
+			"createdAt": "Booked on",
+			"price": "Price",
+			"total": "Total",
+			"points": "points",
+			"progress": "Progress",
+			"note": "Note"
+		},
+		"cancel": {
+			"button": "Cancel booking",
+			"unavailable": "This booking can no longer be cancelled.",
+			"confirmTitle": "Cancel this booking?",
+			"confirmText": "The member is told, and anything they paid goes back to their wallet.",
+			"confirmOk": "Cancel booking",
+			"confirmBack": "Keep it",
+			"success": "Booking cancelled."
+		}
 	},
 	"shortcuts": {
 		"title": "Shortcuts"

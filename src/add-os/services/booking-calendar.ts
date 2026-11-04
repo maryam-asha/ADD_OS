@@ -2,6 +2,7 @@ import type { Paginated, RawPaginatedResponse } from "./pagination"
 import type { DaySlots } from "@/add-os/modules/booking/types/availability"
 import type {
 	AdminBooking,
+	AdminBookingDetail,
 	AdminBookingFilters,
 	CalendarFilters,
 	CalendarResponse
@@ -68,16 +69,15 @@ export async function listBookings(query?: Record<string, unknown>): Promise<Pag
 
 /**
  * One booking, with the same price breakdown, approval stepper and action
- * flags the member sees on their own copy.
+ * flags the member sees on their own copy — what the All Bookings details
+ * drawer shows.
  *
  * That sharing is deliberate on the backend's side: operations and the member
  * read the same computed blocks, so the two can never disagree about what a
- * booking cost or where its approval stands. Typed loosely as `AdminBooking`
- * plus unknown extras until a screen actually renders the stepper — narrowing
- * it now would be typing a shape nothing consumes.
+ * booking cost or where its approval stands.
  */
-export async function getBooking(id: number): Promise<{ data: AdminBooking & Record<string, unknown> }> {
-	return get<{ data: AdminBooking & Record<string, unknown> }>(`${BASE}/bookings/${id}`)
+export async function getBooking(id: number): Promise<{ data: AdminBookingDetail }> {
+	return get<{ data: AdminBookingDetail }>(`${BASE}/bookings/${id}`)
 }
 
 /**
