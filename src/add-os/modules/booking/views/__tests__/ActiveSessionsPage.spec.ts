@@ -37,6 +37,23 @@ vi.mock("@/add-os/services/realtime", () => ({
 
 vi.mock("@/add-os/modules/payments/components/CollectPaymentModal.vue", () => ({ default: { name: "CollectPaymentModal", render: () => null } }))
 
+// The desk's permission gates, read from a set each test can narrow.
+const { granted } = vi.hoisted(() => ({ granted: new Set<string>() }))
+
+vi.mock("@/add-os/config/permissions", async importOriginal => ({
+	...await importOriginal<typeof import("@/add-os/config/permissions")>(),
+	canCheckInAtReception: () => granted.has("reception.check_in"),
+	canBookAtReception: () => granted.has("reception.book"),
+	canSettleAtReception: () => granted.has("reception.settle_payment")
+}))
+
+function grantOnly(...permissions: string[]): void {
+	granted.clear()
+	for (const permission of permissions) granted.add(permission)
+}
+
+beforeEach(() => grantOnly("reception.check_in", "reception.book", "reception.settle_payment"))
+
 /** What `GET .../extension-options` answers for a booking with two hours free after it. */
 function extensionOptions(overrides: Record<string, unknown> = {}) {
 	return {
@@ -286,6 +303,27 @@ describe("activeSessionsPage", () => {
 			expect(wrapper.find('[aria-label="Extend"]').exists()).toBe(true)
 			expect(wrapper.find('[aria-label="Cancel booking"]').exists()).toBe(true)
 			wrapper.unmount()
+		})
+
+		it("offers a booking's extend and cancel only with reception.book, and check-out only with reception.check_in", async () => {
+			listActiveSessionsMock.mockResolvedValue([bookingSession])
+			grantOnly("reception.check_in")
+			const wrapper = mountPage()
+			await flushPromises()
+
+			expect(wrapper.find('[aria-label="Check out"]').exists()).toBe(true)
+			expect(wrapper.find('[aria-label="Extend"]').exists()).toBe(false)
+			expect(wrapper.find('[aria-label="Cancel booking"]').exists()).toBe(false)
+			wrapper.unmount()
+
+			grantOnly()
+			const readOnly = mountPage()
+			await flushPromises()
+
+			expect(readOnly.find('[aria-label="Check out"]').exists()).toBe(false)
+			// No translation for it in this spec's messages: the key is the label.
+			expect(readOnly.find('[aria-label="activeSessions.details"]').exists()).toBe(true)
+			readOnly.unmount()
 		})
 
 		it("offers only check-out on a walk-in row", async () => {

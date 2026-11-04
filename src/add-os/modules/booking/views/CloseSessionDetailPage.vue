@@ -197,17 +197,20 @@
 							<n-alert v-else-if="method === 'paymera'" type="info" :bordered="false">{{ t("closeSession.detail.cardNote") }}</n-alert>
 							<n-alert v-else type="warning" :bordered="false">{{ t("closeSession.detail.noMethodNote") }}</n-alert>
 
-							<template v-if="method === 'cash' && !closing?.already_paid">
-								<n-button type="primary" size="large" block :loading="isConfirming" @click="askConfirm(true)">
-									{{ t("closeSession.detail.cashCollected") }}
-								</n-button>
-								<n-button secondary block :disabled="isConfirming" @click="askConfirm(false)">
-									{{ t("closeSession.detail.cashLater") }}
+							<!-- Ending is reception.check_in; taking the cash as well, reception.settle_payment — without it the cash stays owed. -->
+							<template v-if="canCheckInAtReception()">
+								<template v-if="method === 'cash' && !closing?.already_paid">
+									<n-button v-if="canSettleAtReception()" type="primary" size="large" block :loading="isConfirming" @click="askConfirm(true)">
+										{{ t("closeSession.detail.cashCollected") }}
+									</n-button>
+									<n-button secondary block :disabled="isConfirming" @click="askConfirm(false)">
+										{{ t("closeSession.detail.cashLater") }}
+									</n-button>
+								</template>
+								<n-button v-else type="primary" size="large" block :loading="isConfirming" @click="askConfirm(false)">
+									{{ t("closeSession.detail.confirm") }}
 								</n-button>
 							</template>
-							<n-button v-else type="primary" size="large" block :loading="isConfirming" @click="askConfirm(false)">
-								{{ t("closeSession.detail.confirm") }}
-							</n-button>
 						</div>
 					</n-card>
 				</div>
@@ -229,6 +232,7 @@ import { NAlert, NAvatar, NButton, NCard, NSpin, NTag, useDialog, useMessage } f
 import { computed, onBeforeUnmount, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
+import { canCheckInAtReception, canSettleAtReception } from "@/add-os/config/permissions"
 import CollectPaymentModal from "@/add-os/modules/payments/components/CollectPaymentModal.vue"
 import { ApiError } from "@/add-os/services/api"
 import { confirmSessionEnd, getSessionReport } from "@/add-os/services/reception"

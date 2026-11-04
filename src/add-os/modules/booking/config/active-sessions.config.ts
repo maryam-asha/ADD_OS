@@ -8,12 +8,16 @@ import { formatDateTime } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 import { spaceTypeLabel } from "./space-type-label"
 
+/**
+ * A handler left out is an action this account may not take — its
+ * `reception.*` permission is missing — and its button is not drawn.
+ */
 interface SessionHandlers {
-	onCheckOut: (row: ActiveSession) => void
+	onCheckOut?: (row: ActiveSession) => void
 	/** Opens the session's own page: its live timer, its bill so far. */
 	onDetails: (row: ActiveSession) => void
-	onExtend: (row: ActiveSession) => void
-	onCancel: (row: ActiveSession) => void
+	onExtend?: (row: ActiveSession) => void
+	onCancel?: (row: ActiveSession) => void
 }
 
 /**
@@ -113,34 +117,42 @@ export function buildSessionColumns(t: ComposerTranslation, handlers: SessionHan
 			render: row => {
 				const checkOutLabel = t("activeSessions.checkOut.button")
 				const detailsLabel = t("activeSessions.details")
+				const { onCheckOut, onExtend, onCancel } = handlers
 				const buttons = [
 					h(
 						NButton,
 						{ size: "small", secondary: true, "aria-label": detailsLabel, onClick: () => handlers.onDetails(row) },
 						{ icon: () => h(Icon, { name: "carbon:view", size: 16 }), default: () => detailsLabel }
-					),
-					h(
-						NButton,
-						{ size: "small", type: "primary", "aria-label": checkOutLabel, onClick: () => handlers.onCheckOut(row) },
-						{ icon: () => h(Icon, { name: "carbon:logout", size: 16 }), default: () => checkOutLabel }
 					)
 				]
 
-				if (row.type === "booking") {
+				if (onCheckOut) {
+					buttons.push(
+						h(
+							NButton,
+							{ size: "small", type: "primary", "aria-label": checkOutLabel, onClick: () => onCheckOut(row) },
+							{ icon: () => h(Icon, { name: "carbon:logout", size: 16 }), default: () => checkOutLabel }
+						)
+					)
+				}
+
+				if (row.type === "booking" && onExtend) {
 					const extendLabel = t("activeSessions.extend.button")
 					buttons.push(
 						h(
 							NButton,
-							{ size: "small", quaternary: true, "aria-label": extendLabel, title: extendLabel, onClick: () => handlers.onExtend(row) },
+							{ size: "small", quaternary: true, "aria-label": extendLabel, title: extendLabel, onClick: () => onExtend(row) },
 							{ icon: () => h(Icon, { name: "carbon:time", size: 16 }) }
 						)
 					)
+				}
 
+				if (row.type === "booking" && onCancel) {
 					const cancelLabel = t("activeSessions.cancel.button")
 					buttons.push(
 						h(
 							NButton,
-							{ size: "small", quaternary: true, type: "error", "aria-label": cancelLabel, title: cancelLabel, onClick: () => handlers.onCancel(row) },
+							{ size: "small", quaternary: true, type: "error", "aria-label": cancelLabel, title: cancelLabel, onClick: () => onCancel(row) },
 							{ icon: () => h(Icon, { name: "carbon:close-outline", size: 16 }) }
 						)
 					)

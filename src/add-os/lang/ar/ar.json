@@ -2816,11 +2816,27 @@
 	"reception": {
 		"statusOperational": "العمليات جاهزة ونشطة",
 		"quickActionsTitle": "إجراءات سريعة",
+		"tabs": {
+			"overview": "نظرة عامة",
+			"arrivals": "الوصول",
+			"approvals": "قيد الموافقة",
+			"sessions": "الجلسات النشطة",
+			"endRequests": "طلبات الإنهاء"
+		},
 		"actions": {
 			"startSession": "بدء جلسة",
 			"registerGuest": "تسجيل ضيف",
 			"topUpWallet": "شحن محفظة",
-			"closeSession": "إنهاء جلسة"
+			"closeSession": "إنهاء جلسة",
+			"bookSpace": "حجز مساحة",
+			"subscribePlan": "اشتراك بخطة"
+		},
+		"quickBooking": {
+			"start": "من",
+			"end": "إلى",
+			"duration": "المدة",
+			"minutes": "{minutes} دقيقة",
+			"inCash": "نقداً"
 		},
 		"upNextTitle": "القادم تالياً",
 		"stats": {

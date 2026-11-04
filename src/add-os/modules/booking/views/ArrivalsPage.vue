@@ -2,11 +2,11 @@
 <template>
 	<div class="flex flex-col gap-5">
 		<div class="flex flex-wrap items-start justify-between gap-3">
-			<div class="flex flex-col gap-1">
+			<div v-if="!embedded" class="flex flex-col gap-1">
 				<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.arrivals") }}</h1>
 				<p>{{ t("arrivals.description") }}</p>
 			</div>
-			<n-button :loading="isLoading" @click="refetchAll">
+			<n-button :loading="isLoading" class="ms-auto" @click="refetchAll">
 				<template #icon><Icon name="carbon:renew" :size="16" /></template>
 				{{ t("activeSessions.refresh") }}
 			</n-button>
@@ -50,6 +50,7 @@ import { NAlert, NAvatar, NButton, NCard, NDataTable, NModal, NSelect, NTag } fr
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
+import { canCheckInAtReception } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import { useReceptionAction } from "@/add-os/modules/booking/composables/useReceptionAction"
 import { useReceptionRealtime } from "@/add-os/modules/booking/composables/useReceptionRealtime"
@@ -80,7 +81,8 @@ import Icon from "@/components/common/Icon.vue"
  * a 30 s poll only while that socket is down (useReceptionRealtime).
  */
 
-defineProps<{ titleKey?: string }>()
+/** `embedded`: shown inside the reception desk's tab, which names it already. */
+defineProps<{ titleKey?: string, embedded?: boolean }>()
 
 const { t } = useI18n()
 
@@ -155,6 +157,11 @@ useReceptionRealtime(refetchAll, { events: ["arrival_request.created", "arrival_
 
 const action = useReceptionAction(refetchAll)
 
+/** Letting a member in is `reception.check_in`: without it both lists are read-only, with no actions column. */
+function actionsIfAllowed<T>(columns: DataTableColumns<T>): DataTableColumns<T> {
+	return canCheckInAtReception() ? columns : columns.filter(column => !("key" in column) || column.key !== "actions")
+}
+
 /** Today's, not yet checked in, not yet over — soonest first. */
 const expected = computed(() => {
 	const today = localDate(new Date(now.value))
@@ -173,7 +180,7 @@ async function checkIn(booking: AdminBooking): Promise<void> {
 	await action.run(() => checkInBooking(booking.id), t("arrivals.expected.checkedIn"))
 }
 
-const bookingColumns = computed<DataTableColumns<AdminBooking>>(() => [
+const bookingColumns = computed<DataTableColumns<AdminBooking>>(() => actionsIfAllowed<AdminBooking>([
 	{ title: t("arrivals.columns.member"), key: "member", minWidth: 160, render: row => row.member.name ?? "—" },
 	{ title: t("arrivals.columns.space"), key: "space", minWidth: 140, render: row => row.space.title ?? "—" },
 	{
@@ -202,7 +209,7 @@ const bookingColumns = computed<DataTableColumns<AdminBooking>>(() => [
 			)
 		}
 	}
-])
+]))
 
 /* ── Arrival requests ─────────────────────────────────────────────────────── */
 
@@ -272,7 +279,7 @@ function coverageTag(row: ArrivalRequest) {
 	return h(NTag, { size: "small", round: true, type: "warning" }, { default: () => t("arrivals.requests.paysHourly") })
 }
 
-const requestColumns = computed<DataTableColumns<ArrivalRequest>>(() => [
+const requestColumns = computed<DataTableColumns<ArrivalRequest>>(() => actionsIfAllowed<ArrivalRequest>([
 	{
 		title: t("arrivals.columns.member"),
 		key: "user",
@@ -322,7 +329,7 @@ const requestColumns = computed<DataTableColumns<ArrivalRequest>>(() => [
 			h(NButton, { size: "small", secondary: true, onClick: () => reject(row) }, { icon: () => h(Icon, { name: "carbon:close", size: 16 }), default: () => t("arrivals.requests.reject") })
 		])
 	}
-])
+]))
 
 defineExpose({ requests, expected, checkIn, confirm, confirmWalkIn, reject, walkInSpaceId, spaceModalVisible, refetchAll })
 </script>

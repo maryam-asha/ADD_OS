@@ -1,7 +1,8 @@
 <template>
-	<div class="page page-wrapped flex flex-col gap-8">
-		<div class="flex items-center justify-between">
-			<h1 class="text-2xl font-bold tracking-tight text-slate-900">{{ t('nav.pages.planPurchases', 'شحن الخطط') }}</h1>
+	<div class="flex flex-col gap-8" :class="inModal ? '' : 'page page-wrapped'">
+		<!-- Inside the reception desk's dialog, the dialog carries the title. -->
+		<div v-if="!inModal" class="flex items-center justify-between">
+			<h1 class="text-2xl font-bold tracking-tight text-slate-900">{{ t('nav.pages.planPurchases') }}</h1>
 		</div>
 
 		<div class="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
@@ -261,6 +262,18 @@ import { listUsers } from "@/add-os/services/users"
 import { getWalletBalance } from "@/add-os/services/wallet-top-ups"
 import { formatDate } from "@/add-os/utils/format/dates"
 
+/**
+ * `inModal`: opened from the reception desk's dialog, which carries the title.
+ * `preselectedUserId`: the member the sale is for, when the desk already knows them.
+ */
+const props = withDefaults(defineProps<{ inModal?: boolean, preselectedUserId?: number | null }>(), {
+	inModal: false,
+	preselectedUserId: null
+})
+
+/** After each sale, with its receipt — the desk refreshes its counts on it. */
+const emit = defineEmits<{ success: [receipt: PlanPurchaseReceipt] }>()
+
 function formatCurrency(amount: number, currency: string) {
     return `${amount.toLocaleString()} ${currency}`
 }
@@ -370,6 +383,7 @@ const receiptModalVisible = ref(false)
 const lastReceipt = ref<PlanPurchaseReceipt | null>(null)
 
 onMounted(() => {
+    if (props.preselectedUserId) form.value.user_id = props.preselectedUserId
     fetchUsers()
     fetchCompanies()
     fetchPlans()
@@ -422,7 +436,7 @@ async function fetchCurrencies() {
     try {
         const currencies = await listCurrencies()
         currencyOptions.value = currencies.map(c => ({ label: c.code, value: c.code }))
-        
+
         // Auto-select the default currency if none is selected
         if (!form.value.currency) {
             const defaultCurrency = currencies.find(c => c.is_base)
@@ -546,6 +560,7 @@ async function submit() {
         const res = await executePlanPurchase(buildPayload())
         lastReceipt.value = res
         receiptModalVisible.value = true
+        emit("success", res)
         message.success(t('walletTopUps.submit.success', 'Purchased successfully'))
 
         form.value.plan_id = null

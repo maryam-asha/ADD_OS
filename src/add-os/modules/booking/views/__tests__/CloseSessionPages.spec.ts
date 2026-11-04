@@ -7,11 +7,12 @@ import ReceptionDeskPage from "@/add-os/modules/reception/views/ReceptionDeskPag
 import CloseSessionDetailPage from "../CloseSessionDetailPage.vue"
 import CloseSessionPage from "../CloseSessionPage.vue"
 
-const { listActiveSessionsMock, getSessionReportMock, confirmSessionEndMock, getReceptionSummaryMock, pushMock, routeParams, successMock, warningMock } = vi.hoisted(() => ({
+const { listActiveSessionsMock, getSessionReportMock, confirmSessionEndMock, getReceptionSummaryMock, listPendingApprovalsMock, pushMock, routeParams, successMock, warningMock } = vi.hoisted(() => ({
 	listActiveSessionsMock: vi.fn(),
 	getSessionReportMock: vi.fn(),
 	confirmSessionEndMock: vi.fn(),
 	getReceptionSummaryMock: vi.fn(),
+	listPendingApprovalsMock: vi.fn(),
 	pushMock: vi.fn(),
 	routeParams: { type: "walkin", id: "7" } as Record<string, string>,
 	successMock: vi.fn(),
@@ -22,8 +23,32 @@ vi.mock("@/add-os/services/reception", () => ({
 	listActiveSessions: listActiveSessionsMock,
 	getSessionReport: getSessionReportMock,
 	confirmSessionEnd: confirmSessionEndMock,
-	getReceptionSummary: getReceptionSummaryMock
+	getReceptionSummary: getReceptionSummaryMock,
+	listPendingApprovals: listPendingApprovalsMock,
+	checkInBooking: vi.fn()
 }))
+
+// The desk's permission gates, read from a set each test can narrow.
+const { granted } = vi.hoisted(() => ({ granted: new Set<string>() }))
+
+vi.mock("@/add-os/config/permissions", async importOriginal => ({
+	...await importOriginal<typeof import("@/add-os/config/permissions")>(),
+	canCheckInAtReception: () => granted.has("reception.check_in"),
+	canBookAtReception: () => granted.has("reception.book"),
+	canApproveBookings: () => granted.has("reception.approve"),
+	canSettleAtReception: () => granted.has("reception.settle_payment"),
+	canTopUpWallets: () => granted.has("wallet-top-ups.create"),
+	canSellPlans: () => granted.has("plan-purchases.create")
+}))
+
+const DESK_PERMISSIONS = ["reception.check_in", "reception.book", "reception.approve", "reception.settle_payment", "wallet-top-ups.create", "plan-purchases.create"]
+
+function grantOnly(...permissions: string[]): void {
+	granted.clear()
+	for (const permission of permissions) granted.add(permission)
+}
+
+beforeEach(() => grantOnly(...DESK_PERMISSIONS))
 
 // The desk channel, captured: a test plays an event through it.
 const { realtimeSubscriptions } = vi.hoisted(() => ({
@@ -176,6 +201,31 @@ describe("end requests", () => {
 		wrapper.unmount()
 	})
 
+	it("offers no cash collection to an account that may end sessions but not take money", async () => {
+		grantOnly("reception.check_in")
+		getSessionReportMock.mockResolvedValue(report("cash"))
+		const wrapper = mountWith(CloseSessionDetailPage)
+		await flushPromises()
+
+		const labels = wrapper.findAll("button").map(node => node.text())
+		expect(labels.some(label => label.includes("Money received"))).toBe(false)
+		expect(labels.some(label => label.includes(en.closeSession.detail.cashLater))).toBe(true)
+
+		wrapper.unmount()
+	})
+
+	it("offers no way to end it to an account that may only see the desk", async () => {
+		grantOnly()
+		getSessionReportMock.mockResolvedValue(report("cash"))
+		const wrapper = mountWith(CloseSessionDetailPage)
+		await flushPromises()
+
+		const labels = wrapper.findAll("button").map(node => node.text())
+		expect(labels.some(label => label.includes(en.closeSession.detail.cashLater) || label.includes(en.closeSession.detail.confirm))).toBe(false)
+
+		wrapper.unmount()
+	})
+
 	it("warns when the wallet will not cover it, and still only ends it", async () => {
 		getSessionReportMock.mockResolvedValue(report("wallet", 50))
 		confirmSessionEndMock.mockResolvedValue({ message: "Session ended. Payment is still due.", data: { payment_state: "unpaid", price_points: 200, amount_owed: "20.00" } })
@@ -247,11 +297,20 @@ describe("session payment", () => {
 })
 
 describe("reception desk", () => {
-	it("shows the day's real counts and opens an end request on its session", async () => {
+	beforeEach(() => {
+		vi.clearAllMocks()
 		getReceptionSummaryMock.mockResolvedValue({
 			stats: { active_sessions: 4, expected_bookings: 6, pending_arrivals: 1, pending_end_requests: 2, pending_payments: 3 },
 			upcoming: [{ kind: "end_request", id: 11, at: "2026-08-17T10:00:00+03:00", member: { id: 3, name: "Layla Haddad" }, space: "Open Space", session: { type: "walkin", id: 7 }, payment_method: "cash" }]
 		})
+		listPendingApprovalsMock.mockResolvedValue({ data: [], meta: { current_page: 1, last_page: 1, per_page: 25, total: 5 } })
+	})
+
+	function tabLabels(): string[] {
+		return [...document.body.querySelectorAll(".n-tabs-tab")].map(node => node.textContent?.trim() ?? "")
+	}
+
+	it("shows the day's real counts and opens an end request on its session", async () => {
 		const wrapper = mountWith(ReceptionDeskPage)
 		await flushPromises()
 
@@ -262,6 +321,46 @@ describe("reception desk", () => {
 
 		await wrapper.find(".divide-y > div").trigger("click")
 		expect(pushMock).toHaveBeenCalledWith({ name: "bookings.closeSessionDetail", params: { type: "walkin", id: 7 } })
+
+		wrapper.unmount()
+	})
+
+	it("loads no tab's list until its tab is opened", async () => {
+		const wrapper = mountWith(ReceptionDeskPage)
+		await flushPromises()
+
+		expect(listActiveSessionsMock).not.toHaveBeenCalled()
+		expect(realtimeSubscriptions.at(-1)?.events).toEqual(["arrival_request.created", "arrival_request.resolved", "session_end_request.created", "session_end_request.cancelled", "session_end_request.resolved"])
+
+		wrapper.unmount()
+	})
+
+	it("counts the approval queue from its own list, for whoever may decide it", async () => {
+		const wrapper = mountWith(ReceptionDeskPage)
+		await flushPromises()
+
+		const vm = wrapper.vm as unknown as { pendingApprovals: number }
+		expect(vm.pendingApprovals).toBe(5)
+		expect(tabLabels().some(label => label.startsWith(en.reception.tabs.approvals))).toBe(true)
+
+		wrapper.unmount()
+	})
+
+	it("offers only the sales and tabs the account's permissions make work", async () => {
+		grantOnly("wallet-top-ups.create")
+		getReceptionSummaryMock.mockResolvedValue({
+			stats: { active_sessions: 0, expected_bookings: 1, pending_arrivals: 0, pending_end_requests: 0, pending_payments: 0 },
+			upcoming: [{ kind: "booking", id: 21, at: "2026-08-17T10:00:00+03:00", member: { id: 4, name: "Omar Saleh" }, space: "Room 2", session: null, payment_method: null }]
+		})
+		const wrapper = mountWith(ReceptionDeskPage)
+		await flushPromises()
+
+		const vm = wrapper.vm as unknown as { quickActions: { key: string }[] }
+		expect(vm.quickActions.map(action => action.key)).toEqual(["topUp"])
+		expect(listPendingApprovalsMock).not.toHaveBeenCalled()
+		expect(tabLabels().some(label => label.startsWith(en.reception.tabs.approvals))).toBe(false)
+		// A booking's check-in is reception.check_in: not offered here.
+		expect(wrapper.findAll("button").some(node => node.text() === en.arrivals.expected.checkIn)).toBe(false)
 
 		wrapper.unmount()
 	})

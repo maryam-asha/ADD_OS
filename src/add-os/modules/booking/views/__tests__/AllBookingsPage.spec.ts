@@ -9,6 +9,12 @@ const { listBookingsMock } = vi.hoisted(() => ({ listBookingsMock: vi.fn() }))
 
 vi.mock("@/add-os/services/booking-calendar", () => ({ listBookings: listBookingsMock }))
 
+// The page reads `?payment_state` as its starting filter; mounted here without a router.
+vi.mock("vue-router", async () => {
+	const actual = await vi.importActual<typeof import("vue-router")>("vue-router")
+	return { ...actual, useRoute: () => ({ query: {} }) }
+})
+
 function booking(overrides: Record<string, unknown> = {}) {
 	return {
 		id: 1,

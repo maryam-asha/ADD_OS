@@ -5,13 +5,13 @@
 	opens the session's own page, where the desk sees the bill and ends it.
 -->
 <template>
-	<div class="flex flex-col gap-6 max-w-5xl mx-auto p-4 sm:p-6">
-		<div class="flex items-center justify-between flex-wrap gap-3 border-b border-stone-200/80 pb-4">
-			<div class="flex flex-col gap-1">
+	<div class="flex flex-col gap-6" :class="embedded ? '' : 'max-w-5xl mx-auto p-4 sm:p-6'">
+		<div class="flex items-center justify-between flex-wrap gap-3" :class="embedded ? '' : 'border-b border-stone-200/80 pb-4'">
+			<div v-if="!embedded" class="flex flex-col gap-1">
 				<h1 class="text-2xl font-bold text-stone-900">{{ t("closeSession.title") }}</h1>
 				<span class="text-xs text-stone-500">{{ t("closeSession.subtitle") }}</span>
 			</div>
-			<n-button secondary round :loading="isLoading" @click="load">
+			<n-button secondary round class="ms-auto" :loading="isLoading" @click="load">
 				<template #icon><Icon name="carbon:renew" :size="18" /></template>
 				{{ t("closeSession.refresh") }}
 			</n-button>
@@ -65,6 +65,9 @@ import { ApiError } from "@/add-os/services/api"
 import { listActiveSessions } from "@/add-os/services/reception"
 import { formatTime } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
+
+/** `embedded`: shown inside the reception desk's tab, which names it already. */
+defineProps<{ embedded?: boolean }>()
 
 const { t } = useI18n()
 const router = useRouter()

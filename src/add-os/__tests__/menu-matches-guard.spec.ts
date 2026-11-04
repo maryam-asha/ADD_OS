@@ -205,7 +205,9 @@ describe("sidebar, route guard and \"/\" agree", () => {
 
 	it("adds a screen to operations' menu as its role is granted the permission", () => {
 		signIn({ roles: ["operations"], permissions: ["branches.view", "spaces.view", "events.view", "reception.view"] })
-		expect(offeredByPermission()).toEqual(["/spatial/branches", "/spatial/spaces", "/bookings/reception-desk", "/bookings/arrivals", "/bookings/approval-queue", "/bookings/active-sessions", "/bookings/close-session", "/community/events"])
+		// Arrivals, approvals, active sessions and end requests are the reception desk's tabs: one sidebar entry.
+		expect(offeredByPermission()).toEqual(["/spatial/branches", "/spatial/spaces", "/bookings/reception-desk", "/community/events"])
+		expect(authGuard(PAGES.get("/bookings/arrivals")!)).toBeUndefined()
 		expect(authGuard(PAGES.get("/community/events/create")!)).toBeUndefined()
 		// A hidden detail page carries its list page's permission.
 		expect(authGuard(PAGES.get("/bookings/active-sessions/:type/:id")!)).toBeUndefined()

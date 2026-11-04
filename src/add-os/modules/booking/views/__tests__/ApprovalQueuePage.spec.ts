@@ -42,6 +42,21 @@ function pageOf(rows: (typeof pendingRow)[], meta: Partial<{ current_page: numbe
 	}
 }
 
+// The desk's permission gates, read from a set each test can narrow.
+const { granted } = vi.hoisted(() => ({ granted: new Set<string>() }))
+
+vi.mock("@/add-os/config/permissions", async importOriginal => ({
+	...await importOriginal<typeof import("@/add-os/config/permissions")>(),
+	canApproveBookings: () => granted.has("reception.approve")
+}))
+
+function grantOnly(...permissions: string[]): void {
+	granted.clear()
+	for (const permission of permissions) granted.add(permission)
+}
+
+beforeEach(() => grantOnly("reception.approve"))
+
 const i18n = createI18n({
 	legacy: false,
 	locale: "en",
@@ -82,6 +97,16 @@ describe("approvalQueuePage", () => {
 		listPendingApprovalsMock.mockResolvedValue(pageOf([pendingRow]))
 		approveBookingMock.mockResolvedValue({ message: "Booking approved." })
 		rejectBookingMock.mockResolvedValue({ message: "Booking rejected." })
+	})
+
+	it("shows the queue read-only to an account that may not decide it", async () => {
+		grantOnly()
+		const wrapper = mountPage()
+		await flushPromises()
+
+		expect(wrapper.vm.rows).toEqual([pendingRow])
+		expect(wrapper.findAll("button").some(node => node.text() === "Approve")).toBe(false)
+		wrapper.unmount()
 	})
 
 	it("asks for the first page on mount and shows what comes back", async () => {

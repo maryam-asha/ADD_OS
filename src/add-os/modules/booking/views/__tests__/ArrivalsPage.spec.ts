@@ -41,6 +41,21 @@ vi.mock("naive-ui", async () => {
 	return { ...actual, useMessage: () => ({ success: vi.fn(), error: vi.fn() }) }
 })
 
+// The desk's permission gates, read from a set each test can narrow.
+const { granted } = vi.hoisted(() => ({ granted: new Set<string>() }))
+
+vi.mock("@/add-os/config/permissions", async importOriginal => ({
+	...await importOriginal<typeof import("@/add-os/config/permissions")>(),
+	canCheckInAtReception: () => granted.has("reception.check_in")
+}))
+
+function grantOnly(...permissions: string[]): void {
+	granted.clear()
+	for (const permission of permissions) granted.add(permission)
+}
+
+beforeEach(() => grantOnly("reception.check_in"))
+
 const i18n = createI18n({ legacy: false, locale: "en", missingWarn: false, fallbackWarn: false, messages: { en: {} } })
 
 /** 10:00 local, today. */
@@ -143,6 +158,16 @@ describe("arrivalsPage", () => {
 
 		expect(listArrivalRequestsMock).toHaveBeenCalledOnce()
 		expect(listBookingsMock).toHaveBeenCalledOnce()
+		wrapper.unmount()
+	})
+
+	it("lists arrivals and bookings without their actions to an account that may not let members in", async () => {
+		grantOnly()
+		const { wrapper, vm } = await mountPage()
+
+		expect(vm.expected.map(b => b.id)).toEqual([1, 4])
+		const labels = wrapper.findAll("button").map(node => node.text())
+		expect(labels.some(label => label.includes("arrivals.requests.confirm") || label.includes("arrivals.expected.checkIn"))).toBe(false)
 		wrapper.unmount()
 	})
 

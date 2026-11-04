@@ -116,6 +116,7 @@ import type { AdminBooking, BookingPaymentState, BookingStatus } from "@/add-os/
 import { NAlert, NButton, NCard, NDataTable, NDatePicker, NInput, NPagination, NSelect } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import { useRoute } from "vue-router"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { buildAllBookingsColumns } from "@/add-os/modules/booking/config/all-bookings.config"
 import { BOOKING_PAYMENT_STATES, BOOKING_STATUSES } from "@/add-os/modules/booking/types/calendar"
@@ -162,10 +163,22 @@ defineProps<{ titleKey?: string }>()
 
 const { t } = useI18n()
 
+const route = useRoute()
 const page = ref(1)
 const search = ref<string | null>(null)
 const status = ref<BookingStatus | null>(null)
-const paymentState = ref<BookingPaymentState | null>(null)
+
+const queryPayment = route.query.payment_state
+const initialPayment = typeof queryPayment === "string" && (BOOKING_PAYMENT_STATES as readonly string[]).includes(queryPayment)
+	? (queryPayment as BookingPaymentState)
+	: null
+const paymentState = ref<BookingPaymentState | null>(initialPayment)
+
+watch(() => route.query.payment_state, (newVal) => {
+	if (typeof newVal === "string" && (BOOKING_PAYMENT_STATES as readonly string[]).includes(newVal)) {
+		paymentState.value = newVal as BookingPaymentState
+	}
+})
 const dateRange = ref<[string, string] | null>(null)
 
 const query = computed<Record<string, unknown>>(() => ({

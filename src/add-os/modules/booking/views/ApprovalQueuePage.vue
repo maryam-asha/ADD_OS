@@ -1,7 +1,7 @@
 <!-- src/add-os/modules/booking/views/ApprovalQueuePage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
+		<div v-if="!embedded" class="flex flex-col gap-1">
 			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.approvalQueue") }}</h1>
 			<p>{{ t("approvalQueue.description") }}</p>
 		</div>
@@ -53,7 +53,9 @@ import { NAlert, NButton, NCard, NDataTable, NForm, NFormItem, NInput, NModal, N
 import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useResourceList } from "@/add-os/composables/useResourceList"
+import { canApproveBookings } from "@/add-os/config/permissions"
 import { useReceptionAction } from "@/add-os/modules/booking/composables/useReceptionAction"
+import { useReceptionRealtime } from "@/add-os/modules/booking/composables/useReceptionRealtime"
 import { buildApprovalColumns } from "@/add-os/modules/booking/config/approval-queue.config"
 import { approveBooking, listPendingApprovals, rejectBooking } from "@/add-os/services/reception"
 
@@ -73,7 +75,8 @@ import { approveBooking, listPendingApprovals, rejectBooking } from "@/add-os/se
  * the server the moment anything else changed.
  */
 
-defineProps<{ titleKey?: string }>()
+/** `embedded`: shown inside the reception desk's tab, which names it already. */
+defineProps<{ titleKey?: string, embedded?: boolean }>()
 
 const { t } = useI18n()
 
@@ -81,6 +84,8 @@ const page = ref(1)
 const { data: rows, isLoading, error, refetch, meta } = useResourceList<PendingApprovalBooking>(listPendingApprovals, undefined, page)
 
 const action = useReceptionAction(refetch)
+
+useReceptionRealtime(refetch)
 
 function rowKey(row: PendingApprovalBooking) {
 	return row.id
@@ -128,7 +133,11 @@ async function submitReject() {
 	if (succeeded) rejectModalVisible.value = false
 }
 
-const columns = computed<DataTableColumns<PendingApprovalBooking>>(() => buildApprovalColumns(t, approve, openReject))
+/** Deciding is `reception.approve`; without it the queue is read-only, with no actions column. */
+const columns = computed<DataTableColumns<PendingApprovalBooking>>(() => {
+	const all = buildApprovalColumns(t, approve, openReject)
+	return canApproveBookings() ? all : all.filter(column => !("key" in column) || column.key !== "actions")
+})
 
 defineExpose({ approve, openReject, submitReject, rejectForm, rejectFieldErrors, rejectModalVisible, page, rows, meta })
 </script>

@@ -2811,11 +2811,27 @@
 	"reception": {
 		"statusOperational": "Desk Operational",
 		"quickActionsTitle": "Quick Actions",
+		"tabs": {
+			"overview": "Overview",
+			"arrivals": "Arrivals",
+			"approvals": "Approvals",
+			"sessions": "Active Sessions",
+			"endRequests": "End Requests"
+		},
 		"actions": {
 			"startSession": "Start Session",
 			"registerGuest": "Register Guest",
 			"topUpWallet": "Top Up Wallet",
-			"closeSession": "Close Session"
+			"closeSession": "Close Session",
+			"bookSpace": "Book Space",
+			"subscribePlan": "Subscribe Plan"
+		},
+		"quickBooking": {
+			"start": "From",
+			"end": "To",
+			"duration": "Duration",
+			"minutes": "{minutes} min",
+			"inCash": "In cash"
 		},
 		"upNextTitle": "Up Next",
 		"stats": {

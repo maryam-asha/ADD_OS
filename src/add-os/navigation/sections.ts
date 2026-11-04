@@ -253,11 +253,15 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		 */
 		pages: [
 			{ key: "receptionDesk", path: "reception-desk", permission: "reception.view" },
-			{ key: "arrivals", path: "arrivals", permission: "reception.view" },
-			{ key: "approvalQueue", path: "approval-queue", permission: "reception.view" },
-			{ key: "activeSessions", path: "active-sessions", permission: "reception.view" },
+			// Arrivals, approval-queue, active-sessions and close-session are now
+			// tabs inside ReceptionDeskPage. They remain routable (deep-links from
+			// notifications / KPI cards) but hidden so the sidebar shows only
+			// "Reception Desk" for the reception role.
+			{ key: "arrivals", path: "arrivals", hidden: true, permission: "reception.view" },
+			{ key: "approvalQueue", path: "approval-queue", hidden: true, permission: "reception.view" },
+			{ key: "activeSessions", path: "active-sessions", hidden: true, permission: "reception.view" },
 			{ key: "activeSessionDetail", path: "active-sessions/:type/:id", hidden: true, permission: "reception.view" },
-			{ key: "closeSession", path: "close-session", permission: "reception.view" },
+			{ key: "closeSession", path: "close-session", hidden: true, permission: "reception.view" },
 			{ key: "closeSessionDetail", path: "close-session/:type/:id", hidden: true, permission: "reception.view" },
 			{ key: "allBookings", path: "all", permission: "bookings.view" },
 			{ key: "calendar", path: "calendar", permission: "bookings.view" }
@@ -306,7 +310,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "paymentMethods", path: "methods", permission: "payment-methods.view" },
 			{ key: "currencies", path: "currencies", permission: "currencies.view" },
 			{ key: "exchangeRates", path: "exchange-rates", permission: "exchange-rates.view" },
-			{ key: "walletTopUps", path: "wallet-top-ups", permission: "wallet-top-ups.view" },
+			{ key: "walletTopUps", path: "wallet-top-ups", icon: "carbon:wallet", permission: "wallet-top-ups.view" },
 			{ key: "cashRegister", path: "cash-register", permission: "cash-register.view" },
 			{ key: "invoices", path: "invoices", permission: "invoices.view" }
 		]

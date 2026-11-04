@@ -213,6 +213,40 @@ export function canViewDashboard(): boolean {
 	return DASHBOARD_SECTIONS.some(canViewDashboardSection)
 }
 
+// ── Reception desk ──────────────────────────────────────────────────────────
+//
+// Seeing the desk is `reception.view` (its page's permission); each kind of
+// desk work is its own grant on ADD Core's `reception/*` routes, so a role
+// sees only the buttons its permissions make work.
+
+/** Letting people in and out: confirming an arrival, checking in, checking out, ending a session. */
+export function canCheckInAtReception(): boolean {
+	return can("reception.check_in")
+}
+
+/** Booking for a member at the desk, and extending or cancelling a booking. */
+export function canBookAtReception(): boolean {
+	return can("reception.book")
+}
+
+/** Approving or rejecting a booking that waits on the desk. */
+export function canApproveBookings(): boolean {
+	return can("reception.approve")
+}
+
+/** Taking money for what a member owes (`reception/payments/settle`). */
+export function canSettleAtReception(): boolean {
+	return can("reception.settle_payment")
+}
+
+export function canTopUpWallets(): boolean {
+	return can("wallet-top-ups.create")
+}
+
+export function canSellPlans(): boolean {
+	return can("plan-purchases.create")
+}
+
 /**
  * HR (add/hr in ADD Core). Every HR admin route carries its own `hr.*`
  * permission and no role gate, so a custom HR role works without

@@ -1,7 +1,7 @@
 <!-- src/add-os/modules/booking/views/ActiveSessionsPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
+		<div v-if="!embedded" class="flex flex-col gap-1">
 			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.activeSessions") }}</h1>
 			<p>{{ t("activeSessions.description") }}</p>
 		</div>
@@ -38,7 +38,7 @@
 					/>
 				</n-form-item>
 
-				<n-form-item path="payment_method" :label="t('activeSessions.checkOut.settleLabel')">
+				<n-form-item v-if="canSettleAtReception()" path="payment_method" :label="t('activeSessions.checkOut.settleLabel')">
 					<n-select
 						v-model:value="checkOutForm.payment_method"
 						:options="paymentMethodOptions"
@@ -127,6 +127,7 @@ import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import { useResourceList } from "@/add-os/composables/useResourceList"
+import { canBookAtReception, canCheckInAtReception, canSettleAtReception } from "@/add-os/config/permissions"
 import { useReceptionAction } from "@/add-os/modules/booking/composables/useReceptionAction"
 import { useReceptionRealtime } from "@/add-os/modules/booking/composables/useReceptionRealtime"
 import { buildSessionColumns } from "@/add-os/modules/booking/config/active-sessions.config"
@@ -173,7 +174,8 @@ import Icon from "@/components/common/Icon.vue"
  * paying in SYP was booked as paying in the base currency.
  */
 
-defineProps<{ titleKey?: string }>()
+/** `embedded`: shown inside the reception desk's tab, which names it already. */
+defineProps<{ titleKey?: string, embedded?: boolean }>()
 
 const { t } = useI18n()
 const dialog = useDialog()
@@ -357,8 +359,14 @@ async function cancelSession(row: ActiveSession) {
 	await action.run(() => cancelBooking(row.id), t("activeSessions.cancel.success"))
 }
 
+/** Checking out is `reception.check_in`; extending and cancelling a booking, `reception.book`. */
 const columns = computed<DataTableColumns<ActiveSession>>(() =>
-	buildSessionColumns(t, { onCheckOut: openCheckOut, onDetails: openDetails, onExtend: openExtend, onCancel: confirmCancel })
+	buildSessionColumns(t, {
+		onDetails: openDetails,
+		onCheckOut: canCheckInAtReception() ? openCheckOut : undefined,
+		onExtend: canBookAtReception() ? openExtend : undefined,
+		onCancel: canBookAtReception() ? confirmCancel : undefined
+	})
 )
 
 defineExpose({
