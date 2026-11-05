@@ -1,6 +1,6 @@
 // src/add-os/modules/plans/utils/saleLines.ts
 
-import type { ItemSalePayload, ItemSalePaymentMethod, SaleItem } from "@/add-os/modules/plans/types/retail"
+import type { ItemSalePayload, ItemSalePaymentMethod, ReceptionWarehouseOptions, SaleItem } from "@/add-os/modules/plans/types/retail"
 
 /** One line of the sell form: a sale item and how many pieces. */
 export interface SaleLine {
@@ -34,4 +34,15 @@ export function salePayload(form: { memberId: number; method: ItemSalePaymentMet
 		warehouse_id: form.warehouseId,
 		lines: form.lines.filter(line => line.saleItemId !== null).map(line => ({ sale_item_id: line.saleItemId!, quantity: line.quantity }))
 	}
+}
+
+/**
+ * The warehouse the sale form starts on: the primary of the open
+ * register's branch. With no register open the list spans every branch,
+ * so the desk chooses — taking the first primary would take another
+ * branch's stock.
+ */
+export function defaultSaleWarehouse(options: ReceptionWarehouseOptions): number | null {
+	if (options.branch_id === null) return null
+	return options.warehouses.find(warehouse => warehouse.allows_sales && warehouse.is_primary)?.id ?? null
 }

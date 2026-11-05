@@ -61,3 +61,9 @@ export interface ReceptionWarehouse {
 	allows_sales: boolean
 	is_primary: boolean
 }
+
+/** What `reception/warehouses` answers: the open register's branch (null with none open) and its warehouses. */
+export interface ReceptionWarehouseOptions {
+	branch_id: number | null
+	warehouses: ReceptionWarehouse[]
+}

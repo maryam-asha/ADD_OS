@@ -76,7 +76,7 @@ import { useI18n } from "vue-i18n"
 import CurrencySelect from "@/add-os/modules/hr/components/payroll/CurrencySelect.vue"
 import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
 import { COLUMN, localized, warehouseLabel } from "@/add-os/modules/inventory/utils/display"
-import { salePayload, scanSaleItem } from "@/add-os/modules/plans/utils/saleLines"
+import { defaultSaleWarehouse, salePayload, scanSaleItem } from "@/add-os/modules/plans/utils/saleLines"
 import { listMembers } from "@/add-os/services/members"
 import { listItemSales, listReceptionWarehouses, listSaleItems, sellItems } from "@/add-os/services/retail"
 import { formatNumber } from "@/add-os/utils/format"
@@ -120,9 +120,9 @@ const loadError = ref("")
 onMounted(() => {
 	void quietly(listMembers, members => (memberOptions.value = members.map(m => ({ label: `${m.name} · ${m.phone}`, value: m.id }))))
 	void quietly(listSaleItems, rows => (saleItems.value = rows.filter(row => row.is_active)))
-	void quietly(listReceptionWarehouses, rows => {
-		warehouses.value = rows.filter(row => row.allows_sales)
-		warehouseId.value = warehouses.value.find(row => row.is_primary)?.id ?? null
+	void quietly(listReceptionWarehouses, options => {
+		warehouses.value = options.warehouses.filter(row => row.allows_sales)
+		warehouseId.value = defaultSaleWarehouse(options)
 	})
 	void load()
 })

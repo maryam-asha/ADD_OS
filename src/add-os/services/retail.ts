@@ -1,5 +1,5 @@
 import type { Paginated, RawPaginatedResponse } from "./pagination"
-import type { ItemSale, ItemSalePayload, ReceptionWarehouse, SaleItem, SaleItemPayload } from "@/add-os/modules/plans/types/retail"
+import type { ItemSale, ItemSalePayload, ReceptionWarehouseOptions, SaleItem, SaleItemPayload } from "@/add-os/modules/plans/types/retail"
 import { get, post } from "./api"
 import { toPaginated } from "./pagination"
 import { createResourceApi } from "./resource-factory"
@@ -29,7 +29,7 @@ export async function sellItems(payload: ItemSalePayload): Promise<ItemSale> {
 	return (await post<{ data: ItemSale }>("/api/v1/admin/reception/item-sales", payload)).data
 }
 
-/** The warehouses the desk may take stock from: its register's branch, the primary first. */
-export async function listReceptionWarehouses(): Promise<ReceptionWarehouse[]> {
-	return (await get<{ data: ReceptionWarehouse[] }>("/api/v1/admin/reception/warehouses")).data
+/** The warehouses the desk may take stock from: its register's branch (primary first), or every active one when no register is open. */
+export async function listReceptionWarehouses(): Promise<ReceptionWarehouseOptions> {
+	return (await get<{ data: ReceptionWarehouseOptions }>("/api/v1/admin/reception/warehouses")).data
 }

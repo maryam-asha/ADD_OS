@@ -119,7 +119,7 @@ import { computed, h, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { canCountStock, canIssueStock, canReceiveStock, canTransferStock } from "@/add-os/config/permissions"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
-import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
+import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import ItemSelect from "@/add-os/modules/inventory/components/ItemSelect.vue"
 import StaffSelect from "@/add-os/modules/inventory/components/StaffSelect.vue"
 import StockOperationModal from "@/add-os/modules/inventory/components/StockOperationModal.vue"
@@ -180,10 +180,9 @@ const totalValue = computed(() => balances.value.reduce((sum, b) => sum + (Numbe
 const primaryCurrency = computed(() => balances.value[0]?.currency || "USD")
 
 onMounted(() => {
-	void quietly(
-		() => listWarehouses({ per_page: 100 }),
-		result => (warehouses.value = result.data)
-	)
+	listWarehouses({ per_page: 100 })
+		.then(result => (warehouses.value = result.data))
+		.catch(e => (loadError.value = apiErrorMessage(e, t("inventory.common.loadError"))))
 	void load()
 })
 
