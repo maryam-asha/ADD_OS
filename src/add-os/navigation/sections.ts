@@ -317,7 +317,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 	},
 	{
 		// Inventory (ADD Core's add/inventory package, 2026-10-24): assets
-		// tracked one by one, consumable stock per place, and their catalog.
+		// tracked one by one, consumable stock per warehouse, and their catalog.
 		// Every page carries its own inventory.* permission, as every route
 		// does on the backend, so a store keeper's custom role works.
 		key: "inventory",
@@ -327,6 +327,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		pages: [
 			{ key: "inventoryAssets", path: "assets", permission: "inventory.assets.view" },
 			{ key: "inventoryAsset", path: "assets/:id", hidden: true, permission: "inventory.assets.view" },
+			{ key: "inventoryWarehouses", path: "warehouses", permission: "inventory.warehouses.view" },
 			{ key: "inventoryStock", path: "stock", permission: "inventory.stock.view" },
 			{ key: "inventoryMaintenance", path: "maintenance", permission: "inventory.assets.view" },
 			{ key: "inventoryCustody", path: "custody", permission: "inventory.assets.view" },

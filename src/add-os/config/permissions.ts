@@ -462,6 +462,11 @@ export function canManageInventoryCatalog(): boolean {
 	return can("inventory.catalog.manage")
 }
 
+/** Adding, editing, deactivating and deleting warehouses. */
+export function canManageWarehouses(): boolean {
+	return can("inventory.warehouses.manage")
+}
+
 /** Registering, editing, moving and changing the status of assets. */
 export function canManageAssets(): boolean {
 	return can("inventory.assets.manage")

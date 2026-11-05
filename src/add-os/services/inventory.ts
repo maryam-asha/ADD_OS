@@ -26,17 +26,20 @@ import type {
 	MaintenanceRecord,
 	MaintenanceSchedule,
 	MaintenanceType,
-	ManualIssueReason,
 	PlaceRef,
 	RegisterAssetPayload,
 	StockBalance,
 	StockMovement,
 	StockMovementType,
+	StockOperationKind,
+	StockOperationPayload,
 	StockValuation,
 	Unit,
-	UnitPayload
+	UnitPayload,
+	Warehouse,
+	WarehousePayload
 } from "@/add-os/modules/inventory/types/inventory"
-import { del, get, patch, post } from "./api"
+import { ApiError, del, get, patch, post } from "./api"
 import { rowsOf, toPaginated } from "./pagination"
 
 const BASE = "/api/v1/inventory"
@@ -137,6 +140,21 @@ export async function removeItem(id: number): Promise<void> {
 	await del(`${BASE}/items/${id}`)
 }
 
+/** The item a scanned code belongs to, or null when none has it. */
+export async function findItemByBarcode(code: string): Promise<Item | null> {
+	try {
+		return (await get<{ data: Item }>(`${BASE}/items/barcode/${encodeURIComponent(code)}`)).data
+	} catch (error) {
+		if (error instanceof ApiError && error.status === 404) return null
+		throw error
+	}
+}
+
+/** An unused internal barcode (EAN-13 starting with 2), for the item form to fill in. */
+export async function generateBarcode(): Promise<string> {
+	return (await post<{ data: { barcode: string } }>(`${BASE}/items/barcodes`, {})).data.barcode
+}
+
 // ── Assets ──────────────────────────────────────────────────────────────────
 
 export interface AssetFilters {
@@ -227,38 +245,82 @@ export async function removeSchedule(id: number): Promise<void> {
 	await del(`${BASE}/maintenance-schedules/${id}`)
 }
 
+// ── Warehouses ──────────────────────────────────────────────────────────────
+
+export interface WarehouseFilters {
+	page?: number
+	per_page?: number
+	search?: string | null
+	active?: boolean | null
+	manager_id?: number | null
+	allows_sales?: boolean | null
+	place?: PlaceRef | null
+}
+
+export async function listWarehouses(filters: WarehouseFilters = {}): Promise<Paginated<Warehouse>> {
+	return toPaginated(await get<RawPaginatedResponse<Warehouse>>(`${BASE}/warehouses`, query({ ...filters })))
+}
+
+export async function getWarehouse(id: number): Promise<Warehouse> {
+	return (await get<{ data: Warehouse }>(`${BASE}/warehouses/${id}`)).data
+}
+
+export async function createWarehouse(payload: WarehousePayload): Promise<Warehouse> {
+	return (await post<{ data: Warehouse }>(`${BASE}/warehouses`, payload)).data
+}
+
+export async function updateWarehouse(id: number, payload: Partial<WarehousePayload>): Promise<MessageResult> {
+	return patch<MessageResult>(`${BASE}/warehouses/${id}`, payload)
+}
+
+export async function removeWarehouse(id: number): Promise<void> {
+	await del(`${BASE}/warehouses/${id}`)
+}
+
 // ── Stock ───────────────────────────────────────────────────────────────────
 
-export async function listBalances(filters: { page?: number; item_id?: number | null; category_id?: number | null; location?: PlaceRef | null; within?: boolean; include_empty?: boolean } = {}): Promise<Paginated<StockBalance>> {
+export interface StockFilters {
+	page?: number
+	per_page?: number
+	item_id?: number | null
+	category_id?: number | null
+	warehouse_id?: number | null
+	/** The warehouses sitting in this place (a branch). */
+	place?: PlaceRef | null
+	include_empty?: boolean
+}
+
+export async function listBalances(filters: StockFilters = {}): Promise<Paginated<StockBalance>> {
 	return toPaginated(await get<RawPaginatedResponse<StockBalance>>(`${BASE}/stock/balances`, query({ ...filters })))
 }
 
-export async function listStockMovements(filters: { page?: number; item_id?: number | null; location?: PlaceRef | null; type?: StockMovementType | null; from?: string | null; to?: string | null } = {}): Promise<Paginated<StockMovement>> {
+export async function listStockMovements(
+	filters: StockFilters & { type?: StockMovementType | null; actor_id?: number | null; operation_id?: string | null; from?: string | null; to?: string | null } = {}
+): Promise<Paginated<StockMovement>> {
 	return toPaginated(await get<RawPaginatedResponse<StockMovement>>(`${BASE}/stock/movements`, query({ ...filters })))
 }
 
-export async function receiveStock(payload: { item_id: number; location: PlaceRef; quantity: number; unit_cost?: number | null; note?: string | null }): Promise<StockMovement> {
-	return (await post<{ data: StockMovement }>(`${BASE}/stock/receive`, payload)).data
+const OPERATION_PATHS: Record<StockOperationKind, string> = {
+	receive: "receive",
+	issue: "issue",
+	writeOff: "issue",
+	transfer: "transfer",
+	adjust: "adjust"
 }
 
-export async function issueStock(payload: { item_id: number; location: PlaceRef; quantity: number; reason: ManualIssueReason; note?: string | null }): Promise<StockMovement> {
-	return (await post<{ data: StockMovement }>(`${BASE}/stock/issue`, payload)).data
-}
-
-export async function transferStock(payload: { item_id: number; from: PlaceRef; to: PlaceRef; quantity: number; note?: string | null }): Promise<StockMovement[]> {
-	return rowsOf<StockMovement>((await post<{ data: StockMovement[] }>(`${BASE}/stock/transfer`, payload)).data)
-}
-
-/** A count that matched the book answers `{message}` and records nothing. */
-export async function countStock(payload: { item_id: number; location: PlaceRef; counted: number; unit_cost?: number | null; note?: string | null }): Promise<StockMovement | MessageResult> {
-	const res = await post<{ data?: StockMovement; message?: string }>(`${BASE}/stock/adjust`, payload)
-	return res.data ?? { message: res.message }
+/**
+ * Records one operation of several lines. Answers the ledger rows it wrote;
+ * a count where every line matched the book answers `{message}` instead.
+ */
+export async function submitStockOperation(kind: StockOperationKind, payload: StockOperationPayload): Promise<StockMovement[] | MessageResult> {
+	const res = await post<{ data?: StockMovement[]; message?: string }>(`${BASE}/stock/${OPERATION_PATHS[kind]}`, payload)
+	return res.data ? rowsOf<StockMovement>(res.data) : { message: res.message }
 }
 
 // ── Reports ─────────────────────────────────────────────────────────────────
 
-export async function stockValuation(location?: PlaceRef | null): Promise<StockValuation> {
-	return (await get<{ data: StockValuation }>(`${BASE}/reports/stock-valuation`, query({ location }))).data
+export async function stockValuation(place?: PlaceRef | null, warehouseId?: number | null): Promise<StockValuation> {
+	return (await get<{ data: StockValuation }>(`${BASE}/reports/stock-valuation`, query({ place, warehouse_id: warehouseId }))).data
 }
 
 export async function assetRegister(includeDisposed = false): Promise<AssetRegister> {

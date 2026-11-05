@@ -69,7 +69,7 @@
 			<div class="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
 				<!-- Row 1: Search + Kind -->
 				<div>
-					<n-input v-model:value="filters.search" :placeholder="t('inventory.items.search')" clearable class="w-full">
+					<n-input v-model:value="filters.search" :placeholder="t('inventory.itemExtras.searchHint')" clearable class="w-full">
 						<template #prefix>
 							<Icon name="carbon:search" :size="16" class="text-slate-400" />
 						</template>
@@ -100,7 +100,7 @@
 
 		<!-- Table Card -->
 		<n-card class="add-ledger-table rounded-2xl border border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900" :bordered="false" size="small">
-			<n-data-table :columns="columns" :data="items" :loading="loading" :bordered="false" size="small" :scroll-x="1000">
+			<n-data-table :columns :data="items" :loading :bordered="false" size="small" :scroll-x="1000">
 				<template #empty>
 					<div class="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-500">
 						<Icon name="carbon:catalog" :size="40" class="mb-2 opacity-50" />
@@ -117,7 +117,7 @@
 			</div>
 		</n-card>
 
-		<ItemModal v-if="mayManage" v-model:show="editorVisible" :item="editing" :categories="categories" :units="units" @saved="load" />
+		<ItemModal v-if="mayManage" v-model:show="editorVisible" :item="editing" :categories :units @saved="load" />
 	</div>
 </template>
 
@@ -238,7 +238,7 @@ const columns = computed<DataTableColumns<Item>>(() => [
 		key: "name",
 		minWidth: 220,
 		ellipsis: { tooltip: true },
-		render: row => nameCell(localized(row.name), row.sku, { code: true })
+		render: row => nameCell(localized(row.name), row.barcode ? `${row.sku} · ${row.barcode}` : row.sku, { code: true })
 	},
 	{
 		title: t("inventory.common.category"),

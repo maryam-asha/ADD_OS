@@ -114,17 +114,27 @@ export interface UnitPayload {
 
 export type PropertyValue = string | number | boolean | null
 
+/** A pack of an item's main unit: `factor` main units in one `unit` (box = 6). */
+export interface ItemPack {
+	unit: Unit
+	factor: string
+}
+
 export interface Item {
 	id: number
 	sku: string
+	barcode: string | null
 	name: Bilingual
 	description: string | null
+	image_url: string | null
 	kind: ItemKind
 	category: { id: number; name: Bilingual }
 	unit: Unit
 	properties: Record<string, PropertyValue>
 	is_active: boolean
-	/** Stock: on hand at every location together. */
+	/** Its packs; loaded on the item lists and pages. */
+	units?: ItemPack[]
+	/** Stock: on hand in every warehouse together. */
 	on_hand?: string
 	assets_count?: number
 }
@@ -134,9 +144,61 @@ export interface ItemPayload {
 	category_id: number
 	unit_id: number
 	sku?: string | null
+	barcode?: string | null
+	image_url?: string | null
 	description?: string | null
 	properties?: Record<string, PropertyValue>
 	is_active?: boolean
+	/** Replaces the item's packs whole when sent. */
+	units?: { unit_id: number; factor: number }[]
+}
+
+// ── Warehouses ──────────────────────────────────────────────────────────────
+
+export type ItemScope = "all" | "selected"
+
+/** Where stock is kept. It sits in a branch, or in nothing (an external store). */
+export interface Warehouse {
+	id: number
+	name: Bilingual
+	code: string | null
+	manager: Actor | null
+	address: string | null
+	location_url: string | null
+	notes: string | null
+	place: PlaceDescription | null
+	item_scope: ItemScope
+	/** The items a `selected` scope allows. */
+	items?: { id: number; sku: string; name: Bilingual }[]
+	allows_sales: boolean
+	is_primary: boolean
+	is_active: boolean
+	/** Stock items with something on hand here. */
+	items_with_balance?: number
+	created_at: string | null
+}
+
+export interface WarehousePayload {
+	name: Bilingual
+	code?: string | null
+	manager_id?: number | null
+	address?: string | null
+	location_url?: string | null
+	notes?: string | null
+	place?: PlaceRef | null
+	item_scope?: ItemScope
+	item_ids?: number[]
+	allows_sales?: boolean
+	is_primary?: boolean
+	is_active?: boolean
+}
+
+/** A warehouse as the stock lists name it. */
+export interface WarehouseRef {
+	id: number
+	name: Bilingual | null
+	code: string | null
+	place: PlaceDescription | null
 }
 
 // ── Assets ──────────────────────────────────────────────────────────────────
@@ -275,12 +337,35 @@ export const MANUAL_ISSUE_REASONS: readonly ManualIssueReason[] = ["internal_use
 
 export type IssueReason = ManualIssueReason | "consumption" | "sale"
 
-/** What staff do to stock by hand (StockActionModal); `count` is ADD Core's adjust. */
-export type StockMode = "receive" | "issue" | "transfer" | "count"
+/** The five operations staff record (the movement picker); a write-off is an issue for damaged or expired stock. */
+export type StockOperationKind = "transfer" | "adjust" | "writeOff" | "receive" | "issue"
+
+export const STOCK_OPERATION_KINDS: readonly StockOperationKind[] = ["transfer", "adjust", "writeOff", "receive", "issue"]
+
+/** One line of an operation: an item in one of its units (the main one when left out). */
+export interface StockLine {
+	item_id: number
+	unit_id?: number | null
+	/** Receive, issue, write-off, transfer. */
+	quantity?: number
+	/** Adjust: what was counted. */
+	counted?: number
+	/** Receive and adjust: per the chosen unit. */
+	unit_cost?: number | null
+}
+
+export interface StockOperationPayload {
+	warehouse_id?: number
+	from_warehouse_id?: number
+	to_warehouse_id?: number
+	lines: StockLine[]
+	reason?: ManualIssueReason
+	note?: string | null
+}
 
 export interface StockBalance {
 	item: { id: number; sku: string; name: Bilingual; unit: { id: number; code: string; name: Bilingual } }
-	location: PlaceDescription
+	warehouse: WarehouseRef
 	quantity: string
 	average_cost: string
 	value: string
@@ -291,13 +376,17 @@ export interface StockBalance {
 export interface StockMovement {
 	id: number
 	item: { id: number; sku: string; name: Bilingual }
-	location: PlaceDescription
+	warehouse: WarehouseRef
 	type: StockMovementType
 	quantity: string
 	unit_cost: string | null
 	quantity_after: string
 	average_cost_after: string
 	transfer_id: string | null
+	/** The rows one operation wrote share it. */
+	operation_id: string | null
+	/** What was typed when it was a pack ("2 box"); for a count, the count. */
+	entered: { unit: { id: number; code: string; name: Bilingual }; quantity: string } | null
 	reason: IssueReason | null
 	source: { type: string; id: number } | null
 	note: string | null
@@ -310,7 +399,7 @@ export interface StockMovement {
 export interface StockValuation {
 	currency: string
 	total: string
-	locations: { location: PlaceDescription; items: number; value: string }[]
+	warehouses: { warehouse: WarehouseRef; items: number; value: string }[]
 }
 
 export interface AssetRegisterRow {

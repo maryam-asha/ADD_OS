@@ -29,7 +29,7 @@
 				</div>
 			</div>
 
-			<n-data-table :columns="valuationColumns" :data="valuation?.locations ?? []" :loading="loading" :bordered="false" size="small" :scroll-x="640">
+			<n-data-table :columns="valuationColumns" :data="valuation?.warehouses ?? []" :loading :bordered="false" size="small" :scroll-x="640">
 				<template #empty>
 					<div class="flex flex-col items-center justify-center py-8 text-slate-400">
 						<Icon name="carbon:layers" :size="32" class="mb-1 opacity-50" />
@@ -72,7 +72,7 @@
 				</div>
 			</div>
 
-			<n-data-table :columns="registerColumns" :data="register?.assets ?? []" :loading="loading" :bordered="false" size="small" :scroll-x="1080" :pagination="{ pageSize: 25 }" />
+			<n-data-table :columns="registerColumns" :data="register?.assets ?? []" :loading :bordered="false" size="small" :scroll-x="1080" :pagination="{ pageSize: 25 }" />
 		</n-card>
 	</div>
 </template>
@@ -87,7 +87,7 @@ import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import AssetStatusTag from "@/add-os/modules/inventory/components/AssetStatusTag.vue"
 import PlacePicker from "@/add-os/modules/inventory/components/PlacePicker.vue"
-import { ALIGN_END, codeChip, EMPTY, localized, money, nameCell, PLACE_COLUMN, placeLabel } from "@/add-os/modules/inventory/utils/display"
+import { ALIGN_END, codeChip, EMPTY, localized, money, nameCell, PLACE_COLUMN, placeLabel, warehouseLabel } from "@/add-os/modules/inventory/utils/display"
 import { assetRegister, stockValuation } from "@/add-os/services/inventory"
 import { formatNumber } from "@/add-os/utils/format"
 import { formatDate } from "@/add-os/utils/format/dates"
@@ -124,10 +124,10 @@ async function load() {
 	}
 }
 
-type ValuationRow = StockValuation["locations"][number]
+type ValuationRow = StockValuation["warehouses"][number]
 
 const valuationColumns = computed<DataTableColumns<ValuationRow>>(() => [
-	{ title: t("inventory.stock.location"), key: "location", ...PLACE_COLUMN, render: row => placeLabel(row.location) },
+	{ title: t("inventory.operations.warehouse"), key: "warehouse", ...PLACE_COLUMN, render: row => warehouseLabel(row.warehouse) },
 	{
 		title: t("inventory.reports.items"),
 		key: "items",

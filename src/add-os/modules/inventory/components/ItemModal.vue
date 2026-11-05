@@ -1,6 +1,22 @@
 <!-- src/add-os/modules/inventory/components/ItemModal.vue -->
 <template>
 	<HrFormModal v-model:show="show" :title="item ? t('inventory.items.edit') : t('inventory.items.add')" size="lg" icon="carbon:box">
+		<div class="mb-4 flex items-start gap-4">
+			<label class="flex h-28 w-28 shrink-0 cursor-pointer flex-col items-center justify-center gap-1 overflow-hidden rounded-2xl border border-dashed border-border-subtle bg-surface-sunken text-xs text-secondary">
+				<img v-if="form.imageUrl" :src="form.imageUrl" :alt="t('inventory.itemExtras.image')" class="h-full w-full object-cover" />
+				<template v-else>
+					<Icon name="carbon:image" :size="22" />
+					<span>{{ uploading ? "…" : t("inventory.itemExtras.chooseImage") }}</span>
+				</template>
+				<input type="file" accept="image/*" class="hidden" @change="upload" />
+			</label>
+			<div class="flex flex-col gap-1">
+				<span class="text-sm font-semibold">{{ t("inventory.itemExtras.basics") }}</span>
+				<span class="text-xs text-secondary">{{ t("inventory.itemExtras.basicsHint") }}</span>
+				<n-button v-if="form.imageUrl" size="tiny" quaternary class="self-start" @click="form.imageUrl = ''">{{ t("inventory.itemExtras.removeImage") }}</n-button>
+			</div>
+		</div>
+
 		<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
 			<n-form-item :label="t('inventory.common.nameAr')" required>
 				<n-input v-model:value="form.nameAr" dir="rtl" :maxlength="255" />
@@ -11,11 +27,19 @@
 			<n-form-item :label="t('inventory.common.category')" required>
 				<n-select v-model:value="form.categoryId" :options="categoryOptions" filterable />
 			</n-form-item>
-			<n-form-item :label="t('inventory.items.unit')" required>
+			<n-form-item :label="t('inventory.itemExtras.mainUnit')" required>
 				<n-select v-model:value="form.unitId" :options="unitOptions" filterable />
 			</n-form-item>
-			<n-form-item :label="t('inventory.items.sku')" :feedback="item ? undefined : t('inventory.items.skuHint')">
+			<n-form-item :label="t('inventory.itemExtras.code')" :feedback="item ? undefined : t('inventory.itemExtras.codeHint')">
 				<n-input v-model:value="form.sku" dir="ltr" :maxlength="40" :class="{ 'font-mono': form.sku }" />
+			</n-form-item>
+			<n-form-item :label="t('inventory.itemExtras.barcode')" :feedback="t('inventory.itemExtras.barcodeHint')">
+				<n-input-group>
+					<n-input v-model:value="form.barcode" :placeholder="t('inventory.itemExtras.barcodePlaceholder')" dir="ltr" :maxlength="32" class="font-mono" />
+					<n-button secondary type="primary" :loading="generating" @click="generate">
+						<template #icon><Icon name="carbon:barcode" :size="16" /></template>{{ t("inventory.itemExtras.generate") }}
+					</n-button>
+				</n-input-group>
 			</n-form-item>
 			<n-form-item :label="t('inventory.common.status')">
 				<n-checkbox v-model:checked="form.active">{{ t("inventory.common.active") }}</n-checkbox>
@@ -24,6 +48,8 @@
 				<n-input v-model:value="form.description" type="textarea" :maxlength="5000" :autosize="{ minRows: 2, maxRows: 4 }" />
 			</n-form-item>
 		</div>
+
+		<ItemUnitsEditor v-if="isStock" v-model:rows="packs" :units :main-unit-id="form.unitId" class="mb-4" />
 
 		<template v-if="fields.length">
 			<span class="mb-1 block text-sm font-semibold">{{ t("inventory.items.properties") }}</span>
@@ -50,7 +76,7 @@
 		<template #footer>
 			<div class="flex justify-end gap-2">
 				<n-button @click="show = false">{{ t("inventory.common.cancel") }}</n-button>
-				<n-button type="primary" :loading="saving" :disabled="!form.nameAr.trim() || !form.categoryId || !form.unitId || fieldsLoading" @click="save">{{ t("inventory.common.save") }}</n-button>
+				<n-button type="primary" :loading="saving" :disabled="!form.nameAr.trim() || !form.categoryId || !form.unitId || fieldsLoading || !packRowsValid(packs)" @click="save">{{ t("inventory.common.save") }}</n-button>
 			</div>
 		</template>
 	</HrFormModal>
@@ -59,14 +85,19 @@
 <script setup lang="ts">
 import type { SelectOption } from "naive-ui"
 import type { AttributeDefinition, Category, Item, PropertyValue, Unit } from "@/add-os/modules/inventory/types/inventory"
-import { NButton, NCheckbox, NDatePicker, NFormItem, NInput, NInputNumber, NSelect, NSwitch, useMessage } from "naive-ui"
+import type { PackRow } from "@/add-os/modules/inventory/utils/itemUnits"
+import { NButton, NCheckbox, NDatePicker, NFormItem, NInput, NInputGroup, NInputNumber, NSelect, NSwitch, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
+import ItemUnitsEditor from "@/add-os/modules/inventory/components/ItemUnitsEditor.vue"
 import { categoryPaths, localized } from "@/add-os/modules/inventory/utils/display"
+import { packRowsValid, packsPayload } from "@/add-os/modules/inventory/utils/itemUnits"
 import { ApiError } from "@/add-os/services/api"
-import { createItem, getCategory, updateItem } from "@/add-os/services/inventory"
+import { createItem, generateBarcode, getCategory, updateItem } from "@/add-os/services/inventory"
+import { uploadMedia } from "@/add-os/services/media"
+import Icon from "@/components/common/Icon.vue"
 
 /**
  * A kind of thing in the catalog ("27-inch monitor", "A4 paper"). Whether
@@ -80,7 +111,12 @@ const show = defineModel<boolean>("show", { required: true })
 const { t } = useI18n()
 const message = useMessage()
 
-const form = ref({ nameAr: "", nameEn: "", categoryId: null as number | null, unitId: null as number | null, sku: "", description: "", active: true })
+const form = ref({ nameAr: "", nameEn: "", categoryId: null as number | null, unitId: null as number | null, sku: "", barcode: "", imageUrl: "", description: "", active: true })
+/** Its packs (stock items only): how many main units each other unit holds. */
+const packs = ref<PackRow[]>([])
+const generating = ref(false)
+const uploading = ref(false)
+const isStock = computed(() => props.categories.find(c => c.id === form.value.categoryId)?.kind === "stock")
 const properties = ref<Record<string, PropertyValue>>({})
 const fields = ref<AttributeDefinition[]>([])
 /** Saving waits for them: properties are sent whole, and sent before they load they would replace the stored ones with nothing. */
@@ -123,12 +159,39 @@ watch(show, open => {
 	if (!open) return
 	const i = props.item
 	form.value = i
-		? { nameAr: i.name.ar, nameEn: i.name.en ?? "", categoryId: i.category.id, unitId: i.unit.id, sku: i.sku, description: i.description ?? "", active: i.is_active }
-		: { nameAr: "", nameEn: "", categoryId: null, unitId: null, sku: "", description: "", active: true }
+		? { nameAr: i.name.ar, nameEn: i.name.en ?? "", categoryId: i.category.id, unitId: i.unit.id, sku: i.sku, barcode: i.barcode ?? "", imageUrl: i.image_url ?? "", description: i.description ?? "", active: i.is_active }
+		: { nameAr: "", nameEn: "", categoryId: null, unitId: null, sku: "", barcode: "", imageUrl: "", description: "", active: true }
+	packs.value = (i?.units ?? []).map(pack => ({ unitId: pack.unit.id, factor: Number(pack.factor) }))
 	properties.value = { ...(i?.properties ?? {}) }
 	problem.value = ""
 	propertyErrors.value = {}
 })
+
+async function generate() {
+	generating.value = true
+	try {
+		form.value.barcode = await generateBarcode()
+	} catch (e) {
+		problem.value = apiErrorMessage(e, t("inventory.common.saveError"))
+	} finally {
+		generating.value = false
+	}
+}
+
+async function upload(event: Event) {
+	const input = event.target as HTMLInputElement
+	const file = input.files?.[0]
+	input.value = ""
+	if (!file) return
+	uploading.value = true
+	try {
+		form.value.imageUrl = (await uploadMedia(file, "inventory")).url
+	} catch (e) {
+		problem.value = apiErrorMessage(e, t("inventory.itemExtras.uploadError"))
+	} finally {
+		uploading.value = false
+	}
+}
 
 async function save() {
 	problem.value = ""
@@ -145,6 +208,9 @@ async function save() {
 		description: f.description.trim() || null,
 		is_active: f.active,
 		properties: answers,
+		barcode: f.barcode.trim() || null,
+		image_url: f.imageUrl || null,
+		...(isStock.value ? { units: packsPayload(packs.value) } : {}),
 		...(f.sku.trim() ? { sku: f.sku.trim() } : {})
 	}
 	try {

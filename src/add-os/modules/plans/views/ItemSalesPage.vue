@@ -22,7 +22,15 @@
 				</n-form-item>
 			</div>
 
+			<n-form-item :label="t('retail.sell.warehouse')" :feedback="t('retail.sell.warehouseHint')" class="max-w-md">
+				<n-select v-model:value="warehouseId" :options="warehouseOptions" clearable />
+			</n-form-item>
+
 			<span class="mb-2 block text-sm font-semibold">{{ t("retail.sell.lines") }}</span>
+			<n-input v-model:value="scanned" :placeholder="t('retail.sell.scan')" dir="ltr" clearable class="mb-2 max-w-md" @keydown.enter.prevent="scan">
+				<template #prefix><Icon name="carbon:barcode" :size="16" /></template>
+			</n-input>
+			<p v-if="scanProblem" class="mb-2 text-xs text-error">{{ scanProblem }}</p>
 			<div v-for="(line, index) in lines" :key="index" class="mb-2 flex flex-wrap items-center gap-2">
 				<n-select v-model:value="line.saleItemId" :options="saleItemOptions" filterable :placeholder="t('retail.sell.pickItem')" class="min-w-[16rem] flex-1" />
 				<n-input-number v-model:value="line.quantity" :min="1" :max="1000" :precision="0" class="w-28" />
@@ -34,15 +42,6 @@
 			<n-button size="small" dashed @click="lines.push({ saleItemId: null, quantity: 1 })">
 				<template #icon><Icon name="carbon:add" :size="16" /></template>{{ t("retail.sell.addLine") }}
 			</n-button>
-
-			<n-collapse class="mt-4">
-				<n-collapse-item :title="t('retail.sell.stockLocation')" name="place">
-					<p class="mb-2 text-sm text-secondary">{{ t("retail.sell.stockLocationHint") }}</p>
-					<div class="max-w-2xl">
-						<PlacePicker v-model:value="place" />
-					</div>
-				</n-collapse-item>
-			</n-collapse>
 
 			<div class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--add-border)] pt-3">
 				<span class="text-base font-bold">{{ t("retail.sell.total") }}: <span class="add-numeric">{{ t("retail.points", { n: formatNumber(total) }) }}</span></span>
@@ -69,26 +68,27 @@
 
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
-import type { PlaceRef } from "@/add-os/modules/inventory/types/inventory"
-import type { ItemSale, ItemSalePaymentMethod, SaleItem } from "@/add-os/modules/plans/types/retail"
-import { NAlert, NButton, NCard, NCollapse, NCollapseItem, NDataTable, NFormItem, NInputNumber, NPagination, NRadioButton, NRadioGroup, NSelect, useMessage } from "naive-ui"
+import type { ItemSale, ItemSalePaymentMethod, ReceptionWarehouse, SaleItem } from "@/add-os/modules/plans/types/retail"
+import type { SaleLine } from "@/add-os/modules/plans/utils/saleLines"
+import { NAlert, NButton, NCard, NDataTable, NFormItem, NInput, NInputNumber, NPagination, NRadioButton, NRadioGroup, NSelect, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import CurrencySelect from "@/add-os/modules/hr/components/payroll/CurrencySelect.vue"
 import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
-import PlacePicker from "@/add-os/modules/inventory/components/PlacePicker.vue"
-import { COLUMN, localized, placeLabel } from "@/add-os/modules/inventory/utils/display"
+import { COLUMN, localized, warehouseLabel } from "@/add-os/modules/inventory/utils/display"
+import { defaultSaleWarehouse, salePayload, scanSaleItem } from "@/add-os/modules/plans/utils/saleLines"
 import { listMembers } from "@/add-os/services/members"
-import { listItemSales, listSaleItems, sellItems } from "@/add-os/services/retail"
+import { listItemSales, listReceptionWarehouses, listSaleItems, sellItems } from "@/add-os/services/retail"
 import { formatNumber } from "@/add-os/utils/format"
 import { formatDateTime } from "@/add-os/utils/format/dates"
 import Icon from "@/components/common/Icon.vue"
 
 /**
  * Selling at the desk: a member, what they buy and how many, paid from
- * their points or with money handed over at today's price. The stock
- * leaves the branch of the operator's open cash register unless another
- * place is named. Points short or a shelf short refuse the whole sale —
+ * their points or with money handed over at today's price, added by
+ * scanning a barcode or by picking. The stock leaves the primary warehouse
+ * of the branch of the operator's open cash register unless another
+ * selling warehouse of that branch is chosen. Points short or a shelf short refuse the whole sale —
  * nothing is charged and nothing leaves the shelf. Below, the sales made.
  */
 defineProps<{ titleKey?: string }>()
@@ -96,17 +96,17 @@ defineProps<{ titleKey?: string }>()
 const { t } = useI18n()
 const message = useMessage()
 
-interface Line {
-	saleItemId: number | null
-	quantity: number
-}
+type Line = SaleLine
 
 const memberOptions = ref<SelectOption[]>([])
 const saleItems = ref<SaleItem[]>([])
 const memberId = ref<number | null>(null)
 const method = ref<ItemSalePaymentMethod>("cash")
 const currency = ref<string | null>(null)
-const place = ref<PlaceRef | null>(null)
+const warehouses = ref<ReceptionWarehouse[]>([])
+const warehouseId = ref<number | null>(null)
+const scanned = ref("")
+const scanProblem = ref("")
 const lines = ref<Line[]>([{ saleItemId: null, quantity: 1 }])
 const selling = ref(false)
 const problem = ref("")
@@ -120,9 +120,22 @@ const loadError = ref("")
 onMounted(() => {
 	void quietly(listMembers, members => (memberOptions.value = members.map(m => ({ label: `${m.name} · ${m.phone}`, value: m.id }))))
 	void quietly(listSaleItems, rows => (saleItems.value = rows.filter(row => row.is_active)))
+	void quietly(listReceptionWarehouses, options => {
+		warehouses.value = options.warehouses.filter(row => row.allows_sales)
+		warehouseId.value = defaultSaleWarehouse(options)
+	})
 	void load()
 })
 watch(page, () => void load())
+
+const warehouseOptions = computed<SelectOption[]>(() => warehouses.value.map(row => ({ label: localized(row.name), value: row.id })))
+
+function scan() {
+	const result = scanSaleItem(lines.value, saleItems.value, scanned.value)
+	scanProblem.value = result.found || !scanned.value.trim() ? "" : t("retail.sell.notForSale")
+	lines.value = result.lines
+	scanned.value = ""
+}
 
 const saleItemOptions = computed<SelectOption[]>(() =>
 	saleItems.value.map(row => ({ label: `${localized(row.item.name)} · ${t("retail.points", { n: formatNumber(row.price_points) })}`, value: row.id }))
@@ -143,13 +156,15 @@ async function sell() {
 	selling.value = true
 	problem.value = ""
 	try {
-		const sale = await sellItems({
-			user_id: memberId.value!,
-			lines: lines.value.map(line => ({ sale_item_id: line.saleItemId!, quantity: line.quantity })),
-			payment_method: method.value,
-			...(method.value === "cash" && currency.value ? { currency: currency.value } : {}),
-			stock_location: place.value
-		})
+		const sale = await sellItems(
+			salePayload({
+				memberId: memberId.value!,
+				method: method.value,
+				currency: method.value === "cash" ? currency.value : null,
+				warehouseId: warehouseId.value,
+				lines: lines.value
+			})
+		)
 		message.success(t("retail.sell.done", { n: formatNumber(sale.total_points) }))
 		lines.value = [{ saleItemId: null, quantity: 1 }]
 		memberId.value = null
@@ -187,7 +202,7 @@ const columns = computed<DataTableColumns<ItemSale>>(() => [
 	},
 	{ title: t("retail.sell.total"), key: "total_points", minWidth: 110, render: row => h("span", { class: "add-numeric font-semibold" }, t("retail.points", { n: formatNumber(row.total_points) })) },
 	{ title: t("retail.sales.method"), key: "method", minWidth: 90, render: row => (row.payment ? t(row.payment.method === "wallet" ? "retail.sell.wallet" : "retail.sell.cash") : "") },
-	{ title: t("retail.sell.stockLocation"), key: "stock_location", ...COLUMN.place, render: row => placeLabel(row.stock_location) },
+	{ title: t("retail.sell.warehouse"), key: "warehouse", ...COLUMN.place, render: row => warehouseLabel(row.warehouse) },
 	{ title: t("retail.sales.soldBy"), key: "sold_by", minWidth: 130, render: row => row.sold_by?.name ?? "" }
 ])
 </script>

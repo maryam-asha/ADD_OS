@@ -1,6 +1,6 @@
 // src/add-os/modules/plans/types/retail.ts
 
-import type { Bilingual, PlaceDescription, PlaceRef } from "@/add-os/modules/inventory/types/inventory"
+import type { Bilingual, WarehouseRef } from "@/add-os/modules/inventory/types/inventory"
 
 /**
  * Selling stock at the reception desk (ADD Core `App\Domain\Retail`,
@@ -11,7 +11,7 @@ import type { Bilingual, PlaceDescription, PlaceRef } from "@/add-os/modules/inv
  */
 export interface SaleItem {
 	id: number
-	item: { id: number; sku: string; name: Bilingual; unit: Bilingual | null }
+	item: { id: number; sku: string; barcode: string | null; image_url: string | null; name: Bilingual; unit: Bilingual | null }
 	price_points: number
 	is_active: boolean
 }
@@ -32,7 +32,8 @@ export interface ItemSaleLine {
 export interface ItemSale {
 	id: number
 	member: { id: number; name: string }
-	stock_location: PlaceDescription
+	/** The warehouse the stock was issued from. */
+	warehouse: WarehouseRef
 	lines: ItemSaleLine[]
 	total_points: number
 	sold_by: { id: number; name: string } | null
@@ -48,6 +49,21 @@ export interface ItemSalePayload {
 	lines: { sale_item_id: number; quantity: number }[]
 	payment_method: ItemSalePaymentMethod
 	currency?: string | null
-	/** Where the stock leaves from; by default the branch of the operator's open cash register. */
-	stock_location?: PlaceRef | null
+	/** The warehouse the stock leaves from; by default the primary one of the branch of the operator's open cash register. */
+	warehouse_id?: number | null
+}
+
+/** A warehouse the desk may take stock from (the branch's primary first). */
+export interface ReceptionWarehouse {
+	id: number
+	name: Bilingual
+	code: string | null
+	allows_sales: boolean
+	is_primary: boolean
+}
+
+/** What `reception/warehouses` answers: the open register's branch (null with none open) and its warehouses. */
+export interface ReceptionWarehouseOptions {
+	branch_id: number | null
+	warehouses: ReceptionWarehouse[]
 }

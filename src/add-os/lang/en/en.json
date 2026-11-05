@@ -259,6 +259,10 @@
 				"maintenance": "Manage maintenance",
 				"dispose": "Dispose of assets"
 			},
+			"warehouses": {
+				"view": "View warehouses",
+				"manage": "Manage warehouses"
+			},
 			"stock": {
 				"view": "View stock",
 				"receive": "Receive stock",
@@ -2031,7 +2035,8 @@
 			"amenities": "Amenity Catalog",
 			"inventoryAssets": "Assets",
 			"inventoryAsset": "Asset",
-			"inventoryStock": "Stock",
+			"inventoryWarehouses": "Warehouses",
+			"inventoryStock": "Stock movements",
 			"inventoryMaintenance": "Maintenance",
 			"inventoryCustody": "Custody",
 			"inventoryItems": "Items",
@@ -4707,6 +4712,10 @@
 			"removeLine": "Remove",
 			"stockLocation": "Taken from",
 			"stockLocationHint": "Leave empty to take it from the branch of your open cash register.",
+			"warehouse": "Warehouse",
+			"warehouseHint": "The branch's primary warehouse unless you choose another.",
+			"scan": "Scan a barcode, then Enter",
+			"notForSale": "This barcode is not on sale here.",
 			"total": "Total",
 			"confirm": "Sell",
 			"done": "Sold for {n} points.",
