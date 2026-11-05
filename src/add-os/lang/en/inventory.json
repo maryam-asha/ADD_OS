@@ -473,7 +473,8 @@
 			"operation": "Operation",
 			"showOperation": "Show this operation's lines",
 			"clearOperation": "Show all movements",
-			"packOf": "{unit} ({n})"
+			"packOf": "{unit} ({n})",
+			"needWarehouse": "Choose the warehouse."
 		},
 		"itemExtras": {
 			"image": "Item image",

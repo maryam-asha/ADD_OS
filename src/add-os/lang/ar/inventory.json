@@ -473,7 +473,8 @@
 			"operation": "العملية",
 			"showOperation": "عرض أسطر هذه العملية",
 			"clearOperation": "عرض كل الحركات",
-			"packOf": "{unit} ({n})"
+			"packOf": "{unit} ({n})",
+			"needWarehouse": "اختر المستودع."
 		},
 		"itemExtras": {
 			"image": "صورة الصنف",
