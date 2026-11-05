@@ -1,6 +1,6 @@
 <!-- src/add-os/modules/inventory/components/PlacePicker.vue -->
 <template>
-	<div :class="inline ? 'flex flex-wrap sm:flex-nowrap items-center gap-2 w-full' : 'grid grid-cols-1 gap-2 sm:grid-cols-2'">
+	<div :class="inline ? 'flex flex-wrap sm:flex-nowrap items-center gap-2 w-full' : 'grid w-full grid-cols-1 gap-2 sm:grid-cols-2'">
 		<n-select v-model:value="branchId" :options="branchOptions" :placeholder="t('inventory.place.branch')" filterable clearable class="w-full flex-1 min-w-[130px]" :disabled />
 		<n-select v-if="!inline || branchId" v-model:value="buildingId" :options="buildingOptions" :placeholder="t('inventory.place.building')" filterable clearable class="w-full flex-1 min-w-[130px]" :disabled="disabled || !branchId" />
 		<n-select v-if="!inline || buildingId" v-model:value="floorId" :options="floorOptions" :placeholder="t('inventory.place.floor')" filterable clearable class="w-full flex-1 min-w-[110px]" :disabled="disabled || !buildingId" />

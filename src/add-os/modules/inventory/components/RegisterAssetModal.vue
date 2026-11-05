@@ -1,7 +1,13 @@
 <!-- src/add-os/modules/inventory/components/RegisterAssetModal.vue -->
 <template>
 	<HrFormModal v-model:show="show" :title="t('inventory.assets.register')" size="lg" icon="carbon:add">
-		<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+		<!--
+			Three groups rather than one grid of twelve: what it is and where,
+			then what it cost, then how it wears. A field with a hint keeps its
+			row partner on the same line (items-start), and the cost carries its
+			currency beside it, so no field is left alone on a row.
+		-->
+		<div class="grid grid-cols-1 items-start gap-x-4 sm:grid-cols-2">
 			<n-form-item :label="t('inventory.assets.item')" class="sm:col-span-2" required>
 				<ItemSelect v-model:value="form.item_id" kind="asset" />
 			</n-form-item>
@@ -14,6 +20,10 @@
 			<n-form-item :label="t('inventory.assets.serial')">
 				<n-input v-model:value="form.serial_number" dir="ltr" :maxlength="100" :disabled="form.count > 1" />
 			</n-form-item>
+		</div>
+
+		<h3 class="mb-2 mt-2 font-semibold">{{ t("inventory.assets.money") }}</h3>
+		<div class="grid grid-cols-1 items-start gap-x-4 sm:grid-cols-2">
 			<n-form-item :label="t('inventory.assets.purchasedOn')">
 				<n-date-picker v-model:formatted-value="form.purchased_on" value-format="yyyy-MM-dd" type="date" clearable class="w-full" />
 			</n-form-item>
@@ -21,19 +31,24 @@
 				<n-input v-model:value="form.supplier" :maxlength="255" />
 			</n-form-item>
 			<n-form-item :label="t('inventory.assets.cost')">
-				<n-input-number v-model:value="form.purchase_cost" :min="0" :precision="2" clearable class="w-full" dir="ltr" />
+				<div class="flex w-full gap-2">
+					<n-input-number v-model:value="form.purchase_cost" :min="0" :precision="2" clearable class="min-w-0 flex-1" dir="ltr" />
+					<!-- "!" because Naive's runtime CSS outranks Tailwind's layer (see PlacePicker). -->
+					<CurrencySelect v-model:value="form.currency" clearable class="w-32! shrink-0" />
+				</div>
 			</n-form-item>
-			<n-form-item :label="t('inventory.assets.currency')">
-				<CurrencySelect v-model:value="form.currency" clearable />
+			<n-form-item :label="t('inventory.assets.warrantyUntil')">
+				<n-date-picker v-model:formatted-value="form.warranty_until" value-format="yyyy-MM-dd" type="date" clearable class="w-full" />
 			</n-form-item>
+		</div>
+
+		<h3 class="mb-2 mt-2 font-semibold">{{ t("inventory.assets.depreciation") }}</h3>
+		<div class="grid grid-cols-1 items-start gap-x-4 sm:grid-cols-2">
 			<n-form-item :label="t('inventory.assets.life')" :feedback="t('inventory.assets.lifeHint')">
 				<n-input-number v-model:value="form.useful_life_months" :min="1" :max="1200" :precision="0" clearable class="w-full" />
 			</n-form-item>
 			<n-form-item :label="t('inventory.assets.salvage')">
 				<n-input-number v-model:value="form.salvage_value" :min="0" :precision="2" clearable class="w-full" dir="ltr" />
-			</n-form-item>
-			<n-form-item :label="t('inventory.assets.warrantyUntil')">
-				<n-date-picker v-model:formatted-value="form.warranty_until" value-format="yyyy-MM-dd" type="date" clearable class="w-full" />
 			</n-form-item>
 			<n-form-item :label="t('inventory.assets.notes')" class="sm:col-span-2">
 				<n-input v-model:value="form.notes" type="textarea" :maxlength="5000" :autosize="{ minRows: 2, maxRows: 4 }" />
