@@ -29,7 +29,7 @@
 							<span class="ms-2 font-mono text-xs text-secondary" dir="ltr">{{ line.item.sku }}</span>
 						</td>
 						<td class="min-w-32 p-2">
-							<n-select :value="line.unitId" :options="unitChoices(line.item)" size="small" @update:value="(v: number) => patchLine(index, { unitId: v })" />
+							<n-select :value="line.unitId" :options="unitOptions(line.item)" size="small" @update:value="(v: number) => patchLine(index, { unitId: v })" />
 						</td>
 						<td v-if="kind === 'adjust'" class="add-numeric p-2 text-end">{{ quantity(book[line.itemId] ?? "0") }}</td>
 						<td class="min-w-28 p-2">
@@ -52,6 +52,7 @@
 </template>
 
 <script setup lang="ts">
+import type { SelectOption } from "naive-ui"
 import type { Item, StockOperationKind } from "@/add-os/modules/inventory/types/inventory"
 import type { LineDraft } from "@/add-os/modules/inventory/utils/stockLines"
 import { NButton, NInput, NInputNumber, NSelect } from "naive-ui"
@@ -81,6 +82,10 @@ const picking = ref<number | null>(null)
 const book = ref<Record<number, string>>({})
 
 const costed = computed(() => props.kind === "receive" || props.kind === "adjust")
+
+function unitOptions(item: Item): SelectOption[] {
+	return unitChoices(item).map(choice => ({ label: choice.label, value: choice.value }))
+}
 
 function add(item: Item | null) {
 	if (!item) return

@@ -100,7 +100,7 @@
 
 		<!-- Table Card -->
 		<n-card class="add-ledger-table rounded-2xl border border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900" :bordered="false" size="small">
-			<n-data-table :columns="columns" :data="items" :loading="loading" :bordered="false" size="small" :scroll-x="1000">
+			<n-data-table :columns :data="items" :loading :bordered="false" size="small" :scroll-x="1000">
 				<template #empty>
 					<div class="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-500">
 						<Icon name="carbon:catalog" :size="40" class="mb-2 opacity-50" />
@@ -117,7 +117,7 @@
 			</div>
 		</n-card>
 
-		<ItemModal v-if="mayManage" v-model:show="editorVisible" :item="editing" :categories="categories" :units="units" @saved="load" />
+		<ItemModal v-if="mayManage" v-model:show="editorVisible" :item="editing" :categories :units @saved="load" />
 	</div>
 </template>
 

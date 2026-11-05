@@ -1,5 +1,5 @@
-import type { VNode } from "vue"
 import type { DataTableColumn } from "naive-ui"
+import type { VNode } from "vue"
 import type { AttributeDefinition, Bilingual, Category, CustodianDescription, PlaceDescription, PropertyValue, WarehouseRef } from "@/add-os/modules/inventory/types/inventory"
 import { NButton, NTooltip } from "naive-ui"
 import { h } from "vue"

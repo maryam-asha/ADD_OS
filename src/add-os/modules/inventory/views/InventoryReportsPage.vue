@@ -29,7 +29,7 @@
 				</div>
 			</div>
 
-			<n-data-table :columns="valuationColumns" :data="valuation?.warehouses ?? []" :loading="loading" :bordered="false" size="small" :scroll-x="640">
+			<n-data-table :columns="valuationColumns" :data="valuation?.warehouses ?? []" :loading :bordered="false" size="small" :scroll-x="640">
 				<template #empty>
 					<div class="flex flex-col items-center justify-center py-8 text-slate-400">
 						<Icon name="carbon:layers" :size="32" class="mb-1 opacity-50" />
@@ -72,7 +72,7 @@
 				</div>
 			</div>
 
-			<n-data-table :columns="registerColumns" :data="register?.assets ?? []" :loading="loading" :bordered="false" size="small" :scroll-x="1080" :pagination="{ pageSize: 25 }" />
+			<n-data-table :columns="registerColumns" :data="register?.assets ?? []" :loading :bordered="false" size="small" :scroll-x="1080" :pagination="{ pageSize: 25 }" />
 		</n-card>
 	</div>
 </template>

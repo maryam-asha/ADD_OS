@@ -1,6 +1,6 @@
 <!-- src/add-os/modules/inventory/components/StaffSelect.vue -->
 <template>
-	<n-select v-model:value="value" :options :loading :placeholder="placeholder" filterable clearable />
+	<n-select v-model:value="value" :options :loading :placeholder filterable clearable />
 </template>
 
 <script setup lang="ts">
