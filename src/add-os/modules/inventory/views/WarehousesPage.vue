@@ -165,7 +165,7 @@ const columns = computed<DataTableColumns<Warehouse>>(() => [
 	},
 	{ title: t("inventory.warehouses.manager"), key: "manager", ...COLUMN.person, render: row => row.manager?.name ?? t("inventory.warehouses.noManager") },
 	{ title: t("inventory.warehouses.location"), key: "location", ...COLUMN.place, render: row => [row.place?.label ?? t("inventory.warehouses.external"), row.address].filter(Boolean).join(" · ") || EMPTY },
-	{ title: t("inventory.warehouses.itemsWithBalance"), key: "items_with_balance", ...COLUMN.count, render: row => h("span", { class: "add-numeric font-semibold" }, formatNumber(row.items_with_balance ?? 0)) },
+	{ title: t("inventory.warehouses.itemsWithBalance"), key: "items_with_balance", ...COLUMN.count, width: 150, render: row => h("span", { class: "add-numeric font-semibold" }, formatNumber(row.items_with_balance ?? 0)) },
 	{
 		title: t("inventory.common.status"),
 		key: "is_active",
