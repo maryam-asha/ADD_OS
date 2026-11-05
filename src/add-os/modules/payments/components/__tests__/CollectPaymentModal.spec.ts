@@ -114,6 +114,27 @@ describe("collectPaymentModal", () => {
 		wrapper.unmount()
 	})
 
+	it("reads the payment back before recording it, and sends nothing until confirmed", async () => {
+		const { wrapper, vm } = await mountOpen()
+		const review = vm as unknown as Vm & { reviewing: boolean, difference: number, review: () => void }
+
+		vm.amount = "25"
+		await flushPromises()
+		review.review()
+		await flushPromises()
+
+		expect(review.reviewing).toBe(true)
+		// 25 handed over for 20 due: the 5 over is named before anything is written.
+		expect(review.difference).toBe(5)
+		expect(settleAtReceptionMock).not.toHaveBeenCalled()
+
+		// Changing the amount drops back to the form.
+		vm.amount = "20"
+		await flushPromises()
+		expect(review.reviewing).toBe(false)
+		wrapper.unmount()
+	})
+
 	it("offers every owed item when nothing is focused", async () => {
 		const { wrapper, vm } = await mountOpen(null)
 

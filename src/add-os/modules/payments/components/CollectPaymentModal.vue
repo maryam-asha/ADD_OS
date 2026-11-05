@@ -5,6 +5,32 @@
 			<n-alert v-if="loadFailed" type="error" :bordered="false" :title="t('collectPayment.loadError')" />
 			<n-alert v-else-if="!isLoading && items.length === 0" type="success" :bordered="false" :title="t('collectPayment.nothingOwed')" />
 
+			<!-- Review: what is about to be recorded, read back before anything is written. -->
+			<div v-else-if="reviewing && selected" class="flex flex-col gap-3">
+				<p class="text-sm font-semibold">{{ t("collectPayment.review.title") }}</p>
+				<dl class="flex flex-col gap-2 rounded-xl border border-[var(--add-border)] bg-[var(--add-surface-sunken)] p-3 text-sm">
+					<div class="flex justify-between gap-3">
+						<dt class="text-[var(--add-text-secondary)]">{{ t("collectPayment.review.for") }}</dt>
+						<dd class="font-medium text-end">{{ itemTitle(selected) }}</dd>
+					</div>
+					<div class="flex justify-between gap-3">
+						<dt class="text-[var(--add-text-secondary)]">{{ t("collectPayment.review.due") }}</dt>
+						<dd><bdi dir="ltr" class="add-numeric">{{ formatAmount(selected.amount) }}</bdi></dd>
+					</div>
+					<div class="flex justify-between gap-3">
+						<dt class="text-[var(--add-text-secondary)]">{{ t("collectPayment.review.received") }}</dt>
+						<dd><bdi dir="ltr" class="font-extrabold add-numeric">{{ formatAmount({ value: amount.trim(), currency }) }}</bdi></dd>
+					</div>
+					<div v-if="difference > 0" class="flex justify-between gap-3">
+						<dt class="text-[var(--add-text-secondary)]">{{ t("collectPayment.review.extra") }}</dt>
+						<dd><bdi dir="ltr" class="add-numeric">{{ formatAmount({ value: String(difference), currency }) }}</bdi></dd>
+					</div>
+				</dl>
+				<n-alert v-if="difference > 0" type="info" :bordered="false">{{ t("collectPayment.review.extraNote") }}</n-alert>
+				<n-alert v-else-if="difference < 0" type="warning" :bordered="false">{{ t("collectPayment.review.shortNote") }}</n-alert>
+				<p class="text-xs text-[var(--add-text-muted)]">{{ t("collectPayment.review.notifyNote") }}</p>
+			</div>
+
 			<div v-else-if="items.length > 0" class="flex flex-col gap-4">
 				<!-- Several owed items: the operator picks which one the money is for. -->
 				<n-radio-group v-if="items.length > 1" v-model:value="selectedKey" :aria-label="t('collectPayment.itemLabel')">
@@ -31,8 +57,9 @@
 						:validation-status="fieldErrors.amount || fieldErrors.currency || shortageMessage ? 'error' : undefined"
 					>
 						<div class="flex w-full gap-2">
-							<n-select v-model:value="currency" :options="currencyOptions" class="w-36 shrink-0" :aria-label="t('collectPayment.currency')" />
-							<n-input v-model:value="amount" :input-props="{ inputmode: 'decimal', dir: 'ltr' }" :placeholder="t('collectPayment.amountPlaceholder')" class="flex-1" />
+							<!-- Inline widths: n-select's own `width: 100%` beats a utility class and pushed the amount out of the dialog. -->
+							<n-select v-model:value="currency" :options="currencyOptions" class="shrink-0" style="width: 9rem" :aria-label="t('collectPayment.currency')" />
+							<n-input v-model:value="amount" :input-props="{ inputmode: 'decimal', dir: 'ltr' }" :placeholder="t('collectPayment.amountPlaceholder')" class="min-w-0" style="flex: 1 1 0%" />
 						</div>
 					</n-form-item>
 				</n-form>
@@ -42,9 +69,15 @@
 		</n-spin>
 
 		<template #footer>
-			<div class="flex justify-end gap-2">
+			<div v-if="reviewing" class="flex justify-end gap-2">
+				<n-button :disabled="isSubmitting" @click="reviewing = false">{{ t("collectPayment.review.back") }}</n-button>
+				<n-button type="primary" :loading="isSubmitting" @click="submit">
+					{{ t("collectPayment.review.confirm") }}
+				</n-button>
+			</div>
+			<div v-else class="flex justify-end gap-2">
 				<n-button @click="emit('update:show', false)">{{ t("resourceCrud.form.cancel") }}</n-button>
-				<n-button type="primary" :disabled="!selected || !amountIsValid" :loading="isSubmitting" @click="submit">
+				<n-button type="primary" :disabled="!selected || !amountIsValid" @click="review">
 					{{ t("collectPayment.submit") }}
 				</n-button>
 			</div>
@@ -118,6 +151,25 @@ const currencyOptions = computed<SelectOption[]>(() =>
 
 const amountIsValid = computed(() => /^\d+(?:\.\d{1,6})?$/.test(amount.value.trim()) && Number(amount.value) > 0)
 
+/**
+ * The review step: the amount, the currency and what it pays for, read back
+ * before anything is recorded — a mistyped zero is caught here, not in the
+ * drawer count. `submit()` itself still sends straight away.
+ */
+const reviewing = ref(false)
+
+/** Received less due, both in the chosen currency (the due figure is re-read in it); only for the review's wording — the server's arithmetic decides. */
+const difference = computed(() => {
+	if (!selected.value || !amountIsValid.value) return 0
+	const scale = 10 ** 6
+	return (Math.round(Number(amount.value.trim()) * scale) - Math.round(Number(selected.value.amount.value) * scale)) / scale
+})
+
+function review(): void {
+	if (!selected.value || !amountIsValid.value) return
+	reviewing.value = true
+}
+
 const shortageMessage = computed(() =>
 	shortage.value ? t("collectPayment.short", { amount: formatAmount({ value: shortage.value.shortage, currency: shortage.value.currency }) }) : null
 )
@@ -158,6 +210,7 @@ watch(() => props.show, async (open) => {
 	if (!open) return
 	allItems.value = []
 	selectedKey.value = null
+	reviewing.value = false
 	fieldErrors.value = {}
 	shortage.value = null
 	await currencyStore.fetchCurrencies()
@@ -174,12 +227,14 @@ watch(currency, () => {
 
 watch(selectedKey, () => {
 	shortage.value = null
+	reviewing.value = false
 	amount.value = selected.value?.amount.value ?? ""
 })
 
-watch(amount, () => {
+watch([amount, currency], () => {
 	shortage.value = null
 	fieldErrors.value = {}
+	reviewing.value = false
 })
 
 async function submit(): Promise<void> {
@@ -202,6 +257,7 @@ async function submit(): Promise<void> {
 			? t("collectPayment.successWithChange", { points: formatNumber(result.change_points) })
 			: t("collectPayment.success"))
 		emit("settled", result)
+		reviewing.value = false
 
 		if (props.focus) {
 			emit("update:show", false)
@@ -212,6 +268,8 @@ async function submit(): Promise<void> {
 	} catch (caught) {
 		if (!(caught instanceof ApiError)) throw caught
 
+		// Back to the form, where the field shows what went wrong.
+		reviewing.value = false
 		const data = caught.data as { message?: string, errors?: Record<string, string[]>, shortage?: string, currency?: string } | undefined
 		if (caught.status === 422 && data?.shortage && data.currency) {
 			shortage.value = { shortage: data.shortage, currency: data.currency }
@@ -229,5 +287,5 @@ async function submit(): Promise<void> {
 	}
 }
 
-defineExpose({ items, selected, currency, amount, shortage, fieldErrors, submit, load })
+defineExpose({ items, selected, currency, amount, shortage, fieldErrors, reviewing, difference, review, submit, load })
 </script>

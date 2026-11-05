@@ -314,6 +314,8 @@ export interface OutstandingItem {
 	amount_points: number
 	/** What it costs in the currency asked for. */
 	amount: { value: string, currency: string }
+	/** Whose it is — always sent; what the desk-wide list shows on each row. */
+	member?: { id: number, name: string | null, phone: string | null } | null
 }
 
 export interface OutstandingSummary {

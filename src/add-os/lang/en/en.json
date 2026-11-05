@@ -2849,7 +2849,8 @@
 			"arrivals": "Arrivals",
 			"approvals": "Approvals",
 			"sessions": "Active Sessions",
-			"endRequests": "End Requests"
+			"endRequests": "End Requests",
+			"payments": "Pending Payments"
 		},
 		"actions": {
 			"startSession": "Start Session",
@@ -2881,6 +2882,21 @@
 			"end_request": "Wants to end the session",
 			"arrival": "Arrived — waiting for check-in",
 			"booking": "Booking"
+		},
+		"pendingPayments": {
+			"description": "Everything members still pay at reception: sessions and bookings that ended unpaid, bookings their members chose to pay at reception, event registrations, and plans held for cash.",
+			"searchPlaceholder": "Search by member name or phone",
+			"loadError": "Could not load pending payments.",
+			"empty": "Nothing is waiting to be collected.",
+			"columns": {
+				"member": "Member",
+				"item": "Owed for",
+				"when": "When",
+				"amount": "Amount"
+			},
+			"used": "Used — awaiting payment",
+			"upcoming": "Upcoming — pay at reception",
+			"collect": "Collect"
 		}
 	},
 	"members": {
@@ -3098,6 +3114,18 @@
 		"submit": "Record payment",
 		"success": "Payment recorded.",
 		"successWithChange": "Payment recorded; {points} points added to the member's wallet.",
+		"review": {
+			"title": "Review the payment before recording it",
+			"for": "For",
+			"due": "Due",
+			"received": "Received",
+			"extra": "Extra",
+			"extraNote": "More than is due was received; the extra goes to the member's wallet as points.",
+			"shortNote": "Less than is due was received; the payment will not be recorded.",
+			"notifyNote": "The member is notified of the amount received and anything added to their wallet.",
+			"back": "Edit",
+			"confirm": "Confirm and record"
+		},
 		"purpose": {
 			"booking": "Booking",
 			"coworking_session": "Co-working session",

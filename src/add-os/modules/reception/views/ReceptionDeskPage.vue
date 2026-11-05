@@ -177,6 +177,20 @@
 					<CloseSessionPage embedded />
 				</div>
 			</n-tab-pane>
+
+			<!-- Everything owed across every member: what the pending-payments card counts. -->
+			<n-tab-pane name="payments">
+				<template #tab>
+					<span class="flex items-center gap-1.5">
+						<Icon name="carbon:wallet" :size="16" />
+						{{ t("reception.tabs.payments") }}
+						<n-badge v-if="pendingPayments > 0" :value="pendingPayments" :max="99" type="warning" />
+					</span>
+				</template>
+				<div class="mt-4">
+					<PendingPaymentsPanel @settled="refreshSummary" />
+				</div>
+			</n-tab-pane>
 		</n-tabs>
 
 		<QuickBookingModal v-model:show="bookingModalOpen" @success="refreshSummary" />
@@ -198,6 +212,7 @@ import ActiveSessionsPage from "@/add-os/modules/booking/views/ActiveSessionsPag
 import ApprovalQueuePage from "@/add-os/modules/booking/views/ApprovalQueuePage.vue"
 import ArrivalsPage from "@/add-os/modules/booking/views/ArrivalsPage.vue"
 import CloseSessionPage from "@/add-os/modules/booking/views/CloseSessionPage.vue"
+import PendingPaymentsPanel from "@/add-os/modules/reception/components/PendingPaymentsPanel.vue"
 import QuickBookingModal from "@/add-os/modules/reception/components/QuickBookingModal.vue"
 import QuickPlanModal from "@/add-os/modules/reception/components/QuickPlanModal.vue"
 import QuickTopUpModal from "@/add-os/modules/reception/components/QuickTopUpModal.vue"
@@ -207,7 +222,7 @@ import { formatDate, formatNumber, formatTime } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
 type UpcomingItem = ReceptionSummary["upcoming"][number]
-type TabName = "overview" | "arrivals" | "approvals" | "sessions" | "end-requests"
+type TabName = "overview" | "arrivals" | "approvals" | "sessions" | "end-requests" | "payments"
 
 const { t } = useI18n()
 const router = useRouter()
@@ -293,8 +308,8 @@ watch(activeTab, () => void refreshSummary())
 const pendingArrivals = computed(() => summary.value?.stats.pending_arrivals ?? 0)
 const activeSessions = computed(() => summary.value?.stats.active_sessions ?? 0)
 const pendingEndRequests = computed(() => summary.value?.stats.pending_end_requests ?? 0)
+const pendingPayments = computed(() => summary.value?.stats.pending_payments ?? 0)
 
-/** Pending payments opens nothing yet: no screen lists everything owed. */
 const statCards = computed(() => {
 	const stats = summary.value?.stats
 	return [
@@ -302,7 +317,7 @@ const statCards = computed(() => {
 		{ key: "expected", title: t("reception.stats.expectedBookings"), value: stats?.expected_bookings ?? 0, icon: "carbon:calendar", iconBg: "bg-amber-50 text-amber-700", tab: "arrivals" as TabName },
 		{ key: "arrivals", title: t("reception.stats.pendingGuests"), value: stats?.pending_arrivals ?? 0, icon: "carbon:group", iconBg: "bg-emerald-50 text-emerald-700", tab: "arrivals" as TabName },
 		{ key: "endRequests", title: t("reception.stats.pendingEndRequests"), value: stats?.pending_end_requests ?? 0, icon: "carbon:logout", iconBg: "bg-orange-50 text-orange-700", tab: "end-requests" as TabName },
-		{ key: "payments", title: t("reception.stats.pendingPayments"), value: stats?.pending_payments ?? 0, icon: "carbon:wallet", iconBg: "bg-amber-50 text-amber-800", tab: null }
+		{ key: "payments", title: t("reception.stats.pendingPayments"), value: stats?.pending_payments ?? 0, icon: "carbon:wallet", iconBg: "bg-amber-50 text-amber-800", tab: "payments" as TabName }
 	]
 })
 

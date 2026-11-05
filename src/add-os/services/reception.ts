@@ -8,6 +8,7 @@ import type {
 	ConfirmSessionEndResponse,
 	CreateReceptionBookingPayload,
 	ExtendBookingPayload,
+	OutstandingItem,
 	OutstandingSummary,
 	PendingApprovalBooking,
 	QuoteReceptionBookingPayload,
@@ -191,6 +192,16 @@ export async function settleSessionPayment(type: SessionType, id: number, paymen
 export async function getOutstanding(userId: number, currency: string): Promise<OutstandingSummary> {
 	const res = await get<{ data: OutstandingSummary }>(`${BASE}/outstanding`, { user_id: userId, currency })
 	return res.data
+}
+
+/**
+ * Everything owed across every member — the rows the summary's
+ * `pending_payments` counts — each naming its member. 25 per page; `search`
+ * matches a member's name or phone.
+ */
+export async function listPendingPayments(query?: Record<string, unknown>): Promise<Paginated<OutstandingItem>> {
+	const raw = await get<RawPaginatedResponse<OutstandingItem>>(`${BASE}/pending-payments`, query)
+	return toPaginated(raw)
 }
 
 /**
