@@ -2,14 +2,12 @@ import type Echo from "laravel-echo"
 import { post } from "./api"
 
 /**
- * Real-time nudges from ADD Core to the reception desk and to each account's
- * notification bell — Laravel broadcasting over the Pusher protocol (ADDCore
+ * Real-time nudges from ADD Core to the reception desk — Laravel broadcasting over the Pusher protocol (ADDCore
  * config/broadcasting.php).
  *
  * ── What travels ────────────────────────────────────────────────────────────
- * Only an event name and ids, on the private `reception` channel and the
- * account's own `dashboard.{id}`. A screen that
- * hears one re-fetches the endpoint it already reads; nothing on screen is ever
+ * Only an event name and ids, on the private `reception` channel. A screen
+ * that hears one re-fetches the endpoint it already reads; nothing on screen is ever
  * taken from an event, so a missed or duplicated event costs one stale list or
  * one extra request, never a wrong one.
  *
@@ -147,47 +145,9 @@ export function subscribeReception(handler: ReceptionEventHandler, events: reado
 	}
 }
 
-/** The event the API sends on `private-dashboard.{id}` when a notice lands in that account's inbox — ADDCore NotificationCreated. */
-export const NOTIFICATION_CREATED = "notification.created"
-
-const dashboardListeners = new Map<string, number>()
-
-/**
- * Calls `handler` whenever a notice lands in this account's dashboard inbox
- * (staff or provider), until the returned function is called. Only the
- * nudge travels; the caller re-reads the inbox. Same sharing rules as
- * `subscribeReception`.
- */
-export function subscribeDashboardNotifications(userId: number, handler: () => void): () => void {
-	const channelName = `dashboard.${userId}`
-	const callback = () => handler()
-	let stopped = false
-	let attached: EchoInstance | null = null
-
-	dashboardListeners.set(channelName, (dashboardListeners.get(channelName) ?? 0) + 1)
-
-	void getEcho().then(instance => {
-		if (!instance || stopped) return
-		attached = instance
-		instance.private(channelName).listen(`.${NOTIFICATION_CREATED}`, callback)
-	})
-
-	return () => {
-		if (stopped) return
-		stopped = true
-		const left = (dashboardListeners.get(channelName) ?? 1) - 1
-		if (left > 0) dashboardListeners.set(channelName, left)
-		else dashboardListeners.delete(channelName)
-		if (!attached) return
-		attached.private(channelName).stopListening(`.${NOTIFICATION_CREATED}`, callback)
-		if (left === 0) attached.leave(channelName)
-	}
-}
-
 /** Test seam: forget the instance and the counters. */
 export function resetRealtimeForTests(): void {
 	echo = null
 	connected = false
 	receptionListeners = 0
-	dashboardListeners.clear()
 }

@@ -150,24 +150,6 @@ describe("realtime", () => {
 		expect(channel.listen).not.toHaveBeenCalled()
 	})
 
-	it("nudges the account's own dashboard inbox and leaves its channel on stop", async () => {
-		const realtime = await load()
-		const handler = vi.fn()
-		const stop = realtime.subscribeDashboardNotifications(7, handler)
-		await settle()
-
-		expect(instances[0].private).toHaveBeenCalledWith("dashboard.7")
-		const [name, callback] = channel.listen.mock.calls[0]
-		expect(name).toBe(".notification.created")
-
-		callback({ audience: "staff" })
-		expect(handler).toHaveBeenCalledTimes(1)
-
-		stop()
-		expect(channel.stopListening).toHaveBeenCalledWith(".notification.created", callback)
-		expect(instances[0].leave).toHaveBeenCalledWith("dashboard.7")
-	})
-
 	it("follows the socket's connection state", async () => {
 		const realtime = await load()
 		realtime.subscribeReception(vi.fn())

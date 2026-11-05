@@ -7,9 +7,6 @@ const mocks = vi.hoisted(() => ({
 	fetchUnreadCount: vi.fn(),
 	markNotificationRead: vi.fn(),
 	markAllNotificationsRead: vi.fn(),
-	subscribe: vi.fn(),
-	unsubscribe: vi.fn(),
-	connected: { value: false },
 	toast: vi.fn(),
 	push: vi.fn(),
 	replace: vi.fn(),
@@ -23,10 +20,6 @@ vi.mock("@/add-os/services/notifications", () => ({
 	fetchUnreadCount: mocks.fetchUnreadCount,
 	markNotificationRead: mocks.markNotificationRead,
 	markAllNotificationsRead: mocks.markAllNotificationsRead
-}))
-vi.mock("@/add-os/services/realtime", () => ({
-	subscribeDashboardNotifications: mocks.subscribe,
-	isRealtimeConnected: () => mocks.connected.value
 }))
 vi.mock("@/composables/useGlobalActions", () => ({
 	useGlobalActions: () => ({ notification: mocks.toast })
@@ -74,8 +67,6 @@ describe("useInbox", () => {
 	beforeEach(() => {
 		vi.clearAllMocks()
 		vi.useFakeTimers()
-		mocks.connected.value = false
-		mocks.subscribe.mockReturnValue(mocks.unsubscribe)
 		mocks.fetchUnreadCount.mockResolvedValue(2)
 		mocks.fetchInbox.mockResolvedValue(page([notice("a"), notice("b"), notice("c", true)], 1, 2))
 		mocks.markNotificationRead.mockResolvedValue(undefined)
@@ -147,7 +138,6 @@ describe("useInbox", () => {
 
 		expect(mocks.fetchUnreadCount).toHaveBeenCalledWith("staff")
 		expect(mocks.fetchInbox).toHaveBeenCalledWith("staff", 1)
-		expect(mocks.subscribe).toHaveBeenCalledWith(7, expect.any(Function))
 		expect(inbox.items.value.map(n => n.id)).toEqual(["a", "b", "c"])
 		expect(inbox.unreadCount.value).toBe(2)
 		expect(inbox.hasMore.value).toBe(true)
@@ -160,27 +150,24 @@ describe("useInbox", () => {
 		inbox.start("staff", 7)
 		await settle()
 
-		expect(mocks.subscribe).toHaveBeenCalledTimes(1)
+		expect(mocks.fetchInbox).toHaveBeenCalledTimes(1)
 	})
 
-	it("toasts only the notice this tab had not seen when a nudge arrives", async () => {
+	it("toasts only the notice this tab had not seen when a poll finds one", async () => {
 		const { inbox } = await load()
 		inbox.start("staff", 7)
 		await settle()
 
 		mocks.fetchUnreadCount.mockResolvedValue(3)
 		mocks.fetchInbox.mockResolvedValue(page([notice("new"), notice("a"), notice("b"), notice("c", true)], 1, 2))
-		const nudge = mocks.subscribe.mock.calls[0][1] as () => void
-		nudge()
-		await settle()
+		await vi.advanceTimersByTimeAsync(60_000)
 
 		expect(mocks.toast).toHaveBeenCalledTimes(1)
 		expect(mocks.toast).toHaveBeenCalledWith(expect.objectContaining({ title: "title new", content: "body new" }))
 		expect(inbox.items.value[0].id).toBe("new")
 		expect(inbox.unreadCount.value).toBe(3)
 
-		nudge()
-		await settle()
+		await vi.advanceTimersByTimeAsync(60_000)
 		expect(mocks.toast).toHaveBeenCalledTimes(1)
 	})
 
@@ -227,19 +214,17 @@ describe("useInbox", () => {
 		expect(inbox.hasMore.value).toBe(false)
 	})
 
-	it("polls every minute only while the socket is down", async () => {
+	it("re-reads the inbox every minute", async () => {
 		const { inbox } = await load()
 		inbox.start("staff", 7)
 		await settle()
 		const reads = mocks.fetchInbox.mock.calls.length
 
-		mocks.connected.value = true
-		await vi.advanceTimersByTimeAsync(60_000)
-		expect(mocks.fetchInbox.mock.calls.length).toBe(reads)
-
-		mocks.connected.value = false
 		await vi.advanceTimersByTimeAsync(60_000)
 		expect(mocks.fetchInbox.mock.calls.length).toBe(reads + 1)
+
+		await vi.advanceTimersByTimeAsync(60_000)
+		expect(mocks.fetchInbox.mock.calls.length).toBe(reads + 2)
 	})
 
 	it("reloads the list in the new language", async () => {
@@ -283,14 +268,13 @@ describe("useInbox", () => {
 		expect(inbox.unreadCount.value).toBe(1)
 	})
 
-	it("stops listening and forgets the account on stop", async () => {
+	it("stops polling and forgets the account on stop", async () => {
 		const { inbox } = await load()
 		inbox.start("staff", 7)
 		await settle()
 
 		inbox.stop()
 
-		expect(mocks.unsubscribe).toHaveBeenCalled()
 		expect(inbox.items.value).toEqual([])
 		expect(inbox.unreadCount.value).toBe(0)
 		await vi.advanceTimersByTimeAsync(120_000)

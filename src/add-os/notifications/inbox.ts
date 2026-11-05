@@ -3,7 +3,6 @@ import type { InboxAudience, InboxNotification } from "@/add-os/services/notific
 import { computed, ref, watch } from "vue"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import { fetchInbox, fetchUnreadCount, markAllNotificationsRead, markNotificationRead } from "@/add-os/services/notifications"
-import { isRealtimeConnected, subscribeDashboardNotifications } from "@/add-os/services/realtime"
 import { useGlobalActions } from "@/composables/useGlobalActions"
 import router from "@/router"
 import { syncBrowserPush } from "./browserPush"
@@ -14,11 +13,10 @@ import { notificationTarget } from "./targets"
  * drawer: one copy of the state, started by the bell for the account it
  * belongs to.
  *
- * It stays current the way the reception screens do: a `notification.created`
- * nudge on `private-dashboard.{id}` re-reads the unread count and the first
- * page, and while the socket is down (or Pusher is not configured) the same
- * read runs every minute instead. A notice that arrives while the dashboard
- * is open shows once as a toast — only one this tab had not seen, so the
+ * It stays current by re-reading the unread count and the first page every
+ * minute, and at once when a browser push for this account reaches the open
+ * tab (`./browserPush`). A notice that arrives while the dashboard is open
+ * shows once as a toast — only one this tab had not seen, so the
  * first load and repeated reads never toast.
  *
  * Text arrives rendered in the request's language, so a language switch
@@ -52,7 +50,6 @@ const hasMore = computed(() => page.value < lastPage.value)
 let userId: number | null = null
 let seen = new Set<string>()
 let generation = 0
-let stopRealtime: (() => void) | null = null
 let pollTimer: ReturnType<typeof setInterval> | null = null
 let stopLocaleWatch: WatchStopHandle | null = null
 
@@ -94,7 +91,7 @@ async function refresh(): Promise<void> {
 	try {
 		await loadFirstPage({ announce: true })
 	} catch {
-		// A failed read leaves the bell as it was; the next nudge or poll tries again.
+		// A failed read leaves the bell as it was; the next push or poll tries again.
 	}
 }
 
@@ -124,8 +121,6 @@ async function openFromLink(): Promise<void> {
 function stop(): void {
 	generation++
 	if (typeof navigator !== "undefined" && navigator.serviceWorker) navigator.serviceWorker.removeEventListener("message", onWorkerMessage)
-	stopRealtime?.()
-	stopRealtime = null
 	if (pollTimer) clearInterval(pollTimer)
 	pollTimer = null
 	stopLocaleWatch?.()
@@ -154,10 +149,7 @@ function start(forAudience: InboxAudience, forUserId: number): void {
 			loading.value = false
 		})
 
-	stopRealtime = subscribeDashboardNotifications(forUserId, () => void refresh())
-	pollTimer = setInterval(() => {
-		if (!isRealtimeConnected()) void refresh()
-	}, POLL_MS)
+	pollTimer = setInterval(() => void refresh(), POLL_MS)
 	stopLocaleWatch = watch(currentLocale, () => {
 		void loadFirstPage({ announce: false, replace: true }).catch(() => {})
 		void syncBrowserPush(forAudience)
