@@ -69,7 +69,7 @@
 			<div class="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
 				<!-- Row 1: Search + Kind -->
 				<div>
-					<n-input v-model:value="filters.search" :placeholder="t('inventory.items.search')" clearable class="w-full">
+					<n-input v-model:value="filters.search" :placeholder="t('inventory.itemExtras.searchHint')" clearable class="w-full">
 						<template #prefix>
 							<Icon name="carbon:search" :size="16" class="text-slate-400" />
 						</template>
@@ -238,7 +238,7 @@ const columns = computed<DataTableColumns<Item>>(() => [
 		key: "name",
 		minWidth: 220,
 		ellipsis: { tooltip: true },
-		render: row => nameCell(localized(row.name), row.sku, { code: true })
+		render: row => nameCell(localized(row.name), row.barcode ? `${row.sku} · ${row.barcode}` : row.sku, { code: true })
 	},
 	{
 		title: t("inventory.common.category"),
