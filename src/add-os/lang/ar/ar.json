@@ -263,6 +263,10 @@
 				"maintenance": "إدارة الصيانة",
 				"dispose": "استبعاد الأصول"
 			},
+			"warehouses": {
+				"view": "عرض المستودعات",
+				"manage": "إدارة المستودعات"
+			},
 			"stock": {
 				"view": "عرض المخزون",
 				"receive": "استلام المخزون",
@@ -2035,7 +2039,8 @@
 			"amenities": "كتالوج المزايا",
 			"inventoryAssets": "الأصول",
 			"inventoryAsset": "الأصل",
-			"inventoryStock": "المخزون",
+			"inventoryWarehouses": "المستودعات",
+			"inventoryStock": "الحركات المخزنية",
 			"inventoryMaintenance": "الصيانة",
 			"inventoryCustody": "العهدة",
 			"inventoryItems": "المواد",
@@ -4712,6 +4717,10 @@
 			"removeLine": "إزالة",
 			"stockLocation": "موقع الصرف",
 			"stockLocationHint": "اتركه فارغاً لتُصرف المادة من فرع الصندوق المفتوح لديك.",
+			"warehouse": "المستودع",
+			"warehouseHint": "المستودع الرئيسي للفرع ما لم تختر غيره.",
+			"scan": "امسح الباركود ثم اضغط Enter",
+			"notForSale": "هذا الباركود ليس من المواد المعروضة للبيع.",
 			"total": "المجموع",
 			"confirm": "بيع",
 			"done": "تم البيع بـ{n} نقطة.",

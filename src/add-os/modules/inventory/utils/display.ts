@@ -1,6 +1,6 @@
 import type { VNode } from "vue"
 import type { DataTableColumn } from "naive-ui"
-import type { AttributeDefinition, Bilingual, Category, CustodianDescription, PlaceDescription, PropertyValue } from "@/add-os/modules/inventory/types/inventory"
+import type { AttributeDefinition, Bilingual, Category, CustodianDescription, PlaceDescription, PropertyValue, WarehouseRef } from "@/add-os/modules/inventory/types/inventory"
 import { NButton, NTooltip } from "naive-ui"
 import { h } from "vue"
 import { currentLocale } from "@/add-os/lang/currentLocale"
@@ -32,6 +32,12 @@ export function placeLabel(place: PlaceDescription | null | undefined): string {
 	if (!place) return EMPTY
 	const name = isolate(place.label ?? `#${place.id}`)
 	return place.path.length ? `${name} · ${place.path.map(isolate).join(" › ")}` : name
+}
+
+/** A warehouse as the stock lists name it; a deleted one by its id. */
+export function warehouseLabel(warehouse: WarehouseRef | null | undefined): string {
+	if (!warehouse) return EMPTY
+	return warehouse.name ? localized(warehouse.name) : `#${warehouse.id}`
 }
 
 export function custodianLabel(custodian: CustodianDescription | null | undefined): string {

@@ -339,6 +339,9 @@
 			"information-filled": {
 				"body": "<path fill=\"none\" d=\"M16 8a1.5 1.5 0 1 1-1.5 1.5A1.5 1.5 0 0 1 16 8m4 13.875h-2.875v-8H13v2.25h1.875v5.75H12v2.25h8Z\"/><path fill=\"currentColor\" d=\"M16 2a14 14 0 1 0 14 14A14 14 0 0 0 16 2m0 6a1.5 1.5 0 1 1-1.5 1.5A1.5 1.5 0 0 1 16 8m4 16.125h-8v-2.25h2.875v-5.75H13v-2.25h4.125v8H20Z\"/>"
 			},
+			"inventory-management": {
+				"body": "<path fill=\"currentColor\" d=\"M19 24h4v4h-4zm7 0h4v4h-4zm-7-7h4v4h-4zm7 0h4v4h-4z\"/><path fill=\"currentColor\" d=\"M17 24H4V10h24v5h2v-5a2 2 0 0 0-2-2h-6V4a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h13ZM12 4h8v4h-8Z\"/>"
+			},
 			"launch": {
 				"body": "<path fill=\"currentColor\" d=\"M26 28H6a2.003 2.003 0 0 1-2-2V6a2.003 2.003 0 0 1 2-2h10v2H6v20h20V16h2v10a2.003 2.003 0 0 1-2 2\"/><path fill=\"currentColor\" d=\"M20 2v2h6.586L18 12.586L19.414 14L28 5.414V12h2V2z\"/>"
 			},
@@ -461,6 +464,9 @@
 			},
 			"portfolio": {
 				"body": "<path fill=\"currentColor\" d=\"M28 10h-6V6a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h24a2 2 0 0 0 2-2V12a2 2 0 0 0-2-2M12 6h8v4h-8ZM4 26V12h24v14Z\"/>"
+			},
+			"power": {
+				"body": "<path fill=\"currentColor\" d=\"m22.5 5.74l-1 1.73a11 11 0 1 1-11 0l-1-1.73a13 13 0 1 0 13 0\"/><path fill=\"currentColor\" d=\"M15 2h2v14h-2z\"/>"
 			},
 			"printer": {
 				"body": "<path fill=\"currentColor\" d=\"M28 9h-3V3H7v6H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h3v6h18v-6h3a2 2 0 0 0 2-2V11a2 2 0 0 0-2-2M9 5h14v4H9Zm14 22H9V17h14Zm5-6h-3v-6H7v6H4V11h24Z\"/>"
