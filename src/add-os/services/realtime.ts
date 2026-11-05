@@ -36,7 +36,10 @@ export const RECEPTION_EVENTS = [
 	"arrival_request.resolved",
 	"session_end_request.created",
 	"session_end_request.cancelled",
-	"session_end_request.resolved"
+	"session_end_request.resolved",
+	"booking.created",
+	"booking.pending_approval",
+	"booking.cancelled"
 ] as const
 
 export type ReceptionEvent = (typeof RECEPTION_EVENTS)[number]
