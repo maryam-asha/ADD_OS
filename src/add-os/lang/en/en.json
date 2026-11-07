@@ -755,6 +755,56 @@
 			"loadError": "Couldn't load the amenity catalog."
 		}
 	},
+	"kiosks": {
+		"loadError": "Could not load the kiosks.",
+		"isActiveYes": "Active",
+		"isActiveNo": "Inactive",
+		"isPairedYes": "Paired",
+		"isPairedNo": "Not paired",
+		"columns": {
+			"name": "Name",
+			"space": "Space",
+			"isActive": "Status",
+			"isPaired": "Device",
+			"lastUsedAt": "Last used"
+		},
+		"stats": {
+			"total": "Total kiosks",
+			"active": "Active",
+			"paired": "Paired"
+		},
+		"form": {
+			"name": "Name",
+			"space": "Coworking space",
+			"isActive": "Active",
+			"noCoworkingSpaces": "No coworking space exists yet. Add one under Spaces first."
+		},
+		"create": {
+			"button": "Add kiosk",
+			"title": "Add kiosk",
+			"success": "Kiosk added."
+		},
+		"edit": {
+			"title": "Edit kiosk",
+			"success": "Kiosk updated."
+		},
+		"delete": {
+			"success": "Kiosk deleted.",
+			"warning": "The device on this kiosk will stop working."
+		},
+		"pairing": {
+			"title": "Pairing code",
+			"issue": "Get pairing code",
+			"copy": "Copy code",
+			"onceOnly": "This code is shown only once",
+			"instructions": "Sign in on the kiosk app, then enter this code. It works once, until {time}.",
+			"replacesDevice": "This kiosk is paired now. Using the code on a device stops the current one.",
+			"revoke": "Unpair device",
+			"revokeConfirm": "Unpair the device on {name}? It stops working at once and needs a new code.",
+			"revokeConfirmOk": "Unpair",
+			"revokeSuccess": "The device has been unpaired."
+		}
+	},
 	"seatsDesks": {
 		"columns": {
 			"code": "Code",
@@ -1898,6 +1948,7 @@
 			"spaces": "Spaces",
 			"spaceTypeAmenities": "Space Types",
 			"seatsDesks": "Seats & Desks",
+			"kiosks": "Reception Kiosks",
 			"businessHours": "Business Hours",
 			"users": "Users",
 			"roles": "Roles & permissions",

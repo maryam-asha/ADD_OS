@@ -41,6 +41,7 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"spatial.amenities": () => import("@/add-os/modules/spatial/views/AmenitiesPage.vue"),
 	"spatial.spaceTypeAmenities": () => import("@/add-os/modules/spatial/views/SpaceTypeAmenitiesPage.vue"),
 	"spatial.seatsDesks": () => import("@/add-os/modules/spatial/views/SeatsDesksPage.vue"),
+	"spatial.kiosks": () => import("@/add-os/modules/spatial/views/KiosksPage.vue"),
 	"spatial.businessHours": () => import("@/add-os/modules/spatial/views/BusinessHoursPage.vue"),
 	"address.privateOfficeRequests": () => import("@/add-os/modules/members/views/PrivateOfficeRequestsPage.vue"),
 	"address.operationsRequests": () => import("@/add-os/modules/operations/views/OperationsRequestsPage.vue"),

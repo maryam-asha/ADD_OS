@@ -171,6 +171,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "spaceTypeAmenities", path: "space-type-amenities", permission: "amenities.view" },
 			{ key: "spaces", path: "spaces", permission: "spaces.view" },
 			{ key: "seatsDesks", path: "seats-desks", permission: "seats-desks.view" },
+			{ key: "kiosks", path: "kiosks", permission: "kiosks.view" },
 			{ key: "businessHours", path: "business-hours", permission: "business-hours.view" }
 		]
 	},
