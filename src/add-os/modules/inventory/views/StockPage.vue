@@ -57,9 +57,10 @@
 		<div class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
 			<div class="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
 				<n-select v-model:value="warehouseId" :options="warehouseOptions" :placeholder="t('inventory.operations.allWarehouses')" clearable filterable class="w-full" />
-				<ItemSelect v-model:value="itemId" kind="stock" :placeholder="t('inventory.stock.allItems')" class="w-full" />
-				<template v-if="tab === 'movements'">
-					<n-select v-model:value="movementType" :options="typeOptions" :placeholder="t('inventory.operations.allTypes')" clearable class="w-full" />
+				<ItemSelect v-if="tab !== 'operations'" v-model:value="itemId" kind="stock" :placeholder="t('inventory.stock.allItems')" class="w-full" />
+				<n-select v-if="tab === 'operations'" v-model:value="operationKindFilter" :options="operationKindOptions" :placeholder="t('inventory.operations.allTypes')" clearable class="w-full" />
+				<template v-if="tab !== 'balances'">
+					<n-select v-if="tab === 'movements'" v-model:value="movementType" :options="typeOptions" :placeholder="t('inventory.operations.allTypes')" clearable class="w-full" />
 					<StaffSelect v-model:value="actorId" :placeholder="t('inventory.operations.allUsers')" class="w-full" />
 					<n-date-picker v-model:formatted-value="period" type="daterange" value-format="yyyy-MM-dd" clearable class="w-full" />
 				</template>
@@ -88,7 +89,17 @@
 						</template>
 					</n-data-table>
 				</n-tab-pane>
-				<n-tab-pane name="movements" :tab="t('inventory.stock.movements')">
+				<n-tab-pane name="operations" :tab="t('inventory.operations.operationsTab')">
+					<n-data-table :columns="operationColumns" :data="operations" :loading :bordered="false" size="small" :scroll-x="tableWidth(operationColumns)" :row-props="operationRowProps">
+						<template #empty>
+							<div class="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-500">
+								<Icon name="carbon:arrows-vertical" :size="40" class="mb-2 opacity-50" />
+								<span>{{ t("inventory.operations.emptyOperations") }}</span>
+							</div>
+						</template>
+					</n-data-table>
+				</n-tab-pane>
+				<n-tab-pane name="movements" :tab="t('inventory.operations.ledgerTab')">
 					<n-data-table :columns="movementColumns" :data="movements" :loading :bordered="false" size="small" :scroll-x="tableWidth(movementColumns)" :row-props="movementRowProps">
 						<template #empty>
 							<div class="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-500">
@@ -107,47 +118,53 @@
 		</n-card>
 
 		<StockOperationPicker v-model:show="pickerVisible" @picked="open" />
-		<StockOperationModal v-model:show="operationVisible" :kind="operationKind" :warehouses @done="load" />
+		<StockOperationDrawer v-model:show="drawerVisible" :operation="viewing" />
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
-import type { StockBalance, StockMovement, StockMovementType, StockOperationKind, Warehouse } from "@/add-os/modules/inventory/types/inventory"
+import type { StockBalance, StockMovement, StockMovementType, StockOperation, StockOperationKind, StoredOperationKind, Warehouse } from "@/add-os/modules/inventory/types/inventory"
 import { NAlert, NButton, NCard, NDataTable, NDatePicker, NPagination, NSelect, NTabPane, NTabs, NTag } from "naive-ui"
 import { computed, h, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import { useRoute, useRouter } from "vue-router"
 import { canCountStock, canIssueStock, canReceiveStock, canTransferStock } from "@/add-os/config/permissions"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import ItemSelect from "@/add-os/modules/inventory/components/ItemSelect.vue"
 import StaffSelect from "@/add-os/modules/inventory/components/StaffSelect.vue"
-import StockOperationModal from "@/add-os/modules/inventory/components/StockOperationModal.vue"
+import StockOperationDrawer from "@/add-os/modules/inventory/components/StockOperationDrawer.vue"
 import StockOperationPicker from "@/add-os/modules/inventory/components/StockOperationPicker.vue"
-import { STOCK_MOVEMENT_TYPES } from "@/add-os/modules/inventory/types/inventory"
+import { STOCK_MOVEMENT_TYPES, STORED_OPERATION_KIND } from "@/add-os/modules/inventory/types/inventory"
 import { COLUMN, EMPTY, localized, money, nameCell, quantity, tableWidth, warehouseLabel } from "@/add-os/modules/inventory/utils/display"
-import { listBalances, listStockMovements, listWarehouses } from "@/add-os/services/inventory"
-import { formatDateTime } from "@/add-os/utils/format/dates"
+import { listBalances, listStockMovements, listStockOperations, listWarehouses } from "@/add-os/services/inventory"
+import { formatDate, formatDateTime } from "@/add-os/utils/format/dates"
 import Icon from "@/components/common/Icon.vue"
 
 /**
- * Stock by warehouse: what each one holds and its value at average cost,
- * and the ledger every quantity is counted from — receipts, issues (by
- * hand, by a sale at reception, by recorded consumption), transfers and
- * counts. A movement is recorded as one operation of several lines;
- * clicking a movement shows the rest of its operation.
+ * Warehouse movements: what each warehouse holds and its value at average
+ * cost; the operations staff recorded (receipts, issues, write-offs,
+ * transfers, counts), one per row, each opening its details and lines;
+ * and the ledger every quantity is counted from, sales and consumption at
+ * reception included. Adding a movement opens its own page.
  */
 defineProps<{ titleKey?: string }>()
 
 const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
 
 const mayRecord = canReceiveStock() || canIssueStock() || canTransferStock() || canCountStock()
 
-const tab = ref<"balances" | "movements">("balances")
+type Tab = "balances" | "operations" | "movements"
+const TABS: Tab[] = ["balances", "operations", "movements"]
+const tab = ref<Tab>(TABS.includes(route.query.tab as Tab) ? (route.query.tab as Tab) : "balances")
 const warehouses = ref<Warehouse[]>([])
 const warehouseId = ref<number | null>(null)
 const itemId = ref<number | null>(null)
 const movementType = ref<StockMovementType | null>(null)
+const operationKindFilter = ref<StoredOperationKind | null>(null)
 const actorId = ref<number | null>(null)
 const period = ref<[string, string] | null>(null)
 const operationId = ref<string | null>(null)
@@ -158,19 +175,24 @@ const loading = ref(true)
 const loadError = ref("")
 const balances = ref<StockBalance[]>([])
 const movements = ref<StockMovement[]>([])
+const operations = ref<StockOperation[]>([])
 const pickerVisible = ref(false)
-const operationVisible = ref(false)
-const operationKind = ref<StockOperationKind>("receive")
+const drawerVisible = ref(false)
+const viewing = ref<StockOperation | null>(null)
 
 const warehouseOptions = computed<SelectOption[]>(() => warehouses.value.map(w => ({ label: localized(w.name), value: w.id })))
 const typeOptions = computed<SelectOption[]>(() => STOCK_MOVEMENT_TYPES.map(type => ({ label: t(`inventory.movementType.${type}`), value: type })))
+const operationKindOptions = computed<SelectOption[]>(() => Object.values(STORED_OPERATION_KIND).map(kind => ({ label: t(`inventory.operations.stored.${kind}`), value: kind })))
 
-const hasActiveFilters = computed(() => Boolean(warehouseId.value || itemId.value || (tab.value === "movements" && (movementType.value || actorId.value || period.value || operationId.value))))
+const hasActiveFilters = computed(() =>
+	Boolean(warehouseId.value || itemId.value || (tab.value !== "balances" && (movementType.value || operationKindFilter.value || actorId.value || period.value || operationId.value)))
+)
 
 function resetFilters() {
 	warehouseId.value = null
 	itemId.value = null
 	movementType.value = null
+	operationKindFilter.value = null
 	actorId.value = null
 	period.value = null
 	operationId.value = null
@@ -187,7 +209,7 @@ onMounted(() => {
 })
 
 // A changed filter starts again from page one; the page watcher loads it then.
-watch([tab, warehouseId, itemId, movementType, actorId, period, operationId], () => {
+watch([tab, warehouseId, itemId, movementType, operationKindFilter, actorId, period, operationId], () => {
 	if (page.value !== 1) page.value = 1
 	else void load()
 })
@@ -198,14 +220,23 @@ async function load() {
 	loadError.value = ""
 	try {
 		const filters = { page: page.value, item_id: itemId.value, warehouse_id: warehouseId.value }
-		const result =
-			tab.value === "balances"
-				? await listBalances(filters)
-				: await listStockMovements({ ...filters, type: movementType.value, actor_id: actorId.value, operation_id: operationId.value, from: period.value?.[0], to: period.value?.[1] })
-		if (tab.value === "balances") balances.value = result.data as StockBalance[]
-		else movements.value = result.data as StockMovement[]
-		lastPage.value = result.meta.last_page
-		totalCount.value = result.meta.total ?? result.data.length
+		const span = { actor_id: actorId.value, from: period.value?.[0], to: period.value?.[1] }
+		if (tab.value === "balances") {
+			const result = await listBalances(filters)
+			balances.value = result.data
+			lastPage.value = result.meta.last_page
+			totalCount.value = result.meta.total ?? result.data.length
+		} else if (tab.value === "operations") {
+			const result = await listStockOperations({ page: page.value, warehouse_id: warehouseId.value, kind: operationKindFilter.value, ...span })
+			operations.value = result.data
+			lastPage.value = result.meta.last_page
+			totalCount.value = result.meta.total ?? result.data.length
+		} else {
+			const result = await listStockMovements({ ...filters, ...span, type: movementType.value, operation_id: operationId.value })
+			movements.value = result.data
+			lastPage.value = result.meta.last_page
+			totalCount.value = result.meta.total ?? result.data.length
+		}
 	} catch (e) {
 		loadError.value = apiErrorMessage(e, t("inventory.common.loadError"))
 	} finally {
@@ -214,8 +245,17 @@ async function load() {
 }
 
 function open(kind: StockOperationKind) {
-	operationKind.value = kind
-	operationVisible.value = true
+	void router.push({ name: "inventory.inventoryStockNew", params: { kind } })
+}
+
+function operationRowProps(row: StockOperation) {
+	return {
+		style: "cursor: pointer",
+		onClick: () => {
+			viewing.value = row
+			drawerVisible.value = true
+		}
+	}
 }
 
 function movementRowProps(row: StockMovement) {
@@ -233,6 +273,34 @@ const TYPE_TAG_TYPES: Record<StockMovementType, "success" | "warning" | "info" |
 	transfer_out: "info",
 	adjustment: "default"
 }
+
+const OPERATION_TAG_TYPES: Record<StoredOperationKind, "success" | "warning" | "info" | "default" | "error"> = {
+	receive: "success",
+	issue: "warning",
+	write_off: "error",
+	transfer: "info",
+	adjust: "default"
+}
+
+const operationColumns = computed<DataTableColumns<StockOperation>>(() => [
+	{ title: t("inventory.operations.date"), key: "operation_date", ...COLUMN.date, render: row => formatDate(row.operation_date) },
+	{
+		title: t("inventory.operations.kindCol"),
+		key: "kind",
+		width: 190,
+		render: row => h(NTag, { size: "small", round: true, type: OPERATION_TAG_TYPES[row.kind] }, () => t(`inventory.operations.stored.${row.kind}`))
+	},
+	{
+		title: t("inventory.operations.warehouse"),
+		key: "warehouse",
+		...COLUMN.place,
+		render: row => (row.to_warehouse ? `${warehouseLabel(row.warehouse)} ← ${warehouseLabel(row.to_warehouse)}` : warehouseLabel(row.warehouse))
+	},
+	{ title: t("inventory.operations.reference"), key: "reference", ...COLUMN.code, render: row => row.reference ?? EMPTY },
+	{ title: t("inventory.operations.linesCount"), key: "lines_count", ...COLUMN.count, render: row => h("span", { class: "add-numeric" }, String(row.lines_count ?? 0)) },
+	{ title: t("inventory.common.note"), key: "note", ...COLUMN.text, render: row => row.note ?? EMPTY },
+	{ title: t("inventory.history.by"), key: "actor", ...COLUMN.person, render: row => row.actor?.name ?? EMPTY }
+])
 
 const balanceColumns = computed<DataTableColumns<StockBalance>>(() => [
 	{ title: t("inventory.stock.item"), key: "item", ...COLUMN.name, render: row => itemCell(row.item) },

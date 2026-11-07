@@ -31,9 +31,11 @@ import type {
 	StockBalance,
 	StockMovement,
 	StockMovementType,
+	StockOperation,
 	StockOperationKind,
 	StockOperationPayload,
 	StockValuation,
+	StoredOperationKind,
 	Unit,
 	UnitPayload,
 	Warehouse,
@@ -126,6 +128,11 @@ export interface ItemFilters {
 
 export async function listItems(filters: ItemFilters = {}): Promise<Paginated<Item>> {
 	return toPaginated(await get<RawPaginatedResponse<Item>>(`${BASE}/items`, query({ ...filters })))
+}
+
+/** One item with its packs, as the line of an operation needs it. */
+export async function getItem(id: number): Promise<Item> {
+	return (await get<{ data: Item }>(`${BASE}/items/${id}`)).data
 }
 
 export async function createItem(payload: ItemPayload): Promise<Item> {
@@ -288,6 +295,8 @@ export interface StockFilters {
 	/** The warehouses sitting in this place (a branch). */
 	place?: PlaceRef | null
 	include_empty?: boolean
+	/** Item name, code or barcode. */
+	search?: string | null
 }
 
 export async function listBalances(filters: StockFilters = {}): Promise<Paginated<StockBalance>> {
@@ -312,9 +321,30 @@ const OPERATION_PATHS: Record<StockOperationKind, string> = {
  * Records one operation of several lines. Answers the ledger rows it wrote;
  * a count where every line matched the book answers `{message}` instead.
  */
-export async function submitStockOperation(kind: StockOperationKind, payload: StockOperationPayload): Promise<StockMovement[] | MessageResult> {
-	const res = await post<{ data?: StockMovement[]; message?: string }>(`${BASE}/stock/${OPERATION_PATHS[kind]}`, payload)
-	return res.data ? rowsOf<StockMovement>(res.data) : { message: res.message }
+export async function submitStockOperation(kind: StockOperationKind, payload: StockOperationPayload): Promise<StockOperation | MessageResult> {
+	const res = await post<{ data?: StockOperation; message?: string }>(`${BASE}/stock/${OPERATION_PATHS[kind]}`, payload)
+	return res.data ?? { message: res.message }
+}
+
+export interface StockOperationFilters {
+	page?: number
+	per_page?: number
+	/** Operations from or into this warehouse. */
+	warehouse_id?: number | null
+	kind?: StoredOperationKind | null
+	actor_id?: number | null
+	from?: string | null
+	to?: string | null
+}
+
+/** Operations as staff recorded them, the latest day first. */
+export async function listStockOperations(filters: StockOperationFilters = {}): Promise<Paginated<StockOperation>> {
+	return toPaginated(await get<RawPaginatedResponse<StockOperation>>(`${BASE}/stock/operations`, query({ ...filters })))
+}
+
+/** One operation with its ledger rows. */
+export async function getStockOperation(id: string): Promise<StockOperation> {
+	return (await get<{ data: StockOperation }>(`${BASE}/stock/operations/${id}`)).data
 }
 
 // ── Reports ─────────────────────────────────────────────────────────────────

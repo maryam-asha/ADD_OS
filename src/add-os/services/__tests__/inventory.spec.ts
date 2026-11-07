@@ -12,7 +12,7 @@ vi.mock("@/stores/auth", () => ({
 	useAuthStore: () => ({ setLogout: vi.fn() })
 }))
 
-const { findItemByBarcode, generateBarcode, listAssets, listBalances, listWarehouses, moveAsset, registerAssets, submitStockOperation } = await import("../inventory")
+const { findItemByBarcode, generateBarcode, getStockOperation, listAssets, listBalances, listStockOperations, listWarehouses, moveAsset, registerAssets, submitStockOperation } = await import("../inventory")
 const { amenityLabel } = await import("../amenities")
 
 function jsonResponse(body: unknown, status = 200) {
@@ -85,29 +85,49 @@ describe("inventory service", () => {
 	})
 
 	it("posts a write-off to stock/issue with its reason", async () => {
-		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: [{ id: 1 }] }, 201))
+		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: { id: "op-1", kind: "write_off", movements: [{ id: 1 }] } }, 201))
 
-		const rows = await submitStockOperation("writeOff", { warehouse_id: 2, reason: "damaged", lines: [{ item_id: 1, quantity: 3 }] })
+		const operation = await submitStockOperation("writeOff", { warehouse_id: 2, reason: "damaged", note: "Broken", operation_date: "2026-11-07", lines: [{ item_id: 1, quantity: 3, note: "Box 2" }] })
 
 		expect(calledUrl().pathname).toBe("/api/v1/inventory/stock/issue")
-		expect(calledBody()).toEqual({ warehouse_id: 2, reason: "damaged", lines: [{ item_id: 1, quantity: 3 }] })
-		expect(rows).toHaveLength(1)
+		expect(calledBody()).toEqual({ warehouse_id: 2, reason: "damaged", note: "Broken", operation_date: "2026-11-07", lines: [{ item_id: 1, quantity: 3, note: "Box 2" }] })
+		expect(operation).toMatchObject({ id: "op-1", kind: "write_off" })
 	})
 
-	it("posts a transfer with both warehouses and answers its rows", async () => {
-		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: [{ type: "transfer_out" }, { type: "transfer_in" }] }, 201))
+	it("posts a transfer with both warehouses", async () => {
+		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: { id: "op-2", kind: "transfer", movements: [] } }, 201))
 
-		const rows = await submitStockOperation("transfer", { from_warehouse_id: 1, to_warehouse_id: 2, lines: [{ item_id: 1, unit_id: 5, quantity: 2 }] })
+		await submitStockOperation("transfer", { from_warehouse_id: 1, to_warehouse_id: 2, lines: [{ item_id: 1, unit_id: 5, quantity: 2 }] })
 
 		expect(calledUrl().pathname).toBe("/api/v1/inventory/stock/transfer")
 		expect(calledBody()).toMatchObject({ from_warehouse_id: 1, to_warehouse_id: 2 })
-		expect((rows as { type: string }[]).map(r => r.type)).toEqual(["transfer_out", "transfer_in"])
+	})
+
+	it("lists operations with their filters and reads one", async () => {
+		vi.mocked(fetch).mockResolvedValueOnce(jsonResponse({ data: [], meta: { current_page: 1, last_page: 1, per_page: 25, total: 0 } }))
+		await listStockOperations({ warehouse_id: 3, kind: "write_off", from: "2026-11-01", to: null })
+		const url = calledUrl()
+		expect(url.pathname).toBe("/api/v1/inventory/stock/operations")
+		expect(url.searchParams.get("kind")).toBe("write_off")
+		expect(url.searchParams.get("warehouse_id")).toBe("3")
+		expect(url.searchParams.has("to")).toBe(false)
+
+		vi.mocked(fetch).mockResolvedValueOnce(jsonResponse({ data: { id: "op-9", movements: [] } }))
+		expect((await getStockOperation("op-9")).id).toBe("op-9")
+	})
+
+	it("searches balances", async () => {
+		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: [], meta: { current_page: 1, last_page: 1, per_page: 25, total: 0 } }))
+
+		await listBalances({ warehouse_id: 2, search: "ITM" })
+
+		expect(calledUrl().searchParams.get("search")).toBe("ITM")
 	})
 
 	it("passes on the message of a count that matched the book", async () => {
 		vi.mocked(fetch).mockResolvedValue(jsonResponse({ message: "The count matches the book; nothing changed." }))
 
-		const result = await submitStockOperation("adjust", { warehouse_id: 1, lines: [{ item_id: 1, counted: 7 }] })
+		const result = await submitStockOperation("adjust", { warehouse_id: 1, note: "Count", lines: [{ item_id: 1, counted: 7 }] })
 
 		expect(calledUrl().pathname).toBe("/api/v1/inventory/stock/adjust")
 		expect(result).toEqual({ message: "The count matches the book; nothing changed." })

@@ -330,6 +330,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "inventoryAsset", path: "assets/:id", hidden: true, permission: "inventory.assets.view" },
 			{ key: "inventoryWarehouses", path: "warehouses", permission: "inventory.warehouses.view" },
 			{ key: "inventoryStock", path: "stock", permission: "inventory.stock.view" },
+			{ key: "inventoryStockNew", path: "stock/new/:kind", hidden: true, permission: "inventory.stock.view" },
 			{ key: "inventoryMaintenance", path: "maintenance", permission: "inventory.assets.view" },
 			{ key: "inventoryCustody", path: "custody", permission: "inventory.assets.view" },
 			{ key: "inventoryItems", path: "items", permission: "inventory.catalog.view" },
