@@ -168,6 +168,26 @@ async function issueCode(row: Kiosk) {
 	}
 }
 
+/**
+ * Issuing stops nothing by itself: the paired device keeps working until the
+ * code is used on another one. That replacement is what is confirmed, so a
+ * kiosk with no device yet gets its code at once.
+ */
+function requestCode(row: Kiosk) {
+	if (!row.is_paired) {
+		void issueCode(row)
+		return
+	}
+
+	dialog.warning({
+		title: t("kiosks.pairing.issue"),
+		content: t("kiosks.pairing.issueConfirm", { name: row.name }),
+		positiveText: t("kiosks.pairing.issueConfirmOk"),
+		negativeText: t("resourceCrud.table.deleteConfirmCancel"),
+		onPositiveClick: () => issueCode(row)
+	})
+}
+
 function confirmRevoke(row: Kiosk) {
 	dialog.warning({
 		title: t("kiosks.pairing.revoke"),
@@ -203,7 +223,7 @@ function renderPairingActions(row: Kiosk) {
 	const buttons = []
 
 	if (row.is_active) {
-		buttons.push(actionButton(t("kiosks.pairing.issue"), "carbon:password", "primary", () => issueCode(row)))
+		buttons.push(actionButton(t("kiosks.pairing.issue"), "carbon:password", "primary", () => requestCode(row)))
 	}
 
 	if (row.is_paired) {

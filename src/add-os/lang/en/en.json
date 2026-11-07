@@ -795,6 +795,8 @@
 		"pairing": {
 			"title": "Pairing code",
 			"issue": "Get pairing code",
+			"issueConfirm": "{name} is paired with a device. Get a code to pair a replacement? The current device keeps working until the code is used.",
+			"issueConfirmOk": "Get code",
 			"copy": "Copy code",
 			"onceOnly": "This code is shown only once",
 			"instructions": "Sign in on the kiosk app, then enter this code. It works once, until {time}.",

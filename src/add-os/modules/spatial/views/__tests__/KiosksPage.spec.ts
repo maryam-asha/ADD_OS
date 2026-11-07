@@ -156,9 +156,27 @@ describe("kiosks page pairing", () => {
 		actions(page, row)[0].props!.onClick()
 		await flushPromises()
 
+		expect(dialogWarning).not.toHaveBeenCalled()
 		expect(issueMock).toHaveBeenCalledWith(3)
 		expect(modal(page).props("issued")).toEqual(issued)
 		expect(modal(page).props("kiosk")).toEqual(row)
+		expect(modal(page).props("show")).toBe(true)
+	})
+
+	it("asks before issuing a code for a paired kiosk, since using it replaces the device", async () => {
+		const issued = { pairing_code: "MDAUCU97", expires_at: "2026-11-07T10:10:00+00:00" }
+		issueMock.mockResolvedValue(issued)
+		const page = await mountPage("kiosks.view", "kiosks.pair")
+
+		actions(page, kiosk({ is_paired: true }))[0].props!.onClick()
+
+		expect(issueMock).not.toHaveBeenCalled()
+		expect(dialogWarning).toHaveBeenCalledOnce()
+
+		await dialogWarning.mock.calls[0][0].onPositiveClick()
+		await flushPromises()
+
+		expect(issueMock).toHaveBeenCalledWith(3)
 		expect(modal(page).props("show")).toBe(true)
 	})
 
