@@ -334,7 +334,7 @@ const movementColumns = computed<DataTableColumns<StockMovement>>(() => [
 	{ title: t("inventory.stock.quantity"), key: "quantity", ...COLUMN.quantity, width: 170, render: quantityCell },
 	{ title: t("inventory.stock.after"), key: "quantity_after", ...COLUMN.quantity, render: row => h("span", { class: "add-numeric" }, quantity(row.quantity_after)) },
 	{ title: t("inventory.stock.unitCost"), key: "unit_cost", ...COLUMN.money, render: row => h("span", { class: "add-numeric" }, row.unit_cost ? quantity(row.unit_cost) : EMPTY) },
-	{ title: t("inventory.common.note"), key: "note", ...COLUMN.text, render: row => row.note ?? EMPTY },
+	{ title: t("inventory.common.note"), key: "note", ...COLUMN.text, render: row => [row.note, row.line_note].filter(Boolean).join(" — ") || EMPTY },
 	{ title: t("inventory.history.by"), key: "actor", ...COLUMN.person, render: row => row.actor?.name ?? EMPTY }
 ])
 </script>

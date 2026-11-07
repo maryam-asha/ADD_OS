@@ -62,6 +62,7 @@ watch(
 	() => [show.value, props.operation?.id] as const,
 	async ([open, id]) => {
 		if (!open || !id) return
+		movements.value = []
 		loading.value = true
 		await quietly(
 			() => getStockOperation(id),

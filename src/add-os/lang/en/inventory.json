@@ -524,7 +524,11 @@
 				"write_off": "Write-off",
 				"transfer": "Transfer between warehouses",
 				"adjust": "Adjustment"
-			}
+			},
+			"leaveTitle": "Leave this movement?",
+			"leaveBody": "It has not been recorded; what you entered will be lost.",
+			"leaveConfirm": "Leave",
+			"stay": "Stay"
 		},
 		"itemExtras": {
 			"image": "Item image",

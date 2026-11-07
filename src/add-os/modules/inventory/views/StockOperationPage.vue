@@ -66,7 +66,7 @@
 						<span class="inline-flex items-center gap-1.5 rounded-lg border border-border-subtle bg-surface-sunken px-3 py-1.5 text-sm">
 							<Icon name="carbon:attachment" :size="16" />{{ uploading ? "…" : t("inventory.operations.chooseFile") }}
 						</span>
-						<input type="file" accept="image/*,application/pdf" class="hidden" @change="upload" />
+						<input type="file" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf" class="hidden" @change="upload" />
 					</label>
 					<template v-if="attachment">
 						<a :href="attachment.url" target="_blank" rel="noopener noreferrer" class="text-sm text-primary underline">{{ attachment.name }}</a>
@@ -85,10 +85,10 @@
 import type { SelectOption } from "naive-ui"
 import type { CostMethod, ManualIssueReason, StockOperationKind, Warehouse } from "@/add-os/modules/inventory/types/inventory"
 import type { LineDraft } from "@/add-os/modules/inventory/utils/stockLines"
-import { NAlert, NButton, NDatePicker, NFormItem, NInput, NRadioButton, NRadioGroup, NSelect, useMessage } from "naive-ui"
-import { computed, onMounted, ref } from "vue"
+import { NAlert, NButton, NDatePicker, NFormItem, NInput, NRadioButton, NRadioGroup, NSelect, useDialog, useMessage } from "naive-ui"
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
-import { useRoute, useRouter } from "vue-router"
+import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router"
 import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
 import StockLinesEditor from "@/add-os/modules/inventory/components/StockLinesEditor.vue"
 import { STOCK_OPERATION_KINDS } from "@/add-os/modules/inventory/types/inventory"
@@ -111,6 +111,7 @@ defineProps<{ titleKey?: string }>()
 
 const { t } = useI18n()
 const message = useMessage()
+const dialog = useDialog()
 const route = useRoute()
 const router = useRouter()
 
@@ -119,6 +120,8 @@ const REASONS: Partial<Record<StockOperationKind, ManualIssueReason[]>> = {
 	issue: ["internal_use", "other"]
 }
 const MAX_ATTACHMENT = 2 * 1024 * 1024
+/** What ADD Core's upload takes: its image types and a PDF. */
+const ATTACHMENT_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "application/pdf"]
 
 const kind = computed<StockOperationKind | null>(() => {
 	const value = String(route.params.kind ?? "")
@@ -139,13 +142,16 @@ const toId = ref<number | null>(null)
 const operationDate = ref<string | null>(today())
 const reference = ref("")
 const reason = ref<ManualIssueReason | null>(null)
-const costMethod = ref<CostMethod>("average")
+// Entered by default: "the current average" needs the item to have one in the warehouse.
+const costMethod = ref<CostMethod>("entered")
 const note = ref("")
 const lines = ref<LineDraft[]>([])
 const attachment = ref<{ url: string; name: string } | null>(null)
 const uploading = ref(false)
 const saving = ref(false)
 const serverProblem = ref("")
+/** Set once recorded, so leaving afterwards asks nothing. */
+const recorded = ref(false)
 
 const reasons = computed(() => (kind.value ? (REASONS[kind.value] ?? []) : []))
 const warehouseOptions = computed<SelectOption[]>(() => warehouses.value.filter(w => w.is_active).map(w => ({ label: localized(w.name), value: w.id })))
@@ -166,8 +172,28 @@ const problem = computed(() => {
 })
 const shownProblem = computed(() => serverProblem.value || (problem.value === "sameWarehouse" ? t("inventory.operations.sameWarehouse") : ""))
 
-onMounted(() => {
+/** Something typed that leaving would lose: there are no drafts. */
+const dirty = computed(() => !recorded.value && Boolean(lines.value.length || note.value.trim() || reference.value.trim() || attachment.value))
+
+/** A fresh form for the current kind: the page is reused when only the kind in the address changes. */
+function reset() {
+	const primary = warehouses.value.find(w => w.is_primary)?.id ?? null
+	warehouseId.value = primary
+	fromId.value = primary
+	toId.value = null
+	operationDate.value = today()
+	reference.value = ""
 	reason.value = reasons.value[0] ?? null
+	costMethod.value = "entered"
+	note.value = ""
+	lines.value = []
+	attachment.value = null
+	serverProblem.value = ""
+	recorded.value = false
+}
+
+onMounted(() => {
+	reset()
 	void quietly(
 		() => listWarehouses({ active: true, per_page: 100 }),
 		result => {
@@ -177,6 +203,34 @@ onMounted(() => {
 		}
 	)
 })
+
+watch(kind, reset)
+
+onBeforeRouteLeave(() => {
+	if (!dirty.value) return true
+	return new Promise<boolean>(resolve => {
+		dialog.warning({
+			title: t("inventory.operations.leaveTitle"),
+			content: t("inventory.operations.leaveBody"),
+			positiveText: t("inventory.operations.leaveConfirm"),
+			negativeText: t("inventory.operations.stay"),
+			onPositiveClick: () => resolve(true),
+			onNegativeClick: () => resolve(false),
+			onClose: () => resolve(false),
+			onMaskClick: () => resolve(false)
+		})
+	})
+})
+
+/** Closing the tab or reloading with something typed asks the browser's own question. */
+function warnBeforeUnload(event: BeforeUnloadEvent) {
+	if (!dirty.value) return
+	event.preventDefault()
+	event.returnValue = ""
+}
+
+onMounted(() => window.addEventListener("beforeunload", warnBeforeUnload))
+onBeforeUnmount(() => window.removeEventListener("beforeunload", warnBeforeUnload))
 
 function isFuture(timestamp: number): boolean {
 	return localDay(new Date(timestamp)) > today()
@@ -192,7 +246,7 @@ async function upload(event: Event) {
 		serverProblem.value = t("inventory.operations.attachmentTooLarge")
 		return
 	}
-	if (!file.type.startsWith("image/") && file.type !== "application/pdf") {
+	if (!ATTACHMENT_TYPES.includes(file.type)) {
 		serverProblem.value = t("inventory.operations.attachmentType")
 		return
 	}
@@ -226,6 +280,7 @@ async function save() {
 			lines: linesPayload(kind.value, lines.value, costMethod.value)
 		})
 		message.success("message" in result && result.message ? result.message : t("inventory.operations.saved"))
+		recorded.value = true
 		leave()
 	} catch (e) {
 		serverProblem.value = apiErrorMessage(e, t("inventory.common.saveError"))
