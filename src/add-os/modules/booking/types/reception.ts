@@ -141,6 +141,9 @@ export interface ReceptionSessionReport {
 		type: SessionType
 		id: number
 		space: { id: number, name: string }
+		/** The booked slot; both null for a walk-in, which booked nothing. */
+		start_at: string | null
+		end_at: string | null
 		checked_in_at: string
 		checked_out_at: string | null
 		duration_seconds: number

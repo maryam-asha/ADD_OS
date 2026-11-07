@@ -38,17 +38,27 @@
 					</n-card>
 
 					<n-card size="small" class="shadow-sm border border-stone-200">
-						<div class="grid grid-cols-3 gap-3 text-center text-xs">
+						<div class="grid gap-3 text-center text-xs" :class="hasBookedSlot ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3'">
+							<template v-if="report.session.start_at && report.session.end_at">
+								<div class="flex flex-col gap-1 items-center p-3 rounded-xl bg-stone-50">
+									<span class="text-stone-400 font-medium">{{ t("closeSession.detail.bookingStart") }}</span>
+									<span class="font-bold text-stone-900 text-base" data-test="booking-start">{{ formatTime(report.session.start_at) }}</span>
+								</div>
+								<div class="flex flex-col gap-1 items-center p-3 rounded-xl bg-stone-50">
+									<span class="text-stone-400 font-medium">{{ t("closeSession.detail.bookingEnd") }}</span>
+									<span class="font-bold text-stone-900 text-base" data-test="booking-end">{{ formatTime(report.session.end_at) }}</span>
+								</div>
+							</template>
 							<div class="flex flex-col gap-1 items-center p-3 rounded-xl bg-stone-50">
 								<span class="text-stone-400 font-medium">{{ t("closeSession.detail.checkIn") }}</span>
-								<span class="font-bold text-stone-900 text-base">{{ formatTime(report.session.checked_in_at) }}</span>
+								<span class="font-bold text-stone-900 text-base" data-test="session-check-in">{{ formatTime(report.session.checked_in_at) }}</span>
 								<span v-if="report.session.started_via" class="text-stone-500">{{ t(`activeSessions.startedVia.${report.session.started_via}`) }}</span>
 							</div>
 							<div class="flex flex-col gap-1 items-center p-3 rounded-xl bg-stone-50">
-								<span class="text-stone-400 font-medium">{{ t("closeSession.detail.endAt") }}</span>
-								<span class="font-bold text-stone-900 text-base">{{ endAt ? formatTime(endAt) : "—" }}</span>
+								<span class="text-stone-400 font-medium">{{ t("closeSession.detail.checkOut") }}</span>
+								<span class="font-bold text-stone-900 text-base" data-test="session-check-out">{{ leftAt ? formatTime(leftAt) : "—" }}</span>
 							</div>
-							<div class="flex flex-col gap-1 items-center p-3 rounded-xl bg-emerald-50/50 border border-emerald-100">
+							<div class="flex flex-col gap-1 items-center p-3 rounded-xl bg-emerald-50/50 border border-emerald-100" :class="{ 'col-span-full': hasBookedSlot }">
 								<span class="text-emerald-700 font-medium">{{ t("closeSession.detail.duration") }}</span>
 								<span class="font-extrabold text-emerald-800 text-base"><bdi dir="ltr">{{ durationLabel(durationSeconds) }}</bdi></span>
 							</div>
@@ -287,6 +297,14 @@ const walletCovers = computed(() => report.value !== null && closing.value !== n
 
 /** When the session ends: the moment the member pressed, for an open one. */
 const endAt = computed(() => report.value?.session.checked_out_at ?? closing.value?.at ?? null)
+
+/**
+ * When the member left, for the check-out tile: nothing yet on an open session
+ * nobody has asked to end, whose `closing.at` is only the server's "now".
+ */
+const leftAt = computed(() => report.value?.session.checked_out_at ?? (closing.value?.end_request ? closing.value.at : null))
+
+const hasBookedSlot = computed(() => Boolean(report.value?.session.start_at && report.value.session.end_at))
 
 const durationSeconds = computed(() => {
 	if (!report.value) return 0

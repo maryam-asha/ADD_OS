@@ -4,6 +4,7 @@ import { createI18n } from "vue-i18n"
 
 import en from "@/add-os/lang/en/en.json"
 import ReceptionDeskPage from "@/add-os/modules/reception/views/ReceptionDeskPage.vue"
+import { formatTime } from "@/add-os/utils/format"
 import CloseSessionDetailPage from "../CloseSessionDetailPage.vue"
 import CloseSessionPage from "../CloseSessionPage.vue"
 
@@ -264,6 +265,61 @@ describe("session timer", () => {
 
 		wrapper.unmount()
 		vi.useRealTimers()
+	})
+})
+
+describe("session times", () => {
+	function openBooking(endRequested: boolean) {
+		const base = report(null)
+		return {
+			...base,
+			session: { ...base.session, type: "booking", start_at: "2026-08-17T07:30:00+03:00", end_at: "2026-08-17T09:30:00+03:00" },
+			closing: { ...base.closing, end_request: endRequested ? endRequest(11, null) : null }
+		}
+	}
+
+	function tile(wrapper: ReturnType<typeof mountWith>, name: string): string {
+		return wrapper.find(`[data-test='${name}']`).text()
+	}
+
+	it("shows the booked slot and the actual check-in, and no check-out until there is one", async () => {
+		vi.clearAllMocks()
+		getSessionReportMock.mockResolvedValue(openBooking(false))
+		const wrapper = mountWith(CloseSessionDetailPage)
+		await flushPromises()
+
+		expect(tile(wrapper, "booking-start")).toBe(formatTime("2026-08-17T07:30:00+03:00"))
+		expect(tile(wrapper, "booking-end")).toBe(formatTime("2026-08-17T09:30:00+03:00"))
+		expect(tile(wrapper, "session-check-in")).toBe(formatTime("2026-08-17T08:00:00+03:00"))
+		// closing.at here is only the server's "now": never shown as the end.
+		expect(tile(wrapper, "session-check-out")).toBe("—")
+
+		wrapper.unmount()
+	})
+
+	it("takes the check-out from the member's end request", async () => {
+		vi.clearAllMocks()
+		getSessionReportMock.mockResolvedValue(openBooking(true))
+		const wrapper = mountWith(CloseSessionDetailPage)
+		await flushPromises()
+
+		expect(tile(wrapper, "session-check-out")).toBe(formatTime("2026-08-17T10:00:00+03:00"))
+
+		wrapper.unmount()
+	})
+
+	it("shows no booked slot for a walk-in, which booked nothing", async () => {
+		vi.clearAllMocks()
+		const base = report(null)
+		getSessionReportMock.mockResolvedValue({ ...base, session: { ...base.session, start_at: null, end_at: null } })
+		const wrapper = mountWith(CloseSessionDetailPage)
+		await flushPromises()
+
+		expect(wrapper.find("[data-test='booking-start']").exists()).toBe(false)
+		expect(wrapper.find("[data-test='booking-end']").exists()).toBe(false)
+		expect(tile(wrapper, "session-check-in")).toBe(formatTime("2026-08-17T08:00:00+03:00"))
+
+		wrapper.unmount()
 	})
 })
 
