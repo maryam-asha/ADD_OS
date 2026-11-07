@@ -39,7 +39,9 @@ export const RECEPTION_EVENTS = [
 	"session_end_request.resolved",
 	"booking.created",
 	"booking.pending_approval",
-	"booking.cancelled"
+	"booking.cancelled",
+	// What the desk has to collect changed: paid by any method, newly owed, or no longer owed.
+	"payments.pending_changed"
 ] as const
 
 export type ReceptionEvent = (typeof RECEPTION_EVENTS)[number]
