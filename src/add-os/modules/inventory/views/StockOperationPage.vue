@@ -61,19 +61,7 @@
 			<!-- Attachment -->
 			<section class="rounded-2xl border border-border-subtle bg-surface p-4">
 				<span class="block text-sm font-semibold">{{ t("inventory.operations.attachment") }}</span>
-				<div class="mt-2 flex flex-wrap items-center gap-3">
-					<label class="cursor-pointer">
-						<span class="inline-flex items-center gap-1.5 rounded-lg border border-border-subtle bg-surface-sunken px-3 py-1.5 text-sm">
-							<Icon name="carbon:attachment" :size="16" />{{ uploading ? "…" : t("inventory.operations.chooseFile") }}
-						</span>
-						<input type="file" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf" class="hidden" @change="upload" />
-					</label>
-					<template v-if="attachment">
-						<a :href="attachment.url" target="_blank" rel="noopener noreferrer" class="text-sm text-primary underline">{{ attachment.name }}</a>
-						<n-button size="tiny" quaternary @click="attachment = null">{{ t("inventory.operations.removeAttachment") }}</n-button>
-					</template>
-				</div>
-				<p class="mt-1 text-xs text-secondary">{{ t("inventory.operations.attachmentHint") }}</p>
+				<AttachmentField v-model:value="attachment" class="mt-2" />
 			</section>
 
 			<p v-if="shownProblem" class="text-sm text-error">{{ shownProblem }}</p>
@@ -90,13 +78,12 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router"
 import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
+import AttachmentField from "@/add-os/modules/inventory/components/AttachmentField.vue"
 import StockLinesEditor from "@/add-os/modules/inventory/components/StockLinesEditor.vue"
 import { STOCK_OPERATION_KINDS } from "@/add-os/modules/inventory/types/inventory"
 import { localized } from "@/add-os/modules/inventory/utils/display"
 import { linesPayload, operationProblem } from "@/add-os/modules/inventory/utils/stockLines"
 import { listWarehouses, submitStockOperation } from "@/add-os/services/inventory"
-import { uploadMedia } from "@/add-os/services/media"
-import Icon from "@/components/common/Icon.vue"
 
 /**
  * Recording one stock operation of several lines, on its own page: into,
@@ -119,9 +106,6 @@ const REASONS: Partial<Record<StockOperationKind, ManualIssueReason[]>> = {
 	writeOff: ["damaged", "expired"],
 	issue: ["internal_use", "other"]
 }
-const MAX_ATTACHMENT = 2 * 1024 * 1024
-/** What ADD Core's upload takes: its image types and a PDF. */
-const ATTACHMENT_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "application/pdf"]
 
 const kind = computed<StockOperationKind | null>(() => {
 	const value = String(route.params.kind ?? "")
@@ -146,8 +130,7 @@ const reason = ref<ManualIssueReason | null>(null)
 const costMethod = ref<CostMethod>("entered")
 const note = ref("")
 const lines = ref<LineDraft[]>([])
-const attachment = ref<{ url: string; name: string } | null>(null)
-const uploading = ref(false)
+const attachment = ref<string | null>(null)
 const saving = ref(false)
 const serverProblem = ref("")
 /** Set once recorded, so leaving afterwards asks nothing. */
@@ -236,30 +219,6 @@ function isFuture(timestamp: number): boolean {
 	return localDay(new Date(timestamp)) > today()
 }
 
-async function upload(event: Event) {
-	const input = event.target as HTMLInputElement
-	const file = input.files?.[0]
-	input.value = ""
-	if (!file) return
-	serverProblem.value = ""
-	if (file.size > MAX_ATTACHMENT) {
-		serverProblem.value = t("inventory.operations.attachmentTooLarge")
-		return
-	}
-	if (!ATTACHMENT_TYPES.includes(file.type)) {
-		serverProblem.value = t("inventory.operations.attachmentType")
-		return
-	}
-	uploading.value = true
-	try {
-		attachment.value = { url: (await uploadMedia(file, "inventory")).url, name: file.name }
-	} catch (e) {
-		serverProblem.value = apiErrorMessage(e, t("inventory.common.saveError"))
-	} finally {
-		uploading.value = false
-	}
-}
-
 function leave() {
 	void router.push({ name: "inventory.inventoryStock", query: { tab: "operations" } })
 }
@@ -276,7 +235,7 @@ async function save() {
 			operation_date: operationDate.value,
 			reference: reference.value.trim() || null,
 			note: note.value.trim() || null,
-			attachment_url: attachment.value?.url ?? null,
+			attachment_url: attachment.value,
 			lines: linesPayload(kind.value, lines.value, costMethod.value)
 		})
 		message.success("message" in result && result.message ? result.message : t("inventory.operations.saved"))

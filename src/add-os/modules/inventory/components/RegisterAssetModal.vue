@@ -30,6 +30,12 @@
 			<n-form-item :label="t('inventory.assets.supplier')">
 				<n-input v-model:value="form.supplier" :maxlength="255" />
 			</n-form-item>
+			<n-form-item :label="t('inventory.operations.reference')">
+				<n-input v-model:value="form.reference" :placeholder="t('inventory.operations.optional')" :maxlength="60" />
+			</n-form-item>
+			<n-form-item :label="t('inventory.operations.attachment')" class="sm:col-span-2">
+				<AttachmentField v-model:value="form.attachment_url" />
+			</n-form-item>
 			<n-form-item :label="t('inventory.assets.cost')">
 				<div class="flex w-full gap-2">
 					<n-input-number v-model:value="form.purchase_cost" :min="0" :precision="2" clearable class="min-w-0 flex-1" dir="ltr" />
@@ -74,6 +80,7 @@ import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import CurrencySelect from "@/add-os/modules/hr/components/payroll/CurrencySelect.vue"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import AssetPlacePicker from "@/add-os/modules/inventory/components/AssetPlacePicker.vue"
+import AttachmentField from "@/add-os/modules/inventory/components/AttachmentField.vue"
 import ItemSelect from "@/add-os/modules/inventory/components/ItemSelect.vue"
 import { registerAssets } from "@/add-os/services/inventory"
 import { countKey, formatNumber } from "@/add-os/utils/format"
@@ -97,6 +104,8 @@ function blank() {
 		serial_number: "",
 		purchased_on: null as string | null,
 		supplier: "",
+		reference: "",
+		attachment_url: null as string | null,
 		purchase_cost: null as number | null,
 		currency: null as string | null,
 		useful_life_months: null as number | null,
@@ -130,6 +139,8 @@ async function save() {
 			serial_number: f.count > 1 ? null : f.serial_number || null,
 			purchased_on: f.purchased_on,
 			supplier: f.supplier || null,
+			reference: f.reference.trim() || null,
+			attachment_url: f.attachment_url,
 			purchase_cost: f.purchase_cost,
 			currency: f.purchase_cost === null ? null : f.currency,
 			useful_life_months: f.useful_life_months,

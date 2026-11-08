@@ -25,7 +25,8 @@ export interface UnitChoice {
 /** The item's main unit and its packs ("box (6)"). */
 export function unitChoices(item: Item): UnitChoice[] {
 	return [
-		{ label: localized(item.unit.name), value: item.unit.id, factor: "1" },
+		// A stock item always has its unit.
+		...(item.unit ? [{ label: localized(item.unit.name), value: item.unit.id, factor: "1" }] : []),
 		...(item.units ?? []).map(pack => ({ label: `${localized(pack.unit.name)} (${pack.factor})`, value: pack.unit.id, factor: pack.factor }))
 	]
 }
@@ -34,7 +35,7 @@ export function unitChoices(item: Item): UnitChoice[] {
 export function addItemLine(lines: LineDraft[], item: Item): LineDraft[] {
 	const index = lines.findIndex(line => line.itemId === item.id)
 	if (index >= 0) return lines.map((line, i) => (i === index ? { ...line, amount: (line.amount ?? 0) + 1 } : line))
-	return [...lines, { itemId: item.id, item, unitId: item.unit.id, amount: 1, unitCost: null }]
+	return [...lines, { itemId: item.id, item, unitId: item.unit?.id ?? 0, amount: 1, unitCost: null }]
 }
 
 /** Whether a line's cost is sent: a count may price stock found beyond the book; a receipt only when its costs are entered. */

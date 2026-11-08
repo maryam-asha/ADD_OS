@@ -27,7 +27,7 @@
 			<n-form-item :label="t('inventory.common.category')" required>
 				<n-select v-model:value="form.categoryId" :options="categoryOptions" filterable />
 			</n-form-item>
-			<n-form-item :label="t('inventory.itemExtras.mainUnit')" required>
+			<n-form-item v-if="!isAsset" :label="t('inventory.itemExtras.mainUnit')" required>
 				<n-select v-model:value="form.unitId" :options="unitOptions" filterable />
 			</n-form-item>
 			<n-form-item :label="t('inventory.itemExtras.code')" :feedback="item ? undefined : t('inventory.itemExtras.codeHint')">
@@ -76,7 +76,7 @@
 		<template #footer>
 			<div class="flex justify-end gap-2">
 				<n-button @click="show = false">{{ t("inventory.common.cancel") }}</n-button>
-				<n-button type="primary" :loading="saving" :disabled="!form.nameAr.trim() || !form.categoryId || !form.unitId || fieldsLoading || !packRowsValid(packs)" @click="save">{{ t("inventory.common.save") }}</n-button>
+				<n-button type="primary" :loading="saving" :disabled="!form.nameAr.trim() || !form.categoryId || (!isAsset && !form.unitId) || fieldsLoading || !packRowsValid(packs)" @click="save">{{ t("inventory.common.save") }}</n-button>
 			</div>
 		</template>
 	</HrFormModal>
@@ -117,6 +117,8 @@ const packs = ref<PackRow[]>([])
 const generating = ref(false)
 const uploading = ref(false)
 const isStock = computed(() => props.categories.find(c => c.id === form.value.categoryId)?.kind === "stock")
+/** An asset item is counted one by one: it has no unit to choose. */
+const isAsset = computed(() => props.categories.find(c => c.id === form.value.categoryId)?.kind === "asset")
 const properties = ref<Record<string, PropertyValue>>({})
 const fields = ref<AttributeDefinition[]>([])
 /** Saving waits for them: properties are sent whole, and sent before they load they would replace the stored ones with nothing. */
@@ -159,7 +161,7 @@ watch(show, open => {
 	if (!open) return
 	const i = props.item
 	form.value = i
-		? { nameAr: i.name.ar, nameEn: i.name.en ?? "", categoryId: i.category.id, unitId: i.unit.id, sku: i.sku, barcode: i.barcode ?? "", imageUrl: i.image_url ?? "", description: i.description ?? "", active: i.is_active }
+		? { nameAr: i.name.ar, nameEn: i.name.en ?? "", categoryId: i.category.id, unitId: i.unit?.id ?? null, sku: i.sku, barcode: i.barcode ?? "", imageUrl: i.image_url ?? "", description: i.description ?? "", active: i.is_active }
 		: { nameAr: "", nameEn: "", categoryId: null, unitId: null, sku: "", barcode: "", imageUrl: "", description: "", active: true }
 	packs.value = (i?.units ?? []).map(pack => ({ unitId: pack.unit.id, factor: Number(pack.factor) }))
 	properties.value = { ...(i?.properties ?? {}) }
@@ -204,7 +206,7 @@ async function save() {
 	const payload = {
 		name: { ar: f.nameAr.trim(), en: f.nameEn.trim() || null },
 		category_id: f.categoryId!,
-		unit_id: f.unitId!,
+		unit_id: isAsset.value ? null : f.unitId,
 		description: f.description.trim() || null,
 		is_active: f.active,
 		properties: answers,

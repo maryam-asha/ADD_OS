@@ -130,7 +130,8 @@ export interface Item {
 	image_url: string | null
 	kind: ItemKind
 	category: { id: number; name: Bilingual }
-	unit: Unit
+	/** None for an asset item: it is counted one by one. */
+	unit: Unit | null
 	properties: Record<string, PropertyValue>
 	is_active: boolean
 	/** Its packs; loaded on the item lists and pages. */
@@ -143,7 +144,8 @@ export interface Item {
 export interface ItemPayload {
 	name: Bilingual
 	category_id: number
-	unit_id: number
+	/** Required for stock; an asset item may have none. */
+	unit_id: number | null
 	sku?: string | null
 	barcode?: string | null
 	image_url?: string | null
@@ -292,6 +294,9 @@ export interface Asset {
 	purchase_cost: string | null
 	currency: string | null
 	supplier: string | null
+	/** The supplier's invoice number, and the invoice uploaded. */
+	reference: string | null
+	attachment_url: string | null
 	useful_life_months: number | null
 	salvage_value: string | null
 	depreciation: Depreciation | null
@@ -312,6 +317,8 @@ export interface AssetDetailsPayload {
 	purchase_cost?: number | null
 	currency?: string | null
 	supplier?: string | null
+	reference?: string | null
+	attachment_url?: string | null
 	useful_life_months?: number | null
 	salvage_value?: number | null
 	warranty_until?: string | null

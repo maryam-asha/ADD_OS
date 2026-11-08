@@ -8,6 +8,12 @@
 			<n-form-item :label="t('inventory.assets.supplier')">
 				<n-input v-model:value="form.supplier" :maxlength="255" />
 			</n-form-item>
+			<n-form-item :label="t('inventory.operations.reference')">
+				<n-input v-model:value="form.reference" :placeholder="t('inventory.operations.optional')" :maxlength="60" />
+			</n-form-item>
+			<n-form-item :label="t('inventory.operations.attachment')" class="sm:col-span-2">
+				<AttachmentField v-model:value="form.attachment_url" />
+			</n-form-item>
 			<n-form-item :label="t('inventory.assets.purchasedOn')">
 				<n-date-picker v-model:formatted-value="form.purchased_on" value-format="yyyy-MM-dd" type="date" clearable class="w-full" />
 			</n-form-item>
@@ -49,6 +55,7 @@ import { useI18n } from "vue-i18n"
 import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import CurrencySelect from "@/add-os/modules/hr/components/payroll/CurrencySelect.vue"
 import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
+import AttachmentField from "@/add-os/modules/inventory/components/AttachmentField.vue"
 import { updateAsset } from "@/add-os/services/inventory"
 
 /** An asset's details and money; where it is, who holds it and its status each have their own action. */
@@ -64,6 +71,8 @@ function fromAsset(asset: Asset) {
 	return {
 		serial_number: asset.serial_number ?? "",
 		supplier: asset.supplier ?? "",
+		reference: asset.reference ?? "",
+		attachment_url: asset.attachment_url,
 		purchased_on: asset.purchased_on,
 		warranty_until: asset.warranty_until,
 		purchase_cost: num(asset.purchase_cost),
@@ -94,6 +103,7 @@ async function save() {
 			...f,
 			serial_number: f.serial_number || null,
 			supplier: f.supplier || null,
+			reference: f.reference.trim() || null,
 			notes: f.notes || null,
 			currency: f.purchase_cost === null ? null : f.currency
 		})
