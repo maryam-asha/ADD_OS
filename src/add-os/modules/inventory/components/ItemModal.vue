@@ -30,8 +30,8 @@
 			<n-form-item v-if="!isAsset" :label="t('inventory.itemExtras.mainUnit')" required>
 				<n-select v-model:value="form.unitId" :options="unitOptions" filterable />
 			</n-form-item>
-			<n-form-item :label="t('inventory.itemExtras.code')" :feedback="item ? undefined : t('inventory.itemExtras.codeHint')">
-				<n-input v-model:value="form.sku" dir="ltr" :maxlength="40" :class="{ 'font-mono': form.sku }" />
+			<n-form-item :label="t('inventory.itemExtras.code')" :feedback="codeHint">
+				<n-input v-model:value="form.sku" dir="ltr" :maxlength="40" :readonly="!typable" :placeholder="typable ? undefined : t('inventory.itemExtras.codeAuto')" :class="{ 'font-mono': form.sku }" />
 			</n-form-item>
 			<n-form-item :label="t('inventory.itemExtras.barcode')" :feedback="t('inventory.itemExtras.barcodeHint')">
 				<n-input-group>
@@ -85,6 +85,7 @@
 <script setup lang="ts">
 import type { SelectOption } from "naive-ui"
 import type { AttributeDefinition, Category, Item, PropertyValue, Unit } from "@/add-os/modules/inventory/types/inventory"
+import type { ItemCodeMode } from "@/add-os/modules/inventory/utils/itemCode"
 import type { PackRow } from "@/add-os/modules/inventory/utils/itemUnits"
 import { NButton, NCheckbox, NDatePicker, NFormItem, NInput, NInputGroup, NInputNumber, NSelect, NSwitch, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
@@ -93,9 +94,10 @@ import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
 import ItemUnitsEditor from "@/add-os/modules/inventory/components/ItemUnitsEditor.vue"
 import { categoryPaths, localized } from "@/add-os/modules/inventory/utils/display"
+import { codeTypable } from "@/add-os/modules/inventory/utils/itemCode"
 import { packRowsValid, packsPayload } from "@/add-os/modules/inventory/utils/itemUnits"
 import { ApiError } from "@/add-os/services/api"
-import { createItem, generateBarcode, getCategory, updateItem } from "@/add-os/services/inventory"
+import { createItem, generateBarcode, getCategory, inventorySettings, updateItem } from "@/add-os/services/inventory"
 import { uploadMedia } from "@/add-os/services/media"
 import Icon from "@/components/common/Icon.vue"
 
@@ -117,6 +119,16 @@ const packs = ref<PackRow[]>([])
 const generating = ref(false)
 const uploading = ref(false)
 const isStock = computed(() => props.categories.find(c => c.id === form.value.categoryId)?.kind === "stock")
+/** Who sets the code — ADD Core's setting; the server refuses a code it does not take either way. */
+const codeMode = ref<ItemCodeMode>("on_create")
+const typable = computed(() => codeTypable(codeMode.value, !props.item))
+const codeHint = computed(() => {
+	if (codeMode.value === "auto") return props.item ? undefined : t("inventory.itemExtras.codeAuto")
+	if (!props.item) return t("inventory.itemExtras.codeOptional")
+	return codeMode.value === "on_create" ? t("inventory.itemExtras.codeFixed") : undefined
+})
+void quietly(inventorySettings, settings => (codeMode.value = settings.item_code_mode))
+
 /** An asset item is counted one by one: it has no unit to choose. */
 const isAsset = computed(() => props.categories.find(c => c.id === form.value.categoryId)?.kind === "asset")
 const properties = ref<Record<string, PropertyValue>>({})
@@ -213,7 +225,8 @@ async function save() {
 		barcode: f.barcode.trim() || null,
 		image_url: f.imageUrl || null,
 		...(isStock.value ? { units: packsPayload(packs.value) } : {}),
-		...(f.sku.trim() ? { sku: f.sku.trim() } : {})
+		// Sent only where the package takes a typed code, and only when there is one to send.
+		...(typable.value && f.sku.trim() && f.sku.trim() !== props.item?.sku ? { sku: f.sku.trim() } : {})
 	}
 	try {
 		if (props.item) await updateItem(props.item.id, payload)

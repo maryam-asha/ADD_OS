@@ -41,6 +41,7 @@ import type {
 	Warehouse,
 	WarehousePayload
 } from "@/add-os/modules/inventory/types/inventory"
+import type { ItemCodeMode } from "@/add-os/modules/inventory/utils/itemCode"
 import { ApiError, del, get, patch, post } from "./api"
 import { rowsOf, toPaginated } from "./pagination"
 
@@ -259,6 +260,8 @@ export async function removeSchedule(id: number): Promise<void> {
 export interface InventorySettings {
 	/** Whether an asset may be registered in or moved to a warehouse. */
 	assets_in_warehouses: boolean
+	/** Who sets an item's code: auto (never typed), on_create (typed when made, fixed after) or editable. */
+	item_code_mode: ItemCodeMode
 }
 
 let settings: Promise<InventorySettings> | null = null
