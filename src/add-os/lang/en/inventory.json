@@ -357,7 +357,9 @@
 			},
 			"confirmDelete": "Delete this item?",
 			"propertyRequired": "This field is required.",
-			"propertyInvalid": "This value wasn't accepted."
+			"propertyInvalid": "This value wasn't accepted.",
+			"viewTable": "Table",
+			"viewTree": "Tree"
 		},
 		"catalog": {
 			"description": "The category tree: a branch is either assets or stock, and each category has fields its items, and those below it, answer. And the units items are counted in.",
