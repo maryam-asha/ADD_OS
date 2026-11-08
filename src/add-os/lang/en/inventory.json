@@ -553,7 +553,10 @@
 			"factor": "Factor",
 			"noUnits": "No other units yet.",
 			"mainUnit": "Main unit",
-			"searchHint": "Search by name, code or barcode"
+			"searchHint": "Search by name, code or barcode",
+			"codeAuto": "Generated automatically when saved.",
+			"codeOptional": "Leave it empty to have it generated. It cannot change after saving.",
+			"codeFixed": "The code is fixed once saved."
 		}
 	}
 }
