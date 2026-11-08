@@ -9,6 +9,8 @@
 import type { Paginated, RawPaginatedResponse } from "./pagination"
 import type {
 	Asset,
+	AssetAddition,
+	AssetAdditionPayload,
 	AssetAssignment,
 	AssetDetailsPayload,
 	AssetMovement,
@@ -19,6 +21,7 @@ import type {
 	Category,
 	CategoryPayload,
 	CustodianRef,
+	DepreciationMethod,
 	DisposalMethod,
 	Item,
 	ItemKind,
@@ -197,6 +200,28 @@ export async function registerAssetBatch(payload: RegisterAssetBatchPayload): Pr
 	return rowsOf<Asset>((await post<{ data: Asset[] }>(`${BASE}/assets/batch`, payload)).data)
 }
 
+/** A draft approved into service (inventory.assets.approve). */
+export async function approveAsset(id: number): Promise<MessageResult> {
+	return post<MessageResult>(`${BASE}/assets/${id}/approve`, {})
+}
+
+/** Only a draft is deleted. */
+export async function deleteDraftAsset(id: number): Promise<MessageResult> {
+	return del<MessageResult>(`${BASE}/assets/${id}`)
+}
+
+export async function listAssetAdditions(assetId: number): Promise<AssetAddition[]> {
+	return rowsOf<AssetAddition>((await get<{ data: AssetAddition[] }>(`${BASE}/assets/${assetId}/additions`)).data)
+}
+
+export async function addAssetAddition(assetId: number, payload: AssetAdditionPayload): Promise<AssetAddition> {
+	return (await post<{ data: AssetAddition }>(`${BASE}/assets/${assetId}/additions`, payload)).data
+}
+
+export async function removeAssetAddition(id: number): Promise<MessageResult> {
+	return del<MessageResult>(`${BASE}/asset-additions/${id}`)
+}
+
 export async function updateAsset(id: number, payload: AssetDetailsPayload): Promise<MessageResult> {
 	return patch<MessageResult>(`${BASE}/assets/${id}`, payload)
 }
@@ -268,6 +293,14 @@ export interface InventorySettings {
 	assets_in_warehouses: boolean
 	/** Who sets an item's code: auto (never typed), on_create (typed when made, fixed after) or editable. */
 	item_code_mode: ItemCodeMode
+	/** The methods an asset may be depreciated by; the first is the default. */
+	depreciation_methods: DepreciationMethod[]
+	/** Whether an asset category may be intangible. */
+	intangible_assets: boolean
+	/** Whether capital additions may be recorded on an asset. */
+	capital_additions: boolean
+	/** Whether a registered asset waits as a draft for approval. */
+	asset_drafts: boolean
 }
 
 let settings: Promise<InventorySettings> | null = null

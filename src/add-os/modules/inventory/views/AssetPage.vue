@@ -17,9 +17,28 @@
 				</template>
 			</HrPageHeader>
 
+			<!-- A draft: approved, edited or deleted — nothing else until then. -->
+			<div v-if="draft" class="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+				<span class="me-auto text-sm text-secondary">{{ t("inventory.assets.draftNote") }}</span>
+				<n-button v-if="may.approve" size="small" type="primary" :loading="busy" @click="approve">
+					<template #icon><Icon name="carbon:checkmark-outline" :size="15" /></template>{{ t("inventory.assets.approve") }}
+				</n-button>
+				<n-button v-if="may.manage" size="small" secondary @click="detailsVisible = true">
+					<template #icon><Icon name="carbon:document" :size="15" /></template>{{ t("inventory.assets.editDetails") }}
+				</n-button>
+				<n-popconfirm v-if="may.manage" @positive-click="removeDraft">
+					<template #trigger>
+						<n-button size="small" type="error" secondary :loading="busy">
+							<template #icon><Icon name="carbon:trash-can" :size="15" /></template>{{ t("inventory.assets.deleteDraft") }}
+						</n-button>
+					</template>
+					{{ t("inventory.assets.deleteDraftConfirm") }}
+				</n-popconfirm>
+			</div>
+
 			<!-- Action Buttons Ribbon -->
-			<div v-if="!disposed" class="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-				<n-button v-if="may.manage" size="small" secondary @click="open('move')">
+			<div v-else-if="!disposed" class="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+				<n-button v-if="may.manage && !asset.intangible" size="small" secondary @click="open('move')">
 					<template #icon><Icon name="carbon:location" :size="15" /></template>{{ t("inventory.actions.move.title") }}
 				</n-button>
 				<n-button v-if="may.custody && !asset.custodian" size="small" type="primary" :disabled="asset.status !== 'in_service'" @click="open('assign')">
@@ -28,7 +47,7 @@
 				<n-button v-if="may.custody && asset.custodian" size="small" type="warning" secondary @click="open('return')">
 					<template #icon><Icon name="carbon:undo" :size="15" /></template>{{ t("inventory.actions.return.title") }}
 				</n-button>
-				<n-button v-if="may.maintenance && !asset.open_maintenance" size="small" secondary :disabled="asset.status !== 'in_service'" @click="open('maintenance')">
+				<n-button v-if="may.maintenance && !asset.open_maintenance && !asset.intangible" size="small" secondary :disabled="asset.status !== 'in_service'" @click="open('maintenance')">
 					<template #icon><Icon name="carbon:tool-kit" :size="15" /></template>{{ t("inventory.actions.maintenance.title") }}
 				</n-button>
 				<n-button v-if="may.maintenance && asset.open_maintenance" size="small" type="primary" @click="open('close')">
@@ -59,7 +78,7 @@
 						</div>
 					</template>
 					<dl class="flex flex-col gap-2.5 text-sm">
-						<div>
+						<div v-if="!asset.intangible">
 							<dt class="text-xs text-secondary">{{ t("inventory.assets.location") }}</dt>
 							<dd class="font-medium">{{ placeLabel(asset.location) }}</dd>
 						</div>
@@ -77,7 +96,7 @@
 								<template v-else>{{ EMPTY }}</template>
 							</dd>
 						</div>
-						<div>
+						<div v-if="!asset.intangible">
 							<dt class="text-xs text-secondary">{{ t("inventory.assets.qr") }}</dt>
 							<dd class="break-all"><span dir="ltr" class="font-mono text-xs text-slate-500">{{ asset.qr_token }}</span></dd>
 						</div>
@@ -108,6 +127,10 @@
 							<dt class="text-xs text-secondary">{{ t("inventory.assets.cost") }}</dt>
 							<dd class="add-numeric font-mono font-semibold text-emerald-600 dark:text-emerald-400">{{ money(asset.purchase_cost, asset.currency) }}</dd>
 						</div>
+						<div v-if="Number(asset.additions_total) > 0">
+							<dt class="text-xs text-secondary">{{ t("inventory.assets.totalCost") }}</dt>
+							<dd class="add-numeric font-mono font-semibold">{{ money(asset.total_cost, asset.currency) }}</dd>
+						</div>
 						<div>
 							<dt class="text-xs text-secondary">{{ t("inventory.assets.supplier") }}</dt>
 							<dd class="font-medium">{{ asset.supplier ?? EMPTY }}</dd>
@@ -132,6 +155,10 @@
 							<dt class="text-xs text-secondary">{{ t("inventory.assets.salvage") }}</dt>
 							<dd class="add-numeric font-medium">{{ money(asset.salvage_value, asset.currency) }}</dd>
 						</div>
+						<div v-if="asset.depreciation_method && !asset.intangible">
+							<dt class="text-xs text-secondary">{{ t("inventory.assets.method") }}</dt>
+							<dd class="font-medium">{{ t(`inventory.assets.methods.${asset.depreciation_method}`) }}</dd>
+						</div>
 					</dl>
 				</n-card>
 
@@ -139,7 +166,7 @@
 					<template #header>
 						<div class="flex items-center gap-2">
 							<Icon name="carbon:chart-line" :size="18" class="text-amber-500" />
-							<span class="font-bold">{{ t("inventory.assets.depreciation") }}</span>
+							<span class="font-bold">{{ asset.intangible ? t("inventory.assets.amortization") : t("inventory.assets.depreciation") }}</span>
 						</div>
 					</template>
 					<p v-if="!asset.depreciation" class="text-sm text-secondary">{{ t("inventory.assets.noDepreciation") }}</p>
@@ -204,6 +231,21 @@
 							</template>
 						</n-data-table>
 					</n-tab-pane>
+					<n-tab-pane v-if="additionsShown" name="additions" :tab="t('inventory.additions.title')">
+						<div v-if="may.manage && settings?.capital_additions && !disposed && !draft" class="mb-3 flex justify-end">
+							<n-button size="small" type="primary" secondary @click="additionVisible = true">
+								<template #icon><Icon name="carbon:add" :size="15" /></template>{{ t("inventory.additions.add") }}
+							</n-button>
+						</div>
+						<n-data-table :columns="additionColumns" :data="additions" :bordered="false" size="small" :scroll-x="720">
+							<template #empty>
+								<div class="flex flex-col items-center justify-center py-8 text-slate-400">
+									<Icon name="carbon:currency" :size="32" class="mb-1 opacity-50" />
+									<span class="text-sm">{{ t("inventory.additions.empty") }}</span>
+								</div>
+							</template>
+						</n-data-table>
+					</n-tab-pane>
 					<n-tab-pane name="schedules" :tab="t('inventory.history.schedules')">
 						<div v-if="may.maintenance && !disposed" class="mb-3 flex justify-end">
 							<n-button size="small" type="primary" secondary @click="editSchedule(null)">
@@ -225,27 +267,30 @@
 			<AssetActionModal v-model:show="actionVisible" :asset :action :schedules="asset.maintenance_schedules" @done="load" />
 			<AssetDetailsModal v-if="may.manage" v-model:show="detailsVisible" :asset @saved="load" />
 			<ScheduleModal v-if="may.maintenance" v-model:show="scheduleVisible" :asset-id="asset.id" :schedule="editingSchedule" @saved="load" />
+			<AssetAdditionModal v-if="may.manage" v-model:show="additionVisible" :asset-id="asset.id" :currency="asset.currency" @saved="load" />
 		</template>
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns } from "naive-ui"
-import type { Asset, AssetAction, AssetAssignment, AssetMovement, MaintenanceRecord, MaintenanceSchedule } from "@/add-os/modules/inventory/types/inventory"
+import type { Asset, AssetAction, AssetAddition, AssetAssignment, AssetMovement, MaintenanceRecord, MaintenanceSchedule } from "@/add-os/modules/inventory/types/inventory"
+import type { InventorySettings } from "@/add-os/services/inventory"
 import { NAlert, NButton, NCard, NDataTable, NPopconfirm, NSpin, NTabPane, NTabs, NTag, NTooltip, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
-import { useRoute } from "vue-router"
-import { canDisposeAssets, canManageAssets, canManageCustody, canManageMaintenance } from "@/add-os/config/permissions"
+import { useRoute, useRouter } from "vue-router"
+import { canApproveAssets, canDisposeAssets, canManageAssets, canManageCustody, canManageMaintenance } from "@/add-os/config/permissions"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
-import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
+import { apiErrorMessage, quietly, serverMessage } from "@/add-os/modules/hr/utils/errors"
 import AssetActionModal from "@/add-os/modules/inventory/components/AssetActionModal.vue"
+import AssetAdditionModal from "@/add-os/modules/inventory/components/AssetAdditionModal.vue"
 import AssetDetailsModal from "@/add-os/modules/inventory/components/AssetDetailsModal.vue"
 import AssetStatusTag from "@/add-os/modules/inventory/components/AssetStatusTag.vue"
 import ScheduleModal from "@/add-os/modules/inventory/components/ScheduleModal.vue"
 import { attachmentName } from "@/add-os/modules/inventory/utils/attachments"
 import { ALIGN_END, custodianLabel, EMPTY, isolate, localized, money, PLACE_COLUMN, placeLabel } from "@/add-os/modules/inventory/utils/display"
-import { getAsset, removeSchedule } from "@/add-os/services/inventory"
+import { approveAsset, deleteDraftAsset, getAsset, inventorySettings, listAssetAdditions, removeAssetAddition, removeSchedule } from "@/add-os/services/inventory"
 import { countKey, formatNumber } from "@/add-os/utils/format"
 import { formatDate, formatDateTime, formatTime } from "@/add-os/utils/format/dates"
 import Icon from "@/components/common/Icon.vue"
@@ -260,9 +305,10 @@ defineProps<{ titleKey?: string }>()
 
 const { t } = useI18n()
 const route = useRoute()
+const router = useRouter()
 const message = useMessage()
 
-const may = { manage: canManageAssets(), custody: canManageCustody(), maintenance: canManageMaintenance(), dispose: canDisposeAssets() }
+const may = { manage: canManageAssets(), custody: canManageCustody(), maintenance: canManageMaintenance(), dispose: canDisposeAssets(), approve: canApproveAssets() }
 
 const asset = ref<Asset | null>(null)
 const loadError = ref("")
@@ -273,15 +319,62 @@ const scheduleVisible = ref(false)
 const editingSchedule = ref<MaintenanceSchedule | null>(null)
 
 const disposed = computed(() => asset.value?.status === "disposed")
+const draft = computed(() => asset.value?.status === "draft")
+const busy = ref(false)
+const settings = ref<InventorySettings | null>(null)
+const additions = ref<AssetAddition[]>([])
+const additionVisible = ref(false)
+/** Shown while the option is on, or when the asset has additions from before. */
+const additionsShown = computed(() => !!settings.value?.capital_additions || additions.value.length > 0)
 
-onMounted(load)
+onMounted(() => {
+	void quietly(inventorySettings, next => (settings.value = next))
+	void load()
+})
 
 async function load() {
 	loadError.value = ""
 	try {
-		asset.value = await getAsset(Number(route.params.id))
+		const id = Number(route.params.id)
+		asset.value = await getAsset(id)
+		additions.value = await listAssetAdditions(id)
 	} catch (e) {
 		loadError.value = apiErrorMessage(e, t("inventory.common.loadError"))
+	}
+}
+
+async function approve() {
+	if (!asset.value) return
+	busy.value = true
+	try {
+		message.success(serverMessage(await approveAsset(asset.value.id), t("inventory.common.saved")))
+		await load()
+	} catch (e) {
+		message.error(apiErrorMessage(e, t("inventory.common.saveError")))
+	} finally {
+		busy.value = false
+	}
+}
+
+async function removeDraft() {
+	if (!asset.value) return
+	busy.value = true
+	try {
+		message.success(serverMessage(await deleteDraftAsset(asset.value.id), t("inventory.common.saved")))
+		await router.push({ name: "inventory.inventoryAssets" })
+	} catch (e) {
+		message.error(apiErrorMessage(e, t("inventory.common.saveError")))
+	} finally {
+		busy.value = false
+	}
+}
+
+async function removeAddition(addition: AssetAddition) {
+	try {
+		message.success(serverMessage(await removeAssetAddition(addition.id), t("inventory.common.saved")))
+		await load()
+	} catch (e) {
+		message.error(apiErrorMessage(e, t("inventory.common.saveError")))
 	}
 }
 
@@ -308,6 +401,28 @@ async function deleteSchedule(schedule: MaintenanceSchedule) {
 const actorName = (actor: { name: string | null } | null) => actor?.name ?? EMPTY
 const months = (n: number) => t(countKey("inventory.assets.months", n), { n: formatNumber(n) })
 const every = (n: number) => t(countKey("inventory.schedules.every", n), { n: formatNumber(n) })
+
+const additionColumns = computed<DataTableColumns<AssetAddition>>(() => [
+	{ title: t("inventory.additions.date"), key: "added_on", width: 120, render: row => formatDate(row.added_on) },
+	{ title: t("inventory.additions.description"), key: "description", minWidth: 200 },
+	{ title: t("inventory.additions.amount"), key: "amount", width: 140, align: ALIGN_END, render: row => money(row.amount, asset.value?.currency ?? null) },
+	{ title: t("inventory.operations.reference"), key: "reference", width: 130, render: row => row.reference ?? EMPTY },
+	{
+		title: t("inventory.assets.attachments"),
+		key: "attachments",
+		width: 160,
+		render: row => (row.attachments.length ? row.attachments.map(url => h("a", { href: url, target: "_blank", rel: "noopener noreferrer", class: "block truncate text-xs text-primary underline" }, attachmentName(url))) : EMPTY)
+	},
+	{
+		title: "",
+		key: "actions",
+		width: 70,
+		render: row =>
+			may.manage && !disposed.value
+				? h(NPopconfirm, { onPositiveClick: () => removeAddition(row) }, { trigger: () => h(NButton, { size: "tiny", quaternary: true, type: "error" }, () => t("inventory.additions.remove")), default: () => t("inventory.additions.removeConfirm") })
+				: null
+	}
+])
 
 const movementColumns = computed<DataTableColumns<AssetMovement>>(() => [
 	{

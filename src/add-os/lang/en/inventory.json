@@ -48,7 +48,8 @@
 			"in_maintenance": "In maintenance",
 			"retired": "Retired",
 			"lost": "Lost",
-			"disposed": "Disposed"
+			"disposed": "Disposed",
+			"draft": "Draft"
 		},
 		"maintenanceType": {
 			"corrective": "Repair",
@@ -141,7 +142,22 @@
 			},
 			"inServiceOn": "In service on",
 			"inServiceHint": "Depreciation starts then; left empty, at the purchase date.",
-			"attachments": "Attachments"
+			"attachments": "Attachments",
+			"method": "Depreciation method",
+			"methods": {
+				"straight_line": "Straight line",
+				"declining_balance": "Declining balance"
+			},
+			"intangible": "Intangible",
+			"amortization": "Amortization",
+			"totalCost": "Cost with additions",
+			"noPlaceNeeded": "Intangible items need no place.",
+			"saveDraft": "Save as draft",
+			"saveApprove": "Save and approve",
+			"approve": "Approve",
+			"deleteDraft": "Delete draft",
+			"deleteDraftConfirm": "The draft will be deleted for good. Continue?",
+			"draftNote": "Draft: no code, movement or depreciation until approved."
 		},
 		"actions": {
 			"move": {
@@ -363,7 +379,9 @@
 			"order": "Order",
 			"showToMembers": "Shown to members",
 			"showToMembersHint": "Its assets in service show to members in a space's details (a projector, two mics).",
-			"shownToMembers": "Shown to members"
+			"shownToMembers": "Shown to members",
+			"intangible": "Intangible",
+			"intangibleHint": "Assets with no body (a software licence): no place or maintenance, amortized on a straight line."
 		},
 		"fields": {
 			"description": "The fields this category's items answer, inherited ones included.",
@@ -627,6 +645,22 @@
 				"stock_currency": {
 					"label": "Stock cost currency",
 					"hint": "Stock is costed in it at weighted average cost."
+				},
+				"assets_drafts": {
+					"label": "Register assets as drafts, then approve",
+					"hint": "An asset stays a draft until someone allowed to approve does so."
+				},
+				"assets_intangible": {
+					"label": "Intangible assets",
+					"hint": "Allows asset categories with no place (software licences), amortized on a straight line."
+				},
+				"assets_capital_additions": {
+					"label": "Capital additions",
+					"hint": "Money spent on an asset that raises its cost, depreciated over what is left of its life."
+				},
+				"assets_depreciation_methods": {
+					"label": "Depreciation methods on offer",
+					"hint": "The first is the default for a new asset."
 				}
 			},
 			"options": {
@@ -634,8 +668,23 @@
 					"auto": "Always numbered",
 					"on_create": "Typed when made, then fixed",
 					"editable": "Typed and changed any time"
+				},
+				"assets_depreciation_methods": {
+					"straight_line": "Straight line",
+					"declining_balance": "Declining balance"
 				}
 			}
+		},
+		"additions": {
+			"title": "Capital additions",
+			"add": "Add an addition",
+			"date": "Date",
+			"amount": "Amount",
+			"description": "Description",
+			"empty": "No capital additions.",
+			"remove": "Remove",
+			"removeConfirm": "This addition will be removed and depreciation recalculated. Continue?",
+			"hint": "They raise the asset's cost and are depreciated over what is left of its life."
 		}
 	}
 }

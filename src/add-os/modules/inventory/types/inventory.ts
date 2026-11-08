@@ -101,6 +101,8 @@ export interface Category {
 	id: number
 	parent_id: number | null
 	kind: ItemKind
+	/** An asset category whose assets have no body (a licence): no place, amortized. */
+	intangible: boolean
 	name: Bilingual
 	icon: string | null
 	show_to_members: boolean
@@ -114,6 +116,7 @@ export interface CategoryPayload {
 	name: Bilingual
 	parent_id?: number | null
 	kind?: ItemKind
+	intangible?: boolean
 	icon?: string | null
 	show_to_members?: boolean
 	order?: number
@@ -158,7 +161,7 @@ export interface Item {
 	description: string | null
 	image_url: string | null
 	kind: ItemKind
-	category: { id: number; name: Bilingual }
+	category: { id: number; name: Bilingual; intangible?: boolean }
 	/** None for an asset item: it is counted one by one. */
 	unit: Unit | null
 	properties: Record<string, PropertyValue>
@@ -235,9 +238,13 @@ export interface WarehouseRef {
 
 // ── Assets ──────────────────────────────────────────────────────────────────
 
-export type AssetStatus = "in_service" | "in_maintenance" | "retired" | "lost" | "disposed"
+/** `draft` only with the package's drafts on: saved, waiting for approval. */
+export type AssetStatus = "draft" | "in_service" | "in_maintenance" | "retired" | "lost" | "disposed"
 
-export const ASSET_STATUSES: readonly AssetStatus[] = ["in_service", "in_maintenance", "retired", "lost", "disposed"]
+export const ASSET_STATUSES: readonly AssetStatus[] = ["draft", "in_service", "in_maintenance", "retired", "lost", "disposed"]
+
+/** How an asset loses its value: evenly each month, or twice that rate on what is left. */
+export type DepreciationMethod = "straight_line" | "declining_balance"
 
 /** What PATCH assets/{id}/status may set; the other two have their own flows. */
 export const SETTABLE_ASSET_STATUSES: readonly AssetStatus[] = ["in_service", "retired", "lost"]
@@ -330,6 +337,12 @@ export interface Asset {
 	attachments: string[]
 	useful_life_months: number | null
 	salvage_value: string | null
+	depreciation_method: DepreciationMethod | null
+	/** No body: no place, no QR to scan, no maintenance; amortized. */
+	intangible: boolean
+	/** Capital additions so far, and the cost with them. */
+	additions_total: string
+	total_cost: string | null
 	depreciation: Depreciation | null
 	warranty_until: string | null
 	disposal: { disposed_on: string; method: DisposalMethod | null; proceeds: string | null; note: string | null } | null
@@ -373,11 +386,13 @@ export interface AssetBatchLine {
 	useful_life_months?: number | null
 	salvage_value?: number | null
 	warranty_until?: string | null
+	depreciation_method?: DepreciationMethod
 }
 
 /** POST assets/batch — a room's contents: the place and what the purchase shares once, a line per item. */
 export interface RegisterAssetBatchPayload {
-	location: PlaceRef
+	/** Needed unless every line is intangible (sits nowhere). */
+	location?: PlaceRef
 	purchased_on?: string | null
 	in_service_on?: string | null
 	supplier?: string | null
@@ -385,6 +400,8 @@ export interface RegisterAssetBatchPayload {
 	attachments?: string[]
 	currency?: string | null
 	notes?: string | null
+	/** Only with the package's drafts on: false needs inventory.assets.approve. */
+	draft?: boolean
 	lines: AssetBatchLine[]
 }
 
@@ -524,4 +541,24 @@ export interface AssetRegisterRow {
 export interface AssetRegister {
 	assets: AssetRegisterRow[]
 	totals: { currency: string; cost: string; accumulated: string; book_value: string }[]
+}
+
+/** A capital addition: money spent on an asset that raised its cost (GET assets/{id}/additions). */
+export interface AssetAddition {
+	id: number
+	asset_id: number
+	added_on: string
+	amount: string
+	description: string
+	reference: string | null
+	attachments: string[]
+	actor: { id: number; name: string | null } | null
+}
+
+export interface AssetAdditionPayload {
+	added_on: string
+	amount: number
+	description: string
+	reference?: string | null
+	attachments?: string[]
 }

@@ -12,7 +12,7 @@ vi.mock("@/stores/auth", () => ({
 	useAuthStore: () => ({ setLogout: vi.fn() })
 }))
 
-const { findItemByBarcode, generateBarcode, getStockOperation, inventorySettings, listAssets, listBalances, listStockOperations, listManagedSettings, listWarehouses, moveAsset, registerAssetBatch, registerAssets, saveSettings, submitStockOperation } = await import("../inventory")
+const { addAssetAddition, approveAsset, deleteDraftAsset, removeAssetAddition, findItemByBarcode, generateBarcode, getStockOperation, inventorySettings, listAssets, listBalances, listStockOperations, listManagedSettings, listWarehouses, moveAsset, registerAssetBatch, registerAssets, saveSettings, submitStockOperation } = await import("../inventory")
 const { amenityLabel } = await import("../amenities")
 
 function jsonResponse(body: unknown, status = 200) {
@@ -61,6 +61,23 @@ describe("inventory service", () => {
 
 		expect(assets).toHaveLength(2)
 		expect(calledBody()).toEqual({ item_id: 4, location: { type: "space", id: 7 }, count: 2 })
+	})
+
+	it("approves a draft, deletes one, and adds or removes a capital addition at their own URLs", async () => {
+		vi.mocked(fetch).mockImplementation(async () => jsonResponse({ message: "ok", data: { id: 3 } }))
+
+		await approveAsset(7)
+		await deleteDraftAsset(7)
+		await addAssetAddition(7, { added_on: "2026-02-01", amount: 50, description: "RAM" })
+		await removeAssetAddition(3)
+
+		const calls = vi.mocked(fetch).mock.calls.map(([url, init]) => `${(init as RequestInit).method} ${new URL(String(url)).pathname}`)
+		expect(calls).toEqual([
+			"POST /api/v1/inventory/assets/7/approve",
+			"DELETE /api/v1/inventory/assets/7",
+			"POST /api/v1/inventory/assets/7/additions",
+			"DELETE /api/v1/inventory/asset-additions/3"
+		])
 	})
 
 	it("lists the settings page's rows", async () => {

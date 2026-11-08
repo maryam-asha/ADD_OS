@@ -35,6 +35,9 @@
 			<n-form-item :label="t('inventory.assets.salvage')">
 				<n-input-number v-model:value="form.salvage_value" :min="0" :precision="2" clearable class="w-full" dir="ltr" />
 			</n-form-item>
+			<n-form-item v-if="methodOptions.length > 1 && !asset.intangible" :label="t('inventory.assets.method')">
+				<n-select v-model:value="form.depreciation_method" :options="methodOptions" />
+			</n-form-item>
 			<n-form-item :label="t('inventory.assets.notes')" class="sm:col-span-2">
 				<n-input v-model:value="form.notes" type="textarea" :maxlength="5000" :autosize="{ minRows: 2, maxRows: 4 }" />
 			</n-form-item>
@@ -51,15 +54,16 @@
 </template>
 
 <script setup lang="ts">
-import type { Asset } from "@/add-os/modules/inventory/types/inventory"
-import { NButton, NDatePicker, NFormItem, NInput, NInputNumber, useMessage } from "naive-ui"
-import { ref, watch } from "vue"
+import type { SelectOption } from "naive-ui"
+import type { Asset, DepreciationMethod } from "@/add-os/modules/inventory/types/inventory"
+import { NButton, NDatePicker, NFormItem, NInput, NInputNumber, NSelect, useMessage } from "naive-ui"
+import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import CurrencySelect from "@/add-os/modules/hr/components/payroll/CurrencySelect.vue"
-import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
+import { apiErrorMessage, quietly, serverMessage } from "@/add-os/modules/hr/utils/errors"
 import AttachmentsField from "@/add-os/modules/inventory/components/AttachmentsField.vue"
-import { updateAsset } from "@/add-os/services/inventory"
+import { inventorySettings, updateAsset } from "@/add-os/services/inventory"
 
 /** An asset's details and money; where it is, who holds it and its status each have their own action. */
 const props = defineProps<{ asset: Asset }>()
@@ -83,11 +87,16 @@ function fromAsset(asset: Asset) {
 		currency: asset.currency,
 		useful_life_months: asset.useful_life_months,
 		salvage_value: num(asset.salvage_value),
+		depreciation_method: asset.depreciation_method ?? "straight_line",
 		notes: asset.notes ?? ""
 	}
 }
 
 const form = ref(fromAsset(props.asset))
+/** The methods the package offers; a choice only when there is more than one. */
+const methods = ref<DepreciationMethod[]>([])
+void quietly(inventorySettings, settings => (methods.value = settings.depreciation_methods))
+const methodOptions = computed<SelectOption[]>(() => methods.value.map(method => ({ value: method, label: t(`inventory.assets.methods.${method}`) })))
 const saving = ref(false)
 const problem = ref("")
 
