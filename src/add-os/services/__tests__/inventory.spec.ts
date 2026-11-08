@@ -12,7 +12,7 @@ vi.mock("@/stores/auth", () => ({
 	useAuthStore: () => ({ setLogout: vi.fn() })
 }))
 
-const { findItemByBarcode, generateBarcode, getStockOperation, listAssets, listBalances, listStockOperations, listWarehouses, moveAsset, registerAssets, submitStockOperation } = await import("../inventory")
+const { findItemByBarcode, generateBarcode, getStockOperation, inventorySettings, listAssets, listBalances, listStockOperations, listWarehouses, moveAsset, registerAssets, submitStockOperation } = await import("../inventory")
 const { amenityLabel } = await import("../amenities")
 
 function jsonResponse(body: unknown, status = 200) {
@@ -114,6 +114,16 @@ describe("inventory service", () => {
 
 		vi.mocked(fetch).mockResolvedValueOnce(jsonResponse({ data: { id: "op-9", movements: [] } }))
 		expect((await getStockOperation("op-9")).id).toBe("op-9")
+	})
+
+	it("reads the package's settings once and keeps them", async () => {
+		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: { assets_in_warehouses: true } }))
+
+		expect(await inventorySettings()).toEqual({ assets_in_warehouses: true })
+		expect(await inventorySettings()).toEqual({ assets_in_warehouses: true })
+
+		expect(calledUrl().pathname).toBe("/api/v1/inventory/settings")
+		expect(vi.mocked(fetch)).toHaveBeenCalledTimes(1)
 	})
 
 	it("searches balances", async () => {

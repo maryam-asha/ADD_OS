@@ -29,7 +29,10 @@
 			"building": "المبنى",
 			"floor": "الطابق",
 			"zone": "المنطقة",
-			"space": "المساحة"
+			"space": "المساحة",
+			"inPlace": "مكان",
+			"inWarehouse": "مستودع",
+			"pickWarehouse": "اختر المستودع"
 		},
 		"custodianType": {
 			"hr_employee": "موظف",
@@ -416,7 +419,8 @@
 			"balances": "الأرصدة",
 			"recentMovements": "آخر الحركات",
 			"external": "خارج الفروع",
-			"save": "حفظ المستودع"
+			"save": "حفظ المستودع",
+			"assets": "الأصول المخزّنة فيه"
 		},
 		"operations": {
 			"add": "إضافة حركة",

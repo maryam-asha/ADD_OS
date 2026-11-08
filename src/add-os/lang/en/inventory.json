@@ -29,7 +29,10 @@
 			"building": "Building",
 			"floor": "Floor",
 			"zone": "Zone",
-			"space": "Space"
+			"space": "Space",
+			"inPlace": "A place",
+			"inWarehouse": "A warehouse",
+			"pickWarehouse": "Choose the warehouse"
 		},
 		"custodianType": {
 			"hr_employee": "Employee",
@@ -416,7 +419,8 @@
 			"balances": "On hand",
 			"recentMovements": "Recent movements",
 			"external": "Outside any branch",
-			"save": "Save warehouse"
+			"save": "Save warehouse",
+			"assets": "Assets kept here"
 		},
 		"operations": {
 			"add": "Add movement",

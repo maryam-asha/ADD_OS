@@ -12,7 +12,7 @@
 				<ItemSelect v-model:value="form.item_id" kind="asset" />
 			</n-form-item>
 			<n-form-item :label="t('inventory.assets.location')" class="sm:col-span-2" required>
-				<PlacePicker v-model:value="form.location" />
+				<AssetPlacePicker v-model:value="form.location" />
 			</n-form-item>
 			<n-form-item :label="t('inventory.assets.count')" :feedback="t('inventory.assets.countHint')">
 				<n-input-number v-model:value="form.count" :min="1" :max="100" :precision="0" class="w-full" />
@@ -73,8 +73,8 @@ import { useI18n } from "vue-i18n"
 import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import CurrencySelect from "@/add-os/modules/hr/components/payroll/CurrencySelect.vue"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
+import AssetPlacePicker from "@/add-os/modules/inventory/components/AssetPlacePicker.vue"
 import ItemSelect from "@/add-os/modules/inventory/components/ItemSelect.vue"
-import PlacePicker from "@/add-os/modules/inventory/components/PlacePicker.vue"
 import { registerAssets } from "@/add-os/services/inventory"
 import { countKey, formatNumber } from "@/add-os/utils/format"
 

@@ -166,6 +166,7 @@ export async function generateBarcode(): Promise<string> {
 
 export interface AssetFilters {
 	page?: number
+	per_page?: number
 	item_id?: number | null
 	category_id?: number | null
 	status?: AssetStatus | null
@@ -250,6 +251,27 @@ export async function updateSchedule(id: number, payload: Partial<{ title: strin
 
 export async function removeSchedule(id: number): Promise<void> {
 	await del(`${BASE}/maintenance-schedules/${id}`)
+}
+
+// ── Settings ────────────────────────────────────────────────────────────────
+
+/** The package's options the screens follow (config/inventory.php on ADD Core). */
+export interface InventorySettings {
+	/** Whether an asset may be registered in or moved to a warehouse. */
+	assets_in_warehouses: boolean
+}
+
+let settings: Promise<InventorySettings> | null = null
+
+/** Read once per page load: they change only with a deploy. A failed read is retried next time. */
+export function inventorySettings(): Promise<InventorySettings> {
+	settings ??= get<{ data: InventorySettings }>(`${BASE}/settings`)
+		.then(res => res.data)
+		.catch(error => {
+			settings = null
+			throw error
+		})
+	return settings
 }
 
 // ── Warehouses ──────────────────────────────────────────────────────────────

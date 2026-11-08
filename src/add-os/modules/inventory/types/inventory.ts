@@ -12,7 +12,8 @@ export interface Bilingual {
 }
 
 /** ADD's own places: what an asset sits in and stock is counted on. */
-export type PlaceType = "branch" | "building" | "floor" | "zone" | "space"
+/** `warehouse` only as an asset's place, when the package lets assets be stored in warehouses. */
+export type PlaceType = "branch" | "building" | "floor" | "zone" | "space" | "warehouse"
 
 export const PLACE_TYPES: readonly PlaceType[] = ["branch", "building", "floor", "zone", "space"]
 
