@@ -27,6 +27,7 @@ import type {
 	MaintenanceSchedule,
 	MaintenanceType,
 	PlaceRef,
+	RegisterAssetBatchPayload,
 	RegisterAssetPayload,
 	StockBalance,
 	StockMovement,
@@ -189,6 +190,10 @@ export async function getAsset(id: number): Promise<Asset> {
 /** `count` identical assets, each with its own code and QR. */
 export async function registerAssets(payload: RegisterAssetPayload): Promise<Asset[]> {
 	return rowsOf<Asset>((await post<{ data: Asset[] }>(`${BASE}/assets`, payload)).data)
+}
+
+export async function registerAssetBatch(payload: RegisterAssetBatchPayload): Promise<Asset[]> {
+	return rowsOf<Asset>((await post<{ data: Asset[] }>(`${BASE}/assets/batch`, payload)).data)
 }
 
 export async function updateAsset(id: number, payload: AssetDetailsPayload): Promise<MessageResult> {

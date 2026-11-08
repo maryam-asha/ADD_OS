@@ -12,7 +12,7 @@ vi.mock("@/stores/auth", () => ({
 	useAuthStore: () => ({ setLogout: vi.fn() })
 }))
 
-const { findItemByBarcode, generateBarcode, getStockOperation, inventorySettings, listAssets, listBalances, listStockOperations, listWarehouses, moveAsset, registerAssets, submitStockOperation } = await import("../inventory")
+const { findItemByBarcode, generateBarcode, getStockOperation, inventorySettings, listAssets, listBalances, listStockOperations, listWarehouses, moveAsset, registerAssetBatch, registerAssets, submitStockOperation } = await import("../inventory")
 const { amenityLabel } = await import("../amenities")
 
 function jsonResponse(body: unknown, status = 200) {
@@ -61,6 +61,17 @@ describe("inventory service", () => {
 
 		expect(assets).toHaveLength(2)
 		expect(calledBody()).toEqual({ item_id: 4, location: { type: "space", id: 7 }, count: 2 })
+	})
+
+	it("registers a place's assets in one batch", async () => {
+		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: [{ id: 1 }, { id: 2 }, { id: 3 }] }, 201))
+		const payload = { location: { type: "space" as const, id: 7 }, currency: "USD", lines: [{ item_id: 4, count: 2, purchase_cost: 25 }, { item_id: 5, serial_number: "S-1" }] }
+
+		const assets = await registerAssetBatch(payload)
+
+		expect(calledUrl().pathname).toMatch(/\/assets\/batch$/)
+		expect(assets).toHaveLength(3)
+		expect(calledBody()).toEqual(payload)
 	})
 
 	it("moves an asset with its place as an object and an empty note as null", async () => {

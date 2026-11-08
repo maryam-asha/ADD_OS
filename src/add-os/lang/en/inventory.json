@@ -123,6 +123,21 @@
 				"few": "{n} months",
 				"many": "{n} months",
 				"other": "{n} months"
+			},
+			"lines": "Assets in this place",
+			"linesHint": "Add each item found in the place with its count; every asset gets its own code and QR.",
+			"addLine": "Add an item…",
+			"removeLine": "Remove line",
+			"unitCost": "Cost each",
+			"purchase": "Purchase",
+			"purchaseHint": "Applies to every asset registered here.",
+			"toRegister": {
+				"zero": "No assets yet",
+				"one": "{n} asset",
+				"two": "{n} assets",
+				"few": "{n} assets",
+				"many": "{n} assets",
+				"other": "{n} assets"
 			}
 		},
 		"actions": {

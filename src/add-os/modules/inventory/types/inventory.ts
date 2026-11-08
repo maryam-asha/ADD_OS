@@ -22,6 +22,15 @@ export interface PlaceRef {
 	id: number
 }
 
+/** The levels chosen in the place picker, outermost first — what it needs to show a place again without asking the server. */
+export interface PlaceChain {
+	branchId: number | null
+	buildingId: number | null
+	floorId: number | null
+	zoneId: number | null
+	spaceId: number | null
+}
+
 /** A place as the server names it: its own label, and the places it sits in, outermost first. */
 export interface PlaceDescription extends PlaceRef {
 	label: string | null
@@ -330,6 +339,29 @@ export interface RegisterAssetPayload extends AssetDetailsPayload {
 	location: PlaceRef
 	count?: number
 	code?: string | null
+}
+
+/** One asset item of a registration in one place: its count and what differs from the others. */
+export interface AssetBatchLine {
+	item_id: number
+	count?: number
+	serial_number?: string | null
+	purchase_cost?: number | null
+	useful_life_months?: number | null
+	salvage_value?: number | null
+	warranty_until?: string | null
+}
+
+/** POST assets/batch — a room's contents: the place and what the purchase shares once, a line per item. */
+export interface RegisterAssetBatchPayload {
+	location: PlaceRef
+	purchased_on?: string | null
+	supplier?: string | null
+	reference?: string | null
+	attachment_url?: string | null
+	currency?: string | null
+	notes?: string | null
+	lines: AssetBatchLine[]
 }
 
 // ── Stock ───────────────────────────────────────────────────────────────────

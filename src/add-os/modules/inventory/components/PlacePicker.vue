@@ -1,17 +1,17 @@
 <!-- src/add-os/modules/inventory/components/PlacePicker.vue -->
 <template>
 	<div :class="inline ? 'flex flex-wrap sm:flex-nowrap items-center gap-2 w-full' : 'grid w-full grid-cols-1 gap-2 sm:grid-cols-2'">
-		<n-select v-model:value="branchId" :options="branchOptions" :placeholder="t('inventory.place.branch')" filterable clearable class="w-full flex-1 min-w-[130px]" :disabled />
-		<n-select v-if="!inline || branchId" v-model:value="buildingId" :options="buildingOptions" :placeholder="t('inventory.place.building')" filterable clearable class="w-full flex-1 min-w-[130px]" :disabled="disabled || !branchId" />
-		<n-select v-if="!inline || buildingId" v-model:value="floorId" :options="floorOptions" :placeholder="t('inventory.place.floor')" filterable clearable class="w-full flex-1 min-w-[110px]" :disabled="disabled || !buildingId" />
-		<n-select v-if="!inline || floorId" v-model:value="zoneId" :options="zoneOptions" :placeholder="t('inventory.place.zone')" filterable clearable class="w-full flex-1 min-w-[110px]" :disabled="disabled || !floorId" />
-		<n-select v-if="!inline || buildingId" v-model:value="spaceId" :options="spaceOptions" :placeholder="t('inventory.place.space')" filterable clearable class="w-full flex-1 min-w-[130px]" :disabled="disabled || !buildingId" />
+		<n-select :value="branchId" :options="branchOptions" :placeholder="t('inventory.place.branch')" filterable clearable class="w-full flex-1 min-w-[130px]" :disabled @update:value="pickBranch" />
+		<n-select v-if="!inline || branchId" :value="buildingId" :options="buildingOptions" :placeholder="t('inventory.place.building')" filterable clearable class="w-full flex-1 min-w-[130px]" :disabled="disabled || !branchId" @update:value="pickBuilding" />
+		<n-select v-if="!inline || buildingId" :value="floorId" :options="floorOptions" :placeholder="t('inventory.place.floor')" filterable clearable class="w-full flex-1 min-w-[110px]" :disabled="disabled || !buildingId" @update:value="pickFloor" />
+		<n-select v-if="!inline || floorId" :value="zoneId" :options="zoneOptions" :placeholder="t('inventory.place.zone')" filterable clearable class="w-full flex-1 min-w-[110px]" :disabled="disabled || !floorId" @update:value="pickZone" />
+		<n-select v-if="!inline || buildingId" :value="spaceId" :options="spaceOptions" :placeholder="t('inventory.place.space')" filterable clearable class="w-full flex-1 min-w-[130px]" :disabled="disabled || !buildingId" @update:value="pickSpace" />
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { SelectOption } from "naive-ui"
-import type { PlaceRef } from "@/add-os/modules/inventory/types/inventory"
+import type { PlaceChain, PlaceRef } from "@/add-os/modules/inventory/types/inventory"
 import { NSelect } from "naive-ui"
 import { onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
@@ -28,7 +28,11 @@ import { listZones } from "@/add-os/services/zones"
  * deep as it needs to go — a building, a floor, a zone, a space. The value
  * is the deepest one chosen, as ADD Core's `{type, id}`; a space can be
  * picked straight from its building, since a space need not be zoned.
- * Clearing a level clears every level below it.
+ * Choosing a level clears every level below it.
+ *
+ * `chain` carries the levels themselves: read it to remember what was
+ * chosen, pass one in to open on that place already chosen (the asset
+ * form starts from the list's place filter that way).
  *
  * `inline` is for a list's filter bar: the selects become the bar's own
  * items, and a level shows only once the one above it is chosen — a bar of
@@ -37,6 +41,7 @@ import { listZones } from "@/add-os/services/zones"
  */
 defineProps<{ disabled?: boolean; inline?: boolean }>()
 const value = defineModel<PlaceRef | null>("value", { required: true })
+const chain = defineModel<PlaceChain | null>("chain")
 
 const { t } = useI18n()
 
@@ -52,48 +57,77 @@ const floorOptions = ref<SelectOption[]>([])
 const zoneOptions = ref<SelectOption[]>([])
 const spaceOptions = ref<SelectOption[]>([])
 
-onMounted(() => void quietly(listBranches, branches => (branchOptions.value = branches.map(b => ({ label: localized(b.name), value: b.id })))))
+onMounted(() => {
+	void quietly(listBranches, branches => (branchOptions.value = branches.map(b => ({ label: localized(b.name), value: b.id }))))
+	if (chain.value && value.value) restore(chain.value)
+})
 
-watch(branchId, id => {
-	buildingId.value = null
+function restore(levels: PlaceChain) {
+	branchId.value = levels.branchId
+	buildingId.value = levels.buildingId
+	floorId.value = levels.floorId
+	zoneId.value = levels.zoneId
+	spaceId.value = levels.spaceId
+	if (levels.branchId) loadBuildings(levels.branchId)
+	if (levels.buildingId) loadFloors(levels.buildingId)
+	if (levels.floorId) loadZones(levels.floorId)
+	loadSpaces()
+}
+
+function pickBranch(id: number | null) {
+	branchId.value = id
 	buildingOptions.value = []
-	if (id) void quietly(() => listBuildings(id), buildings => (buildingOptions.value = buildings.map(b => ({ label: localized(b.name), value: b.id }))))
-	emit()
-})
+	if (id) loadBuildings(id)
+	pickBuilding(null)
+}
 
-watch(buildingId, id => {
-	floorId.value = null
-	spaceId.value = null
+function pickBuilding(id: number | null) {
+	buildingId.value = id
 	floorOptions.value = []
-	if (id) void quietly(() => listFloors(id), floors => (floorOptions.value = floors.map(f => ({ label: f.label, value: f.id }))))
-	loadSpaces()
-	emit()
-})
+	if (id) loadFloors(id)
+	pickFloor(null)
+}
 
-watch(floorId, id => {
-	zoneId.value = null
+function pickFloor(id: number | null) {
+	floorId.value = id
 	zoneOptions.value = []
-	if (id) void quietly(() => listZones(id), zones => (zoneOptions.value = zones.map(z => ({ label: z.label, value: z.id }))))
-	emit()
-})
+	if (id) loadZones(id)
+	pickZone(null)
+}
 
-watch(zoneId, () => {
-	spaceId.value = null
+function pickZone(id: number | null) {
+	zoneId.value = id
 	loadSpaces()
+	pickSpace(null)
+}
+
+function pickSpace(id: number | null) {
+	spaceId.value = id
 	emit()
-})
+}
 
-watch(spaceId, () => emit())
-
-watch(value, newVal => {
-	if (!newVal) {
+watch(value, next => {
+	if (!next) {
 		branchId.value = null
 		buildingId.value = null
 		floorId.value = null
 		zoneId.value = null
 		spaceId.value = null
+		chain.value = null
 	}
 })
+
+function loadBuildings(branch: number) {
+	void quietly(() => listBuildings(branch), buildings => (buildingOptions.value = buildings.map(b => ({ label: localized(b.name), value: b.id }))))
+}
+
+function loadFloors(building: number) {
+	void quietly(() => listFloors(building), floors => (floorOptions.value = floors.map(f => ({ label: f.label, value: f.id }))))
+}
+
+function loadZones(floor: number) {
+	void quietly(() => listZones(floor), zones => (zoneOptions.value = zones.map(z => ({ label: z.label, value: z.id }))))
+}
 
 function loadSpaces() {
 	spaceOptions.value = []
@@ -117,6 +151,7 @@ function emit() {
 					: branchId.value
 						? { type: "branch", id: branchId.value }
 						: null
+	chain.value = deepest ? { branchId: branchId.value, buildingId: buildingId.value, floorId: floorId.value, zoneId: zoneId.value, spaceId: spaceId.value } : null
 	value.value = deepest
 }
 </script>
