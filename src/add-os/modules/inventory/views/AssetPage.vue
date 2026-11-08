@@ -101,6 +101,10 @@
 							<dd class="font-medium">{{ asset.purchased_on ? formatDate(asset.purchased_on) : EMPTY }}</dd>
 						</div>
 						<div>
+							<dt class="text-xs text-secondary">{{ t("inventory.assets.inServiceOn") }}</dt>
+							<dd class="font-medium">{{ asset.in_service_on ? formatDate(asset.in_service_on) : EMPTY }}</dd>
+						</div>
+						<div>
 							<dt class="text-xs text-secondary">{{ t("inventory.assets.cost") }}</dt>
 							<dd class="add-numeric font-mono font-semibold text-emerald-600 dark:text-emerald-400">{{ money(asset.purchase_cost, asset.currency) }}</dd>
 						</div>
@@ -112,7 +116,12 @@
 							<dt class="text-xs text-secondary">{{ t("inventory.operations.reference") }}</dt>
 							<dd class="font-medium">
 								{{ asset.reference ?? EMPTY }}
-								<a v-if="asset.attachment_url" :href="asset.attachment_url" target="_blank" rel="noopener noreferrer" class="ms-2 text-xs text-primary underline">{{ t("inventory.operations.openAttachment") }}</a>
+							</dd>
+						</div>
+						<div v-if="asset.attachments.length">
+							<dt class="text-xs text-secondary">{{ t("inventory.assets.attachments") }}</dt>
+							<dd class="flex flex-col gap-1">
+								<a v-for="url in asset.attachments" :key="url" :href="url" target="_blank" rel="noopener noreferrer" class="truncate text-xs text-primary underline">{{ attachmentName(url) }}</a>
 							</dd>
 						</div>
 						<div>
@@ -234,6 +243,7 @@ import AssetActionModal from "@/add-os/modules/inventory/components/AssetActionM
 import AssetDetailsModal from "@/add-os/modules/inventory/components/AssetDetailsModal.vue"
 import AssetStatusTag from "@/add-os/modules/inventory/components/AssetStatusTag.vue"
 import ScheduleModal from "@/add-os/modules/inventory/components/ScheduleModal.vue"
+import { attachmentName } from "@/add-os/modules/inventory/utils/attachments"
 import { ALIGN_END, custodianLabel, EMPTY, isolate, localized, money, PLACE_COLUMN, placeLabel } from "@/add-os/modules/inventory/utils/display"
 import { getAsset, removeSchedule } from "@/add-os/services/inventory"
 import { countKey, formatNumber } from "@/add-os/utils/format"

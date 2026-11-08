@@ -12,7 +12,7 @@ vi.mock("@/stores/auth", () => ({
 	useAuthStore: () => ({ setLogout: vi.fn() })
 }))
 
-const { findItemByBarcode, generateBarcode, getStockOperation, inventorySettings, listAssets, listBalances, listStockOperations, listWarehouses, moveAsset, registerAssetBatch, registerAssets, submitStockOperation } = await import("../inventory")
+const { findItemByBarcode, generateBarcode, getStockOperation, inventorySettings, listAssets, listBalances, listStockOperations, listManagedSettings, listWarehouses, moveAsset, registerAssetBatch, registerAssets, saveSettings, submitStockOperation } = await import("../inventory")
 const { amenityLabel } = await import("../amenities")
 
 function jsonResponse(body: unknown, status = 200) {
@@ -63,9 +63,18 @@ describe("inventory service", () => {
 		expect(calledBody()).toEqual({ item_id: 4, location: { type: "space", id: 7 }, count: 2 })
 	})
 
+	it("lists the settings page's rows", async () => {
+		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: [{ key: "items.sku_mode", group: "items", type: "enum", options: ["auto"], value: "auto", default: "auto", locked: false, locked_reason: null }] }))
+
+		const rows = await listManagedSettings()
+
+		expect(calledUrl().pathname).toMatch(/\/inventory\/settings\/manage$/)
+		expect(rows[0].key).toBe("items.sku_mode")
+	})
+
 	it("registers a place's assets in one batch", async () => {
 		vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: [{ id: 1 }, { id: 2 }, { id: 3 }] }, 201))
-		const payload = { location: { type: "space" as const, id: 7 }, currency: "USD", lines: [{ item_id: 4, count: 2, purchase_cost: 25 }, { item_id: 5, serial_number: "S-1" }] }
+		const payload = { location: { type: "space" as const, id: 7 }, currency: "USD", in_service_on: "2026-03-15", attachments: ["/storage/a.pdf", "/storage/b.jpg"], lines: [{ item_id: 4, count: 2, purchase_cost: 25 }, { item_id: 5, serial_number: "S-1" }] }
 
 		const assets = await registerAssetBatch(payload)
 
@@ -135,6 +144,20 @@ describe("inventory service", () => {
 
 		expect(calledUrl().pathname).toBe("/api/v1/inventory/settings")
 		expect(vi.mocked(fetch)).toHaveBeenCalledTimes(1)
+	})
+
+	it("saves only the values sent, under values, and reads the public settings afresh after", async () => {
+		vi.mocked(fetch).mockResolvedValueOnce(jsonResponse({ message: "ok" }))
+
+		await saveSettings({ "items.sku_prefix": "P-" })
+
+		expect(calledUrl().pathname).toMatch(/\/inventory\/settings$/)
+		expect((vi.mocked(fetch).mock.calls[0][1] as RequestInit).method).toBe("PATCH")
+		expect(calledBody()).toEqual({ values: { "items.sku_prefix": "P-" } })
+
+		vi.mocked(fetch).mockResolvedValueOnce(jsonResponse({ data: { assets_in_warehouses: false, item_code_mode: "auto" } }))
+		expect((await inventorySettings()).item_code_mode).toBe("auto")
+		expect(vi.mocked(fetch)).toHaveBeenCalledTimes(2)
 	})
 
 	it("searches balances", async () => {

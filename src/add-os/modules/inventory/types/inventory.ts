@@ -22,6 +22,26 @@ export interface PlaceRef {
 	id: number
 }
 
+// ── Settings ────────────────────────────────────────────────────────────────
+
+export type SettingType = "string" | "integer" | "boolean" | "enum" | "list"
+
+/** One row of the settings page (GET inventory/settings/manage): a config value the dashboard may change. */
+export interface ManagedSetting {
+	/** The config path under `inventory.`, e.g. `items.sku_prefix`. */
+	key: string
+	group: string
+	type: SettingType
+	/** The choices of an enum or a list. */
+	options: string[]
+	value: unknown
+	/** What config/inventory.php says. */
+	default: unknown
+	/** Data already depends on it: shown, not changed. */
+	locked: boolean
+	locked_reason: string | null
+}
+
 /** The levels chosen in the place picker, outermost first — what it needs to show a place again without asking the server. */
 export interface PlaceChain {
 	branchId: number | null
@@ -300,12 +320,14 @@ export interface Asset {
 	location: PlaceDescription
 	custodian?: (CustodianDescription & { since: string }) | null
 	purchased_on: string | null
+	/** When it was put in service: its depreciation starts then (else at purchase). */
+	in_service_on: string | null
 	purchase_cost: string | null
 	currency: string | null
 	supplier: string | null
-	/** The supplier's invoice number, and the invoice uploaded. */
+	/** The supplier's invoice number, and the documents uploaded (the invoice, photos…). */
 	reference: string | null
-	attachment_url: string | null
+	attachments: string[]
 	useful_life_months: number | null
 	salvage_value: string | null
 	depreciation: Depreciation | null
@@ -323,11 +345,12 @@ export interface Asset {
 export interface AssetDetailsPayload {
 	serial_number?: string | null
 	purchased_on?: string | null
+	in_service_on?: string | null
 	purchase_cost?: number | null
 	currency?: string | null
 	supplier?: string | null
 	reference?: string | null
-	attachment_url?: string | null
+	attachments?: string[]
 	useful_life_months?: number | null
 	salvage_value?: number | null
 	warranty_until?: string | null
@@ -356,9 +379,10 @@ export interface AssetBatchLine {
 export interface RegisterAssetBatchPayload {
 	location: PlaceRef
 	purchased_on?: string | null
+	in_service_on?: string | null
 	supplier?: string | null
 	reference?: string | null
-	attachment_url?: string | null
+	attachments?: string[]
 	currency?: string | null
 	notes?: string | null
 	lines: AssetBatchLine[]

@@ -61,6 +61,9 @@
 			<n-form-item :label="t('inventory.assets.purchasedOn')">
 				<n-date-picker v-model:formatted-value="form.purchased_on" value-format="yyyy-MM-dd" type="date" clearable class="w-full" />
 			</n-form-item>
+			<n-form-item :label="t('inventory.assets.inServiceOn')" :feedback="t('inventory.assets.inServiceHint')">
+				<n-date-picker v-model:formatted-value="form.in_service_on" value-format="yyyy-MM-dd" type="date" clearable class="w-full" />
+			</n-form-item>
 			<n-form-item :label="t('inventory.assets.supplier')">
 				<n-input v-model:value="form.supplier" :maxlength="255" />
 			</n-form-item>
@@ -71,7 +74,7 @@
 				<CurrencySelect v-model:value="form.currency" clearable class="w-full" />
 			</n-form-item>
 			<n-form-item :label="t('inventory.operations.attachment')" class="sm:col-span-2">
-				<AttachmentField v-model:value="form.attachment_url" />
+				<AttachmentsField v-model:value="form.attachments" />
 			</n-form-item>
 			<n-form-item :label="t('inventory.assets.notes')" class="sm:col-span-2">
 				<n-input v-model:value="form.notes" type="textarea" :maxlength="5000" :autosize="{ minRows: 2, maxRows: 4 }" />
@@ -98,7 +101,7 @@ import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import CurrencySelect from "@/add-os/modules/hr/components/payroll/CurrencySelect.vue"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import AssetPlacePicker from "@/add-os/modules/inventory/components/AssetPlacePicker.vue"
-import AttachmentField from "@/add-os/modules/inventory/components/AttachmentField.vue"
+import AttachmentsField from "@/add-os/modules/inventory/components/AttachmentsField.vue"
 import ItemSelect from "@/add-os/modules/inventory/components/ItemSelect.vue"
 import { localized } from "@/add-os/modules/inventory/utils/display"
 import { registerAssetBatch } from "@/add-os/services/inventory"
@@ -133,9 +136,10 @@ function blank() {
 	return {
 		location: (props.place ?? null) as PlaceRef | null,
 		purchased_on: null as string | null,
+		in_service_on: null as string | null,
 		supplier: "",
 		reference: "",
-		attachment_url: null as string | null,
+		attachments: [] as string[],
 		currency: null as string | null,
 		notes: ""
 	}
@@ -179,7 +183,8 @@ async function save() {
 			purchased_on: f.purchased_on,
 			supplier: f.supplier.trim() || null,
 			reference: f.reference.trim() || null,
-			attachment_url: f.attachment_url,
+			attachments: f.attachments,
+			in_service_on: f.in_service_on,
 			currency: costed.value ? f.currency : null,
 			notes: f.notes.trim() || null,
 			lines: lines.value.map(line => {

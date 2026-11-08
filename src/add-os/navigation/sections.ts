@@ -335,7 +335,8 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "inventoryCustody", path: "custody", permission: "inventory.assets.view" },
 			{ key: "inventoryItems", path: "items", permission: "inventory.catalog.view" },
 			{ key: "inventoryCatalog", path: "catalog", permission: "inventory.catalog.view" },
-			{ key: "inventoryReports", path: "reports", permission: "inventory.reports.view" }
+			{ key: "inventoryReports", path: "reports", permission: "inventory.reports.view" },
+			{ key: "inventorySettings", path: "settings", permission: "inventory.settings.manage" }
 		]
 	},
 	{

@@ -12,10 +12,13 @@
 				<n-input v-model:value="form.reference" :placeholder="t('inventory.operations.optional')" :maxlength="60" />
 			</n-form-item>
 			<n-form-item :label="t('inventory.operations.attachment')" class="sm:col-span-2">
-				<AttachmentField v-model:value="form.attachment_url" />
+				<AttachmentsField v-model:value="form.attachments" />
 			</n-form-item>
 			<n-form-item :label="t('inventory.assets.purchasedOn')">
 				<n-date-picker v-model:formatted-value="form.purchased_on" value-format="yyyy-MM-dd" type="date" clearable class="w-full" />
+			</n-form-item>
+			<n-form-item :label="t('inventory.assets.inServiceOn')" :feedback="t('inventory.assets.inServiceHint')">
+				<n-date-picker v-model:formatted-value="form.in_service_on" value-format="yyyy-MM-dd" type="date" clearable class="w-full" />
 			</n-form-item>
 			<n-form-item :label="t('inventory.assets.warrantyUntil')">
 				<n-date-picker v-model:formatted-value="form.warranty_until" value-format="yyyy-MM-dd" type="date" clearable class="w-full" />
@@ -55,7 +58,7 @@ import { useI18n } from "vue-i18n"
 import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import CurrencySelect from "@/add-os/modules/hr/components/payroll/CurrencySelect.vue"
 import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
-import AttachmentField from "@/add-os/modules/inventory/components/AttachmentField.vue"
+import AttachmentsField from "@/add-os/modules/inventory/components/AttachmentsField.vue"
 import { updateAsset } from "@/add-os/services/inventory"
 
 /** An asset's details and money; where it is, who holds it and its status each have their own action. */
@@ -72,8 +75,9 @@ function fromAsset(asset: Asset) {
 		serial_number: asset.serial_number ?? "",
 		supplier: asset.supplier ?? "",
 		reference: asset.reference ?? "",
-		attachment_url: asset.attachment_url,
+		attachments: [...asset.attachments],
 		purchased_on: asset.purchased_on,
+		in_service_on: asset.in_service_on,
 		warranty_until: asset.warranty_until,
 		purchase_cost: num(asset.purchase_cost),
 		currency: asset.currency,

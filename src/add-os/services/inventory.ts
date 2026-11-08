@@ -26,6 +26,7 @@ import type {
 	MaintenanceRecord,
 	MaintenanceSchedule,
 	MaintenanceType,
+	ManagedSetting,
 	PlaceRef,
 	RegisterAssetBatchPayload,
 	RegisterAssetPayload,
@@ -271,7 +272,7 @@ export interface InventorySettings {
 
 let settings: Promise<InventorySettings> | null = null
 
-/** Read once per page load: they change only with a deploy. A failed read is retried next time. */
+/** Read once per page load, and again after the settings page saves. A failed read is retried next time. */
 export function inventorySettings(): Promise<InventorySettings> {
 	settings ??= get<{ data: InventorySettings }>(`${BASE}/settings`)
 		.then(res => res.data)
@@ -280,6 +281,18 @@ export function inventorySettings(): Promise<InventorySettings> {
 			throw error
 		})
 	return settings
+}
+
+/** The settings page: every setting with its value, the config file's default and its lock. */
+export async function listManagedSettings(): Promise<ManagedSetting[]> {
+	return (await get<{ data: ManagedSetting[] }>(`${BASE}/settings/manage`)).data
+}
+
+/** Saves the values that changed (`{ "items.sku_prefix": "P-" }`); the screens read the settings afresh after. */
+export async function saveSettings(values: Record<string, unknown>): Promise<MessageResult> {
+	const result = await patch<MessageResult>(`${BASE}/settings`, { values })
+	settings = null
+	return result
 }
 
 // ── Warehouses ──────────────────────────────────────────────────────────────
