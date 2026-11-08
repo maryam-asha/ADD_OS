@@ -16,14 +16,24 @@
 
 		<n-tabs v-model:value="tab" type="line" animated>
 			<n-tab-pane name="categories" :tab="t('inventory.catalog.categories')">
-				<div class="grid grid-cols-1 gap-4 lg:grid-cols-5">
+				<!-- One search for both views, and the choice of view: the tree, or a table of every category with its path. -->
+				<div class="mb-4 flex flex-wrap items-center gap-3">
+					<n-input v-model:value="treeSearch" :placeholder="t('inventory.catalog.searchTree')" clearable size="small" class="max-w-sm flex-1">
+						<template #prefix><Icon name="carbon:search" :size="14" class="text-slate-400" /></template>
+					</n-input>
+					<n-radio-group v-model:value="categoryView" size="small" class="ms-auto">
+						<n-radio-button value="tree">
+							<span class="inline-flex items-center gap-1.5"><Icon name="carbon:tree-view" :size="14" />{{ t("inventory.catalog.viewTree") }}</span>
+						</n-radio-button>
+						<n-radio-button value="table">
+							<span class="inline-flex items-center gap-1.5"><Icon name="carbon:table" :size="14" />{{ t("inventory.catalog.viewTable") }}</span>
+						</n-radio-button>
+					</n-radio-group>
+				</div>
+
+				<div :class="categoryView === 'tree' ? 'grid grid-cols-1 gap-4 lg:grid-cols-5' : 'flex flex-col gap-4'">
 					<!-- Categories Tree Card -->
-					<n-card size="small" class="rounded-2xl border border-slate-200/80 shadow-xs lg:col-span-2 dark:border-slate-800 dark:bg-slate-900" :bordered="false">
-						<div class="mb-3">
-							<n-input v-model:value="treeSearch" :placeholder="t('inventory.catalog.searchTree')" clearable size="small" class="w-full">
-								<template #prefix><Icon name="carbon:search" :size="14" class="text-slate-400" /></template>
-							</n-input>
-						</div>
+					<n-card v-if="categoryView === 'tree'" size="small" class="rounded-2xl border border-slate-200/80 shadow-xs lg:col-span-2 dark:border-slate-800 dark:bg-slate-900" :bordered="false">
 						<n-spin :show="loading">
 							<n-tree v-if="filteredTree.length" :data="filteredTree" block-line selectable :selected-keys="selected ? [selected.id] : []" default-expand-all @update:selected-keys="select" />
 							<div v-else class="flex flex-col items-center justify-center py-8 text-slate-400">
@@ -31,6 +41,18 @@
 								<p class="text-sm">{{ t("inventory.catalog.empty") }}</p>
 							</div>
 						</n-spin>
+					</n-card>
+
+					<!-- Categories Table Card: a row opens the category below. -->
+					<n-card v-else size="small" class="add-ledger-table rounded-2xl border border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900" :bordered="false">
+						<n-data-table :columns="categoryColumns" :data="tableRows" :loading :bordered="false" size="small" :scroll-x="tableWidth(categoryColumns)" :row-props="categoryRowProps" :row-class-name="row => (selected?.id === row.category.id ? 'bg-primary/5' : '')">
+							<template #empty>
+								<div class="flex flex-col items-center justify-center py-8 text-slate-400">
+									<Icon name="carbon:catalog" :size="32" class="mb-1 opacity-50" />
+									<p class="text-sm">{{ t("inventory.catalog.empty") }}</p>
+								</div>
+							</template>
+						</n-data-table>
 					</n-card>
 
 					<!-- Selected Category Detail Card -->
@@ -70,7 +92,7 @@
 							</template>
 						</n-data-table>
 					</n-card>
-					<n-card v-else size="small" class="flex flex-col items-center justify-center rounded-2xl border border-slate-200/80 py-16 text-center shadow-xs lg:col-span-3 dark:border-slate-800 dark:bg-slate-900" :bordered="false">
+					<n-card v-else-if="categoryView === 'tree'" size="small" class="flex flex-col items-center justify-center rounded-2xl border border-slate-200/80 py-16 text-center shadow-xs lg:col-span-3 dark:border-slate-800 dark:bg-slate-900" :bordered="false">
 						<Icon name="carbon:catalog" :size="48" class="mb-2 text-slate-300 dark:text-slate-600" />
 						<p class="text-sm text-secondary">{{ t("inventory.catalog.pick") }}</p>
 					</n-card>
@@ -79,13 +101,13 @@
 
 			<n-tab-pane name="units" :tab="t('inventory.units.title')">
 				<n-card size="small" class="add-ledger-table rounded-2xl border border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900" :bordered="false">
-					<n-data-table :columns="unitColumns" :data="units" :loading="loading" :bordered="false" size="small" :scroll-x="600" />
+					<n-data-table :columns="unitColumns" :data="units" :loading :bordered="false" size="small" :scroll-x="600" />
 				</n-card>
 			</n-tab-pane>
 		</n-tabs>
 
 		<template v-if="mayManage">
-			<CategoryModal v-model:show="categoryVisible" :category="editingCategory" :categories="categories" :parent-id="newParentId" @saved="load" />
+			<CategoryModal v-model:show="categoryVisible" :category="editingCategory" :categories :parent-id="newParentId" @saved="load" />
 			<FieldModal v-if="selected" v-model:show="fieldVisible" :category-id="selected.id" :field="editingField" @saved="reloadSelected" />
 			<UnitModal v-model:show="unitVisible" :unit="editingUnit" @saved="load" />
 		</template>
@@ -95,8 +117,8 @@
 <script setup lang="ts">
 import type { DataTableColumns, TreeOption } from "naive-ui"
 import type { AttributeDefinition, Category, Unit } from "@/add-os/modules/inventory/types/inventory"
-import { NAlert, NButton, NCard, NDataTable, NInput, NPopconfirm, NSpin, NTabPane, NTabs, NTag, NTooltip, NTree, useMessage } from "naive-ui"
-import { computed, h, onMounted, ref } from "vue"
+import { NAlert, NButton, NCard, NDataTable, NInput, NPopconfirm, NRadioButton, NRadioGroup, NSpin, NTabPane, NTabs, NTag, NTooltip, NTree, useMessage } from "naive-ui"
+import { computed, h, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { canManageInventoryCatalog } from "@/add-os/config/permissions"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
@@ -104,7 +126,7 @@ import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import CategoryModal from "@/add-os/modules/inventory/components/CategoryModal.vue"
 import FieldModal from "@/add-os/modules/inventory/components/FieldModal.vue"
 import UnitModal from "@/add-os/modules/inventory/components/UnitModal.vue"
-import { codeChip, EMPTY, localized } from "@/add-os/modules/inventory/utils/display"
+import { categoryPaths, codeChip, COLUMN, EMPTY, localized, tableWidth } from "@/add-os/modules/inventory/utils/display"
 import { getCategory, listCategories, listUnits, removeCategory, removeField, removeUnit } from "@/add-os/services/inventory"
 import { formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
@@ -128,6 +150,65 @@ const selected = ref<Category | null>(null)
 const loading = ref(true)
 const loadError = ref("")
 const treeSearch = ref("")
+
+/** The categories' view, remembered on this browser: the tree (default) or a table. */
+const VIEW_KEY = "inventory.catalog.view"
+function storedView(): "tree" | "table" {
+	try {
+		return localStorage.getItem(VIEW_KEY) === "table" ? "table" : "tree"
+	} catch {
+		return "tree"
+	}
+}
+const categoryView = ref<"tree" | "table">(storedView())
+watch(categoryView, view => {
+	try {
+		localStorage.setItem(VIEW_KEY, view)
+	} catch {}
+})
+
+/** Every category with its full path, in tree order; the search matches anywhere in the path. */
+const tableRows = computed(() => {
+	const query = treeSearch.value.trim().toLowerCase()
+	return categoryPaths(categories.value).filter(row => !query || row.path.toLowerCase().includes(query))
+})
+
+interface CategoryRow { category: Category; path: string }
+
+const categoryColumns = computed<DataTableColumns<CategoryRow>>(() => [
+	{
+		title: t("inventory.common.category"),
+		key: "path",
+		minWidth: 280,
+		render: row => {
+			const parts = row.path.split(" › ")
+			const own = parts.pop()
+			return h("span", {}, [parts.length ? h("span", { class: "text-secondary" }, `${parts.join(" › ")} › `) : null, h("span", { class: "font-medium" }, own)])
+		}
+	},
+	{
+		title: t("inventory.catalog.kind"),
+		key: "kind",
+		...COLUMN.status,
+		render: row => h(NTag, { size: "small", round: true, bordered: false, type: row.category.kind === "asset" ? "info" : "default" }, () => t(`inventory.kind.${row.category.kind}`))
+	},
+	{ title: t("inventory.catalog.itemsCount"), key: "items_count", ...COLUMN.count, render: row => formatNumber(row.category.items_count ?? 0) },
+	{
+		title: t("inventory.catalog.traits"),
+		key: "traits",
+		width: 200,
+		render: row =>
+			h("span", { class: "inline-flex flex-wrap gap-1" }, [
+				row.category.intangible ? h(NTag, { size: "tiny", bordered: false }, () => t("inventory.catalog.intangible")) : null,
+				row.category.show_to_members ? h(NTag, { size: "tiny", bordered: false, type: "info" }, () => t("inventory.catalog.shownToMembers")) : null
+			])
+	},
+	{ title: t("inventory.catalog.order"), key: "order", ...COLUMN.count, render: row => formatNumber(row.category.order) }
+])
+
+function categoryRowProps(row: CategoryRow) {
+	return { class: "cursor-pointer", onClick: () => select([row.category.id]) }
+}
 
 const categoryVisible = ref(false)
 const editingCategory = ref<Category | null>(null)

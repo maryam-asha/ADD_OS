@@ -383,7 +383,11 @@
 			"showToMembersHint": "Its assets in service show to members in a space's details (a projector, two mics).",
 			"shownToMembers": "Shown to members",
 			"intangible": "Intangible",
-			"intangibleHint": "Assets with no body (a software licence): no place or maintenance, amortized on a straight line."
+			"intangibleHint": "Assets with no body (a software licence): no place or maintenance, amortized on a straight line.",
+			"viewTree": "Tree",
+			"viewTable": "Table",
+			"itemsCount": "Items",
+			"traits": "Traits"
 		},
 		"fields": {
 			"description": "The fields this category's items answer, inherited ones included.",
