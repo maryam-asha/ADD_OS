@@ -68,8 +68,11 @@ for (const parent of createAddOsRoutes()) {
 	}
 }
 
-/** Real screens with no API of their own — the only ones besides placeholders that may be `allStaff`. */
+/** Real screens with no API of their own — besides placeholders, these may be `allStaff`. */
 const NO_API_SCREENS = ["dashboard.overview", "settings.accountSecurity"]
+
+/** Screens that read only the signed-in account's own records (its inbox): no permission can gate them, so they are `allStaff` too. */
+const OWN_DATA_SCREENS = ["dashboard.myNotifications"]
 
 /** The sections the sidebar lists, in order — a group's modules count as their own sections. */
 function menuSections(items: MenuMixedOption[]): string[] {
@@ -110,9 +113,9 @@ describe("every staff page says who opens it", () => {
 		expect(untagged).toEqual([])
 	})
 
-	it("keeps allStaff to pages with no API — the placeholders and the screens named here", () => {
+	it("keeps allStaff to pages with no API or only the account's own data — the placeholders and the screens named here", () => {
 		const misused = NAV_SECTIONS.flatMap(section => section.pages.filter(page => page.allStaff).map(page => navRouteName(section, page)))
-			.filter(name => !PLACEHOLDERS.has(name) && !NO_API_SCREENS.includes(name))
+			.filter(name => !PLACEHOLDERS.has(name) && !NO_API_SCREENS.includes(name) && !OWN_DATA_SCREENS.includes(name))
 		expect(misused).toEqual([])
 	})
 
