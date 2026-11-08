@@ -172,7 +172,7 @@ export function buildDeviceFields(ctx: DeviceFieldContext, t: ComposerTranslatio
 			hiddenWhen: model => model.type !== "lock",
 			optionsFrom: parents =>
 				ctx.spaces()
-					.filter(({ space, branchId }) => space.is_lockable && (parents.branch_id == null || branchId === parents.branch_id))
+					.filter(({ space, branchId }) => space.is_lockable && space.space_type !== "co_space" && (parents.branch_id == null || branchId === parents.branch_id))
 					.map(({ space }) => ({ label: spaceLabel(space, t, locale), value: space.id })),
 			hint: () => t("accessDevices.form.spaceHint")
 		},
