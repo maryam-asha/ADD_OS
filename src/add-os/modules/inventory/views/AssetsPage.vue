@@ -86,7 +86,7 @@
 					<n-select v-model:value="filters.category_id" :options="categoryOptions" :placeholder="t('inventory.common.category')" clearable filterable class="w-full" />
 				</div>
 				<div>
-					<PlacePicker v-model:value="place" inline />
+					<PlacePicker v-model:value="place" v-model:chain="placeChain" inline />
 				</div>
 			</div>
 
@@ -119,13 +119,13 @@
 			</div>
 		</n-card>
 
-		<RegisterAssetModal v-if="mayManage" v-model:show="registerVisible" @saved="load" />
+		<RegisterAssetModal v-if="mayManage" v-model:show="registerVisible" :place :place-chain @saved="load" />
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
-import type { Asset, AssetStatus, Category, PlaceRef } from "@/add-os/modules/inventory/types/inventory"
+import type { Asset, AssetStatus, Category, PlaceChain, PlaceRef } from "@/add-os/modules/inventory/types/inventory"
 import { NAlert, NButton, NCard, NDataTable, NInput, NPagination, NSelect } from "naive-ui"
 import { computed, h, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
@@ -161,6 +161,8 @@ const totalCount = ref(0)
 const registerVisible = ref(false)
 const categories = ref<Category[]>([])
 const place = ref<PlaceRef | null>(null)
+/** The filter's levels, so registering starts on the place the list is filtered to. */
+const placeChain = ref<PlaceChain | null>(null)
 
 const { filters, applied, page } = useRouteFilters({ search: "string", status: "string", category_id: "number" }, () => void load(), { debounced: ["search"] })
 

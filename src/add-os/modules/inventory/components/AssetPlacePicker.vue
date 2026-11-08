@@ -6,13 +6,13 @@
 			<n-radio-button value="warehouse">{{ t("inventory.place.inWarehouse") }}</n-radio-button>
 		</n-radio-group>
 		<n-select v-if="where === 'warehouse'" :value="warehouseId" :options="warehouseOptions" :placeholder="t('inventory.place.pickWarehouse')" filterable clearable @update:value="pickWarehouse" />
-		<PlacePicker v-else v-model:value="place" />
+		<PlacePicker v-else v-model:value="place" :chain />
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { SelectOption } from "naive-ui"
-import type { PlaceRef, Warehouse } from "@/add-os/modules/inventory/types/inventory"
+import type { PlaceChain, PlaceRef, Warehouse } from "@/add-os/modules/inventory/types/inventory"
 import { NRadioButton, NRadioGroup, NSelect } from "naive-ui"
 import { computed, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
@@ -24,8 +24,10 @@ import { inventorySettings, listWarehouses } from "@/add-os/services/inventory"
 /**
  * Where an asset goes: one of ADD's places — or, when the package lets
  * assets be stored before they are handed out, an active warehouse. With
- * the option off it is the plain place picker.
+ * the option off it is the plain place picker; `chain` opens it on a place
+ * already chosen (see PlacePicker).
  */
+defineProps<{ chain?: PlaceChain | null }>()
 const value = defineModel<PlaceRef | null>("value", { required: true })
 const { t } = useI18n()
 

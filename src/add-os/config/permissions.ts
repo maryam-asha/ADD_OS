@@ -486,6 +486,11 @@ export function canDisposeAssets(): boolean {
 	return can("inventory.assets.dispose")
 }
 
+/** Approve a draft asset into service (the package's drafts option). */
+export function canApproveAssets(): boolean {
+	return can("inventory.assets.approve")
+}
+
 export function canReceiveStock(): boolean {
 	return can("inventory.stock.receive")
 }

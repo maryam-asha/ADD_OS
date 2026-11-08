@@ -98,8 +98,26 @@
 
 		<n-alert v-if="loadError" type="error" :title="loadError" />
 
+		<!-- Two ways to see the items: a table, or the catalog's tree. -->
+		<div class="flex justify-end">
+			<n-radio-group v-model:value="filters.view" size="small">
+				<n-radio-button value="table">
+					<span class="inline-flex items-center gap-1.5"><Icon name="carbon:table" :size="14" />{{ t("inventory.items.viewTable") }}</span>
+				</n-radio-button>
+				<n-radio-button value="tree">
+					<span class="inline-flex items-center gap-1.5"><Icon name="carbon:tree-view" :size="14" />{{ t("inventory.items.viewTree") }}</span>
+				</n-radio-button>
+			</n-radio-group>
+		</div>
+
+		<n-card v-if="filters.view === 'tree'" class="rounded-2xl border border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900" :bordered="false" size="small">
+			<n-spin :show="loading">
+				<ItemsTree :items :categories @open="item => mayManage && edit(item)" />
+			</n-spin>
+		</n-card>
+
 		<!-- Table Card -->
-		<n-card class="add-ledger-table rounded-2xl border border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900" :bordered="false" size="small">
+		<n-card v-else class="add-ledger-table rounded-2xl border border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900" :bordered="false" size="small">
 			<n-data-table :columns :data="items" :loading :bordered="false" size="small" :scroll-x="1000">
 				<template #empty>
 					<div class="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-500">
@@ -124,7 +142,7 @@
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
 import type { AttributeDefinition, Category, Item, ItemKind, Unit } from "@/add-os/modules/inventory/types/inventory"
-import { NAlert, NButton, NCard, NDataTable, NInput, NPagination, NPopconfirm, NSelect, NTag, NTooltip, useMessage } from "naive-ui"
+import { NAlert, NButton, NCard, NDataTable, NInput, NPagination, NPopconfirm, NRadioButton, NRadioGroup, NSelect, NSpin, NTag, NTooltip, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { canManageInventoryCatalog } from "@/add-os/config/permissions"
@@ -132,6 +150,7 @@ import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
 import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
 import ItemModal from "@/add-os/modules/inventory/components/ItemModal.vue"
+import ItemsTree from "@/add-os/modules/inventory/components/ItemsTree.vue"
 import { categoryPaths, isolate, localized, nameCell, propertySummary, quantity } from "@/add-os/modules/inventory/utils/display"
 import { getCategory, listCategories, listItems, listUnits, removeItem } from "@/add-os/services/inventory"
 import { countKey, formatNumber } from "@/add-os/utils/format"
@@ -161,7 +180,13 @@ const editing = ref<Item | null>(null)
 /** Each category's fields, read once, so a property shows under its label rather than its key. */
 const fieldsByCategory = ref(new Map<number, AttributeDefinition[]>())
 
-const { filters, applied, page } = useRouteFilters({ search: "string", kind: "string", category_id: "number", active: "string" }, () => void load(), { debounced: ["search"] })
+const { filters, applied, page } = useRouteFilters({ search: "string", kind: "string", category_id: "number", active: "string", view: "string" }, () => void load(), {
+	debounced: ["search"],
+	defaults: { view: "table" }
+})
+
+/** The tree shows every match at once: read page after page (100 each), up to this many. */
+const TREE_PAGES = 30
 
 const hasActiveFilters = computed(() => Boolean(filters.value.search || filters.value.kind || filters.value.category_id || filters.value.active))
 
@@ -191,13 +216,27 @@ async function load() {
 	loadError.value = ""
 	try {
 		const activeFilter = applied.value.active === "true" ? true : applied.value.active === "false" ? false : null
-		const result = await listItems({
-			page: page.value,
+		const filter = {
 			search: applied.value.search,
 			kind: applied.value.kind as ItemKind | null,
 			category_id: applied.value.category_id,
 			active: activeFilter
-		})
+		}
+		if (applied.value.view === "tree") {
+			const rows: Item[] = []
+			let total = 0
+			for (let next = 1, last = 1; next <= last && next <= TREE_PAGES; next++) {
+				const result = await listItems({ ...filter, page: next, per_page: 100 })
+				rows.push(...result.data)
+				last = result.meta.last_page
+				total = result.meta.total ?? rows.length
+			}
+			items.value = rows
+			lastPage.value = 1
+			totalCount.value = total
+			return
+		}
+		const result = await listItems({ ...filter, page: page.value })
 		items.value = result.data
 		lastPage.value = result.meta.last_page
 		totalCount.value = result.meta.total ?? result.data.length

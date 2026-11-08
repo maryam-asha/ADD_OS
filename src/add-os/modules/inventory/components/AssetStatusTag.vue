@@ -13,6 +13,7 @@ defineProps<{ status: AssetStatus }>()
 const { t } = useI18n()
 
 const TYPES: Record<AssetStatus, "success" | "warning" | "default" | "error" | "info"> = {
+	draft: "default",
 	in_service: "success",
 	in_maintenance: "warning",
 	retired: "default",

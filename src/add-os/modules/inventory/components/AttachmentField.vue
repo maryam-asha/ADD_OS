@@ -27,6 +27,8 @@ import { ATTACHMENT_TYPES, attachmentName, attachmentProblem } from "@/add-os/mo
 import { uploadMedia } from "@/add-os/services/media"
 import Icon from "@/components/common/Icon.vue"
 
+/** The uploaded file's own name, just before its URL arrives (AttachmentsField keeps it). */
+const emit = defineEmits<{ named: [name: string] }>()
 /**
  * A scanned document beside a record — an operation's or an asset's
  * supplier invoice: an image or a PDF up to 2 MB, uploaded to ADD Core
@@ -50,8 +52,10 @@ async function upload(event: Event) {
 	if (refused) return
 	uploading.value = true
 	try {
-		value.value = (await uploadMedia(file, "inventory")).url
+		const url = (await uploadMedia(file, "inventory")).url
 		name.value = file.name
+		emit("named", file.name)
+		value.value = url
 	} catch (e) {
 		problem.value = apiErrorMessage(e, t("inventory.common.saveError"))
 	} finally {

@@ -9,6 +9,8 @@
 import type { Paginated, RawPaginatedResponse } from "./pagination"
 import type {
 	Asset,
+	AssetAddition,
+	AssetAdditionPayload,
 	AssetAssignment,
 	AssetDetailsPayload,
 	AssetMovement,
@@ -19,6 +21,7 @@ import type {
 	Category,
 	CategoryPayload,
 	CustodianRef,
+	DepreciationMethod,
 	DisposalMethod,
 	Item,
 	ItemKind,
@@ -26,7 +29,9 @@ import type {
 	MaintenanceRecord,
 	MaintenanceSchedule,
 	MaintenanceType,
+	ManagedSetting,
 	PlaceRef,
+	RegisterAssetBatchPayload,
 	RegisterAssetPayload,
 	StockBalance,
 	StockMovement,
@@ -191,6 +196,32 @@ export async function registerAssets(payload: RegisterAssetPayload): Promise<Ass
 	return rowsOf<Asset>((await post<{ data: Asset[] }>(`${BASE}/assets`, payload)).data)
 }
 
+export async function registerAssetBatch(payload: RegisterAssetBatchPayload): Promise<Asset[]> {
+	return rowsOf<Asset>((await post<{ data: Asset[] }>(`${BASE}/assets/batch`, payload)).data)
+}
+
+/** A draft approved into service (inventory.assets.approve). */
+export async function approveAsset(id: number): Promise<MessageResult> {
+	return post<MessageResult>(`${BASE}/assets/${id}/approve`, {})
+}
+
+/** Only a draft is deleted. */
+export async function deleteDraftAsset(id: number): Promise<MessageResult> {
+	return del<MessageResult>(`${BASE}/assets/${id}`)
+}
+
+export async function listAssetAdditions(assetId: number): Promise<AssetAddition[]> {
+	return rowsOf<AssetAddition>((await get<{ data: AssetAddition[] }>(`${BASE}/assets/${assetId}/additions`)).data)
+}
+
+export async function addAssetAddition(assetId: number, payload: AssetAdditionPayload): Promise<AssetAddition> {
+	return (await post<{ data: AssetAddition }>(`${BASE}/assets/${assetId}/additions`, payload)).data
+}
+
+export async function removeAssetAddition(id: number): Promise<MessageResult> {
+	return del<MessageResult>(`${BASE}/asset-additions/${id}`)
+}
+
 export async function updateAsset(id: number, payload: AssetDetailsPayload): Promise<MessageResult> {
 	return patch<MessageResult>(`${BASE}/assets/${id}`, payload)
 }
@@ -262,11 +293,19 @@ export interface InventorySettings {
 	assets_in_warehouses: boolean
 	/** Who sets an item's code: auto (never typed), on_create (typed when made, fixed after) or editable. */
 	item_code_mode: ItemCodeMode
+	/** The methods an asset may be depreciated by; the first is the default. */
+	depreciation_methods: DepreciationMethod[]
+	/** Whether an asset category may be intangible. */
+	intangible_assets: boolean
+	/** Whether capital additions may be recorded on an asset. */
+	capital_additions: boolean
+	/** Whether a registered asset waits as a draft for approval. */
+	asset_drafts: boolean
 }
 
 let settings: Promise<InventorySettings> | null = null
 
-/** Read once per page load: they change only with a deploy. A failed read is retried next time. */
+/** Read once per page load, and again after the settings page saves. A failed read is retried next time. */
 export function inventorySettings(): Promise<InventorySettings> {
 	settings ??= get<{ data: InventorySettings }>(`${BASE}/settings`)
 		.then(res => res.data)
@@ -275,6 +314,18 @@ export function inventorySettings(): Promise<InventorySettings> {
 			throw error
 		})
 	return settings
+}
+
+/** The settings page: every setting with its value, the config file's default and its lock. */
+export async function listManagedSettings(): Promise<ManagedSetting[]> {
+	return (await get<{ data: ManagedSetting[] }>(`${BASE}/settings/manage`)).data
+}
+
+/** Saves the values that changed (`{ "items.sku_prefix": "P-" }`); the screens read the settings afresh after. */
+export async function saveSettings(values: Record<string, unknown>): Promise<MessageResult> {
+	const result = await patch<MessageResult>(`${BASE}/settings`, { values })
+	settings = null
+	return result
 }
 
 // ── Warehouses ──────────────────────────────────────────────────────────────

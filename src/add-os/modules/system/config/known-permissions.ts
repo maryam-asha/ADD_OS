@@ -177,7 +177,9 @@ export const KNOWN_PERMISSIONS: readonly string[] = [
 	"inventory.stock.issue",
 	"inventory.stock.transfer",
 	"inventory.stock.adjust",
-	"inventory.reports.view"
+	"inventory.reports.view",
+	"inventory.settings.manage",
+	"inventory.assets.approve"
 ]
 
 /**

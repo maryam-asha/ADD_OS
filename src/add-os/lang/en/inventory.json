@@ -48,7 +48,8 @@
 			"in_maintenance": "In maintenance",
 			"retired": "Retired",
 			"lost": "Lost",
-			"disposed": "Disposed"
+			"disposed": "Disposed",
+			"draft": "Draft"
 		},
 		"maintenanceType": {
 			"corrective": "Repair",
@@ -123,7 +124,40 @@
 				"few": "{n} months",
 				"many": "{n} months",
 				"other": "{n} months"
-			}
+			},
+			"lines": "Assets in this place",
+			"linesHint": "Add each item found in the place with its count; every asset gets its own code and QR.",
+			"addLine": "Add an item…",
+			"removeLine": "Remove line",
+			"unitCost": "Cost each",
+			"purchase": "Purchase",
+			"purchaseHint": "Applies to every asset registered here.",
+			"toRegister": {
+				"zero": "No assets yet",
+				"one": "{n} asset",
+				"two": "{n} assets",
+				"few": "{n} assets",
+				"many": "{n} assets",
+				"other": "{n} assets"
+			},
+			"inServiceOn": "In service on",
+			"inServiceHint": "Depreciation starts then; left empty, at the purchase date.",
+			"attachments": "Attachments",
+			"method": "Depreciation method",
+			"methods": {
+				"straight_line": "Straight line",
+				"declining_balance": "Declining balance"
+			},
+			"intangible": "Intangible",
+			"amortization": "Amortization",
+			"totalCost": "Cost with additions",
+			"noPlaceNeeded": "Intangible items need no place.",
+			"saveDraft": "Save as draft",
+			"saveApprove": "Save and approve",
+			"approve": "Approve",
+			"deleteDraft": "Delete draft",
+			"deleteDraftConfirm": "The draft will be deleted for good. Continue?",
+			"draftNote": "Draft: no code, movement or depreciation until approved."
 		},
 		"actions": {
 			"move": {
@@ -323,7 +357,9 @@
 			},
 			"confirmDelete": "Delete this item?",
 			"propertyRequired": "This field is required.",
-			"propertyInvalid": "This value wasn't accepted."
+			"propertyInvalid": "This value wasn't accepted.",
+			"viewTable": "Table",
+			"viewTree": "Tree"
 		},
 		"catalog": {
 			"description": "The category tree: a branch is either assets or stock, and each category has fields its items, and those below it, answer. And the units items are counted in.",
@@ -345,7 +381,9 @@
 			"order": "Order",
 			"showToMembers": "Shown to members",
 			"showToMembersHint": "Its assets in service show to members in a space's details (a projector, two mics).",
-			"shownToMembers": "Shown to members"
+			"shownToMembers": "Shown to members",
+			"intangible": "Intangible",
+			"intangibleHint": "Assets with no body (a software licence): no place or maintenance, amortized on a straight line."
 		},
 		"fields": {
 			"description": "The fields this category's items answer, inherited ones included.",
@@ -557,6 +595,99 @@
 			"codeAuto": "Generated automatically when saved.",
 			"codeOptional": "Leave it empty to have it generated. It cannot change after saving.",
 			"codeFixed": "The code is fixed once saved."
+		},
+		"settings": {
+			"description": "Set when the warehouses are first used; they override the config file. What recorded data depends on is locked, with its reason.",
+			"save": "Save changes",
+			"saved": "Settings saved.",
+			"locked": "Locked",
+			"loadError": "The settings could not be loaded.",
+			"groups": {
+				"items": "Items",
+				"assets": "Assets",
+				"depreciation": "Depreciation",
+				"stock": "Stock"
+			},
+			"fields": {
+				"items_sku_mode": {
+					"label": "Who sets an item's code",
+					"hint": "Always numbered, typed when made then fixed, or typed and changed at any time."
+				},
+				"items_sku_prefix": {
+					"label": "Item code characters",
+					"hint": "Put before the running number, like ITM- in ITM-00001."
+				},
+				"items_sku_pad": {
+					"label": "Number of digits",
+					"hint": "The number is padded with zeros to this many digits."
+				},
+				"assets_code_prefix": {
+					"label": "Asset code characters",
+					"hint": "Put before the asset's number, like AST- in AST-000001."
+				},
+				"assets_code_pad": {
+					"label": "Asset number digits"
+				},
+				"assets_store_in_warehouses": {
+					"label": "Store assets in warehouses",
+					"hint": "An asset is received in a warehouse before it is handed to where it is used."
+				},
+				"assets_max_batch": {
+					"label": "Most identical assets in one registration"
+				},
+				"assets_max_lines": {
+					"label": "Most items in one place's registration"
+				},
+				"assets_maintenance_lead_days": {
+					"label": "Warn before maintenance (days)"
+				},
+				"assets_warranty_lead_days": {
+					"label": "Warn before a warranty ends (days)"
+				},
+				"stock_currency": {
+					"label": "Stock cost currency",
+					"hint": "Stock is costed in it at weighted average cost."
+				},
+				"assets_drafts": {
+					"label": "Register assets as drafts, then approve",
+					"hint": "An asset stays a draft until someone allowed to approve does so."
+				},
+				"assets_intangible": {
+					"label": "Intangible assets",
+					"hint": "Allows asset categories with no place (software licences), amortized on a straight line."
+				},
+				"assets_capital_additions": {
+					"label": "Capital additions",
+					"hint": "Money spent on an asset that raises its cost, depreciated over what is left of its life."
+				},
+				"assets_depreciation_methods": {
+					"label": "Depreciation methods on offer",
+					"hint": "The first is the default for a new asset."
+				}
+			},
+			"options": {
+				"items_sku_mode": {
+					"auto": "Always numbered",
+					"on_create": "Typed when made, then fixed",
+					"editable": "Typed and changed any time"
+				},
+				"assets_depreciation_methods": {
+					"straight_line": "Straight line",
+					"declining_balance": "Declining balance"
+				}
+			},
+			"optionsInUse": "The dimmed choices are used by registered assets and cannot be removed."
+		},
+		"additions": {
+			"title": "Capital additions",
+			"add": "Add an addition",
+			"date": "Date",
+			"amount": "Amount",
+			"description": "Description",
+			"empty": "No capital additions.",
+			"remove": "Remove",
+			"removeConfirm": "This addition will be removed and depreciation recalculated. Continue?",
+			"hint": "They raise the asset's cost and are depreciated over what is left of its life."
 		}
 	}
 }

@@ -17,6 +17,9 @@
 					<n-radio-button value="stock">{{ t("inventory.kind.stock") }}</n-radio-button>
 				</n-radio-group>
 			</n-form-item>
+			<n-form-item v-if="intangibleAllowed && form.kind === 'asset'" :label="t('inventory.catalog.intangible')" :feedback="t('inventory.catalog.intangibleHint')">
+				<n-switch v-model:value="form.intangible" />
+			</n-form-item>
 			<n-form-item :label="t('inventory.catalog.icon')">
 				<n-input v-model:value="form.icon" dir="ltr" :maxlength="40" />
 			</n-form-item>
@@ -40,13 +43,13 @@
 <script setup lang="ts">
 import type { SelectOption } from "naive-ui"
 import type { Category, ItemKind } from "@/add-os/modules/inventory/types/inventory"
-import { NButton, NCheckbox, NFormItem, NInput, NInputNumber, NRadioButton, NRadioGroup, NSelect, useMessage } from "naive-ui"
+import { NButton, NCheckbox, NFormItem, NInput, NInputNumber, NRadioButton, NRadioGroup, NSelect, NSwitch, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
-import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
+import { apiErrorMessage, quietly, serverMessage } from "@/add-os/modules/hr/utils/errors"
 import { categoryPaths } from "@/add-os/modules/inventory/utils/display"
-import { createCategory, updateCategory } from "@/add-os/services/inventory"
+import { createCategory, inventorySettings, updateCategory } from "@/add-os/services/inventory"
 
 /**
  * A node of the catalog tree. A root category names its kind — assets
@@ -59,7 +62,10 @@ const show = defineModel<boolean>("show", { required: true })
 const { t } = useI18n()
 const message = useMessage()
 
-const form = ref({ nameAr: "", nameEn: "", parentId: null as number | null, kind: "asset" as ItemKind, icon: "", order: 0, showToMembers: false })
+const form = ref({ nameAr: "", nameEn: "", parentId: null as number | null, kind: "asset" as ItemKind, intangible: false, icon: "", order: 0, showToMembers: false })
+/** The package lets asset categories be intangible (a licence: no place, amortized). */
+const intangibleAllowed = ref(false)
+void quietly(inventorySettings, settings => (intangibleAllowed.value = settings.intangible_assets))
 const saving = ref(false)
 const problem = ref("")
 
@@ -90,8 +96,8 @@ watch(show, open => {
 	if (!open) return
 	const c = props.category
 	form.value = c
-		? { nameAr: c.name.ar, nameEn: c.name.en ?? "", parentId: c.parent_id, kind: c.kind, icon: c.icon ?? "", order: c.order, showToMembers: c.show_to_members }
-		: { nameAr: "", nameEn: "", parentId: props.parentId ?? null, kind: "asset", icon: "", order: 0, showToMembers: false }
+		? { nameAr: c.name.ar, nameEn: c.name.en ?? "", parentId: c.parent_id, kind: c.kind, intangible: c.intangible, icon: c.icon ?? "", order: c.order, showToMembers: c.show_to_members }
+		: { nameAr: "", nameEn: "", parentId: props.parentId ?? null, kind: "asset", intangible: false, icon: "", order: 0, showToMembers: false }
 	problem.value = ""
 })
 
@@ -105,6 +111,7 @@ async function save() {
 		icon: f.icon.trim() || null,
 		order: f.order,
 		show_to_members: f.showToMembers,
+		...(intangibleAllowed.value ? { intangible: f.kind === "asset" && f.intangible } : {}),
 		...(f.parentId ? {} : { kind: f.kind })
 	}
 	try {

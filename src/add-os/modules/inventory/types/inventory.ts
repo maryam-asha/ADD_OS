@@ -22,6 +22,37 @@ export interface PlaceRef {
 	id: number
 }
 
+// ── Settings ────────────────────────────────────────────────────────────────
+
+export type SettingType = "string" | "integer" | "boolean" | "enum" | "list"
+
+/** One row of the settings page (GET inventory/settings/manage): a config value the dashboard may change. */
+export interface ManagedSetting {
+	/** The config path under `inventory.`, e.g. `items.sku_prefix`. */
+	key: string
+	group: string
+	type: SettingType
+	/** The choices of an enum or a list. */
+	options: string[]
+	value: unknown
+	/** What config/inventory.php says. */
+	default: unknown
+	/** Data already depends on it: shown, not changed. */
+	locked: boolean
+	locked_reason: string | null
+	/** A list's options data already uses: they stay; the rest may change. */
+	locked_options: string[]
+}
+
+/** The levels chosen in the place picker, outermost first — what it needs to show a place again without asking the server. */
+export interface PlaceChain {
+	branchId: number | null
+	buildingId: number | null
+	floorId: number | null
+	zoneId: number | null
+	spaceId: number | null
+}
+
 /** A place as the server names it: its own label, and the places it sits in, outermost first. */
 export interface PlaceDescription extends PlaceRef {
 	label: string | null
@@ -72,6 +103,8 @@ export interface Category {
 	id: number
 	parent_id: number | null
 	kind: ItemKind
+	/** An asset category whose assets have no body (a licence): no place, amortized. */
+	intangible: boolean
 	name: Bilingual
 	icon: string | null
 	show_to_members: boolean
@@ -85,6 +118,7 @@ export interface CategoryPayload {
 	name: Bilingual
 	parent_id?: number | null
 	kind?: ItemKind
+	intangible?: boolean
 	icon?: string | null
 	show_to_members?: boolean
 	order?: number
@@ -129,7 +163,7 @@ export interface Item {
 	description: string | null
 	image_url: string | null
 	kind: ItemKind
-	category: { id: number; name: Bilingual }
+	category: { id: number; name: Bilingual; intangible?: boolean }
 	/** None for an asset item: it is counted one by one. */
 	unit: Unit | null
 	properties: Record<string, PropertyValue>
@@ -206,9 +240,13 @@ export interface WarehouseRef {
 
 // ── Assets ──────────────────────────────────────────────────────────────────
 
-export type AssetStatus = "in_service" | "in_maintenance" | "retired" | "lost" | "disposed"
+/** `draft` only with the package's drafts on: saved, waiting for approval. */
+export type AssetStatus = "draft" | "in_service" | "in_maintenance" | "retired" | "lost" | "disposed"
 
-export const ASSET_STATUSES: readonly AssetStatus[] = ["in_service", "in_maintenance", "retired", "lost", "disposed"]
+export const ASSET_STATUSES: readonly AssetStatus[] = ["draft", "in_service", "in_maintenance", "retired", "lost", "disposed"]
+
+/** How an asset loses its value: evenly each month, or twice that rate on what is left. */
+export type DepreciationMethod = "straight_line" | "declining_balance"
 
 /** What PATCH assets/{id}/status may set; the other two have their own flows. */
 export const SETTABLE_ASSET_STATUSES: readonly AssetStatus[] = ["in_service", "retired", "lost"]
@@ -291,14 +329,22 @@ export interface Asset {
 	location: PlaceDescription
 	custodian?: (CustodianDescription & { since: string }) | null
 	purchased_on: string | null
+	/** When it was put in service: its depreciation starts then (else at purchase). */
+	in_service_on: string | null
 	purchase_cost: string | null
 	currency: string | null
 	supplier: string | null
-	/** The supplier's invoice number, and the invoice uploaded. */
+	/** The supplier's invoice number, and the documents uploaded (the invoice, photos…). */
 	reference: string | null
-	attachment_url: string | null
+	attachments: string[]
 	useful_life_months: number | null
 	salvage_value: string | null
+	depreciation_method: DepreciationMethod | null
+	/** No body: no place, no QR to scan, no maintenance; amortized. */
+	intangible: boolean
+	/** Capital additions so far, and the cost with them. */
+	additions_total: string
+	total_cost: string | null
 	depreciation: Depreciation | null
 	warranty_until: string | null
 	disposal: { disposed_on: string; method: DisposalMethod | null; proceeds: string | null; note: string | null } | null
@@ -314,11 +360,12 @@ export interface Asset {
 export interface AssetDetailsPayload {
 	serial_number?: string | null
 	purchased_on?: string | null
+	in_service_on?: string | null
 	purchase_cost?: number | null
 	currency?: string | null
 	supplier?: string | null
 	reference?: string | null
-	attachment_url?: string | null
+	attachments?: string[]
 	useful_life_months?: number | null
 	salvage_value?: number | null
 	warranty_until?: string | null
@@ -330,6 +377,34 @@ export interface RegisterAssetPayload extends AssetDetailsPayload {
 	location: PlaceRef
 	count?: number
 	code?: string | null
+}
+
+/** One asset item of a registration in one place: its count and what differs from the others. */
+export interface AssetBatchLine {
+	item_id: number
+	count?: number
+	serial_number?: string | null
+	purchase_cost?: number | null
+	useful_life_months?: number | null
+	salvage_value?: number | null
+	warranty_until?: string | null
+	depreciation_method?: DepreciationMethod
+}
+
+/** POST assets/batch — a room's contents: the place and what the purchase shares once, a line per item. */
+export interface RegisterAssetBatchPayload {
+	/** Needed unless every line is intangible (sits nowhere). */
+	location?: PlaceRef
+	purchased_on?: string | null
+	in_service_on?: string | null
+	supplier?: string | null
+	reference?: string | null
+	attachments?: string[]
+	currency?: string | null
+	notes?: string | null
+	/** Only with the package's drafts on: false needs inventory.assets.approve. */
+	draft?: boolean
+	lines: AssetBatchLine[]
 }
 
 // ── Stock ───────────────────────────────────────────────────────────────────
@@ -468,4 +543,24 @@ export interface AssetRegisterRow {
 export interface AssetRegister {
 	assets: AssetRegisterRow[]
 	totals: { currency: string; cost: string; accumulated: string; book_value: string }[]
+}
+
+/** A capital addition: money spent on an asset that raised its cost (GET assets/{id}/additions). */
+export interface AssetAddition {
+	id: number
+	asset_id: number
+	added_on: string
+	amount: string
+	description: string
+	reference: string | null
+	attachments: string[]
+	actor: { id: number; name: string | null } | null
+}
+
+export interface AssetAdditionPayload {
+	added_on: string
+	amount: number
+	description: string
+	reference?: string | null
+	attachments?: string[]
 }

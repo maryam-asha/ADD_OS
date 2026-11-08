@@ -91,6 +91,7 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"inventory.inventoryItems": () => import("@/add-os/modules/inventory/views/ItemsPage.vue"),
 	"inventory.inventoryCatalog": () => import("@/add-os/modules/inventory/views/CatalogPage.vue"),
 	"inventory.inventoryReports": () => import("@/add-os/modules/inventory/views/InventoryReportsPage.vue"),
+	"inventory.inventorySettings": () => import("@/add-os/modules/inventory/views/InventorySettingsPage.vue"),
 	"community.events": () => import("@/add-os/modules/events/views/EventsPage.vue"),
 	"community.eventCreate": () => import("@/add-os/modules/events/views/EventFormPage.vue"),
 	"community.eventEdit": () => import("@/add-os/modules/events/views/EventFormPage.vue"),
