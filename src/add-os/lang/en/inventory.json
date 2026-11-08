@@ -673,7 +673,8 @@
 					"straight_line": "Straight line",
 					"declining_balance": "Declining balance"
 				}
-			}
+			},
+			"optionsInUse": "The dimmed choices are used by registered assets and cannot be removed."
 		},
 		"additions": {
 			"title": "Capital additions",

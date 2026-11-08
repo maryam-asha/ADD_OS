@@ -40,6 +40,8 @@ export interface ManagedSetting {
 	/** Data already depends on it: shown, not changed. */
 	locked: boolean
 	locked_reason: string | null
+	/** A list's options data already uses: they stay; the rest may change. */
+	locked_options: string[]
 }
 
 /** The levels chosen in the place picker, outermost first — what it needs to show a place again without asking the server. */

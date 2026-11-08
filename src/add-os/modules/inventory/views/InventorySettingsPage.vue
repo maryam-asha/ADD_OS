@@ -28,6 +28,7 @@
 					<n-input v-else :value="(draft[row.key] as string | null) ?? ''" :disabled="row.locked" dir="ltr" @update:value="(v: string) => set(row, v)" />
 
 					<span v-if="row.locked && row.locked_reason" class="text-xs text-warning">{{ row.locked_reason }}</span>
+					<span v-else-if="row.locked_options.length" class="text-xs text-warning">{{ t("inventory.settings.optionsInUse") }}</span>
 					<span v-else-if="te(fieldKey(row, 'hint'))" class="text-xs text-secondary">{{ t(fieldKey(row, "hint")) }}</span>
 					<span v-if="errors[row.key]" class="text-xs text-error">{{ errors[row.key] }}</span>
 				</div>
@@ -83,7 +84,8 @@ function label(row: ManagedSetting): string {
 
 function optionsOf(row: ManagedSetting): SelectOption[] {
 	const base = `inventory.settings.options.${row.key.replace(/\./g, "_")}`
-	return row.options.map(option => ({ value: option, label: te(`${base}.${option}`) ? t(`${base}.${option}`) : option }))
+	// An option in use cannot be removed: Naive draws its tag without a close button.
+	return row.options.map(option => ({ value: option, label: te(`${base}.${option}`) ? t(`${base}.${option}`) : option, disabled: row.locked_options.includes(option) }))
 }
 
 function set(row: ManagedSetting, value: unknown) {

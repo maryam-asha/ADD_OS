@@ -247,7 +247,7 @@
 						</n-data-table>
 					</n-tab-pane>
 					<n-tab-pane name="schedules" :tab="t('inventory.history.schedules')">
-						<div v-if="may.maintenance && !disposed" class="mb-3 flex justify-end">
+						<div v-if="may.maintenance && !disposed && !draft && !asset.intangible" class="mb-3 flex justify-end">
 							<n-button size="small" type="primary" secondary @click="editSchedule(null)">
 								<template #icon><Icon name="carbon:add" :size="15" /></template>{{ t("inventory.schedules.add") }}
 							</n-button>
