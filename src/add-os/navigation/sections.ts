@@ -291,14 +291,16 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		]
 	},
 	{
+		// Door locks (TTLock): the devices, the codes on them, and every
+		// opening. A booking's own code is also handled from its drawer.
 		key: "access",
 		path: "/access",
 		icon: "carbon:locked",
-		status: "coming-soon",
+		status: "active",
 		pages: [
-			// ComingSoon: no API yet.
-			{ key: "locks", path: "locks", allStaff: true },
-			{ key: "accessLogs", path: "logs", allStaff: true }
+			{ key: "locks", path: "locks", permission: "devices.view" },
+			{ key: "doorCodes", path: "door-codes", permission: "access-grants.view" },
+			{ key: "accessLogs", path: "logs", permission: "access-events.view" }
 		]
 	},
 	{

@@ -159,6 +159,8 @@
 			"manage_attendees": "Manage registrations",
 			"manage": "Manage",
 			"broadcast": "Send broadcast",
+			"control": "Open / lock",
+			"revoke": "Stop",
 			"pair": "Pair device",
 			"reverse": "Reverse at the bank",
 			"cancel": "Cancel",
@@ -309,6 +311,8 @@
 			"inventory": "Inventory & Assets",
 			"invoices": "Invoices",
 			"item-sales": "Item Sales",
+			"access-grants": "Door codes",
+			"access-events": "Access log",
 			"kiosks": "Reception Kiosks",
 			"members": "Members",
 			"memberships": "Memberships",
@@ -1967,6 +1971,7 @@
 			"packages": "Packages",
 			"wallet": "Wallet",
 			"locks": "Locks",
+			"doorCodes": "Door Codes",
 			"accessLogs": "Access logs",
 			"transactions": "Transactions",
 			"paymentMethods": "Payment methods",
@@ -4812,5 +4817,174 @@
 			"method": "Paid by",
 			"soldBy": "Sold by"
 		}
+	},
+	"accessDevices": {
+		"subtitle": "Door locks and the gateways that connect them, linked to the TTLock account.",
+		"loadError": "The locks could not be loaded.",
+		"accountUnavailable": "The TTLock account could not be reached, so TTLock ids are typed by hand for now.",
+		"sync": "Refresh from TTLock",
+		"synced": "Devices refreshed.",
+		"done": "Done.",
+		"notLinked": "Not linked",
+		"noGateway": "No gateway",
+		"viaGateway": "via gateway {ref}",
+		"lockCount": "{count} locks",
+		"codes": "Door codes",
+		"log": "Access log",
+		"type": {
+			"lock": "Lock",
+			"gateway": "Gateway"
+		},
+		"status": {
+			"online": "Online",
+			"offline": "Offline",
+			"faulted": "Not on TTLock"
+		},
+		"columns": {
+			"type": "Type",
+			"space": "Space",
+			"ttlockId": "TTLock id",
+			"status": "Status",
+			"details": "Battery / gateway",
+			"syncedAt": "Last refreshed"
+		},
+		"stats": {
+			"locks": "Locks",
+			"gateways": "Gateways",
+			"online": "Online",
+			"lowBattery": "Low battery"
+		},
+		"create": {
+			"button": "Add device",
+			"title": "Add a lock or gateway",
+			"success": "Device added."
+		},
+		"edit": {
+			"title": "Edit device",
+			"success": "Device updated."
+		},
+		"delete": {
+			"warning": "Its door codes and access log go with it.",
+			"success": "Device deleted."
+		},
+		"form": {
+			"type": "Type",
+			"ttlockDevice": "TTLock device",
+			"ttlockDeviceHint": "Devices on the TTLock account not linked to another row yet.",
+			"ttlockId": "TTLock id",
+			"ttlockIdHint": "The lockId or gatewayId shown in the TTLock app.",
+			"mac": "MAC address",
+			"branch": "Branch",
+			"space": "Space",
+			"spaceHint": "The room, office or hall this lock closes.",
+			"gateway": "Gateway",
+			"gatewayHint": "The gateway this lock is paired with in the TTLock app."
+		},
+		"unlock": {
+			"button": "Open door",
+			"title": "Open the door",
+			"confirm": "Open the door of {place} now? Anyone there can walk in.",
+			"ok": "Open"
+		},
+		"lock": {
+			"button": "Lock door"
+		},
+		"qr": {
+			"button": "Door sticker",
+			"title": "Door sticker",
+			"hint": "Members scan this with the app to open the door. On its own it opens nothing.",
+			"download": "Download PNG",
+			"regenerate": "New sticker",
+			"regenerateConfirm": "The current sticker stops working at once. Replace it at the door after this.",
+			"regenerateOk": "Make a new one"
+		}
+	},
+	"doorCodes": {
+		"subtitle": "Every code on a lock and where it stands. The code itself is never shown.",
+		"loadError": "The door codes could not be loaded.",
+		"filters": {
+			"lock": "All locks"
+		},
+		"status": {
+			"live": "Active (issued or activated)",
+			"issued": "Issued",
+			"activated": "Activated",
+			"expired": "Expired",
+			"revoked": "Stopped"
+		},
+		"revokeReason": {
+			"maintenance": "maintenance",
+			"cancellation": "booking cancelled",
+			"replaced": "replaced",
+			"lease": "lease",
+			"staff": "by staff"
+		},
+		"columns": {
+			"status": "Status",
+			"place": "Door",
+			"for": "For",
+			"issuedAt": "Issued",
+			"activation": "Activated",
+			"expiresAt": "Ends",
+			"revoked": "Stopped"
+		},
+		"forBooking": "Booking #{id}",
+		"forLease": "Lease #{id}",
+		"activateBy": "by {at}",
+		"revoke": {
+			"button": "Stop code",
+			"confirm": "Stop {who}'s code for {place}? It is not issued again unless the desk re-issues it.",
+			"ok": "Stop it",
+			"done": "Code stopped."
+		}
+	},
+	"accessLog": {
+		"subtitle": "Every door opened, locked or refused. Keypad entries are not reported by the lock.",
+		"loadError": "The access log could not be loaded.",
+		"filters": {
+			"lock": "All locks",
+			"type": "Any event",
+			"channel": "Any channel"
+		},
+		"type": {
+			"unlock": "Opened",
+			"lock": "Locked",
+			"lock_auto": "Locked itself",
+			"failed_attempt": "Refused"
+		},
+		"channel": {
+			"keypad_manual": "Keypad",
+			"qr_scan": "Sticker scan",
+			"reception_activation": "Desk activation",
+			"app_remote": "App door button",
+			"dashboard": "Dashboard"
+		},
+		"columns": {
+			"at": "When",
+			"type": "Event",
+			"channel": "Through",
+			"place": "Door",
+			"actor": "By",
+			"code": "Code"
+		}
+	},
+	"bookingDoor": {
+		"title": "Door",
+		"none": "No door code yet.",
+		"status": "Code",
+		"activateBy": "Activate by",
+		"activatedAt": "Activated",
+		"expiresAt": "Ends",
+		"activate": "Activate code",
+		"activated": "Code activated.",
+		"issue": "Issue code now",
+		"reissue": "Issue a new code",
+		"issueConfirm": "Put a code for this booking on the lock now?",
+		"reissueConfirm": "Put a new code on the lock? The current one stops working.",
+		"reissued": "New code issued.",
+		"open": "Open door",
+		"openConfirm": "Open this room's door now? Anyone there can walk in.",
+		"opened": "Door opened.",
+		"confirm": "Yes"
 	}
 }

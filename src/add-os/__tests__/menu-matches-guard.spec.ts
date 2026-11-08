@@ -224,8 +224,8 @@ describe("sidebar, route guard and \"/\" agree", () => {
 	it("shows an HR role only HR, its own file, and what is open to every staff account", () => {
 		signIn(ACCOUNTS["an HR role"])
 		expect(offeredByPermission().every(path => path.startsWith("/hr"))).toBe(true)
-		// dashboard + the ComingSoon placeholders (plans' wallet, access, the café, incubation), open to all staff.
-		expect(NAV_SECTIONS.filter(maySeeSection).map(section => section.key)).toEqual(["dashboard", "plans", "access", "community", "incubation", "hr", "hrTime", "hrPay", "hrReports", "hrSettings", "myHr"])
+		// dashboard + the ComingSoon placeholders (plans' wallet, the café, incubation), open to all staff.
+		expect(NAV_SECTIONS.filter(maySeeSection).map(section => section.key)).toEqual(["dashboard", "plans", "community", "incubation", "hr", "hrTime", "hrPay", "hrReports", "hrSettings", "myHr"])
 		expect(homePath()).toBe("/hr/employees")
 	})
 

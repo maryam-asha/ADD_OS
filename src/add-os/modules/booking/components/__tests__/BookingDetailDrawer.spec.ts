@@ -66,7 +66,9 @@ function detail(overrides: Record<string, unknown> = {}) {
 // The drawer's shell teleports; its contents are what is under test.
 const stubs = {
 	Drawer: { template: "<div><slot /></div>" },
-	DrawerContent: { template: "<div><slot /></div>" }
+	DrawerContent: { template: "<div><slot /></div>" },
+	// The door section loads and acts on its own (access module); not under test here.
+	BookingDoorSection: true
 }
 
 function mountDrawer(mayCancel = true) {
