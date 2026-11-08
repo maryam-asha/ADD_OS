@@ -29,7 +29,10 @@
 			"building": "المبنى",
 			"floor": "الطابق",
 			"zone": "المنطقة",
-			"space": "المساحة"
+			"space": "المساحة",
+			"inPlace": "مكان",
+			"inWarehouse": "مستودع",
+			"pickWarehouse": "اختر المستودع"
 		},
 		"custodianType": {
 			"hr_employee": "موظف",
@@ -416,11 +419,12 @@
 			"balances": "الأرصدة",
 			"recentMovements": "آخر الحركات",
 			"external": "خارج الفروع",
-			"save": "حفظ المستودع"
+			"save": "حفظ المستودع",
+			"assets": "الأصول المخزّنة فيه"
 		},
 		"operations": {
 			"add": "إضافة حركة",
-			"pickTitle": "إضافة حركة مخزنية",
+			"pickTitle": "إضافة حركة مستودع",
 			"pickHint": "اختر نوع الحركة للانتقال إلى صفحة الإدخال.",
 			"kind": {
 				"transfer": {
@@ -474,7 +478,61 @@
 			"showOperation": "عرض أسطر هذه العملية",
 			"clearOperation": "عرض كل الحركات",
 			"packOf": "{unit} ({n})",
-			"needWarehouse": "اختر المستودع."
+			"needWarehouse": "اختر المستودع.",
+			"pageTitle": "إضافة حركة: {kind}",
+			"pageHint": "تُسجَّل الحركة عند الحفظ وتؤثر على الرصيد فوراً.",
+			"record": "تسجيل الحركة",
+			"date": "تاريخ الحركة",
+			"reference": "رقم المرجع",
+			"optional": "اختياري",
+			"costMethod": "طريقة احتساب التكلفة",
+			"costAverage": "متوسط التكلفة الحالي",
+			"costEntered": "إدخال تكلفة الوحدة",
+			"reasonText": {
+				"receive": "سبب الإدخال",
+				"issue": "سبب الإخراج",
+				"writeOff": "سبب الإتلاف",
+				"adjust": "سبب التسوية",
+				"transfer": "سبب النقل أو الملاحظات"
+			},
+			"linesTitle": "الأصناف والكميات",
+			"linesHint": {
+				"fromStock": "تظهر الأصناف ذات الرصيد الموجب في المستودع المحدد.",
+				"average": "تُحتسب التكلفة وفق المتوسط المرجّح الحالي لكل صنف في المستودع.",
+				"entered": "أدخل تكلفة الوحدة لكل صنف، وتُستخدم في احتساب المتوسط المرجّح.",
+				"adjust": "أدخل الكمية المعدودة، ويُسجَّل الفرق عن الرصيد الدفتري."
+			},
+			"inMainUnit": "بالوحدة الرئيسية",
+			"totalValue": "القيمة الإجمالية",
+			"lineNote": "ملاحظات الصنف",
+			"pickStockItem": "اختر الصنف",
+			"onHand": "الرصيد: {n}",
+			"pickWarehouseFirst": "اختر المستودع أولاً.",
+			"attachment": "مرفق اختياري",
+			"attachmentHint": "صور أو PDF فقط، بحد أقصى 2 ميغابايت.",
+			"chooseFile": "اختيار ملف",
+			"attachmentTooLarge": "الملف أكبر من 2 ميغابايت.",
+			"attachmentType": "يمكن إرفاق صورة أو ملف PDF فقط.",
+			"openAttachment": "فتح المرفق",
+			"removeAttachment": "إزالة",
+			"operationsTab": "الحركات",
+			"ledgerTab": "سجل الدفتر",
+			"kindCol": "النوع",
+			"linesCount": "الأصناف",
+			"details": "تفاصيل الحركة",
+			"emptyOperations": "لا توجد حركات بعد.",
+			"invalidKind": "نوع حركة غير معروف.",
+			"stored": {
+				"receive": "إدخال يدوي",
+				"issue": "إخراج يدوي",
+				"write_off": "إتلاف",
+				"transfer": "نقل بين المستودعات",
+				"adjust": "تسوية"
+			},
+			"leaveTitle": "مغادرة هذه الحركة؟",
+			"leaveBody": "لم تُسجَّل الحركة بعد، وسيضيع ما أدخلته.",
+			"leaveConfirm": "مغادرة",
+			"stay": "البقاء"
 		},
 		"itemExtras": {
 			"image": "صورة الصنف",

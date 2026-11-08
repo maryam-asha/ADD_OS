@@ -15,6 +15,11 @@
 			<h3 class="mt-6 mb-2 text-sm font-semibold">{{ t("inventory.warehouses.balances") }}</h3>
 			<n-data-table class="add-ledger-table" :columns="balanceColumns" :data="balances" :loading :bordered="false" size="small" :scroll-x="tableWidth(balanceColumns)" />
 
+			<template v-if="assetsAllowed">
+				<h3 class="mt-6 mb-2 text-sm font-semibold">{{ t("inventory.warehouses.assets") }}</h3>
+				<n-data-table class="add-ledger-table" :columns="assetColumns" :data="assets" :loading :bordered="false" size="small" :scroll-x="tableWidth(assetColumns)" />
+			</template>
+
 			<h3 class="mt-6 mb-2 text-sm font-semibold">{{ t("inventory.warehouses.recentMovements") }}</h3>
 			<n-data-table class="add-ledger-table" :columns="movementColumns" :data="movements" :loading :bordered="false" size="small" :scroll-x="tableWidth(movementColumns)" />
 		</template>
@@ -23,14 +28,14 @@
 
 <script setup lang="ts">
 import type { DataTableColumns } from "naive-ui"
-import type { StockBalance, StockMovement, Warehouse } from "@/add-os/modules/inventory/types/inventory"
+import type { Asset, StockBalance, StockMovement, Warehouse } from "@/add-os/modules/inventory/types/inventory"
 import { NDataTable } from "naive-ui"
 import { computed, h, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import HrDrawer from "@/add-os/modules/hr/components/HrDrawer.vue"
 import { quietly } from "@/add-os/modules/hr/utils/errors"
 import { COLUMN, EMPTY, localized, money, quantity, tableWidth } from "@/add-os/modules/inventory/utils/display"
-import { listBalances, listStockMovements } from "@/add-os/services/inventory"
+import { inventorySettings, listAssets, listBalances, listStockMovements } from "@/add-os/services/inventory"
 import { formatDateTime } from "@/add-os/utils/format/dates"
 
 /** One warehouse: its details, what it holds and its latest movements. */
@@ -39,6 +44,8 @@ const show = defineModel<boolean>("show", { required: true })
 const { t } = useI18n()
 
 const balances = ref<StockBalance[]>([])
+const assets = ref<Asset[]>([])
+const assetsAllowed = ref(false)
 const movements = ref<StockMovement[]>([])
 const loading = ref(false)
 
@@ -61,13 +68,21 @@ watch(
 	async ([open, id]) => {
 		if (!open || !id) return
 		loading.value = true
+		await quietly(inventorySettings, settings => (assetsAllowed.value = settings.assets_in_warehouses))
 		await Promise.all([
+			...(assetsAllowed.value ? [quietly(() => listAssets({ location: { type: "warehouse", id }, per_page: 100 }), result => (assets.value = result.data))] : []),
 			quietly(() => listBalances({ warehouse_id: id, per_page: 100 }), result => (balances.value = result.data)),
 			quietly(() => listStockMovements({ warehouse_id: id, per_page: 10 }), result => (movements.value = result.data))
 		])
 		loading.value = false
 	}
 )
+
+const assetColumns = computed<DataTableColumns<Asset>>(() => [
+	{ title: t("inventory.assets.code"), key: "code", ...COLUMN.code, render: row => row.code },
+	{ title: t("inventory.stock.item"), key: "item", ...COLUMN.name, render: row => localized(row.item.name) },
+	{ title: t("inventory.common.status"), key: "status", ...COLUMN.status, render: row => t(`inventory.assetStatus.${row.status}`) }
+])
 
 const balanceColumns = computed<DataTableColumns<StockBalance>>(() => [
 	{ title: t("inventory.stock.item"), key: "item", ...COLUMN.name, render: row => localized(row.item.name) },

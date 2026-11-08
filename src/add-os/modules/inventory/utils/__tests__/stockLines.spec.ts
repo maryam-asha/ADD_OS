@@ -1,6 +1,6 @@
 import type { Item } from "@/add-os/modules/inventory/types/inventory"
 import { describe, expect, it } from "vitest"
-import { addItemLine, linesPayload, operationProblem, unitChoices } from "../stockLines"
+import { addItemLine, linesPayload, lineValue, mainQuantity, operationProblem, unitChoices } from "../stockLines"
 
 const piece = { id: 1, code: "pc", name: { ar: "قطعة", en: "piece" }, allows_fractions: false }
 const box = { id: 2, code: "box", name: { ar: "علبة", en: "box" }, allows_fractions: false }
@@ -44,5 +44,20 @@ describe("stock lines", () => {
 		expect(operationProblem("receive", { warehouse: 1, lines: [] })).toBe("needLine")
 		expect(operationProblem("receive", { warehouse: 1, lines: [{ ...lines[0], amount: null }] })).toBe("needLine")
 		expect(operationProblem("adjust", { warehouse: 1, lines: [{ ...lines[0], amount: 0 }] })).toBeNull()
+	})
+
+	it("sends a line's note, and a receipt's cost only when costs are entered", () => {
+		const [line] = addItemLine([], water)
+		const noted = { ...line, amount: 2, unitCost: 3, note: " dented " }
+		expect(linesPayload("receive", [noted], "entered")).toEqual([{ item_id: 10, unit_id: 1, quantity: 2, unit_cost: 3, note: "dented" }])
+		expect(linesPayload("receive", [noted], "average")).toEqual([{ item_id: 10, unit_id: 1, quantity: 2, note: "dented" }])
+	})
+
+	it("shows what a line is in the main unit and what it is worth", () => {
+		const [line] = addItemLine([], water)
+		expect(mainQuantity({ ...line, unitId: 2, amount: 2 })).toBe("12")
+		expect(mainQuantity({ ...line, amount: null })).toBe("0")
+		expect(lineValue({ ...line, unitId: 2, amount: 2, unitCost: 1.5 })).toBe("3")
+		expect(lineValue({ ...line, amount: 2, unitCost: null })).toBe("0")
 	})
 })

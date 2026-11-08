@@ -12,7 +12,8 @@ export interface Bilingual {
 }
 
 /** ADD's own places: what an asset sits in and stock is counted on. */
-export type PlaceType = "branch" | "building" | "floor" | "zone" | "space"
+/** `warehouse` only as an asset's place, when the package lets assets be stored in warehouses. */
+export type PlaceType = "branch" | "building" | "floor" | "zone" | "space" | "warehouse"
 
 export const PLACE_TYPES: readonly PlaceType[] = ["branch", "building", "floor", "zone", "space"]
 
@@ -129,7 +130,8 @@ export interface Item {
 	image_url: string | null
 	kind: ItemKind
 	category: { id: number; name: Bilingual }
-	unit: Unit
+	/** None for an asset item: it is counted one by one. */
+	unit: Unit | null
 	properties: Record<string, PropertyValue>
 	is_active: boolean
 	/** Its packs; loaded on the item lists and pages. */
@@ -142,7 +144,8 @@ export interface Item {
 export interface ItemPayload {
 	name: Bilingual
 	category_id: number
-	unit_id: number
+	/** Required for stock; an asset item may have none. */
+	unit_id: number | null
 	sku?: string | null
 	barcode?: string | null
 	image_url?: string | null
@@ -291,6 +294,9 @@ export interface Asset {
 	purchase_cost: string | null
 	currency: string | null
 	supplier: string | null
+	/** The supplier's invoice number, and the invoice uploaded. */
+	reference: string | null
+	attachment_url: string | null
 	useful_life_months: number | null
 	salvage_value: string | null
 	depreciation: Depreciation | null
@@ -311,6 +317,8 @@ export interface AssetDetailsPayload {
 	purchase_cost?: number | null
 	currency?: string | null
 	supplier?: string | null
+	reference?: string | null
+	attachment_url?: string | null
 	useful_life_months?: number | null
 	salvage_value?: number | null
 	warranty_until?: string | null
@@ -352,7 +360,12 @@ export interface StockLine {
 	counted?: number
 	/** Receive and adjust: per the chosen unit. */
 	unit_cost?: number | null
+	/** A note on this line. */
+	note?: string | null
 }
+
+/** A receipt's costing: the warehouse's current average, or a cost entered per line. */
+export type CostMethod = "average" | "entered"
 
 export interface StockOperationPayload {
 	warehouse_id?: number
@@ -360,7 +373,42 @@ export interface StockOperationPayload {
 	to_warehouse_id?: number
 	lines: StockLine[]
 	reason?: ManualIssueReason
+	/** Why, in words: required but for a transfer. */
 	note?: string | null
+	/** The day it happened (yyyy-MM-dd); today when left out, never later. */
+	operation_date?: string | null
+	reference?: string | null
+	attachment_url?: string | null
+	cost_method?: CostMethod
+}
+
+/** An operation's kind as ADD Core stores it. */
+export type StoredOperationKind = "receive" | "issue" | "write_off" | "transfer" | "adjust"
+
+export const STORED_OPERATION_KIND: Record<StockOperationKind, StoredOperationKind> = {
+	receive: "receive",
+	issue: "issue",
+	writeOff: "write_off",
+	transfer: "transfer",
+	adjust: "adjust"
+}
+
+/** One operation as staff recorded it, over the ledger rows it wrote. */
+export interface StockOperation {
+	id: string
+	kind: StoredOperationKind
+	warehouse: WarehouseRef
+	to_warehouse: WarehouseRef | null
+	operation_date: string
+	reference: string | null
+	reason: ManualIssueReason | null
+	note: string | null
+	cost_method: CostMethod | null
+	attachment_url: string | null
+	actor: Actor | null
+	lines_count?: number
+	movements?: StockMovement[]
+	created_at: string | null
 }
 
 export interface StockBalance {
@@ -387,6 +435,8 @@ export interface StockMovement {
 	operation_id: string | null
 	/** What was typed when it was a pack ("2 box"); for a count, the count. */
 	entered: { unit: { id: number; code: string; name: Bilingual }; quantity: string } | null
+	/** A note on this line of its operation. */
+	line_note: string | null
 	reason: IssueReason | null
 	source: { type: string; id: number } | null
 	note: string | null

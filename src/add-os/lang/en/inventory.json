@@ -29,7 +29,10 @@
 			"building": "Building",
 			"floor": "Floor",
 			"zone": "Zone",
-			"space": "Space"
+			"space": "Space",
+			"inPlace": "A place",
+			"inWarehouse": "A warehouse",
+			"pickWarehouse": "Choose the warehouse"
 		},
 		"custodianType": {
 			"hr_employee": "Employee",
@@ -416,11 +419,12 @@
 			"balances": "On hand",
 			"recentMovements": "Recent movements",
 			"external": "Outside any branch",
-			"save": "Save warehouse"
+			"save": "Save warehouse",
+			"assets": "Assets kept here"
 		},
 		"operations": {
 			"add": "Add movement",
-			"pickTitle": "Add a stock movement",
+			"pickTitle": "Add a warehouse movement",
 			"pickHint": "Choose the kind of movement to open its form.",
 			"kind": {
 				"transfer": {
@@ -474,7 +478,61 @@
 			"showOperation": "Show this operation's lines",
 			"clearOperation": "Show all movements",
 			"packOf": "{unit} ({n})",
-			"needWarehouse": "Choose the warehouse."
+			"needWarehouse": "Choose the warehouse.",
+			"pageTitle": "Add movement: {kind}",
+			"pageHint": "The movement is recorded as soon as you save it and changes the balance right away.",
+			"record": "Record movement",
+			"date": "Movement date",
+			"reference": "Reference number",
+			"optional": "Optional",
+			"costMethod": "Costing",
+			"costAverage": "Current average cost",
+			"costEntered": "Enter unit cost",
+			"reasonText": {
+				"receive": "Reason for the receipt",
+				"issue": "Reason for the issue",
+				"writeOff": "Reason for the write-off",
+				"adjust": "Reason for the adjustment",
+				"transfer": "Reason for the transfer or notes"
+			},
+			"linesTitle": "Items and quantities",
+			"linesHint": {
+				"fromStock": "Only items with stock in the chosen warehouse are listed.",
+				"average": "Cost follows each item’s current weighted average in the warehouse.",
+				"entered": "Enter each item’s unit cost; it is used in the weighted average.",
+				"adjust": "Enter what was counted; the difference from the book is recorded."
+			},
+			"inMainUnit": "In main unit",
+			"totalValue": "Total value",
+			"lineNote": "Item notes",
+			"pickStockItem": "Choose an item",
+			"onHand": "On hand: {n}",
+			"pickWarehouseFirst": "Choose the warehouse first.",
+			"attachment": "Optional attachment",
+			"attachmentHint": "Images or PDF only, up to 2 MB.",
+			"chooseFile": "Choose file",
+			"attachmentTooLarge": "The file is larger than 2 MB.",
+			"attachmentType": "Only images or a PDF can be attached.",
+			"openAttachment": "Open attachment",
+			"removeAttachment": "Remove",
+			"operationsTab": "Movements",
+			"ledgerTab": "Ledger",
+			"kindCol": "Type",
+			"linesCount": "Items",
+			"details": "Movement details",
+			"emptyOperations": "No movements yet.",
+			"invalidKind": "Unknown movement type.",
+			"stored": {
+				"receive": "Manual receipt",
+				"issue": "Manual issue",
+				"write_off": "Write-off",
+				"transfer": "Transfer between warehouses",
+				"adjust": "Adjustment"
+			},
+			"leaveTitle": "Leave this movement?",
+			"leaveBody": "It has not been recorded; what you entered will be lost.",
+			"leaveConfirm": "Leave",
+			"stay": "Stay"
 		},
 		"itemExtras": {
 			"image": "Item image",

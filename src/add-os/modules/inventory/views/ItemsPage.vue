@@ -263,7 +263,7 @@ const columns = computed<DataTableColumns<Item>>(() => [
 			const label =
 				row.kind === "asset"
 					? t(countKey("inventory.items.assetsCount", row.assets_count ?? 0), { n: formatNumber(row.assets_count ?? 0) })
-					: `${quantity(row.on_hand ?? "0")} ${isolate(localized(row.unit.name))}`
+					: `${quantity(row.on_hand ?? "0")} ${isolate(localized(row.unit?.name))}`
 			return h(
 				"span",
 				{

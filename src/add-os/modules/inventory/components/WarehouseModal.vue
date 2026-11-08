@@ -93,7 +93,7 @@ import StaffSelect from "@/add-os/modules/inventory/components/StaffSelect.vue"
 import { localized } from "@/add-os/modules/inventory/utils/display"
 import { blankWarehouseForm, canBePrimary, warehouseForm, warehousePayload } from "@/add-os/modules/inventory/utils/warehouses"
 import { listBranches } from "@/add-os/services/branches"
-import { createWarehouse, listItems, updateWarehouse } from "@/add-os/services/inventory"
+import { createWarehouse, inventorySettings, listItems, updateWarehouse } from "@/add-os/services/inventory"
 import Icon from "@/components/common/Icon.vue"
 
 /**
@@ -118,7 +118,13 @@ const choices = ref<{ id: number; label: string; sku: string }[]>([])
 const saving = ref(false)
 const problem = ref("")
 
-onMounted(() => void quietly(listBranches, branches => (branchOptions.value = branches.map(b => ({ label: localized(b.name), value: b.id })))))
+/** Asset items may be listed in a scope too, when the package stores assets in warehouses. */
+const assetsAllowed = ref(false)
+
+onMounted(() => {
+	void quietly(listBranches, branches => (branchOptions.value = branches.map(b => ({ label: localized(b.name), value: b.id }))))
+	void quietly(inventorySettings, settings => (assetsAllowed.value = settings.assets_in_warehouses))
+})
 
 watch(show, open => {
 	if (!open) return
@@ -146,7 +152,7 @@ watch(
 
 async function search(text: string) {
 	await quietly(
-		() => listItems({ kind: "stock", search: text.trim() || null, active: true, per_page: 25 }),
+		() => listItems({ kind: assetsAllowed.value ? null : "stock", search: text.trim() || null, active: true, per_page: 25 }),
 		result => {
 			const ticked = choices.value.filter(choice => form.value.itemIds.includes(choice.id))
 			const found = result.data.filter(item => !form.value.itemIds.includes(item.id)).map(item => ({ id: item.id, label: localized(item.name), sku: item.sku }))

@@ -109,6 +109,13 @@
 							<dd class="font-medium">{{ asset.supplier ?? EMPTY }}</dd>
 						</div>
 						<div>
+							<dt class="text-xs text-secondary">{{ t("inventory.operations.reference") }}</dt>
+							<dd class="font-medium">
+								{{ asset.reference ?? EMPTY }}
+								<a v-if="asset.attachment_url" :href="asset.attachment_url" target="_blank" rel="noopener noreferrer" class="ms-2 text-xs text-primary underline">{{ t("inventory.operations.openAttachment") }}</a>
+							</dd>
+						</div>
+						<div>
 							<dt class="text-xs text-secondary">{{ t("inventory.assets.life") }}</dt>
 							<dd class="font-medium">{{ asset.useful_life_months ? months(asset.useful_life_months) : EMPTY }}</dd>
 						</div>
@@ -206,8 +213,8 @@
 				</n-tabs>
 			</n-card>
 
-			<AssetActionModal v-model:show="actionVisible" :asset="asset" :action="action" :schedules="asset.maintenance_schedules" @done="load" />
-			<AssetDetailsModal v-if="may.manage" v-model:show="detailsVisible" :asset="asset" @saved="load" />
+			<AssetActionModal v-model:show="actionVisible" :asset :action :schedules="asset.maintenance_schedules" @done="load" />
+			<AssetDetailsModal v-if="may.manage" v-model:show="detailsVisible" :asset @saved="load" />
 			<ScheduleModal v-if="may.maintenance" v-model:show="scheduleVisible" :asset-id="asset.id" :schedule="editingSchedule" @saved="load" />
 		</template>
 	</div>

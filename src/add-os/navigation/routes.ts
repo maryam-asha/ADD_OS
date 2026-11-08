@@ -82,6 +82,7 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"inventory.inventoryAsset": () => import("@/add-os/modules/inventory/views/AssetPage.vue"),
 	"inventory.inventoryWarehouses": () => import("@/add-os/modules/inventory/views/WarehousesPage.vue"),
 	"inventory.inventoryStock": () => import("@/add-os/modules/inventory/views/StockPage.vue"),
+	"inventory.inventoryStockNew": () => import("@/add-os/modules/inventory/views/StockOperationPage.vue"),
 	"inventory.inventoryMaintenance": () => import("@/add-os/modules/inventory/views/MaintenancePage.vue"),
 	"inventory.inventoryCustody": () => import("@/add-os/modules/inventory/views/CustodyPage.vue"),
 	"inventory.inventoryItems": () => import("@/add-os/modules/inventory/views/ItemsPage.vue"),

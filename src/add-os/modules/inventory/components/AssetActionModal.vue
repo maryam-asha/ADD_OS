@@ -5,7 +5,7 @@
 
 		<template v-if="action === 'move'">
 			<n-form-item :label="t('inventory.assets.location')" required>
-				<PlacePicker v-model:value="place" />
+				<AssetPlacePicker v-model:value="place" />
 			</n-form-item>
 		</template>
 
@@ -91,8 +91,8 @@ import { useI18n } from "vue-i18n"
 import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import CurrencySelect from "@/add-os/modules/hr/components/payroll/CurrencySelect.vue"
 import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
+import AssetPlacePicker from "@/add-os/modules/inventory/components/AssetPlacePicker.vue"
 import CustodianPicker from "@/add-os/modules/inventory/components/CustodianPicker.vue"
-import PlacePicker from "@/add-os/modules/inventory/components/PlacePicker.vue"
 import { DISPOSAL_METHODS, SETTABLE_ASSET_STATUSES } from "@/add-os/modules/inventory/types/inventory"
 import { assignAsset, closeMaintenance, disposeAsset, moveAsset, openMaintenance, returnAsset, setAssetStatus } from "@/add-os/services/inventory"
 
