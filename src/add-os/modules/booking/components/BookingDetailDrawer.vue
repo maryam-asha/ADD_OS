@@ -62,6 +62,8 @@
 						</n-alert>
 					</section>
 
+					<BookingDoorSection v-if="hasDoor" :booking-id="booking.id" :booking-open="doorOpen" />
+
 					<section v-if="booking.note" class="flex flex-col gap-2">
 						<h3 class="font-semibold">{{ t("allBookings.detail.note") }}</h3>
 						<p class="whitespace-pre-line">{{ booking.note }}</p>
@@ -92,6 +94,7 @@ import { NAlert, NButton, NDrawer, NDrawerContent, NSpin, NTag } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { currentLocale } from "@/add-os/lang/currentLocale"
+import BookingDoorSection from "@/add-os/modules/access/components/BookingDoorSection.vue"
 import { isCancellable, STATUS_TAG_TYPE } from "@/add-os/modules/booking/config/all-bookings.config"
 import { spaceTypeLabel } from "@/add-os/modules/booking/config/space-type-label"
 import AppliedDiscountList from "@/add-os/modules/pricing/components/AppliedDiscountList.vue"
@@ -121,6 +124,10 @@ const loading = ref(false)
 const failed = ref(false)
 
 const isOpen = computed(() => booking.value !== null && isCancellable(booking.value))
+
+// Co-working has no door code; every other bookable space may have a lock.
+const hasDoor = computed(() => booking.value !== null && booking.value.space.space_type !== "co_space")
+const doorOpen = computed(() => booking.value?.status === "confirmed" && new Date(booking.value.when.end_at).getTime() > Date.now())
 
 const fields = computed(() => {
 	const row = booking.value

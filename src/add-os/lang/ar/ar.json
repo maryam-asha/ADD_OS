@@ -163,6 +163,8 @@
 			"manage_attendees": "إدارة التسجيلات",
 			"manage": "إدارة",
 			"broadcast": "إرسال إشعار عام",
+			"control": "فتح / قفل",
+			"revoke": "إيقاف",
 			"pair": "ربط الجهاز",
 			"reverse": "الاسترجاع من البنك",
 			"cancel": "إلغاء",
@@ -313,6 +315,8 @@
 			"inventory": "المخزون والأصول",
 			"invoices": "الفواتير",
 			"item-sales": "بيع المواد",
+			"access-grants": "رموز الأبواب",
+			"access-events": "سجل الدخول",
 			"kiosks": "شاشات الاستقبال",
 			"members": "الأعضاء",
 			"memberships": "العضويات",
@@ -1971,6 +1975,7 @@
 			"packages": "الباقات",
 			"wallet": "المحفظة",
 			"locks": "الأقفال",
+			"doorCodes": "رموز الأبواب",
 			"accessLogs": "سجلّات الدخول",
 			"transactions": "المعاملات",
 			"paymentMethods": "طرق الدفع",
@@ -4817,5 +4822,174 @@
 			"method": "الدفع",
 			"soldBy": "البائع"
 		}
+	},
+	"accessDevices": {
+		"subtitle": "أقفال الأبواب والبوابات التي تصلها بالإنترنت، مربوطة بحساب TTLock.",
+		"loadError": "تعذّر تحميل الأقفال.",
+		"accountUnavailable": "تعذّر الوصول إلى حساب TTLock، لذلك يُكتب رقم TTLock يدوياً حالياً.",
+		"sync": "تحديث من TTLock",
+		"synced": "تم تحديث الأجهزة.",
+		"done": "تم.",
+		"notLinked": "غير مربوط",
+		"noGateway": "بلا بوابة",
+		"viaGateway": "عبر البوابة {ref}",
+		"lockCount": "{count} أقفال",
+		"codes": "رموز الباب",
+		"log": "سجل الدخول",
+		"type": {
+			"lock": "قفل",
+			"gateway": "بوابة"
+		},
+		"status": {
+			"online": "متصل",
+			"offline": "غير متصل",
+			"faulted": "غير موجود في TTLock"
+		},
+		"columns": {
+			"type": "النوع",
+			"space": "المساحة",
+			"ttlockId": "رقم TTLock",
+			"status": "الحالة",
+			"details": "البطارية / البوابة",
+			"syncedAt": "آخر تحديث"
+		},
+		"stats": {
+			"locks": "الأقفال",
+			"gateways": "البوابات",
+			"online": "متصل",
+			"lowBattery": "بطارية منخفضة"
+		},
+		"create": {
+			"button": "إضافة جهاز",
+			"title": "إضافة قفل أو بوابة",
+			"success": "تمت إضافة الجهاز."
+		},
+		"edit": {
+			"title": "تعديل الجهاز",
+			"success": "تم تحديث الجهاز."
+		},
+		"delete": {
+			"warning": "تُحذف معه رموز أبوابه وسجل دخوله.",
+			"success": "تم حذف الجهاز."
+		},
+		"form": {
+			"type": "النوع",
+			"ttlockDevice": "جهاز TTLock",
+			"ttlockDeviceHint": "الأجهزة الموجودة في حساب TTLock وغير المربوطة بسجل آخر.",
+			"ttlockId": "رقم TTLock",
+			"ttlockIdHint": "رقم lockId أو gatewayId كما يظهر في تطبيق TTLock.",
+			"mac": "عنوان MAC",
+			"branch": "الفرع",
+			"space": "المساحة",
+			"spaceHint": "الغرفة أو المكتب أو القاعة التي يغلقها هذا القفل.",
+			"gateway": "البوابة",
+			"gatewayHint": "البوابة المقترن بها هذا القفل في تطبيق TTLock."
+		},
+		"unlock": {
+			"button": "فتح الباب",
+			"title": "فتح الباب",
+			"confirm": "فتح باب {place} الآن؟ يستطيع أي شخص هناك الدخول.",
+			"ok": "افتح"
+		},
+		"lock": {
+			"button": "قفل الباب"
+		},
+		"qr": {
+			"button": "ملصق الباب",
+			"title": "ملصق الباب",
+			"hint": "يمسحه الأعضاء بالتطبيق لفتح الباب، ولا يفتح شيئاً وحده.",
+			"download": "تنزيل PNG",
+			"regenerate": "ملصق جديد",
+			"regenerateConfirm": "يتوقف الملصق الحالي فوراً. استبدله على الباب بعد ذلك.",
+			"regenerateOk": "أنشئ ملصقاً جديداً"
+		}
+	},
+	"doorCodes": {
+		"subtitle": "كل رمز على قفل وأين وصل. لا يُعرض الرمز نفسه أبداً.",
+		"loadError": "تعذّر تحميل رموز الأبواب.",
+		"filters": {
+			"lock": "كل الأقفال"
+		},
+		"status": {
+			"live": "فعّال (صادر أو مفعّل)",
+			"issued": "صادر",
+			"activated": "مفعّل",
+			"expired": "منتهٍ",
+			"revoked": "موقوف"
+		},
+		"revokeReason": {
+			"maintenance": "صيانة",
+			"cancellation": "أُلغي الحجز",
+			"replaced": "استُبدل",
+			"lease": "الإيجار",
+			"staff": "من الموظفين"
+		},
+		"columns": {
+			"status": "الحالة",
+			"place": "الباب",
+			"for": "لِـ",
+			"issuedAt": "صدر",
+			"activation": "فُعّل",
+			"expiresAt": "ينتهي",
+			"revoked": "أُوقف"
+		},
+		"forBooking": "الحجز #{id}",
+		"forLease": "الإيجار #{id}",
+		"activateBy": "قبل {at}",
+		"revoke": {
+			"button": "إيقاف الرمز",
+			"confirm": "إيقاف رمز {who} لباب {place}؟ لن يصدر مجدداً إلا إذا أعاد الاستقبال إصداره.",
+			"ok": "أوقفه",
+			"done": "تم إيقاف الرمز."
+		}
+	},
+	"accessLog": {
+		"subtitle": "كل باب فُتح أو قُفل أو رُفض. القفل لا يبلّغ عن الإدخال من لوحة الأرقام.",
+		"loadError": "تعذّر تحميل سجل الدخول.",
+		"filters": {
+			"lock": "كل الأقفال",
+			"type": "أي حدث",
+			"channel": "أي طريقة"
+		},
+		"type": {
+			"unlock": "فُتح",
+			"lock": "قُفل",
+			"lock_auto": "قُفل تلقائياً",
+			"failed_attempt": "رُفض"
+		},
+		"channel": {
+			"keypad_manual": "لوحة الأرقام",
+			"qr_scan": "مسح الملصق",
+			"reception_activation": "تفعيل الاستقبال",
+			"app_remote": "زر الباب في التطبيق",
+			"dashboard": "لوحة التحكم"
+		},
+		"columns": {
+			"at": "الوقت",
+			"type": "الحدث",
+			"channel": "الطريقة",
+			"place": "الباب",
+			"actor": "بواسطة",
+			"code": "الرمز"
+		}
+	},
+	"bookingDoor": {
+		"title": "الباب",
+		"none": "لا يوجد رمز باب بعد.",
+		"status": "الرمز",
+		"activateBy": "يُفعّل قبل",
+		"activatedAt": "فُعّل",
+		"expiresAt": "ينتهي",
+		"activate": "تفعيل الرمز",
+		"activated": "تم تفعيل الرمز.",
+		"issue": "إصدار الرمز الآن",
+		"reissue": "إصدار رمز جديد",
+		"issueConfirm": "وضع رمز لهذا الحجز على القفل الآن؟",
+		"reissueConfirm": "وضع رمز جديد على القفل؟ يتوقف الرمز الحالي.",
+		"reissued": "تم إصدار رمز جديد.",
+		"open": "فتح الباب",
+		"openConfirm": "فتح باب هذه الغرفة الآن؟ يستطيع أي شخص هناك الدخول.",
+		"opened": "تم فتح الباب.",
+		"confirm": "نعم"
 	}
 }

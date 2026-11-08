@@ -46,6 +46,7 @@ describe("section list", () => {
 			"providerPortal",
 			"bookings",
 			"plans",
+			"access",
 			"payments",
 			"inventory",
 			"reports",
@@ -236,8 +237,9 @@ describe("sidebar groups", () => {
 	it("gives HR one sidebar entry holding a module per section, each opening to its pages", () => {
 		const items = menuFor({ roles: ["hr_manager"], permissions: HR_ALL, employee })
 		// Beside HR: the dashboard home and the ComingSoon placeholders, open to
-		// every staff account since 2026-10-27 (`allStaff`).
-		expect(items.map(item => String(item.key))).toEqual(["dashboard.overview", "plans.wallet", "access", "community.cafe", "incubation", "hrGroup"])
+		// every staff account since 2026-10-27 (`allStaff`). Door access is built
+		// and permission-gated since 2026-11-08, so it is no longer one of them.
+		expect(items.map(item => String(item.key))).toEqual(["dashboard.overview", "plans.wallet", "community.cafe", "incubation", "hrGroup"])
 
 		const group = items.find(item => item.key === "hrGroup")
 		expect(childKeys(group)).toEqual(["hr", "hrTime", "hrPay", "hrTalent", "hrReports", "hrSettings"])
