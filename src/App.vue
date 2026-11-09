@@ -24,7 +24,8 @@
 		</component>
 
 		<SplashScreen :show="loading" />
-		<SearchDialog v-if="isLogged" />
+		<!-- ADD OS: the toolbar search finds the dashboard's own pages — see add-os/navigation/pageSearch.ts. -->
+		<PageSearchDialog v-if="isLogged" />
 	</Provider>
 </template>
 
@@ -34,13 +35,13 @@ import type { RouteLocationNormalized } from "vue-router"
 import type { Layout, RouterTransition, ThemeNameEnum } from "@/types/theme.d"
 import { computed, onBeforeMount, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
+import PageSearchDialog from "@/add-os/components/search/PageSearchDialog.vue"
 import { pageKey } from "@/add-os/navigation/pageKey"
 import Blank from "@/app-layouts/Blank"
 import Provider from "@/app-layouts/common/Provider.vue"
 import SplashScreen from "@/app-layouts/common/SplashScreen.vue"
 import HorizontalNav from "@/app-layouts/HorizontalNav"
 import VerticalNav from "@/app-layouts/VerticalNav"
-import SearchDialog from "@/components/common/SearchDialog.vue"
 import { useAuthStore } from "@/stores/auth"
 import { useCurrencyStore } from "@/stores/currency"
 import { useMainStore } from "@/stores/main"

@@ -1912,6 +1912,15 @@
 	"shortcuts": {
 		"title": "Shortcuts"
 	},
+	"pageSearch": {
+		"placeholder": "Search the dashboard's pages…",
+		"empty": "No page matches “{query}”",
+		"hints": {
+			"open": "Enter to open",
+			"move": "↑ ↓ to move",
+			"close": "Esc to close"
+		}
+	},
 	"nav": {
 		"groups": {
 			"hr": "Human resources"

@@ -1916,6 +1916,15 @@
 	"shortcuts": {
 		"title": "الاختصارات"
 	},
+	"pageSearch": {
+		"placeholder": "ابحث في صفحات لوحة التحكم…",
+		"empty": "لا توجد صفحة تطابق «{query}»",
+		"hints": {
+			"open": "Enter للفتح",
+			"move": "↑ ↓ للتنقل",
+			"close": "Esc للإغلاق"
+		}
+	},
 	"nav": {
 		"groups": {
 			"hr": "الموارد البشرية"

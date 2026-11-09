@@ -209,3 +209,26 @@ the store, so re-adding a write path fails the suite rather than passing silentl
 module are real admin product screens managing the currency catalogue and rates.
 `setCurrencyStatus()` in `services/currencies.ts` is a different function entirely.
 This section is only about the shell control.
+
+---
+
+## 2026-11-09 — the command palette replaced by a page search
+
+After item 3's removal the Pinx palette (`src/components/common/SearchDialog.vue`)
+still shipped its other demo entries: "Add todo list", "Compose new email" and
+"View Notes" (routes `Apps-Kanban` / `Apps-Mailbox` / `Apps-Notes`, never
+registered by ADD OS), three invented contacts pointing at `Apps-Chat`, and a
+"Toggle fullscreen" action. Every page entry was a dead link — a no-op control
+reachable from Ctrl/⌘ K and the toolbar's search button.
+
+`App.vue` now mounts `src/add-os/components/search/PageSearchDialog.vue` instead.
+Its list is `src/add-os/navigation/pageSearch.ts`, read from `sections.ts`
+through `navigation/access.ts` — the same pair the sidebar and route guard
+read — so it offers exactly the pages the account's sidebar and avatar menu
+offer, matched on their titles in both languages and their URL.
+
+**Given up:** the "Toggle fullscreen" action. The toolbar's fullscreen button
+still does it; the palette copy was a second door to the same thing, not a
+capability. The vendor file stays on disk, unmounted, like the other unrouted
+Pinx surfaces (Category C: not edited). Covered by
+`src/add-os/navigation/__tests__/pageSearch.spec.ts`.
