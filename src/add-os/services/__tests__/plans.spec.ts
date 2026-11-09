@@ -53,7 +53,10 @@ describe("plans service", () => {
 			access_window_end: null,
 			is_active: true,
 			is_public: true,
-			order: 1
+			order: 1,
+			coworking_seat: "none" as const,
+			coworking_hours: null,
+			allowance_cycle: "period" as const
 		}
 		const plan = await createPlan(payload)
 
@@ -85,7 +88,10 @@ describe("plans service", () => {
 			access_window_end: null,
 			is_active: true,
 			is_public: true,
-			order: 1
+			order: 1,
+			coworking_seat: "none" as const,
+			coworking_hours: null,
+			allowance_cycle: "period" as const
 		})
 
 		expect(fetch).toHaveBeenCalledWith("http://api.test/api/v1/admin/plans/1", expect.objectContaining({ method: "PUT" }))

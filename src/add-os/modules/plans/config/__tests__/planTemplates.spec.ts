@@ -22,7 +22,7 @@ describe("plan templates", () => {
 			name: { ar: "باقة", en: "Plan" },
 			price_points: 1500,
 			coworking_seat: "dedicated" as const,
-			discounts: [{ percentage: 30, space_type: "event_hall", usage_limit: 6, is_active: true }]
+			discounts: [{ percentage: 30, space_type: "event_hall" as const, usage_limit: 6, is_active: true }]
 		}
 
 		const result = applyTemplate(payload, "setHours")

@@ -26,7 +26,7 @@ describe("previewStats", () => {
 	})
 
 	it("a 30% event-hall discount limited to 6 previews as a ring with percent_off 30", () => {
-		const model = { ...emptyPlanPayload(), discounts: [{ percentage: 30, space_type: "event_hall", usage_limit: 6, is_active: true }] }
+		const model = { ...emptyPlanPayload(), discounts: [{ percentage: 30, space_type: "event_hall" as const, usage_limit: 6, is_active: true }] }
 		const discount = previewStats(model, t).find(c => c.type === "discount")
 
 		expect(discount).toMatchObject({ display: "ring", total: 6, used: 3, percent_off: 30 })

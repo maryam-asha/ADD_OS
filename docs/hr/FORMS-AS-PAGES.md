@@ -147,3 +147,40 @@ redesign did not carry over. The backend still serves all of these:
 Whether these capabilities come back (in the new pages, or through these dialogs) or are
 deliberately dropped, along with the dialogs and their keys, is the product owner's decision.
 Until then the dialogs stay as they are.
+
+**Ruled the same day (product owner): bring them back.** Reviewing f97384d's three pages for
+that showed they did more than drop capabilities. They did not work:
+
+- **Approval flows** read and sent `approver_type`, `required_ability`,
+  `approver_employee_id` and `order`, none of which StoreApprovalFlowRequest reads. Saved
+  flows showed wrong, and saving was refused. The page also offered request types the
+  server has no request for (custody, resignation), wrote a fixed indigo `#4F46E5` and
+  Arabic literals into the code, and seeded every new flow with two direct-manager steps.
+- **Time settings** never sent the workdays, saved only the first of the periods it let
+  you add, never saved the grace, overtime, deduct-break or self-timed-punch controls
+  (every one a no-op), and built a shift's code from its name with non-Latin letters
+  stripped, so an Arabic name always became `shift-<timestamp>`.
+- **Leave settings** sent `attachment_document_type_id: 1` for any type needing an
+  attachment, saved a carry-over cap of 10 days nobody entered, swallowed a failed policy
+  save (`.catch(() => {})`) so it looked saved, never saved the colour, the negative
+  balance or the minimum and maximum days, and brought back the colour picker
+  `no-runtime-theming.spec.ts` forbids, with five hex colours written into the code.
+
+What was done, as decided:
+
+- **Approval flows: rebuilt** in Bayraq's layout (request-type chips, then the type's steps
+  one under the other joined by a "+" that inserts a step) on the FlowStep the server
+  stores, with the timeouts, the step order and deleting a flow back.
+  `ApprovalFlowModal` and its spec are deleted, its rules and tests moved to
+  `ApprovalFlowsPage`, and its four keys no surface uses any more (`add`, `edit`,
+  `addStep`, `empty`) are removed from both catalogues.
+- **Time and leave settings: restored** to their versions before f97384d, which work, are
+  tested, and carry the work patterns, attendance policies and leave policies. Their
+  dialogs (`WorkPatternModal`, `LeavePolicyModal`) are in use again.
+- **What that gives up, for now:** Bayraq's look on those two pages (a list of models
+  beside an editor, the settings as switches). It is to be laid over the restored, working
+  code next, not by patching f97384d's version.
+- **Split shifts** (several periods in one day, as Bayraq allows) are **out**: ADD has
+  none (product owner), and a shift template holds one start and one end. The "add a
+  period" control does not come back.
+- The settings menu (`HrSettingsLayout`, f97384d) stays, with HR's own page names.

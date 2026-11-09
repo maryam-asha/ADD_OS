@@ -1,329 +1,254 @@
 <!-- src/add-os/modules/hr/views/approvals/ApprovalFlowsPage.vue -->
 <template>
-	<div class="flex flex-col gap-6">
-		<!-- Header / Breadcrumb matching Image 4 -->
-		<div class="flex flex-col gap-1">
-			<div class="flex items-center gap-1.5 text-xs text-slate-400">
-				<span>{{ t("nav.sections.hrSettings", "إعدادات الموارد البشرية") }}</span>
-				<Icon name="carbon:chevron-left" :size="12" class="rtl:rotate-0 rotate-180" />
-				<span class="font-medium text-slate-700 dark:text-neutral-200">{{ t("nav.pages.hrApprovalFlows", "سلسلة الموافقات") }}</span>
-			</div>
-			<h1 class="text-2xl font-bold text-slate-900 dark:text-white">
-				{{ t("nav.pages.hrApprovalFlows", "سلسلة الموافقات") }}
-			</h1>
+	<div class="flex flex-col gap-5">
+		<HrPageHeader :title="t(titleKey || 'nav.pages.hrApprovalFlows')" :description="t('hrApprovals.flows.description')" />
+
+		<n-alert v-if="loadError" type="error" :title="t('hr.common.loadError')" />
+
+		<div v-if="loading" class="flex justify-center py-16">
+			<n-spin />
 		</div>
 
-		<n-alert v-if="loadError" type="error" :title="t('hr.common.loadError')" class="rounded-xl" />
-
-		<!-- Request Type Selector Card matching Image 4 -->
-		<div class="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-			<h3 class="text-sm font-semibold text-slate-500 dark:text-neutral-400">
-				{{ t("hrApprovals.flows.selectTypePrompt", "اختر نوع الطلب لتعيين سلسلة موافقاته") }}
-			</h3>
-
-			<!-- Chips / Pills with round dot -->
-			<div class="mt-3.5 flex flex-wrap gap-2.5">
-				<button
-					v-for="type in availableTypes"
-					:key="type.key"
-					type="button"
-					class="inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-all shadow-xs"
-					:class="[
-						selectedType === type.key
-							? 'bg-[#4F46E5] text-white shadow-indigo-500/20 font-semibold'
-							: 'border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200'
-					]"
-					@click="switchType(type.key)"
-				>
-					<span
-						class="h-2 w-2 rounded-full"
-						:class="selectedType === type.key ? 'bg-white' : 'bg-indigo-500'"
-					/>
-					<span>{{ type.label }}</span>
-				</button>
-			</div>
-		</div>
-
-		<!-- Main Approval Chain Flow Card matching Image 4 -->
-		<div class="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-			<!-- Header with Request Type & Steps Count Badge -->
-			<div class="flex items-center justify-between border-b border-slate-100 pb-5 dark:border-neutral-800">
-				<div class="flex items-center gap-3">
-					<div class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400">
-						<Icon name="carbon:document" :size="18" />
-					</div>
-					<h2 class="text-lg font-bold text-slate-900 dark:text-white">
-						{{ currentTypeLabel }}
-					</h2>
+		<template v-else-if="types.length">
+			<HrPanel :title="t('hrApprovals.flows.requestType')" :subtitle="t('hrApprovals.flows.chooseType')" icon="carbon:flow">
+				<div class="flex flex-wrap gap-2">
+					<n-button
+						v-for="type in types"
+						:key="type"
+						round
+						:type="selected === type ? 'primary' : 'default'"
+						:secondary="selected !== type"
+						@click="selected = type"
+					>
+						{{ requestTypeLabel(t, type) }}
+						<n-badge v-if="flowFor(type)" dot :type="flowFor(type)!.is_active ? 'success' : 'default'" class="ms-2" />
+					</n-button>
 				</div>
+			</HrPanel>
 
-				<div class="rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">
-					{{ t("hrApprovals.flows.stagesCount", { n: currentSteps.length }, `${currentSteps.length} مراحل`) }}
-				</div>
-			</div>
+			<HrPanel v-if="current" :title="requestTypeLabel(t, selected)" :subtitle="t('hrApprovals.flows.stepsHint')" icon="carbon:document">
+				<template #extra>
+					<n-tag :bordered="false" round>{{ t("hrApprovals.flows.stepTotal", { n: formatNumber(current.steps.length) }) }}</n-tag>
+					<n-switch v-model:value="current.isActive" :aria-label="t('hr.common.active')" />
+					<span class="text-sm text-secondary">{{ t("hr.common.active") }}</span>
+				</template>
 
-			<!-- Interactive Step Flow Hierarchy -->
-			<div class="my-8 flex flex-col items-center">
-				<div
-					v-for="(step, index) in currentSteps"
-					:key="step.id"
-					class="flex flex-col items-center w-full max-w-xl"
-				>
-					<!-- Step Card Container -->
-					<div class="w-full rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm transition-all hover:border-slate-300 dark:border-neutral-800 dark:bg-neutral-900">
-						<!-- Step Header -->
-						<div class="flex items-center justify-between">
-							<div class="flex items-center gap-2.5">
-								<span class="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-50 text-xs font-bold text-indigo-600 dark:bg-indigo-950/80 dark:text-indigo-300">
-									{{ index + 1 }}
-								</span>
-								<span class="text-sm font-bold text-slate-800 dark:text-neutral-200">
-									{{ t("hrApprovals.flows.stageTitle", { n: index + 1 }, `مرحلة الموافقة ${index + 1}`) }}
-								</span>
-							</div>
+				<n-alert v-if="!current.flow" type="info" class="mb-4">{{ t("hrApprovals.flows.noFlow") }}</n-alert>
 
-							<!-- Delete Step Button (disabled if only 1 step) -->
-							<button
-								v-if="currentSteps.length > 1"
-								type="button"
-								class="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
-								:title="t('hrApprovals.flows.removeStep', 'حذف المرحلة')"
-								@click="removeStep(index)"
-							>
-								<Icon name="carbon:close" :size="16" />
-							</button>
-						</div>
+				<div class="flex flex-col items-center">
+					<div v-for="(step, index) in current.steps" :key="step.key" class="flex w-full max-w-2xl flex-col items-center">
+						<section class="w-full rounded-add-large border border-[var(--add-border)] bg-[var(--add-surface-raised)] p-4">
+							<header class="mb-3 flex items-center justify-between gap-2">
+								<div class="flex items-center gap-2">
+									<span class="flex h-7 w-7 items-center justify-center rounded-add-default bg-[var(--add-surface-sunken)] text-sm font-semibold text-primary">
+										{{ formatNumber(index + 1) }}
+									</span>
+									<span class="font-semibold">{{ t("hrApprovals.step", { n: formatNumber(index + 1) }) }}</span>
+								</div>
+								<div class="flex gap-3">
+									<n-button text :disabled="index === 0" :aria-label="t('hrApprovals.flows.moveUp')" :title="t('hrApprovals.flows.moveUp')" @click="move(index, -1)">
+										<template #icon><Icon name="carbon:arrow-up" :size="18" /></template>
+									</n-button>
+									<n-button text :disabled="index === current.steps.length - 1" :aria-label="t('hrApprovals.flows.moveDown')" :title="t('hrApprovals.flows.moveDown')" @click="move(index, 1)">
+										<template #icon><Icon name="carbon:arrow-down" :size="18" /></template>
+									</n-button>
+									<n-button text type="error" :disabled="current.steps.length === 1" :aria-label="t('hrApprovals.flows.removeStep')" :title="t('hrApprovals.flows.removeStep')" @click="current.steps.splice(index, 1)">
+										<template #icon><Icon name="carbon:trash-can" :size="18" /></template>
+									</n-button>
+								</div>
+							</header>
 
-						<!-- Segmented Control: Manager vs Other Person -->
-						<div class="mt-4">
-							<div class="grid grid-cols-2 rounded-xl border border-slate-200 p-1 dark:border-neutral-700 dark:bg-neutral-800/40">
-								<button
-									type="button"
-									class="rounded-lg py-2.5 text-xs font-bold transition-all text-center"
-									:class="[
-										step.approverCategory === 'manager'
-											? 'bg-[#4F46E5] text-white shadow-sm'
-											: 'text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white'
-									]"
-									@click="setApproverCategory(step, 'manager')"
-								>
-									{{ t("hrApprovals.approverType.direct_manager", "المدير المباشر") }}
-								</button>
-								<button
-									type="button"
-									class="rounded-lg py-2.5 text-xs font-bold transition-all text-center"
-									:class="[
-										step.approverCategory === 'other'
-											? 'bg-[#4F46E5] text-white shadow-sm'
-											: 'text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-white'
-									]"
-									@click="setApproverCategory(step, 'other')"
-								>
-									{{ t("hrApprovals.flows.otherPerson", "شخص آخر") }}
-								</button>
-							</div>
+							<n-radio-group :value="step.approver === 'direct_manager' ? 'manager' : 'other'" class="mb-3 flex" @update:value="(v: string) => setCategory(step, v)">
+								<n-radio-button value="manager" class="flex-1 text-center">{{ t("hrApprovals.approverType.direct_manager") }}</n-radio-button>
+								<n-radio-button value="other" class="flex-1 text-center">{{ t("hrApprovals.flows.otherApprover") }}</n-radio-button>
+							</n-radio-group>
 
-							<!-- Other Person details dropdown if 'other' is selected -->
-							<div v-if="step.approverCategory === 'other'" class="mt-3 flex flex-col gap-2">
-								<div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+							<div v-if="step.approver !== 'direct_manager'" class="@container mb-3">
+								<div class="grid grid-cols-1 gap-3 @md:grid-cols-2">
+									<n-select v-model:value="step.approver" :options="otherApproverOptions" :aria-label="t('hrApprovals.flows.approver')" />
 									<n-select
-										v-model:value="step.specificType"
-										size="small"
-										:options="otherTypeOptions"
-										:placeholder="t('hrApprovals.flows.selectRoleType', 'نوع الصلاحية')"
-									/>
-									<n-select
-										v-if="step.specificType === 'ability'"
+										v-if="step.approver === 'ability'"
 										v-model:value="step.ability"
-										size="small"
 										:options="abilityOptions"
 										filterable
-										:placeholder="t('hrApprovals.flows.ability', 'حدد الصلاحية المطلوبة')"
+										:placeholder="t('hrApprovals.flows.ability')"
+										:status="showErrors && !step.ability ? 'error' : undefined"
 									/>
 									<EmployeeSelect
-										v-else-if="step.specificType === 'employee'"
+										v-else-if="step.approver === 'employee'"
 										v-model:value="step.employeeId"
-										size="small"
-										:placeholder="t('hrApprovals.flows.selectEmployee', 'اختر موظفاً')"
+										:options="step.employeeOptions"
+										:placeholder="mayFindEmployees ? undefined : t('hrApprovals.flows.noEmployeeSearch')"
+										:disabled="!mayFindEmployees"
+										:status="showErrors && !step.employeeId ? 'error' : undefined"
 									/>
 								</div>
 							</div>
+							<p class="mb-3 text-sm text-secondary">{{ t(`hrApprovals.approverHint.${step.approver}`) }}</p>
+
+							<div class="@container">
+								<div class="grid grid-cols-1 gap-3 @md:grid-cols-2">
+									<n-input-number
+										v-model:value="step.timeoutHours"
+										:min="1"
+										:max="720"
+										:precision="0"
+										clearable
+										:placeholder="t('hrApprovals.flows.timeoutHours')"
+										:aria-label="t('hrApprovals.flows.timeoutHours')"
+									/>
+									<n-select v-if="step.timeoutHours" v-model:value="step.onTimeout" :options="timeoutOptions" :aria-label="t('hrApprovals.flows.onTimeout')" />
+								</div>
+							</div>
+						</section>
+
+						<div class="flex flex-col items-center py-1">
+							<span class="h-4 w-px bg-[var(--add-border)]" />
+							<n-button
+								circle
+								size="small"
+								dashed
+								:disabled="current.steps.length >= MAX_STEPS"
+								:aria-label="t('hrApprovals.flows.insertStep')"
+								:title="t('hrApprovals.flows.insertStep')"
+								@click="insertStep(index + 1)"
+							>
+								<template #icon><Icon name="carbon:add" :size="14" /></template>
+							</n-button>
+							<span v-if="index < current.steps.length - 1" class="h-4 w-px bg-[var(--add-border)]" />
 						</div>
 					</div>
-
-					<!-- Visual Connector Line with (+) Circle Button -->
-					<div class="relative my-2 flex flex-col items-center">
-						<div class="h-6 w-0.5 bg-indigo-200 dark:bg-indigo-900/60" />
-						<button
-							type="button"
-							class="flex h-7 w-7 items-center justify-center rounded-full border-2 border-indigo-500 bg-white text-indigo-600 shadow-sm transition-all hover:bg-indigo-50 hover:scale-110 dark:bg-neutral-900 dark:text-indigo-400"
-							:title="t('hrApprovals.flows.insertStep', 'إضافة مرحلة موافقة')"
-							@click="insertStep(index + 1)"
-						>
-							<Icon name="carbon:add" :size="14" />
-						</button>
-						<div class="h-6 w-0.5 bg-indigo-200 dark:bg-indigo-900/60" />
-					</div>
 				</div>
-			</div>
 
-			<!-- Bottom Save Button matching Image 4 -->
-			<div class="flex justify-start border-t border-slate-100 pt-5 dark:border-neutral-800">
-				<button
-					type="button"
-					class="inline-flex items-center gap-2 rounded-xl bg-[#4F46E5] px-7 py-3 text-sm font-bold text-white shadow-md shadow-indigo-600/20 transition-all hover:bg-[#4338CA] disabled:opacity-50"
-					:disabled="saving"
-					@click="saveFlow"
-				>
-					<Icon name="carbon:checkmark" :size="18" />
-					<span>{{ saving ? t("hr.common.saving", "جاري الحفظ...") : t("hrApprovals.flows.saveChain", "حفظ سلسلة الموافقات") }}</span>
-				</button>
-			</div>
-		</div>
+				<p v-if="showErrors && stepsIncomplete" class="mt-2 text-sm text-error">{{ t("hrApprovals.flows.stepIncomplete") }}</p>
+
+				<footer class="mt-4 flex flex-wrap items-center justify-end gap-2 border-t border-[var(--add-border)] pt-4">
+					<n-button v-if="current.flow" type="error" secondary class="me-auto" @click="confirmDelete(current.flow)">
+						<template #icon><Icon name="carbon:trash-can" :size="16" /></template>
+						{{ t("hrApprovals.flows.delete") }}
+					</n-button>
+					<n-button type="primary" :loading="saving" @click="save">
+						<template #icon><Icon name="carbon:checkmark" :size="16" /></template>
+						{{ t("hr.common.save") }}
+					</n-button>
+				</footer>
+			</HrPanel>
+		</template>
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { SelectOption } from "naive-ui"
-import type { ApprovalFlow, FlowStep } from "@/add-os/modules/hr/types/approvals"
-import { NAlert, NSelect, useMessage } from "naive-ui"
+import type { ApprovalFlow, ApproverType, FlowStep, TimeoutAction } from "@/add-os/modules/hr/types/approvals"
+import { NAlert, NBadge, NButton, NInputNumber, NRadioButton, NRadioGroup, NSelect, NSpin, NSwitch, NTag, useDialog, useMessage } from "naive-ui"
 import { computed, onMounted, reactive, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import { canViewEmployees } from "@/add-os/config/permissions"
 import EmployeeSelect from "@/add-os/modules/hr/components/EmployeeSelect.vue"
-import { HR_ABILITIES } from "@/add-os/modules/hr/types/approvals"
+import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
+import HrPanel from "@/add-os/modules/hr/components/ui/HrPanel.vue"
+import { HR_ABILITIES, TIMEOUT_ACTIONS } from "@/add-os/modules/hr/types/approvals"
 import { abilityLabel } from "@/add-os/modules/hr/utils/approvalLabels"
 import { requestTypeLabel } from "@/add-os/modules/hr/utils/approvalSummary"
-import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
-import { toBilingual } from "@/add-os/modules/hr/utils/forms"
+import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
 import { ApiError } from "@/add-os/services/api"
-import {
-	createApprovalFlow,
-	listApprovalFlows,
-	listApprovalTypes,
-	updateApprovalFlow
-} from "@/add-os/services/hr/approvals"
+import { createApprovalFlow, deleteApprovalFlow, listApprovalFlows, listApprovalTypes, updateApprovalFlow } from "@/add-os/services/hr/approvals"
+import { formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
+/**
+ * Approval flows, one request type at a time, laid out after Bayraq's: the
+ * types as chips, then the chosen type's steps one under the other, joined
+ * by a "+" that inserts a step there. A step waits for the requester's
+ * direct manager or for someone else: their unit's head, a named employee,
+ * or anyone holding a permission. With a timeout it escalates, approves or
+ * rejects when the time runs out. At most ten steps. A type without a flow
+ * goes to the direct manager alone; deleting a flow returns it to that.
+ * Saved flows are copied into each request on submission, so an edit
+ * changes only what is submitted afterwards.
+ *
+ * Only the types the server knows (`GET approval-types`) are offered. The
+ * f97384d version of this page sent `approver_type`/`required_ability`/
+ * `approver_employee_id`, which StoreApprovalFlowRequest does not read, and
+ * offered types the server has no request for; it also dropped the
+ * timeouts, the step order and deleting a flow. Each step here is the
+ * FlowStep the server stores (see ApprovalFlowModal before it, whose rules
+ * this keeps).
+ */
 defineProps<{ titleKey?: string }>()
 
 const { t } = useI18n()
 const message = useMessage()
+const dialog = useDialog()
+const mayFindEmployees = canViewEmployees()
 
-const flows = ref<ApprovalFlow[]>([])
-const rawTypes = ref<string[]>([])
-const selectedType = ref<string>("loan")
-const loading = ref(false)
-const saving = ref(false)
-const loadError = ref(false)
+const MAX_STEPS = 10
 
-interface StepUi {
-	id: string
-	approverCategory: "manager" | "other"
-	specificType: "unit_head" | "ability" | "employee"
+interface StepRow {
+	key: number
+	approver: ApproverType
 	ability: string | null
 	employeeId: number | null
+	/** A flow stores an employee's id, not their name: shown by id until searched. */
+	employeeOptions: SelectOption[]
 	timeoutHours: number | null
+	onTimeout: TimeoutAction
 }
 
-const stepsByType = reactive<Record<string, StepUi[]>>({})
+interface TypeState {
+	flow: ApprovalFlow | null
+	steps: StepRow[]
+	isActive: boolean
+}
 
-const DEFAULT_TYPES = [
-	{ key: "loan", label: "طلب سلفة" },
-	{ key: "leave", label: "طلب إجازة" },
-	{ key: "custody", label: "طلب عهدة" },
-	{ key: "resignation", label: "طلب استقالة" }
-]
+let nextKey = 0
+function row(step?: FlowStep): StepRow {
+	return {
+		key: nextKey++,
+		approver: step?.approver ?? "direct_manager",
+		ability: step?.ability ?? null,
+		employeeId: step?.employee_id ?? null,
+		employeeOptions: step?.employee_id ? [{ label: t("hrApprovals.flows.employeeId", { id: step.employee_id }), value: step.employee_id }] : [],
+		timeoutHours: step?.timeout_hours ?? null,
+		onTimeout: step?.on_timeout ?? "escalate"
+	}
+}
 
-const availableTypes = computed(() => {
-	const map = new Map<string, string>()
-	for (const dt of DEFAULT_TYPES) {
-		map.set(dt.key, dt.label)
-	}
-	for (const rt of rawTypes.value) {
-		if (!map.has(rt)) {
-			map.set(rt, requestTypeLabel(t, rt))
-		}
-	}
-	return Array.from(map.entries()).map(([key, label]) => ({ key, label }))
+const types = ref<string[]>([])
+const flows = ref<ApprovalFlow[]>([])
+const states = reactive<Record<string, TypeState>>({})
+const selected = ref("")
+const loading = ref(true)
+const loadError = ref(false)
+const saving = ref(false)
+const showErrors = ref(false)
+
+function flowFor(type: string): ApprovalFlow | null {
+	return flows.value.find(flow => flow.request_type === type) ?? null
+}
+
+function stateFor(type: string): TypeState {
+	const flow = flowFor(type)
+	return { flow, steps: flow?.steps.length ? flow.steps.map(row) : [row()], isActive: flow?.is_active ?? true }
+}
+
+/** The chosen type's steps, kept while another type is looked at, until saved or reloaded. */
+const current = computed<TypeState | null>(() => {
+	if (!selected.value) return null
+	if (!states[selected.value]) states[selected.value] = stateFor(selected.value)
+	return states[selected.value]
 })
-
-const currentTypeLabel = computed(() => {
-	const found = availableTypes.value.find(t => t.key === selectedType.value)
-	return found?.label || requestTypeLabel(t, selectedType.value)
-})
-
-const currentSteps = computed(() => {
-	if (!stepsByType[selectedType.value]) {
-		stepsByType[selectedType.value] = [
-			{ id: "1", approverCategory: "manager", specificType: "ability", ability: "hr.approvals.manage", employeeId: null, timeoutHours: null },
-			{ id: "2", approverCategory: "manager", specificType: "ability", ability: "hr.approvals.manage", employeeId: null, timeoutHours: null }
-		]
-	}
-	return stepsByType[selectedType.value]
-})
-
-const otherTypeOptions: SelectOption[] = [
-	{ value: "ability", label: "صاحب صلاحية محددة" },
-	{ value: "unit_head", label: "رئيس القسم" },
-	{ value: "employee", label: "موظف محدد" }
-]
-
-const abilityOptions = computed<SelectOption[]>(() =>
-	HR_ABILITIES.map(ability => ({ value: ability, label: abilityLabel(t, ability) }))
-)
-
-function setApproverCategory(step: StepUi, cat: "manager" | "other") {
-	step.approverCategory = cat
-}
-
-function switchType(typeKey: string) {
-	selectedType.value = typeKey
-}
-
-function insertStep(index: number) {
-	const list = stepsByType[selectedType.value]
-	list.splice(index, 0, {
-		id: String(Date.now()),
-		approverCategory: "manager",
-		specificType: "ability",
-		ability: "hr.approvals.manage",
-		employeeId: null,
-		timeoutHours: null
-	})
-}
-
-function removeStep(index: number) {
-	const list = stepsByType[selectedType.value]
-	if (list.length > 1) {
-		list.splice(index, 1)
-	}
-}
 
 async function load() {
 	loading.value = true
 	loadError.value = false
 	try {
-		const [flowsRes, typesRes] = await Promise.all([
-			listApprovalFlows(),
-			listApprovalTypes()
-		])
-		flows.value = flowsRes
-		rawTypes.value = typesRes
-
-		// Populate steps from existing flows
-		for (const flow of flowsRes) {
-			stepsByType[flow.request_type] = flow.steps.map(s => ({
-				id: String(s.id),
-				approverCategory: s.approver_type === "direct_manager" ? "manager" : "other",
-				specificType: (s.approver_type === "direct_manager" ? "ability" : s.approver_type) as "unit_head" | "ability" | "employee",
-				ability: s.required_ability || null,
-				employeeId: s.approver_employee_id || null,
-				timeoutHours: s.timeout_hours || null
-			}))
-		}
+		;[types.value, flows.value] = await Promise.all([listApprovalTypes(), listApprovalFlows()])
+		for (const key of Object.keys(states)) delete states[key]
+		if (!types.value.includes(selected.value)) selected.value = types.value[0] ?? ""
 	} catch (e) {
-		loadError.value = true
 		if (!(e instanceof ApiError)) throw e
+		loadError.value = true
 	} finally {
 		loading.value = false
 	}
@@ -331,43 +256,76 @@ async function load() {
 
 onMounted(load)
 
-async function saveFlow() {
+const otherApproverOptions = computed<SelectOption[]>(() =>
+	(["unit_head", "employee", "ability"] as const).map(type => ({ label: t(`hrApprovals.approverType.${type}`), value: type }))
+)
+const abilityOptions = computed<SelectOption[]>(() => HR_ABILITIES.map(ability => ({ label: abilityLabel(t, ability), value: ability })))
+const timeoutOptions = computed<SelectOption[]>(() => TIMEOUT_ACTIONS.map(action => ({ label: t(`hrApprovals.onTimeout.${action}`), value: action })))
+
+const stepsIncomplete = computed(() => (current.value?.steps ?? []).some(s => (s.approver === "ability" && !s.ability) || (s.approver === "employee" && !s.employeeId)))
+
+function setCategory(step: StepRow, category: string) {
+	step.approver = category === "manager" ? "direct_manager" : "unit_head"
+}
+
+function move(index: number, by: -1 | 1) {
+	const list = current.value!.steps
+	;[list[index], list[index + by]] = [list[index + by], list[index]]
+}
+
+function insertStep(at: number) {
+	current.value!.steps.splice(at, 0, row())
+}
+
+/** Only the keys that apply, as StoreApprovalFlowRequest::steps() keeps them. */
+function toStep(s: StepRow): FlowStep {
+	const step: FlowStep = { approver: s.approver }
+	if (s.approver === "ability" && s.ability) step.ability = s.ability
+	if (s.approver === "employee" && s.employeeId) step.employee_id = s.employeeId
+	if (s.timeoutHours) {
+		step.timeout_hours = s.timeoutHours
+		step.on_timeout = s.onTimeout
+	}
+	return step
+}
+
+async function save() {
+	const state = current.value
+	if (!state) return
+	showErrors.value = true
+	if (stepsIncomplete.value) return
+	const body = { name: state.flow?.name ?? null, steps: state.steps.map(toStep), is_active: state.isActive }
 	saving.value = true
 	try {
-		const steps = currentSteps.value.map((s, idx) => ({
-			order: idx + 1,
-			approver_type: s.approverCategory === "manager" ? "direct_manager" : s.specificType,
-			required_ability: s.approverCategory === "other" && s.specificType === "ability" ? s.ability : null,
-			approver_employee_id: s.approverCategory === "other" && s.specificType === "employee" ? s.employeeId : null,
-			timeout_hours: s.timeoutHours,
-			on_timeout: "escalate" as const
-		}))
-
-		const existing = flows.value.find(f => f.request_type === selectedType.value)
-		const label = currentTypeLabel.value
-		const bilingualName = toBilingual({ ar: `سلسلة موافقات ${label}`, en: `${label} Approval Flow` })
-
-		if (existing) {
-			await updateApprovalFlow(existing.id, {
-				name: bilingualName,
-				is_active: true,
-				steps
-			})
-		} else {
-			await createApprovalFlow({
-				request_type: selectedType.value,
-				name: bilingualName,
-				is_active: true,
-				steps
-			})
+		if (state.flow) message.success(serverMessage(await updateApprovalFlow(state.flow.id, body), t("hrApprovals.flows.saved")))
+		else {
+			await createApprovalFlow({ request_type: selected.value, ...body })
+			message.success(t("hrApprovals.flows.saved"))
 		}
-
-		message.success(t("hrApprovals.flows.savedSuccess", "تم حفظ سلسلة الموافقات بنجاح"))
+		showErrors.value = false
 		await load()
 	} catch (e) {
-		message.error(apiErrorMessage(e, t("hr.common.saveError", "حدث خطأ أثناء الحفظ")))
+		message.error(apiErrorMessage(e, t("hr.common.saveError")))
 	} finally {
 		saving.value = false
 	}
+}
+
+function confirmDelete(flow: ApprovalFlow) {
+	dialog.warning({
+		title: t("hrApprovals.flows.delete"),
+		content: t("hrApprovals.flows.deleteConfirm", { type: requestTypeLabel(t, flow.request_type) }),
+		positiveText: t("hr.common.delete"),
+		negativeText: t("hr.common.cancel"),
+		onPositiveClick: async () => {
+			try {
+				await deleteApprovalFlow(flow.id)
+				message.success(t("hrApprovals.flows.deleted"))
+				await load()
+			} catch (e) {
+				message.error(apiErrorMessage(e, t("hr.common.saveError")))
+			}
+		}
+	})
 }
 </script>
