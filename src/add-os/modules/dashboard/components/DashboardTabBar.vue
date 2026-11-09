@@ -18,11 +18,10 @@
 				role="tab"
 				:aria-selected="item.key === tab"
 				:aria-controls="`dashboard-tabpanel-${item.key}`"
-				class="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--add-primary)]"
+				class="flex shrink-0 items-center whitespace-nowrap rounded-xl px-4 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--add-primary)]"
 				:class="item.key === tab ? ACTIVE : IDLE"
 				@click="tab = item.key"
 			>
-				<span class="h-1.5 w-1.5 shrink-0 rounded-full" :class="item.key === tab ? 'bg-[var(--add-primary-on)]' : 'bg-[var(--add-text-muted)]'" />
 				{{ item.label }}
 			</button>
 		</div>
