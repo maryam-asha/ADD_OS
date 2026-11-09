@@ -4895,6 +4895,8 @@
 			"title": "Door sticker",
 			"hint": "Members scan this with the app to open the door. On its own it opens nothing.",
 			"download": "Download PNG",
+			"print": "Print sticker",
+			"printHint": "Scan with the ADD app to open this door.",
 			"regenerate": "New sticker",
 			"regenerateConfirm": "The current sticker stops working at once. Replace it at the door after this.",
 			"regenerateOk": "Make a new one"
