@@ -195,7 +195,8 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
  * when the section left the sidebar for the avatar menu. Lazy, as pages are.
  */
 const SECTION_LAYOUTS: Record<string, () => Promise<unknown>> = {
-	myHr: () => import("@/add-os/modules/hr/views/core/MyHrLayout.vue")
+	myHr: () => import("@/add-os/modules/hr/views/core/MyHrLayout.vue"),
+	hrSettings: () => import("@/add-os/modules/hr/views/core/HrSettingsLayout.vue")
 }
 
 export function createAddOsRoutes(): RouteRecordRaw[] {
