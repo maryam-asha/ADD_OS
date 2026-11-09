@@ -60,6 +60,11 @@
 		"requisitions": {
 			"description": "Every request to hire, newest first. A requisition is decided in the approval requests; once approved it takes job openings, and it is filled when its headcount is hired.",
 			"add": "New requisition",
+			"backToList": "Back to requisitions",
+			"backToMine": "Back to jobs and hiring",
+			"rolePanel": "The role",
+			"reasonPanel": "Why, and who hires",
+			"budgetPanel": "Budget and the case for it",
 			"hint": "It goes for approval. Once approved, job openings can be added to it.",
 			"detail": "Requisition",
 			"title": "Job title",

@@ -59,7 +59,12 @@
 			"attachmentHint": "Some leave types need a supporting document. PDF, JPG or PNG, up to 10 MB.",
 			"attachmentRequired": "This leave type needs an attachment.",
 			"submit": "Submit request",
-			"submitted": "Leave request sent for approval."
+			"submitted": "Leave request sent for approval.",
+			"pageDescription": "Choose the type and the days; what it takes from your balance shows before you send it.",
+			"backToMyLeave": "Back to my leave",
+			"details": "The request",
+			"balances": "Balances",
+			"forEmployeeHint": "Filed on the employee's behalf; it still goes through their approval flow."
 		},
 		"quote": {
 			"title": "This request takes {amount}",

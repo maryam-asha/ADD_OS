@@ -7,10 +7,11 @@ import en from "@/add-os/lang/en/en.json"
 import enHr from "@/add-os/lang/en/hr.json"
 import EmployeeProfilePage from "../EmployeeProfilePage.vue"
 
-const { getEmployeeMock, permissions, route, replaceMock } = vi.hoisted(() => ({
+const { getEmployeeMock, permissions, route, replaceMock, pushMock } = vi.hoisted(() => ({
 	getEmployeeMock: vi.fn(),
 	route: { params: { id: "7" }, query: {} as Record<string, string> },
 	replaceMock: vi.fn(),
+	pushMock: vi.fn(),
 	permissions: { update: true, events: true, documents: true, checklists: true }
 }))
 
@@ -37,14 +38,13 @@ vi.mock("@/add-os/modules/hr/components/core/CareerTab.vue", () => ({ default: {
 vi.mock("@/add-os/modules/hr/components/core/ChecklistTab.vue", () => ({ default: { name: "ChecklistTab", render: () => null } }))
 vi.mock("@/add-os/modules/hr/components/core/EmployeeDocumentsTab.vue", () => ({ default: { name: "EmployeeDocumentsTab", render: () => null } }))
 vi.mock("@/add-os/modules/hr/components/core/PeopleListModal.vue", () => ({ default: { name: "PeopleListModal", render: () => null } }))
-vi.mock("@/add-os/modules/hr/components/core/RecordEventModal.vue", () => ({ default: { name: "RecordEventModal", props: ["show", "employee", "initialType"], render: () => null } }))
 vi.mock("naive-ui", async () => {
 	const actual = await vi.importActual<typeof import("naive-ui")>("naive-ui")
 	return { ...actual, useMessage: () => ({ success: vi.fn(), error: vi.fn() }) }
 })
 vi.mock("vue-router", async () => {
 	const actual = await vi.importActual<typeof import("vue-router")>("vue-router")
-	return { ...actual, useRouter: () => ({ push: vi.fn(), replace: replaceMock }), useRoute: () => route }
+	return { ...actual, useRouter: () => ({ push: pushMock, replace: replaceMock }), useRoute: () => route }
 })
 
 const i18n = createI18n({ legacy: false, locale: "en", messages: { en: { ...en, ...enHr } } })
@@ -127,31 +127,24 @@ describe("employeeProfilePage", () => {
 		expect(text).not.toContain("Edit details")
 		expect(text).not.toContain("Record event")
 		expect(text).not.toContain("Checklist")
-		expect(wrapper.findComponent({ name: "RecordEventModal" }).exists()).toBe(false)
 		wrapper.unmount()
 	})
 
-	it("reloads the file after an event is recorded", async () => {
+	it("opens recording an event on a page of its own", async () => {
 		const wrapper = mountPage()
 		await flushPromises()
-		getEmployeeMock.mockClear()
 
-		wrapper.findComponent({ name: "RecordEventModal" }).vm.$emit("recorded")
-		await flushPromises()
-
-		expect(getEmployeeMock).toHaveBeenCalledWith(7)
+		await wrapper.findAll("button").find(b => b.text().includes("Record event"))!.trigger("click")
+		expect(pushMock).toHaveBeenCalledWith({ name: "hr.employeeEventCreate", params: { id: 7 }, query: {} })
 		wrapper.unmount()
 	})
 
-	it("opens the event form on a promotion when a review sends it here, then leaves the address", async () => {
+	it("goes on to the event page on a promotion when an older link asks for one, replacing the address", async () => {
 		route.query = { event: "promotion", tab: "career" }
 		const wrapper = mountPage()
 		await flushPromises()
 
-		const modal = wrapper.findComponent({ name: "RecordEventModal" })
-		expect(modal.props("show")).toBe(true)
-		expect(modal.props("initialType")).toBe("promotion")
-		expect(replaceMock).toHaveBeenCalledWith({ query: { tab: "career" } })
+		expect(replaceMock).toHaveBeenCalledWith({ name: "hr.employeeEventCreate", params: { id: 7 }, query: { type: "promotion" } })
 		wrapper.unmount()
 	})
 
@@ -159,15 +152,17 @@ describe("employeeProfilePage", () => {
 		route.query = { event: "hire" }
 		const unknown = mountPage()
 		await flushPromises()
-		expect(unknown.findComponent({ name: "RecordEventModal" }).props("show")).toBe(false)
+		expect(replaceMock).toHaveBeenCalledWith({ query: {} })
+		expect(replaceMock).not.toHaveBeenCalledWith(expect.objectContaining({ name: "hr.employeeEventCreate" }))
 		unknown.unmount()
 
 		document.body.innerHTML = ""
+		replaceMock.mockClear()
 		Object.assign(permissions, { events: false })
 		route.query = { event: "promotion" }
 		const reader = mountPage()
 		await flushPromises()
-		expect(reader.findComponent({ name: "RecordEventModal" }).exists()).toBe(false)
+		expect(replaceMock).not.toHaveBeenCalled()
 		reader.unmount()
 	})
 })

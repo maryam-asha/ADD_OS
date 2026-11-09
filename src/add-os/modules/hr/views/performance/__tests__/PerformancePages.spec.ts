@@ -238,7 +238,7 @@ describe("performance pages", () => {
 
 			expect(document.body.textContent).toContain("Nothing changes until it is recorded")
 			recordButton()?.click()
-			expect(mocks.push).toHaveBeenCalledWith({ name: "hr.employeeProfile", params: { id: 9 }, query: { event: "promotion" } })
+			expect(mocks.push).toHaveBeenCalledWith({ name: "hr.employeeEventCreate", params: { id: 9 }, query: { type: "promotion" } })
 			wrapper.unmount()
 		})
 

@@ -37,7 +37,6 @@ vi.mock("@/add-os/services/hr/leave", () => ({
 }))
 vi.mock("@/add-os/services/hr/core", () => ({ listEmployees: vi.fn() }))
 vi.mock("@/add-os/modules/hr/components/leave/LeaveRequestDetailDrawer.vue", () => ({ default: { name: "LeaveRequestDetailDrawer", props: ["show", "requestId", "cancel"], render: () => null } }))
-vi.mock("@/add-os/modules/hr/components/leave/LeaveRequestModal.vue", () => ({ default: { name: "LeaveRequestModal", render: () => null } }))
 vi.mock("naive-ui", async () => {
 	const actual = await vi.importActual<typeof import("naive-ui")>("naive-ui")
 	return { ...actual, useMessage: () => ({ success: vi.fn(), error: vi.fn() }), useDialog: () => ({ warning: warningMock }) }

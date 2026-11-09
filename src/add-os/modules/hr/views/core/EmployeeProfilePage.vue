@@ -140,7 +140,7 @@
 				</n-tab-pane>
 
 				<n-tab-pane v-if="mayManageChecklists" name="checklist" :tab="t('hr.profile.tabs.checklist')" display-directive="show:lazy">
-					<ChecklistTab ref="checklistTab" :employee-id />
+					<ChecklistTab :employee-id />
 				</n-tab-pane>
 			</n-tabs>
 
@@ -160,7 +160,6 @@
 				:save-dependents="rows => replaceEmployeeDependents(employeeId, rows)"
 				@saved="load"
 			/>
-			<RecordEventModal v-if="mayRecordEvents" v-model:show="eventVisible" :employee :initial-type="initialEvent" @recorded="onEventRecorded" />
 		</template>
 	</div>
 </template>
@@ -189,7 +188,6 @@ import CareerTab from "@/add-os/modules/hr/components/core/CareerTab.vue"
 import ChecklistTab from "@/add-os/modules/hr/components/core/ChecklistTab.vue"
 import EmployeeDocumentsTab from "@/add-os/modules/hr/components/core/EmployeeDocumentsTab.vue"
 import PeopleListModal from "@/add-os/modules/hr/components/core/PeopleListModal.vue"
-import RecordEventModal from "@/add-os/modules/hr/components/core/RecordEventModal.vue"
 import SensitiveDetails from "@/add-os/modules/hr/components/core/SensitiveDetails.vue"
 import JobDetails from "@/add-os/modules/hr/components/JobDetails.vue"
 import EmployeeLeaveTab from "@/add-os/modules/hr/components/leave/EmployeeLeaveTab.vue"
@@ -234,19 +232,19 @@ const loading = ref(true)
 const loadError = ref(false)
 const notFound = ref(false)
 /** Each tab after the first loads the first time it opens (`show:lazy`). */
-const tab = ref<"overview" | "career" | "documents" | "leave" | "attendance" | "pay" | "benefits" | "performance" | "training" | "cost" | "checklist">("overview")
+type ProfileTab = "overview" | "career" | "documents" | "leave" | "attendance" | "pay" | "benefits" | "performance" | "training" | "cost" | "checklist"
+const PROFILE_TABS: readonly ProfileTab[] = ["overview", "career", "documents", "leave", "attendance", "pay", "benefits", "performance", "training", "cost", "checklist"]
+/** `?tab=` opens the file on a tab: a form page sends HR back to the tab it was opened from. */
+const tab = ref<ProfileTab>(PROFILE_TABS.find(name => name === route.query.tab) ?? "overview")
 
 const contactsVisible = ref(false)
 const dependentsVisible = ref(false)
-const eventVisible = ref(false)
-const initialEvent = ref<RecordableEventType | null>(null)
-
-function openEvent(type: RecordableEventType | null) {
-	initialEvent.value = type
-	eventVisible.value = true
+/** Recording an event is a page of its own (RecordEventPage), opened on a type when one is asked for. */
+function openEvent(type: RecordableEventType | null, replace = false) {
+	const target = { name: "hr.employeeEventCreate", params: { id: employeeId.value }, query: type ? { type } : {} }
+	void (replace ? router.replace(target) : router.push(target))
 }
 const careerTab = ref<InstanceType<typeof CareerTab> | null>(null)
-const checklistTab = ref<InstanceType<typeof ChecklistTab> | null>(null)
 
 /** A reload after an edit keeps the page on screen; only the first load shows the skeleton. */
 async function load() {
@@ -265,23 +263,17 @@ async function load() {
 }
 
 /**
- * `?event=promotion` — from a review that recommended one — opens the event
- * form on that type once the file has loaded, then leaves the address, so
- * a reload does not open it again.
+ * `?event=promotion` (an older link to a review's recommendation) goes on to
+ * the event page on that type once the file has loaded, replacing this
+ * address so the back button does not bounce. One it does not know, or an
+ * account that may not record it, just leaves the address.
  */
 onMounted(async () => {
 	await load()
 	const asked = route.query?.event
 	if (!mayRecordEvents || !employee.value || typeof asked !== "string") return
-	if ((RECORDABLE_EVENT_TYPES as readonly string[]).includes(asked)) openEvent(asked as RecordableEventType)
+	if ((RECORDABLE_EVENT_TYPES as readonly string[]).includes(asked)) return openEvent(asked as RecordableEventType, true)
 	const { event: _event, ...rest } = route.query
 	void router.replace({ query: rest })
 })
-
-/** An event changes status, job and contract, and a hire or termination creates checklist tasks. */
-async function onEventRecorded() {
-	await load()
-	await careerTab.value?.load()
-	await checklistTab.value?.load()
-}
 </script>

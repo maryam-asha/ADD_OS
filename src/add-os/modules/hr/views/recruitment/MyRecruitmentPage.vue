@@ -33,7 +33,7 @@
 				<div class="flex flex-col gap-3">
 					<div class="flex flex-wrap items-center justify-between gap-3">
 						<p class="text-sm text-secondary">{{ t("hrRecruitment.mine.requisitionsHint") }}</p>
-						<n-button type="primary" @click="requisitionVisible = true">
+						<n-button type="primary" @click="router.push({ name: 'myHr.hrMyRequisitionCreate' })">
 							<template #icon><Icon name="carbon:add" :size="16" /></template>
 							{{ t("hrRecruitment.requisitions.add") }}
 						</n-button>
@@ -75,7 +75,6 @@
 			</template>
 		</HrFormModal>
 
-		<RequisitionModal v-model:show="requisitionVisible" mine @saved="loadRequisitions" />
 		<ScorecardModal v-model:show="scorecardVisible" :interview="scoring" @saved="loadInterviews" />
 	</div>
 </template>
@@ -86,10 +85,10 @@ import type { MyApplication, MyInterview, PipelineStage, PublicJobOpening, Requi
 import { NAlert, NButton, NCard, NDataTable, NEmpty, NFormItem, NInput, NSkeleton, NTabPane, NTabs, NTag, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import { useRoute, useRouter } from "vue-router"
 import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import CvPicker from "@/add-os/modules/hr/components/recruitment/CvPicker.vue"
 import RecruitmentStatusTag from "@/add-os/modules/hr/components/recruitment/RecruitmentStatusTag.vue"
-import RequisitionModal from "@/add-os/modules/hr/components/recruitment/RequisitionModal.vue"
 import ScorecardModal from "@/add-os/modules/hr/components/recruitment/ScorecardModal.vue"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import HrPanel from "@/add-os/modules/hr/components/ui/HrPanel.vue"
@@ -114,7 +113,12 @@ defineProps<{ titleKey?: string }>()
 
 const { t } = useI18n()
 const message = useMessage()
-const tab = ref<"jobs" | "applications" | "requisitions" | "interviews">("jobs")
+const route = useRoute()
+const router = useRouter()
+type RecruitmentTab = "jobs" | "applications" | "requisitions" | "interviews"
+const RECRUITMENT_TABS: readonly RecruitmentTab[] = ["jobs", "applications", "requisitions", "interviews"]
+/** `?tab=` opens on a tab: filing a requisition, a page of its own, comes back to the requisitions. */
+const tab = ref<RecruitmentTab>(RECRUITMENT_TABS.find(name => name === route.query.tab) ?? "jobs")
 const stages = ref<PipelineStage[]>([])
 
 // ── Jobs ────────────────────────────────────────────────────────────────────
@@ -189,7 +193,6 @@ const applicationColumns = computed<DataTableColumns<MyApplication>>(() => [
 // ── My requisitions ─────────────────────────────────────────────────────────
 const requisitions = ref<Requisition[]>([])
 const requisitionsLoading = ref(false)
-const requisitionVisible = ref(false)
 let requisitionsLoaded = false
 
 async function loadRequisitions() {
@@ -250,10 +253,14 @@ const interviewColumns = computed<DataTableColumns<MyInterview>>(() => [
 	}
 ])
 
-watch(tab, current => {
-	if (current === "requisitions" && !requisitionsLoaded) void loadRequisitions()
-	if (current === "interviews" && !interviewsLoaded) void loadInterviews()
-})
+watch(
+	tab,
+	current => {
+		if (current === "requisitions" && !requisitionsLoaded) void loadRequisitions()
+		if (current === "interviews" && !interviewsLoaded) void loadInterviews()
+	},
+	{ immediate: true }
+)
 
 onMounted(() => {
 	void loadJobs()

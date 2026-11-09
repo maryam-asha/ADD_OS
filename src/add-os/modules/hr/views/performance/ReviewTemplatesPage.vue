@@ -19,8 +19,6 @@
 				</template>
 			</n-data-table>
 		</n-card>
-
-		<TemplateModal v-if="mayManage" v-model:show="editorVisible" :template="editing" @saved="load" />
 	</div>
 </template>
 
@@ -30,9 +28,9 @@ import type { ReviewTemplate } from "@/add-os/modules/hr/types/performance"
 import { NAlert, NButton, NCard, NDataTable } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import { useRouter } from "vue-router"
 import { canManagePerformance } from "@/add-os/config/permissions"
 import ActiveTag from "@/add-os/modules/hr/components/ActiveTag.vue"
-import TemplateModal from "@/add-os/modules/hr/components/performance/TemplateModal.vue"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import { translated } from "@/add-os/modules/hr/utils/translated"
@@ -49,13 +47,12 @@ import Icon from "@/components/common/Icon.vue"
 defineProps<{ titleKey?: string }>()
 
 const { t } = useI18n()
+const router = useRouter()
 const mayManage = canManagePerformance()
 
 const templates = ref<ReviewTemplate[]>([])
 const loading = ref(true)
 const loadError = ref("")
-const editorVisible = ref(false)
-const editing = ref<ReviewTemplate | null>(null)
 
 async function load() {
 	loading.value = true
@@ -71,9 +68,9 @@ async function load() {
 
 onMounted(load)
 
+/** Adding and editing are a page of their own (TemplateFormPage). */
 function openEditor(template: ReviewTemplate | null) {
-	editing.value = template
-	editorVisible.value = true
+	void router.push(template ? { name: "hrSettings.hrReviewTemplateEdit", params: { id: template.id } } : { name: "hrSettings.hrReviewTemplateCreate" })
 }
 
 const columns = computed<DataTableColumns<ReviewTemplate>>(() => [

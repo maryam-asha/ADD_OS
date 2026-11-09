@@ -6,10 +6,13 @@ import { createI18n } from "vue-i18n"
 import en from "@/add-os/lang/en/en.json"
 import enHr from "@/add-os/lang/en/hr.json"
 import { ApiError } from "@/add-os/services/api"
-import RecordEventModal from "../RecordEventModal.vue"
+import RecordEventPage from "../RecordEventPage.vue"
 
-const { recordMock, listPositionsMock, warningMock, successMock, errorMock } = vi.hoisted(() => ({
+const { recordMock, getEmployeeMock, listPositionsMock, warningMock, successMock, errorMock, pushMock, route } = vi.hoisted(() => ({
 	recordMock: vi.fn(),
+	getEmployeeMock: vi.fn(),
+	pushMock: vi.fn(),
+	route: { params: { id: "7" } as Record<string, string>, query: {} as Record<string, string> },
 	listPositionsMock: vi.fn(),
 	warningMock: vi.fn(),
 	successMock: vi.fn(),
@@ -19,6 +22,7 @@ const { recordMock, listPositionsMock, warningMock, successMock, errorMock } = v
 vi.mock("@/add-os/config/permissions", () => ({ canViewEmployees: () => false }))
 vi.mock("@/add-os/services/hr/core", () => ({
 	recordEmploymentEvent: recordMock,
+	getEmployee: getEmployeeMock,
 	listOrgUnits: vi.fn().mockResolvedValue([]),
 	listJobGrades: vi.fn().mockResolvedValue([]),
 	listWorkLocations: vi.fn().mockResolvedValue([]),
@@ -28,6 +32,11 @@ vi.mock("@/add-os/services/hr/core", () => ({
 vi.mock("naive-ui", async () => {
 	const actual = await vi.importActual<typeof import("naive-ui")>("naive-ui")
 	return { ...actual, useDialog: () => ({ warning: warningMock }), useMessage: () => ({ success: successMock, error: errorMock, warning: vi.fn() }) }
+})
+
+vi.mock("vue-router", async () => {
+	const actual = await vi.importActual<typeof import("vue-router")>("vue-router")
+	return { ...actual, useRouter: () => ({ push: pushMock }), useRoute: () => route }
 })
 
 const i18n = createI18n({ legacy: false, locale: "en", messages: { en: { ...en, ...enHr } } })
@@ -80,17 +89,20 @@ interface DrawerVm {
 	typeOptions: { value: string }[]
 }
 
+const backToCareer = { name: "hr.employeeProfile", params: { id: 7 }, query: { tab: "career" } }
+
 async function mountDrawer(e: Employee = employee()) {
-	const wrapper = mount(RecordEventModal, { props: { employee: e, show: false }, global: { plugins: [i18n], stubs: { Icon: true } }, attachTo: document.body })
-	await wrapper.setProps({ show: true })
+	getEmployeeMock.mockResolvedValue(e)
+	const wrapper = mount(RecordEventPage, { global: { plugins: [i18n], stubs: { Icon: true } }, attachTo: document.body })
 	await flushPromises()
 	return { wrapper, vm: wrapper.vm as unknown as DrawerVm }
 }
 
-describe("recordEventModal", () => {
+describe("recordEventPage", () => {
 	beforeEach(() => {
 		vi.clearAllMocks()
 		recordMock.mockResolvedValue({ id: 30 })
+		route.query = {}
 		listPositionsMock.mockResolvedValue([])
 	})
 
@@ -130,24 +142,29 @@ describe("recordEventModal", () => {
 		await flushPromises()
 
 		expect(recordMock).toHaveBeenCalledWith(7, { type: "promotion", effective_on: "2026-11-01", reason: null, notes: null, assignment: { job_grade_id: 3 } })
-		expect(wrapper.emitted("recorded")).toHaveLength(1)
+		expect(getEmployeeMock).toHaveBeenCalledWith(7)
+		expect(pushMock).toHaveBeenCalledWith(backToCareer)
 		wrapper.unmount()
 	})
 
-	it("keeps the current position when the drawer reopens after the unit was changed", async () => {
+	it("opens on the type a review asked for, and only on one that can apply", async () => {
+		route.query = { type: "promotion" }
+		const asked = await mountDrawer()
+		expect(asked.vm.form.type).toBe("promotion")
+		asked.wrapper.unmount()
+
+		route.query = { type: "rehire" }
+		const refused = await mountDrawer()
+		expect(refused.vm.form.type).toBeNull()
+		refused.wrapper.unmount()
+	})
+
+	it("keeps the current position while the unit stays the current one", async () => {
 		const held = employee()
 		held.current_assignment!.position = { id: 11, title: { ar: "منسّق", en: "Coordinator" } }
 		const position = { id: 11, org_unit_id: 5, job_grade_id: null, code: null, title: { ar: "منسّق", en: "Coordinator" }, headcount: 2, occupied: 1, is_active: true }
 		listPositionsMock.mockImplementation(async (unitId: number) => (unitId === 5 ? [position] : []))
 		const { wrapper, vm } = await mountDrawer(held)
-
-		vm.form.orgUnitId = 9
-		await flushPromises()
-		expect(vm.form.positionId).toBeNull()
-
-		await wrapper.setProps({ show: false })
-		await wrapper.setProps({ show: true })
-		await flushPromises()
 		expect(vm.form.positionId).toBe(11)
 
 		Object.assign(vm.form, { type: "promotion", effectiveOn: "2026-11-01", jobGradeId: 3 })
@@ -185,7 +202,7 @@ describe("recordEventModal", () => {
 		await flushPromises()
 
 		expect(errorMock).toHaveBeenCalledWith("The contract end date must be after the effective date.")
-		expect(wrapper.emitted("recorded")).toBeUndefined()
+		expect(pushMock).not.toHaveBeenCalled()
 		wrapper.unmount()
 	})
 })

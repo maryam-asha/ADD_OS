@@ -375,6 +375,8 @@
 		},
 		"events": {
 			"title": "Record event",
+			"eventPanel": "The event",
+			"currentJob": "Today's job and contract",
 			"type": "Event",
 			"typePlaceholder": "Choose what changed",
 			"effectiveOn": "Effective on",

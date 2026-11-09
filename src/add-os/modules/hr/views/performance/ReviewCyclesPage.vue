@@ -3,7 +3,7 @@
 	<div class="flex flex-col gap-5">
 		<HrPageHeader :title="t(titleKey || 'nav.pages.hrReviewCycles')" :description="t('hrPerformance.cycles.description')">
 			<template v-if="mayManage" #actions>
-				<n-button type="primary" @click="createVisible = true">
+				<n-button type="primary" @click="router.push({ name: 'hrTalent.hrReviewCycleCreate' })">
 					<template #icon><Icon name="carbon:add" :size="16" /></template>
 					{{ t("hrPerformance.cycles.add") }}
 				</n-button>
@@ -26,28 +26,25 @@
 				<n-pagination v-model:page="page" :page-count="lastPage" :disabled="loading" />
 			</div>
 		</n-card>
-
-		<CycleModal v-if="mayManage" v-model:show="createVisible" :cycle="null" :templates @saved="onCreated" />
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
-import type { CycleStatus, ReviewCycle, ReviewTemplate } from "@/add-os/modules/hr/types/performance"
+import type { CycleStatus, ReviewCycle } from "@/add-os/modules/hr/types/performance"
 import { NAlert, NButton, NCard, NDataTable, NPagination, NSelect } from "naive-ui"
-import { computed, h, onMounted, ref } from "vue"
+import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import { canManagePerformance } from "@/add-os/config/permissions"
-import CycleModal from "@/add-os/modules/hr/components/performance/CycleModal.vue"
 import PerformanceStatusTag from "@/add-os/modules/hr/components/performance/PerformanceStatusTag.vue"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import HrToolbar from "@/add-os/modules/hr/components/ui/HrToolbar.vue"
 import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
 import { CYCLE_STATUSES } from "@/add-os/modules/hr/types/performance"
-import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
+import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import { translated } from "@/add-os/modules/hr/utils/translated"
-import { listCycles, listTemplates } from "@/add-os/services/hr/performance"
+import { listCycles } from "@/add-os/services/hr/performance"
 import { formatDate } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
@@ -63,11 +60,9 @@ const router = useRouter()
 const mayManage = canManagePerformance()
 
 const rows = ref<ReviewCycle[]>([])
-const templates = ref<ReviewTemplate[]>([])
 const loading = ref(true)
 const loadError = ref("")
 const lastPage = ref(1)
-const createVisible = ref(false)
 
 const { filters, applied, page } = useRouteFilters({ status: "string" }, () => void load())
 
@@ -85,16 +80,8 @@ async function load() {
 	}
 }
 
-onMounted(() => {
-	if (mayManage) void quietly(listTemplates, list => (templates.value = list))
-})
-
 function goTo(id: number) {
 	void router.push({ name: "hrTalent.hrReviewCycle", params: { id } })
-}
-
-function onCreated(cycle: ReviewCycle | null) {
-	if (cycle) goTo(cycle.id)
 }
 
 const statusOptions = computed<SelectOption[]>(() => CYCLE_STATUSES.map(s => ({ label: t(`hrPerformance.status.cycle.${s}`), value: s })))

@@ -438,6 +438,8 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			// the permission its form writes with, as a write-only page does.
 			{ key: "employeeCreate", path: "employees/create", hidden: true, permission: "hr.employees.create" },
 			{ key: "employeeEdit", path: "employees/:id/edit", hidden: true, permission: "hr.employees.update" },
+			{ key: "employeeLeaveRequest", path: "employees/:id/leave-request", hidden: true, permission: "hr.leave.manage" },
+			{ key: "employeeEventCreate", path: "employees/:id/events/create", hidden: true, permission: "hr.lifecycle.manage" },
 			{ key: "employeeProfile", path: "employees/:id", hidden: true, permission: "hr.employees.view" },
 			{ key: "orgStructure", path: "org-structure", permission: "hr.org.view" },
 			{ key: "hrAlerts", path: "alerts", permission: "hr.alerts.view" },
@@ -480,6 +482,8 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "hrLoans", path: "loans", permission: "hr.loans.manage" },
 			{ key: "hrEndOfService", path: "end-of-service", permission: "hr.payroll.view" },
 			{ key: "hrBenefits", path: "benefits", permission: "hr.benefits.view" },
+			{ key: "hrBenefitCreate", path: "benefits/create", hidden: true, permission: "hr.benefits.manage" },
+			{ key: "hrBenefitEdit", path: "benefits/:id/edit", hidden: true, permission: "hr.benefits.manage" },
 			{ key: "hrBenefit", path: "benefits/:id", hidden: true, permission: "hr.benefits.view" },
 			{ key: "hrBenefitGrants", path: "benefit-grants", permission: "hr.benefits.view" },
 			{ key: "hrEmployeeCost", path: "employee-cost", permission: "hr.payroll.view" }
@@ -496,15 +500,20 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		status: "active",
 		pages: [
 			{ key: "hrRequisitions", path: "requisitions", permission: "hr.recruitment.view" },
+			{ key: "hrRequisitionCreate", path: "requisitions/create", hidden: true, permission: "hr.recruitment.manage" },
 			{ key: "hrJobOpenings", path: "job-openings", permission: "hr.recruitment.view" },
 			{ key: "hrJobOpening", path: "job-openings/:id", hidden: true, permission: "hr.recruitment.view" },
 			{ key: "hrApplication", path: "applications/:id", hidden: true, permission: "hr.recruitment.view" },
 			{ key: "hrCandidates", path: "candidates", permission: "hr.recruitment.view" },
 			{ key: "hrCandidate", path: "candidates/:id", hidden: true, permission: "hr.recruitment.view" },
 			{ key: "hrReviewCycles", path: "review-cycles", permission: "hr.performance.view" },
+			{ key: "hrReviewCycleCreate", path: "review-cycles/create", hidden: true, permission: "hr.performance.manage" },
+			{ key: "hrReviewCycleEdit", path: "review-cycles/:id/edit", hidden: true, permission: "hr.performance.manage" },
 			{ key: "hrReviewCycle", path: "review-cycles/:id", hidden: true, permission: "hr.performance.view" },
 			{ key: "hrGoals", path: "goals", permission: "hr.performance.view" },
 			{ key: "hrCourses", path: "courses", permission: "hr.training.view" },
+			{ key: "hrCourseCreate", path: "courses/create", hidden: true, permission: "hr.training.manage" },
+			{ key: "hrCourseEdit", path: "courses/:id/edit", hidden: true, permission: "hr.training.manage" },
 			{ key: "hrTrainingSessions", path: "training-sessions", permission: "hr.training.view" },
 			{ key: "hrTrainingSession", path: "training-sessions/:id", hidden: true, permission: "hr.training.view" },
 			{ key: "hrCertifications", path: "certifications", permission: "hr.training.view" },
@@ -548,7 +557,9 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "hrPayComponentEdit", path: "pay-components/:id/edit", hidden: true, permission: "hr.settings.manage" },
 			{ key: "hrRateTables", path: "rate-tables", permission: "hr.payroll.view" },
 			{ key: "hrPipelineStages", path: "pipeline-stages", permission: "hr.recruitment.view" },
-			{ key: "hrReviewTemplates", path: "review-templates", permission: "hr.performance.view" }
+			{ key: "hrReviewTemplates", path: "review-templates", permission: "hr.performance.view" },
+			{ key: "hrReviewTemplateCreate", path: "review-templates/create", hidden: true, permission: "hr.performance.manage" },
+			{ key: "hrReviewTemplateEdit", path: "review-templates/:id/edit", hidden: true, permission: "hr.performance.manage" }
 		]
 	},
 	{
@@ -565,12 +576,14 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "myProfile", path: "profile", icon: "carbon:user-profile" },
 			{ key: "hrMyApprovals", path: "approvals", icon: "carbon:task-approved" },
 			{ key: "hrMyLeave", path: "leave", icon: "carbon:calendar" },
+			{ key: "hrMyLeaveRequest", path: "leave/request", hidden: true },
 			{ key: "hrMyAttendance", path: "attendance", icon: "carbon:time" },
 			{ key: "hrMyTimesheets", path: "timesheets", icon: "carbon:event-schedule" },
 			{ key: "hrMyPay", path: "pay", icon: "carbon:money" },
 			{ key: "hrMyPayslip", path: "pay/payslips/:id", hidden: true },
 			{ key: "hrMyBenefits", path: "benefits", icon: "carbon:gift" },
 			{ key: "hrMyRecruitment", path: "jobs", icon: "carbon:portfolio" },
+			{ key: "hrMyRequisitionCreate", path: "jobs/requisitions/create", hidden: true },
 			{ key: "hrMyPerformance", path: "performance", icon: "carbon:growth" },
 			{ key: "hrMyTraining", path: "training", icon: "carbon:education" },
 			{ key: "hrMyCertificate", path: "certificates/:kind", hidden: true }

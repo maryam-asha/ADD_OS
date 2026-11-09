@@ -1,61 +1,49 @@
-<!-- src/add-os/modules/hr/components/leave/LeaveRequestModal.vue -->
+<!-- src/add-os/modules/hr/components/leave/LeaveRequestForm.vue -->
 <template>
-	<HrFormModal v-model:show="show" :title icon="carbon:calendar-add">
-		<n-form ref="formRef" :model="form" :rules label-placement="top">
-			<n-form-item path="typeId" :label="t('hrLeave.request.type')">
-				<n-select v-model:value="form.typeId" :options="typeOptions" />
+	<n-form ref="formRef" :model="form" :rules label-placement="top">
+		<n-form-item path="typeId" :label="t('hrLeave.request.type')">
+			<n-select v-model:value="form.typeId" :options="typeOptions" />
+		</n-form-item>
+
+		<template v-if="selected">
+			<n-form-item v-if="selected.unit === 'hour'" path="startsOn" :label="t('hrLeave.request.day')">
+				<n-date-picker v-model:formatted-value="form.startsOn" value-format="yyyy-MM-dd" type="date" class="w-full" />
+			</n-form-item>
+			<n-form-item v-else path="range" :label="t('hrLeave.request.dates')">
+				<n-date-picker v-model:formatted-value="form.range" value-format="yyyy-MM-dd" type="daterange" class="w-full" />
 			</n-form-item>
 
-			<template v-if="selected">
-				<n-form-item v-if="selected.unit === 'hour'" path="startsOn" :label="t('hrLeave.request.day')">
-					<n-date-picker v-model:formatted-value="form.startsOn" value-format="yyyy-MM-dd" type="date" class="w-full" />
-				</n-form-item>
-				<n-form-item v-else path="range" :label="t('hrLeave.request.dates')">
-					<n-date-picker v-model:formatted-value="form.range" value-format="yyyy-MM-dd" type="daterange" class="w-full" />
-				</n-form-item>
+			<n-form-item v-if="selected.unit === 'hour'" path="hours" :label="t('hrLeave.request.hours')">
+				<n-input-number v-model:value="form.hours" :min="0.25" :max="24" :step="0.5" class="w-full" />
+			</n-form-item>
+			<n-form-item v-else-if="halfDayOffered" path="halfDay" :label="t('hrLeave.request.halfDay')" :feedback="singleDay ? undefined : t('hrLeave.request.halfDayHint')">
+				<n-select v-model:value="form.halfDay" :options="halfDayOptions" :disabled="!singleDay" clearable :placeholder="t('hrLeave.request.fullDay')" />
+			</n-form-item>
 
-				<n-form-item v-if="selected.unit === 'hour'" path="hours" :label="t('hrLeave.request.hours')">
-					<n-input-number v-model:value="form.hours" :min="0.25" :max="24" :step="0.5" class="w-full" />
-				</n-form-item>
-				<n-form-item v-else-if="halfDayOffered" path="halfDay" :label="t('hrLeave.request.halfDay')" :feedback="singleDay ? undefined : t('hrLeave.request.halfDayHint')">
-					<n-select v-model:value="form.halfDay" :options="halfDayOptions" :disabled="!singleDay" clearable :placeholder="t('hrLeave.request.fullDay')" />
-				</n-form-item>
+			<n-alert v-if="quote" type="info" class="mb-4" :title="t('hrLeave.quote.title', { amount: leaveAmount(t, quote.amount, quote.unit) })">
+				<template v-if="quote.available !== null">
+					{{ t("hrLeave.quote.balance", { available: leaveAmount(t, quote.available, quote.unit), after: leaveAmount(t, quote.remaining_after, quote.unit) }) }}
+				</template>
+			</n-alert>
+			<n-alert v-else-if="quoteError" type="warning" class="mb-4" :title="quoteError" />
 
-				<n-alert v-if="quote" type="info" class="mb-4" :title="t('hrLeave.quote.title', { amount: leaveAmount(t, quote.amount, quote.unit) })">
-					<template v-if="quote.available !== null">
-						{{ t("hrLeave.quote.balance", { available: leaveAmount(t, quote.available, quote.unit), after: leaveAmount(t, quote.remaining_after, quote.unit) }) }}
-					</template>
-				</n-alert>
-				<n-alert v-else-if="quoteError" type="warning" class="mb-4" :title="quoteError" />
-
-				<n-form-item path="reason" :label="t('hrLeave.request.reason')">
-					<n-input v-model:value="form.reason" type="textarea" :autosize="{ minRows: 2, maxRows: 5 }" :maxlength="1000" />
-				</n-form-item>
-				<n-form-item
-					path="attachment"
-					:label="t('hrLeave.request.attachment')"
-					:feedback="selected.requires_attachment ? t('hrLeave.request.attachmentRequired') : t('hrLeave.request.attachmentHint')"
-				>
-					<n-upload :default-upload="false" :max="1" accept=".pdf,.jpg,.jpeg,.png" :file-list @update:file-list="onFiles">
-						<n-button>
-							<template #icon><Icon name="carbon:document-add" :size="16" /></template>
-							{{ t("hr.upload.choose") }}
-						</n-button>
-					</n-upload>
-				</n-form-item>
-			</template>
-		</n-form>
-
-		<template #footer>
-			<div class="flex justify-end gap-2">
-				<n-button @click="show = false">{{ t("hr.common.cancel") }}</n-button>
-				<n-button type="primary" :loading="submitting" :disabled="!selected" @click="send">
-					<template #icon><Icon name="carbon:send" :size="16" /></template>
-					{{ t("hrLeave.request.submit") }}
-				</n-button>
-			</div>
+			<n-form-item path="reason" :label="t('hrLeave.request.reason')">
+				<n-input v-model:value="form.reason" type="textarea" :autosize="{ minRows: 2, maxRows: 5 }" :maxlength="1000" />
+			</n-form-item>
+			<n-form-item
+				path="attachment"
+				:label="t('hrLeave.request.attachment')"
+				:feedback="selected.requires_attachment ? t('hrLeave.request.attachmentRequired') : t('hrLeave.request.attachmentHint')"
+			>
+				<n-upload :default-upload="false" :max="1" accept=".pdf,.jpg,.jpeg,.png" :file-list @update:file-list="onFiles">
+					<n-button>
+						<template #icon><Icon name="carbon:document-add" :size="16" /></template>
+						{{ t("hr.upload.choose") }}
+					</n-button>
+				</n-upload>
+			</n-form-item>
 		</template>
-	</HrFormModal>
+	</n-form>
 </template>
 
 <script setup lang="ts">
@@ -65,7 +53,6 @@ import type { HalfDay, LeaveQuote, LeaveRequest, LeaveUnit, SubmitLeavePayload }
 import { NAlert, NButton, NDatePicker, NForm, NFormItem, NInput, NInputNumber, NSelect, NUpload, useMessage } from "naive-ui"
 import { computed, onBeforeUnmount, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
-import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import { HALF_DAYS } from "@/add-os/modules/hr/types/leave"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import { nullable } from "@/add-os/modules/hr/utils/forms"
@@ -81,6 +68,11 @@ import Icon from "@/components/common/Icon.vue"
  * (`quote`, `POST me/leave/quote`) as they fill it in; HR filing for an
  * employee has no preview endpoint, so the server's answer on submit is the
  * check. Every request then goes through the employee's approval flow.
+ *
+ * The fields only: the page that holds them (MyLeaveRequestPage, or
+ * EmployeeLeaveRequestPage for HR) puts the buttons in its own bar and
+ * calls `send()`; `submitting` and `ready` drive them. Until 2026-11-09
+ * this was LeaveRequestModal: see docs/hr/FORMS-AS-PAGES.md.
  */
 export interface LeaveTypeChoice {
 	id: number
@@ -93,12 +85,10 @@ export interface LeaveTypeChoice {
 
 const props = defineProps<{
 	types: LeaveTypeChoice[]
-	title: string
 	submit: (payload: SubmitLeavePayload) => Promise<LeaveRequest>
 	quote?: (payload: Omit<SubmitLeavePayload, "attachment" | "reason">) => Promise<LeaveQuote>
 }>()
 const emit = defineEmits<{ submitted: [request: LeaveRequest] }>()
-const show = defineModel<boolean>("show", { required: true })
 
 const QUOTE_DELAY_MS = 400
 
@@ -125,14 +115,6 @@ const quoteError = ref("")
 function blank(): LeaveForm {
 	return { typeId: null, range: null, startsOn: null, hours: null, halfDay: null, reason: "", attachment: null }
 }
-
-watch(show, visible => {
-	if (!visible) return
-	form.value = blank()
-	fileList.value = []
-	quote.value = null
-	quoteError.value = ""
-})
 
 const selected = computed(() => props.types.find(type => type.id === form.value.typeId) ?? null)
 const typeOptions = computed<SelectOption[]>(() => props.types.map(type => ({ label: translated(type.name), value: type.id })))
@@ -217,7 +199,6 @@ async function send() {
 	try {
 		const created = await props.submit({ ...when, reason: nullable(form.value.reason), attachment: form.value.attachment })
 		message.success(t("hrLeave.request.submitted"))
-		show.value = false
 		emit("submitted", created)
 	} catch (e) {
 		message.error(apiErrorMessage(e, t("hr.common.saveError")))
@@ -225,4 +206,8 @@ async function send() {
 		submitting.value = false
 	}
 }
+/** Whether a type is chosen: the page holds its submit button until then. */
+const ready = computed(() => selected.value !== null)
+
+defineExpose({ send, submitting, ready })
 </script>

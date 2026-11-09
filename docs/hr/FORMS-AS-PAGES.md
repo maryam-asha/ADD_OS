@@ -95,8 +95,55 @@ editor), `TemplateModal` (review template sections), `WorkPatternModal` (a weekl
 | Open a payroll run | `OpenRunModal` | `OpenPayrollRunPage`, `/hr-pay/payroll-runs/create` (`hr.payroll.manage`); on success it goes to the run's own page |
 | Add or edit a pay component | `PayComponentModal` | `PayComponentFormPage`, `/hr-settings/pay-components/create` and `/:id/edit` (`hr.settings.manage`, the permission the list page already wrote with, not `hr.payroll.manage`). There is no GET for one component, so the edit page finds it in the list it loads anyway for the codes the settings refer to |
 
+| Request leave (the employee) | `LeaveRequestModal` | `MyLeaveRequestPage`, `/my-hr/leave/request` (My HR's audience); the balances beside the form |
+| Request leave for an employee (HR) | `LeaveRequestModal` | `EmployeeLeaveRequestPage`, `/hr/employees/:id/leave-request` (`hr.leave.manage`); returns to the file on its leave tab (`?tab=leave`, which the file now honours) |
+
+| Record an employment event (promotion, transfer, renewal, suspension, termination, rehire…) | `RecordEventModal` | `RecordEventPage`, `/hr/employees/:id/events/create` (`hr.lifecycle.manage`); `?type=` opens it on a type (a review's recommended promotion links straight there); today's job and contract sit beside the form; returns to the file on its career tab. The file's older `?event=` link now forwards to it, replacing the address |
+
+| Add or edit a benefit | `BenefitModal` | `BenefitFormPage`, `/hr-pay/benefits/create` and `/:id/edit` (`hr.benefits.manage`); three panels: the benefit, value and frequency, cost and eligibility |
+
+| File a hiring requisition | `RequisitionModal` | `RequisitionFormPage`, one page at two addresses: `/hr-talent/requisitions/create` for HR (`hr.recruitment.manage`, names the hiring manager) and `/my-hr/jobs/requisitions/create` for a manager filing their own; the latter returns to My recruitment on its requisitions tab (`?tab=`, which that page now honours) |
+
+| Add or edit a course | `CourseModal` | `CourseFormPage`, `/hr-talent/courses/create` and `/:id/edit` (`hr.training.manage`); three panels: the course, provider/length/cost, the certification it grants |
+
+| Add or edit a review template | `TemplateModal` | `TemplateFormPage`, `/hr-settings/review-templates/create` and `/:id/edit` (`hr.performance.manage`); the competencies get a panel of their own. No GET for one template: an edit finds it in the list |
+| Add or edit a review cycle | `CycleModal` | `CycleFormPage`, `/hr-talent/review-cycles/create` and `/:id/edit` (`hr.performance.manage`); a new cycle opens on its own page once created, an edit returns to it |
+
+The two leave pages share their fields: the dialog became `LeaveRequestForm`, the form
+without its frame, which exposes `send()`, `submitting` and `ready` to the page's bar.
+`LeaveBalances` moved to container queries too, so it lays out one card per row in a side
+column and four across on a full page, menu open or collapsed.
+
 ### Moved back to the dialogs (2026-11-09)
 
 - `PositionFormModal` stays a dialog. It opens from the org structure page with a unit
   already chosen in the tree beside it, and a page would leave that tree. Bayraq likewise
   edits positions inside its org chart, not on a page.
+- `GoalModal` stays a dialog. It opens from three places (the goals list, the performance
+  tab of an employee's file, My performance), each in the middle of its own list, in admin
+  or self mode, for whichever employee that screen is about. A page would need three
+  return addresses and would lose the list each goal belongs to.
+- `OpeningModal` stays a dialog. It opens from inside the requisition drawer (for a new
+  opening) and from the opening's own page (to edit it). A page from the drawer would close
+  the requisition being read.
+
+### Three dialogs nothing opens any more (2026-11-09), kept, not deleted
+
+`LeavePolicyModal`, `ApprovalFlowModal` and `WorkPatternModal` lost their only call sites
+in f97384d ("redesign hr settings … to match reference UI"), which rebuilt the leave,
+approval-flow and time settings pages in Bayraq's layout. They look like dead code, and
+the rule for dead controls is to delete them with their i18n keys. **They are kept
+instead**, because deleting them would also delete the only UI for capabilities the
+redesign did not carry over. The backend still serves all of these:
+
+- **Leave policies:** service-based entitlement tiers, a maximum carried-over balance and
+  its expiry in months, a maximum negative balance, and narrowing a policy to contract
+  types, job grades or units (`hrLeave.policies.*`, 22 keys used nowhere else).
+- **Approval flows:** a timeout per step and what happens when it passes (escalate,
+  approve, reject), moving steps up and down (`hrApprovals.flows.*`, 13 keys).
+- **Work patterns:** the weekly pattern (which shift each day) and weekly hours
+  (`hrAttendance.patterns.*`, 8 keys).
+
+Whether these capabilities come back (in the new pages, or through these dialogs) or are
+deliberately dropped, along with the dialogs and their keys, is the product owner's decision.
+Until then the dialogs stay as they are.

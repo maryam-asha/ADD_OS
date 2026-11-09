@@ -9,7 +9,7 @@ import enApprovals from "@/add-os/lang/en/hr-approvals.json"
 import enLeave from "@/add-os/lang/en/hr-leave.json"
 import enHr from "@/add-os/lang/en/hr.json"
 import { ApiError } from "@/add-os/services/api"
-import LeaveRequestModal from "../LeaveRequestModal.vue"
+import LeaveRequestForm from "../LeaveRequestForm.vue"
 
 const { successMock, errorMock } = vi.hoisted(() => ({ successMock: vi.fn(), errorMock: vi.fn() }))
 
@@ -33,13 +33,12 @@ interface DrawerVm {
 }
 
 async function mountDrawer(submit: (p: SubmitLeavePayload) => Promise<LeaveRequest>, quote?: (p: Omit<SubmitLeavePayload, "attachment" | "reason">) => Promise<LeaveQuote>) {
-	const wrapper = mount(LeaveRequestModal, { props: { types, title: "Request leave", submit, quote, show: false }, global: { plugins: [i18n], stubs: { Icon: true } }, attachTo: document.body })
-	await wrapper.setProps({ show: true })
+	const wrapper = mount(LeaveRequestForm, { props: { types, submit, quote }, global: { plugins: [i18n], stubs: { Icon: true } }, attachTo: document.body })
 	await flushPromises()
 	return { wrapper, vm: wrapper.vm as unknown as DrawerVm }
 }
 
-describe("leaveRequestModal", () => {
+describe("leaveRequestForm", () => {
 	beforeAll(() => {
 		setCurrentLocale("en")
 	})

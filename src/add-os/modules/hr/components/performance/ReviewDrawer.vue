@@ -145,7 +145,7 @@ function recordPromotion() {
 	const employee = review.value?.employee
 	if (!employee) return
 	show.value = false
-	void router.push({ name: "hr.employeeProfile", params: { id: employee.id }, query: { event: "promotion" } })
+	void router.push({ name: "hr.employeeEventCreate", params: { id: employee.id }, query: { type: "promotion" } })
 }
 
 const canCalibrate = computed(() => review.value?.cycle.status === "calibration" && review.value.status === "manager_submitted")

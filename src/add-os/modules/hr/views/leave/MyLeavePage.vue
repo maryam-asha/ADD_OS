@@ -3,7 +3,7 @@
 	<div class="flex flex-col gap-5">
 		<HrPageHeader :title="t(titleKey || 'nav.pages.hrMyLeave')" :description="t('hrLeave.me.description')">
 			<template #actions>
-				<n-button type="primary" :disabled="!balances.length" @click="requestVisible = true">
+				<n-button type="primary" :disabled="!balances.length" @click="router.push({ name: 'myHr.hrMyLeaveRequest' })">
 					<template #icon><Icon name="carbon:add" :size="16" /></template>
 					{{ t("hrLeave.me.request") }}
 				</n-button>
@@ -47,15 +47,6 @@
 				</div>
 			</n-tab-pane>
 		</n-tabs>
-
-		<LeaveRequestModal
-			v-model:show="requestVisible"
-			:types="balanceTypes"
-			:title="t('hrLeave.me.request')"
-			:submit="submitMyLeave"
-			:quote="quoteMyLeave"
-			@submitted="afterChange"
-		/>
 	</div>
 </template>
 
@@ -66,25 +57,25 @@ import type { LeaveBalance, LeaveRequest, LeaveTypeRef } from "@/add-os/modules/
 import { NAlert, NButton, NCard, NDataTable, NDatePicker, NPagination, NSpin, NTabPane, NTabs, useDialog, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import { useRouter } from "vue-router"
 import ApprovalStatusTag from "@/add-os/modules/hr/components/approvals/ApprovalStatusTag.vue"
 import LeaveBalances from "@/add-os/modules/hr/components/leave/LeaveBalances.vue"
 import LeaveLedgerTable from "@/add-os/modules/hr/components/leave/LeaveLedgerTable.vue"
 import LeaveMonthGrid from "@/add-os/modules/hr/components/leave/LeaveMonthGrid.vue"
-import LeaveRequestModal from "@/add-os/modules/hr/components/leave/LeaveRequestModal.vue"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import HrPanel from "@/add-os/modules/hr/components/ui/HrPanel.vue"
 import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
 import { leaveAmount, leavePeriod, monthRange, todayIso } from "@/add-os/modules/hr/utils/leave"
 import { translated } from "@/add-os/modules/hr/utils/translated"
 import { ApiError } from "@/add-os/services/api"
-import { cancelMyLeave, listMyLeaveRequests, myLeaveBalances, myLeaveLedger, myTeamLeave, quoteMyLeave, submitMyLeave } from "@/add-os/services/hr/leave"
+import { cancelMyLeave, listMyLeaveRequests, myLeaveBalances, myLeaveLedger, myTeamLeave } from "@/add-os/services/hr/leave"
 import Icon from "@/components/common/Icon.vue"
 
 /**
  * The signed-in employee's leave: what they have, what they asked for (and
  * cancelling it before it starts), every movement on their balances, and —
- * for a manager — their direct reports' month. A new request previews what
- * it takes before it is sent.
+ * for a manager — their direct reports' month. A new request is a page of
+ * its own (MyLeaveRequestPage) that previews what it takes before it is sent.
  */
 defineProps<{ titleKey?: string }>()
 
@@ -92,7 +83,7 @@ const { t } = useI18n()
 const message = useMessage()
 const dialog = useDialog()
 const tab = ref<"overview" | "ledger" | "team">("overview")
-const requestVisible = ref(false)
+const router = useRouter()
 const ledger = ref<InstanceType<typeof LeaveLedgerTable> | null>(null)
 
 // ── Balances ────────────────────────────────────────────────────────────────

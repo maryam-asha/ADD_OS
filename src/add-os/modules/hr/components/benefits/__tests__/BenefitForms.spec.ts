@@ -10,13 +10,17 @@ import enApprovals from "@/add-os/lang/en/hr-approvals.json"
 import enBenefits from "@/add-os/lang/en/hr-benefits.json"
 import enPayroll from "@/add-os/lang/en/hr-payroll.json"
 import enHr from "@/add-os/lang/en/hr.json"
+import BenefitFormPage from "@/add-os/modules/hr/views/benefits/BenefitFormPage.vue"
 import { ApiError } from "@/add-os/services/api"
 import AssignmentModal from "../AssignmentModal.vue"
-import BenefitModal from "../BenefitModal.vue"
 import GrantsTable from "../GrantsTable.vue"
 
 const mocks = vi.hoisted(() => ({
 	create: vi.fn(),
+	getBenefit: vi.fn(),
+	payComponents: vi.fn(),
+	push: vi.fn(),
+	route: { params: {} as Record<string, string>, query: {} },
 	update: vi.fn(),
 	assign: vi.fn(),
 	retry: vi.fn(),
@@ -31,11 +35,16 @@ vi.mock("@/add-os/config/permissions", () => ({ canViewEmployees: () => false })
 vi.mock("@/add-os/services/hr/benefits", () => ({
 	createBenefit: mocks.create,
 	updateBenefit: mocks.update,
+	getBenefit: mocks.getBenefit,
 	assignBenefit: mocks.assign,
 	retryGrant: mocks.retry,
 	cancelGrant: mocks.cancel
 }))
-vi.mock("@/add-os/services/hr/payroll", () => ({ listCurrencyOptions: vi.fn().mockResolvedValue([]) }))
+vi.mock("@/add-os/services/hr/payroll", () => ({ listCurrencyOptions: vi.fn().mockResolvedValue([]), listPayComponents: mocks.payComponents }))
+vi.mock("vue-router", async () => {
+	const actual = await vi.importActual<typeof import("vue-router")>("vue-router")
+	return { ...actual, useRouter: () => ({ push: mocks.push }), useRoute: () => mocks.route }
+})
 vi.mock("@/add-os/services/hr/core", () => ({ listJobGrades: vi.fn().mockResolvedValue([]), listOrgUnits: vi.fn().mockResolvedValue([]), listEmployees: vi.fn(), getEmployee: vi.fn() }))
 vi.mock("naive-ui", async () => {
 	const actual = await vi.importActual<typeof import("naive-ui")>("naive-ui")
@@ -80,8 +89,18 @@ const allowance: PayComponent = {
 	is_active: true
 }
 
+/** The benefit form is a page: what it edits comes from the address and the services. */
+async function openBenefitPage(edit: Benefit | null, payComponents: PayComponent[]) {
+	mocks.route.params = edit ? { id: String(edit.id) } : {}
+	mocks.getBenefit.mockResolvedValue(edit)
+	mocks.payComponents.mockResolvedValue(payComponents)
+	const wrapper = mount(BenefitFormPage, { global: { plugins: [i18n], stubs: { Icon: true } }, attachTo: document.body })
+	await flushPromises()
+	return wrapper
+}
+
 /** Mounts a dialog closed, then opens it, as a page does. */
-async function open(target: typeof BenefitModal | typeof AssignmentModal, props: Record<string, unknown>) {
+async function open(target: typeof AssignmentModal, props: Record<string, unknown>) {
 	const wrapper = mount(target as never, { props: { show: false, ...props }, global: { plugins: [i18n], stubs: { Icon: true } }, attachTo: document.body } as never) as ReturnType<typeof mount>
 	await wrapper.setProps({ show: true })
 	await flushPromises()
@@ -113,7 +132,7 @@ describe("benefit forms", () => {
 		}
 
 		it("sends points, a pocket and a cost for a new in-kind benefit, and no currency or pay component", async () => {
-			const wrapper = await open(BenefitModal, { benefit: null, payComponents: [allowance] })
+			const wrapper = await openBenefitPage(null, [allowance])
 			const vm = wrapper.vm as unknown as Vm
 			Object.assign(vm.form, { nameAr: "نقاط المقهى", code: "cafe-pts", kind: "in_kind_credit", amount: 200, category: "cafe", expiresAfterDays: 30, employerCost: 20, costCurrency: "USD" })
 
@@ -135,7 +154,7 @@ describe("benefit forms", () => {
 		})
 
 		it("sends a currency and pay component for a cash allowance, and never an employer cost", async () => {
-			const wrapper = await open(BenefitModal, { benefit: null, payComponents: [allowance, { ...allowance, id: 6, applies_to_all: false }] })
+			const wrapper = await openBenefitPage(null, [allowance, { ...allowance, id: 6, applies_to_all: false }])
 			const vm = wrapper.vm as unknown as Vm
 			Object.assign(vm.form, { nameAr: "بدل نقل", code: "transport", kind: "cash_allowance", amount: 40, currency: "USD", payComponentId: 5, employerCost: 10 })
 
@@ -149,7 +168,7 @@ describe("benefit forms", () => {
 
 		it("leaves the fixed fields and an empty description out of an update", async () => {
 			mocks.update.mockResolvedValue({ message: "The benefit has been updated." })
-			const wrapper = await open(BenefitModal, { benefit: benefit(), payComponents: [] })
+			const wrapper = await openBenefitPage(benefit(), [])
 			const vm = wrapper.vm as unknown as Vm
 
 			const payload = vm.payload()
@@ -158,6 +177,19 @@ describe("benefit forms", () => {
 			expect(payload).not.toHaveProperty("unit")
 			expect(payload).not.toHaveProperty("description")
 			expect(payload).toMatchObject({ amount: 200, fulfillment: { category: "cafe", expires_after_days: 30 }, eligible_after_days: 90 })
+			wrapper.unmount()
+		})
+
+		it("saves an edit on its page and returns to the benefits", async () => {
+			mocks.update.mockResolvedValue({ message: "The benefit has been updated." })
+			const wrapper = await openBenefitPage(benefit(), [])
+
+			expect(mocks.getBenefit).toHaveBeenCalledWith(1)
+			await wrapper.findAll("button").find(b => b.text().trim() === "Save")!.trigger("click")
+			await flushPromises()
+
+			expect(mocks.update).toHaveBeenCalledWith(1, expect.objectContaining({ amount: 200 }))
+			expect(mocks.push).toHaveBeenCalledWith({ name: "hrPay.hrBenefits" })
 			wrapper.unmount()
 		})
 	})

@@ -3,7 +3,7 @@
 	<div class="flex flex-col gap-5">
 		<HrPageHeader :title="t(titleKey || 'nav.pages.hrRequisitions')" :description="t('hrRecruitment.requisitions.description')">
 			<template v-if="mayManage" #actions>
-				<n-button type="primary" @click="createVisible = true">
+				<n-button type="primary" @click="router.push({ name: 'hrTalent.hrRequisitionCreate' })">
 					<template #icon><Icon name="carbon:add" :size="16" /></template>
 					{{ t("hrRecruitment.requisitions.add") }}
 				</n-button>
@@ -28,7 +28,6 @@
 			</div>
 		</n-card>
 
-		<RequisitionModal v-if="mayManage" v-model:show="createVisible" @saved="load" />
 		<RequisitionDrawer v-model:show="detailVisible" :requisition="openRequisition" :may-manage @changed="load" />
 	</div>
 </template>
@@ -40,10 +39,10 @@ import type { Requisition, RequisitionStatus } from "@/add-os/modules/hr/types/r
 import { NAlert, NButton, NCard, NDataTable, NPagination, NSelect } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import { useRouter } from "vue-router"
 import { canManageRecruitment } from "@/add-os/config/permissions"
 import RecruitmentStatusTag from "@/add-os/modules/hr/components/recruitment/RecruitmentStatusTag.vue"
 import RequisitionDrawer from "@/add-os/modules/hr/components/recruitment/RequisitionDrawer.vue"
-import RequisitionModal from "@/add-os/modules/hr/components/recruitment/RequisitionModal.vue"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import HrToolbar from "@/add-os/modules/hr/components/ui/HrToolbar.vue"
 import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
@@ -71,7 +70,7 @@ const units = ref<OrgUnit[]>([])
 const loading = ref(true)
 const loadError = ref("")
 const lastPage = ref(1)
-const createVisible = ref(false)
+const router = useRouter()
 const detailVisible = ref(false)
 const openRequisition = ref<Requisition | null>(null)
 

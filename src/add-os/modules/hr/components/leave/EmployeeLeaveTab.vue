@@ -6,7 +6,7 @@
 				<template #icon><Icon name="carbon:calculator" :size="16" /></template>
 				{{ t("hrLeave.adjust.title") }}
 			</n-button>
-			<n-button type="primary" @click="requestVisible = true">
+			<n-button type="primary" @click="router.push({ name: 'hr.employeeLeaveRequest', params: { id: employeeId } })">
 				<template #icon><Icon name="carbon:add" :size="16" /></template>
 				{{ t("hrLeave.profile.requestFor") }}
 			</n-button>
@@ -20,41 +20,35 @@
 
 		<template v-if="mayManage">
 			<AdjustBalanceModal v-model:show="adjustVisible" :employee-id :types="trackedTypes" @saved="reload" />
-			<LeaveRequestModal
-				v-model:show="requestVisible"
-				:types="requestTypes"
-				:title="t('hrLeave.profile.requestFor')"
-				:submit="payload => submitLeaveForEmployee(employeeId, payload)"
-				@submitted="reload"
-			/>
 		</template>
 	</div>
 </template>
 
 <script setup lang="ts">
-import type { LeaveTypeChoice } from "@/add-os/modules/hr/components/leave/LeaveRequestModal.vue"
 import type { LeaveBalance, LeaveType, LeaveTypeRef } from "@/add-os/modules/hr/types/leave"
 import { NButton } from "naive-ui"
 import { computed, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import { useRouter } from "vue-router"
 import { canManageLeave } from "@/add-os/config/permissions"
 import AdjustBalanceModal from "@/add-os/modules/hr/components/leave/AdjustBalanceModal.vue"
 import LeaveBalances from "@/add-os/modules/hr/components/leave/LeaveBalances.vue"
 import LeaveLedgerTable from "@/add-os/modules/hr/components/leave/LeaveLedgerTable.vue"
-import LeaveRequestModal from "@/add-os/modules/hr/components/leave/LeaveRequestModal.vue"
 import HrPanel from "@/add-os/modules/hr/components/ui/HrPanel.vue"
 import { ApiError } from "@/add-os/services/api"
-import { employeeLeaveBalances, employeeLeaveLedger, listLeaveTypes, submitLeaveForEmployee } from "@/add-os/services/hr/leave"
+import { employeeLeaveBalances, employeeLeaveLedger, listLeaveTypes } from "@/add-os/services/hr/leave"
 import Icon from "@/components/common/Icon.vue"
 
 /**
  * An employee's leave on their file: balances and ledger (hr.leave.view),
  * and — with hr.leave.manage — a balance adjustment or a request filed for
- * them, which still goes through their approval flow.
+ * them (EmployeeLeaveRequestPage, a page of its own), which still goes
+ * through their approval flow.
  */
 const props = defineProps<{ employeeId: number }>()
 
 const { t } = useI18n()
+const router = useRouter()
 const mayManage = canManageLeave()
 
 const balances = ref<LeaveBalance[]>([])
@@ -62,7 +56,6 @@ const types = ref<LeaveType[]>([])
 const loading = ref(true)
 const error = ref(false)
 const adjustVisible = ref(false)
-const requestVisible = ref(false)
 const ledger = ref<InstanceType<typeof LeaveLedgerTable> | null>(null)
 
 async function loadBalances() {
@@ -95,11 +88,4 @@ const loadLedger = (filters: { page: number; leave_type_id: number | null }) => 
 /** Every type, so the ledger names entries of a type no longer active. */
 const allTypes = computed<LeaveTypeRef[]>(() => (types.value.length ? types.value : balances.value.map(b => b.leave_type)))
 const trackedTypes = computed<LeaveTypeRef[]>(() => types.value.filter(type => type.tracks_balance))
-/** The types this employee can take, with what the settings know about each. */
-const requestTypes = computed<LeaveTypeChoice[]>(() =>
-	balances.value.map(b => {
-		const full = types.value.find(type => type.id === b.leave_type.id)
-		return { ...b.leave_type, allows_half_day: full?.allows_half_day, requires_attachment: full?.requires_attachment }
-	})
-)
 </script>

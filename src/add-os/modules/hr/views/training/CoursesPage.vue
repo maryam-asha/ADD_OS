@@ -24,7 +24,6 @@
 			</n-data-table>
 		</n-card>
 
-		<CourseModal v-if="mayManage" v-model:show="editorVisible" :course="editing" @saved="load" />
 	</div>
 </template>
 
@@ -37,7 +36,6 @@ import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import { canManageTraining } from "@/add-os/config/permissions"
 import ActiveTag from "@/add-os/modules/hr/components/ActiveTag.vue"
-import CourseModal from "@/add-os/modules/hr/components/training/CourseModal.vue"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import HrToolbar from "@/add-os/modules/hr/components/ui/HrToolbar.vue"
 import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
@@ -61,8 +59,6 @@ const mayManage = canManageTraining()
 const rows = ref<Course[]>([])
 const loading = ref(true)
 const loadError = ref("")
-const editorVisible = ref(false)
-const editing = ref<Course | null>(null)
 
 const { filters, applied } = useRouteFilters({ active: "string" }, () => void load())
 
@@ -84,9 +80,9 @@ const activeOptions = computed<SelectOption[]>(() => [
 	{ label: t("hr.common.inactive"), value: "no" }
 ])
 
+/** Adding and editing are a page of their own (CourseFormPage). */
 function openEditor(course: Course | null) {
-	editing.value = course
-	editorVisible.value = true
+	void router.push(course ? { name: "hrTalent.hrCourseEdit", params: { id: course.id } } : { name: "hrTalent.hrCourseCreate" })
 }
 
 const columns = computed<DataTableColumns<Course>>(() => [

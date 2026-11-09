@@ -375,6 +375,8 @@
 		},
 		"events": {
 			"title": "تسجيل حدث",
+			"eventPanel": "الحدث",
+			"currentJob": "الوظيفة والعقد الحاليان",
 			"type": "الحدث",
 			"typePlaceholder": "اختر ما الذي تغيّر",
 			"effectiveOn": "تاريخ السريان",

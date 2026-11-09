@@ -19,28 +19,23 @@
 				</template>
 			</n-data-table>
 		</n-card>
-
-		<BenefitModal v-if="mayManage" v-model:show="editorVisible" :benefit="editing" :pay-components @saved="load" />
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns } from "naive-ui"
 import type { Benefit } from "@/add-os/modules/hr/types/benefits"
-import type { PayComponent } from "@/add-os/modules/hr/types/payroll"
 import { NAlert, NButton, NCard, NDataTable, useDialog, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import { canManageBenefits } from "@/add-os/config/permissions"
 import ActiveTag from "@/add-os/modules/hr/components/ActiveTag.vue"
-import BenefitModal from "@/add-os/modules/hr/components/benefits/BenefitModal.vue"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import { benefitValue } from "@/add-os/modules/hr/utils/benefits"
-import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
+import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import { translated } from "@/add-os/modules/hr/utils/translated"
 import { deleteBenefit, listBenefits } from "@/add-os/services/hr/benefits"
-import { listPayComponents } from "@/add-os/services/hr/payroll"
 import { formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
@@ -60,11 +55,8 @@ const dialog = useDialog()
 const mayManage = canManageBenefits()
 
 const benefits = ref<Benefit[]>([])
-const payComponents = ref<PayComponent[]>([])
 const loading = ref(true)
 const loadError = ref("")
-const editorVisible = ref(false)
-const editing = ref<Benefit | null>(null)
 
 async function load() {
 	loading.value = true
@@ -78,15 +70,11 @@ async function load() {
 	}
 }
 
-onMounted(() => {
-	void load()
-	// A cash allowance names its pay component; reading them needs hr.payroll.view, so this may stay empty.
-	if (mayManage) void quietly(listPayComponents, list => (payComponents.value = list))
-})
+onMounted(() => void load())
 
+/** Adding and editing are a page of their own (BenefitFormPage). */
 function openEditor(benefit: Benefit | null) {
-	editing.value = benefit
-	editorVisible.value = true
+	void router.push(benefit ? { name: "hrPay.hrBenefitEdit", params: { id: benefit.id } } : { name: "hrPay.hrBenefitCreate" })
 }
 
 function confirmDelete(benefit: Benefit) {

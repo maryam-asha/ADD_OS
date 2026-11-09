@@ -18,7 +18,7 @@
 					<div class="flex flex-wrap items-center gap-2">
 						<PerformanceStatusTag kind="cycle" :status="cycle.status" />
 						<template v-if="mayManage">
-							<n-button v-if="cycle.status === 'draft'" @click="editVisible = true">
+							<n-button v-if="cycle.status === 'draft'" @click="router.push({ name: 'hrTalent.hrReviewCycleEdit', params: { id: cycle.id } })">
 								<template #icon><Icon name="carbon:edit" :size="16" /></template>
 								{{ t("hr.common.edit") }}
 							</n-button>
@@ -66,7 +66,6 @@
 
 			<ReviewDrawer v-model:show="drawerVisible" :review-id="openReview" :load="getReview" :may-manage @changed="reloadAll" />
 			<template v-if="mayManage">
-				<CycleModal v-model:show="editVisible" :cycle :templates @saved="loadCycle" />
 				<HrFormModal v-model:show="addVisible" :title="t('hrPerformance.cycles.addEmployee')" size="sm" icon="carbon:user-follow">
 					<p class="mb-3 text-sm text-secondary">{{ t("hrPerformance.cycles.addEmployeeHint") }}</p>
 					<EmployeeSelect v-model:value="adding" class="w-full" />
@@ -84,7 +83,7 @@
 
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
-import type { CycleStatus, Review, ReviewCycle, ReviewStatus, ReviewTemplate } from "@/add-os/modules/hr/types/performance"
+import type { CycleStatus, Review, ReviewCycle, ReviewStatus } from "@/add-os/modules/hr/types/performance"
 import { NAlert, NButton, NCard, NDataTable, NPagination, NSelect, NSkeleton, NStep, NSteps, useDialog, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
@@ -92,7 +91,6 @@ import { useRoute, useRouter } from "vue-router"
 import { canManagePerformance } from "@/add-os/config/permissions"
 import EmployeeSelect from "@/add-os/modules/hr/components/EmployeeSelect.vue"
 import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
-import CycleModal from "@/add-os/modules/hr/components/performance/CycleModal.vue"
 import PerformanceStatusTag from "@/add-os/modules/hr/components/performance/PerformanceStatusTag.vue"
 import ReviewDrawer from "@/add-os/modules/hr/components/performance/ReviewDrawer.vue"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
@@ -100,11 +98,11 @@ import HrPanel from "@/add-os/modules/hr/components/ui/HrPanel.vue"
 import HrStatCard from "@/add-os/modules/hr/components/ui/HrStatCard.vue"
 import { CYCLE_STATUSES, REVIEW_STATUSES } from "@/add-os/modules/hr/types/performance"
 import { employeeCell } from "@/add-os/modules/hr/utils/cells"
-import { apiErrorMessage, quietly, serverMessage } from "@/add-os/modules/hr/utils/errors"
+import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
 import { nextPhase, phaseIndex, scoreLabel } from "@/add-os/modules/hr/utils/performance"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
 import { ApiError } from "@/add-os/services/api"
-import { addToCycle, advanceCycle, getCycle, getReview, launchCycle, listCycleReviews, listTemplates } from "@/add-os/services/hr/performance"
+import { addToCycle, advanceCycle, getCycle, getReview, launchCycle, listCycleReviews } from "@/add-os/services/hr/performance"
 import { formatDate, formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
@@ -126,11 +124,9 @@ const mayManage = canManagePerformance()
 
 const cycleId = computed(() => Number(route.params.id))
 const cycle = ref<ReviewCycle | null>(null)
-const templates = ref<ReviewTemplate[]>([])
 const loadError = ref("")
 const notFound = ref(false)
 const busy = ref(false)
-const editVisible = ref(false)
 const addVisible = ref(false)
 const adding = ref<number | null>(null)
 
@@ -228,7 +224,6 @@ watch(reviewStatus, () => {
 
 onMounted(async () => {
 	await reloadAll()
-	if (mayManage) void quietly(listTemplates, list => (templates.value = list))
 })
 
 const reviewStatusOptions = computed<SelectOption[]>(() => REVIEW_STATUSES.map(s => ({ label: t(`hrPerformance.status.review.${s}`), value: s })))
