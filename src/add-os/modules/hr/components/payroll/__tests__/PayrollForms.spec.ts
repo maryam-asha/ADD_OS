@@ -10,13 +10,10 @@ import enTimesheets from "@/add-os/lang/en/hr-timesheets.json"
 import enHr from "@/add-os/lang/en/hr.json"
 import { ApiError } from "@/add-os/services/api"
 import CompensationModal from "../CompensationModal.vue"
-import PayComponentModal from "../PayComponentModal.vue"
 
-const mocks = vi.hoisted(() => ({ create: vi.fn(), update: vi.fn(), change: vi.fn(), success: vi.fn(), error: vi.fn() }))
+const mocks = vi.hoisted(() => ({ change: vi.fn(), success: vi.fn(), error: vi.fn() }))
 
 vi.mock("@/add-os/services/hr/payroll", () => ({
-	createPayComponent: mocks.create,
-	updatePayComponent: mocks.update,
 	changeCompensation: mocks.change,
 	listCurrencyOptions: vi.fn().mockResolvedValue([{ code: "USD", name: "Dollar", symbol: "$" }])
 }))
@@ -45,7 +42,7 @@ function component(overrides: Partial<PayComponent> = {}): PayComponent {
 }
 
 /** Mounts a dialog closed, then opens it, as a page does — its `watch(show)` fills the form. */
-async function open(target: typeof PayComponentModal | typeof CompensationModal, props: Record<string, unknown>) {
+async function open(target: typeof CompensationModal, props: Record<string, unknown>) {
 	const wrapper = mount(target as never, { props: { show: false, ...props }, global: { plugins: [i18n], stubs: { Icon: true } }, attachTo: document.body } as never) as ReturnType<typeof mount>
 	await wrapper.setProps({ show: true })
 	await flushPromises()
@@ -67,66 +64,6 @@ describe("payroll forms", () => {
 
 	afterAll(() => {
 		setCurrentLocale("ar")
-	})
-
-	describe("pay component", () => {
-		interface Vm {
-			form: { calculator: string }
-			config: { base: string; components: string[]; less: string[]; table: string | null }
-			rawConfig: string
-			rawError: string
-			buildConfig: () => unknown
-			onCalculator: () => void
-			save: () => Promise<void>
-		}
-
-		const props = { component: null, components: [component()], rateTables: [], calculators: ["fixed", "rate_table", "donor_share"] }
-
-		it("opens on the server's defaults for each built-in calculator", async () => {
-			const wrapper = await open(PayComponentModal, props)
-			const vm = wrapper.vm as unknown as Vm
-
-			expect(vm.buildConfig()).toEqual({ prorate: true })
-			vm.form.calculator = "overtime"
-			vm.onCalculator()
-			expect(vm.buildConfig()).toEqual({ base_components: ["basic"], hours_per_month: 208, multiplier: 1.5 })
-			wrapper.unmount()
-		})
-
-		it("sends a rate table's components only when the base is chosen lines", async () => {
-			const wrapper = await open(PayComponentModal, props)
-			const vm = wrapper.vm as unknown as Vm
-			vm.form.calculator = "rate_table"
-			vm.onCalculator()
-			Object.assign(vm.config, { table: "TAX", base: "taxable", components: ["basic"], less: ["social_ee"] })
-
-			expect(vm.buildConfig()).toEqual({ table: "TAX", base: "taxable", less: ["social_ee"] })
-			vm.config.base = "components"
-			expect(vm.buildConfig()).toEqual({ table: "TAX", base: "components", components: ["basic"], less: ["social_ee"] })
-			wrapper.unmount()
-		})
-
-		it("takes a server-added calculator's settings as a JSON object", async () => {
-			const wrapper = await open(PayComponentModal, props)
-			const vm = wrapper.vm as unknown as Vm
-			vm.form.calculator = "donor_share"
-			vm.onCalculator()
-
-			vm.rawConfig = "[1, 2]"
-			expect(vm.rawError).toBe("Write the settings as one JSON object.")
-			vm.rawConfig = "{ \"share\": 0.4 }"
-			expect(vm.rawError).toBe("")
-			expect(vm.buildConfig()).toEqual({ share: 0.4 })
-			wrapper.unmount()
-		})
-
-		it("keeps an existing component's settings when it opens", async () => {
-			const wrapper = await open(PayComponentModal, { ...props, component: component({ id: 4, code: "tax", kind: "deduction", calculator: "rate_table", config: { table: "TAX", base: "taxable", less: ["social_ee"] } }) })
-			const vm = wrapper.vm as unknown as Vm
-
-			expect(vm.buildConfig()).toEqual({ table: "TAX", base: "taxable", less: ["social_ee"] })
-			wrapper.unmount()
-		})
 	})
 
 	describe("pay change", () => {

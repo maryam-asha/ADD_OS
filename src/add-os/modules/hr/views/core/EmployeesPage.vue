@@ -3,7 +3,7 @@
 	<div class="flex flex-col gap-5">
 		<HrPageHeader :title="t(titleKey || 'nav.pages.employees')" :description="t('hr.employees.description')">
 			<template #actions>
-				<n-button v-if="mayHire" type="primary" @click="openHire(null)">
+				<n-button v-if="mayHire" type="primary" @click="openHire">
 					<template #icon><Icon name="carbon:user-follow" :size="16" /></template>
 					{{ t("hr.employees.hire") }}
 				</n-button>
@@ -55,21 +55,18 @@
 				<n-pagination v-model:page="page" :page-count="lastPage" :disabled="loading" />
 			</div>
 		</n-card>
-
-		<HireEmployeeModal v-if="mayHire" v-model:show="hireVisible" :units :account="hireAccount" @hired="onHired" />
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
-import type { AccountMatch, EmployeeStatus, EmployeeSummary, OrgUnit } from "@/add-os/modules/hr/types/hr"
+import type { EmployeeStatus, EmployeeSummary, OrgUnit } from "@/add-os/modules/hr/types/hr"
 import { NAlert, NButton, NCard, NDataTable, NInput, NPagination, NSelect } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import { canHireEmployees } from "@/add-os/config/permissions"
 import EmployeeStatusTag from "@/add-os/modules/hr/components/EmployeeStatusTag.vue"
-import HireEmployeeModal from "@/add-os/modules/hr/components/HireEmployeeModal.vue"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import HrToolbar from "@/add-os/modules/hr/components/ui/HrToolbar.vue"
 import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
@@ -86,24 +83,10 @@ defineProps<{ titleKey?: string }>()
 const { t } = useI18n()
 const router = useRouter()
 const mayHire = canHireEmployees()
-const hireVisible = ref(false)
-const hireAccount = ref<AccountMatch | null>(null)
 
-function openHire(account: AccountMatch | null) {
-	hireAccount.value = account
-	hireVisible.value = true
-}
-
-/**
- * The Users page's "Hire" arrives with the account in the history state, not
- * the URL (no phone or email in an address); taken once, so a reload or a
- * back button does not reopen the form.
- */
-function takeHireRequest() {
-	const account = (window.history.state as { hireAccount?: AccountMatch } | null)?.hireAccount
-	if (!account || !mayHire) return
-	window.history.replaceState({ ...window.history.state, hireAccount: undefined }, "")
-	openHire(account)
+/** Hiring is a page of its own (HireEmployeePage), not a dialog over this list. */
+function openHire() {
+	void router.push({ name: "hr.employeeCreate" })
 }
 
 // ── Data ────────────────────────────────────────────────────────────────────
@@ -138,7 +121,7 @@ async function load() {
 	}
 }
 
-/** Units for the filter and the hire form; a reader without hr.org.view simply gets no unit filter. */
+/** Units for the filter; a reader without hr.org.view simply gets no unit filter. */
 async function loadUnits() {
 	try {
 		units.value = await listOrgUnits()
@@ -149,7 +132,6 @@ async function loadUnits() {
 
 onMounted(() => {
 	void loadUnits()
-	takeHireRequest()
 })
 
 // ── Options ─────────────────────────────────────────────────────────────────
@@ -163,10 +145,6 @@ function openProfile(row: EmployeeSummary) {
 
 function rowProps(row: EmployeeSummary) {
 	return { class: "cursor-pointer", onClick: () => openProfile(row) }
-}
-
-function onHired(id: number) {
-	void router.push({ name: "hr.employeeProfile", params: { id } })
 }
 
 const columns = computed<DataTableColumns<EmployeeSummary>>(() => [

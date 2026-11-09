@@ -274,7 +274,7 @@ async function hire(row: User) {
 		if (!(error instanceof ApiError)) throw error
 	}
 	const { id, name, phone, email, employee_id } = account
-	void router.push({ name: "hr.employees", state: { hireAccount: { id, name, phone, email, employee_id } } })
+	void router.push({ name: "hr.employeeCreate", state: { hireAccount: { id, name, phone, email, employee_id } } })
 }
 
 function renderActions(row: User) {

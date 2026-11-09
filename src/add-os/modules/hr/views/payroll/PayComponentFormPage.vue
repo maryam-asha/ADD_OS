@@ -1,32 +1,43 @@
+<!-- src/add-os/modules/hr/views/payroll/PayComponentFormPage.vue -->
 <template>
-	<HrFormModal v-model:show="show" :title="component ? t('hrPayroll.components.edit') : t('hrPayroll.components.add')" size="lg" icon="carbon:money">
-		<n-form ref="formRef" :model="form" :rules label-placement="top">
-			<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
-				<n-form-item :label="t('hrPayroll.components.nameAr')" path="nameAr">
-					<n-input v-model:value="form.nameAr" dir="rtl" :maxlength="255" />
-				</n-form-item>
-				<n-form-item :label="t('hrPayroll.components.nameEn')" path="nameEn">
-					<n-input v-model:value="form.nameEn" dir="ltr" :maxlength="255" />
-				</n-form-item>
-				<n-form-item :label="t('hr.org.code')" path="code">
-					<n-input v-model:value="form.code" dir="ltr" :maxlength="32" class="font-mono" />
-				</n-form-item>
-				<n-form-item :label="t('hrPayroll.components.kind')" path="kind">
-					<n-select v-model:value="form.kind" :options="kindOptions" />
-				</n-form-item>
+	<HrFormPage
+		:title="isEdit ? t('hrPayroll.components.edit') : t('hrPayroll.components.add')"
+		:description="isEdit && component ? `${translated(component.name)} · ${component.code}` : t('hrPayroll.components.formDescription')"
+		:eyebrow="t('nav.pages.hrPayComponents')"
+		:back-to="{ name: 'hrSettings.hrPayComponents' }"
+		:back-label="t('hrPayroll.components.backToList')"
+		:loading
+		:error="loadError"
+	>
+		<n-form ref="formRef" :model="form" :rules label-placement="top" class="flex flex-col gap-5">
+			<HrPanel :title="t('hrPayroll.components.basics')" icon="carbon:money">
+				<div class="grid grid-cols-1 gap-x-4 @xl:grid-cols-2">
+					<n-form-item :label="t('hrPayroll.components.nameAr')" path="nameAr">
+						<n-input v-model:value="form.nameAr" dir="rtl" :maxlength="255" />
+					</n-form-item>
+					<n-form-item :label="t('hrPayroll.components.nameEn')" path="nameEn">
+						<n-input v-model:value="form.nameEn" dir="ltr" :maxlength="255" />
+					</n-form-item>
+					<n-form-item :label="t('hr.org.code')" path="code">
+						<n-input v-model:value="form.code" dir="ltr" :maxlength="32" class="font-mono" />
+					</n-form-item>
+					<n-form-item :label="t('hrPayroll.components.kind')" path="kind">
+						<n-select v-model:value="form.kind" :options="kindOptions" />
+					</n-form-item>
+					<n-form-item :label="t('hrPayroll.components.sort')">
+						<n-input-number v-model:value="form.sort" :min="0" :max="65000" :precision="0" class="w-full" />
+					</n-form-item>
+				</div>
+			</HrPanel>
+
+			<HrPanel :title="t('hrPayroll.components.calculator')" :subtitle="form.calculator ? calculatorHint : undefined" icon="carbon:calculator">
 				<n-form-item :label="t('hrPayroll.components.calculator')" path="calculator">
 					<n-select v-model:value="form.calculator" :options="calculatorOptions" @update:value="onCalculator" />
 				</n-form-item>
-				<n-form-item :label="t('hrPayroll.components.sort')">
-					<n-input-number v-model:value="form.sort" :min="0" :max="65000" :precision="0" class="w-full" />
-				</n-form-item>
-			</div>
-			<p v-if="form.calculator" class="-mt-2 mb-4 text-sm text-secondary">{{ calculatorHint }}</p>
 
-			<HrPanel v-if="form.calculator && hasSettings" :title="t('hrPayroll.components.settings')" icon="carbon:settings-adjust" class="mb-4">
-				<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+				<div v-if="form.calculator && hasSettings" class="grid grid-cols-1 gap-x-4 @xl:grid-cols-2">
 					<template v-if="form.calculator === 'fixed'">
-						<n-form-item :label="t('hrPayroll.config.prorate')" class="sm:col-span-2">
+						<n-form-item :label="t('hrPayroll.config.prorate')" class="@xl:col-span-2">
 							<n-switch v-model:value="config.prorate" />
 							<span class="ms-3 text-sm text-secondary">{{ t("hrPayroll.config.prorateHint") }}</span>
 						</n-form-item>
@@ -59,7 +70,7 @@
 					</template>
 
 					<template v-if="form.calculator === 'overtime' || form.calculator === 'unpaid_days'">
-						<n-form-item :label="t('hrPayroll.config.baseComponents')" class="sm:col-span-2">
+						<n-form-item :label="t('hrPayroll.config.baseComponents')" class="@xl:col-span-2">
 							<n-select v-model:value="config.base_components" :options="codeOptions" multiple filterable tag />
 						</n-form-item>
 					</template>
@@ -71,7 +82,7 @@
 						<n-form-item :label="t('hrPayroll.config.multiplier')">
 							<n-input-number v-model:value="config.multiplier" :min="0" :max="10" :step="0.25" class="w-full" />
 						</n-form-item>
-						<n-form-item :label="t('hrPayroll.config.multiplierTable')" class="sm:col-span-2">
+						<n-form-item :label="t('hrPayroll.config.multiplierTable')" class="@xl:col-span-2">
 							<n-select v-model:value="config.multiplier_table" :options="percentTableOptions" filterable clearable />
 						</n-form-item>
 					</template>
@@ -83,58 +94,77 @@
 					</template>
 
 					<template v-if="!isKnownCalculator(form.calculator)">
-						<n-form-item :label="t('hrPayroll.config.raw')" :feedback="rawError" :validation-status="rawError ? 'error' : undefined" class="sm:col-span-2">
+						<n-form-item :label="t('hrPayroll.config.raw')" :feedback="rawError" :validation-status="rawError ? 'error' : undefined" class="@xl:col-span-2">
 							<n-input v-model:value="rawConfig" type="textarea" dir="ltr" :autosize="{ minRows: 3, maxRows: 10 }" class="font-mono" />
 						</n-form-item>
 					</template>
 				</div>
 			</HrPanel>
 
-			<div class="flex flex-wrap gap-x-6 gap-y-2">
-				<n-checkbox v-model:checked="form.applies_to_all">{{ t("hrPayroll.components.appliesToAll") }}</n-checkbox>
-				<n-checkbox v-model:checked="form.taxable">{{ t("hrPayroll.components.taxable") }}</n-checkbox>
-				<n-checkbox v-model:checked="form.insurable">{{ t("hrPayroll.components.insurable") }}</n-checkbox>
-				<n-checkbox v-model:checked="form.is_active">{{ t("hr.common.active") }}</n-checkbox>
-			</div>
-			<p class="mt-2 text-xs text-secondary">{{ t("hrPayroll.components.appliesToAllHint") }}</p>
+			<HrPanel :title="t('hrPayroll.components.application')" :subtitle="t('hrPayroll.components.appliesToAllHint')" icon="carbon:checkbox-checked">
+				<div class="flex flex-wrap gap-x-6 gap-y-2">
+					<n-checkbox v-model:checked="form.applies_to_all">{{ t("hrPayroll.components.appliesToAll") }}</n-checkbox>
+					<n-checkbox v-model:checked="form.taxable">{{ t("hrPayroll.components.taxable") }}</n-checkbox>
+					<n-checkbox v-model:checked="form.insurable">{{ t("hrPayroll.components.insurable") }}</n-checkbox>
+					<n-checkbox v-model:checked="form.is_active">{{ t("hr.common.active") }}</n-checkbox>
+				</div>
+			</HrPanel>
 		</n-form>
 
-		<template #footer>
-			<div class="flex justify-end gap-2">
-				<n-button @click="show = false">{{ t("hr.common.cancel") }}</n-button>
-				<n-button type="primary" :loading="saving" :disabled="!!rawError" @click="save">{{ t("hr.common.save") }}</n-button>
-			</div>
+		<template #actions>
+			<n-button @click="leave">{{ t("hr.common.cancel") }}</n-button>
+			<n-button type="primary" :loading="saving" :disabled="!!rawError" @click="save">
+				<template #icon><Icon name="carbon:checkmark" :size="16" /></template>
+				{{ t("hr.common.save") }}
+			</n-button>
 		</template>
-	</HrFormModal>
+	</HrFormPage>
 </template>
 
 <script setup lang="ts">
 import type { FormInst, FormRules, SelectOption } from "naive-ui"
 import type { ComponentConfig, PayComponent, PayComponentKind, PayComponentPayload, RateTable } from "@/add-os/modules/hr/types/payroll"
 import { NButton, NCheckbox, NForm, NFormItem, NInput, NInputNumber, NSelect, NSwitch, useMessage } from "naive-ui"
-import { computed, ref, watch } from "vue"
+import { computed, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
-import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
+import { useRoute, useRouter } from "vue-router"
+import HrFormPage from "@/add-os/modules/hr/components/ui/HrFormPage.vue"
 import HrPanel from "@/add-os/modules/hr/components/ui/HrPanel.vue"
 import { PAY_COMPONENT_KINDS } from "@/add-os/modules/hr/types/payroll"
 import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
 import { calculatorLabel, isKnownCalculator } from "@/add-os/modules/hr/utils/payroll"
-import { createPayComponent, updatePayComponent } from "@/add-os/services/hr/payroll"
+import { translated } from "@/add-os/modules/hr/utils/translated"
+import { ApiError } from "@/add-os/services/api"
+import { createPayComponent, listCalculators, listPayComponents, listRateTables, updatePayComponent } from "@/add-os/services/hr/payroll"
+import Icon from "@/components/common/Icon.vue"
 
 /**
- * A pay component: what it is (earning, deduction, employer contribution,
- * in kind), how it is worked out (its calculator) and that calculator's
- * settings, as each built-in calculator reads them. A calculator the server
- * added on its own is set up as JSON. Rules mirror StorePayComponentRequest.
+ * A pay component, on a page of its own: what it is (earning, deduction,
+ * employer contribution, in kind), how it is worked out (its calculator)
+ * and that calculator's settings, as each built-in calculator reads them.
+ * A calculator the server added on its own is set up as JSON. Rules mirror
+ * StorePayComponentRequest. `:id` edits one; without it, a new one.
+ * There is no GET for a single component, so an edit finds it in the list
+ * the page loads anyway for the codes the settings refer to.
+ *
+ * This was PayComponentModal until 2026-11-09: see docs/hr/FORMS-AS-PAGES.md.
  */
-const props = defineProps<{ component: PayComponent | null; components: PayComponent[]; rateTables: RateTable[]; calculators: string[] }>()
-const emit = defineEmits<{ saved: [] }>()
-const show = defineModel<boolean>("show", { required: true })
-
 const { t } = useI18n()
 const message = useMessage()
+const route = useRoute()
+const router = useRouter()
+
+const editId = route.params.id === undefined ? null : Number(route.params.id)
+const isEdit = editId !== null
+
 const formRef = ref<FormInst | null>(null)
 const saving = ref(false)
+const loading = ref(true)
+const loadError = ref<string | null>(null)
+const component = ref<PayComponent | null>(null)
+const components = ref<PayComponent[]>([])
+const rateTables = ref<RateTable[]>([])
+const calculators = ref<string[]>([])
 
 /** Laravel's `alpha_dash`, 32 at most. */
 const CODE_PATTERN = /^[\p{L}\p{N}_-]{1,32}$/u
@@ -193,25 +223,37 @@ const form = ref(emptyForm())
 const config = ref<KnownConfig>(readConfig(null))
 const rawConfig = ref("")
 
-watch(show, open => {
-	if (!open) return
-	const c = props.component
-	form.value = c
-		? {
-				nameAr: c.name.ar ?? "",
-				nameEn: c.name.en ?? "",
-				code: c.code,
-				kind: c.kind,
-				calculator: c.calculator,
-				sort: c.sort,
-				applies_to_all: c.applies_to_all,
-				taxable: c.taxable,
-				insurable: c.insurable,
-				is_active: c.is_active
-			}
-		: emptyForm()
-	config.value = readConfig(c?.config ?? null)
-	rawConfig.value = c?.config && !isKnownCalculator(c.calculator) ? JSON.stringify(c.config, null, 2) : ""
+function fill(c: PayComponent) {
+	form.value = {
+		nameAr: c.name.ar ?? "",
+		nameEn: c.name.en ?? "",
+		code: c.code,
+		kind: c.kind,
+		calculator: c.calculator,
+		sort: c.sort,
+		applies_to_all: c.applies_to_all,
+		taxable: c.taxable,
+		insurable: c.insurable,
+		is_active: c.is_active
+	}
+	config.value = readConfig(c.config)
+	rawConfig.value = c.config && !isKnownCalculator(c.calculator) ? JSON.stringify(c.config, null, 2) : ""
+}
+
+onMounted(async () => {
+	try {
+		;[components.value, calculators.value, rateTables.value] = await Promise.all([listPayComponents(), listCalculators(), listRateTables()])
+		if (isEdit) {
+			component.value = components.value.find(c => c.id === editId) ?? null
+			if (!component.value) loadError.value = t("hrPayroll.components.notFound")
+			else fill(component.value)
+		}
+	} catch (e) {
+		if (!(e instanceof ApiError)) throw e
+		loadError.value = t("hr.common.loadError")
+	} finally {
+		loading.value = false
+	}
 })
 
 /** Another calculator reads other settings: start them from its defaults. */
@@ -261,15 +303,13 @@ function buildConfig(): ComponentConfig | null {
 
 const kindOptions = computed<SelectOption[]>(() => PAY_COMPONENT_KINDS.map(k => ({ label: t(`hrPayroll.kind.${k}`), value: k })))
 const calculatorOptions = computed<SelectOption[]>(() => {
-	const keys = props.calculators.length ? props.calculators : [form.value.calculator]
+	const keys = calculators.value.length ? calculators.value : [form.value.calculator]
 	return keys.map(key => ({ label: calculatorLabel(t, key), value: key }))
 })
 /** Earlier lines a calculator may build on, by code — any other component, or a code typed in. */
-const codeOptions = computed<SelectOption[]>(() =>
-	props.components.filter(c => c.id !== props.component?.id).map(c => ({ label: c.code, value: c.code }))
-)
-const tableOptions = computed<SelectOption[]>(() => props.rateTables.map(r => ({ label: r.code, value: r.code })))
-const percentTableOptions = computed<SelectOption[]>(() => props.rateTables.filter(r => r.kind === "percent").map(r => ({ label: r.code, value: r.code })))
+const codeOptions = computed<SelectOption[]>(() => components.value.filter(c => c.id !== editId).map(c => ({ label: c.code, value: c.code })))
+const tableOptions = computed<SelectOption[]>(() => rateTables.value.map(r => ({ label: r.code, value: r.code })))
+const percentTableOptions = computed<SelectOption[]>(() => rateTables.value.filter(r => r.kind === "percent").map(r => ({ label: r.code, value: r.code })))
 const baseOptions = computed<SelectOption[]>(() => ["gross", "taxable", "insurable", "components"].map(b => ({ label: t(`hrPayroll.config.bases.${b}`), value: b })))
 
 const rules = computed<FormRules>(() => ({
@@ -278,6 +318,10 @@ const rules = computed<FormRules>(() => ({
 	kind: { required: true, message: t("hr.common.required") },
 	calculator: { required: true, message: t("hr.common.required") }
 }))
+
+function leave() {
+	void router.push({ name: "hrSettings.hrPayComponents" })
+}
 
 async function save() {
 	try {
@@ -300,14 +344,13 @@ async function save() {
 	}
 	saving.value = true
 	try {
-		if (props.component) {
-			message.success(serverMessage(await updatePayComponent(props.component.id, payload), t("hrPayroll.components.updated")))
+		if (editId !== null) {
+			message.success(serverMessage(await updatePayComponent(editId, payload), t("hrPayroll.components.updated")))
 		} else {
 			await createPayComponent(payload)
 			message.success(t("hrPayroll.components.created"))
 		}
-		show.value = false
-		emit("saved")
+		leave()
 	} catch (e) {
 		message.error(apiErrorMessage(e, t("hr.common.saveError")))
 	} finally {

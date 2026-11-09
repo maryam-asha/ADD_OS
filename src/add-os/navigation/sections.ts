@@ -434,6 +434,10 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		status: "active",
 		pages: [
 			{ key: "employees", path: "employees", permission: "hr.employees.view" },
+			// Forms on pages of their own (docs/hr/FORMS-AS-PAGES.md). Each carries
+			// the permission its form writes with, as a write-only page does.
+			{ key: "employeeCreate", path: "employees/create", hidden: true, permission: "hr.employees.create" },
+			{ key: "employeeEdit", path: "employees/:id/edit", hidden: true, permission: "hr.employees.update" },
 			{ key: "employeeProfile", path: "employees/:id", hidden: true, permission: "hr.employees.view" },
 			{ key: "orgStructure", path: "org-structure", permission: "hr.org.view" },
 			{ key: "hrAlerts", path: "alerts", permission: "hr.alerts.view" },
@@ -470,6 +474,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		status: "active",
 		pages: [
 			{ key: "hrPayrollRuns", path: "payroll-runs", permission: "hr.payroll.view" },
+			{ key: "hrPayrollRunCreate", path: "payroll-runs/create", hidden: true, permission: "hr.payroll.manage" },
 			{ key: "hrPayrollRun", path: "payroll-runs/:id", hidden: true, permission: "hr.payroll.view" },
 			{ key: "hrPayslip", path: "payslips/:id", hidden: true, permission: "hr.payroll.view" },
 			{ key: "hrLoans", path: "loans", permission: "hr.loans.manage" },
@@ -539,6 +544,8 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "hrTimeSettings", path: "time", permission: "hr.attendance.view" },
 			{ key: "hrCostCenters", path: "cost-centers", permission: "hr.timesheets.view" },
 			{ key: "hrPayComponents", path: "pay-components", permission: "hr.payroll.view" },
+			{ key: "hrPayComponentCreate", path: "pay-components/create", hidden: true, permission: "hr.settings.manage" },
+			{ key: "hrPayComponentEdit", path: "pay-components/:id/edit", hidden: true, permission: "hr.settings.manage" },
 			{ key: "hrRateTables", path: "rate-tables", permission: "hr.payroll.view" },
 			{ key: "hrPipelineStages", path: "pipeline-stages", permission: "hr.recruitment.view" },
 			{ key: "hrReviewTemplates", path: "review-templates", permission: "hr.performance.view" }

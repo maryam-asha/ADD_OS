@@ -15,7 +15,7 @@
 		<template v-else-if="employee">
 			<EmployeeHero :name="employee.name" :employee-number="employee.employee_number" :status="employee.status" :assignment="employee.current_assignment">
 				<template #actions>
-					<n-button v-if="mayUpdate" @click="editVisible = true">
+					<n-button v-if="mayUpdate" @click="router.push({ name: 'hr.employeeEdit', params: { id: employee.id } })">
 						<template #icon><Icon name="carbon:edit" :size="16" /></template>
 						{{ t("hr.editEmployee.title") }}
 					</n-button>
@@ -144,7 +144,6 @@
 				</n-tab-pane>
 			</n-tabs>
 
-			<EditEmployeeModal v-if="mayUpdate" v-model:show="editVisible" :employee @saved="load" />
 			<PeopleListModal
 				v-if="mayUpdate"
 				v-model:show="contactsVisible"
@@ -188,7 +187,6 @@ import {
 import EmployeeBenefitsTab from "@/add-os/modules/hr/components/benefits/EmployeeBenefitsTab.vue"
 import CareerTab from "@/add-os/modules/hr/components/core/CareerTab.vue"
 import ChecklistTab from "@/add-os/modules/hr/components/core/ChecklistTab.vue"
-import EditEmployeeModal from "@/add-os/modules/hr/components/core/EditEmployeeModal.vue"
 import EmployeeDocumentsTab from "@/add-os/modules/hr/components/core/EmployeeDocumentsTab.vue"
 import PeopleListModal from "@/add-os/modules/hr/components/core/PeopleListModal.vue"
 import RecordEventModal from "@/add-os/modules/hr/components/core/RecordEventModal.vue"
@@ -238,7 +236,6 @@ const notFound = ref(false)
 /** Each tab after the first loads the first time it opens (`show:lazy`). */
 const tab = ref<"overview" | "career" | "documents" | "leave" | "attendance" | "pay" | "benefits" | "performance" | "training" | "cost" | "checklist">("overview")
 
-const editVisible = ref(false)
 const contactsVisible = ref(false)
 const dependentsVisible = ref(false)
 const eventVisible = ref(false)

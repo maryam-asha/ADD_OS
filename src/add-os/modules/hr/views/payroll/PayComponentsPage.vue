@@ -19,26 +19,23 @@
 				</template>
 			</n-data-table>
 		</n-card>
-
-		<PayComponentModal v-if="mayManage" v-model:show="editorVisible" :component="editing" :components :rate-tables :calculators @saved="load" />
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns } from "naive-ui"
-import type { PayComponent, RateTable } from "@/add-os/modules/hr/types/payroll"
+import type { PayComponent } from "@/add-os/modules/hr/types/payroll"
 import { NAlert, NButton, NCard, NDataTable, useDialog, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import { useRouter } from "vue-router"
 import { canManageHrSettings } from "@/add-os/config/permissions"
 import ActiveTag from "@/add-os/modules/hr/components/ActiveTag.vue"
-import PayComponentModal from "@/add-os/modules/hr/components/payroll/PayComponentModal.vue"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
 import { calculatorLabel } from "@/add-os/modules/hr/utils/payroll"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
-import { ApiError } from "@/add-os/services/api"
-import { deletePayComponent, listCalculators, listPayComponents, listRateTables } from "@/add-os/services/hr/payroll"
+import { deletePayComponent, listPayComponents } from "@/add-os/services/hr/payroll"
 import { formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
@@ -54,15 +51,12 @@ defineProps<{ titleKey?: string }>()
 const { t } = useI18n()
 const message = useMessage()
 const dialog = useDialog()
+const router = useRouter()
 const mayManage = canManageHrSettings()
 
 const components = ref<PayComponent[]>([])
-const rateTables = ref<RateTable[]>([])
-const calculators = ref<string[]>([])
 const loading = ref(true)
 const loadError = ref("")
-const editorVisible = ref(false)
-const editing = ref<PayComponent | null>(null)
 
 async function load() {
 	loading.value = true
@@ -76,19 +70,11 @@ async function load() {
 	}
 }
 
-onMounted(async () => {
-	void load()
-	if (!mayManage) return
-	try {
-		;[calculators.value, rateTables.value] = await Promise.all([listCalculators(), listRateTables()])
-	} catch (e) {
-		if (!(e instanceof ApiError)) throw e
-	}
-})
+onMounted(() => void load())
 
+/** Adding and editing are a page of their own (PayComponentFormPage). */
 function openEditor(component: PayComponent | null) {
-	editing.value = component
-	editorVisible.value = true
+	void router.push(component ? { name: "hrSettings.hrPayComponentEdit", params: { id: component.id } } : { name: "hrSettings.hrPayComponentCreate" })
 }
 
 function confirmDelete(component: PayComponent) {

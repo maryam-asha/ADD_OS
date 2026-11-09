@@ -11,7 +11,7 @@
 							{{ t("nav.sections.hrSettings") }}
 						</h2>
 						<p class="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
-							{{ t("hr.settings.subtitle", "سياسات الموظفين والطلبات والموافقات.") }}
+							{{ t("hr.settings.subtitle") }}
 						</p>
 					</div>
 					<div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 dark:bg-neutral-800 dark:text-neutral-300">
@@ -20,7 +20,7 @@
 				</div>
 
 				<!-- Menu items with arrows -->
-				<nav class="flex flex-col gap-1.5" aria-label="قائمة إعدادات الموارد البشرية">
+				<nav class="flex flex-col gap-1.5" :aria-label="t('nav.sections.hrSettings')">
 					<button
 						v-for="page in pages"
 						:key="page.name"
@@ -81,29 +81,17 @@ const route = useRoute()
 const router = useRouter()
 const mainStore = useMainStore()
 
-/** Custom label mapping to align with reference image 1 */
-const REFERENCE_LABELS: Record<string, string> = {
-	hrTimeSettings: "نماذج الدوام",
-	hrDocumentTypes: "أنواع العهد",
-	hrRateTables: "إعدادات السلف",
-	hrPayComponents: "إعدادات الرواتب",
-	hrLeaveSettings: "إعدادات الإجازات",
-	hrChecklistTemplates: "الطلبات الذاتية",
-	hrApprovalFlows: "سلاسل الموافقات"
-}
-
 const pages = computed(() => {
 	const section = NAV_SECTIONS.find(candidate => candidate.key === "hrSettings")
 	if (!section) return []
 	return menuPages(section).map(page => {
 		const name = navRouteName(section, page)
-		const customArLabel = REFERENCE_LABELS[page.key]
 		return {
 			name,
 			key: page.key,
 			path: navRoutePath(section, page),
 			titleKey: navPageTitleKey(page),
-			label: customArLabel || t(navPageTitleKey(page)),
+			label: t(navPageTitleKey(page)),
 			icon: page.icon
 		}
 	})

@@ -3,7 +3,7 @@
 	<div class="flex flex-col gap-5">
 		<HrPageHeader :title="t(titleKey || 'nav.pages.hrPayrollRuns')" :description="t('hrPayroll.runs.description')">
 			<template v-if="mayManage" #actions>
-				<n-button type="primary" @click="openVisible = true">
+				<n-button type="primary" @click="router.push({ name: 'hrPay.hrPayrollRunCreate' })">
 					<template #icon><Icon name="carbon:add" :size="16" /></template>
 					{{ t("hrPayroll.runs.open") }}
 				</n-button>
@@ -36,8 +36,6 @@
 				<n-pagination v-model:page="page" :page-count="lastPage" :disabled="loading" />
 			</div>
 		</n-card>
-
-		<OpenRunModal v-if="mayManage" v-model:show="openVisible" @opened="goTo" />
 	</div>
 </template>
 
@@ -49,7 +47,6 @@ import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import { canManagePayroll } from "@/add-os/config/permissions"
-import OpenRunModal from "@/add-os/modules/hr/components/payroll/OpenRunModal.vue"
 import RunStatusTag from "@/add-os/modules/hr/components/payroll/RunStatusTag.vue"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import HrToolbar from "@/add-os/modules/hr/components/ui/HrToolbar.vue"
@@ -77,7 +74,6 @@ const runs = ref<PayrollRun[]>([])
 const loading = ref(true)
 const loadError = ref("")
 const lastPage = ref(1)
-const openVisible = ref(false)
 
 const { filters, applied, page } = useRouteFilters({ year: "number", status: "string" }, () => void load(), { debounced: ["year"] })
 

@@ -35,7 +35,6 @@ vi.mock("@/add-os/services/hr/core", () => ({
 }))
 vi.mock("@/add-os/modules/hr/components/core/CareerTab.vue", () => ({ default: { name: "CareerTab", render: () => null } }))
 vi.mock("@/add-os/modules/hr/components/core/ChecklistTab.vue", () => ({ default: { name: "ChecklistTab", render: () => null } }))
-vi.mock("@/add-os/modules/hr/components/core/EditEmployeeModal.vue", () => ({ default: { name: "EditEmployeeModal", props: ["show", "employee"], render: () => null } }))
 vi.mock("@/add-os/modules/hr/components/core/EmployeeDocumentsTab.vue", () => ({ default: { name: "EmployeeDocumentsTab", render: () => null } }))
 vi.mock("@/add-os/modules/hr/components/core/PeopleListModal.vue", () => ({ default: { name: "PeopleListModal", render: () => null } }))
 vi.mock("@/add-os/modules/hr/components/core/RecordEventModal.vue", () => ({ default: { name: "RecordEventModal", props: ["show", "employee", "initialType"], render: () => null } }))

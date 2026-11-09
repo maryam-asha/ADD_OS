@@ -8,8 +8,9 @@ import en from "@/add-os/lang/en/en.json"
 import enHr from "@/add-os/lang/en/hr.json"
 import EmployeesPage from "../EmployeesPage.vue"
 
-const { listEmployeesMock, replaceMock, route, permissions } = vi.hoisted(() => ({
+const { listEmployeesMock, pushMock, replaceMock, route, permissions } = vi.hoisted(() => ({
 	listEmployeesMock: vi.fn(),
+	pushMock: vi.fn(),
 	replaceMock: vi.fn(),
 	route: { query: {} as Record<string, string> },
 	permissions: { hire: true }
@@ -20,10 +21,9 @@ vi.mock("@/add-os/services/hr/core", () => ({
 	listEmployees: listEmployeesMock,
 	listOrgUnits: vi.fn().mockResolvedValue([{ id: 4, name: { ar: "العمليات", en: "Operations" }, is_active: true, parent_id: null, code: null, head_employee_id: null }])
 }))
-vi.mock("@/add-os/modules/hr/components/HireEmployeeModal.vue", () => ({ default: { name: "HireEmployeeModal", render: () => null } }))
 vi.mock("vue-router", async () => {
 	const actual = await vi.importActual<typeof import("vue-router")>("vue-router")
-	return { ...actual, useRouter: () => ({ push: vi.fn(), replace: replaceMock }), useRoute: () => route }
+	return { ...actual, useRouter: () => ({ push: pushMock, replace: replaceMock }), useRoute: () => route }
 })
 
 const i18n = createI18n({ legacy: false, locale: "en", messages: { en: { ...en, ...enHr } } })
@@ -71,6 +71,18 @@ describe("employeesPage", () => {
 		await flushPromises()
 
 		expect(document.body.textContent).not.toContain("Hire employee")
+		wrapper.unmount()
+	})
+
+	it("opens hiring on a page of its own, not a dialog over the list", async () => {
+		const wrapper = mountPage()
+		await flushPromises()
+
+		const hire = wrapper.findAll("button").find(b => b.text().includes("Hire employee"))
+		await hire!.trigger("click")
+
+		expect(pushMock).toHaveBeenCalledWith({ name: "hr.employeeCreate" })
+		expect(document.querySelector(".n-modal")).toBeNull()
 		wrapper.unmount()
 	})
 

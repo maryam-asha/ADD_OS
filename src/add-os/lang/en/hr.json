@@ -1,7 +1,11 @@
 {
 	"hr": {
+		"settings": {
+			"subtitle": "HR policies, requests and approvals."
+		},
 		"common": {
 			"loadError": "Could not load the data. Try again.",
+			"backToEmployees": "Back to employees",
 			"required": "This field is required",
 			"back": "Back",
 			"cancel": "Cancel",
@@ -72,6 +76,7 @@
 		},
 		"hire": {
 			"title": "Hire employee",
+			"description": "Who the employee is, then their job and first contract, on one page.",
 			"person": "Employee",
 			"job": "Job",
 			"contract": "Contract",
@@ -106,8 +111,7 @@
 			"alreadyEmployee": "This account is already an employee.",
 			"openProfile": "Open their file",
 			"identityFromAccount": "The name, phone and email come from the account and change on the Users page.",
-			"details": "Personal details (optional)",
-			"next": "Next"
+			"details": "Personal details (optional)"
 		},
 		"profile": {
 			"notFound": "This employee was not found.",
@@ -346,6 +350,8 @@
 		},
 		"editEmployee": {
 			"title": "Edit details",
+			"personal": "Personal details",
+			"backToProfile": "Back to the employee's file",
 			"gender": "Gender",
 			"dateOfBirth": "Date of birth",
 			"nationality": "Nationality",
