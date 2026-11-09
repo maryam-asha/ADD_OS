@@ -259,7 +259,8 @@
 				"manage": "Manage assets",
 				"custody": "Hand over and take back",
 				"maintenance": "Manage maintenance",
-				"dispose": "Dispose of assets"
+				"dispose": "Dispose of assets",
+				"approve": "Approve draft assets"
 			},
 			"warehouses": {
 				"view": "View warehouses",
