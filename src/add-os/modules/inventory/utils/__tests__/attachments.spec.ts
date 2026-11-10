@@ -14,6 +14,6 @@ describe("attachments", () => {
 
 	it("names a stored attachment by the end of its URL", () => {
 		expect(attachmentName("/storage/uploads/inventory/aB3x.pdf")).toBe("aB3x.pdf")
-		expect(attachmentName("https://cdn.example.test/a/b.png?x=1")).toBe("b.png")
+		expect(attachmentName("https://api.test/storage/a/b.png?x=1")).toBe("b.png")
 	})
 })

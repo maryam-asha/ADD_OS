@@ -519,7 +519,6 @@
 			"operation": "العملية",
 			"showOperation": "عرض أسطر هذه العملية",
 			"clearOperation": "عرض كل الحركات",
-			"packOf": "{unit} ({n})",
 			"needWarehouse": "اختر المستودع.",
 			"pageTitle": "إضافة حركة: {kind}",
 			"pageHint": "تُسجَّل الحركة عند الحفظ وتؤثر على الرصيد فوراً.",
