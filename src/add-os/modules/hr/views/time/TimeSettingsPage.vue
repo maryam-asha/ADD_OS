@@ -3,88 +3,114 @@
 	<div class="flex flex-col gap-5">
 		<HrPageHeader :title="t(titleKey || 'nav.pages.hrTimeSettings')" :description="t('hrAttendance.settings.description')" />
 
-		<n-tabs v-model:value="tab" type="line" animated>
-			<n-tab-pane name="shifts" :tab="t('hrAttendance.settings.tabs.shifts')" display-directive="show:lazy">
-				<HrResourcePanel
-					:api="shiftsApi"
-					:columns="shiftColumns"
-					:fields="shiftFields"
-					:empty-form="emptyShiftForm"
-					:to-form="shiftToForm"
-					:to-payload="shiftToPayload"
-					:can-manage="mayManage"
-					:description="t('hrAttendance.shifts.description')"
-					:labels="{
-						add: t('hrAttendance.shifts.add'),
-						createTitle: t('hrAttendance.shifts.add'),
-						editTitle: t('hrAttendance.shifts.edit'),
-						created: t('hrAttendance.shifts.created'),
-						updated: t('hrAttendance.shifts.updated'),
-						deleted: t('hrAttendance.shifts.deleted'),
-						deleteWarning: t('hrAttendance.shifts.deleteWarning')
-					}"
-				/>
-			</n-tab-pane>
+		<!-- Work patterns, as Bayraq's "نماذج الدوام": the patterns as cards, the chosen one edited beside them. -->
+		<HrPanel :title="t('hrAttendance.settings.tabs.patterns')" :subtitle="t('hrAttendance.patterns.description')" icon="carbon:calendar-settings">
+			<template v-if="mayManage" #extra>
+				<n-button type="primary" size="small" @click="selectPattern(null)">
+					<template #icon><Icon name="carbon:add" :size="16" /></template>
+					{{ t("hrAttendance.patterns.add") }}
+				</n-button>
+			</template>
 
-			<n-tab-pane name="patterns" :tab="t('hrAttendance.settings.tabs.patterns')" display-directive="show:lazy">
-				<div class="flex flex-col gap-4">
-					<div class="flex flex-wrap items-start justify-between gap-3">
-						<p class="max-w-3xl">{{ t("hrAttendance.patterns.description") }}</p>
-						<n-button v-if="mayManage" type="primary" class="ms-auto" @click="openPattern(null)">
-							<template #icon><Icon name="carbon:add" :size="16" /></template>
-							{{ t("hrAttendance.patterns.add") }}
-						</n-button>
-					</div>
-					<n-alert v-if="patternsError" type="error" :title="t('hr.common.loadError')" />
-					<n-card class="add-ledger-table">
-						<n-data-table :columns="patternColumns" :data="patterns" :loading="patternsLoading" :bordered="false" size="small" :scroll-x="760">
-							<template #empty>
-								<span class="text-secondary">{{ t("hrAttendance.patterns.empty") }}</span>
-							</template>
-						</n-data-table>
-					</n-card>
+			<n-alert v-if="patternsError" type="error" :title="t('hr.common.loadError')" class="mb-4" />
+			<div v-if="patternsLoading" class="flex justify-center py-10">
+				<n-spin />
+			</div>
+			<div v-else class="@container">
+				<div class="grid grid-cols-1 items-start gap-4 @3xl:grid-cols-[18rem_1fr]">
+					<nav class="flex flex-col gap-2" :aria-label="t('hrAttendance.settings.tabs.patterns')">
+						<p v-if="!patterns.length" class="text-secondary">{{ t("hrAttendance.patterns.empty") }}</p>
+						<button
+							v-for="pattern in patterns"
+							:key="pattern.id"
+							type="button"
+							class="flex flex-col gap-1 rounded-add-default border p-3 text-start transition-colors"
+							:class="selectedId === pattern.id ? 'border-primary bg-[var(--add-surface-sunken)]' : 'border-[var(--add-border)] hover:bg-[var(--add-surface-sunken)]'"
+							:aria-current="selectedId === pattern.id ? 'true' : undefined"
+							@click="selectPattern(pattern)"
+						>
+							<span class="flex items-center justify-between gap-2">
+								<span class="font-semibold">{{ translated(pattern.name) }}</span>
+								<ActiveTag :active="pattern.is_active" />
+							</span>
+							<span class="text-xs text-secondary">{{ pattern.kind === "roster" ? t("hrAttendance.patterns.kinds.roster") : `${t(`hrAttendance.patterns.kinds.${pattern.kind}`)} · ${patternSummary(pattern)}` }}</span>
+						</button>
+					</nav>
+
+					<section class="rounded-add-large border border-[var(--add-border)] p-4">
+						<WorkPatternEditor
+							v-if="editing"
+							:pattern="selectedPattern"
+							:shifts
+							:may-manage
+							@saved="onPatternSaved"
+							@cancel="editing = false"
+							@delete="confirmDeletePattern"
+						/>
+						<p v-else class="py-8 text-center text-secondary">{{ t("hrAttendance.patterns.chooseOne") }}</p>
+					</section>
 				</div>
-			</n-tab-pane>
+			</div>
+		</HrPanel>
 
-			<n-tab-pane name="policies" :tab="t('hrAttendance.settings.tabs.policies')" display-directive="show:lazy">
-				<HrResourcePanel
-					:api="policiesApi"
-					:columns="policyColumns"
-					:fields="policyFields"
-					:empty-form="emptyAttendancePolicyForm"
-					:to-form="policyToForm"
-					:to-payload="policyToPayload"
-					:can-manage="mayManage"
-					:description="t('hrAttendance.policies.description')"
-					:labels="{
-						add: t('hrAttendance.policies.add'),
-						createTitle: t('hrAttendance.policies.add'),
-						editTitle: t('hrAttendance.policies.edit'),
-						created: t('hrAttendance.policies.created'),
-						updated: t('hrAttendance.policies.updated'),
-						deleted: t('hrAttendance.policies.deleted')
-					}"
-				/>
-			</n-tab-pane>
-		</n-tabs>
+		<HrPanel :title="t('hrAttendance.settings.tabs.shifts')" icon="carbon:time">
+			<HrResourcePanel
+				:api="shiftsApi"
+				:columns="shiftColumns"
+				:fields="shiftFields"
+				:empty-form="emptyShiftForm"
+				:to-form="shiftToForm"
+				:to-payload="shiftToPayload"
+				:can-manage="mayManage"
+				:description="t('hrAttendance.shifts.description')"
+				:labels="{
+					add: t('hrAttendance.shifts.add'),
+					createTitle: t('hrAttendance.shifts.add'),
+					editTitle: t('hrAttendance.shifts.edit'),
+					created: t('hrAttendance.shifts.created'),
+					updated: t('hrAttendance.shifts.updated'),
+					deleted: t('hrAttendance.shifts.deleted'),
+					deleteWarning: t('hrAttendance.shifts.deleteWarning')
+				}"
+			/>
+		</HrPanel>
 
-		<WorkPatternModal v-if="mayManage" v-model:show="patternVisible" :pattern="editingPattern" :shifts @saved="loadPatterns" />
+		<HrPanel :title="t('hrAttendance.settings.tabs.policies')" icon="carbon:rule">
+			<HrResourcePanel
+				:api="policiesApi"
+				:columns="policyColumns"
+				:fields="policyFields"
+				:empty-form="emptyAttendancePolicyForm"
+				:to-form="policyToForm"
+				:to-payload="policyToPayload"
+				:can-manage="mayManage"
+				:description="t('hrAttendance.policies.description')"
+				:labels="{
+					add: t('hrAttendance.policies.add'),
+					createTitle: t('hrAttendance.policies.add'),
+					editTitle: t('hrAttendance.policies.edit'),
+					created: t('hrAttendance.policies.created'),
+					updated: t('hrAttendance.policies.updated'),
+					deleted: t('hrAttendance.policies.deleted')
+				}"
+			/>
+		</HrPanel>
 	</div>
 </template>
 
 <script setup lang="ts">
-import type { DataTableColumns } from "naive-ui"
 import type { AttendancePolicyForm, ShiftForm } from "@/add-os/modules/hr/config/time.config"
 import type { AttendancePolicy, AttendancePolicyPayload, ShiftTemplate, ShiftTemplatePayload, WorkPattern } from "@/add-os/modules/hr/types/time"
-import { NAlert, NButton, NCard, NDataTable, NTabPane, NTabs, useDialog, useMessage } from "naive-ui"
-import { computed, h, onMounted, ref } from "vue"
+import { NAlert, NButton, NSpin, useDialog, useMessage } from "naive-ui"
+import { computed, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { canManageHrSettings } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import ActiveTag from "@/add-os/modules/hr/components/ActiveTag.vue"
 import HrResourcePanel from "@/add-os/modules/hr/components/core/HrResourcePanel.vue"
-import WorkPatternModal from "@/add-os/modules/hr/components/time/WorkPatternModal.vue"
+import WorkPatternEditor from "@/add-os/modules/hr/components/time/WorkPatternEditor.vue"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
+import HrPanel from "@/add-os/modules/hr/components/ui/HrPanel.vue"
 import {
 	buildAttendancePolicyColumns,
 	buildAttendancePolicyFields,
@@ -113,14 +139,25 @@ import {
 import { formatNumber, WEEKDAYS_SHORT } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
-/** Shifts, work patterns and attendance policies. Read with hr.attendance.view, changed with hr.settings.manage. */
+/**
+ * Shifts, work patterns and attendance policies. Read with hr.attendance.view,
+ * changed with hr.settings.manage. Laid out after Bayraq's "نماذج الدوام":
+ * the work patterns as cards with the chosen one edited beside them
+ * (WorkPatternEditor), then the shifts they are made of and the attendance
+ * rules, one panel under the other instead of tabs.
+ *
+ * f97384d replaced this page with a Bayraq-styled one whose workdays,
+ * periods, grace and overtime controls saved nothing; it was restored on
+ * 2026-11-09 and given this layout on 2026-11-10. Split shifts (several
+ * periods a day) stay out: a shift template holds one start and one end,
+ * and ADD has none. See docs/hr/FORMS-AS-PAGES.md.
+ */
 defineProps<{ titleKey?: string }>()
 
 const { t } = useI18n()
 const message = useMessage()
 const dialog = useDialog()
 const mayManage = canManageHrSettings()
-const tab = ref<"shifts" | "patterns" | "policies">("shifts")
 
 // ── Shifts ──────────────────────────────────────────────────────────────────
 const shifts = ref<ShiftTemplate[]>([])
@@ -157,14 +194,20 @@ function shiftToPayload(f: ShiftForm): ShiftTemplatePayload {
 const patterns = ref<WorkPattern[]>([])
 const patternsLoading = ref(true)
 const patternsError = ref(false)
-const patternVisible = ref(false)
-const editingPattern = ref<WorkPattern | null>(null)
+/** The pattern in the editor: an id, or null with `editing` for a new one. */
+const selectedId = ref<number | null>(null)
+const editing = ref(false)
+const selectedPattern = computed(() => patterns.value.find(p => p.id === selectedId.value) ?? null)
 
 async function loadPatterns() {
 	patternsLoading.value = true
 	patternsError.value = false
 	try {
 		patterns.value = await listWorkPatterns()
+		if (selectedId.value !== null && !selectedPattern.value) {
+			selectedId.value = null
+			editing.value = false
+		}
 	} catch (e) {
 		patternsError.value = true
 		if (!(e instanceof ApiError)) throw e
@@ -182,9 +225,15 @@ onMounted(async () => {
 	}
 })
 
-function openPattern(pattern: WorkPattern | null) {
-	editingPattern.value = pattern
-	patternVisible.value = true
+function selectPattern(pattern: WorkPattern | null) {
+	selectedId.value = pattern?.id ?? null
+	editing.value = true
+}
+
+/** A new pattern stays open in the editor once saved, as the one just made. */
+async function onPatternSaved(id: number | null) {
+	await loadPatterns()
+	if (id !== null) selectedId.value = id
 }
 
 function confirmDeletePattern(pattern: WorkPattern) {
@@ -197,6 +246,8 @@ function confirmDeletePattern(pattern: WorkPattern) {
 			try {
 				await deleteWorkPattern(pattern.id)
 				message.success(t("hrAttendance.patterns.deleted"))
+				selectedId.value = null
+				editing.value = false
 				await loadPatterns()
 			} catch (e) {
 				message.error(apiErrorMessage(e, t("hr.common.saveError")))
@@ -212,33 +263,6 @@ function patternSummary(row: WorkPattern): string {
 	const days = ISO_WEEKDAYS.filter(day => row.weekly?.[String(day)])
 	return days.length ? days.map(day => WEEKDAYS_SHORT[currentLocale.value][day % 7]).join("، ") : EMPTY
 }
-
-const patternColumns = computed<DataTableColumns<WorkPattern>>(() => [
-	{ title: t("hr.org.code"), key: "code", minWidth: 100, render: row => h("span", { class: "font-mono", dir: "ltr" }, row.code) },
-	{ title: t("hrAttendance.shifts.name"), key: "name", minWidth: 150, render: row => translated(row.name) },
-	{ title: t("hrAttendance.patterns.kind"), key: "kind", minWidth: 110, render: row => t(`hrAttendance.patterns.kinds.${row.kind}`) },
-	{ title: t("hrAttendance.patterns.days"), key: "weekly", minWidth: 220, render: patternSummary },
-	{ title: t("hr.common.status"), key: "is_active", minWidth: 100, render: row => h(ActiveTag, { active: row.is_active }) },
-	...(mayManage
-		? [
-				{
-					title: t("hr.employees.columns.actions"),
-					key: "actions",
-					width: 100,
-					align: "center" as const,
-					render: (row: WorkPattern) =>
-						h("div", { class: "flex justify-center gap-3" }, [
-							h(NButton, { text: true, type: "primary", "aria-label": t("hr.common.edit"), title: t("hr.common.edit"), onClick: () => openPattern(row) }, { icon: () => h(Icon, { name: "carbon:edit", size: 18 }) }),
-							h(
-								NButton,
-								{ text: true, type: "error", "aria-label": t("hr.common.delete"), title: t("hr.common.delete"), onClick: () => confirmDeletePattern(row) },
-								{ icon: () => h(Icon, { name: "carbon:trash-can", size: 18 }) }
-							)
-						])
-				}
-			]
-		: [])
-])
 
 // ── Policies ────────────────────────────────────────────────────────────────
 const policiesApi = { list: listAttendancePolicies, create: createAttendancePolicy, update: updateAttendancePolicy, remove: deleteAttendancePolicy }

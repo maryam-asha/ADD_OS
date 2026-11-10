@@ -21,7 +21,7 @@
 						@click="selected = type"
 					>
 						{{ requestTypeLabel(t, type) }}
-						<n-badge v-if="flowFor(type)" dot :type="flowFor(type)!.is_active ? 'success' : 'default'" class="ms-2" />
+						<span v-if="flowFor(type)" class="ms-2 inline-flex"><n-badge dot :type="flowFor(type)!.is_active ? 'success' : 'default'" /></span>
 					</n-button>
 				</div>
 			</HrPanel>
@@ -141,7 +141,7 @@
 import type { SelectOption } from "naive-ui"
 import type { ApprovalFlow, ApproverType, FlowStep, TimeoutAction } from "@/add-os/modules/hr/types/approvals"
 import { NAlert, NBadge, NButton, NInputNumber, NRadioButton, NRadioGroup, NSelect, NSpin, NSwitch, NTag, useDialog, useMessage } from "naive-ui"
-import { computed, onMounted, reactive, ref } from "vue"
+import { computed, onMounted, reactive, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { canViewEmployees } from "@/add-os/config/permissions"
 import EmployeeSelect from "@/add-os/modules/hr/components/EmployeeSelect.vue"
@@ -233,11 +233,14 @@ function stateFor(type: string): TypeState {
 }
 
 /** The chosen type's steps, kept while another type is looked at, until saved or reloaded. */
-const current = computed<TypeState | null>(() => {
-	if (!selected.value) return null
-	if (!states[selected.value]) states[selected.value] = stateFor(selected.value)
-	return states[selected.value]
-})
+const current = computed<TypeState | null>(() => states[selected.value] ?? null)
+
+/** A type's steps are set up the first time it is chosen: from its flow, or one direct-manager step. */
+function ensureState(type: string) {
+	if (type && !states[type]) states[type] = stateFor(type)
+}
+
+watch(selected, ensureState)
 
 async function load() {
 	loading.value = true
@@ -246,6 +249,7 @@ async function load() {
 		;[types.value, flows.value] = await Promise.all([listApprovalTypes(), listApprovalFlows()])
 		for (const key of Object.keys(states)) delete states[key]
 		if (!types.value.includes(selected.value)) selected.value = types.value[0] ?? ""
+		ensureState(selected.value)
 	} catch (e) {
 		if (!(e instanceof ApiError)) throw e
 		loadError.value = true
@@ -297,8 +301,9 @@ async function save() {
 	const body = { name: state.flow?.name ?? null, steps: state.steps.map(toStep), is_active: state.isActive }
 	saving.value = true
 	try {
-		if (state.flow) message.success(serverMessage(await updateApprovalFlow(state.flow.id, body), t("hrApprovals.flows.saved")))
-		else {
+		if (state.flow) {
+			message.success(serverMessage(await updateApprovalFlow(state.flow.id, body), t("hrApprovals.flows.saved")))
+		} else {
 			await createApprovalFlow({ request_type: selected.value, ...body })
 			message.success(t("hrApprovals.flows.saved"))
 		}

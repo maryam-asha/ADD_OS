@@ -1,88 +1,21 @@
 import type { DataTableColumns, SelectOption } from "naive-ui"
 import type { ComposerTranslation } from "vue-i18n"
 import type { Bilingual, FieldDescriptor } from "@/add-os/components/resource/field-types"
-import type { CoverageRule, Holiday, LeaveType, LeaveUnit } from "@/add-os/modules/hr/types/leave"
+import type { CoverageRule, Holiday } from "@/add-os/modules/hr/types/leave"
 import { h } from "vue"
 import ActiveTag from "@/add-os/modules/hr/components/ActiveTag.vue"
-import { LEAVE_UNITS } from "@/add-os/modules/hr/types/leave"
 import { arabicRequiredRule } from "@/add-os/modules/hr/utils/forms"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
 import { formatDate, formatNumber } from "@/add-os/utils/format"
 
 /**
  * Leave settings edited through ResourceTable + ResourceFormDrawer. Rules
- * mirror ADD Core's Store*Request classes for leave types, holidays and
- * coverage rules; policies have their own drawer (LeavePolicyModal).
+ * mirror ADD Core's Store*Request classes for holidays and coverage rules.
+ * Leave types are edited beside their list (LeaveTypeEditor) since
+ * 2026-11-10; policies have their own dialog (LeavePolicyModal).
  */
 
 const yesNo = (t: ComposerTranslation, value: boolean) => (value ? t("hr.common.yes") : t("hr.common.no"))
-
-// ── Leave types ─────────────────────────────────────────────────────────────
-
-export interface LeaveTypeForm extends Record<string, unknown> {
-	code: string
-	name: Bilingual
-	unit: LeaveUnit
-	is_paid: boolean
-	tracks_balance: boolean
-	allows_half_day: boolean
-	counts_calendar_days: boolean
-	hide_reason: boolean
-	attachment_document_type_id: number | null
-	is_active: boolean
-	/** Not sent: the unit is fixed once the type exists. */
-	editing: boolean
-}
-
-export function emptyLeaveTypeForm(): LeaveTypeForm {
-	return {
-		code: "",
-		name: { ar: "", en: "" },
-		unit: "day",
-		is_paid: true,
-		tracks_balance: true,
-		allows_half_day: false,
-		counts_calendar_days: false,
-		hide_reason: false,
-		attachment_document_type_id: null,
-		is_active: true,
-		editing: false
-	}
-}
-
-export function buildLeaveTypeColumns(t: ComposerTranslation): DataTableColumns<LeaveType> {
-	return [
-		{ title: t("hr.org.code"), key: "code", minWidth: 100, render: row => h("span", { class: "font-mono", dir: "ltr" }, row.code) },
-		{ title: t("hrLeave.types.name"), key: "name", minWidth: 160, render: row => translated(row.name) },
-		{ title: t("hrLeave.types.unit"), key: "unit", minWidth: 80, render: row => t(`hrLeave.unit.${row.unit}`) },
-		{ title: t("hrLeave.types.isPaid"), key: "is_paid", minWidth: 80, render: row => yesNo(t, row.is_paid) },
-		{ title: t("hrLeave.types.tracksBalance"), key: "tracks_balance", minWidth: 110, render: row => yesNo(t, row.tracks_balance) },
-		{ title: t("hrLeave.types.requiresAttachment"), key: "requires_attachment", minWidth: 110, render: row => yesNo(t, row.requires_attachment) },
-		{ title: t("hr.common.status"), key: "is_active", minWidth: 100, render: row => h(ActiveTag, { active: row.is_active }) }
-	]
-}
-
-export function buildLeaveTypeFields(t: ComposerTranslation, documentTypes: SelectOption[]): FieldDescriptor<LeaveTypeForm>[] {
-	return [
-		{ key: "name", labelKey: "hrLeave.types.name", type: "bilingual-text", rule: arabicRequiredRule(t, "hrLeave.types.name") },
-		{ key: "code", labelKey: "hr.org.code", type: "text", required: true },
-		{
-			key: "unit",
-			labelKey: "hrLeave.types.unit",
-			type: "select",
-			required: true,
-			options: LEAVE_UNITS.map(unit => ({ label: t(`hrLeave.unit.${unit}`), value: unit })),
-			disabledWhen: model => model.editing
-		},
-		{ key: "is_paid", labelKey: "hrLeave.types.isPaid", type: "switch" },
-		{ key: "tracks_balance", labelKey: "hrLeave.types.tracksBalance", type: "switch" },
-		{ key: "allows_half_day", labelKey: "hrLeave.types.allowsHalfDay", type: "switch", hiddenWhen: model => model.unit === "hour" },
-		{ key: "counts_calendar_days", labelKey: "hrLeave.types.countsCalendarDays", type: "switch", hiddenWhen: model => model.unit === "hour" },
-		{ key: "hide_reason", labelKey: "hrLeave.types.hideReason", type: "switch" },
-		{ key: "attachment_document_type_id", labelKey: "hrLeave.types.attachmentType", type: "select", options: documentTypes },
-		{ key: "is_active", labelKey: "hr.common.active", type: "switch" }
-	]
-}
 
 // ── Holidays ────────────────────────────────────────────────────────────────
 

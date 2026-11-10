@@ -1,7 +1,7 @@
 <!-- src/add-os/modules/hr/views/core/RecordEventPage.vue -->
 <template>
 	<HrFormPage
-		:title="t('hr.events.title')"
+		:title="t('nav.pages.employeeEventCreate')"
 		:description="employee ? `${translated(employee.name)} · ${employee.employee_number}` : undefined"
 		:eyebrow="t('nav.pages.employees')"
 		:back-to

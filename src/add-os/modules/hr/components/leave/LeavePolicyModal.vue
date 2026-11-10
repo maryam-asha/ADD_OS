@@ -111,7 +111,14 @@ import Icon from "@/components/common/Icon.vue"
  * grades, units; none chosen means everyone). Decimal strings from the
  * server are read into the number inputs for editing only.
  */
-const props = defineProps<{ policy: LeavePolicy | null; types: LeaveType[]; grades: JobGrade[]; units: OrgUnit[] }>()
+const props = defineProps<{
+	policy: LeavePolicy | null
+	types: LeaveType[]
+	grades: JobGrade[]
+	units: OrgUnit[]
+	/** A new policy starts on this type: the leave settings open it from a type's own list. */
+	leaveTypeId?: number | null
+}>()
 const emit = defineEmits<{ saved: [] }>()
 const show = defineModel<boolean>("show", { required: true })
 
@@ -139,7 +146,7 @@ const toNumber = (value: string | number | null | undefined): number | null => (
 
 function fromPolicy(p: LeavePolicy | null): PolicyForm {
 	return {
-		leaveTypeId: p?.leave_type_id ?? null,
+		leaveTypeId: p?.leave_type_id ?? props.leaveTypeId ?? null,
 		nameAr: p?.name?.ar ?? "",
 		nameEn: p?.name?.en ?? "",
 		effectiveFrom: p?.effective_from ?? null,

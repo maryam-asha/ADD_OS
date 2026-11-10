@@ -3,118 +3,142 @@
 	<div class="flex flex-col gap-5">
 		<HrPageHeader :title="t(titleKey || 'nav.pages.hrLeaveSettings')" :description="t('hrLeave.settings.description')" />
 
-		<n-tabs v-model:value="tab" type="line" animated>
-			<n-tab-pane name="types" :tab="t('hrLeave.settings.tabs.types')" display-directive="show:lazy">
-				<HrResourcePanel
-					:api="typesApi"
-					:columns="typeColumns"
-					:fields="typeFields"
-					:empty-form="emptyLeaveTypeForm"
-					:to-form="typeToForm"
-					:to-payload="typeToPayload"
-					:can-manage="mayManage"
-					:description="t('hrLeave.types.description')"
-					:labels="{
-						add: t('hrLeave.types.add'),
-						createTitle: t('hrLeave.types.add'),
-						editTitle: t('hrLeave.types.edit'),
-						created: t('hrLeave.types.created'),
-						updated: t('hrLeave.types.updated'),
-						deleted: t('hrLeave.types.deleted'),
-						deleteWarning: t('hrLeave.types.deleteWarning')
-					}"
-				/>
-			</n-tab-pane>
+		<!-- Leave types, as Bayraq's: the types as cards, the chosen one edited beside them with its policies under it. -->
+		<HrPanel :title="t('hrLeave.settings.tabs.types')" :subtitle="t('hrLeave.types.description')" icon="carbon:calendar">
+			<template v-if="mayManage" #extra>
+				<n-button type="primary" size="small" @click="selectType(null)">
+					<template #icon><Icon name="carbon:add" :size="16" /></template>
+					{{ t("hrLeave.types.add") }}
+				</n-button>
+			</template>
 
-			<n-tab-pane name="policies" :tab="t('hrLeave.settings.tabs.policies')" display-directive="show:lazy">
-				<div class="flex flex-col gap-4">
-					<div class="flex flex-wrap items-start justify-between gap-3">
-						<p class="max-w-3xl">{{ t("hrLeave.policies.description") }}</p>
-						<n-button v-if="mayManage" type="primary" class="ms-auto" @click="openPolicy(null)">
+			<n-alert v-if="typesError" type="error" :title="t('hr.common.loadError')" class="mb-4" />
+			<div v-if="typesLoading" class="flex justify-center py-10">
+				<n-spin />
+			</div>
+			<div v-else class="@container">
+				<div class="grid grid-cols-1 items-start gap-4 @3xl:grid-cols-[18rem_1fr]">
+					<nav class="flex flex-col gap-2" :aria-label="t('hrLeave.settings.tabs.types')">
+						<p v-if="!leaveTypes.length" class="text-secondary">{{ t("hrLeave.types.empty") }}</p>
+						<button
+							v-for="type in leaveTypes"
+							:key="type.id"
+							type="button"
+							class="flex flex-col gap-1 rounded-add-default border p-3 text-start transition-colors"
+							:class="selectedTypeId === type.id ? 'border-primary bg-[var(--add-surface-sunken)]' : 'border-[var(--add-border)] hover:bg-[var(--add-surface-sunken)]'"
+							:aria-current="selectedTypeId === type.id ? 'true' : undefined"
+							@click="selectType(type)"
+						>
+							<span class="flex items-center justify-between gap-2">
+								<span class="font-semibold">{{ translated(type.name) }}</span>
+								<ActiveTag :active="type.is_active" />
+							</span>
+							<span class="text-xs text-secondary">{{ typeSummary(type) }}</span>
+						</button>
+					</nav>
+
+					<section class="min-w-0 rounded-add-large border border-[var(--add-border)] p-4">
+						<LeaveTypeEditor
+							v-if="editingType"
+							:type="selectedType"
+							:document-type-options
+							:may-manage
+							@saved="onTypeSaved"
+							@cancel="editingType = false"
+							@delete="confirmDeleteType"
+						/>
+						<p v-else class="py-8 text-center text-secondary">{{ t("hrLeave.types.chooseOne") }}</p>
+					</section>
+				</div>
+				<section v-if="selectedType" class="mt-4 rounded-add-large border border-[var(--add-border)] p-4">
+					<header class="mb-3 flex flex-wrap items-center justify-between gap-3">
+						<div class="flex flex-col">
+							<h4 class="font-semibold">{{ t("hrLeave.policies.ofType") }}</h4>
+							<span class="text-sm text-secondary">{{ t("hrLeave.policies.description") }}</span>
+						</div>
+						<n-button v-if="mayManage" size="small" @click="openPolicy(null)">
 							<template #icon><Icon name="carbon:add" :size="16" /></template>
 							{{ t("hrLeave.policies.add") }}
 						</n-button>
-					</div>
+					</header>
 					<n-alert v-if="policiesError" type="error" :title="t('hr.common.loadError')" />
-					<n-card class="add-ledger-table">
-						<n-data-table :columns="policyColumns" :data="policies" :loading="policiesLoading" :bordered="false" size="small" :scroll-x="900">
-							<template #empty>
-								<span class="text-secondary">{{ t("hrLeave.policies.empty") }}</span>
-							</template>
-						</n-data-table>
-					</n-card>
-				</div>
-			</n-tab-pane>
+					<n-data-table v-else :columns="policyColumns" :data="typePolicies" :loading="policiesLoading" :bordered="false" size="small" :scroll-x="760">
+						<template #empty>
+							<span class="text-secondary">{{ t("hrLeave.policies.empty") }}</span>
+						</template>
+					</n-data-table>
+				</section>
+			</div>
+		</HrPanel>
 
-			<n-tab-pane name="holidays" :tab="t('hrLeave.settings.tabs.holidays')" display-directive="show:lazy">
-				<HrResourcePanel
-					:api="holidaysApi"
-					:columns="holidayColumns"
-					:fields="holidayFields"
-					:empty-form="emptyHolidayForm"
-					:to-form="holidayToForm"
-					:to-payload="holidayToPayload"
-					:can-manage="mayManage"
-					:description="t('hrLeave.holidays.description')"
-					:labels="{
-						add: t('hrLeave.holidays.add'),
-						createTitle: t('hrLeave.holidays.add'),
-						editTitle: t('hrLeave.holidays.edit'),
-						created: t('hrLeave.holidays.created'),
-						updated: t('hrLeave.holidays.updated'),
-						deleted: t('hrLeave.holidays.deleted')
-					}"
-				/>
-			</n-tab-pane>
+		<HrPanel :title="t('hrLeave.settings.tabs.holidays')" icon="carbon:calendar-heat-map">
+			<HrResourcePanel
+				:api="holidaysApi"
+				:columns="holidayColumns"
+				:fields="holidayFields"
+				:empty-form="emptyHolidayForm"
+				:to-form="holidayToForm"
+				:to-payload="holidayToPayload"
+				:can-manage="mayManage"
+				:description="t('hrLeave.holidays.description')"
+				:labels="{
+					add: t('hrLeave.holidays.add'),
+					createTitle: t('hrLeave.holidays.add'),
+					editTitle: t('hrLeave.holidays.edit'),
+					created: t('hrLeave.holidays.created'),
+					updated: t('hrLeave.holidays.updated'),
+					deleted: t('hrLeave.holidays.deleted')
+				}"
+			/>
+		</HrPanel>
 
-			<n-tab-pane name="coverage" :tab="t('hrLeave.settings.tabs.coverage')" display-directive="show:lazy">
-				<HrResourcePanel
-					:api="coverageApi"
-					:columns="coverageColumns"
-					:fields="coverageFields"
-					:empty-form="emptyCoverageForm"
-					:to-form="coverageToForm"
-					:to-payload="coverageToPayload"
-					:can-manage="mayManage"
-					:description="t('hrLeave.coverage.description')"
-					:labels="{
-						add: t('hrLeave.coverage.add'),
-						createTitle: t('hrLeave.coverage.add'),
-						editTitle: t('hrLeave.coverage.edit'),
-						created: t('hrLeave.coverage.created'),
-						updated: t('hrLeave.coverage.updated'),
-						deleted: t('hrLeave.coverage.deleted')
-					}"
-				/>
-			</n-tab-pane>
-		</n-tabs>
+		<HrPanel :title="t('hrLeave.settings.tabs.coverage')" icon="carbon:user-multiple">
+			<HrResourcePanel
+				:api="coverageApi"
+				:columns="coverageColumns"
+				:fields="coverageFields"
+				:empty-form="emptyCoverageForm"
+				:to-form="coverageToForm"
+				:to-payload="coverageToPayload"
+				:can-manage="mayManage"
+				:description="t('hrLeave.coverage.description')"
+				:labels="{
+					add: t('hrLeave.coverage.add'),
+					createTitle: t('hrLeave.coverage.add'),
+					editTitle: t('hrLeave.coverage.edit'),
+					created: t('hrLeave.coverage.created'),
+					updated: t('hrLeave.coverage.updated'),
+					deleted: t('hrLeave.coverage.deleted')
+				}"
+			/>
+		</HrPanel>
 
-		<LeavePolicyModal v-if="mayManage" v-model:show="policyVisible" :policy="editingPolicy" :types="leaveTypes" :grades :units @saved="loadPolicies" />
+		<LeavePolicyModal v-if="mayManage" v-model:show="policyVisible" :policy="editingPolicy" :types="leaveTypes" :grades :units :leave-type-id="selectedTypeId" @saved="loadPolicies" />
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
-import type { CoverageForm, HolidayForm, LeaveTypeForm } from "@/add-os/modules/hr/config/leave.config"
+import type { CoverageForm, HolidayForm } from "@/add-os/modules/hr/config/leave.config"
 import type { JobGrade, OrgUnit, Position } from "@/add-os/modules/hr/types/hr"
-import type { CoverageRule, CoverageRulePayload, Holiday, HolidayPayload, LeavePolicy, LeaveType, LeaveTypePayload } from "@/add-os/modules/hr/types/leave"
-import { NAlert, NButton, NCard, NDataTable, NTabPane, NTabs, useDialog, useMessage } from "naive-ui"
+import type { CoverageRule, CoverageRulePayload, Holiday, HolidayPayload, LeavePolicy, LeaveType } from "@/add-os/modules/hr/types/leave"
+import { NAlert, NButton, NDataTable, NSpin, useDialog, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { canManageHrSettings } from "@/add-os/config/permissions"
+import ActiveTag from "@/add-os/modules/hr/components/ActiveTag.vue"
 import HrResourcePanel from "@/add-os/modules/hr/components/core/HrResourcePanel.vue"
 import LeavePolicyModal from "@/add-os/modules/hr/components/leave/LeavePolicyModal.vue"
+import LeaveTypeEditor from "@/add-os/modules/hr/components/leave/LeaveTypeEditor.vue"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
+import HrPanel from "@/add-os/modules/hr/components/ui/HrPanel.vue"
 import {
 	buildCoverageColumns,
 	buildCoverageFields,
 	buildHolidayColumns,
 	buildHolidayFields,
-	buildLeaveTypeColumns,
-	buildLeaveTypeFields,
 	emptyCoverageForm,
-	emptyHolidayForm,
-	emptyLeaveTypeForm
+	emptyHolidayForm
 } from "@/add-os/modules/hr/config/leave.config"
 import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
 import { toBilingual, toTranslatable } from "@/add-os/modules/hr/utils/forms"
@@ -125,7 +149,6 @@ import { listDocumentTypes, listJobGrades, listOrgUnits, listPositions } from "@
 import {
 	createCoverageRule,
 	createHoliday,
-	createLeaveType,
 	deleteCoverageRule,
 	deleteHoliday,
 	deleteLeavePolicy,
@@ -135,8 +158,7 @@ import {
 	listLeavePolicies,
 	listLeaveTypes,
 	updateCoverageRule,
-	updateHoliday,
-	updateLeaveType
+	updateHoliday
 } from "@/add-os/services/hr/leave"
 import { formatDate } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
@@ -144,7 +166,15 @@ import Icon from "@/components/common/Icon.vue"
 /**
  * Leave types, the policies that give them, public holidays and the
  * coverage rules approvals are checked against. Read with hr.leave.view;
- * changed with hr.settings.manage.
+ * changed with hr.settings.manage. Laid out after Bayraq's leave settings:
+ * the types as cards with the chosen one edited beside them
+ * (LeaveTypeEditor) and its policies under it, then the holidays and the
+ * coverage rules, one panel under the other instead of tabs.
+ *
+ * f97384d replaced this page with a Bayraq-styled one that saved a fixed
+ * document type and a 10-day carry-over nobody entered and hid failed
+ * saves; it was restored on 2026-11-09 and given this layout on
+ * 2026-11-10. See docs/hr/FORMS-AS-PAGES.md.
  */
 defineProps<{ titleKey?: string }>()
 
@@ -152,7 +182,6 @@ const { t } = useI18n()
 const message = useMessage()
 const dialog = useDialog()
 const mayManage = canManageHrSettings()
-const tab = ref<"types" | "policies" | "holidays" | "coverage">("types")
 
 // ── Lookups for the forms and the tables. Each may be refused (another permission); the form then offers fewer choices.
 const leaveTypes = ref<LeaveType[]>([])
@@ -162,7 +191,7 @@ const positions = ref<Position[]>([])
 const documentTypeOptions = ref<SelectOption[]>([])
 
 onMounted(() => {
-	void quietly(listLeaveTypes, v => (leaveTypes.value = v))
+	void loadTypes()
 	void quietly(listJobGrades, v => (grades.value = v))
 	void quietly(listOrgUnits, v => (units.value = v))
 	void quietly(listPositions, v => (positions.value = v))
@@ -171,42 +200,64 @@ onMounted(() => {
 })
 
 // ── Types ───────────────────────────────────────────────────────────────────
-const typesApi = {
-	list: async () => (leaveTypes.value = await listLeaveTypes()),
-	create: createLeaveType,
-	update: updateLeaveType,
-	remove: deleteLeaveType
+const typesLoading = ref(true)
+const typesError = ref(false)
+/** The type in the editor: an id, or null with `editingType` for a new one. */
+const selectedTypeId = ref<number | null>(null)
+const editingType = ref(false)
+const selectedType = computed(() => leaveTypes.value.find(type => type.id === selectedTypeId.value) ?? null)
+
+async function loadTypes() {
+	typesLoading.value = true
+	typesError.value = false
+	try {
+		leaveTypes.value = await listLeaveTypes()
+		if (selectedTypeId.value !== null && !selectedType.value) {
+			selectedTypeId.value = null
+			editingType.value = false
+		}
+	} catch (e) {
+		typesError.value = true
+		if (!(e instanceof ApiError)) throw e
+	} finally {
+		typesLoading.value = false
+	}
 }
-const typeColumns = computed(() => buildLeaveTypeColumns(t))
-const typeFields = computed(() => buildLeaveTypeFields(t, documentTypeOptions.value))
-function typeToForm(row: LeaveType): LeaveTypeForm {
-  return {
-	code: row.code,
-	name: toBilingual(row.name),
-	unit: row.unit,
-	is_paid: row.is_paid,
-	tracks_balance: row.tracks_balance,
-	allows_half_day: row.allows_half_day,
-	counts_calendar_days: row.counts_calendar_days,
-	hide_reason: row.hide_reason,
-	attachment_document_type_id: row.attachment_document_type_id,
-	is_active: row.is_active,
-	editing: true
+
+function selectType(type: LeaveType | null) {
+	selectedTypeId.value = type?.id ?? null
+	editingType.value = true
 }
+
+/** A new type stays open in the editor once saved, ready for its first policy. */
+async function onTypeSaved(id: number | null) {
+	await loadTypes()
+	if (id !== null) selectedTypeId.value = id
 }
-function typeToPayload(f: LeaveTypeForm): LeaveTypePayload {
-  return {
-	code: f.code.trim(),
-	name: toTranslatable(f.name),
-	unit: f.unit,
-	is_paid: f.is_paid,
-	tracks_balance: f.tracks_balance,
-	allows_half_day: f.unit === "day" && f.allows_half_day,
-	counts_calendar_days: f.unit === "day" && f.counts_calendar_days,
-	hide_reason: f.hide_reason,
-	attachment_document_type_id: f.attachment_document_type_id,
-	is_active: f.is_active
+
+function confirmDeleteType(type: LeaveType) {
+	dialog.warning({
+		title: t("hrLeave.types.delete"),
+		content: t("hrLeave.types.deleteConfirm", { name: translated(type.name) }),
+		positiveText: t("hr.common.delete"),
+		negativeText: t("hr.common.cancel"),
+		onPositiveClick: async () => {
+			try {
+				await deleteLeaveType(type.id)
+				message.success(t("hrLeave.types.deleted"))
+				selectedTypeId.value = null
+				editingType.value = false
+				await loadTypes()
+			} catch (e) {
+				message.error(apiErrorMessage(e, t("hr.common.saveError")))
+			}
+		}
+	})
 }
+
+/** What a card says under the name: the unit, paid or not, against a balance or not. */
+function typeSummary(type: LeaveType): string {
+	return [t(`hrLeave.unit.${type.unit}`), type.is_paid ? t("hrLeave.types.isPaid") : t("hrLeave.types.unpaid"), type.tracks_balance ? t("hrLeave.types.tracksBalance") : t("hrLeave.types.noBalance")].join(" · ")
 }
 
 // ── Policies ────────────────────────────────────────────────────────────────
@@ -253,6 +304,8 @@ function confirmDeletePolicy(policy: LeavePolicy) {
 }
 
 const typeOf = (id: number) => leaveTypes.value.find(type => type.id === id)
+/** The chosen type's policies, newest first as the server lists them. */
+const typePolicies = computed(() => policies.value.filter(policy => policy.leave_type_id === selectedTypeId.value))
 
 /** Who a policy covers: every limit it sets, or everyone. */
 function scopeOf(policy: LeavePolicy): string {
@@ -265,7 +318,6 @@ function scopeOf(policy: LeavePolicy): string {
 }
 
 const policyColumns = computed<DataTableColumns<LeavePolicy>>(() => [
-	{ title: t("hrLeave.request.type"), key: "leave_type_id", minWidth: 140, render: row => translated(typeOf(row.leave_type_id)?.name) || EMPTY },
 	{ title: t("hrApprovals.flows.name"), key: "name", minWidth: 140, render: row => translated(row.name) || EMPTY },
 	{
 		title: t("hrLeave.policies.effective"),
@@ -278,7 +330,6 @@ const policyColumns = computed<DataTableColumns<LeavePolicy>>(() => [
 		title: t("hrLeave.policies.annualEntitlement"),
 		key: "annual_entitlement",
 		minWidth: 120,
-		className: "add-numeric",
 		render: row => leaveAmount(t, row.annual_entitlement, typeOf(row.leave_type_id)?.unit ?? "day")
 	},
 	{ title: t("hrLeave.policies.appliesTo"), key: "scope", minWidth: 200, ellipsis: { tooltip: true }, render: scopeOf },

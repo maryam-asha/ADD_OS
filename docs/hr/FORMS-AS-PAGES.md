@@ -184,3 +184,19 @@ What was done, as decided:
   none (product owner), and a shift template holds one start and one end. The "add a
   period" control does not come back.
 - The settings menu (`HrSettingsLayout`, f97384d) stays, with HR's own page names.
+
+**2026-11-10: Bayraq's look laid over the restored pages**, on the code that works:
+
+- **Time settings:** the work patterns as cards, the chosen one edited beside them
+  (`WorkPatternEditor`, which `WorkPatternModal` became). A fixed week's days are chips
+  turned on and off, each working day taking a shift, and the editor shows the week's net
+  hours worked out from those shifts, as Bayraq shows "صافي العمل". Below come the shifts and
+  the attendance policies, one panel under the other instead of tabs.
+- **Leave settings:** the leave types as cards, the chosen one edited beside them
+  (`LeaveTypeEditor`) in Bayraq's groups (the balance, how the length is counted, what a
+  request needs), with that type's policies listed under the editor. A new policy opens
+  on the chosen type (`LeavePolicyModal`'s `leaveTypeId`). The holidays and coverage rules
+  follow as panels. The leave-type table and dialog helpers in `leave.config.ts` went with
+  the tabs, as did `hrLeave.types.requiresAttachment`, which only that table read.
+- Both master–detail layouts are container queries (`@3xl:`), so the editor sits beside the
+  list only when the content area is wide enough, menu open or collapsed.

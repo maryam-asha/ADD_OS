@@ -89,6 +89,9 @@
 				"flexible": "A number of hours a week, at any time."
 			},
 			"week": "The week",
+			"weekHint": "Turn on the days that are worked and choose each one's shift; every other day is a rest day.",
+			"weeklyNet": "Net work a week",
+			"chooseOne": "Choose a work pattern to see or change it, or add one.",
 			"restDay": "Rest day",
 			"weeklyHours": "Hours a week",
 			"hoursAWeek": "{n} hour a week | {n} hours a week",
