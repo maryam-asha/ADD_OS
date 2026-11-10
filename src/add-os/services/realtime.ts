@@ -37,6 +37,11 @@ export const RECEPTION_EVENTS = [
 	"session_end_request.created",
 	"session_end_request.cancelled",
 	"session_end_request.resolved",
+	// A coworking session closed however it closed (the desk, the closing-time sweep, a confirmed end request).
+	"coworking.session_closed",
+	// A room, office or hall booking checked in, or closed (the desk, its end, or the member checking out).
+	"booking.checked_in",
+	"booking.checked_out",
 	"booking.created",
 	"booking.pending_approval",
 	"booking.cancelled",
