@@ -77,6 +77,7 @@ function print() {
 		qrCanvas: canvas,
 		title: props.caption,
 		subtitle: props.device.external_ref ? `#${props.device.external_ref}` : "",
+		subtitleDir: "ltr",
 		hint: t("accessDevices.qr.printHint"),
 		dir: currentLocale.value === "ar" ? "rtl" : "ltr"
 	})

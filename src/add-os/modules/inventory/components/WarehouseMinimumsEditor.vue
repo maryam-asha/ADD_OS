@@ -37,7 +37,7 @@
 
 		<div v-if="mayManage" class="mt-3 flex flex-wrap items-center gap-3">
 			<ItemSelect v-model:value="picking" kind="stock" :placeholder="t('inventory.warehouses.minimums.add')" class="sm:w-72!" @picked="add" />
-			<n-button type="primary" :loading="saving" data-test="minimums-save" @click="save">
+			<n-button type="primary" :loading="saving" :disabled="lines.length === 0" data-test="minimums-save" @click="save">
 				{{ t("inventory.warehouses.minimums.save") }}
 			</n-button>
 		</div>
@@ -59,8 +59,9 @@ import { getItem, getWarehouseMinimums, setWarehouseMinimums } from "@/add-os/se
 /**
  * The least a warehouse should hold of each item. Rows are item + minimum;
  * the quantity takes decimals only when the item's unit allows fractions. A
- * minimum of 0 (or a removed row) removes the item's row on the server, which
- * the screen then reloads from the answer. Read-only without
+ * minimum of 0 (a cleared input counts as 0, or a removed row) removes the
+ * item's row on the server, which the screen then reloads from the answer.
+ * Saving is off when there is nothing to send. Read-only without
  * `inventory.warehouses.manage`.
  *
  * Items are picked from the whole stock catalogue, not from what the
@@ -120,6 +121,8 @@ async function load() {
 function add(item: Item | null) {
 	picking.value = null
 	if (!item || rows.value.some(row => row.itemId === item.id)) return
+	// An item taken off and put back is no longer a removal: sending it twice would be a duplicate item_id (422).
+	removed.value = removed.value.filter(id => id !== item.id)
 	rows.value.push({ itemId: item.id, item, minimum: null, onHand: null, below: false })
 }
 
@@ -128,14 +131,23 @@ function drop(index: number) {
 	if (row && row.onHand !== null) removed.value.push(row.itemId)
 }
 
+/**
+ * What a save sends. A cleared input is a 0, which removes the row; a row the
+ * server never had that is still 0 or empty has nothing to say, so it is left out.
+ */
+const lines = computed(() => {
+	const kept = rows.value.flatMap((row) => {
+		const minimum = row.minimum ?? 0
+		return row.onHand === null && minimum === 0 ? [] : [{ item_id: row.itemId, minimum: String(minimum) }]
+	})
+	return [...kept, ...removed.value.map(id => ({ item_id: id, minimum: "0" }))]
+})
+
 async function save() {
-	const removedLines = removed.value.map(id => ({ item_id: id, minimum: "0" }))
-	const lines = rows.value
-		.filter(row => row.minimum !== null)
-		.map(row => ({ item_id: row.itemId, minimum: String(row.minimum) }))
+	if (lines.value.length === 0) return
 	saving.value = true
 	try {
-		const saved = await setWarehouseMinimums(props.warehouseId, [...lines, ...removedLines])
+		const saved = await setWarehouseMinimums(props.warehouseId, lines.value)
 		rows.value = await toRows(saved)
 		removed.value = []
 		message.success(t("inventory.warehouses.minimums.saved"))
@@ -149,5 +161,5 @@ async function save() {
 
 watch(() => props.warehouseId, () => void load(), { immediate: true })
 
-defineExpose({ rows, save, precisionOf })
+defineExpose({ rows, removed, lines, add, drop, save, precisionOf })
 </script>

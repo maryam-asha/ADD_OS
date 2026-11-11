@@ -211,8 +211,11 @@ async function run(order: KitchenOrder, action: () => Promise<unknown>, success:
 		else message.error(caught.data?.message ?? t("resourceCrud.mutations.genericError"))
 		return false
 	} finally {
-		busyId.value = null
-		await load()
+		try {
+			await load()
+		} finally {
+			busyId.value = null
+		}
 	}
 }
 

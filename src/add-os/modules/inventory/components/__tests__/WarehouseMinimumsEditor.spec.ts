@@ -76,6 +76,34 @@ describe("warehouseMinimumsEditor", () => {
 		wrapper.unmount()
 	})
 
+	it("a_cleared_input_removes_and_a_re_added_item_is_not_sent_twice", async () => {
+		const wrapper = await mountEditor()
+
+		// Cleared counts as 0: the existing row is sent as a removal.
+		wrapper.vm.rows[0].minimum = null
+		expect(wrapper.vm.lines).toEqual([{ item_id: 1, minimum: "0" }, { item_id: 2, minimum: "1.5" }])
+
+		// Removed, then put back with a new minimum: one line for the item, not two.
+		wrapper.vm.drop(1)
+		expect(wrapper.vm.removed).toEqual([2])
+		wrapper.vm.add({ id: 2, sku: "SKU2", name: { ar: "مادة 2", en: "Item 2" }, unit: null } as never)
+		wrapper.vm.rows.find(row => row.itemId === 2)!.minimum = 3
+		expect(wrapper.vm.removed).toEqual([])
+		expect(wrapper.vm.lines.filter(line => line.item_id === 2)).toEqual([{ item_id: 2, minimum: "3" }])
+		wrapper.unmount()
+	})
+
+	it("save_is_disabled_when_there_is_nothing_to_send", async () => {
+		getMinimumsMock.mockResolvedValue([])
+		const wrapper = await mountEditor()
+
+		const save = wrapper.get("[data-test=minimums-save]")
+		expect(save.attributes("disabled")).toBeDefined()
+		await save.trigger("click")
+		expect(setMinimumsMock).not.toHaveBeenCalled()
+		wrapper.unmount()
+	})
+
 	it("read_only_without_manage", async () => {
 		granted.clear()
 		const wrapper = await mountEditor()

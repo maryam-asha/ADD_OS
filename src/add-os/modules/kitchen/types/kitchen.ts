@@ -48,7 +48,8 @@ export interface KitchenOrder {
 		delivered_at: string | null
 	}
 	paid: boolean
-	member: { id: number; name: string; phone: string | null }
+	/** Null when the member's account has since been deleted. */
+	member: { id: number; name: string; phone: string | null } | null
 	/** From when it was sent until now while open, or until it was delivered, rejected or cancelled. */
 	waited_seconds: number
 }

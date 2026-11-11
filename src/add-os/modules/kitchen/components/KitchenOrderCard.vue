@@ -6,7 +6,7 @@
 				<span class="font-bold">{{ t("kitchen.card.order", { id: formatNumber(order.id, { grouping: false }) }) }}</span>
 				<span class="text-secondary text-sm" data-test="waited">
 					<Icon name="carbon:time" :size="14" class="align-middle" />
-					{{ t("kitchen.card.waited", { minutes: formatNumber(waitedMinutes) }) }}
+					{{ t(countKey("kitchen.card.waited", waitedMinutes), { n: formatNumber(waitedMinutes) }) }}
 				</span>
 			</div>
 
@@ -19,7 +19,7 @@
 
 			<div class="flex items-center gap-2">
 				<Icon name="carbon:user" :size="16" class="shrink-0" />
-				<span>{{ order.member.name }}</span>
+				<span dir="auto">{{ order.member?.name ?? t("kitchen.card.unknownMember") }}</span>
 			</div>
 
 			<ul class="flex flex-col gap-1" data-test="lines">
@@ -49,7 +49,7 @@ import type { DeliveryType, KitchenOrder } from "@/add-os/modules/kitchen/types/
 import { NButton, NCard } from "naive-ui"
 import { computed } from "vue"
 import { useI18n } from "vue-i18n"
-import { formatNumber, formatTime } from "@/add-os/utils/format"
+import { countKey, formatNumber, formatTime } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
 type CardAction = "accept" | "reject" | "ready" | "deliver"

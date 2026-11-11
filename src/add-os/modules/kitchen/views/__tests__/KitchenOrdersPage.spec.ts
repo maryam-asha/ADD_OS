@@ -52,7 +52,7 @@ describe("kitchenOrdersPage", () => {
 		await flushPromises()
 
 		// No status chosen: every status, not the API's open-only default.
-		expect(listOrdersMock).toHaveBeenLastCalledWith({ status: ["pending", "preparing", "ready", "delivered", "rejected", "cancelled"], page: 1 })
+		expect(listOrdersMock).toHaveBeenLastCalledWith({ sort: "newest", status: ["pending", "preparing", "ready", "delivered", "rejected", "cancelled"], page: 1 })
 
 		wrapper.vm.branchId = 1
 		wrapper.vm.statuses = ["rejected", "cancelled"]
@@ -60,7 +60,19 @@ describe("kitchenOrdersPage", () => {
 		wrapper.vm.memberId = 5
 		await flushPromises()
 
-		expect(listOrdersMock).toHaveBeenLastCalledWith({ status: ["rejected", "cancelled"], branch_id: 1, from: "2026-11-01", to: "2026-11-10", user_id: 5, page: 1 })
+		expect(listOrdersMock).toHaveBeenLastCalledWith({ sort: "newest", status: ["rejected", "cancelled"], branch_id: 1, from: "2026-11-01", to: "2026-11-10", user_id: 5, page: 1 })
+		wrapper.unmount()
+	})
+
+	it("an_order_whose_member_is_gone_still_lists", async () => {
+		listOrdersMock.mockResolvedValue({ data: [{ ...rejected, member: null }], meta: { current_page: 1, last_page: 1, per_page: 25, total: 1 } })
+		const wrapper = mountPage()
+		await flushPromises()
+
+		expect(wrapper.find("tbody tr").text()).toContain("Unknown member")
+		await wrapper.find("tbody tr").trigger("click")
+		await flushPromises()
+		expect(document.querySelector("[data-test=order-detail]")?.textContent).toContain("Unknown member")
 		wrapper.unmount()
 	})
 

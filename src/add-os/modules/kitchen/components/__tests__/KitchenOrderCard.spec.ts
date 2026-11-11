@@ -50,6 +50,15 @@ describe("kitchenOrderCard", () => {
 		expect(without.findAll("button")).toHaveLength(0)
 	})
 
+	it("an_unknown_member_and_arabic_plural_wait", () => {
+		const gone = mountCard(orderOf({ member: null }))
+		expect(gone.text()).toContain("Unknown member")
+
+		// Two minutes is the dual in Arabic, three the few form.
+		expect(mountCard(orderOf({ waited_seconds: 120 }), true, "ar").get("[data-test=waited]").text()).toContain("دقيقتين")
+		expect(mountCard(orderOf({ waited_seconds: 180 }), true, "ar").get("[data-test=waited]").text()).toContain("دقائق")
+	})
+
 	it("shows_full_note", () => {
 		const note = "الرجاء إحضار الطلب إلى الطاولة الكبيرة قرب النافذة في الطابق الثاني، بجانب غرفة الاجتماعات الزجاجية، وشكرًا جزيلًا لكم على تعبكم"
 		const wrapper = mountCard(orderOf({ delivery: { type: "note", label: note, note } }), true, "ar")

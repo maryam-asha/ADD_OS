@@ -12,11 +12,23 @@ export interface StickerOptions {
 	title: string
 	/** A small reference line below the hint; may be empty. */
 	subtitle: string
+	/**
+	 * Which way the subtitle reads. `auto` (the default) follows its own first
+	 * strong character, for a name such as a branch's; `ltr` pins a reference
+	 * like the door sticker's `#ref` so its `#` stays on the left in Arabic.
+	 */
+	subtitleDir?: "auto" | "ltr"
 	/** What the person holding the phone should do. */
 	hint: string
 	dir: "rtl" | "ltr"
 }
 
+/*
+ * The print frame is a separate document: it cannot read the app's CSS
+ * variables or design tokens, so the colours below are literal on purpose, a
+ * deliberate exception to the no-hardcoded-values rule (a sticker prints in
+ * black on white whatever the app's theme).
+ */
 const STICKER_CSS = `
 	@page { size: auto; margin: 12mm; }
 	html, body { margin: 0; background: #fff; color: #111; font-family: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif; }
@@ -24,7 +36,8 @@ const STICKER_CSS = `
 	.sticker img { display: block; width: 62mm; height: 62mm; margin: 0 auto; image-rendering: pixelated; }
 	.place { margin: 5mm 0 2mm; font-size: 15pt; font-weight: 700; }
 	.hint { margin: 0; font-size: 9pt; color: #444; }
-	.ref { margin: 3mm 0 0; font-size: 7pt; color: #888; direction: ltr; }
+	.ref { margin: 3mm 0 0; font-size: 7pt; color: #888; }
+	.ref[dir="auto"] { unicode-bidi: plaintext; }
 `
 
 export function printSticker(opts: StickerOptions): void {
@@ -65,6 +78,7 @@ export function printSticker(opts: StickerOptions): void {
 	hint.textContent = opts.hint
 	const ref = doc.createElement("p")
 	ref.className = "ref"
+	ref.dir = opts.subtitleDir ?? "auto"
 	ref.textContent = opts.subtitle
 	card.append(qr, place, hint, ref)
 	doc.body.appendChild(card)

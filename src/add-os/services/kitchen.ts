@@ -31,6 +31,8 @@ export interface KitchenOrderQuery {
 	from?: string
 	to?: string
 	user_id?: number
+	/** `oldest` (the API's default, the live queue) or `newest` (the history). */
+	sort?: "oldest" | "newest"
 	page?: number
 	/** 1–100; the API's default is 25. */
 	per_page?: number

@@ -14,11 +14,18 @@
 			data-test="branch-select"
 		/>
 
-		<n-alert v-if="loadError" type="error" :title="t('kitchen.qr.loadError')" />
+		<!-- One alert per source that failed: a 403 on one list names that list, it does not blank the page. -->
+		<n-alert
+			v-for="failure in failures"
+			:key="failure.source"
+			:type="failure.denied ? 'warning' : 'error'"
+			:title="t(failure.denied ? 'kitchen.qr.sourceDenied' : 'kitchen.qr.sourceError', { source: t(`kitchen.qr.sources.${failure.source}`) })"
+			data-test="source-failure"
+		/>
 
 		<n-card v-if="branchId !== null">
 			<n-spin :show="isLoading">
-				<div v-if="rows.length === 0 && !isLoading" class="py-10 text-center">{{ t("kitchen.qr.empty") }}</div>
+				<div v-if="rows.length === 0 && !isLoading && failures.length === 0" class="py-10 text-center">{{ t("kitchen.qr.empty") }}</div>
 				<div
 					v-for="row in rows"
 					:key="row.key"
@@ -89,6 +96,8 @@ import Icon from "@/components/common/Icon.vue"
  * be printed as a sticker, or deleted, which stops the printed stickers.
  */
 
+type QrSource = "buildings" | "spaces" | "desks" | "codes"
+
 interface PlaceRow {
 	key: string
 	placeType: QrPlaceType
@@ -108,7 +117,8 @@ const mayDelete = computed(() => can("qr-points.delete"))
 const branchId = ref<number | null>(null)
 const rows = ref<PlaceRow[]>([])
 const isLoading = ref(false)
-const loadError = ref(false)
+/** The lists that could not be read this time, and whether the reason is a missing permission. */
+const failures = ref<{ source: QrSource; denied: boolean }[]>([])
 const busyKey = ref<string | null>(null)
 const stickerOpen = ref(false)
 const stickerRow = ref<PlaceRow | null>(null)
@@ -123,14 +133,33 @@ async function load() {
 	if (branchId.value === null) return
 	const branch = branchId.value
 	isLoading.value = true
-	loadError.value = false
+	const failed: { source: QrSource; denied: boolean }[] = []
+
+	/** One source's answer, or its fallback and a note of why it is missing. Anything but an API refusal is a bug and surfaces. */
+	async function read<T>(source: QrSource, fallback: T, run: () => Promise<T>): Promise<T> {
+		try {
+			return await run()
+		} catch (caught) {
+			if (!(caught instanceof ApiError)) throw caught
+			failed.push({ source, denied: caught.status === 403 })
+			return fallback
+		}
+	}
+
 	try {
-		const buildings = await listBuildings(branch)
-		const spaceLists = await Promise.all(buildings.map(building => listSpaces({ building_id: building.id })))
+		const buildings = await read("buildings", [], () => listBuildings(branch))
+		const spaceLists = await read("spaces", [], () => Promise.all(buildings.map(building => listSpaces({ building_id: building.id }))))
 		const spaces = spaceLists.flat()
-		const desks = await listSeatsDesks({ branch_id: branch })
-		const points = (await listQrPoints({ branch_id: branch, per_page: 100 })).data
+		const desks = await read("desks", [], () => listSeatsDesks({ branch_id: branch }))
+		// Without the codes every place would read "No code", which would be a lie: show no rows rather than wrong ones.
+		const points = await read<QrPoint[] | null>("codes", null, async () => (await listQrPoints({ branch_id: branch })).data)
 		if (branch !== branchId.value) return
+		failures.value = failed
+
+		if (points === null) {
+			rows.value = []
+			return
+		}
 
 		const pointOf = (type: QrPlaceType, id: number) => points.find(point => point.place_type === type && point.place_id === id) ?? null
 		const spaceById = new Map(spaces.map(space => [space.id, space]))
@@ -155,10 +184,6 @@ async function load() {
 				point: pointOf("space", space.id)
 			}))
 		rows.value = [...deskRows, ...roomRows]
-	} catch (caught) {
-		if (!(caught instanceof ApiError)) throw caught
-		loadError.value = true
-		rows.value = []
 	} finally {
 		isLoading.value = false
 	}

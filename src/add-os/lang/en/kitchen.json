@@ -37,7 +37,15 @@
 		},
 		"card": {
 			"order": "Order #{id}",
-			"waited": "Waiting {minutes} min",
+			"waited": {
+				"zero": "Waiting {n} min",
+				"one": "Waiting {n} min",
+				"two": "Waiting {n} min",
+				"few": "Waiting {n} min",
+				"many": "Waiting {n} min",
+				"other": "Waiting {n} min"
+			},
+			"unknownMember": "Unknown member",
 			"line": "{name} × {quantity}",
 			"unnamedItem": "Removed item",
 			"total": "{points} points",
@@ -116,7 +124,14 @@
 			"description": "The codes members scan at a desk or in a room to order from the kitchen. Print one as a sticker for the place.",
 			"branch": "Branch",
 			"chooseBranch": "Choose a branch to see its desks and rooms.",
-			"loadError": "Couldn't load this branch's places and codes.",
+			"sourceDenied": "You don't have permission to view {source}, so this list is incomplete.",
+			"sourceError": "Couldn't load {source}.",
+			"sources": {
+				"buildings": "buildings",
+				"spaces": "rooms and spaces",
+				"desks": "desks",
+				"codes": "ordering codes"
+			},
 			"empty": "This branch has no desks or rooms yet.",
 			"kind": {
 				"seat_desk": "Desk",

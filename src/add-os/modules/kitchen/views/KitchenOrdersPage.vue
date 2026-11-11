@@ -125,7 +125,8 @@ onMounted(async () => {
 })
 
 const query = computed<Record<string, unknown>>(() => {
-	const q: KitchenOrderQuery = { status: statuses.value.length > 0 ? [...statuses.value] : [...KITCHEN_ORDER_STATUSES] }
+	// History reads newest first; the board (no `sort`) keeps the queue oldest first.
+	const q: KitchenOrderQuery = { sort: "newest", status: statuses.value.length > 0 ? [...statuses.value] : [...KITCHEN_ORDER_STATUSES] }
 	if (branchId.value !== null) q.branch_id = branchId.value
 	if (range.value) {
 		q.from = range.value[0]
@@ -144,10 +145,15 @@ function placeOf(order: KitchenOrder): string {
 	return order.delivery.label ?? order.delivery.note ?? t(`kitchen.deliveryType.${order.delivery.type}`)
 }
 
+/** The member's name, or "unknown member" once their account has been deleted. */
+function memberName(order: KitchenOrder): string {
+	return order.member?.name ?? t("kitchen.card.unknownMember")
+}
+
 const columns = computed<DataTableColumns<KitchenOrder>>(() => [
 	{ key: "id", title: t("kitchen.history.columns.order"), width: 90, render: row => formatNumber(row.id, { grouping: false }) },
 	{ key: "submitted", title: t("kitchen.history.columns.submitted"), render: row => (row.timestamps.submitted_at ? formatDateTime(row.timestamps.submitted_at) : "—") },
-	{ key: "member", title: t("kitchen.history.columns.member"), render: row => row.member.name },
+	{ key: "member", title: t("kitchen.history.columns.member"), render: row => memberName(row) },
 	{ key: "place", title: t("kitchen.history.columns.place"), ellipsis: { tooltip: true }, render: row => placeOf(row) },
 	{ key: "total", title: t("kitchen.history.columns.total"), render: row => formatNumber(row.total_points) },
 	{ key: "status", title: t("kitchen.history.columns.status"), render: row => h(NTag, { type: STATUS_TAG[row.status], size: "small" }, () => t(`kitchen.status.${row.status}`)) }
@@ -174,7 +180,7 @@ const fields = computed(() => {
 	const order = selected.value
 	if (order === null) return []
 	const list = [
-		{ label: t("kitchen.history.columns.member"), value: order.member.phone ? `${order.member.name} · ${order.member.phone}` : order.member.name },
+		{ label: t("kitchen.history.columns.member"), value: order.member?.phone ? `${memberName(order)} · ${order.member.phone}` : memberName(order) },
 		{ label: t("kitchen.history.columns.place"), value: placeOf(order) },
 		{ label: t("kitchen.history.bill"), value: t(`kitchen.history.billType.${order.bill.type}`, { id: formatNumber(order.bill.id, { grouping: false }) }) },
 		{ label: t("kitchen.history.source"), value: t(`kitchen.history.sourceType.${order.source}`) },
