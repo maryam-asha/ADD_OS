@@ -61,6 +61,56 @@
 			"reasonPlaceholder": "The member will read this.",
 			"reasonRequired": "Give a reason for the rejection.",
 			"submit": "Reject order"
+		},
+		"history": {
+			"description": "Every order sent to a branch kitchen. Open a row to see the whole order.",
+			"loadError": "Couldn't load the kitchen's orders.",
+			"filters": {
+				"branch": "Branch",
+				"status": "Status",
+				"member": "Member"
+			},
+			"columns": {
+				"order": "Order",
+				"submitted": "Sent",
+				"member": "Member",
+				"place": "Deliver to",
+				"total": "Points",
+				"status": "Status"
+			},
+			"paid": "Paid",
+			"unpaid": "Unpaid",
+			"lines": "Items",
+			"rejectionReason": "Why it was rejected",
+			"bill": "Billed to",
+			"billType": {
+				"booking": "Booking #{id}",
+				"walkin": "Walk-in session #{id}"
+			},
+			"source": "Ordered from",
+			"sourceType": {
+				"qr": "A scanned QR code",
+				"app": "The member app"
+			},
+			"submittedAt": "Sent",
+			"acceptedAt": "Accepted",
+			"readyAt": "Ready",
+			"deliveredAt": "Delivered",
+			"cancelledBy": "Cancelled by",
+			"cancelledByType": {
+				"member": "The member",
+				"system": "The system"
+			}
+		},
+		"stores": {
+			"description": "The warehouse each branch's kitchen draws from; its menu is what that warehouse holds. A branch with none takes no orders.",
+			"loadError": "Couldn't load the kitchen stores.",
+			"warehousesUnavailable": "Couldn't load the warehouses to choose from.",
+			"empty": "No branches yet.",
+			"choose": "Choose a warehouse that sells",
+			"save": "Save",
+			"saved": "Kitchen store saved.",
+			"none": "No kitchen store"
 		}
 	}
 }

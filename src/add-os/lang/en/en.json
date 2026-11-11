@@ -1960,6 +1960,8 @@
 		},
 		"pages": {
 			"board": "Kitchen board",
+			"orders": "Kitchen orders",
+			"stores": "Kitchen stores",
 			"overview": "Overview",
 			"myNotifications": "Notifications",
 			"branches": "Branches",

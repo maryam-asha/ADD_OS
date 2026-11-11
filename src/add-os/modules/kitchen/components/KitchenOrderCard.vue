@@ -36,7 +36,7 @@
 			</div>
 
 			<div v-if="canManage && actions.length > 0" class="flex flex-wrap gap-2" data-test="actions">
-				<n-button v-for="action in actions" :key="action.key" size="small" :type="action.type" :disabled="busy" :data-action="action.key" @click="emit(action.key)">
+				<n-button v-for="action in actions" :key="action.key" size="small" :type="action.type" :disabled="busy" :data-action="action.key" @click="fire(action.key)">
 					{{ t(`kitchen.actions.${action.key}`) }}
 				</n-button>
 			</div>
@@ -69,6 +69,13 @@ const props = defineProps<{
 const emit = defineEmits<{ accept: []; reject: []; ready: []; deliver: [] }>()
 
 const { t } = useI18n()
+
+function fire(action: CardAction) {
+	if (action === "accept") emit("accept")
+	else if (action === "reject") emit("reject")
+	else if (action === "ready") emit("ready")
+	else emit("deliver")
+}
 
 const DELIVERY_ICON: Record<DeliveryType, string> = {
 	desk: "carbon:workspace",

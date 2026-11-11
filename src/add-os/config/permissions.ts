@@ -528,3 +528,8 @@ export function canViewKitchenStores(): boolean {
 export function canUpdateKitchenStores(): boolean {
 	return can("kitchen-stores.update")
 }
+
+/** Reading the member list (`GET admin/users`), e.g. to filter kitchen orders by member — any of the three ADD Core accepts there. */
+export function canListMembers(): boolean {
+	return can("users.view") || can("members.view") || can("reception.view")
+}

@@ -1964,6 +1964,8 @@
 		},
 		"pages": {
 			"board": "لوحة المطبخ",
+			"orders": "طلبات المطبخ",
+			"stores": "مستودعات المطبخ",
 			"overview": "نظرة عامة",
 			"myNotifications": "الإشعارات",
 			"branches": "الفروع",
