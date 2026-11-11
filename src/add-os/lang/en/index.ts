@@ -27,6 +27,7 @@ import hrTimesheets from "./hr-timesheets.json"
 import hrTraining from "./hr-training.json"
 import hr from "./hr.json"
 import inventory from "./inventory.json"
+import kitchen from "./kitchen.json"
 
 const messages = {
 	...base,
@@ -42,7 +43,8 @@ const messages = {
 	...hrPerformance,
 	...hrTraining,
 	...hrReports,
-	...inventory
+	...inventory,
+	...kitchen
 	// ...spread future ADD OS module bundles here (mirror ../ar/index.ts exactly)
 }
 

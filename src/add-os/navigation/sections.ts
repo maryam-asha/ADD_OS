@@ -342,6 +342,15 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		]
 	},
 	{
+		// Members' orders to the branch kitchen. Not the Business Café under
+		// Community, which is its own (still ComingSoon) page.
+		key: "kitchen",
+		path: "/kitchen",
+		icon: "carbon:cafe",
+		status: "active",
+		pages: [{ key: "board", path: "board", permission: "kitchen-orders.view" }]
+	},
+	{
 		key: "reports",
 		path: "/reports",
 		icon: "carbon:chart-line",

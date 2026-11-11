@@ -310,6 +310,9 @@
 			"exchange-rates": "Exchange Rates",
 			"hr": "Human Resources",
 			"inventory": "Inventory & Assets",
+			"kitchen-orders": "Kitchen orders",
+			"kitchen-stores": "Kitchen stores",
+			"qr-points": "Ordering QR codes",
 			"invoices": "Invoices",
 			"item-sales": "Item Sales",
 			"access-grants": "Door codes",
@@ -1952,9 +1955,11 @@
 			"hrPay": "Pay and benefits",
 			"hrTalent": "Talent",
 			"hrReports": "HR reports",
-			"inventory": "Inventory"
+			"inventory": "Inventory",
+			"kitchen": "Kitchen"
 		},
 		"pages": {
+			"board": "Kitchen board",
 			"overview": "Overview",
 			"myNotifications": "Notifications",
 			"branches": "Branches",

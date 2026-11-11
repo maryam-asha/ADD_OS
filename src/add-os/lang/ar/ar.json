@@ -314,6 +314,9 @@
 			"exchange-rates": "أسعار الصرف",
 			"hr": "الموارد البشرية",
 			"inventory": "المخزون والأصول",
+			"kitchen-orders": "طلبات المطبخ",
+			"kitchen-stores": "مستودعات المطبخ",
+			"qr-points": "رموز الطلب QR",
 			"invoices": "الفواتير",
 			"item-sales": "بيع المواد",
 			"access-grants": "رموز الأبواب",
@@ -1956,9 +1959,11 @@
 			"hrPay": "الرواتب والمزايا",
 			"hrTalent": "التوظيف والمواهب",
 			"hrReports": "تقارير الموارد البشرية",
-			"inventory": "المخزون والأصول"
+			"inventory": "المخزون والأصول",
+			"kitchen": "المطبخ"
 		},
 		"pages": {
+			"board": "لوحة المطبخ",
 			"overview": "نظرة عامة",
 			"myNotifications": "الإشعارات",
 			"branches": "الفروع",
