@@ -2,11 +2,11 @@ import type Echo from "laravel-echo"
 import { post } from "./api"
 
 /**
- * Real-time nudges from ADD Core to the reception desk — Laravel broadcasting over the Pusher protocol (ADDCore
+ * Real-time nudges from ADD Core to the reception desk and the kitchen board — Laravel broadcasting over the Pusher protocol (ADDCore
  * config/broadcasting.php).
  *
  * ── What travels ────────────────────────────────────────────────────────────
- * Only an event name and ids, on the private `reception` channel. A screen
+ * Only an event name and ids, on the private `reception` and `kitchen` channels. A screen
  * that hears one re-fetches the endpoint it already reads; nothing on screen is ever
  * taken from an event, so a missed or duplicated event costs one stale list or
  * one extra request, never a wrong one.
@@ -25,7 +25,7 @@ import { post } from "./api"
  * server later is the `broadcaster`/`wsHost` options here and nothing else.
  *
  * ── Auth ────────────────────────────────────────────────────────────────────
- * The channel is signed by `POST /api/broadcasting/auth` through the same
+ * Each channel is signed by `POST /api/broadcasting/auth` through the same
  * `post()` every dashboard call uses — the session cookie, X-XSRF-TOKEN and the
  * `lang` header come with it, and a 401 signs the operator out like any other.
  */
@@ -48,7 +48,19 @@ export type ReceptionEvent = (typeof RECEPTION_EVENTS)[number]
 
 export type ReceptionEventHandler = (event: ReceptionEvent, payload: Record<string, unknown>) => void
 
+/**
+ * The events the API sends on `private-kitchen` — ADDCore App\Domain\Kitchen\Events
+ * (`KitchenOrderChanged::broadcastAs`). Payload `{order_id, branch_id, status}`;
+ * the board reads its list again rather than use it.
+ */
+export const KITCHEN_EVENTS = ["kitchen_order.created", "kitchen_order.updated"] as const
+
+export type KitchenEvent = (typeof KITCHEN_EVENTS)[number]
+
+export type KitchenEventHandler = (event: KitchenEvent, payload: Record<string, unknown>) => void
+
 const RECEPTION_CHANNEL = "reception"
+const KITCHEN_CHANNEL = "kitchen"
 
 type EchoInstance = Echo<"pusher">
 
@@ -57,7 +69,8 @@ const PUSHER_CLUSTER = import.meta.env.VITE_PUSHER_APP_CLUSTER as string | undef
 
 let echo: Promise<EchoInstance | null> | null = null
 let connected = false
-let receptionListeners = 0
+/** How many screens listen on each channel; the channel is left when its count reaches 0. */
+const listeners: Record<string, number> = {}
 
 function isSet(value: string | undefined): value is string {
 	return typeof value === "string" && value.trim() !== ""
@@ -118,22 +131,22 @@ function getEcho(): Promise<EchoInstance | null> {
 }
 
 /**
- * Calls `handler` for each of `events` sent on `private-reception` until the
- * returned function is called. Safe to call when realtime is off (does nothing)
- * and from several screens at once: the channel is left only when the last
- * screen stops listening.
+ * Calls `handler` for each of `events` sent on `private-<name>` until the
+ * returned function is called. Safe to call when realtime is off (does
+ * nothing) and from several screens at once: the channel is left only when
+ * the last screen listening on it stops.
  */
-export function subscribeReception(handler: ReceptionEventHandler, events: readonly ReceptionEvent[] = RECEPTION_EVENTS): () => void {
+function subscribeChannel<E extends string>(name: string, handler: (event: E, payload: Record<string, unknown>) => void, events: readonly E[]): () => void {
 	let stopped = false
 	const callbacks = events.map(event => [event, (payload: Record<string, unknown>) => handler(event, payload ?? {})] as const)
 	let attached: EchoInstance | null = null
 
-	receptionListeners++
+	listeners[name] = (listeners[name] ?? 0) + 1
 
 	void getEcho().then(instance => {
 		if (!instance || stopped) return
 		attached = instance
-		const channel = instance.private(RECEPTION_CHANNEL)
+		const channel = instance.private(name)
 		// Leading dot: the API names its events with broadcastAs(), so Echo must
 		// not prefix them with a PHP namespace.
 		for (const [event, callback] of callbacks) channel.listen(`.${event}`, callback)
@@ -142,17 +155,27 @@ export function subscribeReception(handler: ReceptionEventHandler, events: reado
 	return () => {
 		if (stopped) return
 		stopped = true
-		receptionListeners--
+		listeners[name] = (listeners[name] ?? 1) - 1
 		if (!attached) return
-		const channel = attached.private(RECEPTION_CHANNEL)
+		const channel = attached.private(name)
 		for (const [event, callback] of callbacks) channel.stopListening(`.${event}`, callback)
-		if (receptionListeners === 0) attached.leave(RECEPTION_CHANNEL)
+		if (listeners[name] === 0) attached.leave(name)
 	}
+}
+
+/** The reception desk's events on `private-reception`; see `subscribeChannel`. */
+export function subscribeReception(handler: ReceptionEventHandler, events: readonly ReceptionEvent[] = RECEPTION_EVENTS): () => void {
+	return subscribeChannel(RECEPTION_CHANNEL, handler, events)
+}
+
+/** The kitchen board's events on `private-kitchen`; see `subscribeChannel`. */
+export function subscribeKitchen(handler: KitchenEventHandler, events: readonly KitchenEvent[] = KITCHEN_EVENTS): () => void {
+	return subscribeChannel(KITCHEN_CHANNEL, handler, events)
 }
 
 /** Test seam: forget the instance and the counters. */
 export function resetRealtimeForTests(): void {
 	echo = null
 	connected = false
-	receptionListeners = 0
+	for (const name of Object.keys(listeners)) delete listeners[name]
 }
