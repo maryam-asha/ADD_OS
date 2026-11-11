@@ -462,7 +462,22 @@
 			"recentMovements": "Recent movements",
 			"external": "Outside any branch",
 			"save": "Save warehouse",
-			"assets": "Assets kept here"
+			"assets": "Assets kept here",
+			"minimums": {
+				"title": "Minimum quantities",
+				"description": "The least this warehouse should hold of each item. An item that falls below it is flagged. A minimum of 0 removes the row.",
+				"empty": "No minimums set.",
+				"item": "Item",
+				"minimum": "Minimum",
+				"onHand": "On hand",
+				"below": "Below minimum",
+				"add": "Add an item",
+				"remove": "Remove",
+				"save": "Save minimums",
+				"saved": "Minimums saved.",
+				"loadError": "Couldn't load the minimums.",
+				"saveError": "Couldn't save the minimums."
+			}
 		},
 		"operations": {
 			"add": "Add movement",
