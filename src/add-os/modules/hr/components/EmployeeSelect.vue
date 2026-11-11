@@ -11,6 +11,7 @@
 		filterable
 		clearable
 		@search="search"
+		@update:show="opened"
 	/>
 </template>
 
@@ -25,8 +26,9 @@ import { translated } from "@/add-os/modules/hr/utils/translated"
 import { getEmployee, listEmployees } from "@/add-os/services/hr/core"
 
 /**
- * Choosing an employee. With hr.employees.view it searches every employee as
- * you type (`GET employees?q=`); without it, it offers only `options` — the
+ * Choosing an employee. With hr.employees.view it lists the first page when
+ * opened and searches every employee as you type (`GET employees?q=`);
+ * without it, it offers only `options` — the
  * choices the caller already has, such as a manager's own team. A value
  * that arrives with no label (from the URL, a saved flow) is named once
  * from its record when the account may read it.
@@ -58,16 +60,30 @@ const options = computed<SelectOption[]>(() => {
 	return [...found.value, ...(props.options ?? []), ...named.value].filter(o => !props.exclude?.includes(o.value as number) && !seen.has(o.value) && seen.add(o.value))
 })
 
+/** The latest request; an earlier one that answers after it is dropped. */
+let asked = 0
+let listedOnOpen = false
+
+/** A term searches; an empty one lists the first page, as opening does. */
 async function search(term: string) {
-	if (!mayFind || !term.trim()) return
+	if (!mayFind) return
+	const q = term.trim()
+	const mine = ++asked
 	searching.value = true
 	await quietly(
-		() => listEmployees({ q: term.trim() }),
+		() => listEmployees(q ? { q } : {}),
 		result => {
+			if (mine !== asked) return
 			found.value = result.data.filter(e => props.includeFormer || e.status !== "terminated").map(e => ({ label: label(e), value: e.id }))
 		}
 	)
-	searching.value = false
+	if (mine === asked) searching.value = false
+}
+
+function opened(show: boolean) {
+	if (!show || listedOnOpen || !mayFind) return
+	listedOnOpen = true
+	void search("")
 }
 
 watch(

@@ -29,7 +29,7 @@ describe("employeeSelect", () => {
 	})
 
 	beforeEach(() => {
-		vi.clearAllMocks()
+		vi.resetAllMocks()
 		permissions.view = true
 		listMock.mockResolvedValue({ data: [person(1), person(2, "terminated")], meta: { current_page: 1, last_page: 1, per_page: 25, total: 2 } })
 		getMock.mockResolvedValue(person(9))
@@ -46,6 +46,56 @@ describe("employeeSelect", () => {
 
 		expect(listMock).toHaveBeenCalledWith({ q: "pe" })
 		expect(vm.options.map(o => o.value)).toEqual([1])
+		wrapper.unmount()
+	})
+
+	it("lists the first page of employees when opened, before anything is typed", async () => {
+		const wrapper = mountSelect(null)
+		await wrapper.findComponent({ name: "Select" }).vm.$emit("update:show", true)
+		await flushPromises()
+
+		expect(listMock).toHaveBeenCalledWith({})
+		expect((wrapper.vm as unknown as SelectVm).options.map(o => o.value)).toEqual([1])
+		wrapper.unmount()
+	})
+
+	it("loads the opening list only once", async () => {
+		const wrapper = mountSelect(null)
+		const select = wrapper.findComponent({ name: "Select" })
+		await select.vm.$emit("update:show", true)
+		await flushPromises()
+		await select.vm.$emit("update:show", false)
+		await select.vm.$emit("update:show", true)
+		await flushPromises()
+
+		expect(listMock).toHaveBeenCalledTimes(1)
+		wrapper.unmount()
+	})
+
+	it("returns to the first page when the search is cleared", async () => {
+		const wrapper = mountSelect(null)
+		const vm = wrapper.vm as unknown as SelectVm
+		await vm.search("pe")
+		listMock.mockResolvedValueOnce({ data: [person(5)], meta: { current_page: 1, last_page: 1, per_page: 25, total: 1 } })
+		await vm.search("  ")
+
+		expect(listMock).toHaveBeenLastCalledWith({})
+		expect(vm.options.map(o => o.value)).toEqual([5])
+		wrapper.unmount()
+	})
+
+	it("keeps the latest search when an earlier request answers last", async () => {
+		let answerFirst: (v: unknown) => void = () => {}
+		listMock.mockReturnValueOnce(new Promise(resolve => (answerFirst = resolve)))
+		listMock.mockResolvedValueOnce({ data: [person(7)], meta: { current_page: 1, last_page: 1, per_page: 25, total: 1 } })
+		const wrapper = mountSelect(null)
+		const vm = wrapper.vm as unknown as SelectVm
+		const first = vm.search("p")
+		await vm.search("pe")
+		answerFirst({ data: [person(1)], meta: { current_page: 1, last_page: 1, per_page: 25, total: 1 } })
+		await first
+
+		expect(vm.options.map(o => o.value)).toEqual([7])
 		wrapper.unmount()
 	})
 
@@ -71,6 +121,7 @@ describe("employeeSelect", () => {
 		permissions.view = false
 		const wrapper = mountSelect(4, { options: [{ label: "My manager", value: 4 }] })
 		const vm = wrapper.vm as unknown as SelectVm
+		await wrapper.findComponent({ name: "Select" }).vm.$emit("update:show", true)
 		await vm.search("pe")
 		await flushPromises()
 
