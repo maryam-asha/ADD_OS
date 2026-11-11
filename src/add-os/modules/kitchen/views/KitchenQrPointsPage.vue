@@ -61,7 +61,7 @@
 		</n-card>
 		<p v-else>{{ t("kitchen.qr.chooseBranch") }}</p>
 
-		<QrPointStickerModal v-model:show="stickerOpen" :point="stickerRow?.point ?? null" :label="stickerRow?.label ?? ''" :branch-name="branchName" />
+		<QrPointStickerModal v-model:show="stickerOpen" :point="stickerRow?.point ?? null" :label="stickerRow?.label ?? ''" :branch-name />
 	</div>
 </template>
 
