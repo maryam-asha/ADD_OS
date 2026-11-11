@@ -508,3 +508,28 @@ export function canTransferStock(): boolean {
 export function canCountStock(): boolean {
 	return can("inventory.stock.adjust")
 }
+
+// ── Kitchen ─────────────────────────────────────────────────────────────────
+//
+// ADD Core's kitchen orders (`routes/api/v1/admin.php`, `kitchen/*` and
+// `qr-points`): each route carries its own `permission:` middleware.
+
+/** Accepting, rejecting, and marking an order ready or delivered. */
+export function canManageKitchenOrders(): boolean {
+	return can("kitchen-orders.manage")
+}
+
+/** Reading which warehouse each branch's kitchen draws from. */
+export function canViewKitchenStores(): boolean {
+	return can("kitchen-stores.view")
+}
+
+/** Choosing the warehouse a branch's kitchen draws from. */
+export function canUpdateKitchenStores(): boolean {
+	return can("kitchen-stores.update")
+}
+
+/** Reading the member list (`GET admin/users`), e.g. to filter kitchen orders by member — any of the three ADD Core accepts there. */
+export function canListMembers(): boolean {
+	return can("users.view") || can("members.view") || can("reception.view")
+}

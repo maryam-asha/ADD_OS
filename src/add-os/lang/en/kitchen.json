@@ -1,0 +1,157 @@
+{
+	"kitchen": {
+		"status": {
+			"pending": "New",
+			"preparing": "Preparing",
+			"ready": "Ready",
+			"delivered": "Delivered",
+			"rejected": "Rejected",
+			"cancelled": "Cancelled"
+		},
+		"deliveryType": {
+			"desk": "Desk",
+			"space": "Room",
+			"pickup": "Pickup",
+			"note": "Note"
+		},
+		"delivery": {
+			"pickup": "Pickup at the kitchen counter"
+		},
+		"board": {
+			"description": "Members' orders to this branch's kitchen, oldest first in each column.",
+			"branch": "Branch",
+			"refresh": "Refresh",
+			"chooseBranch": "Choose a branch to see its kitchen's orders.",
+			"loadError": "Couldn't load the kitchen's orders.",
+			"emptyColumn": "No orders here.",
+			"columns": {
+				"pending": "New",
+				"preparing": "Preparing",
+				"ready": "Ready"
+			},
+			"noStore": {
+				"title": "This branch has no kitchen store",
+				"reason": "{branch} has no warehouse set for its kitchen, so members can't order there and no order can be accepted.",
+				"link": "Set the kitchen store"
+			}
+		},
+		"card": {
+			"order": "Order #{id}",
+			"waited": {
+				"zero": "Waiting {n} min",
+				"one": "Waiting {n} min",
+				"two": "Waiting {n} min",
+				"few": "Waiting {n} min",
+				"many": "Waiting {n} min",
+				"other": "Waiting {n} min"
+			},
+			"unknownMember": "Unknown member",
+			"line": "{name} × {quantity}",
+			"unnamedItem": "Removed item",
+			"total": "{points} points",
+			"submitted": "Sent at {time}"
+		},
+		"actions": {
+			"accept": "Accept",
+			"reject": "Reject",
+			"ready": "Ready for pickup",
+			"deliver": "Delivered"
+		},
+		"success": {
+			"accept": "Order accepted.",
+			"reject": "Order rejected.",
+			"ready": "Order marked ready.",
+			"deliver": "Order marked delivered."
+		},
+		"reject": {
+			"title": "Reject order #{id}",
+			"reasonLabel": "Reason",
+			"reasonPlaceholder": "The member will read this.",
+			"reasonRequired": "Give a reason for the rejection.",
+			"submit": "Reject order"
+		},
+		"history": {
+			"description": "Every order sent to a branch kitchen. Open a row to see the whole order.",
+			"loadError": "Couldn't load the kitchen's orders.",
+			"filters": {
+				"branch": "Branch",
+				"status": "Status",
+				"member": "Member"
+			},
+			"columns": {
+				"order": "Order",
+				"submitted": "Sent",
+				"member": "Member",
+				"place": "Deliver to",
+				"total": "Points",
+				"status": "Status"
+			},
+			"paid": "Paid",
+			"unpaid": "Unpaid",
+			"lines": "Items",
+			"rejectionReason": "Why it was rejected",
+			"bill": "Billed to",
+			"billType": {
+				"booking": "Booking #{id}",
+				"walkin": "Walk-in session #{id}"
+			},
+			"source": "Ordered from",
+			"sourceType": {
+				"qr": "A scanned QR code",
+				"app": "The member app"
+			},
+			"submittedAt": "Sent",
+			"acceptedAt": "Accepted",
+			"readyAt": "Ready",
+			"deliveredAt": "Delivered",
+			"cancelledBy": "Cancelled by",
+			"cancelledByType": {
+				"member": "The member",
+				"system": "The system"
+			}
+		},
+		"stores": {
+			"description": "The warehouse each branch's kitchen draws from; its menu is what that warehouse holds. A branch with none takes no orders.",
+			"loadError": "Couldn't load the kitchen stores.",
+			"warehousesUnavailable": "Couldn't load the warehouses to choose from.",
+			"empty": "No branches yet.",
+			"choose": "Choose a warehouse that sells",
+			"save": "Save",
+			"saved": "Kitchen store saved.",
+			"none": "No kitchen store"
+		},
+		"qr": {
+			"description": "The codes members scan at a desk or in a room to order from the kitchen. Print one as a sticker for the place.",
+			"branch": "Branch",
+			"chooseBranch": "Choose a branch to see its desks and rooms.",
+			"sourceDenied": "You don't have permission to view {source}, so this list is incomplete.",
+			"sourceError": "Couldn't load {source}.",
+			"sources": {
+				"buildings": "buildings",
+				"spaces": "rooms and spaces",
+				"desks": "desks",
+				"codes": "ordering codes"
+			},
+			"empty": "This branch has no desks or rooms yet.",
+			"kind": {
+				"seat_desk": "Desk",
+				"space": "Room"
+			},
+			"hasCode": "Has a code",
+			"noCode": "No code",
+			"create": "Create code",
+			"created": "Code created.",
+			"print": "Print",
+			"delete": "Delete code",
+			"deleteOk": "Delete the code",
+			"deleted": "Code deleted.",
+			"deleteConfirm": "Delete the code for {place}? Stickers already printed and fixed there will stop working.",
+			"sticker": {
+				"title": "Ordering sticker",
+				"hint": "Members scan this code to order from the kitchen.",
+				"print": "Print sticker",
+				"printHint": "Scan to order from the kitchen."
+			}
+		}
+	}
+}

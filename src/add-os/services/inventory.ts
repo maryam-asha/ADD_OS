@@ -47,7 +47,7 @@ import type {
 	WarehousePayload
 } from "@/add-os/modules/inventory/types/inventory"
 import type { ItemCodeMode } from "@/add-os/modules/inventory/utils/itemCode"
-import { ApiError, del, get, patch, post } from "./api"
+import { ApiError, del, get, patch, post, put } from "./api"
 import { rowsOf, toPaginated } from "./pagination"
 
 const BASE = "/api/v1/inventory"
@@ -354,6 +354,23 @@ export async function createWarehouse(payload: WarehousePayload): Promise<Wareho
 
 export async function updateWarehouse(id: number, payload: Partial<WarehousePayload>): Promise<MessageResult> {
 	return patch<MessageResult>(`${BASE}/warehouses/${id}`, payload)
+}
+
+/** One minimum a warehouse should hold of an item, with what it holds now. Quantities are decimal strings. */
+export interface WarehouseMinimum {
+	item_id: number
+	minimum: string
+	on_hand: string
+	below: boolean
+}
+
+export async function getWarehouseMinimums(id: number): Promise<WarehouseMinimum[]> {
+	return rowsOf<WarehouseMinimum>((await get<{ data: unknown }>(`${BASE}/warehouses/${id}/minimums`)).data)
+}
+
+/** Sets the items listed (the rest are left alone); a minimum of "0" removes the item's row. Answers the full list. */
+export async function setWarehouseMinimums(id: number, items: { item_id: number; minimum: string }[]): Promise<WarehouseMinimum[]> {
+	return rowsOf<WarehouseMinimum>((await put<{ data: unknown }>(`${BASE}/warehouses/${id}/minimums`, { items })).data)
 }
 
 export async function removeWarehouse(id: number): Promise<void> {

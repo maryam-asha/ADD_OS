@@ -179,7 +179,16 @@ export const KNOWN_PERMISSIONS: readonly string[] = [
 	"inventory.stock.adjust",
 	"inventory.reports.view",
 	"inventory.settings.manage",
-	"inventory.assets.approve"
+	"inventory.assets.approve",
+
+	// Kitchen orders (`routes/api/v1/admin.php`: `kitchen/*`, `qr-points`)
+	"kitchen-orders.view",
+	"kitchen-orders.manage",
+	"kitchen-stores.view",
+	"kitchen-stores.update",
+	"qr-points.view",
+	"qr-points.create",
+	"qr-points.delete"
 ]
 
 /**

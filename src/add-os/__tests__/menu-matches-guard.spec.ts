@@ -238,6 +238,15 @@ describe("sidebar, route guard and \"/\" agree", () => {
 		expect(homePath()).toBe("/dashboard/overview")
 	})
 
+	it("offers the kitchen its board and history, and the store settings only with kitchen-stores.view", () => {
+		signIn({ roles: ["kitchen"], permissions: ["kitchen-orders.view", "kitchen-orders.manage"] })
+		expect(offeredByPermission()).toEqual(["/kitchen/board", "/kitchen/orders"])
+		expect(homePath()).toBe("/kitchen/board")
+
+		signIn({ roles: ["kitchen"], permissions: ["kitchen-orders.view", "kitchen-stores.view"] })
+		expect(offeredByPermission()).toEqual(["/kitchen/board", "/kitchen/orders", "/kitchen/stores"])
+	})
+
 	it("sends an employee with no permission to My HR", () => {
 		signIn(ACCOUNTS["an employee with no role"])
 		expect(NAV_SECTIONS.filter(maySeeSection).map(section => section.key)).toEqual(["myHr"])

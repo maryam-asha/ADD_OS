@@ -20,6 +20,8 @@
 				<n-data-table class="add-ledger-table" :columns="assetColumns" :data="assets" :loading :bordered="false" size="small" :scroll-x="tableWidth(assetColumns)" />
 			</template>
 
+			<WarehouseMinimumsEditor v-if="show" :warehouse-id="warehouse.id" />
+
 			<h3 class="mt-6 mb-2 text-sm font-semibold">{{ t("inventory.warehouses.recentMovements") }}</h3>
 			<n-data-table class="add-ledger-table" :columns="movementColumns" :data="movements" :loading :bordered="false" size="small" :scroll-x="tableWidth(movementColumns)" />
 		</template>
@@ -34,6 +36,7 @@ import { computed, h, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import HrDrawer from "@/add-os/modules/hr/components/HrDrawer.vue"
 import { quietly } from "@/add-os/modules/hr/utils/errors"
+import WarehouseMinimumsEditor from "@/add-os/modules/inventory/components/WarehouseMinimumsEditor.vue"
 import { COLUMN, EMPTY, localized, money, quantity, tableWidth } from "@/add-os/modules/inventory/utils/display"
 import { inventorySettings, listAssets, listBalances, listStockMovements } from "@/add-os/services/inventory"
 import { formatDateTime } from "@/add-os/utils/format/dates"
