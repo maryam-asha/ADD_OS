@@ -111,6 +111,32 @@
 			"save": "Save",
 			"saved": "Kitchen store saved.",
 			"none": "No kitchen store"
+		},
+		"qr": {
+			"description": "The codes members scan at a desk or in a room to order from the kitchen. Print one as a sticker for the place.",
+			"branch": "Branch",
+			"chooseBranch": "Choose a branch to see its desks and rooms.",
+			"loadError": "Couldn't load this branch's places and codes.",
+			"empty": "This branch has no desks or rooms yet.",
+			"kind": {
+				"seat_desk": "Desk",
+				"space": "Room"
+			},
+			"hasCode": "Has a code",
+			"noCode": "No code",
+			"create": "Create code",
+			"created": "Code created.",
+			"print": "Print",
+			"delete": "Delete code",
+			"deleteOk": "Delete the code",
+			"deleted": "Code deleted.",
+			"deleteConfirm": "Delete the code for {place}? Stickers already printed and fixed there will stop working.",
+			"sticker": {
+				"title": "Ordering sticker",
+				"hint": "Members scan this code to order from the kitchen.",
+				"print": "Print sticker",
+				"printHint": "Scan to order from the kitchen."
+			}
 		}
 	}
 }
