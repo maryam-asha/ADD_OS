@@ -64,14 +64,12 @@
 				</div>
 			</n-form-item>
 
-			<div class="grid grid-cols-2 gap-3">
-				<n-form-item :label="t('operationsRequests.catalog.aboutEn')">
-					<n-input v-model:value="aboutEn" type="textarea" :autosize="{ minRows: 4, maxRows: 12 }" placeholder="<h2>…</h2><p>…</p>" class="font-mono text-xs" />
-				</n-form-item>
-				<n-form-item :label="t('operationsRequests.catalog.aboutAr')">
-					<n-input v-model:value="aboutAr" type="textarea" :autosize="{ minRows: 4, maxRows: 12 }" placeholder="<h2>…</h2><p>…</p>" class="font-mono text-xs" />
-				</n-form-item>
-			</div>
+			<n-form-item :label="t('operationsRequests.catalog.aboutAr')">
+				<MarkdownEditor v-model:value="aboutAr" class="w-full" placeholder="## …" min-height="180px" max-height="400px" />
+			</n-form-item>
+			<n-form-item :label="t('operationsRequests.catalog.aboutEn')">
+				<MarkdownEditor v-model:value="aboutEn" class="w-full" placeholder="## …" min-height="180px" max-height="400px" />
+			</n-form-item>
 
 			<div class="flex flex-wrap items-center gap-6 p-3 bg-stone-50 rounded-xl border border-stone-100">
 				<div class="flex items-center gap-2">
@@ -110,6 +108,7 @@ import type { RequestMethod, ServiceType, ServiceTypePayload } from "../types/se
 import { NButton, NFormItem, NInput, NModal, NSelect, NSpin, NSwitch, NUpload, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import MarkdownEditor from "@/add-os/components/form/MarkdownEditor.vue"
 import { uploadMedia } from "@/add-os/services/media"
 import { createServiceType, updateServiceType } from "@/add-os/services/service-types"
 import Icon from "@/components/common/Icon.vue"

@@ -2839,8 +2839,8 @@
 			"locationRequired": "Requires Location",
 			"fields": "Form Fields",
 			"image": "Cover image",
-			"aboutEn": "Explore page (English, HTML)",
-			"aboutAr": "Explore page (Arabic, HTML)",
+			"aboutEn": "Explore page (English, Markdown)",
+			"aboutAr": "Explore page (Arabic, Markdown)",
 			"showOnHome": "Show in the app's Explore ADD",
 			"onHome": "On the home",
 			"serviceUpdated": "Service updated successfully"

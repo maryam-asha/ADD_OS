@@ -2844,8 +2844,8 @@
 			"locationRequired": "يتطلب الموقع",
 			"fields": "حقول النموذج",
 			"image": "صورة الغلاف",
-			"aboutEn": "صفحة الشرح (إنكليزي، HTML)",
-			"aboutAr": "صفحة الشرح (عربي، HTML)",
+			"aboutEn": "صفحة الشرح (إنكليزي، Markdown)",
+			"aboutAr": "صفحة الشرح (عربي، Markdown)",
 			"showOnHome": "تظهر في Explore ADD بالتطبيق",
 			"onHome": "على الرئيسية",
 			"serviceUpdated": "تم تحديث الخدمة بنجاح"
