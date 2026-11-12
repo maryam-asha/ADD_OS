@@ -65,8 +65,8 @@ describe("membershipsPage — dedicated desks", () => {
 		vi.clearAllMocks()
 		listPlansMock.mockResolvedValue([plan(1, "flexi_desk"), plan(2, "dedicated_desk")])
 		listDesksMock.mockResolvedValue([
-			{ id: 4, space_id: 1, code: "D-04", label: "Window", qr_point_id: null, membership_id: null },
-			{ id: 5, space_id: 1, code: "D-05", label: "D-05", qr_point_id: null, membership_id: null }
+			{ id: 4, space_id: 1, code: "D-04", label: "Window", qr_point_id: null, qr_scan_value: null, membership_id: null },
+			{ id: 5, space_id: 1, code: "D-05", label: "D-05", qr_point_id: null, qr_scan_value: null, membership_id: null }
 		])
 		activateMock.mockResolvedValue({ id: 9 })
 	})

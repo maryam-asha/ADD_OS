@@ -4,14 +4,25 @@ import type { FieldDescriptor } from "@/add-os/components/resource/field-types"
 import type { SupportedLocale } from "@/add-os/lang/locales"
 import type { Branch } from "@/add-os/modules/spatial/types/branch"
 import type { SeatDesk, SeatDeskPayload } from "@/add-os/modules/spatial/types/seat-desk"
+import { NButton } from "naive-ui"
+import { h } from "vue"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import { listBuildings } from "@/add-os/services/buildings"
 import { listFloors } from "@/add-os/services/floors"
 import { listSpaces } from "@/add-os/services/spaces"
 import { listZones } from "@/add-os/services/zones"
-import { formatNumber } from "@/add-os/utils/format"
+import Icon from "@/components/common/Icon.vue"
 
-export function buildSeatDeskColumns(t: ComposerTranslation): DataTableColumns<SeatDesk> {
+/** What the QR column offers: printing needs `qr-points.view`, making a code `qr-points.create`. */
+export interface SeatDeskQrActions {
+	canPrint: boolean
+	canCreate: boolean
+	busyId: number | null
+	onPrint: (row: SeatDesk) => void
+	onCreate: (row: SeatDesk) => void
+}
+
+export function buildSeatDeskColumns(t: ComposerTranslation, qr: SeatDeskQrActions): DataTableColumns<SeatDesk> {
 	return [
 		{ title: t("seatsDesks.columns.code"), key: "code" },
 		{ title: t("seatsDesks.columns.space"), key: "space_id", render: row => `#${row.space_id}` },
@@ -23,8 +34,23 @@ export function buildSeatDeskColumns(t: ComposerTranslation): DataTableColumns<S
 		},
 		{
 			title: t("seatsDesks.columns.qrPointId"),
-			key: "qr_point_id",
-			render: row => (row.qr_point_id !== null ? formatNumber(row.qr_point_id) : "—")
+			key: "qr_scan_value",
+			render: row => {
+				if (row.qr_scan_value !== null) {
+					if (!qr.canPrint) return t("kitchen.qr.hasCode")
+					return h(
+						NButton,
+						{ size: "small", secondary: true, "data-test": "desk-print-code", onClick: () => qr.onPrint(row) },
+						{ icon: () => h(Icon, { name: "carbon:printer", size: 16 }), default: () => t("kitchen.qr.print") }
+					)
+				}
+				if (!qr.canCreate) return "—"
+				return h(
+					NButton,
+					{ size: "small", type: "primary", loading: qr.busyId === row.id, "data-test": "desk-create-code", onClick: () => qr.onCreate(row) },
+					{ default: () => t("kitchen.qr.create") }
+				)
+			}
 		}
 	]
 }
@@ -108,11 +134,10 @@ export function buildSeatDeskFields(t: ComposerTranslation, branches: Branch[], 
 			}
 		},
 		{ key: "code", labelKey: "seatsDesks.form.code", type: "text", required: true },
-		{ key: "label", labelKey: "seatsDesks.form.label", type: "text", required: true },
-		{ key: "qr_point_id", labelKey: "seatsDesks.form.qrPointId", type: "number" }
+		{ key: "label", labelKey: "seatsDesks.form.label", type: "text", required: true }
 	]
 }
 
 export function emptySeatDeskPayload(): SeatDeskFormModel {
-	return { branch_id: null, building_id: null, zone_id: null, space_id: null, code: "", label: "", qr_point_id: null }
+	return { branch_id: null, building_id: null, zone_id: null, space_id: null, code: "", label: "" }
 }

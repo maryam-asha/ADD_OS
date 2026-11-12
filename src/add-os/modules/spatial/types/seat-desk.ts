@@ -9,6 +9,8 @@ export interface SeatDesk {
 	code: string
 	label: string
 	qr_point_id: number | null
+	/** What the desk's printed QR encodes (its kitchen ordering code), or null before one is made. */
+	qr_scan_value: string | null
 	/** The live Dedicated Desk subscription holding it, or null when free. */
 	membership_id?: number | null
 }
@@ -61,5 +63,4 @@ export interface SeatDeskPayload extends Record<string, unknown> {
 	space_id: number | null
 	code: string
 	label: string
-	qr_point_id: number | null
 }
