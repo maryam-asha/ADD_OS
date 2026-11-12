@@ -656,6 +656,7 @@
 			"spaceType": "Type",
 			"capacity": "Capacity",
 			"hourlyRate": "Hourly rate",
+			"qrPoint": "QR point",
 			"status": "Status"
 		},
 		"spaceType": {

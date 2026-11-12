@@ -70,6 +70,18 @@ describe("kitchenQrPointsPage", () => {
 		wrapper.unmount()
 	})
 
+	it("rooms_offices_and_halls_are_listed_with_their_type_but_co_spaces_are_not", async () => {
+		const named = (id: number, space_type: string) => ({ id, building_id: 7, name: { ar: "x", en: `S${id}` }, space_type })
+		spacesMock.mockResolvedValue([named(3, "room"), named(8, "business"), named(9, "event_hall"), named(10, "co_space")])
+		const wrapper = await mountPage()
+
+		expect(wrapper.find("[data-row='space:3']").exists()).toBe(true)
+		expect(wrapper.get("[data-row='space:8']").text()).toContain("Business space")
+		expect(wrapper.get("[data-row='space:9']").text()).toContain("Event hall")
+		expect(wrapper.find("[data-row='space:10']").exists()).toBe(false)
+		wrapper.unmount()
+	})
+
 	it("every_code_is_read_not_just_the_first_hundred", async () => {
 		const desks = Array.from({ length: 120 }, (_, index) => ({ id: 100 + index, space_id: 3, label: `X${index}`, code: `x${index}`, qr_point_id: 500 + index }))
 		const points = desks.map(desk => ({ id: desk.qr_point_id, branch_id: 1, place_type: "seat_desk", place_id: desk.id, place_label: desk.label, scan_value: `scan-${desk.id}` }))

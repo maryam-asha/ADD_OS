@@ -34,7 +34,7 @@
 				>
 					<div class="flex min-w-48 flex-1 flex-col">
 						<span class="font-bold">{{ row.label }}</span>
-						<span class="text-xs text-secondary">{{ t(`kitchen.qr.kind.${row.placeType}`) }}</span>
+						<span class="text-xs text-secondary">{{ row.spaceType ? t(`spaces.spaceType.${row.spaceType}`) : t(`kitchen.qr.kind.${row.placeType}`) }}</span>
 					</div>
 					<n-tag :type="row.point ? 'success' : 'default'" size="small">
 						{{ row.point ? t("kitchen.qr.hasCode") : t("kitchen.qr.noCode") }}
@@ -74,7 +74,7 @@
 
 <script setup lang="ts">
 import type { QrPlaceType, QrPoint } from "@/add-os/modules/kitchen/types/kitchen"
-import type { Space } from "@/add-os/modules/spatial/types/space"
+import type { Space, SpaceType } from "@/add-os/modules/spatial/types/space"
 import { NAlert, NButton, NCard, NSelect, NSpin, NTag, useDialog, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
@@ -91,7 +91,7 @@ import Icon from "@/components/common/Icon.vue"
 
 /**
  * The codes members scan to order from the kitchen: one per desk and one per
- * room. A place without a code can be given one (asking again for a place that
+ * room, office and hall. A place without a code can be given one (asking again for a place that
  * has one answers the existing code, so it is safe to click twice); a code can
  * be printed as a sticker, or deleted, which stops the printed stickers.
  */
@@ -103,8 +103,13 @@ interface PlaceRow {
 	placeType: QrPlaceType
 	placeId: number
 	label: string
+	/** Set for a space row, so the list can say whether it is a room, an office or a hall. */
+	spaceType?: SpaceType
 	point: QrPoint | null
 }
+
+/** A co-working space is coded desk by desk, so it never gets a code of its own. */
+const CODED_SPACE_TYPES: SpaceType[] = ["room", "business", "event_hall"]
 
 const { t } = useI18n()
 const message = useMessage()
@@ -174,16 +179,17 @@ async function load() {
 				point: pointOf("seat_desk", desk.id)
 			}
 		})
-		const roomRows: PlaceRow[] = spaces
-			.filter(space => space.space_type === "room")
+		const spaceRows: PlaceRow[] = spaces
+			.filter(space => CODED_SPACE_TYPES.includes(space.space_type))
 			.map(space => ({
 				key: `space:${space.id}`,
 				placeType: "space",
 				placeId: space.id,
 				label: spaceName(space),
+				spaceType: space.space_type,
 				point: pointOf("space", space.id)
 			}))
-		rows.value = [...deskRows, ...roomRows]
+		rows.value = [...deskRows, ...spaceRows]
 	} finally {
 		isLoading.value = false
 	}

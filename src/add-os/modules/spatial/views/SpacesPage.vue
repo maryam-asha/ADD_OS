@@ -26,6 +26,8 @@
 			:extra-actions="renderExtraActions"
 		/>
 
+		<QrPointStickerModal v-model:show="stickerOpen" :point="stickerPoint" :label="stickerLabel" branch-name="" />
+
 		<ResourceFormDrawer
 			v-model:show="drawerVisible"
 			v-model:model="form"
@@ -56,6 +58,7 @@
 </template>
 
 <script setup lang="ts">
+import type { QrPoint } from "@/add-os/modules/kitchen/types/kitchen"
 import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vue"
 import type { Branch } from "@/add-os/modules/spatial/types/branch"
 import type { Building } from "@/add-os/modules/spatial/types/building"
@@ -65,12 +68,14 @@ import type { Zone } from "@/add-os/modules/spatial/types/zone"
 import { NButton, useMessage } from "naive-ui"
 import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import { pickLocalized } from "@/add-os/components/resource/field-types"
 import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.vue"
 import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
+import QrPointStickerModal from "@/add-os/modules/kitchen/components/QrPointStickerModal.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
-import { canDeleteSpatialResource } from "@/add-os/config/permissions"
+import { can, canDeleteSpatialResource } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import {
 	buildSpaceAmenitiesFields,
@@ -82,6 +87,7 @@ import {
 import { ApiError } from "@/add-os/services/api"
 import { listBranches } from "@/add-os/services/branches"
 import { listBuildings } from "@/add-os/services/buildings"
+import { createQrPoint, listQrPoints } from "@/add-os/services/kitchen"
 import { createSpace, listSpaces, removeSpace, updateSpace, updateSpaceAmenities, updateSpaceStatus } from "@/add-os/services/spaces"
 import { listZones } from "@/add-os/services/zones"
 import Icon from "@/components/common/Icon.vue"
@@ -98,7 +104,61 @@ const { data: zones } = useResourceList<Zone>(() => listZones())
 const zonesById = computed(() => Object.fromEntries(zones.value.map(zone => [zone.id, zone])))
 
 const { data, isLoading, error, refetch } = useResourceList<Space>(() => listSpaces())
-const columns = computed(() => buildSpaceColumns(t, currentLocale.value, buildingsById.value, zonesById.value))
+
+/** Spaces carry no code in their own answer, so every space code is read once and matched by space id. */
+const spacePoints = ref<QrPoint[]>([])
+const pointBySpaceId = computed(() => new Map(spacePoints.value.map(point => [point.place_id, point])))
+const scanValueById = computed(() => Object.fromEntries([...pointBySpaceId.value].map(([id, point]) => [id, point.scan_value])))
+
+async function loadSpacePoints() {
+	if (!can("qr-points.view")) return
+	try {
+		// No per_page: the API answers every code unpaginated.
+		spacePoints.value = (await listQrPoints({ place_type: "space" })).data
+	} catch (caught) {
+		if (!(caught instanceof ApiError)) throw caught
+		spacePoints.value = []
+	}
+}
+void loadSpacePoints()
+
+const busySpaceId = ref<number | null>(null)
+const stickerOpen = ref(false)
+const stickerPoint = ref<QrPoint | null>(null)
+const stickerLabel = ref("")
+
+function printCode(row: Space) {
+	const point = pointBySpaceId.value.get(row.id)
+	if (!point) return
+	stickerPoint.value = point
+	stickerLabel.value = row.name ? pickLocalized(row.name, currentLocale.value) : `#${row.id}`
+	stickerOpen.value = true
+}
+
+async function createCode(row: Space) {
+	busySpaceId.value = row.id
+	try {
+		await createQrPoint({ place_type: "space", place_id: row.id })
+		message.success(t("kitchen.qr.created"))
+		await loadSpacePoints()
+	} catch (caught) {
+		if (!(caught instanceof ApiError)) throw caught
+		message.error(caught.data?.message ?? t("resourceCrud.mutations.genericError"))
+	} finally {
+		busySpaceId.value = null
+	}
+}
+
+const columns = computed(() =>
+	buildSpaceColumns(t, currentLocale.value, buildingsById.value, zonesById.value, {
+		canPrint: can("qr-points.view"),
+		canCreate: can("qr-points.create"),
+		scanValueById: scanValueById.value,
+		busyId: busySpaceId.value,
+		onPrint: printCode,
+		onCreate: createCode
+	})
+)
 const fields = computed(() => buildSpaceFields(t, branches.value, currentLocale.value))
 const canDelete = computed(() => canDeleteSpatialResource("spaces"))
 

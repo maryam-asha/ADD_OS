@@ -660,6 +660,7 @@
 			"spaceType": "النوع",
 			"capacity": "السعة",
 			"hourlyRate": "سعر الساعة",
+			"qrPoint": "نقطة QR",
 			"status": "الحالة"
 		},
 		"spaceType": {
