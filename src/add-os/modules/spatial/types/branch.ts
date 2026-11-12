@@ -1,4 +1,6 @@
 export interface Branch {
+	/** The branch requests fall back to when they name none (ADD Core Branch::defaultId). */
+	is_default?: boolean
 	id: number
 	name: { ar: string; en: string }
 	city: { ar: string; en: string }

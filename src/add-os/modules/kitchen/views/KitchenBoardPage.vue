@@ -7,13 +7,6 @@
 				<p>{{ t("kitchen.board.description") }}</p>
 			</div>
 			<div class="ms-auto flex flex-wrap items-center gap-2">
-				<n-select
-					v-model:value="branchId"
-					:options="branchOptions"
-					:placeholder="t('kitchen.board.branch')"
-					class="sm:w-60!"
-					data-test="branch"
-				/>
 				<n-button :loading="isLoading" @click="load">
 					<template #icon><Icon name="carbon:renew" :size="16" /></template>
 					{{ t("kitchen.board.refresh") }}
@@ -23,9 +16,7 @@
 
 		<n-alert v-if="loadError" type="error" :title="t('kitchen.board.loadError')" />
 
-		<div v-if="branchId === null" class="py-10 text-center">{{ t("kitchen.board.chooseBranch") }}</div>
-
-		<n-card v-else-if="missingStore" data-test="no-store">
+		<n-card v-if="missingStore" data-test="no-store">
 			<div class="flex flex-col items-center gap-3 py-6 text-center">
 				<Icon name="carbon:warning-alt" :size="32" />
 				<h2 class="text-lg font-bold">{{ t("kitchen.board.noStore.title") }}</h2>
@@ -48,7 +39,7 @@
 					:order
 					:can-manage="mayManage"
 					:now
-					:fetched-at="fetchedAt"
+					:fetched-at
 					:busy="busyId === order.id"
 					@accept="accept(order)"
 					@reject="openReject(order)"
@@ -65,7 +56,7 @@
 
 <script setup lang="ts">
 import type { KitchenOrder, KitchenOrderStatus, KitchenStoreRow } from "@/add-os/modules/kitchen/types/kitchen"
-import { NAlert, NButton, NCard, NSelect, NTag, useMessage } from "naive-ui"
+import { NAlert, NButton, NCard, NTag, useMessage } from "naive-ui"
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { canManageKitchenOrders, canUpdateKitchenStores, canViewKitchenStores } from "@/add-os/config/permissions"
@@ -91,42 +82,18 @@ import Icon from "@/components/common/Icon.vue"
 const OPEN_STATUSES: KitchenOrderStatus[] = ["pending", "preparing", "ready"]
 /** The API's ceiling; a branch kitchen with more open orders than this has a different problem. */
 const BOARD_PAGE_SIZE = 100
-const BRANCH_KEY = "kitchen.board.branch"
 
 const { t } = useI18n()
 const message = useMessage()
-const { branchOptions } = useBranchOptions()
+const { defaultBranchId } = useBranchOptions()
 
 const mayManage = canManageKitchenOrders()
 const mayUpdateStores = canUpdateKitchenStores()
 
-// ── Branch, remembered per viewer ──────────────────────────────────────────
-function storedBranch(): number | null {
-	try {
-		const value = Number(localStorage.getItem(BRANCH_KEY))
-		return Number.isInteger(value) && value > 0 ? value : null
-	} catch {
-		return null
-	}
-}
+// ── Branch: the dashboard's default one (ADD Core resolves the same) ──────
+const branchId = defaultBranchId
 
-const branchId = ref<number | null>(storedBranch())
-
-watch(
-	branchOptions,
-	options => {
-		if (options.length === 0) return
-		if (branchId.value === null || !options.some(option => option.value === branchId.value)) branchId.value = Number(options[0].value)
-	},
-	{ immediate: true }
-)
-
-watch(branchId, id => {
-	try {
-		if (id !== null) localStorage.setItem(BRANCH_KEY, String(id))
-	} catch {}
-	void load()
-})
+watch(branchId, () => void load())
 
 // ── The kitchen store each branch draws from ───────────────────────────────
 // Only readable with `kitchen-stores.view`; without it the board cannot tell,

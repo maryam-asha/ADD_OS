@@ -17,6 +17,8 @@ export function useBranchOptions() {
 
 	return {
 		branchOptions: computed<SelectOption[]>(() => branches.value.map(branch => ({ label: label(branch), value: branch.id }))),
-		branchNames: computed<Record<number, string>>(() => Object.fromEntries(branches.value.map(branch => [branch.id, label(branch)])))
+		branchNames: computed<Record<number, string>>(() => Object.fromEntries(branches.value.map(branch => [branch.id, label(branch)]))),
+		/** The branch ADD Core falls back to (ResolveDefaultBranch / Branch::defaultId): the default one, else the first. */
+		defaultBranchId: computed<number | null>(() => (branches.value.find(branch => branch.is_default) ?? branches.value[0])?.id ?? null)
 	}
 }
