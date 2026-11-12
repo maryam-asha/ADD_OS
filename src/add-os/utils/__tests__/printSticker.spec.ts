@@ -19,6 +19,14 @@ describe("printSticker", () => {
 		expect(doc.querySelector(".ref")?.getAttribute("dir")).toBe("ltr")
 	})
 
+	it("a_sticker_without_a_hint_prints_no_hint_line", () => {
+		printSticker({ qrCanvas: canvas(), title: "Desk 01", subtitle: "", dir: "rtl" })
+
+		const doc = document.querySelector("iframe")!.contentDocument!
+		expect(doc.querySelector(".hint")).toBeNull()
+		expect(doc.querySelector(".place")?.textContent).toBe("Desk 01")
+	})
+
 	it("printSticker_sets_text_not_html", () => {
 		const hostile = "<img src=x onerror=alert(1)>"
 		printSticker({ qrCanvas: canvas(), title: hostile, subtitle: hostile, hint: hostile, dir: "rtl" })

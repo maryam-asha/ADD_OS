@@ -18,8 +18,8 @@ export interface StickerOptions {
 	 * like the door sticker's `#ref` so its `#` stays on the left in Arabic.
 	 */
 	subtitleDir?: "auto" | "ltr"
-	/** What the person holding the phone should do. */
-	hint: string
+	/** What the person holding the phone should do; left out when empty or absent. */
+	hint?: string
 	dir: "rtl" | "ltr"
 }
 
@@ -75,12 +75,12 @@ export function printSticker(opts: StickerOptions): void {
 	place.textContent = opts.title
 	const hint = doc.createElement("p")
 	hint.className = "hint"
-	hint.textContent = opts.hint
+	hint.textContent = opts.hint ?? ""
 	const ref = doc.createElement("p")
 	ref.className = "ref"
 	ref.dir = opts.subtitleDir ?? "auto"
 	ref.textContent = opts.subtitle
-	card.append(qr, place, hint, ref)
+	card.append(qr, place, ...(opts.hint ? [hint] : []), ref)
 	doc.body.appendChild(card)
 
 	view.addEventListener("afterprint", () => frame.remove(), { once: true })

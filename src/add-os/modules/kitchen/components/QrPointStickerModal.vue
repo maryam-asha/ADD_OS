@@ -56,7 +56,6 @@ function print() {
 		qrCanvas: canvas,
 		title: props.label,
 		subtitle: props.branchName,
-		hint: t("kitchen.qr.sticker.printHint"),
 		dir: currentLocale.value === "ar" ? "rtl" : "ltr"
 	})
 }
@@ -69,7 +68,6 @@ function download() {
 	downloadSticker({
 		qrCanvas: canvas,
 		title: props.label,
-		hint: t("kitchen.qr.sticker.printHint"),
 		dir: currentLocale.value === "ar" ? "rtl" : "ltr"
 	})
 }
