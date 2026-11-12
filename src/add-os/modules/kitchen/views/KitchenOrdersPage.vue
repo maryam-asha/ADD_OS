@@ -7,7 +7,6 @@
 		</div>
 
 		<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-			<n-select v-model:value="branchId" :options="branchOptions" clearable :placeholder="t('kitchen.history.filters.branch')" />
 			<n-select v-model:value="statuses" :options="statusOptions" multiple clearable :placeholder="t('kitchen.history.filters.status')" />
 			<n-date-picker v-model:formatted-value="range" type="daterange" value-format="yyyy-MM-dd" clearable />
 			<n-select
@@ -75,7 +74,6 @@ import { useI18n } from "vue-i18n"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { canListMembers } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
-import { useBranchOptions } from "@/add-os/modules/dashboard/composables/useBranchOptions"
 import { KITCHEN_ORDER_STATUSES } from "@/add-os/modules/kitchen/types/kitchen"
 import { ApiError } from "@/add-os/services/api"
 import { listKitchenOrders } from "@/add-os/services/kitchen"
@@ -93,7 +91,6 @@ import { formatDateTime, formatNumber } from "@/add-os/utils/format"
 
 const { t } = useI18n()
 const isRtl = computed(() => currentLocale.value === "ar")
-const { branchOptions } = useBranchOptions()
 
 const STATUS_TAG: Record<KitchenOrderStatus, "default" | "info" | "success" | "warning" | "error"> = {
 	pending: "info",
@@ -105,7 +102,6 @@ const STATUS_TAG: Record<KitchenOrderStatus, "default" | "info" | "success" | "w
 }
 
 // ── Filters ─────────────────────────────────────────────────────────────────
-const branchId = ref<number | null>(null)
 const statuses = ref<KitchenOrderStatus[]>([])
 const range = ref<[string, string] | null>(null)
 const memberId = ref<number | null>(null)
@@ -127,7 +123,6 @@ onMounted(async () => {
 const query = computed<Record<string, unknown>>(() => {
 	// History reads newest first; the board (no `sort`) keeps the queue oldest first.
 	const q: KitchenOrderQuery = { sort: "newest", status: statuses.value.length > 0 ? [...statuses.value] : [...KITCHEN_ORDER_STATUSES] }
-	if (branchId.value !== null) q.branch_id = branchId.value
 	if (range.value) {
 		q.from = range.value[0]
 		q.to = range.value[1]
@@ -193,5 +188,5 @@ const fields = computed(() => {
 	return list
 })
 
-defineExpose({ branchId, statuses, range, memberId, page, open })
+defineExpose({ statuses, range, memberId, page, open })
 </script>
