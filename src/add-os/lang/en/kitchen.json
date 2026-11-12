@@ -129,6 +129,7 @@
 				"title": "Ordering sticker",
 				"hint": "Members scan this code to order from the kitchen.",
 				"print": "Print sticker",
+				"download": "Download image",
 				"printHint": "Scan to order from the kitchen."
 			}
 		}

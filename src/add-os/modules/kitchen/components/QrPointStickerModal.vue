@@ -13,10 +13,16 @@
 			<p class="text-center font-semibold">{{ label }}</p>
 			<p v-if="branchName" class="text-center text-xs text-secondary">{{ branchName }}</p>
 			<p class="text-center text-xs text-secondary">{{ t("kitchen.qr.sticker.hint") }}</p>
-			<n-button type="primary" data-test="sticker-print" @click="print">
-				<template #icon><Icon name="carbon:printer" :size="16" /></template>
-				{{ t("kitchen.qr.sticker.print") }}
-			</n-button>
+			<div class="flex flex-wrap justify-center gap-2">
+				<n-button type="primary" data-test="sticker-print" @click="print">
+					<template #icon><Icon name="carbon:printer" :size="16" /></template>
+					{{ t("kitchen.qr.sticker.print") }}
+				</n-button>
+				<n-button secondary data-test="sticker-download" @click="download">
+					<template #icon><Icon name="carbon:download" :size="16" /></template>
+					{{ t("kitchen.qr.sticker.download") }}
+				</n-button>
+			</div>
 		</div>
 	</n-modal>
 </template>
@@ -27,6 +33,7 @@ import { NButton, NModal, NQrCode } from "naive-ui"
 import { useTemplateRef } from "vue"
 import { useI18n } from "vue-i18n"
 import { currentLocale } from "@/add-os/lang/currentLocale"
+import { downloadSticker } from "@/add-os/utils/downloadSticker"
 import { printSticker } from "@/add-os/utils/printSticker"
 import Icon from "@/components/common/Icon.vue"
 
@@ -49,6 +56,19 @@ function print() {
 		qrCanvas: canvas,
 		title: props.label,
 		subtitle: props.branchName,
+		hint: t("kitchen.qr.sticker.printHint"),
+		dir: currentLocale.value === "ar" ? "rtl" : "ltr"
+	})
+}
+
+/** The same sticker saved as a PNG, named after the place. */
+function download() {
+	const canvas = sticker.value?.querySelector("canvas")
+	if (!canvas || !props.point) return
+
+	downloadSticker({
+		qrCanvas: canvas,
+		title: props.label,
 		hint: t("kitchen.qr.sticker.printHint"),
 		dir: currentLocale.value === "ar" ? "rtl" : "ltr"
 	})
