@@ -22,6 +22,8 @@
 			:on-delete="canDelete ? (async row => { await mutations.remove(row.id) }) : undefined"
 		/>
 
+		<QrPointStickerModal v-model:show="stickerOpen" :point="stickerPoint" :label="stickerLabel" branch-name="" />
+
 		<ResourceFormDrawer
 			v-model:show="drawerVisible"
 			v-model:model="form"
@@ -35,16 +37,21 @@
 
 <script setup lang="ts">
 import type { Branch } from "@/add-os/modules/spatial/types/branch"
+import type { QrPoint } from "@/add-os/modules/kitchen/types/kitchen"
 import type { SeatDesk, SeatDeskPayload } from "@/add-os/modules/spatial/types/seat-desk"
 import { computed, ref } from "vue"
+import { useMessage } from "naive-ui"
 import { useI18n } from "vue-i18n"
 import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.vue"
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
+import QrPointStickerModal from "@/add-os/modules/kitchen/components/QrPointStickerModal.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
-import { canDeleteSpatialResource } from "@/add-os/config/permissions"
+import { can, canDeleteSpatialResource } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import { buildSeatDeskColumns, buildSeatDeskFields, emptySeatDeskPayload } from "@/add-os/modules/spatial/config/seats-desks.config"
+import { ApiError } from "@/add-os/services/api"
+import { createQrPoint } from "@/add-os/services/kitchen"
 import { listBranches } from "@/add-os/services/branches"
 import { createSeatDesk, listSeatsDesks, removeSeatDesk, updateSeatDesk } from "@/add-os/services/seats-desks"
 import Icon from "@/components/common/Icon.vue"
@@ -56,7 +63,44 @@ const { t } = useI18n()
 const { data: branches } = useResourceList<Branch>(listBranches)
 
 const { data, isLoading, error, refetch } = useResourceList<SeatDesk>(() => listSeatsDesks())
-const columns = computed(() => buildSeatDeskColumns(t))
+const message = useMessage()
+
+const busyDeskId = ref<number | null>(null)
+const stickerOpen = ref(false)
+const stickerPoint = ref<QrPoint | null>(null)
+const stickerLabel = ref("")
+
+function printCode(row: SeatDesk) {
+	if (row.qr_scan_value === null) return
+	// The sticker only needs what the QR encodes and the desk's name.
+	stickerPoint.value = { id: row.qr_point_id ?? 0, branch_id: 0, place_type: "seat_desk", place_id: row.id, place_label: row.label, scan_value: row.qr_scan_value }
+	stickerLabel.value = row.label
+	stickerOpen.value = true
+}
+
+async function createCode(row: SeatDesk) {
+	busyDeskId.value = row.id
+	try {
+		await createQrPoint({ place_type: "seat_desk", place_id: row.id })
+		message.success(t("kitchen.qr.created"))
+		await refetch()
+	} catch (caught) {
+		if (!(caught instanceof ApiError)) throw caught
+		message.error(caught.data?.message ?? t("resourceCrud.mutations.genericError"))
+	} finally {
+		busyDeskId.value = null
+	}
+}
+
+const columns = computed(() =>
+	buildSeatDeskColumns(t, {
+		canPrint: can("qr-points.view"),
+		canCreate: can("qr-points.create"),
+		busyId: busyDeskId.value,
+		onPrint: printCode,
+		onCreate: createCode
+	})
+)
 const fields = computed(() => buildSeatDeskFields(t, branches.value, currentLocale.value))
 const canDelete = computed(() => canDeleteSpatialResource("seatsDesks"))
 
@@ -87,8 +131,7 @@ function openEdit(row: SeatDesk) {
 		zone_id: null,
 		space_id: row.space_id,
 		code: row.code,
-		label: row.label,
-		qr_point_id: row.qr_point_id
+		label: row.label
 	}
 	drawerVisible.value = true
 }

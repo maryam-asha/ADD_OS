@@ -6,7 +6,7 @@ import type { Branch } from "@/add-os/modules/spatial/types/branch"
 import type { Building } from "@/add-os/modules/spatial/types/building"
 import type { Space, SpacePayload, SpaceType } from "@/add-os/modules/spatial/types/space"
 import type { Zone } from "@/add-os/modules/spatial/types/zone"
-import { NImage } from "naive-ui"
+import { NButton, NImage } from "naive-ui"
 import { h } from "vue"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import { buildOperationalStatusOptions, renderOperationalStatusTag } from "@/add-os/modules/spatial/types/operational-status"
@@ -19,11 +19,28 @@ import { listZones } from "@/add-os/services/zones"
 import { formatCurrency, formatNumber, isCurrencyCode } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
+/** What the QR column offers: printing needs `qr-points.view`, making a code `qr-points.create`. */
+export interface SpaceQrActions {
+	canPrint: boolean
+	canCreate: boolean
+	/** The scan value of each space's code, by space id; a space without a code is absent. */
+	scanValueById: Record<number, string>
+	busyId: number | null
+	onPrint: (row: Space) => void
+	onCreate: (row: Space) => void
+}
+
+/** A co-working space is coded desk by desk, so only these get a code of their own. */
+export function spaceTakesQrPoint(type: SpaceType): boolean {
+	return type === "room" || type === "business" || type === "event_hall"
+}
+
 export function buildSpaceColumns(
 	t: ComposerTranslation,
 	locale: SupportedLocale,
 	buildingsById: Record<number, Building>,
-	zonesById: Record<number, Zone>
+	zonesById: Record<number, Zone>,
+	qr: SpaceQrActions
 ): DataTableColumns<Space> {
 	return [
 		{
@@ -87,6 +104,27 @@ export function buildSpaceColumns(
 									)
 								: null
 						])
+		},
+		{
+			title: t("spaces.columns.qrPoint"),
+			key: "qr_point",
+			render: (row) => {
+				if (!spaceTakesQrPoint(row.space_type)) return "—"
+				if (qr.scanValueById[row.id] !== undefined) {
+					if (!qr.canPrint) return t("kitchen.qr.hasCode")
+					return h(
+						NButton,
+						{ size: "small", secondary: true, "data-test": "space-print-code", onClick: () => qr.onPrint(row) },
+						{ icon: () => h(Icon, { name: "carbon:printer", size: 16 }), default: () => t("kitchen.qr.print") }
+					)
+				}
+				if (!qr.canCreate) return "—"
+				return h(
+					NButton,
+					{ size: "small", type: "primary", loading: qr.busyId === row.id, "data-test": "space-create-code", onClick: () => qr.onCreate(row) },
+					{ default: () => t("kitchen.qr.create") }
+				)
+			}
 		},
 		{ title: t("spaces.columns.status"), key: "status", render: row => renderOperationalStatusTag(row.status, t) }
 	]

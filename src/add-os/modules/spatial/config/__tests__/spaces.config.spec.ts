@@ -1,7 +1,10 @@
 import type { ComposerTranslation } from "vue-i18n"
-import { describe, expect, it } from "vitest"
+import type { VNode } from "vue"
+import type { Space } from "@/add-os/modules/spatial/types/space"
+import { describe, expect, it, vi } from "vitest"
 
-import { buildSpaceFields, emptySpacePayload } from "../spaces.config"
+import type { SpaceQrActions } from "../spaces.config"
+import { buildSpaceColumns, buildSpaceFields, emptySpacePayload } from "../spaces.config"
 
 const t = ((key: string) => key) as ComposerTranslation
 
@@ -33,5 +36,42 @@ describe("space booking rules on the space form", () => {
 	 */
 	it("starts a new space extendable and on the general cancellation window", () => {
 		expect(emptySpacePayload()).toMatchObject({ allows_extension: true, cancellation_window_minutes: null })
+	})
+})
+
+describe("space QR column", () => {
+	const space = (over: Partial<Space>): Space => ({ id: 1, space_type: "room", ...over }) as Space
+
+	function qrCell(row: Space, over: Partial<SpaceQrActions> = {}) {
+		const onPrint = vi.fn()
+		const onCreate = vi.fn()
+		const column = buildSpaceColumns(t, "en", {}, {}, { canPrint: true, canCreate: true, scanValueById: {}, busyId: null, onPrint, onCreate, ...over }).find(
+			c => "key" in c && c.key === "qr_point"
+		)
+		const cell = (column as { render: (r: Space, i: number) => VNode | string }).render(row, 0)
+		return { cell, onPrint, onCreate }
+	}
+
+	it("offers Print when the space has a code", () => {
+		const { cell, onPrint } = qrCell(space({ id: 4 }), { scanValueById: { 4: "add-place:v1:x" } })
+		;(cell as VNode).props?.onClick()
+		expect(onPrint).toHaveBeenCalledOnce()
+	})
+
+	it("offers Create code when it has none, for offices and halls too", () => {
+		for (const type of ["room", "business", "event_hall"] as const) {
+			const { cell, onCreate } = qrCell(space({ space_type: type }))
+			;(cell as VNode).props?.onClick()
+			expect(onCreate).toHaveBeenCalledOnce()
+		}
+	})
+
+	it("shows a dash for a co-working space, whose codes are per desk", () => {
+		expect(qrCell(space({ space_type: "co_space" }), { scanValueById: { 1: "v" } }).cell).toBe("—")
+	})
+
+	it("offers no buttons without the permissions", () => {
+		expect(qrCell(space({ id: 4 }), { canPrint: false, scanValueById: { 4: "v" } }).cell).toBe("kitchen.qr.hasCode")
+		expect(qrCell(space({}), { canCreate: false }).cell).toBe("—")
 	})
 })

@@ -60,7 +60,7 @@ describe("dedicatedDesksCard", () => {
 	beforeEach(() => {
 		vi.clearAllMocks()
 		listMembershipsMock.mockResolvedValue({ data: [membership()], meta: { current_page: 1, last_page: 1, per_page: 15, total: 1 } })
-		listDesksMock.mockResolvedValue([{ id: 4, space_id: 1, code: "D-04", label: "Window", qr_point_id: null, membership_id: null }])
+		listDesksMock.mockResolvedValue([{ id: 4, space_id: 1, code: "D-04", label: "Window", qr_point_id: null, qr_scan_value: null, membership_id: null }])
 		assignMock.mockResolvedValue({ message: "Desks assigned." })
 	})
 

@@ -351,8 +351,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		pages: [
 			{ key: "board", path: "board", permission: "kitchen-orders.view" },
 			{ key: "orders", path: "orders", permission: "kitchen-orders.view" },
-			{ key: "stores", path: "stores", permission: "kitchen-stores.view" },
-			{ key: "qrPoints", path: "qr-points", permission: "qr-points.view" }
+			{ key: "stores", path: "stores", permission: "kitchen-stores.view" }
 		]
 	},
 	{

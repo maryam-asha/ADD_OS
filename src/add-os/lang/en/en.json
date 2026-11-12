@@ -656,6 +656,7 @@
 			"spaceType": "Type",
 			"capacity": "Capacity",
 			"hourlyRate": "Hourly rate",
+			"qrPoint": "QR point",
 			"status": "Status"
 		},
 		"spaceType": {
@@ -843,8 +844,7 @@
 			"zone": "Zone (optional)",
 			"space": "Space",
 			"code": "Code (unique in the branch)",
-			"label": "Label",
-			"qrPointId": "QR point ID (optional)"
+			"label": "Label"
 		},
 		"loadError": "Couldn't load seats & desks. You may not have permission to view this page."
 	},
@@ -1962,7 +1962,6 @@
 			"board": "Kitchen board",
 			"orders": "Kitchen orders",
 			"stores": "Kitchen stores",
-			"qrPoints": "Ordering codes",
 			"overview": "Overview",
 			"myNotifications": "Notifications",
 			"branches": "Branches",
