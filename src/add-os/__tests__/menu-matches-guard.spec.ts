@@ -266,9 +266,16 @@ describe("sidebar, route guard and \"/\" agree", () => {
 		expect(accountMenuSections().map(section => section.key)).toEqual(["myHr"])
 	})
 
-	it("lists only Projects in the sidebar of an employee with no permission, and My HR in the avatar menu (2026-11-14: PM is work, so My HR no longer stands in for an empty sidebar)", () => {
+	it("keeps My HR in the sidebar of an employee with no permission, beside Projects, rather than move it to the avatar menu only (2026-11-14 ruling)", () => {
 		signIn(ACCOUNTS["an employee with no role"])
-		expect(sidebarSections().map(section => section.key)).toEqual(["pm"])
+		expect(sidebarSections().map(section => section.key)).toEqual(["myHr", "pm"])
+		expect(accountMenuSections().map(section => section.key)).toEqual(["myHr"])
+	})
+
+	it("puts Projects in a staff account's sidebar and leaves My HR to the avatar menu", () => {
+		signIn(ACCOUNTS["an HR role"])
+		expect(sidebarSections().map(section => section.key)).toContain("pm")
+		expect(sidebarSections().map(section => section.key)).not.toContain("myHr")
 		expect(accountMenuSections().map(section => section.key)).toEqual(["myHr"])
 	})
 

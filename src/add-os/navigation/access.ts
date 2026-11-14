@@ -65,7 +65,9 @@ export function maySeeSection(section: NavSection): boolean {
 export function sidebarSections(): NavSection[] {
 	const visible = NAV_SECTIONS.filter(maySeeSection)
 	const work = visible.filter(section => !section.accountMenu)
-	return work.length ? work : visible
+	// Pages open to every staff account and employee (Projects) are not work earned by a permission, so they don't push My HR out of an employee's sidebar.
+	const earned = work.filter(section => !section.pages.every(page => page.staffOrEmployee))
+	return earned.length ? work : visible
 }
 
 /** The sections the avatar menu lists for this account. */
