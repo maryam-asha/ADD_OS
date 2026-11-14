@@ -102,12 +102,12 @@ describe("every staff page says who opens it", () => {
 		return Boolean(section.roles?.includes("provider")) || Boolean(section.employee)
 	}
 
-	it("tags every staff page with exactly one of a permission or allStaff", () => {
+	it("tags every staff page with exactly one of a permission, allStaff or staffOrEmployee", () => {
 		const untagged: string[] = []
 		for (const section of NAV_SECTIONS) {
 			if (isAudiencePage(section.key)) continue
 			for (const page of section.pages) {
-				if (Boolean(page.permission) === Boolean(page.allStaff)) untagged.push(navRouteName(section, page))
+				if ([page.permission, page.allStaff, page.staffOrEmployee].filter(Boolean).length !== 1) untagged.push(navRouteName(section, page))
 			}
 		}
 		expect(untagged).toEqual([])
@@ -121,7 +121,7 @@ describe("every staff page says who opens it", () => {
 
 	it("gives the audiences no staff tag: the provider portal and My HR keep their own rules", () => {
 		const tagged = NAV_SECTIONS.filter(section => isAudiencePage(section.key))
-			.flatMap(section => section.pages.filter(page => page.permission || page.allStaff).map(page => navRouteName(section, page)))
+			.flatMap(section => section.pages.filter(page => page.permission || page.allStaff || page.staffOrEmployee).map(page => navRouteName(section, page)))
 		expect(tagged).toEqual([])
 	})
 
@@ -228,7 +228,7 @@ describe("sidebar, route guard and \"/\" agree", () => {
 		signIn(ACCOUNTS["an HR role"])
 		expect(offeredByPermission().every(path => path.startsWith("/hr"))).toBe(true)
 		// dashboard + the ComingSoon placeholders (plans' wallet, the café, incubation), open to all staff.
-		expect(NAV_SECTIONS.filter(maySeeSection).map(section => section.key)).toEqual(["dashboard", "plans", "community", "incubation", "hr", "hrTime", "hrPay", "hrReports", "hrSettings", "myHr"])
+		expect(NAV_SECTIONS.filter(maySeeSection).map(section => section.key)).toEqual(["dashboard", "plans", "community", "incubation", "hr", "hrTime", "hrPay", "hrReports", "hrSettings", "myHr", "pm"])
 		expect(homePath()).toBe("/hr/employees")
 	})
 
@@ -249,7 +249,7 @@ describe("sidebar, route guard and \"/\" agree", () => {
 
 	it("sends an employee with no permission to My HR", () => {
 		signIn(ACCOUNTS["an employee with no role"])
-		expect(NAV_SECTIONS.filter(maySeeSection).map(section => section.key)).toEqual(["myHr"])
+		expect(NAV_SECTIONS.filter(maySeeSection).map(section => section.key)).toEqual(["myHr", "pm"])
 		expect(homePath()).toBe("/my-hr/profile")
 		expect(authGuard(PAGES.get("/dashboard/overview")!)).toEqual({ path: "/my-hr/profile" })
 	})
@@ -266,10 +266,34 @@ describe("sidebar, route guard and \"/\" agree", () => {
 		expect(accountMenuSections().map(section => section.key)).toEqual(["myHr"])
 	})
 
-	it("keeps My HR in the sidebar of an employee who has nothing else, rather than leave it empty", () => {
+	it("lists only Projects in the sidebar of an employee with no permission, and My HR in the avatar menu (2026-11-14: PM is work, so My HR no longer stands in for an empty sidebar)", () => {
 		signIn(ACCOUNTS["an employee with no role"])
-		expect(sidebarSections().map(section => section.key)).toEqual(["myHr"])
+		expect(sidebarSections().map(section => section.key)).toEqual(["pm"])
 		expect(accountMenuSections().map(section => section.key)).toEqual(["myHr"])
+	})
+
+	it("opens Projects to an employee with no permission, and to a member who is an employee", () => {
+		for (const label of ["an employee with no role", "a member who is an employee"]) {
+			signIn(ACCOUNTS[label])
+			expect(offered()).toContain("/pm/projects")
+			expect(offered()).toContain("/pm/my-tasks")
+			expect(authGuard(PAGES.get("/pm/projects")!)).toBeUndefined()
+			expect(authGuard(PAGES.get("/pm/my-tasks")!)).toBeUndefined()
+		}
+	})
+
+	it("opens Projects to any staff account, whatever permission it holds", () => {
+		signIn(ACCOUNTS["a custom role for amenities"])
+		expect(offered()).toContain("/pm/projects")
+		expect(authGuard(PAGES.get("/pm/my-tasks")!)).toBeUndefined()
+	})
+
+	it("never shows or opens Projects to a provider, even one with an employee record", () => {
+		for (const account of [ACCOUNTS["a provider"], { roles: ["provider"], permissions: [], employee }]) {
+			signIn(account)
+			expect(offered().some(path => path.startsWith("/pm"))).toBe(false)
+			expect(authGuard(PAGES.get("/pm/projects")!)).toEqual({ path: "/provider/summary" })
+		}
 	})
 
 	it("offers no My HR to an account with no employee record", () => {

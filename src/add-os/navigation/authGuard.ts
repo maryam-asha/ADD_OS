@@ -41,7 +41,7 @@ export function safeRedirect(raw: unknown): string {
  * straight back to it and loop.
  */
 export function authGuard(route: RouteLocationNormalized): RouteLocationRaw | void {
-	const { checkAuth, authRedirect, auth, roles, permission, allStaff, employee }: RouteMetaAuth = route.meta
+	const { checkAuth, authRedirect, auth, roles, permission, allStaff, staffOrEmployee, employee }: RouteMetaAuth = route.meta
 	const authStore = useAuthStore()
 
 	if (route.redirectedFrom?.name === "Logout") authStore.setLogout()
@@ -86,7 +86,7 @@ export function authGuard(route: RouteLocationNormalized): RouteLocationRaw | vo
 		// staff account turned away goes to "/", which lands on a page it may
 		// open (`homePath`), so this never loops; an employee with no
 		// permission goes to My HR.
-		if (!employee && !isProviderRoute && !mayOpenStaffPage({ permission, allStaff })) {
+		if (!employee && !isProviderRoute && !mayOpenStaffPage({ permission, allStaff, staffOrEmployee })) {
 			return authStore.isStaff ? { path: "/" } : { path: MY_HR_PATH }
 		}
 

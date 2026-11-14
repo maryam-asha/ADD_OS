@@ -13,6 +13,8 @@ export interface RouteMetaAuth {
 	permission?: string
 	/** A staff page with no API of its own: open to every staff account (`NavPage.allStaff`). */
 	allStaff?: boolean
+	/** Projects: open to every staff account and every employee, never a provider (`NavPage.staffOrEmployee`). */
+	staffOrEmployee?: boolean
 	/** HR: only accounts with an employee record (`employee` on GET auth/me). */
 	employee?: boolean
 }

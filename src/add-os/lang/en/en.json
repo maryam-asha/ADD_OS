@@ -1956,9 +1956,12 @@
 			"hrTalent": "Talent",
 			"hrReports": "HR reports",
 			"inventory": "Inventory",
-			"kitchen": "Kitchen"
+			"kitchen": "Kitchen",
+			"pm": "Projects"
 		},
 		"pages": {
+			"pmProjects": "Projects",
+			"pmMyTasks": "My tasks",
 			"board": "Kitchen board",
 			"orders": "Kitchen orders",
 			"stores": "Kitchen stores",

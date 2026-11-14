@@ -31,7 +31,7 @@ function childrenOf(route: RouteRecordRaw): RouteRecordRaw[] {
 
 describe("section list", () => {
 	it("covers all operational sections", () => {
-		expect(NAV_SECTIONS).toHaveLength(26)
+		expect(NAV_SECTIONS).toHaveLength(27)
 	})
 
 	it("marks exactly the built sections as active", () => {
@@ -62,6 +62,7 @@ describe("section list", () => {
 			"hrReports",
 			"hrSettings",
 			"myHr",
+			"pm",
 			"settings"
 		])
 	})
@@ -240,7 +241,8 @@ describe("sidebar groups", () => {
 		// Beside HR: the dashboard home and the ComingSoon placeholders, open to
 		// every staff account since 2026-10-27 (`allStaff`). Door access is built
 		// and permission-gated since 2026-11-08, so it is no longer one of them.
-		expect(items.map(item => String(item.key))).toEqual(["dashboard.overview", "plans.wallet", "community.cafe", "incubation", "hrGroup"])
+		// Projects (2026-11-14) is open to every staff account and every employee.
+		expect(items.map(item => String(item.key))).toEqual(["dashboard.overview", "plans.wallet", "community.cafe", "incubation", "hrGroup", "pm"])
 
 		const group = items.find(item => item.key === "hrGroup")
 		expect(childKeys(group)).toEqual(["hr", "hrTime", "hrPay", "hrTalent", "hrReports", "hrSettings"])

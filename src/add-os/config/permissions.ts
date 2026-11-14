@@ -533,3 +533,14 @@ export function canUpdateKitchenStores(): boolean {
 export function canListMembers(): boolean {
 	return can("users.view") || can("members.view") || can("reception.view")
 }
+
+// ── Projects ────────────────────────────────────────────────────────────────
+//
+// ADD Core's `add/pm` (`pm/*`): every dashboard account may read and work on
+// the projects it belongs to; creating and editing projects, their teams and
+// the tags is the one ability behind `can:pm.projects.manage`.
+
+/** Creating and editing projects, setting their teams, and managing tags. */
+export function canManageProjects(): boolean {
+	return can("pm.projects.manage")
+}

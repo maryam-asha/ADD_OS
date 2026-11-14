@@ -1,0 +1,53 @@
+{
+	"pm": {
+		"tone": {
+			"olive": "Olive",
+			"teal": "Teal",
+			"slate": "Slate",
+			"green": "Green",
+			"cyan": "Cyan",
+			"stone": "Stone"
+		},
+		"priority": {
+			"label": "Priority",
+			"urgent": "Urgent",
+			"high": "High",
+			"normal": "Normal",
+			"low": "Low"
+		},
+		"status": {
+			"todo": "To do",
+			"in_progress": "In progress",
+			"review": "In review",
+			"done": "Done"
+		},
+		"due": {
+			"overdue": "Overdue",
+			"today": "Due today",
+			"week": "This week",
+			"later": "Later",
+			"none": "No due date",
+			"done": "Done"
+		},
+		"scope": {
+			"assigned": "Assigned to me",
+			"created": "Created by me",
+			"all": "All my tasks"
+		},
+		"projects": {
+			"title": "Projects",
+			"description": "The projects you work on, and their tasks."
+		},
+		"myTasks": {
+			"title": "My tasks",
+			"description": "What is assigned to you, soonest due first."
+		},
+		"refusal": {
+			"assign_forbidden": "You can't assign this task to others.",
+			"project_archived": "This project is archived, so it can't be changed.",
+			"assignee_not_member": "Only members of the project can be assigned to its tasks.",
+			"due_before_start": "The due date can't be before the start date.",
+			"subtask_depth": "A subtask can't have subtasks of its own."
+		}
+	}
+}

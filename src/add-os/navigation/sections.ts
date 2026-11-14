@@ -78,6 +78,14 @@ export interface NavPage {
 	 */
 	allStaff?: true
 	/**
+	 * A page with no permission of its own that opens to every staff account
+	 * and to every employee (`isStaff || isEmployee`), and never to a provider:
+	 * Projects. ADD Core admits every dashboard account to `pm/*` and decides
+	 * by membership of the project, so an employee who holds no permission at
+	 * all must still reach it.
+	 */
+	staffOrEmployee?: true
+	/**
 	 * Iconify name drawn beside the page in the sidebar. Optional: most pages
 	 * carry none and read by their label alone; it marks pages a quick glance
 	 * should tell apart, like the app's content pages. Bundled like any icon.
@@ -600,6 +608,20 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 			{ key: "hrMyPerformance", path: "performance", icon: "carbon:growth" },
 			{ key: "hrMyTraining", path: "training", icon: "carbon:education" },
 			{ key: "hrMyCertificate", path: "certificates/:kind", hidden: true }
+		]
+	},
+	{
+		// Projects and tasks (`add/pm`): a module of its own, not HR. Open to
+		// every staff account and every employee; ADD Core decides by
+		// membership of the project. After My HR on purpose, so "/" for an
+		// employee with no permission still lands on My HR.
+		key: "pm",
+		path: "/pm",
+		icon: "carbon:task",
+		status: "active",
+		pages: [
+			{ key: "pmProjects", path: "projects", staffOrEmployee: true },
+			{ key: "pmMyTasks", path: "my-tasks", staffOrEmployee: true }
 		]
 	},
 	{

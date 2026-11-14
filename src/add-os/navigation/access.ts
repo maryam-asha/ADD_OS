@@ -19,8 +19,11 @@ import { useAuthStore } from "@/stores/auth"
  */
 
 /** Whether the signed-in account may open a staff page: by its permission, or as any staff account. */
-export function mayOpenStaffPage(page: Pick<RouteMetaAuth, "permission" | "allStaff">): boolean {
+export function mayOpenStaffPage(page: Pick<RouteMetaAuth, "permission" | "allStaff" | "staffOrEmployee">): boolean {
 	const auth = useAuthStore()
+	// A page open to staff and employees alike (Projects): not a provider, and
+	// either a staff account or one with an employee record.
+	if (page.staffOrEmployee) return !auth.isProvider && (auth.isStaff || auth.isEmployee)
 	if (!auth.isStaff) return false
 	if (page.permission) return auth.hasPermission(page.permission)
 	return page.allStaff === true

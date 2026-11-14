@@ -207,7 +207,9 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"myHr.hrMyRequisitionCreate": () => import("@/add-os/modules/hr/views/recruitment/RequisitionFormPage.vue"),
 	"myHr.hrMyPerformance": () => import("@/add-os/modules/hr/views/performance/MyPerformancePage.vue"),
 	"myHr.hrMyTraining": () => import("@/add-os/modules/hr/views/training/MyTrainingPage.vue"),
-	"myHr.hrMyCertificate": () => import("@/add-os/modules/hr/views/core/MyCertificatePage.vue")
+	"myHr.hrMyCertificate": () => import("@/add-os/modules/hr/views/core/MyCertificatePage.vue"),
+	"pm.pmProjects": () => import("@/add-os/modules/pm/views/ProjectsPage.vue"),
+	"pm.pmMyTasks": () => import("@/add-os/modules/pm/views/MyTasksPage.vue")
 }
 
 /**
@@ -247,6 +249,7 @@ export function createAddOsRoutes(): RouteRecordRaw[] {
 					title: navPageTitleKey(page),
 					permission: page.permission,
 					allStaff: page.allStaff,
+					staffOrEmployee: page.staffOrEmployee,
 					employee: section.employee
 				}
 			}))
