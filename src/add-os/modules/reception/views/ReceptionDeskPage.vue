@@ -203,6 +203,7 @@
 				</template>
 				<div class="mt-4">
 					<ReceptionKitchenQueue @changed="refreshSummary" />
+					<KitchenCashReturns class="mt-8" @changed="refreshSummary" />
 				</div>
 			</n-tab-pane>
 		</n-tabs>
@@ -226,6 +227,7 @@ import ActiveSessionsPage from "@/add-os/modules/booking/views/ActiveSessionsPag
 import ApprovalQueuePage from "@/add-os/modules/booking/views/ApprovalQueuePage.vue"
 import ArrivalsPage from "@/add-os/modules/booking/views/ArrivalsPage.vue"
 import CloseSessionPage from "@/add-os/modules/booking/views/CloseSessionPage.vue"
+import KitchenCashReturns from "@/add-os/modules/kitchen/components/KitchenCashReturns.vue"
 import ReceptionKitchenQueue from "@/add-os/modules/kitchen/components/ReceptionKitchenQueue.vue"
 import PendingPaymentsPanel from "@/add-os/modules/reception/components/PendingPaymentsPanel.vue"
 import QuickBookingModal from "@/add-os/modules/reception/components/QuickBookingModal.vue"
