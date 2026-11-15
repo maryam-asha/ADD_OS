@@ -2929,7 +2929,8 @@
 			"approvals": "Approvals",
 			"sessions": "Active Sessions",
 			"endRequests": "End Requests",
-			"payments": "Pending Payments"
+			"payments": "Pending Payments",
+			"kitchen": "Kitchen orders"
 		},
 		"actions": {
 			"startSession": "Start Session",

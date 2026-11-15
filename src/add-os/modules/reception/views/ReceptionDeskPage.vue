@@ -191,6 +191,20 @@
 					<PendingPaymentsPanel @settled="refreshSummary" />
 				</div>
 			</n-tab-pane>
+
+			<!-- Orders members sent with no session: reception checks they are in the building, then confirms or turns them down. -->
+			<n-tab-pane v-if="canReviewKitchenOrders()" name="kitchen">
+				<template #tab>
+					<span class="flex items-center gap-1.5">
+						<Icon name="carbon:restaurant" :size="16" />
+						{{ t("reception.tabs.kitchen") }}
+						<n-badge v-if="pendingKitchenOrders > 0" :value="pendingKitchenOrders" :max="99" type="warning" />
+					</span>
+				</template>
+				<div class="mt-4">
+					<ReceptionKitchenQueue @changed="refreshSummary" />
+				</div>
+			</n-tab-pane>
 		</n-tabs>
 
 		<QuickBookingModal v-model:show="bookingModalOpen" @success="refreshSummary" />
@@ -206,23 +220,25 @@ import { NAlert, NBadge, NButton, NCard, NSpin, NTabPane, NTabs, useMessage } fr
 import { computed, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
-import { canApproveBookings, canBookAtReception, canCheckInAtReception, canSellPlans, canTopUpWallets } from "@/add-os/config/permissions"
+import { canApproveBookings, canBookAtReception, canCheckInAtReception, canReviewKitchenOrders, canSellPlans, canTopUpWallets } from "@/add-os/config/permissions"
 import { useReceptionRealtime } from "@/add-os/modules/booking/composables/useReceptionRealtime"
 import ActiveSessionsPage from "@/add-os/modules/booking/views/ActiveSessionsPage.vue"
 import ApprovalQueuePage from "@/add-os/modules/booking/views/ApprovalQueuePage.vue"
 import ArrivalsPage from "@/add-os/modules/booking/views/ArrivalsPage.vue"
 import CloseSessionPage from "@/add-os/modules/booking/views/CloseSessionPage.vue"
+import ReceptionKitchenQueue from "@/add-os/modules/kitchen/components/ReceptionKitchenQueue.vue"
 import PendingPaymentsPanel from "@/add-os/modules/reception/components/PendingPaymentsPanel.vue"
 import QuickBookingModal from "@/add-os/modules/reception/components/QuickBookingModal.vue"
 import QuickPlanModal from "@/add-os/modules/reception/components/QuickPlanModal.vue"
 import QuickTopUpModal from "@/add-os/modules/reception/components/QuickTopUpModal.vue"
 import { ApiError } from "@/add-os/services/api"
+import { listOrdersToConfirm } from "@/add-os/services/kitchen"
 import { checkInBooking, getReceptionSummary, listPendingApprovals } from "@/add-os/services/reception"
 import { formatDate, formatNumber, formatTime } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
 type UpcomingItem = ReceptionSummary["upcoming"][number]
-type TabName = "overview" | "arrivals" | "approvals" | "sessions" | "end-requests" | "payments"
+type TabName = "overview" | "arrivals" | "approvals" | "sessions" | "end-requests" | "payments" | "kitchen"
 
 const { t } = useI18n()
 const router = useRouter()
@@ -271,6 +287,17 @@ const summary = ref<ReceptionSummary | null>(null)
 const summaryLoading = ref(false)
 const summaryFailed = ref(false)
 const pendingApprovals = ref(0)
+const pendingKitchenOrders = ref(0)
+
+/** The kitchen orders waiting to be confirmed: the summary has no count of its own for them. */
+async function loadPendingKitchenOrders(): Promise<void> {
+	if (!canReviewKitchenOrders()) return
+	try {
+		pendingKitchenOrders.value = (await listOrdersToConfirm()).meta.total
+	} catch (caught) {
+		if (!(caught instanceof ApiError)) throw caught
+	}
+}
 
 /** The approval queue's total: the summary has no count of its own for it. */
 async function loadPendingApprovals(): Promise<void> {
@@ -287,7 +314,7 @@ async function refreshSummary(): Promise<void> {
 	summaryLoading.value = true
 	summaryFailed.value = false
 	try {
-		const [loaded] = await Promise.all([getReceptionSummary(), loadPendingApprovals()])
+		const [loaded] = await Promise.all([getReceptionSummary(), loadPendingApprovals(), loadPendingKitchenOrders()])
 		summary.value = loaded
 	} catch (caught) {
 		if (!(caught instanceof ApiError)) throw caught
@@ -366,5 +393,5 @@ async function checkIn(item: UpcomingItem): Promise<void> {
 	}
 }
 
-defineExpose({ summary, activeTab, pendingApprovals, quickActions, refreshSummary, bookingModalOpen, topUpModalOpen, planModalOpen })
+defineExpose({ summary, activeTab, pendingApprovals, pendingKitchenOrders, quickActions, refreshSummary, bookingModalOpen, topUpModalOpen, planModalOpen })
 </script>
