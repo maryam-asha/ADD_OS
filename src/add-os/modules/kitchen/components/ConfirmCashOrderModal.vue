@@ -14,6 +14,7 @@
 			</n-form-item>
 
 			<p class="text-xs text-[var(--add-text-muted)]">{{ t("kitchen.confirmCash.note") }}</p>
+			<n-alert v-if="currenciesFailed" type="warning" :bordered="false" data-test="currencies-failed">{{ t("kitchen.confirmCash.currenciesFailed") }}</n-alert>
 			<n-alert v-if="serverError" type="error" :bordered="false" data-test="confirm-cash-error">{{ serverError }}</n-alert>
 		</div>
 		<template #footer>
@@ -47,12 +48,13 @@ const props = defineProps<{
 	loading?: boolean
 	serverError?: string | null
 }>()
-const emit = defineEmits<{ submit: [currency: string] }>()
+const emit = defineEmits<{ submit: [currency: string], changeCurrency: [] }>()
 const show = defineModel<boolean>("show", { required: true })
 
 const { t } = useI18n()
 const currencyStore = useCurrencyStore()
 const currency = ref<string | null>(null)
+const currenciesFailed = ref(false)
 
 const orderLabel = computed(() => (props.order ? formatNumber(props.order.id, { grouping: false }) : ""))
 const duePoints = computed(() => formatNumber(props.order?.cash_due_points ?? 0))
@@ -60,10 +62,18 @@ const currencyOptions = computed<SelectOption[]>(() => currencyStore.availableCu
 
 watch(show, async open => {
 	if (!open) return
-	await currencyStore.fetchCurrencies()
+	currenciesFailed.value = false
+	try {
+		await currencyStore.fetchCurrencies()
+	} catch {
+		// The list the store already holds (the base one among it) is still usable.
+		currenciesFailed.value = true
+	}
 	const base = currencyStore.availableCurrencies.find(c => c.is_base)
 	currency.value = base?.code ?? currencyStore.currency
 }, { immediate: true })
+
+watch(currency, () => emit("changeCurrency"))
 
 function submit() {
 	if (currency.value) emit("submit", currency.value)

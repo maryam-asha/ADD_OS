@@ -148,12 +148,39 @@
 			}
 		},
 		"confirmCash": {
+			"currenciesFailed": "Couldn't load the currency list; the base currency is chosen.",
 			"title": "Confirm order #{id}",
 			"due": "Cash to collect",
 			"duePoints": "{points} points",
 			"currency": "Currency taken",
 			"note": "Take exactly what is due, in the currency you choose; the system works the amount out at today's rate. Change is given from the desk, never as points.",
 			"submit": "Cash taken, confirm"
+		},
+		"cashReturns": {
+			"title": "Cash to return",
+			"description": "Members who paid cash for an order that was not made. Hand the cash back, or credit it as points if the member asks.",
+			"owed": "Owed to the member",
+			"received": "Cash taken: {amount}",
+			"points": "Worth {points} points",
+			"cancel": "Cancel",
+			"why": {
+				"rejected": "Turned down: {reason}",
+				"rejectedNoReason": "Turned down",
+				"cancelledByMember": "Cancelled by the member",
+				"expired": "Not confirmed in time, so it expired"
+			},
+			"returned": {
+				"label": "Returned in cash",
+				"prompt": "Have you handed {amount} back to the member?",
+				"confirm": "Yes, handed back",
+				"done": "Marked as returned in cash."
+			},
+			"credit": {
+				"label": "Credit as points",
+				"prompt": "Credit {points} points to the member's wallet instead of handing the cash back?",
+				"confirm": "Yes, credit points",
+				"done": "Credited to the member as points."
+			}
 		}
 	}
 }

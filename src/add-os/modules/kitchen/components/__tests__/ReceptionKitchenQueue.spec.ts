@@ -188,6 +188,49 @@ describe("receptionKitchenQueue", () => {
 		wrapper.unmount()
 	})
 
+	it("tells_the_desk_after_a_conflict_reload", async () => {
+		listMock.mockResolvedValueOnce(page([orderOf()])).mockResolvedValue(page([]))
+		confirmMock.mockRejectedValue(new ApiError(409, JSON.stringify({ message: "Already handled." })))
+		const wrapper = mountQueue()
+		await flushPromises()
+
+		await wrapper.find("[data-order='41'] [data-action='confirm']").trigger("click")
+		await flushPromises()
+
+		expect(wrapper.emitted("changed")).toHaveLength(1)
+		wrapper.unmount()
+	})
+
+	it("keeps_dialog_usable_when_currencies_fail_to_load", async () => {
+		listMock.mockResolvedValue(page([cashOrder()]))
+		confirmMock.mockResolvedValue(cashOrder({ status: "pending" }))
+		vi.spyOn(useCurrencyStore(), "fetchCurrencies").mockRejectedValue(new Error("offline"))
+		const wrapper = mountQueue()
+		await flushPromises()
+
+		await wrapper.find("[data-order='42'] [data-action='confirm']").trigger("click")
+		await flushPromises()
+
+		expect(inBody("[data-test='currencies-failed']")).not.toBeNull()
+		inBody("[data-test='confirm-cash-submit']")!.click()
+		await flushPromises()
+		expect(confirmMock).toHaveBeenCalledWith(42, "SYP")
+		wrapper.unmount()
+	})
+
+	it("steps_back_a_page_when_the_last_row_drops", async () => {
+		const meta = (last: number) => ({ current_page: 1, last_page: last, per_page: 1, total: last })
+		listMock.mockImplementation(async ({ page: n }: { page: number }) => (n === 2 ? { data: [], meta: meta(1) } : { data: [orderOf()], meta: meta(1) }))
+		const wrapper = mountQueue()
+		await flushPromises()
+		;(wrapper.vm as unknown as { page: number }).page = 2
+		await flushPromises()
+
+		expect((wrapper.vm as unknown as { page: number }).page).toBe(1)
+		expect(wrapper.find("[data-order='41']").exists()).toBe(true)
+		wrapper.unmount()
+	})
+
 	it("turns an order down with its reason", async () => {
 		listMock.mockResolvedValue(page([orderOf()]))
 		turnDownMock.mockResolvedValue(orderOf({ status: "rejected" }))

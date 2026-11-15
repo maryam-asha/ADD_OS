@@ -2,7 +2,7 @@
 <template>
 	<div class="flex flex-col gap-4">
 		<div class="flex flex-wrap items-center justify-between gap-3">
-			<p class="text-sm text-stone-600">{{ t("kitchen.reception.description") }}</p>
+			<p class="text-sm text-[var(--add-text-secondary)]">{{ t("kitchen.reception.description") }}</p>
 			<n-button size="small" secondary :loading="isLoading" @click="load">
 				<template #icon><Icon name="carbon:renew" :size="16" /></template>
 				{{ t("kitchen.board.refresh") }}
@@ -59,13 +59,13 @@
 				</div>
 			</n-card>
 		</div>
-		<div v-else-if="!loadError && !isLoading" class="py-10 text-center text-sm text-stone-500" data-test="empty">{{ t("kitchen.reception.empty") }}</div>
+		<div v-else-if="!loadError && !isLoading" class="py-10 text-center text-sm text-[var(--add-text-muted)]" data-test="empty">{{ t("kitchen.reception.empty") }}</div>
 
 		<div v-if="meta && meta.last_page > 1" class="flex justify-end">
 			<n-pagination v-model:page="page" :page-count="meta.last_page" :disabled="isLoading" />
 		</div>
 
-		<ConfirmCashOrderModal v-model:show="cashVisible" :order="target" :loading="busyId !== null" :server-error="cashError" @submit="submitCash" />
+		<ConfirmCashOrderModal v-model:show="cashVisible" :order="target" :loading="busyId !== null" :server-error="cashError" @submit="submitCash" @change-currency="cashError = null" />
 		<RejectOrderModal v-model:show="turnDownVisible" :order-id="target?.id ?? null" :loading="busyId !== null" :server-error="turnDownError" @submit="submitTurnDown" />
 	</div>
 </template>
@@ -111,6 +111,8 @@ async function load(): Promise<void> {
 		const result = await listOrdersToConfirm({ page: page.value })
 		orders.value = result.data
 		meta.value = result.meta
+		// The last row of the last page was handled: step back to the last page that is left.
+		if (result.data.length === 0 && page.value > 1 && result.meta.last_page < page.value) page.value = Math.max(1, result.meta.last_page)
 		loadError.value = false
 	} catch (caught) {
 		if (!(caught instanceof ApiError)) throw caught
@@ -178,8 +180,10 @@ async function run(order: KitchenOrder, action: () => Promise<unknown>, success:
 		}
 	} finally {
 		try {
-			if (reload) await load()
-			if (worked) emit("changed")
+			if (reload) {
+				await load()
+				emit("changed")
+			}
 		} finally {
 			busyId.value = null
 		}
