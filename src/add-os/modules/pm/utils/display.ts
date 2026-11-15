@@ -3,6 +3,7 @@
  * as a local date, a person's initials, and the sentence for a refusal.
  */
 
+import type { Project } from "@/add-os/modules/pm/types/pm"
 import { ApiError } from "@/add-os/services/api"
 
 /**
@@ -37,4 +38,15 @@ export function refusalText(error: unknown, t: (key: string) => string, fallback
 	const data = error.data as { message?: string; code?: string } | undefined
 	if (data?.code && REFUSAL_CODES.includes(data.code)) return t(`pm.refusal.${data.code}`)
 	return data?.message ?? fallback
+}
+
+/**
+ * Whether the signed-in account may add tasks to `project`: the project must
+ * not be archived, and the account runs it, leads it or is one of its members.
+ * A viewer who is none of those can read the project but every write is refused.
+ */
+export function mayAddTasks(project: Pick<Project, "is_archived" | "can" | "members">, userId: number | undefined): boolean {
+	if (project.is_archived) return false
+	if (project.can.manage || project.can.lead) return true
+	return userId !== undefined && project.members.some(person => person.id === userId)
 }

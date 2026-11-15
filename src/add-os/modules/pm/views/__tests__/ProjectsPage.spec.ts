@@ -16,7 +16,8 @@ const m = vi.hoisted(() => ({
 	createProject: vi.fn(),
 	updateProject: vi.fn(),
 	replaceMembers: vi.fn(),
-	manage: { value: true }
+	manage: { value: true },
+	userId: { value: 99 }
 }))
 
 vi.mock("@/add-os/services/pm", () => ({
@@ -34,6 +35,8 @@ vi.mock("@/add-os/config/permissions", async importOriginal => ({
 	...await importOriginal<typeof import("@/add-os/config/permissions")>(),
 	canManageProjects: () => m.manage.value
 }))
+
+vi.mock("@/stores/auth", () => ({ useAuthStore: () => ({ user: { id: m.userId.value } }) }))
 
 vi.mock("naive-ui", async () => {
 	const actual = await vi.importActual<typeof import("naive-ui")>("naive-ui")
@@ -53,7 +56,7 @@ vi.mock("vue-router", async () => {
 
 const router = await import("vue-router") as unknown as { __route: { query: Record<string, string> } }
 
-function projectOf(id: number, name: string, open: number): Project {
+function projectOf(id: number, name: string, open: number, overrides: Partial<Project> = {}): Project {
 	return {
 		id,
 		name,
@@ -65,7 +68,8 @@ function projectOf(id: number, name: string, open: number): Project {
 		lead: null,
 		members: [],
 		counts: { total: open + 1, done: 1, open, overdue: 0 },
-		can: { manage: true, lead: false }
+		can: { manage: true, lead: false },
+		...overrides
 	}
 }
 
@@ -100,6 +104,7 @@ describe("projectsPage", () => {
 	beforeEach(() => {
 		vi.clearAllMocks()
 		m.manage.value = true
+		m.userId.value = 99
 		router.__route.query = {}
 		m.listProjects.mockResolvedValue([projectOf(1, "Launch", 4), projectOf(2, "Website", 7)])
 		m.listProjectTasks.mockResolvedValue([taskOf(10, "Draft the brief", "todo"), taskOf(11, "Review copy", "review")])
@@ -173,6 +178,58 @@ describe("projectsPage", () => {
 		expect(m.listProjectTasks).toHaveBeenCalledWith(2, expect.anything())
 		expect(wrapper.find("[data-test='board']").exists()).toBe(false)
 		wrapper.unmount()
+	})
+
+	it("shows Edit by the project's own can.manage, not the global permission", async () => {
+		m.listProjects.mockResolvedValue([projectOf(1, "Launch", 4, { can: { manage: false, lead: false } })])
+		const no = mountPage()
+		await flushPromises()
+		expect(m.manage.value).toBe(true)
+		expect(no.find("[data-test='edit-project']").exists()).toBe(false)
+		no.unmount()
+
+		m.listProjects.mockResolvedValue([projectOf(1, "Launch", 4, { is_archived: true })])
+		const archived = mountPage()
+		await flushPromises()
+		expect(archived.find("[data-test='edit-project']").exists()).toBe(true)
+		archived.unmount()
+	})
+
+	it("shows a loading state while the projects are being read", async () => {
+		let release: (rows: Project[]) => void = () => {}
+		m.listProjects.mockReturnValue(new Promise<Project[]>((resolve) => {
+			release = resolve
+		}))
+		const wrapper = mountPage()
+		await flushPromises()
+		expect(wrapper.find("[data-test='projects-loading']").exists()).toBe(true)
+
+		release([projectOf(1, "Launch", 4)])
+		await flushPromises()
+		expect(wrapper.find("[data-test='projects-loading']").exists()).toBe(false)
+		expect(wrapper.find("[data-project='1']").exists()).toBe(true)
+		wrapper.unmount()
+	})
+
+	it("offers Add a task to a runner, a lead or a member, never to a plain viewer", async () => {
+		const viewer = { can: { manage: false, lead: false } }
+		m.listProjects.mockResolvedValue([projectOf(1, "Launch", 4, viewer)])
+		const plain = mountPage()
+		await flushPromises()
+		expect(plain.find("[data-test='add']").exists()).toBe(false)
+		plain.unmount()
+
+		m.listProjects.mockResolvedValue([projectOf(1, "Launch", 4, { ...viewer, members: [{ id: 99, name: "Me", avatar_url: null }] })])
+		const member = mountPage()
+		await flushPromises()
+		expect(member.find("[data-test='add']").exists()).toBe(true)
+		member.unmount()
+
+		m.listProjects.mockResolvedValue([projectOf(1, "Launch", 4, { can: { manage: false, lead: true } })])
+		const lead = mountPage()
+		await flushPromises()
+		expect(lead.find("[data-test='add']").exists()).toBe(true)
+		lead.unmount()
 	})
 
 	it("moves a dropped card, and reads the board again when the move is refused", async () => {

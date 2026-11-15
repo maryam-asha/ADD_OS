@@ -14,6 +14,8 @@
 
 		<n-alert v-if="loadError" type="error" :title="t('pm.projects.loadError')" />
 
+		<n-spin v-else-if="loadingProjects" class="flex justify-center py-12" data-test="projects-loading" />
+
 		<n-empty v-else-if="!loadingProjects && projects.length === 0" :description="t('pm.projects.empty')" data-test="no-projects" />
 
 		<template v-else-if="project">
@@ -60,7 +62,7 @@
 			<n-alert v-if="tasksError" type="error" :title="t('pm.projects.tasksError')" />
 
 			<n-spin :show="loadingTasks">
-				<TaskBoard v-if="view === 'board'" :tasks :can-add="!project.is_archived" @open="openTask" @add="addTask" @moved="onMoved" />
+				<TaskBoard v-if="view === 'board'" :tasks :can-add @open="openTask" @add="addTask" @moved="onMoved" />
 				<TaskList v-else :tasks @open="openTask" />
 			</n-spin>
 		</template>
@@ -81,11 +83,12 @@ import ProjectHeader from "@/add-os/modules/pm/components/ProjectHeader.vue"
 import TaskBoard from "@/add-os/modules/pm/components/TaskBoard.vue"
 import TaskFilters from "@/add-os/modules/pm/components/TaskFilters.vue"
 import TaskList from "@/add-os/modules/pm/components/TaskList.vue"
-import { refusalText } from "@/add-os/modules/pm/utils/display"
+import { mayAddTasks, refusalText } from "@/add-os/modules/pm/utils/display"
 import { toneVar } from "@/add-os/modules/pm/utils/pm"
 import { listProjects, listProjectTasks, listTags, moveTask } from "@/add-os/services/pm"
 import { formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
+import { useAuthStore } from "@/stores/auth"
 
 /**
  * Projects, one at a time: a chip per project the account may see, the
@@ -108,6 +111,7 @@ const route = useRoute()
 const router = useRouter()
 
 const mayManage = canManageProjects()
+const authStore = useAuthStore()
 
 const projects = ref<Project[]>([])
 const tasks = ref<Task[]>([])
@@ -128,6 +132,8 @@ const view = computed<View>(() => (route.query.view === "list" ? "list" : "board
 function setQuery(patch: Record<string, string>) {
 	void router.replace({ query: { ...route.query, ...patch } })
 }
+
+const canAdd = computed(() => (project.value ? mayAddTasks(project.value, authStore.user.id) : false))
 
 /** The people a task of this project can be assigned to, for the assignee filter. */
 const people = computed<Person[]>(() => {

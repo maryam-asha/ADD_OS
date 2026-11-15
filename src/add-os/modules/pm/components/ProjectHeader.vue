@@ -10,7 +10,7 @@
 					</div>
 					<p v-if="project.description" class="text-secondary whitespace-pre-wrap" dir="auto">{{ project.description }}</p>
 				</div>
-				<n-button v-if="canManageProjects()" size="small" data-test="edit-project" @click="emit('edit')">
+				<n-button v-if="project.can.manage" size="small" data-test="edit-project" @click="emit('edit')">
 					<template #icon><Icon name="carbon:edit" :size="16" /></template>
 					{{ t("pm.header.edit") }}
 				</n-button>
@@ -51,13 +51,12 @@ import type { Project } from "@/add-os/modules/pm/types/pm"
 import { NAvatar, NButton, NCard, NProgress, NTag } from "naive-ui"
 import { computed } from "vue"
 import { useI18n } from "vue-i18n"
-import { canManageProjects } from "@/add-os/config/permissions"
 import { dayDate, initialsOf } from "@/add-os/modules/pm/utils/display"
 import { toneVar } from "@/add-os/modules/pm/utils/pm"
 import { formatDate, formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
-/** The selected project at a glance: lead, dates, team and how far along it is. Editing is for `pm.projects.manage`. */
+/** The selected project at a glance: lead, dates, team and how far along it is. Editing is for whoever runs the project (the server's `can.manage`, true on an archived project too). */
 const props = defineProps<{ project: Project }>()
 const emit = defineEmits<{ edit: [] }>()
 
