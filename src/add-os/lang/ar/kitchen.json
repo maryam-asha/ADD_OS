@@ -1,6 +1,8 @@
 {
 	"kitchen": {
 		"status": {
+			"awaiting_payment": "بانتظار الدفع",
+			"awaiting_reception": "بانتظار الاستقبال",
 			"pending": "جديد",
 			"preparing": "قيد التحضير",
 			"ready": "جاهز",

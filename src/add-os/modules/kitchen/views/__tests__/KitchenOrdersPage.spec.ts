@@ -22,6 +22,10 @@ const rejected: KitchenOrder = {
 	source: "app",
 	delivery: { type: "space", label: "Room 3", note: null },
 	bill: { type: "booking", id: 8 },
+	route: "kitchen",
+	payment: { choice: "bill", wallet_owner_type: null, paid: false },
+	cash_due_points: null,
+	cash_return: null,
 	lines: [{ sale_item_id: 1, name: "Juice", quantity: 1, unit_price_points: 300, line_points: 300 }],
 	total_points: 300,
 	rejection_reason: "We are out of oranges today.",
@@ -52,7 +56,7 @@ describe("kitchenOrdersPage", () => {
 		await flushPromises()
 
 		// No status chosen: every status, not the API's open-only default.
-		expect(listOrdersMock).toHaveBeenLastCalledWith({ sort: "newest", status: ["pending", "preparing", "ready", "delivered", "rejected", "cancelled"], page: 1 })
+		expect(listOrdersMock).toHaveBeenLastCalledWith({ sort: "newest", status: ["awaiting_payment", "awaiting_reception", "pending", "preparing", "ready", "delivered", "rejected", "cancelled"], page: 1 })
 
 		wrapper.vm.branchId = 1
 		wrapper.vm.statuses = ["rejected", "cancelled"]

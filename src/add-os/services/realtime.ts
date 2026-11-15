@@ -41,7 +41,9 @@ export const RECEPTION_EVENTS = [
 	"booking.pending_approval",
 	"booking.cancelled",
 	// What the desk has to collect changed: paid by any method, newly owed, or no longer owed.
-	"payments.pending_changed"
+	"payments.pending_changed",
+	// The queue of kitchen orders to confirm changed (`KitchenOrderAwaitingReception`); payload `{order_id, branch_id, status}`.
+	"kitchen_order.awaiting_reception"
 ] as const
 
 export type ReceptionEvent = (typeof RECEPTION_EVENTS)[number]

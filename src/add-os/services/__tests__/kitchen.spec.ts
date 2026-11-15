@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-import { listKitchenOrders, rejectKitchenOrder, setKitchenStore } from "../kitchen"
+import { canReviewKitchenOrders } from "@/add-os/config/permissions"
+import { confirmKitchenOrder, creditCashAsPoints, listCashReturns, listKitchenOrders, listOrdersToConfirm, markCashReturned, rejectKitchenOrder, setKitchenStore, turnDownKitchenOrder } from "../kitchen"
 
 const { getMock, postMock, putMock } = vi.hoisted(() => ({
 	getMock: vi.fn(),
@@ -38,5 +39,48 @@ describe("kitchen service", () => {
 		await setKitchenStore(3, 9)
 
 		expect(putMock).toHaveBeenCalledWith("/api/v1/admin/kitchen/stores/3", { warehouse_id: 9 })
+	})
+
+	it("lists_pass_branch_and_page", async () => {
+		getMock.mockResolvedValue({ data: [], meta: { current_page: 2, last_page: 2, total: 0 } })
+
+		await listOrdersToConfirm({ branch_id: 2, page: 2 })
+		await listCashReturns({ branch_id: 2, page: 2 })
+
+		expect(getMock).toHaveBeenNthCalledWith(1, "/api/v1/admin/reception/kitchen-orders", { branch_id: 2, page: 2 })
+		expect(getMock).toHaveBeenNthCalledWith(2, "/api/v1/admin/reception/kitchen-cash-returns", { branch_id: 2, page: 2 })
+	})
+
+	it("confirm_sends_currency_only_when_given", async () => {
+		postMock.mockResolvedValue({ data: { id: 5 } })
+
+		await confirmKitchenOrder(5)
+		await confirmKitchenOrder(5, "USD")
+
+		expect(postMock).toHaveBeenNthCalledWith(1, "/api/v1/admin/reception/kitchen-orders/5/accept", undefined)
+		expect(postMock).toHaveBeenNthCalledWith(2, "/api/v1/admin/reception/kitchen-orders/5/accept", { currency: "USD" })
+	})
+
+	it("turn_down_sends_reason", async () => {
+		postMock.mockResolvedValue({ data: { id: 5 } })
+
+		await turnDownKitchenOrder(5, "No cash")
+
+		expect(postMock).toHaveBeenCalledWith("/api/v1/admin/reception/kitchen-orders/5/reject", { reason: "No cash" })
+	})
+
+	it("cash_return_actions_hit_their_paths", async () => {
+		postMock.mockResolvedValue({ data: { order: { id: 5 }, points: 10, received_amount: "10", received_currency: "SYP" } })
+
+		const row = await markCashReturned(5)
+		await creditCashAsPoints(5)
+
+		expect(row.points).toBe(10)
+		expect(postMock).toHaveBeenNthCalledWith(1, "/api/v1/admin/reception/kitchen-cash-returns/5/returned")
+		expect(postMock).toHaveBeenNthCalledWith(2, "/api/v1/admin/reception/kitchen-cash-returns/5/credit-points")
+	})
+
+	it("review_permission_is_exported", () => {
+		expect(typeof canReviewKitchenOrders).toBe("function")
 	})
 })

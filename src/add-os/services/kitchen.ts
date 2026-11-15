@@ -1,6 +1,6 @@
 import type { Paginated, RawPaginatedResponse } from "./pagination"
 import type { MessageResponse } from "./resource-factory"
-import type { KitchenOrder, KitchenOrderStatus, KitchenStoreRow, QrPlaceType, QrPoint } from "@/add-os/modules/kitchen/types/kitchen"
+import type { CashReturnRow, KitchenOrder, KitchenOrderStatus, KitchenStoreRow, QrPlaceType, QrPoint } from "@/add-os/modules/kitchen/types/kitchen"
 import { del, get, post, put } from "./api"
 import { rowsOf, toPaginated } from "./pagination"
 
@@ -15,6 +15,12 @@ import { rowsOf, toPaginated } from "./pagination"
  * confirmed from the pinned collection: the snapshot in `docs/api/` (pinned
  * 2026-10-18) has no kitchen endpoint, and the canonical file gains them only
  * when the backend branch lands — re-pin then and cite the pin date here.
+ *
+ * Added 2026-11-14: the reception side (`reception/kitchen-orders*`,
+ * `reception/kitchen-cash-returns*`, permission `kitchen-orders.review`) comes
+ * from ADD Core's branch `feat/kitchen-orders-without-a-bill`
+ * (`KitchenOrderReviewController`, `KitchenCashReturnController`). It is NOT yet
+ * in the pinned snapshot; re-pin once that branch is merged to ADD Core master.
  *
  * Every action answers the order as it now stands; the screens reload their
  * list afterwards rather than splice it in. A refusal (409 "already handled",
@@ -102,4 +108,43 @@ export async function createQrPoint(payload: { place_type: QrPlaceType; place_id
 
 export function removeQrPoint(id: number): Promise<MessageResponse> {
 	return del<MessageResponse>(`${BASE}/qr-points/${id}`)
+}
+
+export interface ReceptionKitchenQuery {
+	branch_id?: number
+	page?: number
+}
+
+/** Orders sent without a bill that wait for reception, oldest first. */
+export async function listOrdersToConfirm(q: ReceptionKitchenQuery = {}): Promise<Paginated<KitchenOrder>> {
+	return toPaginated(await get<RawPaginatedResponse<KitchenOrder>>(`${BASE}/reception/kitchen-orders`, { ...q }))
+}
+
+/**
+ * Lets the order through to the kitchen. For a cash order the desk takes exactly what is
+ * due, in `currency` (omitted: the base currency); there is no amount — change is the
+ * desk's, never points. Ignored for an order already paid. 422 `api.payment.currency_unavailable`
+ * when that currency has no rate yet.
+ */
+export async function confirmKitchenOrder(id: number, currency?: string | null): Promise<KitchenOrder> {
+	return (await post<{ data: KitchenOrder }>(`${BASE}/reception/kitchen-orders/${id}/accept`, currency ? { currency } : undefined)).data
+}
+
+export async function turnDownKitchenOrder(id: number, reason: string): Promise<KitchenOrder> {
+	return (await post<{ data: KitchenOrder }>(`${BASE}/reception/kitchen-orders/${id}/reject`, { reason })).data
+}
+
+/** Cash taken for orders that were not made and is still owed to the member, oldest first. */
+export async function listCashReturns(q: ReceptionKitchenQuery = {}): Promise<Paginated<CashReturnRow>> {
+	return toPaginated(await get<RawPaginatedResponse<CashReturnRow>>(`${BASE}/reception/kitchen-cash-returns`, { ...q }))
+}
+
+/** The cash was handed back to the member. */
+export async function markCashReturned(id: number): Promise<CashReturnRow> {
+	return (await post<{ data: CashReturnRow }>(`${BASE}/reception/kitchen-cash-returns/${id}/returned`)).data
+}
+
+/** The member took the cash as points instead. */
+export async function creditCashAsPoints(id: number): Promise<CashReturnRow> {
+	return (await post<{ data: CashReturnRow }>(`${BASE}/reception/kitchen-cash-returns/${id}/credit-points`)).data
 }

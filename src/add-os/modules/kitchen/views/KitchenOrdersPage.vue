@@ -93,6 +93,8 @@ const { t } = useI18n()
 const isRtl = computed(() => currentLocale.value === "ar")
 
 const STATUS_TAG: Record<KitchenOrderStatus, "default" | "info" | "success" | "warning" | "error"> = {
+	awaiting_payment: "default",
+	awaiting_reception: "warning",
 	pending: "info",
 	preparing: "warning",
 	ready: "success",
@@ -177,7 +179,7 @@ const fields = computed(() => {
 	const list = [
 		{ label: t("kitchen.history.columns.member"), value: order.member?.phone ? `${memberName(order)} · ${order.member.phone}` : memberName(order) },
 		{ label: t("kitchen.history.columns.place"), value: placeOf(order) },
-		{ label: t("kitchen.history.bill"), value: t(`kitchen.history.billType.${order.bill.type}`, { id: formatNumber(order.bill.id, { grouping: false }) }) },
+		{ label: t("kitchen.history.bill"), value: order.bill ? t(`kitchen.history.billType.${order.bill.type}`, { id: formatNumber(order.bill.id, { grouping: false }) }) : "—" },
 		{ label: t("kitchen.history.source"), value: t(`kitchen.history.sourceType.${order.source}`) },
 		{ label: t("kitchen.history.submittedAt"), value: at(order.timestamps.submitted_at) },
 		{ label: t("kitchen.history.acceptedAt"), value: at(order.timestamps.accepted_at) },

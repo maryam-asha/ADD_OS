@@ -1,6 +1,8 @@
 {
 	"kitchen": {
 		"status": {
+			"awaiting_payment": "Awaiting payment",
+			"awaiting_reception": "Awaiting reception",
 			"pending": "New",
 			"preparing": "Preparing",
 			"ready": "Ready",
