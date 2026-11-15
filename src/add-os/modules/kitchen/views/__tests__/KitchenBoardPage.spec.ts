@@ -31,7 +31,7 @@ vi.mock("@/add-os/modules/kitchen/composables/useKitchenRealtime", () => ({ useK
 
 vi.mock("@/add-os/modules/dashboard/composables/useBranchOptions", async () => {
 	const { computed } = await import("vue")
-	return { useBranchOptions: () => ({ branchOptions: computed(() => [{ label: "Main", value: 1 }]), branchNames: computed(() => ({ 1: "Main" })) }) }
+	return { useBranchOptions: () => ({ branchOptions: computed(() => [{ label: "Main", value: 1 }]), branchNames: computed(() => ({ 1: "Main" })), defaultBranchId: computed(() => 1) }) }
 })
 
 vi.mock("@/add-os/config/permissions", () => ({
