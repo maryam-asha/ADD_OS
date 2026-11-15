@@ -23,7 +23,7 @@
 <script setup lang="ts">
 import type { Person } from "@/add-os/modules/pm/types/pm"
 import { NSelect } from "naive-ui"
-import { computed, onBeforeUnmount, ref } from "vue"
+import { computed, onBeforeUnmount, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { searchPeople } from "@/add-os/services/pm"
 
@@ -40,6 +40,8 @@ const props = withDefaults(defineProps<{
 }>(), { known: () => [], multiple: true, placeholder: undefined })
 
 const model = defineModel<number[]>({ default: () => [] })
+/** The chosen ones with their names, for a form that has to offer them elsewhere (the lead among the team). */
+const people = defineModel<Person[]>("people", { default: () => [] })
 
 const { t } = useI18n()
 
@@ -57,13 +59,21 @@ const selected = computed<number | number[] | null>({
 	}
 })
 
-const options = computed(() => {
+const everyone = computed(() => {
 	const byId = new Map<number, Person>()
 	for (const person of props.known) byId.set(person.id, person)
 	for (const person of remembered.values()) byId.set(person.id, person)
 	for (const person of found.value) byId.set(person.id, person)
-	return [...byId.values()].map(person => ({ label: person.name, value: person.id }))
+	return byId
 })
+
+const options = computed(() => [...everyone.value.values()].map(person => ({ label: person.name, value: person.id })))
+
+watch([model, everyone], () => {
+	const chosen = model.value.map(id => everyone.value.get(id)).filter((person): person is Person => person !== undefined)
+	const same = chosen.length === people.value.length && chosen.every((person, index) => person.id === people.value[index].id)
+	if (!same) people.value = chosen
+}, { immediate: true })
 
 async function run(query: string) {
 	const mine = ++latest

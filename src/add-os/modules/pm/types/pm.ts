@@ -46,7 +46,7 @@ export interface Project {
 	lead: Person | null
 	members: Person[]
 	counts: ProjectCounts
-	/** `manage`: may run the project (lead or manager); `lead`: is its lead. */
+	/** `manage`: holds `pm.projects.manage`; `lead`: is its lead or a manager. */
 	can: { manage: boolean; lead: boolean }
 }
 

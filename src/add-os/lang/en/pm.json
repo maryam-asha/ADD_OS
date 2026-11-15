@@ -41,7 +41,8 @@
 			"empty": "There are no projects yet.",
 			"loadError": "Couldn't load the projects.",
 			"tasksError": "Couldn't load the tasks.",
-			"openCount": "{n} open"
+			"openCount": "{n} open",
+			"showArchived": "Show archived"
 		},
 		"myTasks": {
 			"title": "My tasks",
@@ -130,6 +131,7 @@
 			"startsOn": "Starts",
 			"endsOn": "Ends",
 			"lead": "Lead",
+			"leadPlaceholder": "Pick from the members",
 			"members": "Members",
 			"archived": "Archived (read-only)",
 			"save": "Save",

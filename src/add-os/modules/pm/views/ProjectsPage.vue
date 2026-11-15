@@ -6,10 +6,16 @@
 				<h1 class="text-2xl font-bold">{{ t("pm.projects.title") }}</h1>
 				<p>{{ t("pm.projects.description") }}</p>
 			</div>
-			<n-button v-if="mayManage" type="primary" data-test="new-project" @click="openForm(false)">
-				<template #icon><Icon name="carbon:add" :size="16" /></template>
-				{{ t("pm.projects.new") }}
-			</n-button>
+			<div class="flex items-center gap-4">
+				<label v-if="mayManage" class="flex cursor-pointer items-center gap-2">
+					<n-switch v-model:value="showArchived" size="small" data-test="show-archived" />
+					<span>{{ t("pm.projects.showArchived") }}</span>
+				</label>
+				<n-button v-if="mayManage" type="primary" data-test="new-project" @click="openForm(false)">
+					<template #icon><Icon name="carbon:add" :size="16" /></template>
+					{{ t("pm.projects.new") }}
+				</n-button>
+			</div>
 		</div>
 
 		<n-alert v-if="loadError" type="error" :title="t('pm.projects.loadError')" />
@@ -33,6 +39,7 @@
 				>
 					<span class="inline-block size-2 rounded-full" :style="{ backgroundColor: toneVar(item.tone) }" />
 					<span dir="auto">{{ item.name }}</span>
+					<n-tag v-if="item.is_archived" size="small" round :bordered="false" data-test="chip-archived">{{ t("pm.header.archived") }}</n-tag>
 					<n-tag size="small" round :bordered="false" :title="t('pm.projects.openCount', { n: formatNumber(item.counts.open) })">{{ formatNumber(item.counts.open) }}</n-tag>
 				</button>
 			</div>
@@ -83,7 +90,7 @@
 
 <script setup lang="ts">
 import type { Person, Project, Tag, Task, TaskFilters as TaskFilterValues, TaskStatus } from "@/add-os/modules/pm/types/pm"
-import { NAlert, NButton, NEmpty, NSpin, NTag, useMessage } from "naive-ui"
+import { NAlert, NButton, NEmpty, NSpin, NSwitch, NTag, useMessage } from "naive-ui"
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
@@ -130,6 +137,7 @@ const tags = ref<Tag[]>([])
 const filters = ref<TaskFilterValues>({})
 const loadingProjects = ref(true)
 const loadingTasks = ref(false)
+const showArchived = ref(false)
 const loadError = ref(false)
 const tasksError = ref(false)
 
@@ -157,7 +165,7 @@ const people = computed<Person[]>(() => {
 // ── Loading ─────────────────────────────────────────────────────────────────
 async function loadProjects() {
 	try {
-		projects.value = await listProjects()
+		projects.value = await listProjects(showArchived.value ? { archived: true } : {})
 		loadError.value = false
 	} catch {
 		loadError.value = true
@@ -212,6 +220,11 @@ watch(() => project.value?.id, () => {
 	void loadTasks()
 })
 
+// Archived projects are shown on request; a choice on the page, not navigation, so it stays out of the URL.
+watch(showArchived, () => void loadProjects())
+
+const filtersActive = computed(() => Object.values(filters.value).some(value => value !== null && value !== undefined && value !== ""))
+
 watch(filters, () => {
 	clearTimeout(filterTimer)
 	filterTimer = setTimeout(() => {
@@ -228,7 +241,9 @@ onBeforeUnmount(() => clearTimeout(filterTimer))
 // ── Dropping a card ─────────────────────────────────────────────────────────
 async function onMoved(taskId: number, status: TaskStatus, order: number[]) {
 	try {
-		await moveTask(taskId, status, order)
+		// A filtered board shows only some of a column, so its order is not the whole column's: send the status and let the server place the card last.
+		if (filtersActive.value) await moveTask(taskId, status)
+		else await moveTask(taskId, status, order)
 	} catch (caught) {
 		message.error(refusalText(caught, t, t("pm.board.moveError")))
 	}
@@ -277,7 +292,9 @@ function openForm(edit: boolean) {
 
 async function onSaved(saved: Project) {
 	await loadProjects()
-	if (saved.id !== project.value?.id) setQuery({ project: String(saved.id) })
+	if (saved.id !== project.value?.id && projects.value.some(item => item.id === saved.id)) setQuery({ project: String(saved.id) })
+	// Members may have left: their avatars go from the cards too.
+	await loadTasks(true)
 }
 
 defineExpose({ selectedTask, newTaskStatus })

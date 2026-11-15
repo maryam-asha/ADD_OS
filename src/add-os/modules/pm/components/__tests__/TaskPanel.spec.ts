@@ -147,6 +147,20 @@ describe("taskPanel", () => {
 		wrapper.unmount()
 	})
 
+	it("hides the Tags field when there are no tags to pick from", async () => {
+		const bare = mountPanel({ taskId: 10 })
+		await flushPromises()
+		expect(body().querySelector("[data-test='tags']")).toBeNull()
+		bare.unmount()
+		document.body.innerHTML = ""
+
+		m.listTags.mockResolvedValue([{ id: 3, name: "Urgent" }])
+		const tagged = mountPanel({ taskId: 10 })
+		await flushPromises()
+		expect(body().querySelector("[data-test='tags']")).not.toBeNull()
+		tagged.unmount()
+	})
+
 	it("shows read-only fields to a member who may not edit the task", async () => {
 		m.getTask.mockResolvedValue(taskOf({ can: { edit: false, move: false, delete: false, assign: false } }))
 		const wrapper = mountPanel({ taskId: 10 })

@@ -48,7 +48,7 @@
 						<n-form-item :label="t('pm.priority.label')" :feedback="errorOf('priority')" :validation-status="errorOf('priority') ? 'error' : undefined">
 							<n-select v-model:value="priority" :options="priorityOptions" clearable :disabled="!canEdit" data-test="priority" />
 						</n-form-item>
-						<n-form-item :label="t('pm.task.tags')" :feedback="errorOf('tag_ids')" :validation-status="errorOf('tag_ids') ? 'error' : undefined">
+						<n-form-item v-if="tagOptions.length > 0" :label="t('pm.task.tags')" :feedback="errorOf('tag_ids')" :validation-status="errorOf('tag_ids') ? 'error' : undefined">
 							<n-select v-model:value="tagIds" :options="tagOptions" multiple :disabled="!canEdit" data-test="tags" />
 						</n-form-item>
 						<n-form-item :label="t('pm.task.estimate')" :feedback="errorOf('estimate_hours')" :validation-status="errorOf('estimate_hours') ? 'error' : undefined">

@@ -1,10 +1,12 @@
 import type { Project, Task } from "@/add-os/modules/pm/types/pm"
 import { flushPromises, mount } from "@vue/test-utils"
+import { NSwitch } from "naive-ui"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { createI18n } from "vue-i18n"
 import ar from "@/add-os/lang/ar"
 import en from "@/add-os/lang/en"
 import TaskBoard from "../../components/TaskBoard.vue"
+import TaskFilters from "../../components/TaskFilters.vue"
 import TaskPanel from "../../components/TaskPanel.vue"
 import ProjectsPage from "../ProjectsPage.vue"
 
@@ -251,6 +253,40 @@ describe("projectsPage", () => {
 		expect(m.moveTask).toHaveBeenCalledWith(10, "review", [10, 11])
 		expect(m.listProjectTasks.mock.calls.length).toBeGreaterThan(before)
 		wrapper.unmount()
+	})
+
+	it("sends only the status when a drop happens while a filter is active", async () => {
+		const wrapper = mountPage()
+		await flushPromises()
+
+		wrapper.findComponent(TaskFilters).vm.$emit("update:modelValue", { status: "todo" })
+		await flushPromises()
+		wrapper.findComponent(TaskBoard).vm.$emit("moved", 10, "review", [10])
+		await flushPromises()
+
+		expect(m.moveTask).toHaveBeenCalledWith(10, "review")
+		wrapper.unmount()
+	})
+
+	it("shows the archived switch only to a manager and sends archived when it is on", async () => {
+		const wrapper = mountPage()
+		await flushPromises()
+		expect(m.listProjects).toHaveBeenLastCalledWith({})
+
+		m.listProjects.mockResolvedValue([projectOf(1, "Launch", 4), projectOf(3, "Old", 0, { is_archived: true })])
+		wrapper.findComponent(NSwitch).vm.$emit("update:value", true)
+		await flushPromises()
+
+		expect(m.listProjects).toHaveBeenLastCalledWith({ archived: true })
+		expect(wrapper.find("[data-project='3'] [data-test='chip-archived']").exists()).toBe(true)
+		expect(wrapper.find("[data-project='1'] [data-test='chip-archived']").exists()).toBe(false)
+		wrapper.unmount()
+
+		m.manage.value = false
+		const plain = mountPage()
+		await flushPromises()
+		expect(plain.find("[data-test='show-archived']").exists()).toBe(false)
+		plain.unmount()
 	})
 
 	it("opens the task panel on a card, and a new one in the column it was added to", async () => {

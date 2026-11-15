@@ -40,12 +40,12 @@
 				</n-form-item>
 			</div>
 
-			<n-form-item :label="t('pm.form.lead')">
-				<PeopleSelect v-model="lead" :multiple="false" :known="project?.lead ? [project.lead] : []" />
+			<n-form-item :label="t('pm.form.members')">
+				<PeopleSelect v-model="members" v-model:people="chosen" :known="project?.members ?? []" data-test="members" />
 			</n-form-item>
 
-			<n-form-item :label="t('pm.form.members')">
-				<PeopleSelect v-model="members" :known="project?.members ?? []" />
+			<n-form-item :label="t('pm.form.lead')">
+				<n-select v-model:value="lead" :options="leadOptions" clearable :placeholder="t('pm.form.leadPlaceholder')" data-test="lead" />
 			</n-form-item>
 
 			<n-form-item v-if="project" :show-label="false">
@@ -61,9 +61,9 @@
 </template>
 
 <script setup lang="ts">
-import type { Project, ProjectPayload, ProjectTone } from "@/add-os/modules/pm/types/pm"
-import { NAlert, NButton, NCheckbox, NDatePicker, NForm, NFormItem, NInput, NModal, useMessage } from "naive-ui"
-import { ref, watch } from "vue"
+import type { Person, Project, ProjectPayload, ProjectTone } from "@/add-os/modules/pm/types/pm"
+import { NAlert, NButton, NCheckbox, NDatePicker, NForm, NFormItem, NInput, NModal, NSelect, useMessage } from "naive-ui"
+import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import PeopleSelect from "@/add-os/modules/pm/components/PeopleSelect.vue"
 import { PROJECT_TONES } from "@/add-os/modules/pm/types/pm"
@@ -75,7 +75,7 @@ import { createProject, replaceMembers, updateProject } from "@/add-os/services/
  * Creating a project, or editing one. Only `pm.projects.manage` reaches this
  * (the page and the header gate the buttons). The team goes with the create
  * request; on an existing project it is `replaceMembers`, sent only when it
- * changed. A refusal shows its translated sentence in the form.
+ * changed, and before the rest so a new member can be made lead in one go. A refusal shows its translated sentence in the form.
  */
 const props = defineProps<{ project?: Project | null }>()
 const emit = defineEmits<{ saved: [project: Project] }>()
@@ -90,8 +90,9 @@ const description = ref("")
 const tone = ref<ProjectTone>("teal")
 const startsOn = ref<string | null>(null)
 const endsOn = ref<string | null>(null)
-const lead = ref<number[]>([])
+const lead = ref<number | null>(null)
 const members = ref<number[]>([])
+const chosen = ref<Person[]>([])
 const archived = ref(false)
 
 const saving = ref(false)
@@ -106,13 +107,20 @@ function fill() {
 	tone.value = source?.tone ?? "teal"
 	startsOn.value = source?.starts_on ?? null
 	endsOn.value = source?.ends_on ?? null
-	lead.value = source?.lead ? [source.lead.id] : []
+	lead.value = source?.lead?.id ?? null
 	members.value = source?.members.map(person => person.id) ?? []
 	archived.value = source?.is_archived ?? false
 	serverError.value = null
 	nameError.value = null
 	datesError.value = null
 }
+
+// The lead is one of the team: only the chosen members are offered, and one who leaves the team stops being lead.
+const leadOptions = computed(() => chosen.value.map(person => ({ label: person.name, value: person.id })))
+
+watch(members, ids => {
+	if (lead.value !== null && !ids.includes(lead.value)) lead.value = null
+})
 
 watch(show, open => {
 	if (open) fill()
@@ -138,14 +146,19 @@ async function save() {
 		tone: tone.value,
 		starts_on: startsOn.value,
 		ends_on: endsOn.value,
-		lead_user_id: lead.value[0] ?? null
+		lead_user_id: lead.value
 	}
+	// A call that went through before a later one failed: the page still has to read the project again.
+	let partial: Project | null = null
 	try {
 		let saved: Project
 		if (props.project) {
-			saved = await updateProject(props.project.id, { ...payload, is_archived: archived.value })
+			// The team first: the server checks the lead against the team it already has.
 			const before = props.project.members.map(person => person.id)
-			if (!sameIds(before, members.value)) saved = await replaceMembers(props.project.id, members.value)
+			if (!sameIds(before, members.value)) {
+				partial = await replaceMembers(props.project.id, members.value)
+			}
+			saved = await updateProject(props.project.id, { ...payload, is_archived: archived.value })
 		} else {
 			saved = await createProject({ ...payload, members: members.value })
 		}
@@ -154,6 +167,7 @@ async function save() {
 		emit("saved", saved)
 	} catch (caught) {
 		serverError.value = refusalText(caught, t, t("pm.form.saveError"))
+		if (partial) emit("saved", partial)
 	} finally {
 		saving.value = false
 	}
