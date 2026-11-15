@@ -5,6 +5,7 @@ import { createI18n } from "vue-i18n"
 import ar from "@/add-os/lang/ar"
 import en from "@/add-os/lang/en"
 import TaskBoard from "../../components/TaskBoard.vue"
+import TaskPanel from "../../components/TaskPanel.vue"
 import ProjectsPage from "../ProjectsPage.vue"
 
 const m = vi.hoisted(() => ({
@@ -16,6 +17,8 @@ const m = vi.hoisted(() => ({
 	createProject: vi.fn(),
 	updateProject: vi.fn(),
 	replaceMembers: vi.fn(),
+	getTask: vi.fn(),
+	getProject: vi.fn(),
 	manage: { value: true },
 	userId: { value: 99 }
 }))
@@ -28,7 +31,9 @@ vi.mock("@/add-os/services/pm", () => ({
 	moveTask: m.moveTask,
 	createProject: m.createProject,
 	updateProject: m.updateProject,
-	replaceMembers: m.replaceMembers
+	replaceMembers: m.replaceMembers,
+	getTask: m.getTask,
+	getProject: m.getProject
 }))
 
 vi.mock("@/add-os/config/permissions", async importOriginal => ({
@@ -111,6 +116,8 @@ describe("projectsPage", () => {
 		m.listTags.mockResolvedValue([])
 		m.searchPeople.mockResolvedValue([])
 		m.moveTask.mockResolvedValue(taskOf(10, "Draft the brief", "review"))
+		m.getProject.mockResolvedValue(projectOf(1, "Launch", 4))
+		m.getTask.mockResolvedValue(taskOf(10, "Draft the brief", "todo"))
 	})
 
 	it("lists the visible projects as chips with their open counts", async () => {
@@ -243,6 +250,22 @@ describe("projectsPage", () => {
 
 		expect(m.moveTask).toHaveBeenCalledWith(10, "review", [10, 11])
 		expect(m.listProjectTasks.mock.calls.length).toBeGreaterThan(before)
+		wrapper.unmount()
+	})
+
+	it("opens the task panel on a card, and a new one in the column it was added to", async () => {
+		const wrapper = mountPage()
+		await flushPromises()
+
+		wrapper.findComponent(TaskBoard).vm.$emit("open", taskOf(10, "Draft the brief", "todo"))
+		await flushPromises()
+		expect(m.getTask).toHaveBeenCalledWith(10)
+		expect(wrapper.findComponent(TaskPanel).props("taskId")).toBe(10)
+
+		wrapper.findComponent(TaskBoard).vm.$emit("add", "review")
+		await flushPromises()
+		expect(wrapper.findComponent(TaskPanel).props("taskId")).toBeNull()
+		expect(wrapper.findComponent(TaskPanel).props("initialStatus")).toBe("review")
 		wrapper.unmount()
 	})
 })

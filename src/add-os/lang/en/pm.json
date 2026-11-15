@@ -116,6 +116,42 @@
 			"saveError": "Couldn't save the project.",
 			"created": "Project created.",
 			"updated": "Project saved."
+		},
+		"task": {
+			"newTitle": "New task",
+			"editTitle": "Task",
+			"title": "Title",
+			"description": "Description",
+			"status": "Status",
+			"assignees": "Assigned to",
+			"startsOn": "Starts",
+			"dueOn": "Due",
+			"tags": "Tags",
+			"estimate": "Estimate",
+			"hours": "hours",
+			"markComplete": "Mark complete",
+			"save": "Save",
+			"delete": "Delete",
+			"deleteConfirm": "Delete this task and its subtasks?",
+			"titleRequired": "Give the task a title.",
+			"readOnly": "You can read this task but not change it.",
+			"loadError": "Couldn't load the task.",
+			"saveError": "Couldn't save the task.",
+			"moveError": "Couldn't change the status.",
+			"deleteError": "Couldn't delete the task.",
+			"created": "Task created.",
+			"updated": "Task saved.",
+			"deleted": "Task deleted.",
+			"subtasks": {
+				"title": "Subtasks",
+				"empty": "No subtasks yet.",
+				"placeholder": "Add a subtask",
+				"add": "Add",
+				"toggle": "Mark \"{title}\" done",
+				"delete": "Delete \"{title}\"",
+				"addError": "Couldn't add the subtask.",
+				"deleteError": "Couldn't delete the subtask."
+			}
 		}
 	}
 }

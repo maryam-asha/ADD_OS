@@ -67,6 +67,16 @@
 			</n-spin>
 		</template>
 
+		<TaskPanel
+			v-if="project"
+			v-model:show="panelOpen"
+			:task-id="selectedTask?.id ?? null"
+			:project-id="project.id"
+			:initial-status="newTaskStatus ?? undefined"
+			@saved="onTaskChanged"
+			@deleted="onTaskChanged"
+		/>
+
 		<ProjectFormModal v-model:show="formOpen" :project="editing ? project : null" @saved="onSaved" />
 	</div>
 </template>
@@ -83,6 +93,7 @@ import ProjectHeader from "@/add-os/modules/pm/components/ProjectHeader.vue"
 import TaskBoard from "@/add-os/modules/pm/components/TaskBoard.vue"
 import TaskFilters from "@/add-os/modules/pm/components/TaskFilters.vue"
 import TaskList from "@/add-os/modules/pm/components/TaskList.vue"
+import TaskPanel from "@/add-os/modules/pm/components/TaskPanel.vue"
 import { mayAddTasks, refusalText } from "@/add-os/modules/pm/utils/display"
 import { toneVar } from "@/add-os/modules/pm/utils/pm"
 import { listProjects, listProjectTasks, listTags, moveTask } from "@/add-os/services/pm"
@@ -225,10 +236,20 @@ async function onMoved(taskId: number, status: TaskStatus, order: number[]) {
 	await Promise.all([loadTasks(true), loadProjects()])
 }
 
-// ── Task panel hook (Task 8) ────────────────────────────────────────────────
-// TaskPanel binds to these: `selectedTask` opens an existing task, `newTaskStatus` a new one in that column.
+// ── Task panel ──────────────────────────────────────────────────────────────
+// `selectedTask` opens an existing task, `newTaskStatus` a new one in that column.
 const selectedTask = ref<Task | null>(null)
 const newTaskStatus = ref<TaskStatus | null>(null)
+
+const panelOpen = computed({
+	get: () => selectedTask.value !== null || newTaskStatus.value !== null,
+	set: (open: boolean) => {
+		if (!open) {
+			selectedTask.value = null
+			newTaskStatus.value = null
+		}
+	}
+})
 
 function openTask(task: Task) {
 	newTaskStatus.value = null
@@ -238,6 +259,11 @@ function openTask(task: Task) {
 function addTask(status: TaskStatus) {
 	selectedTask.value = null
 	newTaskStatus.value = status
+}
+
+/** A task was saved, moved, completed or deleted in the panel: the board and the counts read again. */
+async function onTaskChanged() {
+	await Promise.all([loadTasks(true), loadProjects()])
 }
 
 // ── Project form ────────────────────────────────────────────────────────────
