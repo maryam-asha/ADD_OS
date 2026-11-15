@@ -46,6 +46,7 @@
 				"other": "Waiting {n} min"
 			},
 			"unknownMember": "Unknown member",
+			"onBill": "On the bill",
 			"line": "{name} × {quantity}",
 			"unnamedItem": "Removed item",
 			"total": "{points} points",
@@ -90,6 +91,15 @@
 			"lines": "Items",
 			"rejectionReason": "Why it was rejected",
 			"bill": "Billed to",
+			"noBill": "Not billed",
+			"payment": "Payment",
+			"notPaid": "Not paid yet",
+			"cashReturn": "Cash for an order not made",
+			"cashReturnState": {
+				"owed": "Cash owed to the member",
+				"returned_in_cash": "Cash returned to the member",
+				"credited_as_points": "Credited to the member as points"
+			},
 			"billType": {
 				"booking": "Booking #{id}",
 				"walkin": "Walk-in session #{id}"

@@ -58,13 +58,12 @@ describe("kitchenOrdersPage", () => {
 		// No status chosen: every status, not the API's open-only default.
 		expect(listOrdersMock).toHaveBeenLastCalledWith({ sort: "newest", status: ["awaiting_payment", "awaiting_reception", "pending", "preparing", "ready", "delivered", "rejected", "cancelled"], page: 1 })
 
-		wrapper.vm.branchId = 1
 		wrapper.vm.statuses = ["rejected", "cancelled"]
 		wrapper.vm.range = ["2026-11-01", "2026-11-10"]
 		wrapper.vm.memberId = 5
 		await flushPromises()
 
-		expect(listOrdersMock).toHaveBeenLastCalledWith({ sort: "newest", status: ["rejected", "cancelled"], branch_id: 1, from: "2026-11-01", to: "2026-11-10", user_id: 5, page: 1 })
+		expect(listOrdersMock).toHaveBeenLastCalledWith({ sort: "newest", status: ["rejected", "cancelled"], from: "2026-11-01", to: "2026-11-10", user_id: 5, page: 1 })
 		wrapper.unmount()
 	})
 
@@ -91,6 +90,33 @@ describe("kitchenOrdersPage", () => {
 		const detail = document.querySelector("[data-test=rejection-reason]")
 		expect(detail?.textContent).toContain("We are out of oranges today.")
 		expect(document.querySelector("[data-test=order-detail]")?.textContent).toContain("Unpaid")
+		wrapper.unmount()
+	})
+
+	it("history_filters_by_new_statuses", async () => {
+		const wrapper = mountPage()
+		await flushPromises()
+		const options = wrapper.findComponent({ name: "Select" }).props("options") as { value: string }[]
+		expect(options.map(option => option.value)).toEqual(expect.arrayContaining(["awaiting_payment", "awaiting_reception"]))
+
+		wrapper.vm.statuses = ["awaiting_reception"]
+		await flushPromises()
+		expect(listOrdersMock).toHaveBeenLastCalledWith({ sort: "newest", status: ["awaiting_reception"], page: 1 })
+		wrapper.unmount()
+	})
+
+	it("history_renders_an_order_without_a_bill", async () => {
+		const unbilled: KitchenOrder = { ...rejected, status: "cancelled", bill: null, payment: { choice: "cash", wallet_owner_type: null, paid: true }, cash_return: "owed", rejection_reason: null }
+		listOrdersMock.mockResolvedValue({ data: [unbilled], meta: { current_page: 1, last_page: 1, per_page: 25, total: 1 } })
+		const wrapper = mountPage()
+		await flushPromises()
+		await wrapper.find("tbody tr").trigger("click")
+		await flushPromises()
+
+		const detail = document.querySelector("[data-test=order-detail]")?.textContent ?? ""
+		expect(detail).toContain("Not billed")
+		expect(detail).toContain("Paid in cash")
+		expect(detail).toContain("Cash owed to the member")
 		wrapper.unmount()
 	})
 })

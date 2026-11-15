@@ -84,4 +84,14 @@ describe("kitchenOrderCard", () => {
 		expect(wrapper.get("[data-test=total]").text()).toBe("1,250 points")
 		expect(wrapper.get("[data-test=waited]").text()).toBe("Waiting 10 min")
 	})
+
+	it("card_shows_paid_or_on_the_bill", () => {
+		const tag = (order: KitchenOrder) => mountCard(order).get("[data-test=payment]").text()
+		expect(tag(orderOf())).toBe("On the bill")
+		expect(tag(orderOf({ payment: { choice: "wallet", wallet_owner_type: "user", paid: true } }))).toBe("Paid from wallet")
+		expect(tag(orderOf({ payment: { choice: "wallet", wallet_owner_type: "company", paid: true } }))).toBe("Paid from company wallet")
+		expect(tag(orderOf({ payment: { choice: "card", wallet_owner_type: null, paid: true } }))).toBe("Paid by card")
+		expect(tag(orderOf({ payment: { choice: "cash", wallet_owner_type: null, paid: true } }))).toBe("Paid in cash")
+		expect(mountCard(orderOf({ payment: { choice: "wallet", wallet_owner_type: "user", paid: true } }), true, "ar").get("[data-test=payment]").text()).toBe("مدفوع من المحفظة")
+	})
 })

@@ -46,6 +46,7 @@
 				"other": "ينتظر منذ {n} دقيقة"
 			},
 			"unknownMember": "عضو غير معروف",
+			"onBill": "على الحساب",
 			"line": "{name}، العدد: {quantity}",
 			"unnamedItem": "مادة محذوفة",
 			"total": "{points} نقطة",
@@ -90,6 +91,15 @@
 			"lines": "المواد",
 			"rejectionReason": "سبب الرفض",
 			"bill": "على حساب",
+			"noBill": "بلا حساب",
+			"payment": "الدفع",
+			"notPaid": "لم يُدفع بعد",
+			"cashReturn": "نقد عن طلب لم يُنفَّذ",
+			"cashReturnState": {
+				"owed": "نقد مستحق للعضو",
+				"returned_in_cash": "أُعيد النقد إلى العضو",
+				"credited_as_points": "أُضيف إلى رصيد العضو نقاطاً"
+			},
 			"billType": {
 				"booking": "الحجز رقم {id}",
 				"walkin": "جلسة الحضور المباشر رقم {id}"

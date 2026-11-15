@@ -22,6 +22,8 @@
 				<span dir="auto">{{ order.member?.name ?? t("kitchen.card.unknownMember") }}</span>
 			</div>
 
+			<n-tag v-if="paymentKey" size="small" :type="order.payment.choice === 'bill' ? 'default' : 'success'" class="self-start" data-test="payment">{{ t(paymentKey) }}</n-tag>
+
 			<ul class="flex flex-col gap-1" data-test="lines">
 				<li v-for="line in order.lines" :key="line.sale_item_id">
 					{{ t("kitchen.card.line", { name: line.name ?? t("kitchen.card.unnamedItem"), quantity: formatNumber(line.quantity) }) }}
@@ -46,9 +48,10 @@
 
 <script setup lang="ts">
 import type { DeliveryType, KitchenOrder } from "@/add-os/modules/kitchen/types/kitchen"
-import { NButton, NCard } from "naive-ui"
+import { NButton, NCard, NTag } from "naive-ui"
 import { computed } from "vue"
 import { useI18n } from "vue-i18n"
+import { paymentLabelKey } from "@/add-os/modules/kitchen/utils/payment"
 import { countKey, formatNumber, formatTime } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
@@ -83,6 +86,8 @@ const DELIVERY_ICON: Record<DeliveryType, string> = {
 	pickup: "carbon:shopping-bag",
 	note: "carbon:location"
 }
+
+const paymentKey = computed(() => paymentLabelKey(props.order))
 
 /** The desk's label or the room's title as the API names them; pickup is the counter, in our own words. */
 const place = computed(() => {
