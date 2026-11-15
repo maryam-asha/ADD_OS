@@ -32,7 +32,7 @@
 		"scope": {
 			"assigned": "Assigned to me",
 			"created": "Created by me",
-			"all": "All my tasks"
+			"all": "Everyone"
 		},
 		"projects": {
 			"title": "Projects",
@@ -45,7 +45,30 @@
 		},
 		"myTasks": {
 			"title": "My tasks",
-			"description": "What is assigned to you, soonest due first."
+			"description": "What is assigned to you, soonest due first.",
+			"groups": {
+				"overdue": "Overdue",
+				"today": "Today",
+				"week": "Next 7 days",
+				"later": "Later",
+				"none": "No date",
+				"done": "Completed"
+			},
+			"counters": {
+				"overdue": "Overdue",
+				"today": "Due today",
+				"week": "Next 7 days",
+				"completed": "Completed"
+			},
+			"countersHint": "Counted over what is assigned to you.",
+			"scopeLabel": "Show",
+			"empty": "No tasks here yet.",
+			"loadError": "Couldn't load the tasks.",
+			"quick": {
+				"placeholder": "Add a task for yourself and press Enter",
+				"project": "Project",
+				"addError": "Couldn't add the task."
+			}
 		},
 		"refusal": {
 			"assign_forbidden": "You can't assign this task to others.",
