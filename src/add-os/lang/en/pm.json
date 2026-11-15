@@ -36,7 +36,12 @@
 		},
 		"projects": {
 			"title": "Projects",
-			"description": "The projects you work on, and their tasks."
+			"description": "The projects you work on, and their tasks.",
+			"new": "New project",
+			"empty": "There are no projects yet.",
+			"loadError": "Couldn't load the projects.",
+			"tasksError": "Couldn't load the tasks.",
+			"openCount": "{n} open"
 		},
 		"myTasks": {
 			"title": "My tasks",
@@ -48,6 +53,69 @@
 			"assignee_not_member": "Only members of the project can be assigned to its tasks.",
 			"due_before_start": "The due date can't be before the start date.",
 			"subtask_depth": "A subtask can't have subtasks of its own."
+		},
+		"view": {
+			"label": "View",
+			"board": "Board",
+			"list": "List"
+		},
+		"board": {
+			"add": "Add a task",
+			"empty": "No tasks",
+			"drag": "Drag to move",
+			"moveError": "Couldn't move the task."
+		},
+		"list": {
+			"empty": "No tasks match.",
+			"columns": {
+				"title": "Task",
+				"assignees": "Assigned to",
+				"due": "Due",
+				"priority": "Priority",
+				"status": "Status",
+				"tags": "Tags"
+			}
+		},
+		"filters": {
+			"search": "Search tasks",
+			"assignee": "Assignee",
+			"status": "Status",
+			"tag": "Tag",
+			"due": "Due",
+			"clear": "Clear filters"
+		},
+		"header": {
+			"lead": "Lead",
+			"noLead": "No lead",
+			"noMembers": "No members",
+			"archived": "Archived",
+			"edit": "Edit project",
+			"done": "{n} of {total} done",
+			"open": "{n} open",
+			"overdue": "{n} overdue"
+		},
+		"people": {
+			"placeholder": "Search by name",
+			"empty": "No one found"
+		},
+		"form": {
+			"newTitle": "New project",
+			"editTitle": "Edit project",
+			"name": "Name",
+			"description": "Description",
+			"tone": "Colour",
+			"startsOn": "Starts",
+			"endsOn": "Ends",
+			"lead": "Lead",
+			"members": "Members",
+			"archived": "Archived (read-only)",
+			"save": "Save",
+			"cancel": "Cancel",
+			"nameRequired": "Give the project a name.",
+			"endsBeforeStart": "The end can't be before the start.",
+			"saveError": "Couldn't save the project.",
+			"created": "Project created.",
+			"updated": "Project saved."
 		}
 	}
 }
