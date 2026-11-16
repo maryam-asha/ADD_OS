@@ -21,6 +21,19 @@ export const LEAVE_REQUEST_STATUSES: readonly LeaveRequestStatus[] = ["pending",
 export const ACCRUAL_METHODS: readonly AccrualMethod[] = ["monthly", "annual_grant", "none"]
 export const MANUAL_LEDGER_KINDS: readonly ManualLedgerKind[] = ["opening", "adjustment", "encashment"]
 
+/** When a yearly grant renews (GrantCycle): 1 January, or each employee's hire anniversary. */
+export type GrantCycle = "calendar_year" | "hire_anniversary"
+/** When a higher seniority tier starts paying (TierTiming). */
+export type TierTiming = "next_cycle" | "on_anniversary"
+/** What a new employee gets in the cycle they join (HireGrant). */
+export type HireGrant = "prorated" | "full" | "after_probation"
+/** What unused days do when a cycle ends (CarryOverMode). */
+export type CarryOverMode = "none" | "capped" | "unlimited"
+export const GRANT_CYCLES: readonly GrantCycle[] = ["calendar_year", "hire_anniversary"]
+export const TIER_TIMINGS: readonly TierTiming[] = ["next_cycle", "on_anniversary"]
+export const HIRE_GRANTS: readonly HireGrant[] = ["prorated", "full", "after_probation"]
+export const CARRY_OVER_MODES: readonly CarryOverMode[] = ["none", "capped", "unlimited"]
+
 export interface LeaveTypeRef {
 	id: number
 	code: string
@@ -37,6 +50,9 @@ export interface LeaveType extends LeaveTypeRef {
 	hide_reason: boolean
 	requires_attachment: boolean
 	attachment_document_type_id: number | null
+	/** The shortest and longest single request, in the type's unit; null: no limit. */
+	min_request: string | null
+	max_request: string | null
 	is_active: boolean
 }
 
@@ -51,6 +67,8 @@ export interface LeaveTypePayload {
 	counts_calendar_days: boolean
 	hide_reason: boolean
 	attachment_document_type_id: number | null
+	min_request: number | null
+	max_request: number | null
 	is_active: boolean
 }
 
@@ -66,8 +84,13 @@ export interface LeavePolicy {
 	effective_from: string
 	effective_to: string | null
 	accrual_method: AccrualMethod
+	grant_cycle: GrantCycle
 	annual_entitlement: string
 	service_tiers: ServiceTier[] | null
+	tier_timing: TierTiming
+	hire_grant: HireGrant
+	carry_over_mode: CarryOverMode
+	/** Used when carry_over_mode is capped. */
 	carry_over_max: string | null
 	carry_over_expiry_months: number | null
 	max_negative: string
@@ -84,8 +107,12 @@ export interface LeavePolicyPayload {
 	effective_from: string
 	effective_to: string | null
 	accrual_method: AccrualMethod
+	grant_cycle: GrantCycle
 	annual_entitlement: number
 	service_tiers: ServiceTier[] | null
+	tier_timing: TierTiming
+	hire_grant: HireGrant
+	carry_over_mode: CarryOverMode
 	carry_over_max: number | null
 	carry_over_expiry_months: number | null
 	max_negative: number

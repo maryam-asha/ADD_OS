@@ -14,7 +14,7 @@
 			"none": "Not earned",
 			"hint": {
 				"monthly": "A twelfth of the yearly entitlement is booked at the end of each month.",
-				"annual_grant": "The whole yearly entitlement is booked at the start of the year.",
+				"annual_grant": "The whole yearly entitlement is booked when the balance renews.",
 				"none": "Nothing is booked automatically; HR records any balance by hand."
 			}
 		},
@@ -148,7 +148,11 @@
 			"created": "Leave type added.",
 			"updated": "Leave type updated.",
 			"deleted": "Leave type deleted.",
-			"deleteWarning": "A type with requests, balances or policies cannot be deleted."
+			"deleteWarning": "A type with requests, balances or policies cannot be deleted.",
+			"minRequest": "Shortest request",
+			"maxRequest": "Longest request",
+			"requestLimitHint": "Empty: no limit.",
+			"requestLimitOrder": "The longest request cannot be shorter than the shortest."
 		},
 		"policies": {
 			"description": "What each type gives, to whom and from when. An employee gets a type when a policy in effect covers their contract type, grade and unit.",
@@ -174,7 +178,6 @@
 			"tierDuplicate": "Two tiers start at the same number of years.",
 			"carryOver": "Carry-over",
 			"carryOverMax": "Carry at most",
-			"carryOverMaxHint": "Empty carries everything into next year.",
 			"carryOverExpiry": "Carried days expire after (months)",
 			"carryOverExpiryHint": "Empty: carried days do not expire.",
 			"appliesTo": "Applies to",
@@ -183,7 +186,35 @@
 			"saved": "Leave policy saved.",
 			"delete": "Delete policy",
 			"deleteConfirm": "Delete this policy? Days already earned stay in the balances; nothing more is earned from it.",
-			"deleted": "Leave policy deleted."
+			"deleted": "Leave policy deleted.",
+			"renewal": "The balance renews",
+			"grantCycles": {
+				"calendar_year": "On 1 January, for everyone",
+				"hire_anniversary": "On each employee's hire anniversary"
+			},
+			"hireGrant": "Someone who joins mid-year gets",
+			"hireGrants": {
+				"prorated": "A share for what is left of the year",
+				"full": "The whole year",
+				"after_probation": "Nothing until probation is over, then a share for what is left"
+			},
+			"tierTiming": "A higher tier starts",
+			"tierTimings": {
+				"next_cycle": "At the next renewal",
+				"on_anniversary": "On the day it is reached, as the difference for the rest of the year"
+			},
+			"carryOverMode": "Unused days when the year ends",
+			"carryOverModes": {
+				"none": "Lapse: nothing carries over",
+				"capped": "Carry over, up to a limit",
+				"unlimited": "All carry over"
+			},
+			"carryOverShort": {
+				"none": "Lapses",
+				"capped": "Up to {n}",
+				"unlimited": "All of it"
+			},
+			"carryOverMaxRequired": "Set how many days carry over."
 		},
 		"holidays": {
 			"description": "Public holidays are not counted as leave days. A holiday spans 31 days at most; a recurring one comes back each year. Leave already approved keeps the days it was counted with.",

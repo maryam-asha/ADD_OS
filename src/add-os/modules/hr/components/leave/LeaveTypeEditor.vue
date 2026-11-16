@@ -51,6 +51,18 @@
 				<n-switch v-model:value="form.hideReason" :disabled="!mayManage" />
 				<span>{{ t("hrLeave.types.hideReason") }}</span>
 			</label>
+			<div class="grid grid-cols-1 gap-x-4 @xl:grid-cols-2">
+				<n-form-item path="minRequest" :label="t('hrLeave.types.minRequest')" :feedback="t('hrLeave.types.requestLimitHint')">
+					<n-input-number v-model:value="form.minRequest" :min="0" :max="366" :step="form.unit === 'hour' ? 0.5 : 1" clearable class="w-full" :disabled="!mayManage">
+						<template #suffix>{{ t(`hrLeave.unit.${form.unit}`) }}</template>
+					</n-input-number>
+				</n-form-item>
+				<n-form-item path="maxRequest" :label="t('hrLeave.types.maxRequest')" :feedback="t('hrLeave.types.requestLimitHint')">
+					<n-input-number v-model:value="form.maxRequest" :min="0.5" :max="366" :step="form.unit === 'hour' ? 0.5 : 1" clearable class="w-full" :disabled="!mayManage">
+						<template #suffix>{{ t(`hrLeave.unit.${form.unit}`) }}</template>
+					</n-input-number>
+				</n-form-item>
+			</div>
 			<n-form-item :label="t('hrLeave.types.attachmentType')" class="max-w-md">
 				<n-select v-model:value="form.attachmentTypeId" :options="documentTypeOptions" clearable :placeholder="t('hrLeave.types.noAttachment')" :disabled="!mayManage" />
 			</n-form-item>
@@ -77,7 +89,7 @@
 <script setup lang="ts">
 import type { FormInst, FormRules, SelectOption } from "naive-ui"
 import type { LeaveType, LeaveTypePayload, LeaveUnit } from "@/add-os/modules/hr/types/leave"
-import { NButton, NForm, NFormItem, NInput, NSelect, NSwitch, useMessage } from "naive-ui"
+import { NButton, NForm, NFormItem, NInput, NInputNumber, NSelect, NSwitch, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { LEAVE_UNITS } from "@/add-os/modules/hr/types/leave"
@@ -95,7 +107,9 @@ import Icon from "@/components/common/Icon.vue"
  * tiers) is its policies', listed under this editor. The unit is fixed once
  * the type exists; half days and calendar days apply to a day type only.
  * A needed document is a document type, never a yes/no: the server checks
- * that one was uploaded of that type.
+ * that one was uploaded of that type. The shortest and longest single
+ * request, in the type's unit, are optional (empty: no limit); the server
+ * refuses a request outside them at the quote, so the form says so first.
  *
  * Until 2026-11-10 these fields were a dialog over a table
  * (buildLeaveTypeFields in leave.config, via HrResourcePanel).
@@ -117,6 +131,8 @@ interface TypeForm {
 	countsCalendarDays: boolean
 	hideReason: boolean
 	attachmentTypeId: number | null
+	minRequest: number | null
+	maxRequest: number | null
 	isActive: boolean
 }
 
@@ -132,6 +148,8 @@ function fromType(type: LeaveType | null): TypeForm {
 		countsCalendarDays: type?.counts_calendar_days ?? false,
 		hideReason: type?.hide_reason ?? false,
 		attachmentTypeId: type?.attachment_document_type_id ?? null,
+		minRequest: type?.min_request ? Number(type.min_request) : null,
+		maxRequest: type?.max_request ? Number(type.max_request) : null,
 		isActive: type?.is_active ?? true
 	}
 }
@@ -149,7 +167,12 @@ const unitOptions = computed<SelectOption[]>(() => LEAVE_UNITS.map(unit => ({ la
 
 const rules = computed<FormRules>(() => ({
 	nameAr: { required: true, trigger: ["blur", "input"], validator: (_r: unknown, v: string) => !!v?.trim(), message: t("hr.common.arabicRequired", { field: t("hrLeave.types.name") }) },
-	code: { required: true, trigger: ["blur", "input"], validator: (_r: unknown, v: string) => !!v?.trim(), message: t("hr.common.required") }
+	code: { required: true, trigger: ["blur", "input"], validator: (_r: unknown, v: string) => !!v?.trim(), message: t("hr.common.required") },
+	maxRequest: {
+		trigger: ["blur", "change"],
+		validator: (_r: unknown, v: number | null) => v === null || form.value.minRequest === null || v >= form.value.minRequest,
+		message: t("hrLeave.types.requestLimitOrder")
+	}
 }))
 
 function payload(): LeaveTypePayload {
@@ -164,6 +187,8 @@ function payload(): LeaveTypePayload {
 		counts_calendar_days: f.unit === "day" && f.countsCalendarDays,
 		hide_reason: f.hideReason,
 		attachment_document_type_id: f.attachmentTypeId,
+		min_request: f.minRequest,
+		max_request: f.maxRequest,
 		is_active: f.isActive
 	}
 }

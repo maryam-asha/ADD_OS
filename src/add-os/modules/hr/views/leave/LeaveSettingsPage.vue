@@ -160,7 +160,7 @@ import {
 	updateCoverageRule,
 	updateHoliday
 } from "@/add-os/services/hr/leave"
-import { formatDate } from "@/add-os/utils/format"
+import { formatDate, formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
 /**
@@ -331,6 +331,12 @@ const policyColumns = computed<DataTableColumns<LeavePolicy>>(() => [
 		key: "annual_entitlement",
 		minWidth: 120,
 		render: row => leaveAmount(t, row.annual_entitlement, typeOf(row.leave_type_id)?.unit ?? "day")
+	},
+	{
+		title: t("hrLeave.policies.carryOver"),
+		key: "carry_over_mode",
+		minWidth: 130,
+		render: row => t(`hrLeave.policies.carryOverShort.${row.carry_over_mode}`, { n: row.carry_over_max ? formatNumber(row.carry_over_max) : "" })
 	},
 	{ title: t("hrLeave.policies.appliesTo"), key: "scope", minWidth: 200, ellipsis: { tooltip: true }, render: scopeOf },
 	...(mayManage

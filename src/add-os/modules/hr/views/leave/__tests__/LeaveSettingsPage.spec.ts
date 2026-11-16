@@ -163,6 +163,23 @@ describe("leaveSettingsPage", () => {
 		wrapper.unmount()
 	})
 
+	it("bounds one request of a type, in its unit, and refuses a longest shorter than the shortest", async () => {
+		mocks.updateType.mockResolvedValue({ message: null })
+		const wrapper = await mountPage()
+		const vm = await open(wrapper, "Annual")
+
+		Object.assign(vm.form, { minRequest: 3, maxRequest: 2 })
+		await vm.save()
+		await flushPromises()
+		expect(mocks.updateType).not.toHaveBeenCalled()
+
+		Object.assign(vm.form, { minRequest: 1, maxRequest: 10 })
+		await vm.save()
+		await flushPromises()
+		expect(mocks.updateType).toHaveBeenCalledWith(1, expect.objectContaining({ min_request: 1, max_request: 10 }))
+		wrapper.unmount()
+	})
+
 	it("shows a failed save instead of hiding it", async () => {
 		mocks.updateType.mockRejectedValue(new ApiError(500, JSON.stringify({ message: "Server error." })))
 		const wrapper = await mountPage()
