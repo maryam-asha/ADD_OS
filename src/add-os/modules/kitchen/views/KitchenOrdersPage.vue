@@ -75,6 +75,7 @@ import { useResourceList } from "@/add-os/composables/useResourceList"
 import { canListMembers } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import { KITCHEN_ORDER_STATUSES } from "@/add-os/modules/kitchen/types/kitchen"
+import { paymentLabelKey } from "@/add-os/modules/kitchen/utils/payment"
 import { ApiError } from "@/add-os/services/api"
 import { listKitchenOrders } from "@/add-os/services/kitchen"
 import { listMembers } from "@/add-os/services/members"
@@ -93,6 +94,8 @@ const { t } = useI18n()
 const isRtl = computed(() => currentLocale.value === "ar")
 
 const STATUS_TAG: Record<KitchenOrderStatus, "default" | "info" | "success" | "warning" | "error"> = {
+	awaiting_payment: "default",
+	awaiting_reception: "warning",
 	pending: "info",
 	preparing: "warning",
 	ready: "success",
@@ -174,10 +177,12 @@ function at(value: string | null): string {
 const fields = computed(() => {
 	const order = selected.value
 	if (order === null) return []
+	const payKey = paymentLabelKey(order)
 	const list = [
 		{ label: t("kitchen.history.columns.member"), value: order.member?.phone ? `${memberName(order)} · ${order.member.phone}` : memberName(order) },
 		{ label: t("kitchen.history.columns.place"), value: placeOf(order) },
-		{ label: t("kitchen.history.bill"), value: t(`kitchen.history.billType.${order.bill.type}`, { id: formatNumber(order.bill.id, { grouping: false }) }) },
+		{ label: t("kitchen.history.bill"), value: order.bill ? t(`kitchen.history.billType.${order.bill.type}`, { id: formatNumber(order.bill.id, { grouping: false }) }) : t("kitchen.history.noBill") },
+		{ label: t("kitchen.history.payment"), value: payKey ? t(payKey) : t("kitchen.history.notPaid") },
 		{ label: t("kitchen.history.source"), value: t(`kitchen.history.sourceType.${order.source}`) },
 		{ label: t("kitchen.history.submittedAt"), value: at(order.timestamps.submitted_at) },
 		{ label: t("kitchen.history.acceptedAt"), value: at(order.timestamps.accepted_at) },
@@ -185,6 +190,7 @@ const fields = computed(() => {
 		{ label: t("kitchen.history.deliveredAt"), value: at(order.timestamps.delivered_at) }
 	]
 	if (order.cancelled_by) list.push({ label: t("kitchen.history.cancelledBy"), value: t(`kitchen.history.cancelledByType.${order.cancelled_by}`) })
+	if (order.cash_return) list.push({ label: t("kitchen.history.cashReturn"), value: t(`kitchen.history.cashReturnState.${order.cash_return}`) })
 	return list
 })
 

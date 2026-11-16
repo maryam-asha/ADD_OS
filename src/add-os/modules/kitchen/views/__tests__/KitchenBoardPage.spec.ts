@@ -29,9 +29,15 @@ vi.mock("@/add-os/services/kitchen", () => ({
 
 vi.mock("@/add-os/modules/kitchen/composables/useKitchenRealtime", () => ({ useKitchenRealtime: vi.fn() }))
 
+const { chimeMock } = vi.hoisted(() => ({ chimeMock: vi.fn() }))
+vi.mock("@/add-os/composables/useNewArrivalChime", async () => {
+	const actual = await vi.importActual<typeof import("@/add-os/composables/useNewArrivalChime")>("@/add-os/composables/useNewArrivalChime")
+	return { ...actual, useNewArrivalChime: (items: Parameters<typeof actual.useNewArrivalChime>[0]) => actual.useNewArrivalChime(items, chimeMock) }
+})
+
 vi.mock("@/add-os/modules/dashboard/composables/useBranchOptions", async () => {
 	const { computed } = await import("vue")
-	return { useBranchOptions: () => ({ branchOptions: computed(() => [{ label: "Main", value: 1 }]), branchNames: computed(() => ({ 1: "Main" })) }) }
+	return { useBranchOptions: () => ({ branchOptions: computed(() => [{ label: "Main", value: 1 }]), branchNames: computed(() => ({ 1: "Main" })), defaultBranchId: computed(() => 1) }) }
 })
 
 vi.mock("@/add-os/config/permissions", () => ({
@@ -52,6 +58,10 @@ function orderOf(id: number, status: KitchenOrder["status"], submittedAt: string
 		source: "app",
 		delivery: { type: "pickup", label: "Kitchen counter", note: null },
 		bill: { type: "booking", id: 2 },
+		route: "kitchen",
+		payment: { choice: "bill", wallet_owner_type: null, paid: false },
+		cash_due_points: null,
+		cash_return: null,
 		lines: [{ sale_item_id: 1, name: "Tea", quantity: 1, unit_price_points: 100, line_points: 100 }],
 		total_points: 100,
 		rejection_reason: null,
@@ -106,6 +116,26 @@ describe("kitchenBoardPage", () => {
 		expect(columnIds(wrapper, "pending")).toEqual([1, 3])
 		expect(columnIds(wrapper, "preparing")).toEqual([5, 2])
 		expect(columnIds(wrapper, "ready")).toEqual([4])
+		wrapper.unmount()
+	})
+
+	it("chimes_when_a_new_order_reaches_the_board", async () => {
+		const { useKitchenRealtime } = await import("@/add-os/modules/kitchen/composables/useKitchenRealtime")
+		listOrdersMock.mockResolvedValueOnce(pageOf([orderOf(1, "pending", "2026-11-11T09:00:00+03:00")]))
+		const wrapper = mountPage()
+		await flushPromises()
+		expect(chimeMock).not.toHaveBeenCalled()
+
+		const reload = vi.mocked(useKitchenRealtime).mock.calls.at(-1)![0] as () => Promise<void>
+		listOrdersMock.mockResolvedValueOnce(pageOf([orderOf(1, "preparing", "2026-11-11T09:00:00+03:00")]))
+		await reload()
+		await flushPromises()
+		expect(chimeMock).not.toHaveBeenCalled()
+
+		listOrdersMock.mockResolvedValueOnce(pageOf([orderOf(1, "preparing", "2026-11-11T09:00:00+03:00"), orderOf(2, "pending", "2026-11-11T09:10:00+03:00")]))
+		await reload()
+		await flushPromises()
+		expect(chimeMock).toHaveBeenCalledTimes(1)
 		wrapper.unmount()
 	})
 

@@ -19,6 +19,10 @@ function orderOf(overrides: Partial<KitchenOrder> = {}): KitchenOrder {
 		source: "qr",
 		delivery: { type: "desk", label: "D-12", note: null },
 		bill: { type: "walkin", id: 3 },
+		route: "kitchen",
+		payment: { choice: "bill", wallet_owner_type: null, paid: false },
+		cash_due_points: null,
+		cash_return: null,
 		lines: [{ sale_item_id: 1, name: "Latte", quantity: 2, unit_price_points: 625, line_points: 1250 }],
 		total_points: 1250,
 		rejection_reason: null,
@@ -79,5 +83,15 @@ describe("kitchenOrderCard", () => {
 		expect(formatTime).toHaveBeenCalledWith("2026-11-11T09:00:00+03:00")
 		expect(wrapper.get("[data-test=total]").text()).toBe("1,250 points")
 		expect(wrapper.get("[data-test=waited]").text()).toBe("Waiting 10 min")
+	})
+
+	it("card_shows_paid_or_on_the_bill", () => {
+		const tag = (order: KitchenOrder) => mountCard(order).get("[data-test=payment]").text()
+		expect(tag(orderOf())).toBe("On the bill")
+		expect(tag(orderOf({ payment: { choice: "wallet", wallet_owner_type: "user", paid: true } }))).toBe("Paid from wallet")
+		expect(tag(orderOf({ payment: { choice: "wallet", wallet_owner_type: "company", paid: true } }))).toBe("Paid from company wallet")
+		expect(tag(orderOf({ payment: { choice: "card", wallet_owner_type: null, paid: true } }))).toBe("Paid by card")
+		expect(tag(orderOf({ payment: { choice: "cash", wallet_owner_type: null, paid: true } }))).toBe("Paid in cash")
+		expect(mountCard(orderOf({ payment: { choice: "wallet", wallet_owner_type: "user", paid: true } }), true, "ar").get("[data-test=payment]").text()).toBe("مدفوع من المحفظة")
 	})
 })

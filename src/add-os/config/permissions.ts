@@ -519,6 +519,11 @@ export function canManageKitchenOrders(): boolean {
 	return can("kitchen-orders.manage")
 }
 
+/** Reception confirming kitchen orders sent without a bill, and settling the cash owed back (`reception/kitchen-orders*`, `reception/kitchen-cash-returns*`). */
+export function canReviewKitchenOrders(): boolean {
+	return can("kitchen-orders.review")
+}
+
 /** Reading which warehouse each branch's kitchen draws from. */
 export function canViewKitchenStores(): boolean {
 	return can("kitchen-stores.view")

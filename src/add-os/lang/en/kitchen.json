@@ -1,6 +1,12 @@
 {
 	"kitchen": {
+		"chime": {
+			"mute": "Mute new-order sound",
+			"unmute": "Turn new-order sound on"
+		},
 		"status": {
+			"awaiting_payment": "Awaiting payment",
+			"awaiting_reception": "Awaiting reception",
 			"pending": "New",
 			"preparing": "Preparing",
 			"ready": "Ready",
@@ -44,6 +50,7 @@
 				"other": "Waiting {n} min"
 			},
 			"unknownMember": "Unknown member",
+			"onBill": "On the bill",
 			"line": "{name} × {quantity}",
 			"unnamedItem": "Removed item",
 			"total": "{points} points",
@@ -88,6 +95,15 @@
 			"lines": "Items",
 			"rejectionReason": "Why it was rejected",
 			"bill": "Billed to",
+			"noBill": "Not billed",
+			"payment": "Payment",
+			"notPaid": "Not paid yet",
+			"cashReturn": "Cash for an order not made",
+			"cashReturnState": {
+				"owed": "Cash owed to the member",
+				"returned_in_cash": "Cash returned to the member",
+				"credited_as_points": "Credited to the member as points"
+			},
 			"billType": {
 				"booking": "Booking #{id}",
 				"walkin": "Walk-in session #{id}"
@@ -127,6 +143,57 @@
 				"hint": "Members scan this code to order from the kitchen.",
 				"print": "Print sticker",
 				"download": "Download image"
+			}
+		},
+		"reception": {
+			"description": "Orders from members with no session, waiting for you to check they are in the building. Confirm to send an order to the kitchen, or turn it down with a reason.",
+			"loadError": "Couldn't load the orders to confirm.",
+			"empty": "No kitchen orders are waiting.",
+			"confirm": "Confirm",
+			"turnDown": "Turn down",
+			"confirmed": "Order confirmed and sent to the kitchen.",
+			"turnedDown": "Order turned down.",
+			"payment": {
+				"wallet": "Paid from wallet",
+				"companyWallet": "Paid from company wallet",
+				"card": "Paid by card",
+				"cash": "Paid in cash",
+				"cashToCollect": "Cash to collect: {points} points"
+			}
+		},
+		"confirmCash": {
+			"currenciesFailed": "Couldn't load the currency list; the base currency is chosen.",
+			"title": "Confirm order #{id}",
+			"due": "Cash to collect",
+			"duePoints": "{points} points",
+			"currency": "Currency taken",
+			"note": "Take exactly what is due, in the currency you choose; the system works the amount out at today's rate. Change is given from the desk, never as points.",
+			"submit": "Cash taken, confirm"
+		},
+		"cashReturns": {
+			"title": "Cash to return",
+			"description": "Members who paid cash for an order that was not made. Hand the cash back, or credit it as points if the member asks.",
+			"owed": "Owed to the member",
+			"received": "Cash taken: {amount}",
+			"points": "Worth {points} points",
+			"cancel": "Cancel",
+			"why": {
+				"rejected": "Turned down: {reason}",
+				"rejectedNoReason": "Turned down",
+				"cancelledByMember": "Cancelled by the member",
+				"expired": "Not confirmed in time, so it expired"
+			},
+			"returned": {
+				"label": "Returned in cash",
+				"prompt": "Have you handed {amount} back to the member?",
+				"confirm": "Yes, handed back",
+				"done": "Marked as returned in cash."
+			},
+			"credit": {
+				"label": "Credit as points",
+				"prompt": "Credit {points} points to the member's wallet instead of handing the cash back?",
+				"confirm": "Yes, credit points",
+				"done": "Credited to the member as points."
 			}
 		}
 	}

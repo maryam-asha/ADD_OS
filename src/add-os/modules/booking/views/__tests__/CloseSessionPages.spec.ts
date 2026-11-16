@@ -8,6 +8,14 @@ import { formatTime } from "@/add-os/utils/format"
 import CloseSessionDetailPage from "../CloseSessionDetailPage.vue"
 import CloseSessionPage from "../CloseSessionPage.vue"
 
+const { listOrdersToConfirmMock } = vi.hoisted(() => ({ listOrdersToConfirmMock: vi.fn() }))
+
+vi.mock("@/add-os/services/kitchen", () => ({
+	listOrdersToConfirm: listOrdersToConfirmMock,
+	confirmKitchenOrder: vi.fn(),
+	turnDownKitchenOrder: vi.fn()
+}))
+
 const { listActiveSessionsMock, getSessionReportMock, confirmSessionEndMock, getReceptionSummaryMock, listPendingApprovalsMock, pushMock, routeParams, successMock, warningMock } = vi.hoisted(() => ({
 	listActiveSessionsMock: vi.fn(),
 	getSessionReportMock: vi.fn(),
@@ -39,7 +47,8 @@ vi.mock("@/add-os/config/permissions", async importOriginal => ({
 	canApproveBookings: () => granted.has("reception.approve"),
 	canSettleAtReception: () => granted.has("reception.settle_payment"),
 	canTopUpWallets: () => granted.has("wallet-top-ups.create"),
-	canSellPlans: () => granted.has("plan-purchases.create")
+	canSellPlans: () => granted.has("plan-purchases.create"),
+	canReviewKitchenOrders: () => granted.has("kitchen-orders.review")
 }))
 
 const DESK_PERMISSIONS = ["reception.check_in", "reception.book", "reception.approve", "reception.settle_payment", "wallet-top-ups.create", "plan-purchases.create"]
@@ -399,6 +408,23 @@ describe("reception desk", () => {
 		expect(vm.pendingApprovals).toBe(5)
 		expect(tabLabels().some(label => label.startsWith(en.reception.tabs.approvals))).toBe(true)
 
+		wrapper.unmount()
+	})
+
+	it("hides_tab_without_permission", async () => {
+		grantOnly(...DESK_PERMISSIONS)
+		listOrdersToConfirmMock.mockResolvedValue({ data: [], meta: { current_page: 1, last_page: 1, per_page: 25, total: 3 } })
+		const without = mountWith(ReceptionDeskPage)
+		await flushPromises()
+		expect(tabLabels().some(label => label.startsWith(en.reception.tabs.kitchen))).toBe(false)
+		expect(listOrdersToConfirmMock).not.toHaveBeenCalled()
+		without.unmount()
+
+		grantOnly(...DESK_PERMISSIONS, "kitchen-orders.review")
+		const wrapper = mountWith(ReceptionDeskPage)
+		await flushPromises()
+		expect(tabLabels().some(label => label.startsWith(en.reception.tabs.kitchen))).toBe(true)
+		expect((wrapper.vm as unknown as { pendingKitchenOrders: number }).pendingKitchenOrders).toBe(3)
 		wrapper.unmount()
 	})
 

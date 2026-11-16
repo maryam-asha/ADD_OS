@@ -7,6 +7,7 @@
 				<p>{{ t("kitchen.board.description") }}</p>
 			</div>
 			<div class="ms-auto flex flex-wrap items-center gap-2">
+				<ChimeMuteButton />
 				<n-button :loading="isLoading" @click="load">
 					<template #icon><Icon name="carbon:renew" :size="16" /></template>
 					{{ t("kitchen.board.refresh") }}
@@ -59,8 +60,10 @@ import type { KitchenOrder, KitchenOrderStatus, KitchenStoreRow } from "@/add-os
 import { NAlert, NButton, NCard, NTag, useMessage } from "naive-ui"
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import { useNewArrivalChime } from "@/add-os/composables/useNewArrivalChime"
 import { canManageKitchenOrders, canUpdateKitchenStores, canViewKitchenStores } from "@/add-os/config/permissions"
 import { useBranchOptions } from "@/add-os/modules/dashboard/composables/useBranchOptions"
+import ChimeMuteButton from "@/add-os/modules/kitchen/components/ChimeMuteButton.vue"
 import KitchenOrderCard from "@/add-os/modules/kitchen/components/KitchenOrderCard.vue"
 import RejectOrderModal from "@/add-os/modules/kitchen/components/RejectOrderModal.vue"
 import { useKitchenRealtime } from "@/add-os/modules/kitchen/composables/useKitchenRealtime"
@@ -118,6 +121,10 @@ const isLoading = ref(false)
 const loadError = ref(false)
 const fetchedAt = ref(Date.now())
 const now = ref(Date.now())
+// A chime when an order the board has not shown arrives; moving between columns is not an arrival.
+const chime = useNewArrivalChime(orders)
+// Another branch's orders are not arrivals.
+watch(branchId, () => chime.rebase(), { flush: "sync" })
 
 async function load() {
 	const id = branchId.value

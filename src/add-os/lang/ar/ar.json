@@ -2955,7 +2955,8 @@
 			"approvals": "قيد الموافقة",
 			"sessions": "الجلسات النشطة",
 			"endRequests": "طلبات الإنهاء",
-			"payments": "المستحقات"
+			"payments": "المستحقات",
+			"kitchen": "طلبات المطبخ"
 		},
 		"actions": {
 			"startSession": "بدء جلسة",

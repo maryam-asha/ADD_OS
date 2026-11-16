@@ -4,10 +4,10 @@
  * `KitchenStoreController::row`, `QrPointResource`).
  */
 
-export type KitchenOrderStatus = "pending" | "preparing" | "ready" | "delivered" | "rejected" | "cancelled"
+export type KitchenOrderStatus = "awaiting_payment" | "awaiting_reception" | "pending" | "preparing" | "ready" | "delivered" | "rejected" | "cancelled"
 
 /** Every status, in the order an order moves through them. */
-export const KITCHEN_ORDER_STATUSES: readonly KitchenOrderStatus[] = ["pending", "preparing", "ready", "delivered", "rejected", "cancelled"]
+export const KITCHEN_ORDER_STATUSES: readonly KitchenOrderStatus[] = ["awaiting_payment", "awaiting_reception", "pending", "preparing", "ready", "delivered", "rejected", "cancelled"]
 
 /** Where the order goes: a desk, a room, the kitchen counter, or wherever the member's note says. */
 export type DeliveryType = "desk" | "space" | "pickup" | "note"
@@ -31,8 +31,20 @@ export interface KitchenOrder {
 		label: string | null
 		note: string | null
 	}
-	/** The session or booking the order is billed onto — the coworking names. */
-	bill: { type: "booking" | "walkin"; id: number }
+	/** The session or booking the order is billed onto — the coworking names. Null when it was sent without a bill. */
+	bill: { type: "booking" | "walkin"; id: number } | null
+	/** Which queue it was sent to: straight to the kitchen, or first to reception to be confirmed. */
+	route: "kitchen" | "reception"
+	payment: {
+		choice: "bill" | "wallet" | "card" | "cash"
+		/** Whose wallet paid; null while nothing has. */
+		wallet_owner_type: "user" | "company" | null
+		paid: boolean
+	}
+	/** Points still to be taken in cash, for a cash order not yet paid; otherwise null. */
+	cash_due_points: number | null
+	/** Cash taken for an order that was not made: owed to the member, handed back, or credited as points. Null when none was taken. */
+	cash_return: "owed" | "returned_in_cash" | "credited_as_points" | null
 	lines: KitchenOrderLine[]
 	total_points: number
 	rejection_reason: string | null
@@ -68,4 +80,13 @@ export interface QrPoint {
 	place_id: number
 	place_label: string | null
 	scan_value: string
+}
+
+/** One row of reception's cash-to-return list (`KitchenCashReturnResource`): the order beside what was taken for it. */
+export interface CashReturnRow {
+	order: KitchenOrder
+	/** What the payment is worth; crediting it gives this back as points. */
+	points: number
+	received_amount: string | null
+	received_currency: string | null
 }
