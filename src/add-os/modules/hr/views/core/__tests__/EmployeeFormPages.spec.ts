@@ -64,7 +64,9 @@ const employee = {
 	personal_email: null,
 	address: null,
 	has_national_id: true,
-	has_bank_account: false
+	has_bank_account: false,
+	status: "active",
+	current_assignment: { job_title: { ar: "محاسبة", en: "Accountant" }, org_unit: { id: 4, name: { ar: "العمليات", en: "Operations" } } }
 }
 
 describe("hR forms on pages of their own", () => {
@@ -90,8 +92,28 @@ describe("hR forms on pages of their own", () => {
 			await flushPromises()
 
 			expect(mocks.getEmployee).toHaveBeenCalledWith(5)
-			expect(document.body.textContent).toContain("reem@add.test")
+			const summary = document.querySelector("[data-test='employee-summary']")!
+			expect(summary.textContent).toContain("Reem")
+			expect(summary.textContent).toContain("Accountant · Operations")
+			expect(summary.textContent).toContain("ADD-0005")
+			expect(summary.textContent).toContain("+963944000005")
+			expect(summary.textContent).toContain("reem@add.test")
 			expect(document.querySelector(".n-modal")).toBeNull()
+			wrapper.unmount()
+		})
+
+		it("says when the form holds unsaved changes, and not before", async () => {
+			mocks.getEmployee.mockResolvedValue(employee)
+			const wrapper = mountPage(EditEmployeePage)
+			await flushPromises()
+
+			expect(document.body.textContent).toContain("No changes yet")
+			expect(document.querySelector("[data-test='unsaved']")).toBeNull()
+
+			await wrapper.find("textarea").setValue("Aleppo")
+			await flushPromises()
+
+			expect(document.querySelector("[data-test='unsaved']")?.textContent).toContain("Unsaved changes")
 			wrapper.unmount()
 		})
 

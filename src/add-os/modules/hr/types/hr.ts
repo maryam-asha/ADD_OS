@@ -84,7 +84,16 @@ export interface EmployeeSummary {
 	hired_on: string
 	job_title: Translatable | null
 	org_unit: { id: number; name: Translatable } | null
+	/** The account's email (the person is kept on their ADD account). */
+	work_email: string | null
+	/** Of today's assignment; null without one. */
+	employment_type: EmploymentType | null
+	manager: PersonRef | null
 }
+
+/** The orders the employee list can be read in; names sort in the reader's language. */
+export type EmployeeSort = "newest" | "oldest" | "name_asc" | "name_desc"
+export const EMPLOYEE_SORTS: readonly EmployeeSort[] = ["newest", "oldest", "name_asc", "name_desc"]
 
 export interface Assignment {
 	id: number

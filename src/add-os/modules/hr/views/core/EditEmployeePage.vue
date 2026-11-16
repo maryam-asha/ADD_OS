@@ -2,15 +2,14 @@
 <template>
 	<HrFormPage
 		:title="t('nav.pages.employeeEdit')"
-		:description="employee ? translated(employee.name) : undefined"
-		:eyebrow="t('nav.pages.employees')"
+		:description="t('hr.editEmployee.description')"
 		:back-to="{ name: 'hr.employeeProfile', params: { id } }"
 		:back-label="t('hr.editEmployee.backToProfile')"
 		:loading
 		:error="loadError ? t('hr.common.loadError') : null"
 	>
 		<n-form v-if="employee" ref="formRef" :model="form" :rules label-placement="top" class="flex flex-col gap-5">
-			<HrPanel :title="t('hr.editEmployee.personal')" icon="carbon:identification">
+			<HrPanel :title="t('hr.editEmployee.personal')" :subtitle="t('hr.editEmployee.personalHint')" icon="carbon:identification">
 				<div class="grid grid-cols-1 gap-x-4 @xl:grid-cols-2">
 					<n-form-item path="gender" :label="t('hr.editEmployee.gender')">
 						<n-select v-model:value="form.gender" :options="genderOptions" clearable />
@@ -31,6 +30,11 @@
 					<n-form-item path="maritalStatus" :label="t('hr.editEmployee.maritalStatus')">
 						<n-select v-model:value="form.maritalStatus" :options="maritalOptions" clearable />
 					</n-form-item>
+				</div>
+			</HrPanel>
+
+			<HrPanel :title="t('hr.editEmployee.contact')" :subtitle="t('hr.editEmployee.contactHint')" icon="carbon:location">
+				<div class="grid grid-cols-1 gap-x-4 @xl:grid-cols-2">
 					<n-form-item path="personalEmail" :label="t('hr.hire.personalEmail')">
 						<n-input v-model:value="form.personalEmail" dir="ltr" />
 					</n-form-item>
@@ -64,19 +68,42 @@
 			</HrPanel>
 		</n-form>
 
+		<!-- Whose details these are, and what this page cannot change. -->
 		<template #aside>
-			<HrPanel v-if="employee" :title="t('hr.hire.person')" icon="carbon:user-avatar">
-				<n-descriptions :column="1" size="small" label-placement="top">
-					<n-descriptions-item :label="t('hr.hire.name')">{{ translated(employee.name) || EMPTY }}</n-descriptions-item>
-					<n-descriptions-item :label="t('hr.hire.phone')">
-						<span dir="ltr">{{ employee.phone || EMPTY }}</span>
-					</n-descriptions-item>
-					<n-descriptions-item :label="t('hr.hire.workEmail')">
-						<span dir="ltr">{{ employee.work_email || EMPTY }}</span>
-					</n-descriptions-item>
-				</n-descriptions>
-				<p class="mt-3 text-sm text-secondary">{{ t("hr.editEmployee.identityHint") }}</p>
-			</HrPanel>
+			<section v-if="employee" class="flex flex-col overflow-hidden rounded-add-large border border-[var(--add-border)] bg-[var(--add-surface-raised)]" data-test="employee-summary">
+				<div class="flex flex-col items-center gap-2 px-4 pb-5 pt-6 text-center">
+					<EmployeeAvatar :name="employee.name" size="xl" shape="disc" />
+					<h2 class="text-lg font-bold">{{ translated(employee.name) || EMPTY }}</h2>
+					<EmployeeStatusTag :status="employee.status" />
+					<span v-if="role" class="text-sm text-secondary">{{ role }}</span>
+					<span class="font-mono text-xs text-secondary" dir="ltr">{{ employee.employee_number }}</span>
+				</div>
+
+				<dl class="flex flex-col gap-3 border-t border-[var(--add-border)] px-4 py-4">
+					<div v-for="row in accountRows" :key="row.label" class="flex items-center gap-3">
+						<span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-add-default bg-[var(--add-surface-sunken)] text-primary">
+							<Icon :name="row.icon" :size="16" />
+						</span>
+						<div class="flex min-w-0 flex-col items-start">
+							<dt class="text-xs font-normal text-secondary">{{ row.label }}</dt>
+							<dd class="max-w-full truncate text-sm font-semibold" dir="ltr">{{ row.value }}</dd>
+						</div>
+					</div>
+				</dl>
+
+				<p class="flex items-start gap-2 border-t border-[var(--add-border)] bg-[var(--add-surface-sunken)] px-4 py-3 text-xs text-secondary">
+					<Icon name="carbon:locked" :size="14" class="mt-0.5 shrink-0" />
+					<span>{{ t("hr.editEmployee.identityHint") }}</span>
+				</p>
+			</section>
+		</template>
+
+		<template #status>
+			<span v-if="dirty" class="inline-flex items-center gap-2 font-semibold text-[var(--add-warning-text)]" data-test="unsaved">
+				<span class="h-2 w-2 rounded-full bg-[var(--add-warning)]" aria-hidden="true" />
+				{{ t("hr.editEmployee.unsaved") }}
+			</span>
+			<span v-else>{{ t("hr.editEmployee.noChanges") }}</span>
 		</template>
 
 		<template #actions>
@@ -92,10 +119,12 @@
 <script setup lang="ts">
 import type { FormInst, FormRules, SelectOption } from "naive-ui"
 import type { Employee, Gender, MaritalStatus, UpdateEmployeePayload } from "@/add-os/modules/hr/types/hr"
-import { NButton, NDatePicker, NDescriptions, NDescriptionsItem, NForm, NFormItem, NInput, NSelect, useMessage } from "naive-ui"
+import { NButton, NDatePicker, NForm, NFormItem, NInput, NSelect, useMessage } from "naive-ui"
 import { computed, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
+import EmployeeStatusTag from "@/add-os/modules/hr/components/EmployeeStatusTag.vue"
+import EmployeeAvatar from "@/add-os/modules/hr/components/ui/EmployeeAvatar.vue"
 import HrFormPage from "@/add-os/modules/hr/components/ui/HrFormPage.vue"
 import HrPanel from "@/add-os/modules/hr/components/ui/HrPanel.vue"
 import { GENDERS, MARITAL_STATUSES } from "@/add-os/modules/hr/types/hr"
@@ -113,6 +142,14 @@ import Icon from "@/components/common/Icon.vue"
  * refused by the server from HR. The national ID and bank account are
  * write-only here: left blank they keep what is on file, since the profile
  * never carries the values themselves.
+ *
+ * The page reads as three sections (personal, contact, the encrypted pair)
+ * beside a card naming whose details these are: the file's initials,
+ * status, job and number, then the account's phone and email with why they
+ * are not edited here. The bar at the bottom says whether anything has
+ * changed. Redesigned 2026-11-12 on review; the side panel before listed the
+ * account's three fields as bare label and value pairs, and the header
+ * repeated the section the breadcrumb already names.
  *
  * This was EditEmployeeModal until 2026-11-09: see docs/hr/FORMS-AS-PAGES.md.
  */
@@ -152,6 +189,21 @@ const form = ref<PersonalForm>({
 	nationalId: "",
 	bankAccount: ""
 })
+/** The form as loaded, to tell whether anything has changed since. */
+const loaded = ref("")
+const dirty = computed(() => loaded.value !== "" && JSON.stringify(form.value) !== loaded.value)
+
+/** The job and the unit held now, under the name. */
+const role = computed(() => {
+	const job = employee.value?.current_assignment
+	return [translated(job?.job_title), translated(job?.org_unit?.name)].filter(Boolean).join(" · ")
+})
+
+/** The account's own contact details, shown and never edited here. */
+const accountRows = computed(() => [
+	{ label: t("hr.hire.phone"), value: employee.value?.phone || EMPTY, icon: "carbon:phone" },
+	{ label: t("hr.hire.workEmail"), value: employee.value?.work_email || EMPTY, icon: "carbon:email" }
+])
 
 function fromEmployee(e: Employee): PersonalForm {
 	return {
@@ -170,6 +222,7 @@ onMounted(async () => {
 	try {
 		employee.value = await getEmployee(id)
 		form.value = fromEmployee(employee.value)
+		loaded.value = JSON.stringify(form.value)
 	} catch (e) {
 		if (!(e instanceof ApiError)) throw e
 		loadError.value = true

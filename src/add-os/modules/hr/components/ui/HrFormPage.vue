@@ -20,16 +20,21 @@
 			<div class="@container flex min-w-0 flex-col gap-5" :class="$slots.aside ? '@4xl:col-span-2' : ''">
 				<slot />
 			</div>
-			<aside v-if="$slots.aside" class="@container flex min-w-0 flex-col gap-5 @4xl:sticky @4xl:top-4">
+			<aside v-if="$slots.aside" class="@container flex min-w-0 flex-col gap-5 @4xl:sticky @4xl:top-20">
 				<slot name="aside" />
 			</aside>
 		</div>
 
 		<footer
 			v-if="$slots.actions && !loading && !error"
-			class="sticky bottom-0 z-10 flex flex-wrap items-center justify-end gap-2 rounded-add-large border border-[var(--add-border)] bg-[var(--add-surface-raised)] px-4 py-3"
+			class="sticky bottom-0 z-10 flex flex-wrap items-center justify-between gap-3 rounded-add-large border border-[var(--add-border)] bg-[var(--add-surface-raised)] px-4 py-3 shadow-lg"
 		>
-			<slot name="actions" />
+			<div class="min-w-0 text-sm text-secondary">
+				<slot name="status" />
+			</div>
+			<div class="flex flex-wrap items-center gap-2">
+				<slot name="actions" />
+			</div>
 		</footer>
 	</div>
 </template>
@@ -57,7 +62,12 @@ import Icon from "@/components/common/Icon.vue"
  * too narrow for it whenever the menu is open. The sections' column and the
  * aside are containers too, so a form's own field grid (`@xl:grid-cols-2`)
  * follows the column it sits in. The bar is `sticky`, not `fixed`, so it
- * spans the content area at whatever width the sidebar leaves it.
+ * spans the content area at whatever width the sidebar leaves it. The aside
+ * sticks below the floating top bar (`top-20`), not under it: at `top-4`
+ * its first card slid beneath the bar on scroll (UX walk, 2026-11-14).
+ *
+ * The bar carries the buttons at its far end and, in `status`, a line at
+ * its start on where the form stands (unsaved changes, say).
  *
  * `loading` and `error` stand in for the form while its record is
  * fetched. Short actions (a reason, a confirmation) stay dialogs: see

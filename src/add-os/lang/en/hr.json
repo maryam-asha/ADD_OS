@@ -63,16 +63,49 @@
 			"searchPlaceholder": "Search by name or employee number",
 			"statusFilter": "Status",
 			"unitFilter": "Unit",
+			"sortLabel": "Order",
+			"sort": {
+				"newest": "Newest added",
+				"oldest": "Oldest added",
+				"name_asc": "Name, A to Z",
+				"name_desc": "Name, Z to A"
+			},
+			"display": "Display",
+			"cards": "Cards",
+			"table": "Table",
+			"download": "Download",
+			"downloadChosen": "Download chosen ({n})",
+			"downloadError": "Could not download the list. Try again.",
+			"selectAll": "Select all shown results",
+			"select": "Select {name}",
+			"chosen": "Chosen: {n}",
+			"clearChosen": "Clear",
+			"shown": "Showing {from}–{to} of {total} employees",
+			"print": "Print",
+			"noManager": "No direct manager",
 			"hire": "Hire employee",
 			"empty": "No matching employees.",
 			"columns": {
 				"employee": "Employee",
+				"number": "Employee no.",
 				"unit": "Unit",
 				"jobTitle": "Job title",
-				"hiredOn": "Hired on",
+				"manager": "Direct manager",
+				"employmentType": "Employment type",
 				"status": "Status",
 				"actions": "Actions"
 			}
+		},
+		"employeeView": {
+			"netPay": "Net pay",
+			"noPay": "No pay on file",
+			"identity": "Identity",
+			"jobAndContact": "Job and contact",
+			"account": "ADD account",
+			"accountLinked": "Linked to an account",
+			"accountNone": "No account",
+			"openFile": "Open full file",
+			"close": "Close"
 		},
 		"hire": {
 			"title": "Hire employee",
@@ -361,7 +394,13 @@
 			"sensitiveHint": "Stored encrypted. Leave blank to keep what is on file.",
 			"keepCurrent": "On file; leave blank to keep",
 			"saved": "Employee updated.",
-			"identityHint": "The name, phone and work email come from the user account; change them on the Users page, not here."
+			"identityHint": "The name, phone and work email come from the user account; change them on the Users page, not here.",
+			"description": "What HR keeps on the employee: personal details, contact, and the encrypted national ID and bank account.",
+			"personalHint": "Kept on the employee's ADD account.",
+			"contact": "Contact and address",
+			"contactHint": "Where to reach the employee outside work.",
+			"unsaved": "Unsaved changes",
+			"noChanges": "No changes yet"
 		},
 		"sensitive": {
 			"title": "National ID and bank account",

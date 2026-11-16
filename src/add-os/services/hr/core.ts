@@ -34,6 +34,7 @@ import type {
 	Employee,
 	EmployeeDocument,
 	EmployeeSensitive,
+	EmployeeSort,
 	EmployeeStatus,
 	EmployeeSummary,
 	EmploymentCertificate,
@@ -55,7 +56,7 @@ import type {
 	UploadDocumentPayload,
 	WorkLocation
 } from "@/add-os/modules/hr/types/hr"
-import { del, get, patch, post, put, uploadFile } from "../api"
+import { del, downloadFile, get, patch, post, put, uploadFile } from "../api"
 import { rowsOf, toPaginated } from "../pagination"
 
 const BASE = "/api/v1/hr"
@@ -73,6 +74,8 @@ export interface EmployeeFilters {
 	status?: EmployeeStatus | null
 	org_unit_id?: number | null
 	user_id?: number | null
+	/** Without one the server keeps its original order, oldest record first. */
+	sort?: EmployeeSort | null
 }
 
 export async function listEmployees(filters: EmployeeFilters = {}): Promise<Paginated<EmployeeSummary>> {
@@ -81,7 +84,26 @@ export async function listEmployees(filters: EmployeeFilters = {}): Promise<Pagi
 	if (filters.status) query.status = filters.status
 	if (filters.org_unit_id) query.org_unit_id = filters.org_unit_id
 	if (filters.user_id) query.user_id = filters.user_id
+	if (filters.sort) query.sort = filters.sort
 	return toPaginated(await get<RawPaginatedResponse<EmployeeSummary>>(`${BASE}/employees`, query))
+}
+
+/**
+ * The list as a CSV the server writes (and audits): every employee matching
+ * the filters, in their order — or only `ids` when some are chosen. The
+ * page number does not apply.
+ */
+export async function downloadEmployees(filters: Omit<EmployeeFilters, "page" | "user_id"> = {}, ids: readonly number[] = []): Promise<void> {
+	const query: Record<string, unknown> = { format: "csv" }
+	if (filters.q) query.q = filters.q
+	if (filters.status) query.status = filters.status
+	if (filters.org_unit_id) query.org_unit_id = filters.org_unit_id
+	if (filters.sort) query.sort = filters.sort
+	// `ids[0]=…&ids[1]=…`: the API helpers write each value as one string.
+	ids.forEach((id, index) => {
+		query[`ids[${index}]`] = id
+	})
+	await downloadFile(`${BASE}/employees`, query, "employees.csv")
 }
 
 /**

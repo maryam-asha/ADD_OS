@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import * as hr from "../core"
 
-const { getMock, postMock, putMock, patchMock, delMock, uploadMock } = vi.hoisted(() => ({
+const { getMock, postMock, putMock, patchMock, delMock, uploadMock, downloadMock } = vi.hoisted(() => ({
+	downloadMock: vi.fn(),
 	getMock: vi.fn(),
 	postMock: vi.fn(),
 	putMock: vi.fn(),
@@ -10,7 +11,7 @@ const { getMock, postMock, putMock, patchMock, delMock, uploadMock } = vi.hoiste
 	uploadMock: vi.fn()
 }))
 
-vi.mock("../../api", () => ({ get: getMock, post: postMock, put: putMock, patch: patchMock, del: delMock, uploadFile: uploadMock }))
+vi.mock("../../api", () => ({ get: getMock, post: postMock, put: putMock, patch: patchMock, del: delMock, uploadFile: uploadMock, downloadFile: downloadMock }))
 
 const BASE = "/api/v1/hr"
 
@@ -28,6 +29,24 @@ describe("hr core service", () => {
 			expect(getMock).toHaveBeenCalledWith(`${BASE}/employees`, { page: 2, q: "rim", status: "active" })
 			expect(page.data).toEqual([{ id: 1 }])
 			expect(page.meta.last_page).toBe(3)
+		})
+
+		it("sends the chosen order with the list", async () => {
+			getMock.mockResolvedValue({ data: [], meta: { current_page: 1, last_page: 1, per_page: 25, total: 0 } })
+
+			await hr.listEmployees({ sort: "name_desc" })
+
+			expect(getMock).toHaveBeenCalledWith(`${BASE}/employees`, { page: 1, sort: "name_desc" })
+		})
+
+		it("downloads the filtered list as CSV, or only the chosen employees", async () => {
+			downloadMock.mockResolvedValue(undefined)
+
+			await hr.downloadEmployees({ q: "rim", status: "probation", org_unit_id: null, sort: "newest" })
+			await hr.downloadEmployees({}, [7, 9])
+
+			expect(downloadMock).toHaveBeenNthCalledWith(1, `${BASE}/employees`, { format: "csv", q: "rim", status: "probation", sort: "newest" }, "employees.csv")
+			expect(downloadMock).toHaveBeenNthCalledWith(2, `${BASE}/employees`, { format: "csv", "ids[0]": 7, "ids[1]": 9 }, "employees.csv")
 		})
 
 		it("patches the personal details and answers the server's message", async () => {

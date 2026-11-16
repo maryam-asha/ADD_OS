@@ -32,5 +32,22 @@
 			overflow: visible !important;
 			height: auto !important;
 		}
+
+		// A sheet that is a dialog (the employee view over the employee list):
+		// the dialog's height cap and body scroll would cut the paper at the
+		// screen's height, and its close button is no use on paper.
+		.n-modal.add-print-page {
+			max-height: none !important;
+			overflow: visible !important;
+			box-shadow: none !important;
+
+			.n-card__content {
+				overflow: visible !important;
+			}
+
+			.n-card-header__close {
+				display: none !important;
+			}
+		}
 	}
 }
