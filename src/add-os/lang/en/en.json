@@ -153,6 +153,7 @@
 			"book": "Book",
 			"approve": "Approve",
 			"reject": "Reject",
+			"review": "Review",
 			"settle_payment": "Settle payment",
 			"record_consumption": "Record consumption",
 			"manage_members": "Manage members",
