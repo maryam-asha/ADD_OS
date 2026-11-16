@@ -58,6 +58,27 @@
 			</div>
 		</div>
 
+		<!-- Filters: place and category narrow both lists; the rest the records. -->
+		<div class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+			<div class="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+				<n-input v-model:value="filters.search" :placeholder="t('inventory.maintenance.search')" clearable class="w-full">
+					<template #prefix><Icon name="carbon:search" :size="16" class="text-slate-400" /></template>
+				</n-input>
+				<n-select v-model:value="filters.category_id" :options="categoryOptions" :placeholder="t('inventory.common.category')" clearable filterable class="w-full" />
+				<n-select v-model:value="filters.type" :options="typeOptions" :placeholder="t('inventory.maintenance.allTypes')" clearable class="w-full" />
+				<n-date-picker v-model:formatted-value="period" type="daterange" value-format="yyyy-MM-dd" clearable class="w-full" />
+				<div class="sm:col-span-2 lg:col-span-4">
+					<PlacePicker v-model:chain="placeChain" :value="place" inline />
+				</div>
+			</div>
+			<div v-if="hasActiveFilters" class="mt-3 flex items-center justify-end border-t border-slate-100 pt-3 dark:border-slate-800/80">
+				<n-button quaternary size="small" @click="resetFilters">
+					<template #icon><Icon name="carbon:reset" :size="14" /></template>
+					{{ t("inventory.common.resetFilters") }}
+				</n-button>
+			</div>
+		</div>
+
 		<n-alert v-if="loadError" type="error" :title="loadError" />
 
 		<!-- Due Schedules Card -->
@@ -111,15 +132,18 @@
 
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
-import type { MaintenanceRecord, MaintenanceSchedule } from "@/add-os/modules/inventory/types/inventory"
-import { NAlert, NCard, NDataTable, NPagination, NRadioButton, NRadioGroup, NSelect, NTag } from "naive-ui"
-import { computed, h, onMounted, ref, watch } from "vue"
+import type { Category, MaintenanceRecord, MaintenanceSchedule, MaintenanceType } from "@/add-os/modules/inventory/types/inventory"
+import { NAlert, NButton, NCard, NDataTable, NDatePicker, NInput, NPagination, NRadioButton, NRadioGroup, NSelect, NTag } from "naive-ui"
+import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
-import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
-import { ALIGN_END, codeChip, EMPTY, localized, money, nameCell, viewActionColumn } from "@/add-os/modules/inventory/utils/display"
-import { listDueSchedules, listMaintenance } from "@/add-os/services/inventory"
+import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
+import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
+import PlacePicker from "@/add-os/modules/inventory/components/PlacePicker.vue"
+import { ALIGN_END, categoryPaths, codeChip, EMPTY, localized, money, nameCell, viewActionColumn } from "@/add-os/modules/inventory/utils/display"
+import { chainOf, filtersOf, PLACE_FILTER_SCHEMA, placeOf, usePlaceFilter } from "@/add-os/modules/inventory/utils/placeFilter"
+import { listCategories, listDueSchedules, listMaintenance } from "@/add-os/services/inventory"
 import { countKey, formatNumber } from "@/add-os/utils/format"
 import { formatDate, formatTime } from "@/add-os/utils/format/dates"
 import Icon from "@/components/common/Icon.vue"
@@ -128,6 +152,9 @@ import Icon from "@/components/common/Icon.vue"
  * What needs looking after: routine servicing coming due (or overdue),
  * and the repairs and servicing on record — open ones first by default.
  * A row opens its asset, where a repair is closed and a schedule edited.
+ * Where the asset sits (a branch takes everything in it) and its category
+ * narrow both lists; type, the days opened and a search the records. Every
+ * filter is kept in the URL.
  */
 defineProps<{ titleKey?: string }>()
 
@@ -136,9 +163,42 @@ const router = useRouter()
 
 const due = ref<MaintenanceSchedule[]>([])
 const records = ref<MaintenanceRecord[]>([])
-const days = ref(7)
-const scope = ref<"open" | "all">("open")
-const page = ref(1)
+const categories = ref<Category[]>([])
+const MAINTENANCE_TYPES: MaintenanceType[] = ["corrective", "preventive"]
+
+const { filters, applied, page } = useRouteFilters(
+	{ search: "string", category_id: "number", type: "string", from: "string", to: "string", scope: "string", days: "number", ...PLACE_FILTER_SCHEMA },
+	() => void load(),
+	{ debounced: ["search"], defaults: { scope: "open", days: 7 } }
+)
+const { place, chain: placeChain } = usePlaceFilter(filters)
+
+const days = computed<number>({
+	get: () => filters.value.days ?? 7,
+	set: n => (filters.value.days = n)
+})
+const scope = computed<"open" | "all">({
+	get: () => (filters.value.scope === "all" ? "all" : "open"),
+	set: next => (filters.value.scope = next)
+})
+const period = computed<[string, string] | null>({
+	get: (): [string, string] | null => {
+		const { from, to } = filters.value
+		return from && to ? [from, to] : null
+	},
+	set: (next: [string, string] | null) => {
+		filters.value = { ...filters.value, from: next?.[0] ?? null, to: next?.[1] ?? null }
+	}
+})
+const typeOptions = computed<SelectOption[]>(() => MAINTENANCE_TYPES.map(type => ({ label: t(`inventory.maintenanceType.${type}`), value: type })))
+const categoryOptions = computed<SelectOption[]>(() => categoryPaths(categories.value).map(({ category, path }) => ({ label: path, value: category.id })))
+
+const hasActiveFilters = computed(() => Boolean(filters.value.search || filters.value.category_id || filters.value.type || filters.value.from || place.value))
+
+function resetFilters() {
+	filters.value = { ...filters.value, ...filtersOf(null), search: "", category_id: null, type: null, from: null, to: null }
+}
+
 const lastPage = ref(1)
 const loading = ref(true)
 const loadError = ref("")
@@ -147,19 +207,18 @@ const overdueCount = computed(() => due.value.filter(s => s.overdue).length)
 const openRecordsCount = computed(() => records.value.filter(r => !r.closed_at).length)
 const totalMaintenanceCost = computed(() => records.value.reduce((sum, r) => sum + (parseFloat(r.cost ?? "") || 0), 0))
 
-onMounted(load)
-watch(days, () => void load())
-watch(scope, () => {
-	if (page.value !== 1) page.value = 1
-	else void load()
-})
-watch(page, () => void load())
+onMounted(() => void quietly(() => listCategories("asset"), list => (categories.value = list)))
 
 async function load() {
 	loading.value = true
 	loadError.value = ""
 	try {
-		const [schedules, result] = await Promise.all([listDueSchedules(days.value), listMaintenance({ page: page.value, open: scope.value === "open" })])
+		const f = applied.value
+		const where = { place: placeOf(chainOf(f)), category_id: f.category_id }
+		const [schedules, result] = await Promise.all([
+			listDueSchedules(f.days ?? 7, where),
+			listMaintenance({ page: page.value, open: f.scope !== "all", ...where, type: f.type as MaintenanceType | null, from: f.from, to: f.to, search: f.search })
+		])
 		due.value = schedules
 		records.value = result.data
 		lastPage.value = result.meta.last_page

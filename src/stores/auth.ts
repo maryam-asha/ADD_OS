@@ -5,6 +5,17 @@ import { hasApiUrl } from "@/add-os/config/env"
 import { getMe } from "@/add-os/services/auth"
 
 /**
+ * ADD Core said this session may not go on: gone (401), an expired CSRF session
+ * (419), or the account suspended (403 — `EnsureAuthenticatedUserIsActive`
+ * refuses it on every request, `me` included). Read by shape: `services/api`
+ * imports this store, so importing `ApiError` here would be a cycle.
+ */
+function sessionEnded(error: unknown): boolean {
+	const status = typeof error === "object" && error !== null && "status" in error ? (error as { status: unknown }).status : null
+	return status === 401 || status === 403 || status === 419
+}
+
+/**
  * Who may use this dashboard at all: a provider (its portal), a staff account
  * — one holding at least one permission, whatever its roles are called — or
  * an employee (My HR, whatever the role). The one rule for sign-in, session
@@ -63,6 +74,11 @@ export const useAuthStore = defineStore("auth", {
 		 * Verifies the Fortify session cookie against the API at app boot, rather than
 		 * trusting the persisted `logged`/`role` from localStorage — a session can expire
 		 * or an account can be blocked server-side without the browser ever knowing.
+		 *
+		 * Only ADD Core saying the session may not go on (`sessionEnded`) signs out here. A request that never got an answer, or a 5xx, says
+		 * nothing about the session: signing out on it bounced a signed-in caller to
+		 * /login whenever the API was slow or restarting (2026-11-16). The persisted
+		 * session stands, and the next request's own 401 still ends it if it is gone.
 		 */
 		async initSession() {
 			if (!hasApiUrl()) return
@@ -73,8 +89,8 @@ export const useAuthStore = defineStore("auth", {
 					return
 				}
 				this.setLogged(user)
-			} catch {
-				this.setLogout()
+			} catch (e) {
+				if (sessionEnded(e)) this.setLogout()
 			}
 		}
 	},

@@ -24,18 +24,19 @@
 						<span class="font-mono text-xs text-secondary" dir="ltr">{{ line.item.sku }}</span>
 						<n-tag v-if="line.item.category.intangible" size="tiny" :bordered="false" class="ms-2">{{ t("inventory.assets.intangible") }}</n-tag>
 					</div>
-					<n-button size="small" quaternary circle :aria-label="t('inventory.assets.removeLine')" @click="lines.splice(index, 1)">
+					<n-button size="small" quaternary circle :aria-label="t('inventory.assets.removeLine')" @click="removeLine(index)">
 						<template #icon><Icon name="carbon:trash-can" :size="16" /></template>
 					</n-button>
 				</div>
 				<div class="grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-4">
 					<label>
 						<span class="mb-1 block text-xs text-secondary">{{ t("inventory.assets.count") }} *</span>
-						<n-input-number v-model:value="line.count" :min="1" :max="100" :precision="0" size="small" dir="ltr" />
+						<n-input-number v-model:value="line.count" :min="1" :max="100" :precision="0" size="small" dir="ltr" @update:value="count => fitSerials(line, count)" />
 					</label>
-					<label>
+					<label v-if="line.serials.length === 1">
 						<span class="mb-1 block text-xs text-secondary">{{ t("inventory.assets.serial") }}</span>
-						<n-input v-model:value="line.serial_number" size="small" dir="ltr" :maxlength="100" :disabled="(line.count ?? 1) > 1" />
+						<n-input v-model:value="line.serials[0]" size="small" dir="ltr" :maxlength="100" :status="serialError(index, 0) ? 'error' : undefined" />
+						<span v-if="serialError(index, 0)" class="mt-1 block text-xs text-error">{{ serialError(index, 0) }}</span>
 					</label>
 					<label>
 						<span class="mb-1 block text-xs text-secondary">{{ t("inventory.assets.unitCost") }}</span>
@@ -57,6 +58,18 @@
 						<span class="mb-1 block text-xs text-secondary">{{ t("inventory.assets.method") }}</span>
 						<n-select v-model:value="line.depreciation_method" :options="methodOptions" size="small" />
 					</label>
+				</div>
+				<!-- Several units: a serial field each, the first to the first asset made. -->
+				<div v-if="line.serials.length > 1" class="mt-3">
+					<span class="mb-1 block text-xs text-secondary">{{ t("inventory.assets.serial") }}</span>
+					<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+						<label v-for="(_, unit) in line.serials" :key="unit">
+							<span class="mb-1 block text-xs text-secondary">{{ t("inventory.assets.unitSerial", { n: formatNumber(unit + 1) }) }}</span>
+							<n-input v-model:value="line.serials[unit]" size="small" dir="ltr" :maxlength="100" :status="serialError(index, unit) ? 'error' : undefined" />
+							<span v-if="serialError(index, unit)" class="mt-1 block text-xs text-error">{{ serialError(index, unit) }}</span>
+						</label>
+					</div>
+					<p class="mt-1 text-xs text-secondary">{{ t("inventory.assets.serialsHint") }}</p>
 				</div>
 			</div>
 		</div>
@@ -117,6 +130,8 @@ import AssetPlacePicker from "@/add-os/modules/inventory/components/AssetPlacePi
 import AttachmentsField from "@/add-os/modules/inventory/components/AttachmentsField.vue"
 import ItemSelect from "@/add-os/modules/inventory/components/ItemSelect.vue"
 import { localized } from "@/add-os/modules/inventory/utils/display"
+import { errorsWithoutLine, resizeSerials, serialErrorKey, serialPayload } from "@/add-os/modules/inventory/utils/serials"
+import { ApiError } from "@/add-os/services/api"
 import { inventorySettings, registerAssetBatch } from "@/add-os/services/inventory"
 import { countKey, formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
@@ -125,8 +140,9 @@ const props = defineProps<{ place?: PlaceRef | null; placeChain?: PlaceChain | n
 const emit = defineEmits<{ saved: [] }>()
 /**
  * Registering assets the way a room is gone through: one place, then each
- * asset item in it with its count (each asset gets its own code and QR, so
- * a serial number is for a line of one). What the purchase shares — date,
+ * asset item in it with its count (each asset gets its own code and QR, and
+ * its own serial: a line of several has a field per unit). What the
+ * purchase shares — date,
  * supplier, its invoice, the currency — is given once for them all. ADD
  * Core takes it all or none, and names the line it refuses.
  *
@@ -143,7 +159,8 @@ interface LineDraft {
 	uid: number
 	item: Item
 	count: number | null
-	serial_number: string
+	/** One per unit; resized with the count. */
+	serials: string[]
 	purchase_cost: number | null
 	useful_life_months: number | null
 	salvage_value: number | null
@@ -169,6 +186,8 @@ const lines = ref<LineDraft[]>([])
 const picking = ref<number | null>(null)
 const saving = ref(false)
 const problem = ref("")
+/** ADD Core's refusals by field, for the serial a unit was refused on. */
+const fieldErrors = ref<Record<string, string>>({})
 const settings = ref<InventorySettings | null>(null)
 /** Bumped on every opening, so the place picker starts again from the list's place. */
 const opened = ref(0)
@@ -186,6 +205,7 @@ watch(show, open => {
 		form.value = blank()
 		lines.value = []
 		problem.value = ""
+		fieldErrors.value = {}
 		opened.value++
 		void quietly(inventorySettings, next => (settings.value = next))
 	}
@@ -194,14 +214,31 @@ watch(show, open => {
 function add(item: Item | null) {
 	if (!item) return
 	const method = settings.value?.depreciation_methods[0] ?? "straight_line"
-	lines.value.push({ uid: nextUid++, item, count: 1, serial_number: "", purchase_cost: null, useful_life_months: null, salvage_value: null, warranty_until: null, depreciation_method: method })
+	lines.value.push({ uid: nextUid++, item, count: 1, serials: [""], purchase_cost: null, useful_life_months: null, salvage_value: null, warranty_until: null, depreciation_method: method })
 	picking.value = null
+}
+
+function fitSerials(line: LineDraft, count: number | null) {
+	line.serials = resizeSerials(line.serials, count)
+}
+
+/** A refusal stays on the line it was about once a line above it is removed. */
+function removeLine(index: number) {
+	lines.value.splice(index, 1)
+	fieldErrors.value = errorsWithoutLine(fieldErrors.value, index)
+}
+
+/** A line of one is reported on `serial_number`, a unit of several on `serial_numbers.{unit}`. */
+function serialError(index: number, unit: number): string {
+	const errors = fieldErrors.value
+	return (lines.value[index]?.serials.length === 1 ? errors[`lines.${index}.serial_number`] : undefined) ?? errors[serialErrorKey(index, unit)] ?? ""
 }
 
 async function save(draft: boolean) {
 	if (!ready.value) return
 	saving.value = true
 	problem.value = ""
+	fieldErrors.value = {}
 	try {
 		const f = form.value
 		const assets = await registerAssetBatch({
@@ -220,7 +257,7 @@ async function save(draft: boolean) {
 				return {
 					item_id: line.item.id,
 					count,
-					serial_number: count > 1 ? null : line.serial_number.trim() || null,
+					...serialPayload(line.serials),
 					purchase_cost: line.purchase_cost,
 					useful_life_months: line.useful_life_months,
 					salvage_value: intangible ? null : line.salvage_value,
@@ -233,6 +270,8 @@ async function save(draft: boolean) {
 		show.value = false
 		emit("saved")
 	} catch (e) {
+		const refused = e instanceof ApiError ? e.data?.errors : undefined
+		if (refused) fieldErrors.value = Object.fromEntries(Object.entries(refused).map(([field, messages]) => [field, messages[0] ?? ""]))
 		problem.value = apiErrorMessage(e, t("inventory.common.saveError"))
 	} finally {
 		saving.value = false

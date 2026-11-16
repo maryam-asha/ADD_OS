@@ -57,17 +57,27 @@
 		<div class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
 			<div class="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
 				<n-select v-model:value="warehouseId" :options="warehouseOptions" :placeholder="t('inventory.operations.allWarehouses')" clearable filterable class="w-full" />
-				<ItemSelect v-if="tab !== 'operations'" v-model:value="itemId" kind="stock" :placeholder="t('inventory.stock.allItems')" class="w-full" />
-				<n-select v-if="tab === 'operations'" v-model:value="operationKindFilter" :options="operationKindOptions" :placeholder="t('inventory.operations.allTypes')" clearable class="w-full" />
+				<ItemSelect v-if="tab !== 'operations'" v-model:value="filters.item_id" kind="stock" :placeholder="t('inventory.stock.allItems')" class="w-full" />
+				<n-select v-if="tab === 'operations'" v-model:value="filters.kind" :options="operationKindOptions" :placeholder="t('inventory.operations.allTypes')" clearable class="w-full" />
+				<template v-if="tab !== 'operations'">
+					<n-input v-model:value="filters.search" :placeholder="t('inventory.itemExtras.searchHint')" clearable class="w-full">
+						<template #prefix><Icon name="carbon:search" :size="16" class="text-slate-400" /></template>
+					</n-input>
+					<n-select v-model:value="filters.category_id" :options="categoryOptions" :placeholder="t('inventory.common.category')" clearable filterable class="w-full" />
+				</template>
 				<template v-if="tab !== 'balances'">
-					<n-select v-if="tab === 'movements'" v-model:value="movementType" :options="typeOptions" :placeholder="t('inventory.operations.allTypes')" clearable class="w-full" />
-					<StaffSelect v-model:value="actorId" :placeholder="t('inventory.operations.allUsers')" class="w-full" />
+					<n-select v-if="tab === 'movements'" v-model:value="filters.type" :options="typeOptions" :placeholder="t('inventory.operations.allTypes')" clearable class="w-full" />
+					<StaffSelect v-model:value="filters.actor_id" :placeholder="t('inventory.operations.allUsers')" class="w-full" />
 					<n-date-picker v-model:formatted-value="period" type="daterange" value-format="yyyy-MM-dd" clearable class="w-full" />
 				</template>
+				<!-- Where the warehouses are: a branch takes every warehouse in it. A warehouse picked above is narrower and replaces it. -->
+				<div class="sm:col-span-3">
+					<PlacePicker v-model:chain="placeChain" :value="place" inline />
+				</div>
 			</div>
 
 			<div v-if="hasActiveFilters" class="mt-3 flex flex-wrap items-center justify-end gap-2 border-t border-slate-100 pt-3 dark:border-slate-800/80">
-				<n-tag v-if="operationId" closable round @close="operationId = null">{{ t("inventory.operations.operation") }} · {{ operationId.slice(0, 8) }}</n-tag>
+				<n-tag v-if="filters.operation_id" closable round @close="filters.operation_id = null">{{ t("inventory.operations.operation") }} · {{ filters.operation_id.slice(0, 8) }}</n-tag>
 				<n-button quaternary size="small" @click="resetFilters">
 					<template #icon><Icon name="carbon:reset" :size="14" /></template>
 					{{ t("inventory.common.resetFilters") }}
@@ -124,21 +134,24 @@
 
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
-import type { StockBalance, StockMovement, StockMovementType, StockOperation, StockOperationKind, StoredOperationKind, Warehouse } from "@/add-os/modules/inventory/types/inventory"
-import { NAlert, NButton, NCard, NDataTable, NDatePicker, NPagination, NSelect, NTabPane, NTabs, NTag } from "naive-ui"
-import { computed, h, onMounted, ref, watch } from "vue"
+import type { Category, PlaceChain, StockBalance, StockMovement, StockMovementType, StockOperation, StockOperationKind, StoredOperationKind, Warehouse } from "@/add-os/modules/inventory/types/inventory"
+import { NAlert, NButton, NCard, NDataTable, NDatePicker, NInput, NPagination, NSelect, NTabPane, NTabs, NTag } from "naive-ui"
+import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
-import { useRoute, useRouter } from "vue-router"
+import { useRouter } from "vue-router"
 import { canCountStock, canIssueStock, canReceiveStock, canTransferStock } from "@/add-os/config/permissions"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
-import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
+import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
+import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
 import ItemSelect from "@/add-os/modules/inventory/components/ItemSelect.vue"
+import PlacePicker from "@/add-os/modules/inventory/components/PlacePicker.vue"
 import StaffSelect from "@/add-os/modules/inventory/components/StaffSelect.vue"
 import StockOperationDrawer from "@/add-os/modules/inventory/components/StockOperationDrawer.vue"
 import StockOperationPicker from "@/add-os/modules/inventory/components/StockOperationPicker.vue"
 import { STOCK_MOVEMENT_TYPES, STORED_OPERATION_KIND } from "@/add-os/modules/inventory/types/inventory"
-import { COLUMN, EMPTY, localized, money, nameCell, quantity, tableWidth, warehouseLabel } from "@/add-os/modules/inventory/utils/display"
-import { listBalances, listStockMovements, listStockOperations, listWarehouses } from "@/add-os/services/inventory"
+import { categoryPaths, COLUMN, EMPTY, localized, money, nameCell, quantity, tableWidth, warehouseLabel } from "@/add-os/modules/inventory/utils/display"
+import { chainOf, filtersOf, PLACE_FILTER_SCHEMA, placeOf } from "@/add-os/modules/inventory/utils/placeFilter"
+import { listBalances, listCategories, listStockMovements, listStockOperations, listWarehouses } from "@/add-os/services/inventory"
 import { formatDate, formatDateTime } from "@/add-os/utils/format/dates"
 import Icon from "@/components/common/Icon.vue"
 
@@ -147,28 +160,68 @@ import Icon from "@/components/common/Icon.vue"
  * cost; the operations staff recorded (receipts, issues, write-offs,
  * transfers, counts), one per row, each opening its details and lines;
  * and the ledger every quantity is counted from, sales and consumption at
- * reception included. Adding a movement opens its own page.
+ * reception included. Adding a movement opens its own page. The tab and
+ * every filter — a branch or deeper place, a warehouse, an item by search
+ * or category — are kept in the URL.
  */
 defineProps<{ titleKey?: string }>()
 
 const { t } = useI18n()
-const route = useRoute()
 const router = useRouter()
 
 const mayRecord = canReceiveStock() || canIssueStock() || canTransferStock() || canCountStock()
 
 type Tab = "balances" | "operations" | "movements"
 const TABS: Tab[] = ["balances", "operations", "movements"]
-const tab = ref<Tab>(TABS.includes(route.query.tab as Tab) ? (route.query.tab as Tab) : "balances")
 const warehouses = ref<Warehouse[]>([])
-const warehouseId = ref<number | null>(null)
-const itemId = ref<number | null>(null)
-const movementType = ref<StockMovementType | null>(null)
-const operationKindFilter = ref<StoredOperationKind | null>(null)
-const actorId = ref<number | null>(null)
-const period = ref<[string, string] | null>(null)
-const operationId = ref<string | null>(null)
-const page = ref(1)
+const categories = ref<Category[]>([])
+
+const { filters, applied, page } = useRouteFilters(
+	{
+		tab: "string",
+		warehouse_id: "number",
+		item_id: "number",
+		search: "string",
+		category_id: "number",
+		kind: "string",
+		type: "string",
+		actor_id: "number",
+		from: "string",
+		to: "string",
+		operation_id: "string",
+		...PLACE_FILTER_SCHEMA
+	},
+	() => void load(),
+	{ debounced: ["search"], defaults: { tab: "balances" } }
+)
+
+const tab = computed<Tab>({
+	get: () => (TABS.includes(filters.value.tab as Tab) ? (filters.value.tab as Tab) : "balances"),
+	set: next => (filters.value.tab = next)
+})
+const period = computed<[string, string] | null>({
+	get: (): [string, string] | null => {
+		const { from, to } = filters.value
+		return from && to ? [from, to] : null
+	},
+	set: (next: [string, string] | null) => {
+		filters.value = { ...filters.value, from: next?.[0] ?? null, to: next?.[1] ?? null }
+	}
+})
+// A warehouse is narrower than a place: choosing one clears the other.
+const warehouseId = computed<number | null>({
+	get: () => filters.value.warehouse_id,
+	set: id => {
+		filters.value = { ...filters.value, warehouse_id: id, ...(id ? filtersOf(null) : {}) }
+	}
+})
+const placeChain = computed<PlaceChain | null>({
+	get: () => chainOf(filters.value),
+	set: next => {
+		filters.value = { ...filters.value, ...filtersOf(next), ...(next ? { warehouse_id: null } : {}) }
+	}
+})
+const place = computed(() => placeOf(placeChain.value))
 const lastPage = ref(1)
 const totalCount = ref(0)
 const loading = ref(true)
@@ -183,19 +236,19 @@ const viewing = ref<StockOperation | null>(null)
 const warehouseOptions = computed<SelectOption[]>(() => warehouses.value.map(w => ({ label: localized(w.name), value: w.id })))
 const typeOptions = computed<SelectOption[]>(() => STOCK_MOVEMENT_TYPES.map(type => ({ label: t(`inventory.movementType.${type}`), value: type })))
 const operationKindOptions = computed<SelectOption[]>(() => Object.values(STORED_OPERATION_KIND).map(kind => ({ label: t(`inventory.operations.stored.${kind}`), value: kind })))
+const categoryOptions = computed<SelectOption[]>(() => categoryPaths(categories.value).map(({ category, path }) => ({ label: path, value: category.id })))
 
-const hasActiveFilters = computed(() =>
-	Boolean(warehouseId.value || itemId.value || (tab.value !== "balances" && (movementType.value || operationKindFilter.value || actorId.value || period.value || operationId.value)))
-)
+/** What narrows the tab in view; a filter only another tab shows does not count. */
+const hasActiveFilters = computed(() => {
+	const f = filters.value
+	const shared = f.warehouse_id || place.value
+	if (tab.value === "balances") return Boolean(shared || f.item_id || f.search || f.category_id)
+	if (tab.value === "operations") return Boolean(shared || f.kind || f.actor_id || f.from)
+	return Boolean(shared || f.item_id || f.search || f.category_id || f.type || f.actor_id || f.from || f.operation_id)
+})
 
 function resetFilters() {
-	warehouseId.value = null
-	itemId.value = null
-	movementType.value = null
-	operationKindFilter.value = null
-	actorId.value = null
-	period.value = null
-	operationId.value = null
+	filters.value = { ...filters.value, ...filtersOf(null), warehouse_id: null, item_id: null, search: "", category_id: null, kind: null, type: null, actor_id: null, from: null, to: null, operation_id: null }
 }
 
 const totalValue = computed(() => balances.value.reduce((sum, b) => sum + (Number.parseFloat(b.value) || 0), 0))
@@ -205,34 +258,29 @@ onMounted(() => {
 	listWarehouses({ per_page: 100 })
 		.then(result => (warehouses.value = result.data))
 		.catch(e => (loadError.value = apiErrorMessage(e, t("inventory.common.loadError"))))
-	void load()
+	void quietly(() => listCategories("stock"), rows => (categories.value = rows))
 })
-
-// A changed filter starts again from page one; the page watcher loads it then.
-watch([tab, warehouseId, itemId, movementType, operationKindFilter, actorId, period, operationId], () => {
-	if (page.value !== 1) page.value = 1
-	else void load()
-})
-watch(page, () => void load())
 
 async function load() {
 	loading.value = true
 	loadError.value = ""
 	try {
-		const filters = { page: page.value, item_id: itemId.value, warehouse_id: warehouseId.value }
-		const span = { actor_id: actorId.value, from: period.value?.[0], to: period.value?.[1] }
+		const f = applied.value
+		const where = { warehouse_id: f.warehouse_id, place: placeOf(chainOf(f)) }
+		const item = { item_id: f.item_id, search: f.search, category_id: f.category_id }
+		const span = { actor_id: f.actor_id, from: f.from, to: f.to }
 		if (tab.value === "balances") {
-			const result = await listBalances(filters)
+			const result = await listBalances({ page: page.value, ...where, ...item })
 			balances.value = result.data
 			lastPage.value = result.meta.last_page
 			totalCount.value = result.meta.total ?? result.data.length
 		} else if (tab.value === "operations") {
-			const result = await listStockOperations({ page: page.value, warehouse_id: warehouseId.value, kind: operationKindFilter.value, ...span })
+			const result = await listStockOperations({ page: page.value, ...where, kind: f.kind as StoredOperationKind | null, ...span })
 			operations.value = result.data
 			lastPage.value = result.meta.last_page
 			totalCount.value = result.meta.total ?? result.data.length
 		} else {
-			const result = await listStockMovements({ ...filters, ...span, type: movementType.value, operation_id: operationId.value })
+			const result = await listStockMovements({ page: page.value, ...where, ...item, ...span, type: f.type as StockMovementType | null, operation_id: f.operation_id })
 			movements.value = result.data
 			lastPage.value = result.meta.last_page
 			totalCount.value = result.meta.total ?? result.data.length
@@ -259,7 +307,7 @@ function operationRowProps(row: StockOperation) {
 }
 
 function movementRowProps(row: StockMovement) {
-	return row.operation_id ? { style: "cursor: pointer", title: t("inventory.operations.showOperation"), onClick: () => (operationId.value = row.operation_id) } : {}
+	return row.operation_id ? { style: "cursor: pointer", title: t("inventory.operations.showOperation"), onClick: () => (filters.value.operation_id = row.operation_id) } : {}
 }
 
 function itemCell(item: { name: { ar: string; en?: string | null }; sku: string }) {

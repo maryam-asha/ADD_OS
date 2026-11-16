@@ -47,6 +47,16 @@
 
 		<!-- Filters Section -->
 		<div class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+			<div class="mb-3.5 grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+				<n-input v-model:value="filters.search" :placeholder="t('inventory.assets.search')" clearable class="w-full">
+					<template #prefix><Icon name="carbon:search" :size="16" class="text-slate-400" /></template>
+				</n-input>
+				<n-select v-model:value="filters.category_id" :options="categoryOptions" :placeholder="t('inventory.common.category')" clearable filterable class="w-full" />
+				<!-- Where the asset sits: a branch takes everything in it. -->
+				<div class="sm:col-span-2">
+					<PlacePicker v-model:chain="placeChain" :value="place" inline />
+				</div>
+			</div>
 			<div class="flex flex-wrap items-center justify-between gap-4">
 				<CustodianPicker v-model:value="custodian" inline />
 				<div class="flex items-center gap-3">
@@ -83,61 +93,86 @@
 </template>
 
 <script setup lang="ts">
-import type { DataTableColumns } from "naive-ui"
-import type { AssetAssignment, CustodianRef, CustodianType } from "@/add-os/modules/inventory/types/inventory"
-import { NAlert, NButton, NCard, NCheckbox, NDataTable, NPagination, NTag } from "naive-ui"
-import { computed, h, onMounted, ref, watch } from "vue"
+import type { DataTableColumns, SelectOption } from "naive-ui"
+import type { AssetAssignment, Category, CustodianRef, CustodianType } from "@/add-os/modules/inventory/types/inventory"
+import { NAlert, NButton, NCard, NCheckbox, NDataTable, NInput, NPagination, NSelect, NTag } from "naive-ui"
+import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
-import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
+import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
+import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
 import CustodianPicker from "@/add-os/modules/inventory/components/CustodianPicker.vue"
-import { custodianLabel, EMPTY, localized, nameCell, viewActionColumn } from "@/add-os/modules/inventory/utils/display"
-import { listCustody } from "@/add-os/services/inventory"
+import PlacePicker from "@/add-os/modules/inventory/components/PlacePicker.vue"
+import { custodianOf } from "@/add-os/modules/inventory/utils/custodianFilter"
+import { categoryPaths, custodianLabel, EMPTY, localized, nameCell, viewActionColumn } from "@/add-os/modules/inventory/utils/display"
+import { chainOf, filtersOf, PLACE_FILTER_SCHEMA, placeOf, usePlaceFilter } from "@/add-os/modules/inventory/utils/placeFilter"
+import { listCategories, listCustody } from "@/add-os/services/inventory"
 import { formatDate, formatTime } from "@/add-os/utils/format/dates"
 import Icon from "@/components/common/Icon.vue"
 
 /**
  * Who holds what: every asset in someone's custody — or, for one employee,
  * member or company, everything they hold (what an employee leaving hands
- * back). A row opens the asset, where it is taken back.
+ * back). Narrowed too by where the asset sits (a branch takes everything
+ * in it), its category, or its code or serial — all kept in the URL. A row
+ * opens the asset, where it is taken back.
  */
 defineProps<{ titleKey?: string }>()
 
 const { t } = useI18n()
 const router = useRouter()
 
-const custodian = ref<CustodianRef | null>(null)
-const includeReturned = ref(false)
 const rows = ref<AssetAssignment[]>([])
-const page = ref(1)
+const categories = ref<Category[]>([])
+
+const { filters, applied, page } = useRouteFilters(
+	{ search: "string", category_id: "number", custodian_type: "string", custodian_id: "number", returned: "string", ...PLACE_FILTER_SCHEMA },
+	() => void load(),
+	{ debounced: ["search"] }
+)
+const { place, chain: placeChain } = usePlaceFilter(filters)
+
+const custodian = computed<CustodianRef | null>({
+	get: () => custodianOf(filters.value.custodian_type, filters.value.custodian_id),
+	set: next => {
+		filters.value = { ...filters.value, custodian_type: next?.type ?? null, custodian_id: next?.id ?? null }
+	}
+})
+const includeReturned = computed<boolean>({
+	get: () => filters.value.returned === "1",
+	set: on => (filters.value.returned = on ? "1" : null)
+})
+const categoryOptions = computed<SelectOption[]>(() => categoryPaths(categories.value).map(({ category, path }) => ({ label: path, value: category.id })))
 const lastPage = ref(1)
 const totalCount = ref(0)
 const loading = ref(true)
 const loadError = ref("")
 
-const hasActiveFilters = computed(() => Boolean(custodian.value || includeReturned.value))
+const hasActiveFilters = computed(() => Boolean(custodian.value || includeReturned.value || filters.value.search || filters.value.category_id || place.value))
 
 function resetFilters() {
-	custodian.value = null
-	includeReturned.value = false
+	filters.value = { ...filters.value, ...filtersOf(null), search: "", category_id: null, custodian_type: null, custodian_id: null, returned: null }
 }
 
 const activeHeldCount = computed(() => rows.value.filter(r => !r.returned_at).length)
 const returnedCount = computed(() => rows.value.filter(r => Boolean(r.returned_at)).length)
 
-onMounted(load)
-watch([custodian, includeReturned], () => {
-	if (page.value !== 1) page.value = 1
-	else void load()
-})
-watch(page, () => void load())
+onMounted(() => void quietly(() => listCategories("asset"), list => (categories.value = list)))
 
 async function load() {
 	loading.value = true
 	loadError.value = ""
 	try {
-		const result = await listCustody({ page: page.value, custodian: custodian.value, open: !includeReturned.value })
+		const f = applied.value
+		const result = await listCustody({
+			page: page.value,
+			custodian: custodianOf(f.custodian_type, f.custodian_id),
+			open: f.returned !== "1",
+			place: placeOf(chainOf(f)),
+			category_id: f.category_id,
+			search: f.search
+		})
 		rows.value = result.data
 		lastPage.value = result.meta.last_page
 		totalCount.value = result.meta.total ?? result.data.length

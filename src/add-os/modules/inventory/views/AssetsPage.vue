@@ -86,7 +86,15 @@
 					<n-select v-model:value="filters.category_id" :options="categoryOptions" :placeholder="t('inventory.common.category')" clearable filterable class="w-full" />
 				</div>
 				<div>
-					<PlacePicker v-model:value="place" v-model:chain="placeChain" inline />
+					<PlacePicker v-model:chain="placeChain" :value="place" inline />
+				</div>
+
+				<!-- Row 3: Item + Custodian -->
+				<div>
+					<ItemSelect v-model:value="filters.item_id" kind="asset" :placeholder="t('inventory.stock.allItems')" />
+				</div>
+				<div>
+					<CustodianPicker v-model:value="custodian" inline />
 				</div>
 			</div>
 
@@ -125,9 +133,9 @@
 
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
-import type { Asset, AssetStatus, Category, PlaceChain, PlaceRef } from "@/add-os/modules/inventory/types/inventory"
+import type { Asset, AssetStatus, Category, CustodianRef } from "@/add-os/modules/inventory/types/inventory"
 import { NAlert, NButton, NCard, NDataTable, NInput, NPagination, NSelect } from "naive-ui"
-import { computed, h, onMounted, ref, watch } from "vue"
+import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
 import { canManageAssets } from "@/add-os/config/permissions"
@@ -135,17 +143,22 @@ import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
 import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
 import AssetStatusTag from "@/add-os/modules/inventory/components/AssetStatusTag.vue"
+import CustodianPicker from "@/add-os/modules/inventory/components/CustodianPicker.vue"
+import ItemSelect from "@/add-os/modules/inventory/components/ItemSelect.vue"
 import PlacePicker from "@/add-os/modules/inventory/components/PlacePicker.vue"
 import RegisterAssetModal from "@/add-os/modules/inventory/components/RegisterAssetModal.vue"
 import { ASSET_STATUSES } from "@/add-os/modules/inventory/types/inventory"
+import { custodianOf } from "@/add-os/modules/inventory/utils/custodianFilter"
 import { categoryPaths, codeChip, custodianLabel, localized, nameCell, PLACE_COLUMN, placeLabel, viewActionColumn } from "@/add-os/modules/inventory/utils/display"
+import { chainOf, PLACE_FILTER_SCHEMA, placeOf, usePlaceFilter } from "@/add-os/modules/inventory/utils/placeFilter"
 import { listAssets, listCategories } from "@/add-os/services/inventory"
 import Icon from "@/components/common/Icon.vue"
 
 /**
  * Every asset — one physical thing each — by code or serial, status,
- * category and place (a place includes everything inside it). A row opens
- * the asset: its history, custody, maintenance, and the actions on it.
+ * category, place (a place includes everything inside it), item and who
+ * holds it, all kept in the URL. A row opens the asset: its history,
+ * custody, maintenance, and the actions on it.
  */
 defineProps<{ titleKey?: string }>()
 
@@ -160,29 +173,32 @@ const lastPage = ref(1)
 const totalCount = ref(0)
 const registerVisible = ref(false)
 const categories = ref<Category[]>([])
-const place = ref<PlaceRef | null>(null)
-/** The filter's levels, so registering starts on the place the list is filtered to. */
-const placeChain = ref<PlaceChain | null>(null)
 
-const { filters, applied, page } = useRouteFilters({ search: "string", status: "string", category_id: "number" }, () => void load(), { debounced: ["search"] })
+const { filters, applied, page } = useRouteFilters(
+	{ search: "string", status: "string", category_id: "number", item_id: "number", custodian_type: "string", custodian_id: "number", ...PLACE_FILTER_SCHEMA },
+	() => void load(),
+	{ debounced: ["search"] }
+)
+/** The filter's levels too, so registering starts on the place the list is filtered to. */
+const { place, chain: placeChain } = usePlaceFilter(filters)
 
-const hasActiveFilters = computed(() => Boolean(filters.value.search || filters.value.status || filters.value.category_id || place.value))
+const custodian = computed<CustodianRef | null>({
+	get: () => custodianOf(filters.value.custodian_type, filters.value.custodian_id),
+	set: next => {
+		filters.value = { ...filters.value, custodian_type: next?.type ?? null, custodian_id: next?.id ?? null }
+	}
+})
+
+const hasActiveFilters = computed(() => Boolean(filters.value.search || filters.value.status || filters.value.category_id || filters.value.item_id || custodian.value || place.value))
 
 function resetFilters() {
-	filters.value.search = ""
-	filters.value.status = null
-	filters.value.category_id = null
-	place.value = null
+	filters.value = { ...filters.value, search: "", status: null, category_id: null, item_id: null, custodian_type: null, custodian_id: null }
+	placeChain.value = null
 }
 
 const inServiceCount = computed(() => assets.value.filter(a => a.status === "in_service").length)
 const inMaintenanceCount = computed(() => assets.value.filter(a => a.status === "in_maintenance").length)
 const inCustodyCount = computed(() => assets.value.filter(a => a.custodian !== null).length)
-
-watch(place, () => {
-	if (page.value !== 1) page.value = 1
-	else void load()
-})
 
 onMounted(() => void quietly(() => listCategories("asset"), rows => (categories.value = rows)))
 
@@ -195,7 +211,9 @@ async function load() {
 			search: applied.value.search,
 			status: applied.value.status as AssetStatus | null,
 			category_id: applied.value.category_id,
-			location: place.value
+			item_id: applied.value.item_id,
+			custodian: custodianOf(applied.value.custodian_type, applied.value.custodian_id),
+			location: placeOf(chainOf(applied.value))
 		})
 		assets.value = result.data
 		lastPage.value = result.meta.last_page

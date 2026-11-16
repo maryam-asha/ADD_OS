@@ -3,6 +3,17 @@
 	<div class="flex flex-col gap-5">
 		<HrPageHeader :title="t(titleKey || 'nav.pages.inventoryReports')" :description="t('inventory.reports.description')" />
 
+		<!-- Where: both reports narrow to it (a branch takes everything in it). -->
+		<div class="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+			<div class="min-w-0 flex-1">
+				<PlacePicker v-model:chain="placeChain" :value="place" inline />
+			</div>
+			<n-button v-if="hasActiveFilters" quaternary size="small" @click="resetFilters">
+				<template #icon><Icon name="carbon:reset" :size="14" /></template>
+				{{ t("inventory.common.resetFilters") }}
+			</n-button>
+		</div>
+
 		<n-alert v-if="loadError" type="error" :title="loadError" />
 
 		<!-- Stock Valuation Card -->
@@ -18,16 +29,6 @@
 					{{ money(valuation.total, valuation.currency) }}
 				</span>
 			</template>
-
-			<div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-				<div class="flex flex-wrap items-center gap-3">
-					<PlacePicker v-model:value="place" inline />
-					<n-button v-if="place" quaternary size="small" @click="place = null">
-						<template #icon><Icon name="carbon:reset" :size="14" /></template>
-						{{ t("inventory.common.resetFilters") }}
-					</n-button>
-				</div>
-			</div>
 
 			<n-data-table :columns="valuationColumns" :data="valuation?.warehouses ?? []" :loading :bordered="false" size="small" :scroll-x="640">
 				<template #empty>
@@ -48,7 +49,11 @@
 				</div>
 			</template>
 			<template #header-extra>
-				<n-checkbox v-model:checked="includeDisposed">{{ t("inventory.reports.includeDisposed") }}</n-checkbox>
+				<div class="flex flex-wrap items-center justify-end gap-3">
+					<!-- The category is the register's own: stock valuation has none. -->
+					<n-select v-model:value="filters.category_id" :options="categoryOptions" :placeholder="t('inventory.common.category')" clearable filterable size="small" class="sm:w-56!" />
+					<n-checkbox v-model:checked="includeDisposed">{{ t("inventory.reports.includeDisposed") }}</n-checkbox>
+				</div>
 			</template>
 
 			<div v-if="register?.totals.length" class="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -78,17 +83,19 @@
 </template>
 
 <script setup lang="ts">
-import type { DataTableColumns } from "naive-ui"
-import type { AssetRegister, AssetRegisterRow, PlaceRef, StockValuation } from "@/add-os/modules/inventory/types/inventory"
-import { NAlert, NButton, NCard, NCheckbox, NDataTable } from "naive-ui"
-import { computed, h, onMounted, ref, watch } from "vue"
+import type { DataTableColumns, SelectOption } from "naive-ui"
+import type { AssetRegister, AssetRegisterRow, Category, StockValuation } from "@/add-os/modules/inventory/types/inventory"
+import { NAlert, NButton, NCard, NCheckbox, NDataTable, NSelect } from "naive-ui"
+import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
-import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
+import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
+import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
 import AssetStatusTag from "@/add-os/modules/inventory/components/AssetStatusTag.vue"
 import PlacePicker from "@/add-os/modules/inventory/components/PlacePicker.vue"
-import { ALIGN_END, codeChip, EMPTY, localized, money, nameCell, PLACE_COLUMN, placeLabel, warehouseLabel } from "@/add-os/modules/inventory/utils/display"
-import { assetRegister, stockValuation } from "@/add-os/services/inventory"
+import { ALIGN_END, categoryPaths, codeChip, EMPTY, localized, money, nameCell, PLACE_COLUMN, placeLabel, warehouseLabel } from "@/add-os/modules/inventory/utils/display"
+import { chainOf, filtersOf, PLACE_FILTER_SCHEMA, placeOf, usePlaceFilter } from "@/add-os/modules/inventory/utils/placeFilter"
+import { assetRegister, listCategories, stockValuation } from "@/add-os/services/inventory"
 import { formatNumber } from "@/add-os/utils/format"
 import { formatDate } from "@/add-os/utils/format/dates"
 import Icon from "@/components/common/Icon.vue"
@@ -96,27 +103,42 @@ import Icon from "@/components/common/Icon.vue"
 /**
  * What the inventory is worth: stock on hand at its average cost, per
  * place, and every asset still owned with what it cost and its book value
- * today — totalled per currency, never across them.
+ * today — totalled per currency, never across them. A place narrows both;
+ * a category the register. Both are kept in the URL.
  */
 defineProps<{ titleKey?: string }>()
 
 const { t } = useI18n()
 
-const place = ref<PlaceRef | null>(null)
-const includeDisposed = ref(false)
+const categories = ref<Category[]>([])
+
+const { filters, applied } = useRouteFilters({ category_id: "number", disposed: "string", ...PLACE_FILTER_SCHEMA }, () => void load())
+const { place, chain: placeChain } = usePlaceFilter(filters)
+const includeDisposed = computed<boolean>({
+	get: () => filters.value.disposed === "1",
+	set: on => (filters.value.disposed = on ? "1" : null)
+})
+const categoryOptions = computed<SelectOption[]>(() => categoryPaths(categories.value).map(({ category, path }) => ({ label: path, value: category.id })))
+const hasActiveFilters = computed(() => Boolean(place.value || filters.value.category_id || includeDisposed.value))
+
+function resetFilters() {
+	filters.value = { ...filters.value, ...filtersOf(null), category_id: null, disposed: null }
+}
+
 const valuation = ref<StockValuation | null>(null)
 const register = ref<AssetRegister | null>(null)
 const loading = ref(true)
 const loadError = ref("")
 
-onMounted(load)
-watch([place, includeDisposed], () => void load())
+onMounted(() => void quietly(() => listCategories("asset"), list => (categories.value = list)))
 
 async function load() {
 	loading.value = true
 	loadError.value = ""
 	try {
-		;[valuation.value, register.value] = await Promise.all([stockValuation(place.value), assetRegister(includeDisposed.value)])
+		const f = applied.value
+		const where = placeOf(chainOf(f))
+		;[valuation.value, register.value] = await Promise.all([stockValuation(where), assetRegister(f.disposed === "1", { place: where, category_id: f.category_id })])
 	} catch (e) {
 		loadError.value = apiErrorMessage(e, t("inventory.common.loadError"))
 	} finally {

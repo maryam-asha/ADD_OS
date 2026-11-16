@@ -377,13 +377,18 @@ export interface RegisterAssetPayload extends AssetDetailsPayload {
 	location: PlaceRef
 	count?: number
 	code?: string | null
+	/** With `count`: one per unit, the first to the first made; null where not known yet. */
+	serial_numbers?: (string | null)[]
 }
 
 /** One asset item of a registration in one place: its count and what differs from the others. */
 export interface AssetBatchLine {
 	item_id: number
 	count?: number
+	/** For a line of one; a line of several sends `serial_numbers`. */
 	serial_number?: string | null
+	/** One per unit, the first to the first made; null where not known yet. */
+	serial_numbers?: (string | null)[]
 	purchase_cost?: number | null
 	useful_life_months?: number | null
 	salvage_value?: number | null

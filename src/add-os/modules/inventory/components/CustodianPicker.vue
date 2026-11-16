@@ -15,7 +15,7 @@
 import type { SelectOption } from "naive-ui"
 import type { CustodianRef, CustodianType } from "@/add-os/modules/inventory/types/inventory"
 import { NRadioButton, NRadioGroup, NSelect } from "naive-ui"
-import { onMounted, ref, watch } from "vue"
+import { nextTick, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import EmployeeSelect from "@/add-os/modules/hr/components/EmployeeSelect.vue"
 import { quietly } from "@/add-os/modules/hr/utils/errors"
@@ -49,20 +49,39 @@ onMounted(async () => {
 	loading.value = false
 })
 
+/** Set while a custodian given from outside is being shown, so showing it is not taken for a pick. */
+let restoring = false
+
 watch(type, () => {
+	if (restoring) return
 	employeeId.value = null
 	otherId.value = null
 })
 
 watch([type, employeeId, otherId], () => {
+	if (restoring) return
 	const id = type.value === "hr_employee" ? employeeId.value : otherId.value
 	value.value = id ? { type: type.value, id } : null
 })
 
-watch(value, newVal => {
-	if (!newVal) {
-		employeeId.value = null
-		otherId.value = null
-	}
-})
+// A custodian given from outside — a list filter read from the URL — is
+// shown as given; the one this picker just emitted is already shown.
+watch(
+	value,
+	newVal => {
+		if (!newVal) {
+			employeeId.value = null
+			otherId.value = null
+			return
+		}
+		const shown = type.value === "hr_employee" ? employeeId.value : otherId.value
+		if (newVal.type === type.value && newVal.id === shown) return
+		restoring = true
+		type.value = newVal.type
+		employeeId.value = newVal.type === "hr_employee" ? newVal.id : null
+		otherId.value = newVal.type === "hr_employee" ? null : newVal.id
+		void nextTick(() => (restoring = false))
+	},
+	{ immediate: true }
+)
 </script>

@@ -106,6 +106,22 @@ function pickSpace(id: number | null) {
 	emit()
 }
 
+// A chain changed from outside — the back button, a cleared filter bar —
+// is shown as given; the one this picker just emitted is already shown.
+watch(chain, next => {
+	if (next && !showing(next)) restore(next)
+})
+
+function showing(levels: PlaceChain): boolean {
+	return (
+		levels.branchId === branchId.value &&
+		levels.buildingId === buildingId.value &&
+		levels.floorId === floorId.value &&
+		levels.zoneId === zoneId.value &&
+		levels.spaceId === spaceId.value
+	)
+}
+
 watch(value, next => {
 	if (!next) {
 		branchId.value = null

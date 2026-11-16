@@ -246,13 +246,39 @@ export async function disposeAsset(id: number, payload: { method: DisposalMethod
 	return post<MessageResult>(`${BASE}/assets/${id}/dispose`, payload)
 }
 
-export async function listCustody(filters: { page?: number; custodian?: CustodianRef | null; open?: boolean } = {}): Promise<Paginated<AssetAssignment>> {
+export interface CustodyFilters {
+	page?: number
+	custodian?: CustodianRef | null
+	open?: boolean
+	/** Where the asset sits, anywhere inside (a branch takes everything it holds). */
+	place?: PlaceRef | null
+	category_id?: number | null
+	/** The asset's code or serial. */
+	search?: string | null
+}
+
+export async function listCustody(filters: CustodyFilters = {}): Promise<Paginated<AssetAssignment>> {
 	return toPaginated(await get<RawPaginatedResponse<AssetAssignment>>(`${BASE}/custody`, query({ ...filters })))
 }
 
 // ── Maintenance ─────────────────────────────────────────────────────────────
 
-export async function listMaintenance(filters: { page?: number; asset_id?: number | null; open?: boolean } = {}): Promise<Paginated<MaintenanceRecord>> {
+export interface MaintenanceFilters {
+	page?: number
+	asset_id?: number | null
+	open?: boolean
+	/** Where the asset sits, anywhere inside. */
+	place?: PlaceRef | null
+	category_id?: number | null
+	type?: MaintenanceType | null
+	/** Opened on or after / before (Y-m-d). */
+	from?: string | null
+	to?: string | null
+	/** The asset's code or serial, the description or the vendor. */
+	search?: string | null
+}
+
+export async function listMaintenance(filters: MaintenanceFilters = {}): Promise<Paginated<MaintenanceRecord>> {
 	return toPaginated(await get<RawPaginatedResponse<MaintenanceRecord>>(`${BASE}/maintenance`, query({ ...filters })))
 }
 
@@ -269,8 +295,8 @@ export async function listSchedules(assetId: number): Promise<MaintenanceSchedul
 }
 
 /** Everything due within `days`, overdue first. */
-export async function listDueSchedules(days?: number): Promise<MaintenanceSchedule[]> {
-	return rowsOf<MaintenanceSchedule>((await get<{ data: MaintenanceSchedule[] }>(`${BASE}/maintenance-schedules/due`, query({ days }))).data)
+export async function listDueSchedules(days?: number, filters: { place?: PlaceRef | null; category_id?: number | null } = {}): Promise<MaintenanceSchedule[]> {
+	return rowsOf<MaintenanceSchedule>((await get<{ data: MaintenanceSchedule[] }>(`${BASE}/maintenance-schedules/due`, query({ days, ...filters }))).data)
 }
 
 export async function createSchedule(assetId: number, payload: { title: string; interval_months: number; next_due_on: string; is_active?: boolean }): Promise<MaintenanceSchedule> {
@@ -424,6 +450,8 @@ export interface StockOperationFilters {
 	per_page?: number
 	/** Operations from or into this warehouse. */
 	warehouse_id?: number | null
+	/** From or into a warehouse anywhere inside this place (a branch). */
+	place?: PlaceRef | null
 	kind?: StoredOperationKind | null
 	actor_id?: number | null
 	from?: string | null
@@ -446,6 +474,6 @@ export async function stockValuation(place?: PlaceRef | null, warehouseId?: numb
 	return (await get<{ data: StockValuation }>(`${BASE}/reports/stock-valuation`, query({ place, warehouse_id: warehouseId }))).data
 }
 
-export async function assetRegister(includeDisposed = false): Promise<AssetRegister> {
-	return (await get<{ data: AssetRegister }>(`${BASE}/reports/asset-register`, query({ include_disposed: includeDisposed }))).data
+export async function assetRegister(includeDisposed = false, filters: { place?: PlaceRef | null; category_id?: number | null } = {}): Promise<AssetRegister> {
+	return (await get<{ data: AssetRegister }>(`${BASE}/reports/asset-register`, query({ include_disposed: includeDisposed, ...filters }))).data
 }

@@ -16,6 +16,15 @@
 				</n-input>
 				<n-select v-model:value="filters.active" :options="statusOptions" :placeholder="t('inventory.common.status')" clearable class="w-full" />
 				<StaffSelect v-model:value="filters.manager_id" :placeholder="t('inventory.warehouses.allManagers')" class="w-full" />
+				<div class="sm:col-span-3">
+					<PlacePicker v-model:chain="placeChain" :value="place" inline />
+				</div>
+			</div>
+			<div v-if="hasActiveFilters" class="mt-3 flex items-center justify-end border-t border-slate-100 pt-3 dark:border-slate-800/80">
+				<n-button quaternary size="small" @click="resetFilters">
+					<template #icon><Icon name="carbon:reset" :size="14" /></template>
+					{{ t("inventory.common.resetFilters") }}
+				</n-button>
 			</div>
 		</div>
 
@@ -52,17 +61,21 @@ import { canManageWarehouses } from "@/add-os/config/permissions"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
+import PlacePicker from "@/add-os/modules/inventory/components/PlacePicker.vue"
 import StaffSelect from "@/add-os/modules/inventory/components/StaffSelect.vue"
 import WarehouseDrawer from "@/add-os/modules/inventory/components/WarehouseDrawer.vue"
 import WarehouseModal from "@/add-os/modules/inventory/components/WarehouseModal.vue"
 import { COLUMN, EMPTY, localized, tableWidth } from "@/add-os/modules/inventory/utils/display"
+import { chainOf, PLACE_FILTER_SCHEMA, placeOf, usePlaceFilter } from "@/add-os/modules/inventory/utils/placeFilter"
 import { getWarehouse, listWarehouses, removeWarehouse, updateWarehouse } from "@/add-os/services/inventory"
 import { formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
 /**
  * The warehouses stock is kept in: who runs each, where it is, how many
- * items it holds, and whether it is active. The branch's primary one —
+ * items it holds, and whether it is active — filtered by name, status,
+ * manager and where it sits (a branch takes every warehouse in it), all
+ * kept in the URL. The branch's primary one —
  * where reception takes stock by default — is marked. One holding stock
  * cannot be deactivated or deleted, and one with history only deactivated;
  * ADD Core says so and its message shows.
@@ -83,7 +96,15 @@ const editing = ref<Warehouse | null>(null)
 const detailsVisible = ref(false)
 const viewing = ref<Warehouse | null>(null)
 
-const { filters, applied, page } = useRouteFilters({ search: "string", active: "string", manager_id: "number" }, () => void load(), { debounced: ["search"] })
+const { filters, applied, page } = useRouteFilters({ search: "string", active: "string", manager_id: "number", ...PLACE_FILTER_SCHEMA }, () => void load(), { debounced: ["search"] })
+const { place, chain: placeChain } = usePlaceFilter(filters)
+
+const hasActiveFilters = computed(() => Boolean(filters.value.search || filters.value.active || filters.value.manager_id || place.value))
+
+function resetFilters() {
+	filters.value = { ...filters.value, search: "", active: null, manager_id: null }
+	placeChain.value = null
+}
 
 const statusOptions = computed<SelectOption[]>(() => [
 	{ label: t("inventory.common.active"), value: "true" },
@@ -98,7 +119,8 @@ async function load() {
 			page: page.value,
 			search: applied.value.search,
 			active: applied.value.active === "true" ? true : applied.value.active === "false" ? false : null,
-			manager_id: applied.value.manager_id
+			manager_id: applied.value.manager_id,
+			place: placeOf(chainOf(applied.value))
 		})
 		warehouses.value = result.data
 		lastPage.value = result.meta.last_page
