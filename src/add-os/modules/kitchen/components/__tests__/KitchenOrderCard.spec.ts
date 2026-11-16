@@ -22,6 +22,7 @@ function orderOf(overrides: Partial<KitchenOrder> = {}): KitchenOrder {
 		route: "kitchen",
 		payment: { choice: "bill", wallet_owner_type: null, paid: false },
 		cash_due_points: null,
+		cash_due_amounts: null,
 		cash_return: null,
 		lines: [{ sale_item_id: 1, name: "Latte", quantity: 2, unit_price_points: 625, line_points: 1250 }],
 		total_points: 1250,

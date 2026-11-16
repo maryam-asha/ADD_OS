@@ -4,8 +4,10 @@
 		<div class="flex flex-col gap-4">
 			<div class="flex flex-col gap-1 rounded-xl border border-[var(--add-border)] bg-[var(--add-surface-sunken)] p-3">
 				<span class="text-sm text-[var(--add-text-secondary)]">{{ t("kitchen.confirmCash.due") }}</span>
-				<bdi dir="ltr" class="text-lg font-extrabold add-numeric" data-test="cash-due">{{ t("kitchen.confirmCash.duePoints", { points: duePoints }) }}</bdi>
+				<bdi v-if="dueAmount" dir="ltr" class="text-lg font-extrabold add-numeric" data-test="cash-due-amount">{{ formatMoneyAmount(dueAmount) }}</bdi>
+				<bdi dir="ltr" :class="dueAmount ? 'text-sm text-[var(--add-text-secondary)] add-numeric' : 'text-lg font-extrabold add-numeric'" data-test="cash-due">{{ t("kitchen.confirmCash.duePoints", { points: duePoints }) }}</bdi>
 			</div>
+			<n-alert v-if="currency && !dueAmount && order?.cash_due_amounts" type="warning" :bordered="false" data-test="no-rate">{{ t("kitchen.confirmCash.noRate", { currency }) }}</n-alert>
 
 			<n-form-item :label="t('kitchen.confirmCash.currency')" :show-feedback="false">
 				<div class="w-full" data-test="cash-currency">
@@ -20,7 +22,7 @@
 		<template #footer>
 			<div class="flex justify-end gap-2">
 				<n-button @click="show = false">{{ t("resourceCrud.form.cancel") }}</n-button>
-				<n-button type="primary" :loading :disabled="!currency" data-test="confirm-cash-submit" @click="submit">{{ t("kitchen.confirmCash.submit") }}</n-button>
+				<n-button type="primary" :loading :disabled="!currency || (!dueAmount && !!order?.cash_due_amounts)" data-test="confirm-cash-submit" @click="submit">{{ t("kitchen.confirmCash.submit") }}</n-button>
 			</div>
 		</template>
 	</n-modal>
@@ -32,7 +34,7 @@ import type { KitchenOrder } from "@/add-os/modules/kitchen/types/kitchen"
 import { NAlert, NButton, NFormItem, NModal, NSelect } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
-import { formatNumber } from "@/add-os/utils/format"
+import { formatMoneyAmount, formatNumber } from "@/add-os/utils/format"
 import { useCurrencyStore } from "@/stores/currency"
 
 /**
@@ -58,6 +60,8 @@ const currenciesFailed = ref(false)
 
 const orderLabel = computed(() => (props.order ? formatNumber(props.order.id, { grouping: false }) : ""))
 const duePoints = computed(() => formatNumber(props.order?.cash_due_points ?? 0))
+/** What to collect in the chosen currency; null when that currency has no rate yet. */
+const dueAmount = computed(() => props.order?.cash_due_amounts?.find(amount => amount.currency === currency.value) ?? null)
 const currencyOptions = computed<SelectOption[]>(() => currencyStore.availableCurrencies.map(c => ({ label: `${c.code} (${c.symbol})`, value: c.code })))
 
 watch(show, async open => {

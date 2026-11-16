@@ -25,6 +25,7 @@ const rejected: KitchenOrder = {
 	route: "kitchen",
 	payment: { choice: "bill", wallet_owner_type: null, paid: false },
 	cash_due_points: null,
+	cash_due_amounts: null,
 	cash_return: null,
 	lines: [{ sale_item_id: 1, name: "Juice", quantity: 1, unit_price_points: 300, line_points: 300 }],
 	total_points: 300,

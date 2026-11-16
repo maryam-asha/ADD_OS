@@ -44,7 +44,10 @@
 					<div class="flex flex-wrap items-center justify-between gap-2">
 						<span class="font-bold" data-test="total">{{ t("kitchen.card.total", { points: formatNumber(order.total_points) }) }}</span>
 						<n-tag v-if="owesCash(order)" type="warning" size="small" :bordered="false" data-test="cash-tag">
-							{{ t("kitchen.reception.payment.cashToCollect", { points: formatNumber(order.cash_due_points ?? 0) }) }}
+							<template v-if="order.cash_due_amounts?.length">
+								{{ t("kitchen.reception.payment.cashToCollectAmount", { amount: formatMoneyAmount(order.cash_due_amounts[0]), points: formatNumber(order.cash_due_points ?? 0) }) }}
+							</template>
+							<template v-else>{{ t("kitchen.reception.payment.cashToCollect", { points: formatNumber(order.cash_due_points ?? 0) }) }}</template>
 						</n-tag>
 						<n-tag v-else-if="paymentKey(order)" type="success" size="small" :bordered="false" data-test="payment">
 							{{ t(`kitchen.reception.payment.${paymentKey(order)}`) }}
@@ -86,7 +89,7 @@ import ConfirmCashOrderModal from "@/add-os/modules/kitchen/components/ConfirmCa
 import RejectOrderModal from "@/add-os/modules/kitchen/components/RejectOrderModal.vue"
 import { ApiError } from "@/add-os/services/api"
 import { confirmKitchenOrder, listOrdersToConfirm, turnDownKitchenOrder } from "@/add-os/services/kitchen"
-import { countKey, formatNumber } from "@/add-os/utils/format"
+import { countKey, formatMoneyAmount, formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
 /**

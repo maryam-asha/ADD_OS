@@ -38,6 +38,7 @@ function rowOf(id: number, overrides: Partial<CashReturnRow> = {}, order: Partia
 			route: "reception",
 			payment: { choice: "cash", wallet_owner_type: null, paid: true },
 			cash_due_points: null,
+			cash_due_amounts: null,
 			cash_return: "owed",
 			lines: [],
 			total_points: 1250,
