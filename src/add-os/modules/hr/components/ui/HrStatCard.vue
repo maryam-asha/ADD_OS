@@ -9,7 +9,7 @@
 		<div class="flex items-start justify-between gap-3">
 			<div class="flex min-w-0 flex-col gap-1">
 				<span class="text-xs font-semibold text-secondary">{{ label }}</span>
-				<span class="add-numeric text-2xl font-bold">
+				<span class="text-2xl font-bold" :class="textValue ? '' : 'add-numeric'">
 					<n-skeleton v-if="loading" text class="w-16" />
 					<template v-else>{{ value }}</template>
 				</span>
@@ -50,5 +50,11 @@ defineProps<{
 	/** The link's words, when `to` is set. */
 	cta?: string
 	loading?: boolean
+	/**
+	 * The value is words, not a figure (a date with its month name): set in
+	 * the body face. The numeric face draws digits only, so it pulled the
+	 * letters of "تشرين الأول" apart.
+	 */
+	textValue?: boolean
 }>()
 </script>

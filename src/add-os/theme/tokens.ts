@@ -496,8 +496,19 @@ export const fontFamily = {
 	 * Arabic face rather than running large in geometric Poppins.
 	 *
 	 * Poppins keeps its mandated Latin display role untouched.
+	 *
+	 * ── Why the Arabic face comes third (added 2026-11-14) ─────────────────
+	 * Only the Latin subset of Noto Sans Arabic is loaded, and JetBrains Mono
+	 * has no Arabic, so an Arabic word inside a numeric value ("٠ أيام",
+	 * "دون حد", a column header over amounts, a date with its month name)
+	 * fell through to a system face glyph by glyph and rendered with its
+	 * letters pulled apart. `var(--font-family-arabic)` after the two digit
+	 * faces gives those letters the body Arabic face, joined. Digits never
+	 * reach it — the first two faces draw every digit — so columns stay
+	 * tabular, and the Arabic face is still named in one place only
+	 * (fonts.scss). Found on the UX walk of My HR › Leave.
 	 */
-	numeric: "'Noto Sans Arabic', 'JetBrains Mono', SFMono-Regular, Consolas, monospace",
+	numeric: "'Noto Sans Arabic', 'JetBrains Mono', var(--font-family-arabic), SFMono-Regular, Consolas, monospace",
 	/**
 	 * Non-brand utility face for code. The Guideline specifies no monospace.
 	 * Also uniform at 600 units, hence its place in the numeric fallback chain.

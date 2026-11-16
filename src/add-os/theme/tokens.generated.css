@@ -65,7 +65,7 @@
 	--add-focus-ring-outer: #FFFFFF;
 
 	/* ── typography families · size and leading are per-language, further down ── */
-	--add-font-family-numeric: 'Noto Sans Arabic', 'JetBrains Mono', SFMono-Regular, Consolas, monospace;
+	--add-font-family-numeric: 'Noto Sans Arabic', 'JetBrains Mono', var(--font-family-arabic), SFMono-Regular, Consolas, monospace;
 	--add-font-weight-regular: 400;
 	--add-font-weight-medium: 500;
 	--add-font-weight-strong: 600;
@@ -87,7 +87,7 @@
 	--add-table-header-text: #314550;
 	--add-table-row-stripe-background: #EDEAE8;
 	--add-table-border-color: #CDC2AF;
-	--add-table-numeric-font-family: 'Noto Sans Arabic', 'JetBrains Mono', SFMono-Regular, Consolas, monospace;
+	--add-table-numeric-font-family: 'Noto Sans Arabic', 'JetBrains Mono', var(--font-family-arabic), SFMono-Regular, Consolas, monospace;
 	--add-auth-panel-background: #43474F;
 	--add-auth-panel-text: #E2DDDB;
 
