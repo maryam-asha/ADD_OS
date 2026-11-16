@@ -76,6 +76,7 @@ import type { PaginationMeta } from "@/add-os/services/pagination"
 import { NAlert, NButton, NCard, NPagination, NTag, useMessage } from "naive-ui"
 import { onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import { useNewArrivalChime } from "@/add-os/composables/useNewArrivalChime"
 import { useReceptionRealtime } from "@/add-os/modules/booking/composables/useReceptionRealtime"
 import ConfirmCashOrderModal from "@/add-os/modules/kitchen/components/ConfirmCashOrderModal.vue"
 import RejectOrderModal from "@/add-os/modules/kitchen/components/RejectOrderModal.vue"
@@ -122,8 +123,14 @@ async function load(): Promise<void> {
 	}
 }
 
+// A chime when an order the desk has not seen arrives; another page is not an arrival.
+const chime = useNewArrivalChime(orders)
+
 onMounted(load)
-watch(page, () => void load())
+watch(page, () => {
+	chime.rebase()
+	void load()
+})
 useReceptionRealtime(load)
 
 function waitedMinutes(order: KitchenOrder): number {

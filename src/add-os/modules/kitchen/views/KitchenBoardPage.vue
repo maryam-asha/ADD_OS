@@ -59,6 +59,7 @@ import type { KitchenOrder, KitchenOrderStatus, KitchenStoreRow } from "@/add-os
 import { NAlert, NButton, NCard, NTag, useMessage } from "naive-ui"
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import { useNewArrivalChime } from "@/add-os/composables/useNewArrivalChime"
 import { canManageKitchenOrders, canUpdateKitchenStores, canViewKitchenStores } from "@/add-os/config/permissions"
 import { useBranchOptions } from "@/add-os/modules/dashboard/composables/useBranchOptions"
 import KitchenOrderCard from "@/add-os/modules/kitchen/components/KitchenOrderCard.vue"
@@ -118,6 +119,10 @@ const isLoading = ref(false)
 const loadError = ref(false)
 const fetchedAt = ref(Date.now())
 const now = ref(Date.now())
+// A chime when an order the board has not shown arrives; moving between columns is not an arrival.
+const chime = useNewArrivalChime(orders)
+// Another branch's orders are not arrivals.
+watch(branchId, () => chime.rebase(), { flush: "sync" })
 
 async function load() {
 	const id = branchId.value

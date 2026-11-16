@@ -24,6 +24,12 @@ vi.mock("@/add-os/services/kitchen", () => ({
 	turnDownKitchenOrder: turnDownMock
 }))
 
+const { chimeMock } = vi.hoisted(() => ({ chimeMock: vi.fn() }))
+vi.mock("@/add-os/composables/useNewArrivalChime", async () => {
+	const actual = await vi.importActual<typeof import("@/add-os/composables/useNewArrivalChime")>("@/add-os/composables/useNewArrivalChime")
+	return { ...actual, useNewArrivalChime: (items: Parameters<typeof actual.useNewArrivalChime>[0]) => actual.useNewArrivalChime(items, chimeMock) }
+})
+
 vi.mock("@/add-os/services/realtime", () => ({
 	RECEPTION_EVENTS: ["kitchen_order.awaiting_reception"],
 	isRealtimeConnected: () => true,
@@ -261,6 +267,33 @@ describe("receptionKitchenQueue", () => {
 		await flushPromises()
 
 		expect(wrapper.find("[data-order='41']").exists()).toBe(false)
+		wrapper.unmount()
+	})
+
+	it("chimes_when_a_new_order_waits_for_the_desk", async () => {
+		chimeMock.mockClear()
+		listMock.mockResolvedValueOnce(page([orderOf()])).mockResolvedValueOnce(page([orderOf(), orderOf({ id: 42 })]))
+		const wrapper = mountQueue()
+		await flushPromises()
+		expect(chimeMock).not.toHaveBeenCalled()
+
+		subscriptions.at(-1)!.handler("kitchen_order.awaiting_reception", { order_id: 42 })
+		await flushPromises()
+
+		expect(chimeMock).toHaveBeenCalledTimes(1)
+		wrapper.unmount()
+	})
+
+	it("stays_silent_when_an_order_leaves_the_desk", async () => {
+		chimeMock.mockClear()
+		listMock.mockResolvedValueOnce(page([orderOf()])).mockResolvedValueOnce(page([]))
+		const wrapper = mountQueue()
+		await flushPromises()
+
+		subscriptions.at(-1)!.handler("kitchen_order.awaiting_reception", { order_id: 41 })
+		await flushPromises()
+
+		expect(chimeMock).not.toHaveBeenCalled()
 		wrapper.unmount()
 	})
 
