@@ -8,9 +8,16 @@
 		:back-label="mine ? t('hrRecruitment.requisitions.backToMine') : t('hrRecruitment.requisitions.backToList')"
 	>
 		<HrPanel :title="t('hrRecruitment.requisitions.rolePanel')" icon="carbon:request-quote">
-			<div class="grid grid-cols-1 gap-x-4 @xl:grid-cols-2">
+			<!-- `items-start`: the note under the Arabic title makes it taller, and a stretched neighbour would centre its field lower. -->
+			<div class="grid grid-cols-1 items-start gap-x-4 @xl:grid-cols-2">
 				<n-form-item :label="t('hrPayroll.components.nameAr')">
-					<n-input v-model:value="form.titleAr" dir="rtl" :maxlength="255" :placeholder="t('hrRecruitment.requisitions.titlePlaceholder')" />
+					<div class="flex w-full flex-col gap-1">
+						<n-input v-model:value="form.titleAr" dir="rtl" :maxlength="255" :placeholder="t('hrRecruitment.requisitions.titlePlaceholder')" />
+						<span v-if="titleFromPosition" class="inline-flex items-center gap-1 text-xs text-secondary" data-test="title-from-position">
+							<Icon name="carbon:information" :size="14" />
+							{{ t("hrRecruitment.requisitions.titleFromPosition") }}
+						</span>
+					</div>
 				</n-form-item>
 				<n-form-item :label="t('hrPayroll.components.nameEn')">
 					<n-input v-model:value="form.titleEn" dir="ltr" :maxlength="255" />
@@ -19,7 +26,14 @@
 					<n-select v-model:value="form.unitId" :options="unitOptions" filterable @update:value="onUnit" />
 				</n-form-item>
 				<n-form-item :label="t('hrRecruitment.requisitions.position')">
-					<n-select v-model:value="form.positionId" :options="positionOptions" :disabled="!form.unitId" clearable filterable />
+					<n-select
+						v-model:value="form.positionId"
+						:options="positionOptions"
+						:disabled="!form.unitId"
+						clearable
+						filterable
+						@update:value="onPosition"
+					/>
 				</n-form-item>
 				<n-form-item :label="t('hrRecruitment.requisitions.grade')">
 					<n-select v-model:value="form.gradeId" :options="gradeOptions" clearable filterable />
@@ -150,9 +164,33 @@ function leave() {
 
 function onUnit(unitId: number | null) {
 	form.value.positionId = null
+	onPosition(null)
 	positions.value = []
 	if (unitId) void quietly(() => listPositions(unitId), list => (positions.value = list))
 }
+
+/**
+ * The title a chosen position filled in, so a later change of position can
+ * tell its own words from the reader's. The position names the seat in the
+ * structure; the title is what the opening and the approver read, so it is
+ * kept, prefilled and editable, never replaced once typed. A new role has no
+ * position yet, and the title is then the only name it has.
+ */
+const autoTitle = ref<{ ar: string; en: string } | null>(null)
+
+function onPosition(positionId: number | null) {
+	const f = form.value
+	const previous = autoTitle.value
+	const position = positions.value.find(p => p.id === positionId)
+	const next = position ? { ar: position.title.ar ?? "", en: position.title.en ?? "" } : null
+	// A field still blank, or still holding what the last position put there, follows the position.
+	if (!f.titleAr.trim() || f.titleAr === previous?.ar) f.titleAr = next?.ar ?? ""
+	if (!f.titleEn.trim() || f.titleEn === previous?.en) f.titleEn = next?.en ?? ""
+	autoTitle.value = next
+}
+
+/** The Arabic title still reads as the chosen position gave it. */
+const titleFromPosition = computed(() => Boolean(autoTitle.value?.ar) && form.value.titleAr === autoTitle.value?.ar)
 
 const unitOptions = computed<SelectOption[]>(() => units.value.map(u => ({ label: translated(u.name), value: u.id })))
 const gradeOptions = computed<SelectOption[]>(() => grades.value.map(g => ({ label: translated(g.name), value: g.id })))

@@ -25,7 +25,10 @@ vi.mock("@/add-os/services/hr/recruitment", () => ({ createRequisition: mocks.cr
 vi.mock("@/add-os/services/hr/core", () => ({
 	listOrgUnits: vi.fn().mockResolvedValue([{ id: 4, name: { ar: "العمليات", en: "Operations" }, is_active: true, parent_id: null, code: null, head_employee_id: null }]),
 	listJobGrades: vi.fn().mockResolvedValue([]),
-	listPositions: vi.fn().mockResolvedValue([])
+	listPositions: vi.fn().mockResolvedValue([
+		{ id: 8, title: { ar: "موظف استقبال", en: "Receptionist" }, is_active: true },
+		{ id: 9, title: { ar: "مشرف استقبال", en: "Reception supervisor" }, is_active: true }
+	])
 }))
 vi.mock("@/add-os/modules/hr/components/EmployeeSelect.vue", () => ({ default: { name: "EmployeeSelect", render: () => null } }))
 vi.mock("@/add-os/modules/hr/components/payroll/CurrencySelect.vue", () => ({ default: { name: "CurrencySelect", render: () => null } }))
@@ -47,9 +50,12 @@ const i18n = createI18n({
 })
 
 interface Vm {
-	form: { titleAr: string; unitId: number | null; managerId: number | null }
+	form: { titleAr: string; titleEn: string; unitId: number | null; positionId: number | null; managerId: number | null }
 	problem: string
+	titleFromPosition: boolean
 	save: () => Promise<void>
+	onUnit: (id: number | null) => void
+	onPosition: (id: number | null) => void
 }
 
 async function mountPage(routeName: string) {
@@ -103,6 +109,72 @@ describe("requisitionFormPage", () => {
 		expect(mocks.fileMine).toHaveBeenCalledWith(expect.not.objectContaining({ hiring_manager_id: expect.anything() }))
 		expect(mocks.create).not.toHaveBeenCalled()
 		expect(mocks.push).toHaveBeenCalledWith({ name: "myHr.hrMyRecruitment", query: { tab: "requisitions" } })
+		wrapper.unmount()
+	})
+
+	it("fills a blank title from the chosen position, in both languages, and says where it came from", async () => {
+		const { wrapper, vm } = await mountPage("hrTalent.hrRequisitionCreate")
+		vm.form.unitId = 4
+		vm.onUnit(4)
+		await flushPromises()
+
+		vm.form.positionId = 8
+		vm.onPosition(8)
+		await flushPromises()
+
+		expect(vm.form.titleAr).toBe("موظف استقبال")
+		expect(vm.form.titleEn).toBe("Receptionist")
+		expect(vm.titleFromPosition).toBe(true)
+		expect(document.body.textContent).toContain("Taken from the chosen position")
+		wrapper.unmount()
+	})
+
+	it("lets a filled title follow a change of position, and empties it when the position is cleared", async () => {
+		const { wrapper, vm } = await mountPage("hrTalent.hrRequisitionCreate")
+		vm.form.unitId = 4
+		vm.onUnit(4)
+		await flushPromises()
+		vm.onPosition(8)
+		vm.onPosition(9)
+		expect(vm.form.titleAr).toBe("مشرف استقبال")
+		expect(vm.form.titleEn).toBe("Reception supervisor")
+
+		vm.onPosition(null)
+		expect(vm.form.titleAr).toBe("")
+		expect(vm.form.titleEn).toBe("")
+		expect(vm.titleFromPosition).toBe(false)
+		wrapper.unmount()
+	})
+
+	it("never replaces a title the reader typed", async () => {
+		const { wrapper, vm } = await mountPage("hrTalent.hrRequisitionCreate")
+		vm.form.unitId = 4
+		vm.onUnit(4)
+		await flushPromises()
+		vm.form.titleAr = "موظف استقبال — دوام مسائي"
+
+		vm.onPosition(8)
+		await flushPromises()
+
+		expect(vm.form.titleAr).toBe("موظف استقبال — دوام مسائي")
+		expect(vm.form.titleEn).toBe("Receptionist")
+		expect(vm.titleFromPosition).toBe(false)
+
+		vm.onPosition(null)
+		expect(vm.form.titleAr).toBe("موظف استقبال — دوام مسائي")
+		wrapper.unmount()
+	})
+
+	it("drops a title its position filled when the unit changes, since the position goes with it", async () => {
+		const { wrapper, vm } = await mountPage("hrTalent.hrRequisitionCreate")
+		vm.form.unitId = 4
+		vm.onUnit(4)
+		await flushPromises()
+		vm.onPosition(8)
+
+		vm.onUnit(4)
+		expect(vm.form.positionId).toBeNull()
+		expect(vm.form.titleAr).toBe("")
 		wrapper.unmount()
 	})
 })

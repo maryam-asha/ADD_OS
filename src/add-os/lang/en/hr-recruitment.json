@@ -69,6 +69,7 @@
 			"detail": "Requisition",
 			"title": "Job title",
 			"titlePlaceholder": "e.g. Community manager",
+			"titleFromPosition": "Taken from the chosen position. Change it if the opening needs a different name.",
 			"position": "Position",
 			"grade": "Grade",
 			"headcount": "Headcount",
