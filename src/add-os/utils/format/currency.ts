@@ -101,3 +101,13 @@ export function formatCurrency(value: number | string | bigint, options: Currenc
 
 	return showSymbol ? `${amount} ${definition.symbol[locale]}` : amount
 }
+
+/**
+ * A server-sent money figure (`{currency, value}`, value a plain decimal
+ * string) with exactly the decimals the server sent: the currency's own symbol
+ * when it is one ADD OS knows, else the bare number.
+ */
+export function formatMoneyAmount(amount: { currency: string, value: string }): string {
+	const fractionDigits = amount.value.split(".")[1]?.length ?? 0
+	return formatCurrency(amount.value, isCurrencyCode(amount.currency) ? { currency: amount.currency, fractionDigits } : { fractionDigits })
+}

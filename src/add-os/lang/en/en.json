@@ -2886,6 +2886,12 @@
 			"planCovered": "Covered by the plan: {duration}",
 			"total": "Total due",
 			"points": "{points} points",
+			"orders": {
+				"paid": "Paid",
+				"unpaid": "Unpaid",
+				"unpaidTotal": "Kitchen orders still unpaid",
+				"grandTotal": "Total with kitchen orders"
+			},
 			"alreadyPaid": "Paid when booked — nothing more is due.",
 			"chosenMethod": "Member chose to pay by",
 			"walletBalance": "Wallet balance",

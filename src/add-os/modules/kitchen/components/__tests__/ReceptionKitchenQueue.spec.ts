@@ -1,5 +1,6 @@
 import type { KitchenOrder } from "@/add-os/modules/kitchen/types/kitchen"
 import { flushPromises, mount } from "@vue/test-utils"
+import { NSelect } from "naive-ui"
 import { createPinia, setActivePinia } from "pinia"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { createI18n } from "vue-i18n"
@@ -54,6 +55,7 @@ function orderOf(overrides: Partial<KitchenOrder> = {}): KitchenOrder {
 		route: "reception",
 		payment: { choice: "wallet", wallet_owner_type: "user", paid: true },
 		cash_due_points: null,
+		cash_due_amounts: null,
 		cash_return: null,
 		lines: [{ sale_item_id: 1, name: "Latte", quantity: 2, unit_price_points: 625, line_points: 1250 }],
 		total_points: 1250,
@@ -80,8 +82,8 @@ function mountQueue(locale: "ar" | "en" = "en") {
 	return mount(ReceptionKitchenQueue, { global: { plugins: [i18n], stubs: { Icon: true } }, attachTo: document.body })
 }
 
-function inBody(selector: string): HTMLElement | null {
-	return document.body.querySelector<HTMLElement>(selector)
+function inBody<T extends HTMLElement = HTMLElement>(selector: string): T | null {
+	return document.body.querySelector<T>(selector)
 }
 
 beforeEach(() => {
@@ -159,6 +161,30 @@ describe("receptionKitchenQueue", () => {
 
 		expect(confirmMock).toHaveBeenCalledWith(42, "SYP")
 		expect(listMock).toHaveBeenCalledTimes(2)
+		wrapper.unmount()
+	})
+
+	it("shows_the_cash_to_collect_in_money_and_blocks_a_currency_with_no_rate", async () => {
+		listMock.mockResolvedValue(page([cashOrder({ cash_due_amounts: [{ currency: "SYP", value: "125000" }] })]))
+		const wrapper = mountQueue()
+		await flushPromises()
+
+		const tag = wrapper.get("[data-order='42'] [data-test='cash-tag']").text()
+		expect(tag).toContain("125,000")
+		expect(tag).toContain("1,250")
+
+		await wrapper.find("[data-order='42'] [data-action='confirm']").trigger("click")
+		await flushPromises()
+		expect(inBody("[data-test='cash-due-amount']")?.textContent).toContain("125,000")
+		expect(inBody("[data-test='cash-due']")?.textContent).toContain("1,250")
+		expect(inBody("[data-test='no-rate']")).toBeNull()
+
+		// USD is offered by the store but has no rate on the server's side.
+		wrapper.findComponent(NSelect).vm.$emit("update:value", "USD")
+		await flushPromises()
+		expect(inBody("[data-test='cash-due-amount']")).toBeNull()
+		expect(inBody("[data-test='no-rate']")?.textContent).toContain("USD")
+		expect(inBody<HTMLButtonElement>("[data-test='confirm-cash-submit']")?.disabled).toBe(true)
 		wrapper.unmount()
 	})
 

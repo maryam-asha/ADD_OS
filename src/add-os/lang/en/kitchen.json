@@ -158,7 +158,8 @@
 				"companyWallet": "Paid from company wallet",
 				"card": "Paid by card",
 				"cash": "Paid in cash",
-				"cashToCollect": "Cash to collect: {points} points"
+				"cashToCollect": "Cash to collect: {points} points",
+				"cashToCollectAmount": "Cash to collect: {amount} ({points} points)"
 			}
 		},
 		"confirmCash": {
@@ -166,6 +167,7 @@
 			"title": "Confirm order #{id}",
 			"due": "Cash to collect",
 			"duePoints": "{points} points",
+			"noRate": "{currency} has no exchange rate yet. Choose another currency.",
 			"currency": "Currency taken",
 			"note": "Take exactly what is due, in the currency you choose; the system works the amount out at today's rate. Change is given from the desk, never as points.",
 			"submit": "Cash taken, confirm"

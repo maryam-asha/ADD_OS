@@ -70,8 +70,15 @@
 							<span class="text-base font-bold text-stone-900">{{ t("closeSession.detail.statement") }}</span>
 						</template>
 						<div class="flex flex-col gap-3 text-sm">
-							<div v-for="(line, index) in report.lines" :key="index" class="flex justify-between items-center text-stone-700 p-2.5 rounded-lg hover:bg-stone-50">
-								<span>{{ line.label }} <span class="text-stone-400">({{ formatNumber(line.quantity) }} {{ line.unit }})</span></span>
+							<div v-for="(line, index) in report.lines" :key="index" class="flex justify-between items-center text-stone-700 p-2.5 rounded-lg hover:bg-stone-50" :data-line="line.kind">
+								<span class="flex flex-wrap items-center gap-2">
+									<Icon v-if="line.kind === 'order'" name="carbon:restaurant" :size="16" class="text-emerald-700" />
+									{{ line.label }}
+									<span v-if="line.quantity !== null" class="text-stone-400">({{ formatNumber(line.quantity) }} {{ line.unit }})</span>
+									<n-tag v-if="line.kind === 'order'" size="small" round :bordered="false" :type="line.paid ? 'success' : 'warning'" data-test="order-paid">
+										{{ t(line.paid ? "closeSession.detail.orders.paid" : "closeSession.detail.orders.unpaid") }}
+									</n-tag>
+								</span>
 								<span v-if="line.points !== null" class="font-semibold text-stone-900">{{ t("closeSession.detail.points", { points: formatNumber(line.points) }) }}</span>
 							</div>
 							<div v-if="closing && closing.covered_seconds > 0" class="text-xs text-emerald-700 px-2.5">
@@ -86,6 +93,16 @@
 									</span>
 								</span>
 							</div>
+							<template v-if="unpaidOrderPoints > 0">
+								<div class="flex justify-between items-center text-stone-700 px-3" data-test="orders-unpaid">
+									<span>{{ t("closeSession.detail.orders.unpaidTotal") }}</span>
+									<span class="font-semibold text-stone-900">{{ t("closeSession.detail.points", { points: formatNumber(unpaidOrderPoints) }) }}</span>
+								</div>
+								<div v-if="closing" class="flex justify-between items-center font-extrabold text-stone-900 px-3" data-test="grand-total">
+									<span>{{ t("closeSession.detail.orders.grandTotal") }}</span>
+									<span class="text-emerald-700">{{ t("closeSession.detail.points", { points: formatNumber(closing.points + unpaidOrderPoints) }) }}</span>
+								</div>
+							</template>
 						</div>
 					</n-card>
 				</div>
@@ -266,6 +283,8 @@ const loadFailed = ref(false)
 const isConfirming = ref(false)
 
 const closing = computed(() => report.value?.closing ?? null)
+/** Its accepted kitchen orders still unpaid — what the desk collects beside the session itself. */
+const unpaidOrderPoints = computed(() => closing.value?.orders_points ?? report.value?.totals?.orders_unpaid_points ?? 0)
 const endRequest = computed(() => closing.value?.end_request?.status === "pending" ? closing.value.end_request : null)
 
 /** The payment method the member chose, as a label key. */

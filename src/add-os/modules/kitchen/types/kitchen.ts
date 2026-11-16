@@ -43,6 +43,8 @@ export interface KitchenOrder {
 	}
 	/** Points still to be taken in cash, for a cash order not yet paid; otherwise null. */
 	cash_due_points: number | null
+	/** What a cash order still owes the desk, in each active currency with a rate, base first; null when nothing is due. */
+	cash_due_amounts: { currency: string, value: string }[] | null
 	/** Cash taken for an order that was not made: owed to the member, handed back, or credited as points. Null when none was taken. */
 	cash_return: "owed" | "returned_in_cash" | "credited_as_points" | null
 	lines: KitchenOrderLine[]
