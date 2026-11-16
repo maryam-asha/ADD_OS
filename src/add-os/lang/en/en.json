@@ -278,6 +278,7 @@
 		"modules": {
 			"amenities": "Amenities",
 			"announcements": "Announcements",
+			"quick-access-shortcuts": "Quick Access",
 			"branches": "Branches",
 			"buildings": "Buildings",
 			"business-hours": "Business Hours",
@@ -2016,6 +2017,7 @@
 			"privacyPolicy": "Privacy Policy",
 			"termsOfUse": "Terms of Use",
 			"helpSupport": "Help & Support",
+			"quickAccess": "Quick access",
 			"accountSecurity": "Account & security",
 			"systemSettings": "System settings",
 			"eventCategories": "Event Categories",
@@ -2535,6 +2537,49 @@
 				"hint": "The fewest points reception can credit in one top-up."
 			}
 		}
+	},
+	"quickAccess": {
+		"subtitle": "The shortcuts at the top of the member app's home, in their display order.",
+		"columns": {
+			"icon": "Icon",
+			"label": "Name",
+			"key": "Key",
+			"route": "App route",
+			"order": "Order",
+			"status": "Status"
+		},
+		"status": {
+			"active": "Shown",
+			"inactive": "Hidden"
+		},
+		"form": {
+			"label": "Name",
+			"icon": "Icon",
+			"route": "App route",
+			"routeHint": "One of the app's own pages, e.g. /cafe-menu, /packages, /wallet, /sessions.",
+			"key": "Key",
+			"keyHint": "A unique English identifier, letters, numbers and dashes only, e.g. cafe.",
+			"order": "Display order",
+			"isActive": "Shown in the app"
+		},
+		"create": {
+			"button": "New shortcut",
+			"title": "New shortcut",
+			"success": "Shortcut created."
+		},
+		"edit": {
+			"title": "Edit shortcut",
+			"success": "Shortcut updated."
+		},
+		"delete": {
+			"success": "Shortcut deleted."
+		},
+		"stats": {
+			"total": "Total shortcuts",
+			"active": "Shown",
+			"inactive": "Hidden"
+		},
+		"loadError": "Couldn't load the shortcuts."
 	},
 	"announcements": {
 		"columns": {

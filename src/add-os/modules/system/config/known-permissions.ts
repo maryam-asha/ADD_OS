@@ -42,6 +42,7 @@ export const KNOWN_PERMISSIONS: readonly string[] = [
 	...crud("sale-items"),
 	...crud("contact-links"),
 	...crud("announcements"),
+	...crud("quick-access-shortcuts"),
 	...crud("event-categories"),
 	...crud("events"),
 	"events.manage_attendees",

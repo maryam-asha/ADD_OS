@@ -282,6 +282,7 @@
 		"modules": {
 			"amenities": "المرافق",
 			"announcements": "الإعلانات",
+			"quick-access-shortcuts": "الوصول السريع",
 			"branches": "الفروع",
 			"buildings": "المباني",
 			"business-hours": "ساعات العمل",
@@ -2020,6 +2021,7 @@
 			"privacyPolicy": "سياسة الخصوصية",
 			"termsOfUse": "شروط الاستخدام",
 			"helpSupport": "المساعدة والدعم",
+			"quickAccess": "الوصول السريع",
 			"accountSecurity": "الحساب والأمان",
 			"systemSettings": "إعدادات النظام",
 			"eventCategories": "فئات الفعاليات",
@@ -2539,6 +2541,49 @@
 				"hint": "أقل عدد من النقاط يمكن للاستقبال شحنه في عملية واحدة."
 			}
 		}
+	},
+	"quickAccess": {
+		"subtitle": "الاختصارات في أعلى الصفحة الرئيسية لتطبيق الأعضاء، بترتيب ظهورها.",
+		"columns": {
+			"icon": "الأيقونة",
+			"label": "الاسم",
+			"key": "المفتاح",
+			"route": "مسار التطبيق",
+			"order": "الترتيب",
+			"status": "الحالة"
+		},
+		"status": {
+			"active": "ظاهر",
+			"inactive": "مخفي"
+		},
+		"form": {
+			"label": "الاسم",
+			"icon": "الأيقونة",
+			"route": "مسار التطبيق",
+			"routeHint": "إحدى صفحات التطبيق نفسه، مثل ‎/cafe-menu أو ‎/packages أو ‎/wallet أو ‎/sessions.",
+			"key": "المفتاح",
+			"keyHint": "معرّف إنجليزي فريد، حروف وأرقام وشرطات فقط، مثل cafe.",
+			"order": "ترتيب الظهور",
+			"isActive": "ظاهر في التطبيق"
+		},
+		"create": {
+			"button": "اختصار جديد",
+			"title": "اختصار جديد",
+			"success": "تم إنشاء الاختصار."
+		},
+		"edit": {
+			"title": "تعديل الاختصار",
+			"success": "تم تحديث الاختصار."
+		},
+		"delete": {
+			"success": "تم حذف الاختصار."
+		},
+		"stats": {
+			"total": "كل الاختصارات",
+			"active": "ظاهرة",
+			"inactive": "مخفية"
+		},
+		"loadError": "تعذّر تحميل الاختصارات."
 	},
 	"announcements": {
 		"columns": {

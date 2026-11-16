@@ -109,6 +109,7 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"appContent.privacyPolicy": () => import("@/add-os/modules/cms/views/PrivacyPolicyPage.vue"),
 	"appContent.termsOfUse": () => import("@/add-os/modules/cms/views/TermsOfUsePage.vue"),
 	"appContent.helpSupport": () => import("@/add-os/modules/cms/views/HelpSupportPage.vue"),
+	"appContent.quickAccess": () => import("@/add-os/modules/cms/views/QuickAccessShortcutsPage.vue"),
 	"providers.list": () => import("@/add-os/modules/providers/views/ProvidersListPage.vue"),
 	"providers.requests": () => import("@/add-os/modules/providers/views/ProviderRequestsPage.vue"),
 	"providerPortal.summary": () => import("@/add-os/modules/provider-portal/views/ProviderSummaryPage.vue"),

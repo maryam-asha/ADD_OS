@@ -442,7 +442,9 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		pages: [
 			{ key: "privacyPolicy", path: "privacy-policy", icon: "carbon:security", permission: "app-content.view" },
 			{ key: "termsOfUse", path: "terms-of-use", icon: "carbon:document-tasks", permission: "app-content.view" },
-			{ key: "helpSupport", path: "help-support", icon: "carbon:help", permission: "app-content.view" }
+			{ key: "helpSupport", path: "help-support", icon: "carbon:help", permission: "app-content.view" },
+			// The home screen's quick-access tiles (GET member/home → quick_access).
+			{ key: "quickAccess", path: "quick-access", icon: "carbon:apps", permission: "quick-access-shortcuts.view" }
 		]
 	},
 	{
