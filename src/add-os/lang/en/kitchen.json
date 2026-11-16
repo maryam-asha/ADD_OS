@@ -1,5 +1,9 @@
 {
 	"kitchen": {
+		"chime": {
+			"mute": "Mute new-order sound",
+			"unmute": "Turn new-order sound on"
+		},
 		"status": {
 			"awaiting_payment": "Awaiting payment",
 			"awaiting_reception": "Awaiting reception",

@@ -1,5 +1,9 @@
 {
 	"kitchen": {
+		"chime": {
+			"mute": "كتم صوت الطلبات الجديدة",
+			"unmute": "تشغيل صوت الطلبات الجديدة"
+		},
 		"status": {
 			"awaiting_payment": "بانتظار الدفع",
 			"awaiting_reception": "بانتظار الاستقبال",

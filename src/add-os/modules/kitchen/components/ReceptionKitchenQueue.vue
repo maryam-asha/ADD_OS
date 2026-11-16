@@ -3,10 +3,13 @@
 	<div class="flex flex-col gap-4">
 		<div class="flex flex-wrap items-center justify-between gap-3">
 			<p class="text-sm text-[var(--add-text-secondary)]">{{ t("kitchen.reception.description") }}</p>
-			<n-button size="small" secondary :loading="isLoading" @click="load">
-				<template #icon><Icon name="carbon:renew" :size="16" /></template>
-				{{ t("kitchen.board.refresh") }}
-			</n-button>
+			<div class="flex items-center gap-2">
+				<ChimeMuteButton size="small" />
+				<n-button size="small" secondary :loading="isLoading" @click="load">
+					<template #icon><Icon name="carbon:renew" :size="16" /></template>
+					{{ t("kitchen.board.refresh") }}
+				</n-button>
+			</div>
 		</div>
 
 		<n-alert v-if="loadError" type="error" :bordered="false" :title="t('kitchen.reception.loadError')" />
@@ -78,6 +81,7 @@ import { onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { useNewArrivalChime } from "@/add-os/composables/useNewArrivalChime"
 import { useReceptionRealtime } from "@/add-os/modules/booking/composables/useReceptionRealtime"
+import ChimeMuteButton from "@/add-os/modules/kitchen/components/ChimeMuteButton.vue"
 import ConfirmCashOrderModal from "@/add-os/modules/kitchen/components/ConfirmCashOrderModal.vue"
 import RejectOrderModal from "@/add-os/modules/kitchen/components/RejectOrderModal.vue"
 import { ApiError } from "@/add-os/services/api"

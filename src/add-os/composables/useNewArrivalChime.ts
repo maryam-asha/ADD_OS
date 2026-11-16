@@ -1,5 +1,39 @@
 import type { Ref } from "vue"
-import { watch } from "vue"
+import { ref, watch } from "vue"
+
+/**
+ * Whether the arrival chime is silenced on this browser — one switch for the
+ * reception queue and the kitchen board alike, remembered across reloads. A
+ * browser that refuses storage simply starts unmuted each time.
+ */
+const MUTE_KEY = "kitchen.chime.muted"
+
+function storedMute(): boolean {
+	try {
+		return localStorage.getItem(MUTE_KEY) === "1"
+	} catch {
+		return false
+	}
+}
+
+const muted = ref(storedMute())
+
+watch(muted, value => {
+	try {
+		if (value) localStorage.setItem(MUTE_KEY, "1")
+		else localStorage.removeItem(MUTE_KEY)
+	} catch {}
+})
+
+/** The mute switch the screens' sound button reads and flips. */
+export function useChimeMute(): { muted: Ref<boolean>; toggle: () => void } {
+	return {
+		muted,
+		toggle(): void {
+			muted.value = !muted.value
+		}
+	}
+}
 
 /**
  * Plays a short chime when a list a screen shows gains an item it has not
@@ -35,7 +69,7 @@ export function useNewArrivalChime(items: Ref<readonly { id: number }[]>, play: 
 
 			const arrived = ids.some(id => !seen.has(id))
 			learn()
-			if (arrived) play()
+			if (arrived && !muted.value) play()
 		}
 	)
 

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 import { nextTick, ref } from "vue"
-import { playChime, useNewArrivalChime } from "@/add-os/composables/useNewArrivalChime"
+import { playChime, useChimeMute, useNewArrivalChime } from "@/add-os/composables/useNewArrivalChime"
 
 function setup() {
 	const items = ref<{ id: number; status?: string }[]>([])
@@ -64,6 +64,28 @@ describe("useNewArrivalChime", () => {
 		await nextTick()
 		expect(play).not.toHaveBeenCalled()
 		items.value = [{ id: 50 }, { id: 51 }, { id: 52 }]
+		await nextTick()
+		expect(play).toHaveBeenCalledTimes(1)
+	})
+
+	it("stays_silent_while_muted_and_remembers_it", async () => {
+		const { muted, toggle } = useChimeMute()
+		muted.value = false
+		const { items, play } = setup()
+		items.value = [{ id: 1 }]
+		await nextTick()
+
+		toggle()
+		await nextTick()
+		expect(localStorage.getItem("kitchen.chime.muted")).toBe("1")
+		items.value = [{ id: 1 }, { id: 2 }]
+		await nextTick()
+		expect(play).not.toHaveBeenCalled()
+
+		toggle()
+		await nextTick()
+		expect(localStorage.getItem("kitchen.chime.muted")).toBeNull()
+		items.value = [{ id: 1 }, { id: 2 }, { id: 3 }]
 		await nextTick()
 		expect(play).toHaveBeenCalledTimes(1)
 	})
