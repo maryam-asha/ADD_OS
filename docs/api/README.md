@@ -29,6 +29,49 @@ snapshot is unverified until someone re-reads the canonical file and re-pins it.
 | Leaf endpoints (parsed) | 745 — `GET` 337, `POST` 250, `PATCH` 64, `DELETE` 54, `PUT` 40 |
 | Distinct `METHOD + URL` | 725 |
 
+### Re-pin held, 2026-11-10 — this pin is still current
+
+`pnpm api:collection:check` reports `MISMATCH`, and a re-pin was attempted against the
+canonical file as committed on ADDCore `master` at `7eed18d2`. Step 2 below fired, so
+**nothing was copied** and the 2026-10-18 pin above stays the one every claim cites.
+
+**What the scan found.** Three saved `200 OK` example responses carry populated,
+high-entropy values in credential-shaped fields. Each is a random 64-character hex
+string, about 3.9 bits per character. None is a word-shaped sample or a `{{placeholder}}`:
+
+| Field | Request |
+|---|---|
+| `data.access_token` (with an `expires_at` of 2026-11-07) | `Kiosk (device app) / Kiosk Operator Login` |
+| the signature half of `auth` | `Member (App) / 11. Coworking Sessions / 1. Real-time: Authorize Member Channel` |
+| the signature half of `auth` | `Admin (Dashboard) / Reception Operations / Real-time: Authorize Reception Channel` |
+
+The kiosk token arrived with ADDCore `3e2b33ed` (2026-11-07) and reads as captured
+from a real call. The file does not say whether the environment was local or the server.
+The ADDCore working copy carries all three as well. Named as fields and requests
+only, never values.
+
+**Ruled 2026-11-10 by the project owner: hold the pin and fix it in the backend.** ADDCore
+replaces the three values with `{{placeholder}}` variables and commits. Then re-pin from
+that commit, repeating both halves of the scan. Until then, every "per the collection"
+claim about an endpoint added since 2026-10-18 is unverified.
+
+**What the attempt measured** (for the next pin's delta, not a pin record): 833 leaf
+endpoints (`GET` 377, `POST` 279, `PATCH` 72, `DELETE` 62, `PUT` 43), 798 distinct
+`METHOD + URL`; 83 pairs added (chiefly inventory, amenities, sale items, device tokens,
+notifications), 10 removed (`admin/resources` CRUD, `POST hr/work-locations`,
+`POST member/access/unlock`, `POST member/arrival-requests`,
+`POST member/coworking-sessions`). Otherwise the scan was clean:
+- `Authorization` headers, `auth` blocks and variables: three headers, all on
+  placeholders. One new `auth` literal, a word-shaped sample in a saved error example.
+  One credential-shaped variable populated, `member_fcm_token`, a word-shaped sample.
+- Hosts and encoding: no `Cookie` header, no literal request host. Strict UTF-8,
+  ASCII-escaped.
+
+**A stray copy in the working tree.** At the time of writing, the working tree held an
+unrecorded copy of ADDCore `a44cbcd3` (2026-11-04) over the pinned file. It already
+carries the two channel signatures, plus a third in `Admin (Dashboard) / Notifications /
+Real-time: Authorize Dashboard Channel`. Do not commit it.
+
 ### What changed since the 2026-10-11 pin
 
 **320 `METHOD + URL` pairs added, 1 removed.** Almost all of it is HR: a new
