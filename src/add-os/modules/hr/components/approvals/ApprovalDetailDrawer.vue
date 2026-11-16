@@ -25,6 +25,10 @@
 				<ApprovalStepsList :steps="request.steps" />
 			</section>
 
+			<n-alert v-if="pending && ownRequest" type="info" :title="t('hrApprovals.ownRequestTitle')" data-test="own-request">
+				{{ t("hrApprovals.ownRequestNote") }}
+			</n-alert>
+
 			<n-alert v-if="override && canDecide" type="warning" :title="t('hrApprovals.overrideTitle')">
 				{{ t("hrApprovals.overrideNote") }}
 			</n-alert>
@@ -82,6 +86,7 @@ import { translated } from "@/add-os/modules/hr/utils/translated"
 import { ApiError } from "@/add-os/services/api"
 import { formatDateTime } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
+import { useAuthStore } from "@/stores/auth"
 
 /**
  * One approval request: what it asks for, its steps, and — while it is
@@ -89,6 +94,15 @@ import Icon from "@/components/common/Icon.vue"
  * calls; the override queue passes the admin ones and `override`, and says
  * the decision is recorded as an override. The server still refuses a
  * request of one's own and one already decided, with its own message.
+ *
+ * A request of one's own offers no decision at all, and says why, before
+ * anyone writes a comment for nothing: ADD Core refuses it to everyone, an
+ * admin and the override included (ApprovalEngine::isOwnRequest — the
+ * account filed it, or it is about the account's own employee record). The
+ * same two tests run here on what the dashboard already holds:
+ * `submitted_by`, and the signed-in account's employee. Found 2026-11-12: an
+ * admin filed a hiring request (Talent), opened it here, wrote the override
+ * reason, and only then met the refusal.
  */
 const props = defineProps<{
 	requestId: number | null
@@ -102,6 +116,7 @@ const show = defineModel<boolean>("show", { required: true })
 
 const { t } = useI18n()
 const message = useMessage()
+const auth = useAuthStore()
 
 const request = ref<ApprovalRequest | null>(null)
 const loading = ref(false)
@@ -123,7 +138,19 @@ watch(show, async visible => {
 })
 
 const rows = computed(() => (request.value ? summaryRows(t, request.value.request_type, request.value.subject) : []))
-const canDecide = computed(() => request.value?.status === "pending")
+const pending = computed(() => request.value?.status === "pending")
+
+/** Filed by the signed-in account, or about its own employee record: ADD Core lets nobody decide it. */
+const ownRequest = computed(() => {
+	const current = request.value
+	if (!current) return false
+	const me = auth.user
+	const filedIt = current.submitted_by !== null && me.id !== undefined && String(current.submitted_by) === String(me.id)
+	const aboutMe = Boolean(me.employee) && me.employee?.id === current.employee.id
+	return filedIt || aboutMe
+})
+
+const canDecide = computed(() => pending.value && !ownRequest.value)
 
 const decisionVisible = ref(false)
 const decision = ref<"approve" | "reject">("approve")

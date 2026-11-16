@@ -215,6 +215,8 @@
 		"rejected": "Rejected.",
 		"gone": "This request no longer waits for you — someone has decided it, or it was withdrawn.",
 		"overrideTitle": "Deciding for the approver",
-		"overrideNote": "This decides the current step in place of whoever it waits for and is recorded as an HR override."
+		"overrideNote": "This decides the current step in place of whoever it waits for and is recorded as an HR override.",
+		"ownRequestTitle": "Someone else decides this request",
+		"ownRequestNote": "You filed it, or it is about you. Nobody approves or rejects a request of their own, an admin included: another holder of approval rights decides it."
 	}
 }

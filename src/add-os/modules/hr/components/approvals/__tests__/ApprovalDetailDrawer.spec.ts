@@ -1,6 +1,8 @@
 import type { ApprovalRequest, ApprovalStatus } from "@/add-os/modules/hr/types/approvals"
 import type { UpdateResult } from "@/add-os/services/hr/core"
+import type { AdminUser } from "@/types/auth.d"
 import { flushPromises, mount } from "@vue/test-utils"
+import { createPinia, setActivePinia } from "pinia"
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 import { createI18n } from "vue-i18n"
 
@@ -9,6 +11,7 @@ import en from "@/add-os/lang/en/en.json"
 import enApprovals from "@/add-os/lang/en/hr-approvals.json"
 import enHr from "@/add-os/lang/en/hr.json"
 import { ApiError } from "@/add-os/services/api"
+import { useAuthStore } from "@/stores/auth"
 import ApprovalDetailDrawer from "../ApprovalDetailDrawer.vue"
 
 const { successMock, errorMock } = vi.hoisted(() => ({ successMock: vi.fn(), errorMock: vi.fn() }))
@@ -61,6 +64,17 @@ async function mountDrawer(options: DrawerCalls = {}) {
 	return { wrapper, props, vm: wrapper.vm as unknown as DrawerVm }
 }
 
+/** The drawer is teleported to the body, so its buttons are looked for there. */
+function buttonLabels(): string[] {
+	return [...document.querySelectorAll("button")].map(b => b.textContent?.trim() ?? "")
+}
+
+function signIn(userId: number, employeeId: number | null) {
+	setActivePinia(createPinia())
+	const employee = employeeId === null ? null : { id: employeeId, employee_number: `E-${employeeId}`, name: { ar: "حساب", en: "Account" }, status: "active" }
+	useAuthStore().setLogged({ id: userId, name: "Account", email: "account@test.local", roles: [], permissions: [], employee } as AdminUser)
+}
+
 describe("approvalDetailDrawer", () => {
 	beforeAll(() => {
 		setCurrentLocale("en")
@@ -68,6 +82,8 @@ describe("approvalDetailDrawer", () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks()
+		// Signed in as HR (user 1, employee 9): neither the filer (user 3) nor the subject (employee 7) of the request.
+		signIn(1, 9)
 	})
 
 	afterEach(() => {
@@ -134,6 +150,51 @@ describe("approvalDetailDrawer", () => {
 		const { wrapper } = await mountDrawer({ override: true })
 
 		expect(document.body.textContent).toContain("recorded as an HR override")
+		expect(document.querySelector("[data-test='own-request']")).toBeNull()
+		wrapper.unmount()
+	})
+
+	it("offers no decision on a request the account filed, even to an override, and says why", async () => {
+		signIn(3, null)
+		const { wrapper } = await mountDrawer({ override: true })
+
+		expect(document.querySelector("[data-test='own-request']")?.textContent).toContain("Someone else decides this request")
+		expect(buttonLabels()).not.toContain("Approve")
+		expect(buttonLabels()).not.toContain("Reject")
+		expect(document.body.textContent).not.toContain("recorded as an HR override")
+		wrapper.unmount()
+	})
+
+	it("offers no decision on a request about the account's own employee record, such as a hiring request it manages", async () => {
+		signIn(40, 7)
+		const requisition = { ...request(), request_type: "requisition", submitted_by: 40 }
+		const { wrapper } = await mountDrawer({ override: true, load: vi.fn().mockResolvedValue(requisition) })
+
+		expect(document.querySelector("[data-test='own-request']")).not.toBeNull()
+		expect(buttonLabels()).not.toContain("Approve")
+		expect(buttonLabels()).not.toContain("Reject")
+		wrapper.unmount()
+	})
+
+	it("still lets another approver decide that same hiring request", async () => {
+		const requisition = { ...request(), request_type: "requisition", submitted_by: 40 }
+		const approve = vi.fn().mockResolvedValue({ message: "Approved." })
+		const { wrapper, vm } = await mountDrawer({ override: true, load: vi.fn().mockResolvedValue(requisition), approve })
+
+		expect(document.querySelector("[data-test='own-request']")).toBeNull()
+		expect(buttonLabels()).toContain("Approve")
+		expect(buttonLabels()).toContain("Reject")
+		vm.openDecision("approve")
+		await vm.decide()
+		expect(approve).toHaveBeenCalledWith(5, null)
+		wrapper.unmount()
+	})
+
+	it("says nothing of ownership once a request of one's own is decided", async () => {
+		signIn(3, null)
+		const { wrapper } = await mountDrawer({ load: vi.fn().mockResolvedValue(request("approved")) })
+
+		expect(document.querySelector("[data-test='own-request']")).toBeNull()
 		wrapper.unmount()
 	})
 })
