@@ -122,13 +122,17 @@ export interface ReceptionSummary {
 
 /** One row of a session's statement, as the server words it. */
 export interface SessionReportLine {
-	kind: "time" | "resource_consumption"
+	/** `order`: an accepted kitchen order on this session, a charge of its own. */
+	kind: "time" | "resource_consumption" | "order"
 	label: string
-	quantity: number
+	/** Null on an `order` line, which has no quantity of its own. */
+	quantity: number | null
 	unit: string | null
 	source: "plan" | "charge" | null
 	points: number | null
 	amount: string | null
+	/** `order` lines only: whether that order is paid yet. */
+	paid?: boolean
 }
 
 /**
@@ -157,11 +161,19 @@ export interface ReceptionSessionReport {
 		covered_seconds: number
 		already_paid: boolean
 		amounts: { currency: string, value: string }[]
+		/** Its accepted kitchen orders still unpaid: a charge of their own beside `points`. */
+		orders_points?: number
 		end_request: SessionEndRequestSummary | null
 	} | null
 	wallet_points: number
 	/** The session's state once closed: paid or still owed. */
-	totals: { payment_state: string | null, payment_method: string | null, paid_at: string | null } | null
+	totals: {
+		payment_state: string | null
+		payment_method: string | null
+		paid_at: string | null
+		/** Its accepted kitchen orders still unpaid, owed beside the session itself. */
+		orders_unpaid_points?: number
+	} | null
 	/** How it was paid, oldest first. */
 	payments: SessionPayment[]
 }

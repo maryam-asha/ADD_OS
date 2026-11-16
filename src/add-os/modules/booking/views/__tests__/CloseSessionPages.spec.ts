@@ -184,6 +184,42 @@ describe("end requests", () => {
 	 * over — amount and currency — in the collect dialog, never recorded as
 	 * exactly what is due in the base currency.
 	 */
+	it("shows the session's kitchen orders, paid or not, and what they add to the total", async () => {
+		const base = report("cash")
+		getSessionReportMock.mockResolvedValue({
+			...base,
+			lines: [
+				...base.lines,
+				{ kind: "order", id: 41, label: "Kitchen order #41", quantity: null, unit: null, source: null, points: 30, amount: "3.00", paid: false, recorded_at: "2026-08-17T09:00:00+03:00" },
+				{ kind: "order", id: 42, label: "Kitchen order #42", quantity: null, unit: null, source: null, points: 15, amount: "1.50", paid: true, recorded_at: "2026-08-17T09:30:00+03:00" }
+			],
+			closing: { ...base.closing, orders_points: 30 }
+		})
+		const wrapper = mountWith(CloseSessionDetailPage)
+		await flushPromises()
+
+		const orders = wrapper.findAll("[data-line=order]")
+		expect(orders).toHaveLength(2)
+		expect(orders[0].text()).toContain("Kitchen order #41")
+		expect(orders[0].text()).toContain("30 points")
+		expect(orders[0].get("[data-test=order-paid]").text()).toBe("Unpaid")
+		expect(orders[1].get("[data-test=order-paid]").text()).toBe("Paid")
+		expect(orders[0].text()).not.toContain("(")
+		expect(wrapper.get("[data-test=orders-unpaid]").text()).toContain("30 points")
+		expect(wrapper.get("[data-test=grand-total]").text()).toContain("230 points")
+		wrapper.unmount()
+	})
+
+	it("shows no kitchen-order totals when nothing is owed for orders", async () => {
+		getSessionReportMock.mockResolvedValue(report("cash"))
+		const wrapper = mountWith(CloseSessionDetailPage)
+		await flushPromises()
+
+		expect(wrapper.find("[data-test=orders-unpaid]").exists()).toBe(false)
+		expect(wrapper.find("[data-test=grand-total]").exists()).toBe(false)
+		wrapper.unmount()
+	})
+
 	it("ends a cash request, then collects the money as handed over", async () => {
 		getSessionReportMock.mockResolvedValue(report("cash"))
 		confirmSessionEndMock.mockResolvedValue({ message: "Session ended. Payment is still due.", data: { payment_state: "unpaid", price_points: 200, amount_owed: "20.00" } })

@@ -2869,6 +2869,12 @@
 			"planCovered": "مغطى من الباقة: {duration}",
 			"total": "المبلغ المستحق",
 			"points": "{points} نقطة",
+			"orders": {
+				"paid": "مدفوع",
+				"unpaid": "غير مدفوع",
+				"unpaidTotal": "طلبات المطبخ غير المدفوعة",
+				"grandTotal": "الإجمالي مع طلبات المطبخ"
+			},
 			"alreadyPaid": "مدفوع عند الحجز — لا يوجد مبلغ إضافي.",
 			"chosenMethod": "اختار العضو الدفع عبر",
 			"walletBalance": "رصيد المحفظة",
