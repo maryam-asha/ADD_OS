@@ -182,6 +182,10 @@ export const KNOWN_PERMISSIONS: readonly string[] = [
 	"inventory.settings.manage",
 	"inventory.assets.approve",
 
+	// Project management package (`Add\Pm\Authorization\Abilities`)
+	"pm.projects.view",
+	"pm.projects.manage",
+
 	// Kitchen orders (`routes/api/v1/admin.php`: `kitchen/*`, `qr-points`)
 	"kitchen-orders.view",
 	"kitchen-orders.manage",

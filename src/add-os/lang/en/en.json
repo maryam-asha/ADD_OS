@@ -273,6 +273,10 @@
 				"issue": "Issue stock",
 				"transfer": "Transfer stock",
 				"adjust": "Record stock counts"
+			},
+			"projects": {
+				"view": "View all projects",
+				"manage": "Manage projects and their teams"
 			}
 		},
 		"modules": {
@@ -312,6 +316,7 @@
 			"exchange-rates": "Exchange Rates",
 			"hr": "Human Resources",
 			"inventory": "Inventory & Assets",
+			"pm": "Project Management",
 			"kitchen-orders": "Kitchen orders",
 			"kitchen-stores": "Kitchen stores",
 			"qr-points": "Ordering QR codes",
