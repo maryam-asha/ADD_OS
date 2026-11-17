@@ -29,6 +29,7 @@ import { NAlert, NButton, NCard, NDataTable, useDialog, useMessage } from "naive
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { canManageBenefits } from "@/add-os/config/permissions"
 import ActiveTag from "@/add-os/modules/hr/components/ActiveTag.vue"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
@@ -99,12 +100,6 @@ function rowProps(row: Benefit) {
 	return { class: "cursor-pointer", onClick: () => void router.push({ name: "hrPay.hrBenefit", params: { id: row.id } }) }
 }
 
-/** Buttons inside a clickable row act on their own. */
-function stop(event: Event, action: () => void) {
-	event.stopPropagation()
-	action()
-}
-
 const columns = computed<DataTableColumns<Benefit>>(() => [
 	{ title: t("hr.org.code"), key: "code", minWidth: 110, render: row => h("span", { class: "font-mono", dir: "ltr" }, row.code) },
 	{ title: t("hrPayroll.components.name"), key: "name", minWidth: 180, render: row => h("span", { class: "font-semibold" }, translated(row.name)) },
@@ -121,17 +116,8 @@ const columns = computed<DataTableColumns<Benefit>>(() => [
 					width: 100,
 					align: "center" as const,
 					render: (row: Benefit) =>
-						h("div", { class: "flex justify-center gap-3" }, [
-							h(
-								NButton,
-								{ text: true, type: "primary", "aria-label": t("hr.common.edit"), title: t("hr.common.edit"), onClick: (e: Event) => stop(e, () => openEditor(row)) },
-								{ icon: () => h(Icon, { name: "carbon:edit", size: 18 }) }
-							),
-							h(
-								NButton,
-								{ text: true, type: "error", "aria-label": t("hr.common.delete"), title: t("hr.common.delete"), onClick: (e: Event) => stop(e, () => confirmDelete(row)) },
-								{ icon: () => h(Icon, { name: "carbon:trash-can", size: 18 }) }
-							)
+						h("div", { onClick: (e: Event) => e.stopPropagation() }, [
+							h(RowActions, { actions: [{ key: "edit", label: t("hr.common.edit"), icon: "carbon:edit", onClick: () => openEditor(row) }, { key: "delete", label: t("hr.common.delete"), icon: "carbon:trash-can", danger: true, onClick: () => confirmDelete(row) }] })
 						])
 				}
 			]

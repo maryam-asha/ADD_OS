@@ -11,7 +11,7 @@
 
 		<n-alert v-if="loadError" type="error" :title="loadError" />
 
-		<n-card v-for="group in groups" :key="group.name" class="rounded-2xl border border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900" :bordered="false" :title="t(`inventory.settings.groups.${group.name}`)">
+		<n-card v-for="group in groups" :key="group.name" class="rounded-2xl border border-[var(--add-border)] shadow-xs" :bordered="false" :title="t(`inventory.settings.groups.${group.name}`)">
 			<div class="grid grid-cols-1 items-start gap-x-6 gap-y-4 md:grid-cols-2">
 				<div v-for="row in group.rows" :key="row.key" class="flex flex-col gap-1">
 					<div class="flex items-center gap-2">

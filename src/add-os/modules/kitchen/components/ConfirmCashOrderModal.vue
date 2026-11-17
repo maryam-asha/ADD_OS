@@ -1,6 +1,6 @@
 <!-- src/add-os/modules/kitchen/components/ConfirmCashOrderModal.vue -->
 <template>
-	<n-modal v-model:show="show" preset="card" :title="t('kitchen.confirmCash.title', { id: orderLabel })" class="max-w-md">
+	<FormModal v-model:show="show" :title="t('kitchen.confirmCash.title', { id: orderLabel })" size="sm">
 		<div class="flex flex-col gap-4">
 			<div class="flex flex-col gap-1 rounded-xl border border-[var(--add-border)] bg-[var(--add-surface-sunken)] p-3">
 				<span class="text-sm text-[var(--add-text-secondary)]">{{ t("kitchen.confirmCash.due") }}</span>
@@ -25,15 +25,16 @@
 				<n-button type="primary" :loading :disabled="!currency || (!dueAmount && !!order?.cash_due_amounts)" data-test="confirm-cash-submit" @click="submit">{{ t("kitchen.confirmCash.submit") }}</n-button>
 			</div>
 		</template>
-	</n-modal>
+	</FormModal>
 </template>
 
 <script setup lang="ts">
 import type { SelectOption } from "naive-ui"
 import type { KitchenOrder } from "@/add-os/modules/kitchen/types/kitchen"
-import { NAlert, NButton, NFormItem, NModal, NSelect } from "naive-ui"
+import { NAlert, NButton, NFormItem, NSelect } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
 import { formatMoneyAmount, formatNumber } from "@/add-os/utils/format"
 import { useCurrencyStore } from "@/stores/currency"
 

@@ -1,16 +1,13 @@
 <!-- src/add-os/modules/provider-portal/views/ProviderOfficeLeasesPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t("providerPortal.officeLeases", "Office Leases") }}</h1>
-			<p class="text-sm text-neutral-500">{{ t("officeLeases.description") }}</p>
-		</div>
+		<PageHeader :title="t('providerPortal.officeLeases', 'Office Leases')" :description="t('officeLeases.description')" />
 
 		<!-- Filters -->
 		<n-card>
 			<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
 				<div>
-					<label class="block text-xs text-neutral-500 mb-1">{{ t("officeLeases.filters.company") }}</label>
+					<label class="block text-xs text-[var(--add-text-secondary)] mb-1">{{ t("officeLeases.filters.company") }}</label>
 					<n-select
 						v-model:value="query.company_id"
 						:options="companyOptions"
@@ -22,7 +19,7 @@
 				</div>
 
 				<div>
-					<label class="block text-xs text-neutral-500 mb-1">{{ t("officeLeases.filters.status") }}</label>
+					<label class="block text-xs text-[var(--add-text-secondary)] mb-1">{{ t("officeLeases.filters.status") }}</label>
 					<n-select
 						v-model:value="query.status"
 						:options="statusOptions"
@@ -32,7 +29,7 @@
 				</div>
 
 				<div>
-					<label class="block text-xs text-neutral-500 mb-1">{{ t("officeLeases.filters.endingWithin") }}</label>
+					<label class="block text-xs text-[var(--add-text-secondary)] mb-1">{{ t("officeLeases.filters.endingWithin") }}</label>
 					<n-select
 						v-model:value="query.ending_within_days"
 						:options="endingWithinOptions"
@@ -49,11 +46,11 @@
 				remote
 				size="small"
 				:scroll-x="1000"
-				:columns="columns"
-				:data="data"
+				:columns
+				:data
 				:loading="isLoading"
 				:bordered="false"
-				:row-key="rowKey"
+				:row-key
 				:pagination="{
 					itemCount: meta?.total,
 					page: meta?.current_page,
@@ -76,15 +73,16 @@
 import type { DataTableColumns } from "naive-ui"
 import type { Company } from "@/add-os/modules/members/types/company"
 import type { OfficeLease, OfficeLeaseFilterQuery, OfficeLeaseStatus } from "@/add-os/modules/members/types/office-lease"
-import { NButton, NCard, NDataTable, NSelect, NSwitch, NTag, useMessage } from "naive-ui"
+import { NCard, NDataTable, NSelect, NSwitch, NTag, useMessage } from "naive-ui"
 import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import ProviderOfficeLeaseDetailModal from "@/add-os/modules/provider-portal/components/ProviderOfficeLeaseDetailModal.vue"
 import { useOpenRecord } from "@/add-os/notifications/useOpenRecord"
 import { ApiError } from "@/add-os/services/api"
 import { listProviderCompanies, listProviderOfficeLeases, setProviderOfficeLeaseAutoRenew } from "@/add-os/services/provider-portal"
-import Icon from "@/components/common/Icon.vue"
 
 const { t } = useI18n()
 const message = useMessage()
@@ -220,18 +218,7 @@ const columns = computed<DataTableColumns<OfficeLease>>(() => [
 		key: "actions",
 		width: 90,
 		align: "center",
-		render: row =>
-			h(
-				NButton,
-				{
-					text: true,
-					type: "primary",
-					"aria-label": t("officeLeases.actions.view"),
-					title: t("officeLeases.actions.view"),
-					onClick: () => openDetail(row)
-				},
-				{ icon: () => h(Icon, { name: "carbon:view", size: 18 }) }
-			)
+		render: row => h(RowActions, { actions: [{ key: "view", label: t("officeLeases.actions.view"), icon: "carbon:view", onClick: () => openDetail(row) }] })
 	}
 ])
 </script>

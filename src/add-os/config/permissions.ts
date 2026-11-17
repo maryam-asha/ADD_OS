@@ -125,6 +125,11 @@ export function canDeleteRoles(): boolean {
 	return can("roles.delete")
 }
 
+/** Deleting a reported app error (`DELETE /api/v1/admin/error-logs/{errorLog}`). */
+export function canDeleteErrorLogs(): boolean {
+	return can("error-logs.delete")
+}
+
 /**
  * Activating a plan for someone without charging their wallet
  * (`POST /api/v1/admin/memberships`), which ADD Core guards with

@@ -1,20 +1,15 @@
 <template>
-	<div class="flex flex-col gap-6 text-neutral-800 dark:text-neutral-100">
+	<div class="flex flex-col gap-6 text-[var(--add-text-primary)]">
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
 		<!-- HEADER & CONTROLS -->
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
 		<div class="flex flex-col gap-4">
 			<!-- Row 1: Title & Actions -->
-			<div class="flex flex-wrap items-center justify-between gap-3">
-				<h1 class="text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">
-					{{ t("nav.pages.invoiceStatement", "كشف الفواتير") }}
-				</h1>
-
-				<!-- Actions: Refresh & Export -->
-				<div class="flex items-center gap-2">
+			<PageHeader :title="t('nav.pages.invoiceStatement', 'كشف الفواتير')" :description="t('pageDescriptions.invoiceStatement')">
+				<template #actions>
 					<n-button size="small" secondary :loading="isLoading" class="rounded-lg" @click="fetchData">
 						<template #icon><Icon name="carbon:renew" :size="15" /></template>
-						{{ t("common.refresh", "تحديث") }}
+						{{ t("common.refresh") }}
 					</n-button>
 					<n-button
 						size="small"
@@ -24,15 +19,15 @@
 						@click="exportStatement"
 					>
 						<template #icon><Icon name="carbon:download" :size="15" /></template>
-						{{ t("reports.providerInvoices.exportStatement", "تصدير كشف") }}
+						{{ t("reports.providerInvoices.exportStatement") }}
 					</n-button>
-				</div>
-			</div>
+				</template>
+			</PageHeader>
 
 			<!-- Row 2: Presets & Date Range Picker (Centered with breathing room) -->
 			<div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 py-2">
 				<!-- Quick Preset Buttons -->
-				<div class="flex flex-wrap items-center gap-2 rounded-xl border border-neutral-200/80 bg-neutral-100/60 p-1.5 dark:border-neutral-800 dark:bg-neutral-900/60">
+				<div class="flex flex-wrap items-center gap-2 rounded-xl border border-[var(--add-border)] bg-[var(--add-surface-sunken)] p-1.5">
 					<n-button
 						size="small"
 						:type="activePreset === 'all' ? 'primary' : 'default'"
@@ -98,13 +93,13 @@
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
 		<div
 			v-else-if="!isLoading && (!reportData || reportData.totals.length === 0)"
-			class="rounded-2xl border border-dashed border-neutral-300 bg-white p-12 text-center dark:border-neutral-800 dark:bg-neutral-900"
+			class="rounded-2xl border border-dashed border-[var(--add-border-strong)] bg-white p-12 text-center"
 		>
-			<Icon name="carbon:document-blank" :size="48" class="mx-auto text-neutral-400" />
-			<h3 class="mt-3 text-base font-semibold text-neutral-700 dark:text-neutral-300">
+			<Icon name="carbon:document-blank" :size="48" class="mx-auto text-[var(--add-text-muted)]" />
+			<h3 class="mt-3 text-base font-semibold text-[var(--add-text-primary)]">
 				{{ t("reports.common.noDataTitle", "لا توجد فواتير في هذه الفترة") }}
 			</h3>
-			<p class="mt-1 text-sm text-neutral-500">
+			<p class="mt-1 text-sm text-[var(--add-text-secondary)]">
 				{{ t("reports.common.noDataDesc", "لم تصدر أي فواتير مطابقة للفترة المحددة. جرّب توسيع نطاق البحث.") }}
 			</p>
 		</div>
@@ -114,329 +109,329 @@
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
 		<n-spin v-else :show="isLoading" class="w-full">
 			<div class="flex flex-col gap-8">
-			<!-- ════════════════════════════════════════════════════════════════════════════ -->
-			<!-- SECTION 1: FINANCIAL TOTALS PER CURRENCY -->
-			<!-- ════════════════════════════════════════════════════════════════════════════ -->
-			<InvoiceTotalsCards :totals="reportData?.totals || []" details-to="/provider/invoices" />
+				<!-- ════════════════════════════════════════════════════════════════════════════ -->
+				<!-- SECTION 1: FINANCIAL TOTALS PER CURRENCY -->
+				<!-- ════════════════════════════════════════════════════════════════════════════ -->
+				<InvoiceTotalsCards :totals="reportData?.totals || []" details-to="/provider/invoices" />
 
-			<!-- ════════════════════════════════════════════════════════════════════════════ -->
-			<!-- SECTION 2: BREAKDOWN BY PAYER CATEGORY -->
-			<!-- ════════════════════════════════════════════════════════════════════════════ -->
-			<section class="flex flex-col gap-3">
-				<div class="flex flex-wrap items-baseline justify-between gap-2 pb-1">
-					<div class="flex items-center gap-2">
-						<Icon name="carbon:user-multiple" :size="18" class="text-neutral-700 dark:text-neutral-300" />
-						<h2 class="text-base font-bold text-neutral-800 dark:text-neutral-100">
-							{{ t("reports.providerInvoices.breakdownByPayer", "التقسيم المالي حسب جهة الدفع (Payer Category)") }}
-						</h2>
+				<!-- ════════════════════════════════════════════════════════════════════════════ -->
+				<!-- SECTION 2: BREAKDOWN BY PAYER CATEGORY -->
+				<!-- ════════════════════════════════════════════════════════════════════════════ -->
+				<section class="flex flex-col gap-3">
+					<div class="flex flex-wrap items-baseline justify-between gap-2 pb-1">
+						<div class="flex items-center gap-2">
+							<Icon name="carbon:user-multiple" :size="18" class="text-[var(--add-text-primary)]" />
+							<h2 class="text-base font-bold text-[var(--add-text-primary)]">
+								{{ t("reports.providerInvoices.breakdownByPayer", "التقسيم المالي حسب جهة الدفع (Payer Category)") }}
+							</h2>
+						</div>
+						<span class="text-xs text-[var(--add-text-muted)]">
+							{{ t("reports.providerInvoices.payerComparisonSubtitle") }}
+						</span>
 					</div>
-					<span class="text-xs text-neutral-400 dark:text-neutral-500">
-						{{ t("reports.providerInvoices.payerComparisonSubtitle", "مقارنة التزامات المزودين مقابل التزامات الشركات المباشرة") }}
-					</span>
-				</div>
 
-				<div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-					<div
-						v-for="tot in reportData?.totals || []"
-						:key="`payer-${tot.currency}`"
-						class="flex flex-col gap-3.5 rounded-2xl border border-neutral-200/90 bg-white p-5 shadow-xs dark:border-neutral-800 dark:bg-neutral-900"
-					>
-						<!-- Payer Card Header -->
-						<div class="flex items-center justify-between pb-1">
-							<span class="text-xs text-neutral-400">
-								{{ t("reports.providerInvoices.directVsProvider", "الدافع المباشر مقابل المزود") }}
-							</span>
-							<div class="flex items-center gap-2">
-								<span class="text-sm font-bold text-neutral-800 dark:text-neutral-100">
-									{{ t("reports.providerInvoices.payerComparison", "مقارنة الدافعين") }} ({{ tot.currency }})
+					<div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+						<div
+							v-for="tot in reportData?.totals || []"
+							:key="`payer-${tot.currency}`"
+							class="flex flex-col gap-3.5 rounded-2xl border border-[var(--add-border)] bg-white p-5 shadow-xs"
+						>
+							<!-- Payer Card Header -->
+							<div class="flex items-center justify-between pb-1">
+								<span class="text-xs text-[var(--add-text-muted)]">
+									{{ t("reports.providerInvoices.directVsProvider") }}
 								</span>
-								<n-tag size="tiny" type="info" :bordered="false" class="font-mono font-bold">
-									{{ tot.currency }}
-								</n-tag>
-							</div>
-						</div>
-
-						<!-- Two Sub-Cards Side by Side -->
-						<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-							<!-- 1. Payer: Provider Himself -->
-							<div class="flex flex-col gap-2 rounded-xl border border-neutral-200/50 bg-neutral-50/60 p-3.5 dark:border-neutral-800/80 dark:bg-neutral-800/30">
-								<div class="flex items-center justify-between">
-									<n-tag size="tiny" round :bordered="false">
-										{{ t("reports.common.provider", "مزود") }}
-									</n-tag>
-									<span class="text-xs font-bold text-neutral-800 dark:text-neutral-200">
-										{{ t("reports.providerInvoices.payerProvider", "على المزوّد نفسه") }}
+								<div class="flex items-center gap-2">
+									<span class="text-sm font-bold text-[var(--add-text-primary)]">
+										{{ t("reports.providerInvoices.payerComparison", "مقارنة الدافعين") }} ({{ tot.currency }})
 									</span>
-								</div>
-
-								<div class="mt-1 flex flex-col gap-1.5 text-xs">
-									<div class="flex items-center justify-between">
-										<span class="text-neutral-400">{{ t("reports.common.billed", "المفوتر:") }}</span>
-										<span class="font-mono font-bold text-neutral-800 dark:text-neutral-100">
-											{{ formatReportMoney(tot.by_payer?.provider?.billed || 0, tot.currency) }}
-										</span>
-									</div>
-									<div class="flex items-center justify-between">
-										<span class="text-neutral-400">{{ t("reports.common.paid", "المدفوع:") }}</span>
-										<span class="font-mono font-bold" style="color: var(--add-primary-text, #556843);">
-											{{ formatReportMoney(tot.by_payer?.provider?.paid || 0, tot.currency) }}
-										</span>
-									</div>
-									<div class="flex items-center justify-between">
-										<span class="text-neutral-400">{{ t("reports.common.remaining", "المتبقي:") }}</span>
-										<span class="font-mono font-bold text-neutral-800 dark:text-neutral-100">
-											{{ formatReportMoney(tot.by_payer?.provider?.remaining || 0, tot.currency) }}
-										</span>
-									</div>
-									<div class="flex items-center justify-between">
-										<span class="text-neutral-400">{{ t("reports.common.overdue", "المتأخر:") }}</span>
-										<span
-											class="font-mono font-bold"
-											:style="Number.parseFloat(tot.by_payer?.provider?.overdue || '0') > 0 ? 'color: var(--add-danger-text, #B4321D);' : ''"
-										>
-											{{ formatReportMoney(tot.by_payer?.provider?.overdue || 0, tot.currency) }}
-										</span>
-									</div>
+									<n-tag size="tiny" type="info" :bordered="false" class="font-mono font-bold">
+										{{ tot.currency }}
+									</n-tag>
 								</div>
 							</div>
 
-							<!-- 2. Payer: Companies Directly -->
-							<div class="flex flex-col gap-2 rounded-xl border border-neutral-200/50 bg-neutral-50/60 p-3.5 dark:border-neutral-800/80 dark:bg-neutral-800/30">
-								<div class="flex items-center justify-between">
-									<n-tag size="tiny" round type="info" :bordered="false">
-										{{ t("reports.common.companies", "شركات") }}
-									</n-tag>
-									<span class="text-xs font-bold text-neutral-800 dark:text-neutral-200">
-										{{ t("reports.providerInvoices.payerCompanies", "على الشركات مباشرة") }}
-									</span>
+							<!-- Two Sub-Cards Side by Side -->
+							<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+								<!-- 1. Payer: Provider Himself -->
+								<div class="flex flex-col gap-2 rounded-xl border border-[var(--add-border)] bg-[var(--add-surface-sunken)] p-3.5">
+									<div class="flex items-center justify-between">
+										<n-tag size="tiny" round :bordered="false">
+											{{ t("reports.common.provider", "مزود") }}
+										</n-tag>
+										<span class="text-xs font-bold text-[var(--add-text-primary)]">
+											{{ t("reports.providerInvoices.payerProvider", "على المزوّد نفسه") }}
+										</span>
+									</div>
+
+									<div class="mt-1 flex flex-col gap-1.5 text-xs">
+										<div class="flex items-center justify-between">
+											<span class="text-[var(--add-text-muted)]">{{ t("reports.common.billed", "المفوتر:") }}</span>
+											<span class="font-mono font-bold text-[var(--add-text-primary)]">
+												{{ formatReportMoney(tot.by_payer?.provider?.billed || 0, tot.currency) }}
+											</span>
+										</div>
+										<div class="flex items-center justify-between">
+											<span class="text-[var(--add-text-muted)]">{{ t("reports.common.paid", "المدفوع:") }}</span>
+											<span class="font-mono font-bold" style="color: var(--add-primary-text);">
+												{{ formatReportMoney(tot.by_payer?.provider?.paid || 0, tot.currency) }}
+											</span>
+										</div>
+										<div class="flex items-center justify-between">
+											<span class="text-[var(--add-text-muted)]">{{ t("reports.common.remaining", "المتبقي:") }}</span>
+											<span class="font-mono font-bold text-[var(--add-text-primary)]">
+												{{ formatReportMoney(tot.by_payer?.provider?.remaining || 0, tot.currency) }}
+											</span>
+										</div>
+										<div class="flex items-center justify-between">
+											<span class="text-[var(--add-text-muted)]">{{ t("reports.common.overdue", "المتأخر:") }}</span>
+											<span
+												class="font-mono font-bold"
+												:style="Number.parseFloat(tot.by_payer?.provider?.overdue || '0') > 0 ? 'color: var(--add-danger-text);' : ''"
+											>
+												{{ formatReportMoney(tot.by_payer?.provider?.overdue || 0, tot.currency) }}
+											</span>
+										</div>
+									</div>
 								</div>
 
-								<div class="mt-1 flex flex-col gap-1.5 text-xs">
+								<!-- 2. Payer: Companies Directly -->
+								<div class="flex flex-col gap-2 rounded-xl border border-[var(--add-border)] bg-[var(--add-surface-sunken)] p-3.5">
 									<div class="flex items-center justify-between">
-										<span class="text-neutral-400">{{ t("reports.common.billed", "المفوتر:") }}</span>
-										<span class="font-mono font-bold text-neutral-800 dark:text-neutral-100">
-											{{ formatReportMoney(tot.by_payer?.company?.billed || 0, tot.currency) }}
+										<n-tag size="tiny" round type="info" :bordered="false">
+											{{ t("reports.common.companies", "شركات") }}
+										</n-tag>
+										<span class="text-xs font-bold text-[var(--add-text-primary)]">
+											{{ t("reports.providerInvoices.payerCompanies", "على الشركات مباشرة") }}
 										</span>
 									</div>
-									<div class="flex items-center justify-between">
-										<span class="text-neutral-400">{{ t("reports.common.paid", "المدفوع:") }}</span>
-										<span class="font-mono font-bold" style="color: var(--add-primary-text, #556843);">
-											{{ formatReportMoney(tot.by_payer?.company?.paid || 0, tot.currency) }}
-										</span>
-									</div>
-									<div class="flex items-center justify-between">
-										<span class="text-neutral-400">{{ t("reports.common.remaining", "المتبقي:") }}</span>
-										<span class="font-mono font-bold text-neutral-800 dark:text-neutral-100">
-											{{ formatReportMoney(tot.by_payer?.company?.remaining || 0, tot.currency) }}
-										</span>
-									</div>
-									<div class="flex items-center justify-between">
-										<span class="text-neutral-400">{{ t("reports.common.overdue", "المتأخر:") }}</span>
-										<span
-											class="font-mono font-bold"
-											:style="Number.parseFloat(tot.by_payer?.company?.overdue || '0') > 0 ? 'color: var(--add-danger-text, #B4321D);' : ''"
-										>
-											{{ formatReportMoney(tot.by_payer?.company?.overdue || 0, tot.currency) }}
-										</span>
+
+									<div class="mt-1 flex flex-col gap-1.5 text-xs">
+										<div class="flex items-center justify-between">
+											<span class="text-[var(--add-text-muted)]">{{ t("reports.common.billed", "المفوتر:") }}</span>
+											<span class="font-mono font-bold text-[var(--add-text-primary)]">
+												{{ formatReportMoney(tot.by_payer?.company?.billed || 0, tot.currency) }}
+											</span>
+										</div>
+										<div class="flex items-center justify-between">
+											<span class="text-[var(--add-text-muted)]">{{ t("reports.common.paid", "المدفوع:") }}</span>
+											<span class="font-mono font-bold" style="color: var(--add-primary-text);">
+												{{ formatReportMoney(tot.by_payer?.company?.paid || 0, tot.currency) }}
+											</span>
+										</div>
+										<div class="flex items-center justify-between">
+											<span class="text-[var(--add-text-muted)]">{{ t("reports.common.remaining", "المتبقي:") }}</span>
+											<span class="font-mono font-bold text-[var(--add-text-primary)]">
+												{{ formatReportMoney(tot.by_payer?.company?.remaining || 0, tot.currency) }}
+											</span>
+										</div>
+										<div class="flex items-center justify-between">
+											<span class="text-[var(--add-text-muted)]">{{ t("reports.common.overdue", "المتأخر:") }}</span>
+											<span
+												class="font-mono font-bold"
+												:style="Number.parseFloat(tot.by_payer?.company?.overdue || '0') > 0 ? 'color: var(--add-danger-text);' : ''"
+											>
+												{{ formatReportMoney(tot.by_payer?.company?.overdue || 0, tot.currency) }}
+											</span>
+										</div>
 									</div>
 								</div>
 							</div>
 						</div>
 					</div>
-				</div>
-			</section>
+				</section>
 
-			<!-- ════════════════════════════════════════════════════════════════════════════ -->
-			<!-- SECTION 3: AGING ANALYSIS -->
-			<!-- ════════════════════════════════════════════════════════════════════════════ -->
-			<ReceivablesAging :aging="reportData?.aging || []" details-to="/provider/invoices" />
+				<!-- ════════════════════════════════════════════════════════════════════════════ -->
+				<!-- SECTION 3: AGING ANALYSIS -->
+				<!-- ════════════════════════════════════════════════════════════════════════════ -->
+				<ReceivablesAging :aging="reportData?.aging || []" details-to="/provider/invoices" />
 
-			<!-- ════════════════════════════════════════════════════════════════════════════ -->
-			<!-- SECTION 4: TABLE BY COMPANY -->
-			<!-- ════════════════════════════════════════════════════════════════════════════ -->
-			<section class="flex flex-col gap-3">
-				<!-- Section Title & Subtitle -->
-				<div class="flex flex-wrap items-baseline justify-between gap-2 pb-1">
-					<div class="flex items-center gap-2">
-						<Icon name="carbon:building" :size="18" class="text-neutral-700 dark:text-neutral-300" />
-						<h2 class="text-base font-bold text-neutral-800 dark:text-neutral-100">
-							{{ t("reports.providerInvoices.byCompanyTitle", "الفواتير والمستحقات حسب الشركة") }}
-						</h2>
+				<!-- ════════════════════════════════════════════════════════════════════════════ -->
+				<!-- SECTION 4: TABLE BY COMPANY -->
+				<!-- ════════════════════════════════════════════════════════════════════════════ -->
+				<section class="flex flex-col gap-3">
+					<!-- Section Title & Subtitle -->
+					<div class="flex flex-wrap items-baseline justify-between gap-2 pb-1">
+						<div class="flex items-center gap-2">
+							<Icon name="carbon:building" :size="18" class="text-[var(--add-text-primary)]" />
+							<h2 class="text-base font-bold text-[var(--add-text-primary)]">
+								{{ t("reports.providerInvoices.byCompanyTitle", "الفواتير والمستحقات حسب الشركة") }}
+							</h2>
+						</div>
+						<span class="text-xs text-[var(--add-text-muted)]">
+							{{ t("reports.providerInvoices.companyTableDesc") }}
+						</span>
 					</div>
-					<span class="text-xs text-neutral-400 dark:text-neutral-500">
-						{{ t("reports.providerInvoices.companyTableDesc", "قائمة تفصيلية بالشركات المتعاملة، المبالغ المفوترة، المسددة، والمتأخرات") }}
-					</span>
-				</div>
 
-				<!-- Table Card Container -->
-				<div class="flex flex-col gap-4 rounded-2xl border border-neutral-200/90 bg-white p-5 shadow-xs dark:border-neutral-800 dark:bg-neutral-900">
-					<!-- Search & Dropdown Filter Bar -->
-					<div class="flex flex-wrap items-center gap-3">
-						<div class="w-full sm:w-72">
-							<n-input
-								v-model:value="searchQuery"
-								size="small"
-								clearable
-								:placeholder="t('reports.providerInvoices.searchCompany', 'بحث باسم الشركة...')"
-								class="rounded-lg"
-							>
-								<template #prefix>
-									<Icon name="carbon:search" :size="14" class="text-neutral-400" />
-								</template>
-							</n-input>
+					<!-- Table Card Container -->
+					<div class="flex flex-col gap-4 rounded-2xl border border-[var(--add-border)] bg-white p-5 shadow-xs">
+						<!-- Search & Dropdown Filter Bar -->
+						<div class="flex flex-wrap items-center gap-3">
+							<div class="w-full sm:w-72">
+								<n-input
+									v-model:value="searchQuery"
+									size="small"
+									clearable
+									:placeholder="t('reports.providerInvoices.searchCompany', 'بحث باسم الشركة...')"
+									class="rounded-lg"
+								>
+									<template #prefix>
+										<Icon name="carbon:search" :size="14" class="text-[var(--add-text-muted)]" />
+									</template>
+								</n-input>
+							</div>
+
+							<div class="w-full sm:w-48">
+								<n-select
+									v-model:value="selectedCurrencyFilter"
+									size="small"
+									:options="currencyFilterOptions"
+									class="rounded-lg"
+								/>
+							</div>
 						</div>
 
-						<div class="w-full sm:w-48">
-							<n-select
-								v-model:value="selectedCurrencyFilter"
+						<!-- Data Table -->
+						<div class="overflow-x-auto rounded-xl border border-[var(--add-border)]">
+							<table class="w-full text-right text-xs">
+								<thead>
+									<tr class="border-b border-[var(--add-border)] bg-[var(--add-surface-sunken)] text-[var(--add-text-secondary)]">
+										<th class="py-3 px-4 font-semibold text-center">{{ t("companies.columns.legalName", "الاسم التجاري والقانوني للشركة") }}</th>
+										<th class="py-3 px-3 font-semibold text-center">{{ t("reports.common.currency") }}</th>
+										<th class="py-3 px-3 font-semibold text-center">{{ t("reports.common.billed", "إجمالي المفوتر") }}</th>
+										<th class="py-3 px-3 font-semibold text-center">{{ t("reports.common.paid", "المدفوع / المحصل") }}</th>
+										<th class="py-3 px-3 font-semibold text-center">{{ t("reports.common.remaining", "المتبقي") }}</th>
+										<th class="py-3 px-3 font-semibold text-center">{{ t("reports.common.overdue", "المتأخر المستحق") }}</th>
+										<th class="py-3 px-4 font-semibold text-center">{{ t("invoices.status", "حالة السداد") }}</th>
+										<th class="py-3 px-4 font-semibold text-center">{{ t("common.actions", "الإجراءات") }}</th>
+									</tr>
+								</thead>
+								<tbody class="divide-y divide-neutral-200/60">
+									<tr
+										v-for="row in paginatedRows"
+										:key="row.key"
+										class="transition-colors hover:bg-[var(--add-surface-sunken)]"
+									>
+										<!-- Company Name & Avatar -->
+										<td class="py-3 px-4 text-center">
+											<div class="inline-flex items-center gap-3 text-start">
+												<div
+													class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-mono text-xs font-bold"
+													:style="row.avatarStyle"
+												>
+													{{ row.initials }}
+												</div>
+												<div class="flex flex-col">
+													<span class="font-bold text-[var(--add-text-primary)]">
+														{{ row.companyName }}
+													</span>
+													<span class="text-[11px] text-[var(--add-text-muted)]">
+														{{ `#${row.companyId}` }}
+													</span>
+												</div>
+											</div>
+										</td>
+
+										<!-- Currency -->
+										<td class="py-3 px-3 text-center">
+											<n-tag size="tiny" type="primary" :bordered="false" class="font-mono font-bold">
+												{{ row.currency }}
+											</n-tag>
+										</td>
+
+										<!-- Billed -->
+										<td class="py-3 px-3 text-center font-mono font-bold text-[var(--add-text-primary)]">
+											{{ formatReportMoney(row.billed, row.currency) }}
+										</td>
+
+										<!-- Paid -->
+										<td class="py-3 px-3 text-center font-mono font-bold" style="color: var(--add-primary-text);">
+											{{ formatReportMoney(row.paid, row.currency) }}
+										</td>
+
+										<!-- Remaining -->
+										<td class="py-3 px-3 text-center font-mono text-[var(--add-text-primary)]">
+											{{ formatReportMoney(row.remaining, row.currency) }}
+										</td>
+
+										<!-- Overdue -->
+										<td class="py-3 px-3 text-center font-mono font-bold">
+											<span
+												:style="Number.parseFloat(row.overdue) > 0 ? 'color: var(--add-danger-text);' : ''"
+												:class="Number.parseFloat(row.overdue) <= 0 ? 'text-[var(--add-text-primary)]' : ''"
+											>
+												{{ formatReportMoney(row.overdue, row.currency) }}
+											</span>
+										</td>
+
+										<!-- Payment Status Pill -->
+										<td class="py-3 px-4 text-center">
+											<div class="flex items-center justify-center">
+												<n-tag
+													size="tiny"
+													round
+													:bordered="false"
+													:type="row.paymentStatus.tagType"
+													class="font-medium"
+												>
+													{{ row.paymentStatus.label }}
+												</n-tag>
+											</div>
+										</td>
+
+										<!-- Actions -->
+										<td class="py-3 px-4 text-center">
+											<div class="flex items-center justify-center gap-1.5 text-[var(--add-text-muted)]">
+												<button
+													type="button"
+													class="rounded p-1 hover:bg-[var(--add-surface-sunken)] hover:text-[var(--add-text-primary)]"
+													:title="t('reports.providerInvoices.viewInvoices', 'عرض الفواتير')"
+													@click="navigateToInvoices(row.companyId)"
+												>
+													<Icon name="carbon:document" :size="15" />
+												</button>
+												<button
+													type="button"
+													class="rounded p-1 hover:bg-[var(--add-surface-sunken)] hover:text-[var(--add-text-primary)]"
+													:title="t('common.share', 'إرسال إشعار')"
+												>
+													<Icon name="carbon:send" :size="15" />
+												</button>
+											</div>
+										</td>
+									</tr>
+
+									<tr v-if="paginatedRows.length === 0">
+										<td colspan="8" class="py-8 text-center text-[var(--add-text-muted)]">
+											{{ t("common.noMatchingResults") }}
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+
+						<!-- Table Pagination & Counter -->
+						<div class="flex flex-wrap items-center justify-between gap-3 pt-2 text-xs text-[var(--add-text-secondary)]">
+							<!-- Showing count -->
+							<span>
+								{{ t("reports.providerInvoices.paginationSummary", {
+									start: filteredRows.length === 0 ? 0 : (currentPage - 1) * pageSize + 1,
+									end: Math.min(currentPage * pageSize, filteredRows.length),
+									total: filteredRows.length
+								}, "عرض {start} - {end} من إجمالي {total} شركات مسجلة") }}
+							</span>
+
+							<!-- Pagination Controls -->
+							<n-pagination
+								v-model:page="currentPage"
+								:page-size
+								:item-count="filteredRows.length"
 								size="small"
-								:options="currencyFilterOptions"
-								class="rounded-lg"
 							/>
 						</div>
 					</div>
-
-					<!-- Data Table -->
-					<div class="overflow-x-auto rounded-xl border border-neutral-200/60 dark:border-neutral-800">
-						<table class="w-full text-right text-xs">
-							<thead>
-								<tr class="border-b border-neutral-200/60 bg-neutral-50/70 text-neutral-500 dark:border-neutral-800 dark:bg-neutral-800/40">
-									<th class="py-3 px-4 font-semibold text-center">{{ t("companies.columns.legalName", "الاسم التجاري والقانوني للشركة") }}</th>
-									<th class="py-3 px-3 font-semibold text-center">{{ t("reports.common.currency", "العملة") }}</th>
-									<th class="py-3 px-3 font-semibold text-center">{{ t("reports.common.billed", "إجمالي المفوتر") }}</th>
-									<th class="py-3 px-3 font-semibold text-center">{{ t("reports.common.paid", "المدفوع / المحصل") }}</th>
-									<th class="py-3 px-3 font-semibold text-center">{{ t("reports.common.remaining", "المتبقي") }}</th>
-									<th class="py-3 px-3 font-semibold text-center">{{ t("reports.common.overdue", "المتأخر المستحق") }}</th>
-									<th class="py-3 px-4 font-semibold text-center">{{ t("invoices.status", "حالة السداد") }}</th>
-									<th class="py-3 px-4 font-semibold text-center">{{ t("common.actions", "الإجراءات") }}</th>
-								</tr>
-							</thead>
-							<tbody class="divide-y divide-neutral-200/60 dark:divide-neutral-800">
-								<tr
-									v-for="row in paginatedRows"
-									:key="row.key"
-									class="transition-colors hover:bg-neutral-50/70 dark:hover:bg-neutral-800/30"
-								>
-									<!-- Company Name & Avatar -->
-									<td class="py-3 px-4 text-center">
-										<div class="inline-flex items-center gap-3 text-start">
-											<div
-												class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-mono text-xs font-bold"
-												:style="row.avatarStyle"
-											>
-												{{ row.initials }}
-											</div>
-											<div class="flex flex-col">
-												<span class="font-bold text-neutral-800 dark:text-neutral-100">
-													{{ row.companyName }}
-												</span>
-												<span class="text-[11px] text-neutral-400">
-													{{ `#${row.companyId}` }}
-												</span>
-											</div>
-										</div>
-									</td>
-
-									<!-- Currency -->
-									<td class="py-3 px-3 text-center">
-										<n-tag size="tiny" type="primary" :bordered="false" class="font-mono font-bold">
-											{{ row.currency }}
-										</n-tag>
-									</td>
-
-									<!-- Billed -->
-									<td class="py-3 px-3 text-center font-mono font-bold text-neutral-800 dark:text-neutral-100">
-										{{ formatReportMoney(row.billed, row.currency) }}
-									</td>
-
-									<!-- Paid -->
-									<td class="py-3 px-3 text-center font-mono font-bold" style="color: var(--add-primary-text, #556843);">
-										{{ formatReportMoney(row.paid, row.currency) }}
-									</td>
-
-									<!-- Remaining -->
-									<td class="py-3 px-3 text-center font-mono text-neutral-700 dark:text-neutral-200">
-										{{ formatReportMoney(row.remaining, row.currency) }}
-									</td>
-
-									<!-- Overdue -->
-									<td class="py-3 px-3 text-center font-mono font-bold">
-										<span
-											:style="Number.parseFloat(row.overdue) > 0 ? 'color: var(--add-danger-text, #B4321D);' : ''"
-											:class="Number.parseFloat(row.overdue) <= 0 ? 'text-neutral-700 dark:text-neutral-300' : ''"
-										>
-											{{ formatReportMoney(row.overdue, row.currency) }}
-										</span>
-									</td>
-
-									<!-- Payment Status Pill -->
-									<td class="py-3 px-4 text-center">
-										<div class="flex items-center justify-center">
-											<n-tag
-												size="tiny"
-												round
-												:bordered="false"
-												:type="row.paymentStatus.tagType"
-												class="font-medium"
-											>
-												{{ row.paymentStatus.label }}
-											</n-tag>
-										</div>
-									</td>
-
-									<!-- Actions -->
-									<td class="py-3 px-4 text-center">
-										<div class="flex items-center justify-center gap-1.5 text-neutral-400">
-											<button
-												type="button"
-												class="rounded p-1 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
-												:title="t('reports.providerInvoices.viewInvoices', 'عرض الفواتير')"
-												@click="navigateToInvoices(row.companyId)"
-											>
-												<Icon name="carbon:document" :size="15" />
-											</button>
-											<button
-												type="button"
-												class="rounded p-1 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
-												:title="t('common.share', 'إرسال إشعار')"
-											>
-												<Icon name="carbon:send" :size="15" />
-											</button>
-										</div>
-									</td>
-								</tr>
-
-								<tr v-if="paginatedRows.length === 0">
-									<td colspan="8" class="py-8 text-center text-neutral-400">
-										{{ t("common.noMatchingResults", "لا توجد نتائج مطابقة للبحث") }}
-									</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
-
-					<!-- Table Pagination & Counter -->
-					<div class="flex flex-wrap items-center justify-between gap-3 pt-2 text-xs text-neutral-500">
-						<!-- Showing count -->
-						<span>
-							{{ t("reports.providerInvoices.paginationSummary", {
-								start: filteredRows.length === 0 ? 0 : (currentPage - 1) * pageSize + 1,
-								end: Math.min(currentPage * pageSize, filteredRows.length),
-								total: filteredRows.length
-							}, "عرض {start} - {end} من إجمالي {total} شركات مسجلة") }}
-						</span>
-
-						<!-- Pagination Controls -->
-						<n-pagination
-							v-model:page="currentPage"
-							:page-size="pageSize"
-							:item-count="filteredRows.length"
-							size="small"
-						/>
-					</div>
-				</div>
-			</section>
-		</div>
+				</section>
+			</div>
 		</n-spin>
 	</div>
 </template>
@@ -447,10 +442,11 @@ import { NButton, NDatePicker, NInput, NPagination, NSelect, NSpin, NTag } from 
 import { computed, onMounted, reactive, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
-import { formatReportMoney, getProviderInvoicesReport } from "@/add-os/services/reports"
-import { formatDate } from "@/add-os/utils/format/dates"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import InvoiceTotalsCards from "@/add-os/modules/dashboard/components/InvoiceTotalsCards.vue"
 import ReceivablesAging from "@/add-os/modules/dashboard/components/ReceivablesAging.vue"
+import { formatReportMoney, getProviderInvoicesReport } from "@/add-os/services/reports"
+import { formatDate } from "@/add-os/utils/format/dates"
 import Icon from "@/components/common/Icon.vue"
 
 const { t } = useI18n()
@@ -577,12 +573,12 @@ const selectedCurrencyFilter = ref<string>("ALL")
 const currentPage = ref(1)
 const pageSize = 10
 
-// Brand-token derived avatar styles (using Tier 1 brand primitives)
+// Avatar tints, each a token at low strength — never a literal colour.
 const avatarStyles = [
-	"background-color: rgba(101, 124, 80, 0.15); color: var(--add-primary-text, #556843);",
-	"background-color: rgba(0, 127, 145, 0.15); color: var(--add-info-text, #006B7A);",
-	"background-color: rgba(169, 124, 87, 0.18); color: #825735;",
-	"background-color: rgba(49, 69, 80, 0.15); color: #314550;"
+	"background-color: color-mix(in srgb, var(--add-primary) 15%, transparent); color: var(--add-primary-text);",
+	"background-color: color-mix(in srgb, var(--add-info) 15%, transparent); color: var(--add-info-text);",
+	"background-color: color-mix(in srgb, var(--add-warning) 18%, transparent); color: var(--add-warning-text);",
+	"background-color: var(--add-surface-sunken); color: var(--add-text-primary);"
 ]
 
 const flattenedCompanyRows = computed<CompanyTableRow[]>(() => {
@@ -612,7 +608,7 @@ const flattenedCompanyRows = computed<CompanyTableRow[]>(() => {
 				initials,
 				avatarStyle,
 				paymentStatus: {
-					label: t("reports.status.noInvoices", "لا توجد فواتير"),
+					label: t("reports.status.noInvoices"),
 					tagType: "default"
 				}
 			})
@@ -625,11 +621,11 @@ const flattenedCompanyRows = computed<CompanyTableRow[]>(() => {
 
 				let paymentStatus: { label: string; tagType: "default" | "primary" | "info" | "success" | "warning" | "error" }
 				if (paidNum === 0 && billedNum > 0) {
-					paymentStatus = { label: t("reports.status.unpaidFully", "غير مسدد بالكامل"), tagType: "error" }
+					paymentStatus = { label: t("reports.status.unpaidFully"), tagType: "error" }
 				} else if (overdueNum > 0) {
-					paymentStatus = { label: t("reports.status.partialOverdue", "سداد جزئي متأخر"), tagType: "warning" }
+					paymentStatus = { label: t("reports.status.partialOverdue"), tagType: "warning" }
 				} else if (paidNum >= billedNum && billedNum > 0) {
-					paymentStatus = { label: t("reports.status.paidFully", "مسدد بالكامل"), tagType: "success" }
+					paymentStatus = { label: t("reports.status.paidFully"), tagType: "success" }
 				} else {
 					paymentStatus = {
 						label: t("reports.status.paidPercentage", { rate: Math.round(rate) }, "سداد بنسبة {rate}%"),
@@ -660,7 +656,7 @@ const flattenedCompanyRows = computed<CompanyTableRow[]>(() => {
 const currencyFilterOptions = computed(() => {
 	const currencies = Array.from(new Set(flattenedCompanyRows.value.map(r => r.currency).filter(c => c && c !== "-")))
 	return [
-		{ label: t("reports.filters.allCompanies", "جميع الشركات"), value: "ALL" },
+		{ label: t("reports.filters.allCompanies"), value: "ALL" },
 		...currencies.map(c => ({ label: `${t("reports.common.currencyGroup", "عملة:")} ${c}`, value: c }))
 	]
 })
@@ -697,8 +693,8 @@ function exportStatement() {
 
 	const headers = [
 		t("companies.columns.legalName", "الشركة"),
-		t("reports.common.recordNumber", "السجل/المعرف"),
-		t("reports.common.currency", "العملة"),
+		t("reports.common.recordNumber"),
+		t("reports.common.currency"),
 		t("reports.common.billed", "إجمالي المفوتر"),
 		t("reports.common.paid", "المدفوع / المحصل"),
 		t("reports.common.remaining", "المتبقي"),
@@ -717,7 +713,7 @@ function exportStatement() {
 		`"${r.paymentStatus.label}"`
 	])
 
-	const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(e => e.join(","))].join("\r\n")
+	const csvContent = `\uFEFF${[headers.join(","), ...rows.map(e => e.join(","))].join("\r\n")}`
 	const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
 	const url = URL.createObjectURL(blob)
 	const link = document.createElement("a")

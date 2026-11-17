@@ -1,11 +1,5 @@
 <template>
-	<n-modal
-		:show
-		preset="card"
-		class="max-w-2xl w-full rounded-2xl"
-		:title="isEdit ? t('operationsRequests.actions.editService') : t('operationsRequests.actions.addService')"
-		@update:show="emit('update:show', $event)"
-	>
+	<FormModal :show :title="isEdit ? t('operationsRequests.actions.editService') : t('operationsRequests.actions.addService')" size="lg" @update:show="emit('update:show', $event)">
 		<div class="flex flex-col gap-4">
 			<div class="grid grid-cols-2 gap-3">
 				<n-form-item label="Service Axis" required>
@@ -46,10 +40,10 @@
 			<!-- The service's "Explore ADD" card and page in the member app -->
 			<n-form-item :label="t('operationsRequests.catalog.image')">
 				<div class="flex items-center gap-3 w-full">
-					<div class="w-28 aspect-video rounded-lg overflow-hidden border border-stone-200 bg-stone-50 flex items-center justify-center shrink-0">
+					<div class="w-28 aspect-video rounded-lg overflow-hidden border border-[var(--add-border)] bg-[var(--add-surface-sunken)] flex items-center justify-center shrink-0">
 						<n-spin v-if="isUploading" size="small" />
 						<img v-else-if="form.image_url" :src="form.image_url" alt="" class="w-full h-full object-cover" />
-						<Icon v-else name="carbon:image" :size="22" class="text-stone-400" />
+						<Icon v-else name="carbon:image" :size="22" class="text-[var(--add-text-muted)]" />
 					</div>
 					<n-upload accept="image/*" :show-file-list="false" :custom-request="uploadImage">
 						<n-button size="small" secondary type="primary" :disabled="isUploading">
@@ -71,26 +65,26 @@
 				<MarkdownEditor v-model:value="aboutEn" class="w-full" placeholder="## …" min-height="180px" max-height="400px" />
 			</n-form-item>
 
-			<div class="flex flex-wrap items-center gap-6 p-3 bg-stone-50 rounded-xl border border-stone-100">
+			<div class="flex flex-wrap items-center gap-6 p-3 bg-[var(--add-surface-sunken)] rounded-xl border border-[var(--add-border)]">
 				<div class="flex items-center gap-2">
 					<n-switch v-model:value="form.is_active" />
-					<span class="text-xs font-medium text-stone-700">{{ t('operationsRequests.catalog.active') }}</span>
+					<span class="text-xs font-medium text-[var(--add-text-primary)]">{{ t('operationsRequests.catalog.active') }}</span>
 				</div>
 				<div class="flex items-center gap-2">
 					<n-switch v-model:value="form.is_coming_soon" />
-					<span class="text-xs font-medium text-stone-700">{{ t('operationsRequests.catalog.comingSoon') }}</span>
+					<span class="text-xs font-medium text-[var(--add-text-primary)]">{{ t('operationsRequests.catalog.comingSoon') }}</span>
 				</div>
 				<div class="flex items-center gap-2">
 					<n-switch v-model:value="form.requires_location" />
-					<span class="text-xs font-medium text-stone-700">{{ t('operationsRequests.catalog.locationRequired') }}</span>
+					<span class="text-xs font-medium text-[var(--add-text-primary)]">{{ t('operationsRequests.catalog.locationRequired') }}</span>
 				</div>
 				<div class="flex items-center gap-2">
 					<n-switch v-model:value="form.show_on_home" />
-					<span class="text-xs font-medium text-stone-700">{{ t('operationsRequests.catalog.showOnHome') }}</span>
+					<span class="text-xs font-medium text-[var(--add-text-primary)]">{{ t('operationsRequests.catalog.showOnHome') }}</span>
 				</div>
 			</div>
 
-			<div class="flex items-center justify-end gap-3 pt-4 border-t border-stone-200">
+			<div class="flex items-center justify-end gap-3 pt-4 border-t border-[var(--add-border)]">
 				<n-button secondary @click="emit('update:show', false)">
 					{{ t('operationsRequests.actions.close') }}
 				</n-button>
@@ -99,16 +93,17 @@
 				</n-button>
 			</div>
 		</div>
-	</n-modal>
+	</FormModal>
 </template>
 
 <script setup lang="ts">
 import type { UploadCustomRequestOptions } from "naive-ui"
 import type { RequestMethod, ServiceType, ServiceTypePayload } from "../types/service"
-import { NButton, NFormItem, NInput, NModal, NSelect, NSpin, NSwitch, NUpload, useMessage } from "naive-ui"
+import { NButton, NFormItem, NInput, NSelect, NSpin, NSwitch, NUpload, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import MarkdownEditor from "@/add-os/components/form/MarkdownEditor.vue"
+import FormModal from "@/add-os/components/page/FormModal.vue"
 import { uploadMedia } from "@/add-os/services/media"
 import { createServiceType, updateServiceType } from "@/add-os/services/service-types"
 import Icon from "@/components/common/Icon.vue"

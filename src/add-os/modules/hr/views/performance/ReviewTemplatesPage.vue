@@ -29,6 +29,7 @@ import { NAlert, NButton, NCard, NDataTable } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { canManagePerformance } from "@/add-os/config/permissions"
 import ActiveTag from "@/add-os/modules/hr/components/ActiveTag.vue"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
@@ -84,9 +85,8 @@ const columns = computed<DataTableColumns<ReviewTemplate>>(() => [
 				{
 					title: "",
 					key: "actions",
-					width: 60,
-					render: (row: ReviewTemplate) =>
-						h(NButton, { text: true, type: "primary", "aria-label": t("hr.common.edit"), title: t("hr.common.edit"), onClick: () => openEditor(row) }, { icon: () => h(Icon, { name: "carbon:edit", size: 18 }) })
+					width: 90,
+					render: (row: ReviewTemplate) => h(RowActions, { actions: [{ key: "edit", label: t("hr.common.edit"), icon: "carbon:edit", onClick: () => openEditor(row) }] })
 				}
 			]
 		: [])

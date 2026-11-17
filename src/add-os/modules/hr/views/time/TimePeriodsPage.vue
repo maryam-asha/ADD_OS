@@ -28,6 +28,7 @@ import type { TimePeriod } from "@/add-os/modules/hr/types/time"
 import { NAlert, NButton, NCard, NDataTable, NDatePicker, NTag, useDialog, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { canLockAttendance } from "@/add-os/config/permissions"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import { apiErrorMessage, serverMessage } from "@/add-os/modules/hr/utils/errors"
@@ -129,16 +130,23 @@ const columns = computed<DataTableColumns<TimePeriod>>(() => [
 				{
 					title: t("hr.employees.columns.actions"),
 					key: "actions",
-					width: 120,
+					width: 130,
 					align: "center" as const,
 					render: (row: TimePeriod) =>
-						row.status === "locked"
-							? h(NButton, { size: "small", onClick: () => confirmUnlock(row) }, { default: () => t("hrAttendance.periods.unlock") })
-							: h(
-									NButton,
-									{ size: "small", type: "primary", onClick: () => run(t("hrAttendance.periods.lockTitle", { month: monthLabel(row.year, row.month) }), t("hrAttendance.periods.lockConfirm"), t("hrAttendance.periods.lock"), () => lockTimePeriod(row.year, row.month)) },
-									{ default: () => t("hrAttendance.periods.lock") }
-								)
+						h(RowActions, {
+							labelled: true,
+							actions: [
+								row.status === "locked"
+									? { key: "unlock", label: t("hrAttendance.periods.unlock"), icon: "carbon:unlocked", onClick: () => confirmUnlock(row) }
+									: {
+											key: "lock",
+											label: t("hrAttendance.periods.lock"),
+											icon: "carbon:locked",
+											primary: true,
+											onClick: () => run(t("hrAttendance.periods.lockTitle", { month: monthLabel(row.year, row.month) }), t("hrAttendance.periods.lockConfirm"), t("hrAttendance.periods.lock"), () => lockTimePeriod(row.year, row.month))
+										}
+							]
+						})
 				}
 			]
 		: [])

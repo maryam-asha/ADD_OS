@@ -1,22 +1,11 @@
 <!-- src/add-os/modules/members/views/OfficeLeasesPage.vue -->
 <template>
-	<div class="flex flex-col gap-6 text-neutral-800 dark:text-neutral-100">
+	<div class="flex flex-col gap-6 text-[var(--add-text-primary)]">
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
 		<!-- HEADER & CONTROLS -->
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
-		<div class="flex flex-wrap items-center justify-between gap-4">
-			<!-- Title & Description -->
-			<div class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">
-					{{ t(titleKey || "nav.pages.officeLeases", "عقود إيجار المكاتب والمساحات") }}
-				</h1>
-				<p class="text-sm text-neutral-500">
-					{{ t("officeLeases.description", "إدارة وتتبع عقود مكاتب الشركات، فترات السريان، الدفعات الشهرية، وضوابط التجديد التلقائي ضمن مجمعات منطقة حلب الرقمية.") }}
-				</p>
-			</div>
-
-			<!-- Top Action Buttons -->
-			<div class="flex flex-wrap items-center gap-2.5">
+		<PageHeader :title="t(titleKey || 'nav.pages.officeLeases', 'عقود إيجار المكاتب والمساحات')" :description="t('officeLeases.description', 'إدارة وتتبع عقود مكاتب الشركات، فترات السريان، الدفعات الدورية والتجديد التلقائي.')">
+			<template #actions>
 				<!-- Export CSV -->
 				<n-button
 					secondary
@@ -25,7 +14,7 @@
 					@click="exportCsv"
 				>
 					<template #icon><Icon name="carbon:download" :size="16" /></template>
-					{{ t("reports.common.exportStatement", "تصدير كشف العقود") }}
+					{{ t("reports.common.exportStatement") }}
 				</n-button>
 
 				<!-- Refresh -->
@@ -36,7 +25,7 @@
 					@click="refetch"
 				>
 					<template #icon><Icon name="carbon:renew" :size="16" /></template>
-					{{ t("common.refresh", "تحديث") }}
+					{{ t("common.refresh") }}
 				</n-button>
 
 				<!-- Create New Lease -->
@@ -49,8 +38,8 @@
 					<template #icon><Icon name="carbon:add" :size="16" /></template>
 					{{ t("officeLeases.create.button", "إنشاء عقد إيجار جديد") }}
 				</n-button>
-			</div>
-		</div>
+			</template>
+		</PageHeader>
 
 		<!-- Permission Denied Alert -->
 		<n-alert v-if="!canView" type="warning" :title="t('officeLeases.permissionDenied', 'ليس لديك صلاحية لعرض عقود إيجار المكاتب.')" />
@@ -64,28 +53,28 @@
 			<!-- ════════════════════════════════════════════════════════════════════════════ -->
 			<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
 				<!-- Card 1: Total Active Contracts -->
-				<div class="flex flex-col justify-between gap-3 rounded-2xl border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface-raised,#FFFFFF)] p-4.5 shadow-xs dark:border-neutral-800 dark:bg-neutral-900/60">
+				<div class="flex flex-col justify-between gap-3 rounded-2xl border border-[var(--add-border)]/40 bg-[var(--add-surface-raised)] p-4.5 shadow-xs">
 					<div class="flex items-center justify-between">
-						<span class="text-xs font-semibold text-[var(--add-text-muted,#5A606B)] dark:text-neutral-400">
-							{{ t("officeLeases.stats.totalActive", "إجمالي العقود النشطة") }}
+						<span class="text-xs font-semibold text-[var(--add-text-muted)]">
+							{{ t("officeLeases.stats.totalActive") }}
 						</span>
-						<div class="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--add-primary,#657C50)]/10 text-[var(--add-primary-text,#556843)] dark:bg-[var(--add-primary,#657C50)]/20 dark:text-[var(--add-primary,#657C50)]">
+						<div class="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--add-primary)]/10 text-[var(--add-primary-text)]">
 							<Icon name="carbon:document" :size="18" />
 						</div>
 					</div>
 
 					<div class="flex items-baseline gap-1.5">
-						<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-text-primary,#43474F)] dark:text-neutral-50">
+						<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-text-primary)]">
 							{{ meta?.total ?? activeCount }}
 						</span>
-						<span class="text-xs font-medium text-[var(--add-text-muted,#5A606B)]">
-							{{ t("officeLeases.stats.activeCountUnit", "عقداً سارياً") }}
+						<span class="text-xs font-medium text-[var(--add-text-muted)]">
+							{{ t("officeLeases.stats.activeCountUnit") }}
 						</span>
 					</div>
 
-					<div class="flex items-center justify-between pt-1 border-t border-[var(--add-border,#CDC2AF)]/20 text-xs text-[var(--add-text-muted,#5A606B)] dark:border-neutral-800">
+					<div class="flex items-center justify-between pt-1 border-t border-[var(--add-border)]/20 text-xs text-[var(--add-text-muted)]">
 						<span>{{ t("officeLeases.stats.acrossWings", { count: activeWingsCount }, "ضمن {count} أجنحة تقنية") }}</span>
-						<span class="inline-flex items-center gap-1 font-bold text-[var(--add-primary-text,#556843)] dark:text-[var(--add-primary,#657C50)]">
+						<span class="inline-flex items-center gap-1 font-bold text-[var(--add-primary-text)]">
 							<Icon name="carbon:growth" :size="13" />
 							<span>+{{ newThisMonthCount }} هذا الشهر</span>
 						</span>
@@ -93,32 +82,32 @@
 				</div>
 
 				<!-- Card 2: Vacant and Ready Spaces -->
-				<div class="flex flex-col justify-between gap-3 rounded-2xl border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface-raised,#FFFFFF)] p-4.5 shadow-xs dark:border-neutral-800 dark:bg-neutral-900/60">
+				<div class="flex flex-col justify-between gap-3 rounded-2xl border border-[var(--add-border)]/40 bg-[var(--add-surface-raised)] p-4.5 shadow-xs">
 					<div class="flex items-center justify-between">
-						<span class="text-xs font-semibold text-[var(--add-text-muted,#5A606B)] dark:text-neutral-400">
-							{{ t("officeLeases.stats.vacantOffices", "المكاتب الشاغرة والمتاحة") }}
+						<span class="text-xs font-semibold text-[var(--add-text-muted)]">
+							{{ t("officeLeases.stats.vacantOffices") }}
 						</span>
-						<div class="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--add-info,#007F91)]/10 text-[var(--add-info-text,#006B7A)] dark:bg-[var(--add-info,#007F91)]/20 dark:text-[var(--add-info,#007F91)]">
+						<div class="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--add-info)]/10 text-[var(--add-info-text)]">
 							<Icon name="carbon:building" :size="18" />
 						</div>
 					</div>
 
 					<div class="flex items-baseline gap-1.5">
-						<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-info-text,#006B7A)] dark:text-[var(--add-info,#007F91)]">
+						<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-info-text)]">
 							{{ vacantSpacesCount }}
 						</span>
-						<span class="text-xs font-medium text-[var(--add-text-muted,#5A606B)]">
-							{{ t("officeLeases.stats.readyOffices", "مكاتب جاهزة") }}
+						<span class="text-xs font-medium text-[var(--add-text-muted)]">
+							{{ t("officeLeases.stats.readyOffices") }}
 						</span>
 					</div>
 
-					<div class="flex items-center justify-between gap-2 pt-1 border-t border-[var(--add-border,#CDC2AF)]/20 text-xs dark:border-neutral-800">
-						<span class="font-bold text-[var(--add-text-primary,#43474F)] dark:text-neutral-300">
+					<div class="flex items-center justify-between gap-2 pt-1 border-t border-[var(--add-border)]/20 text-xs">
+						<span class="font-bold text-[var(--add-text-primary)]">
 							{{ t("officeLeases.stats.occupancy", { percent: occupancyRate }, "إشغال {percent}%") }}
 						</span>
-						<div class="h-2 w-28 overflow-hidden rounded-full bg-[var(--add-surface-sunken,#EDEAE8)] dark:bg-neutral-800">
+						<div class="h-2 w-28 overflow-hidden rounded-full bg-[var(--add-surface-sunken)]">
 							<div
-								class="h-full bg-[var(--add-info,#007F91)] transition-all duration-300"
+								class="h-full bg-[var(--add-info)] transition-all duration-300"
 								:style="{ width: `${occupancyRate}%` }"
 							/>
 						</div>
@@ -126,61 +115,61 @@
 				</div>
 
 				<!-- Card 3: Ending Soon (< 30 days) -->
-				<div class="flex flex-col justify-between gap-3 rounded-2xl border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface-raised,#FFFFFF)] p-4.5 shadow-xs dark:border-neutral-800 dark:bg-neutral-900/60">
+				<div class="flex flex-col justify-between gap-3 rounded-2xl border border-[var(--add-border)]/40 bg-[var(--add-surface-raised)] p-4.5 shadow-xs">
 					<div class="flex items-center justify-between">
-						<span class="text-xs font-semibold text-[var(--add-text-muted,#5A606B)] dark:text-neutral-400">
-							{{ t("officeLeases.stats.endingSoon", "عقود تنتهي قريباً (< 30 يوماً)") }}
+						<span class="text-xs font-semibold text-[var(--add-text-muted)]">
+							{{ t("officeLeases.stats.endingSoon") }}
 						</span>
-						<div class="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--add-warning,#E7B155)]/10 text-[var(--add-warning-text,#845A13)] dark:bg-[var(--add-warning,#E7B155)]/20 dark:text-[var(--add-warning,#E7B155)]">
+						<div class="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--add-warning)]/10 text-[var(--add-warning-text)]">
 							<Icon name="carbon:time" :size="18" />
 						</div>
 					</div>
 
 					<div class="flex items-baseline gap-1.5">
-						<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-warning-text,#845A13)] dark:text-[var(--add-warning,#E7B155)]">
+						<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-warning-text)]">
 							{{ endingSoonCount }}
 						</span>
-						<span class="text-xs font-medium text-[var(--add-text-muted,#5A606B)]">
-							{{ t("officeLeases.stats.dueContracts", "عقود استحقاق") }}
+						<span class="text-xs font-medium text-[var(--add-text-muted)]">
+							{{ t("officeLeases.stats.dueContracts") }}
 						</span>
 					</div>
 
-					<div class="pt-1 border-t border-[var(--add-border,#CDC2AF)]/20 text-xs dark:border-neutral-800">
+					<div class="pt-1 border-t border-[var(--add-border)]/20 text-xs">
 						<span
 							v-if="endingSoonCount > 0"
-							class="inline-flex items-center gap-1 rounded-md bg-[var(--add-warning,#E7B155)]/15 px-2 py-0.5 text-xs font-bold text-[var(--add-warning-text,#845A13)] dark:text-[var(--add-warning,#E7B155)]"
+							class="inline-flex items-center gap-1 rounded-md bg-[var(--add-warning)]/15 px-2 py-0.5 text-xs font-bold text-[var(--add-warning-text)]"
 						>
 							<Icon name="carbon:warning-alt" :size="13" />
-							<span>{{ t("officeLeases.stats.requiresAction", "تتطلب الإجراء والمتابعة") }}</span>
+							<span>{{ t("officeLeases.stats.requiresAction") }}</span>
 						</span>
-						<span v-else class="text-[var(--add-primary-text,#556843)]">
-							{{ t("officeLeases.stats.allHealthy", "كافة العقود ضمن فترات أمان") }}
+						<span v-else class="text-[var(--add-primary-text)]">
+							{{ t("officeLeases.stats.allHealthy") }}
 						</span>
 					</div>
 				</div>
 
 				<!-- Card 4: Monthly Rent Returns -->
-				<div class="flex flex-col justify-between gap-3 rounded-2xl border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface-raised,#FFFFFF)] p-4.5 shadow-xs dark:border-neutral-800 dark:bg-neutral-900/60">
+				<div class="flex flex-col justify-between gap-3 rounded-2xl border border-[var(--add-border)]/40 bg-[var(--add-surface-raised)] p-4.5 shadow-xs">
 					<div class="flex items-center justify-between">
-						<span class="text-xs font-semibold text-[var(--add-text-muted,#5A606B)] dark:text-neutral-400">
-							{{ t("officeLeases.stats.monthlyReturns", "العائد التأجيري الشهري") }}
+						<span class="text-xs font-semibold text-[var(--add-text-muted)]">
+							{{ t("officeLeases.stats.monthlyReturns") }}
 						</span>
-						<div class="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--add-primary,#657C50)]/10 text-[var(--add-primary-text,#556843)] dark:bg-[var(--add-primary,#657C50)]/20 dark:text-[var(--add-primary,#657C50)]">
+						<div class="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--add-primary)]/10 text-[var(--add-primary-text)]">
 							<Icon name="carbon:wallet" :size="18" />
 						</div>
 					</div>
 
 					<div class="flex flex-col">
-						<span class="font-mono text-xl font-bold tracking-tight text-[var(--add-text-primary,#43474F)] dark:text-neutral-50">
+						<span class="font-mono text-xl font-bold tracking-tight text-[var(--add-text-primary)]">
 							{{ formatReportMoney(sypMonthlyTotal, 'SYP') }}
 						</span>
-						<span v-if="usdMonthlyTotal > 0" class="font-mono text-xs font-semibold text-[var(--add-text-secondary,#565B65)] dark:text-neutral-400">
+						<span v-if="usdMonthlyTotal > 0" class="font-mono text-xs font-semibold text-[var(--add-text-secondary)]">
 							+ {{ formatReportMoney(usdMonthlyTotal, 'USD') }} عقود دولية
 						</span>
 					</div>
 
-					<div class="pt-1 border-t border-[var(--add-border,#CDC2AF)]/20 text-xs text-[var(--add-text-muted,#5A606B)] dark:border-neutral-800">
-						<span>{{ t("officeLeases.stats.collectionQuarter", "تحصيل بنسبة 94% للربع الحالي") }}</span>
+					<div class="pt-1 border-t border-[var(--add-border)]/20 text-xs text-[var(--add-text-muted)]">
+						<span>{{ t("officeLeases.stats.collectionQuarter") }}</span>
 					</div>
 				</div>
 			</div>
@@ -190,27 +179,27 @@
 			<!-- ════════════════════════════════════════════════════════════════════════════ -->
 			<div
 				v-if="blockedLeasesCount > 0"
-				class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--add-warning,#E7B155)]/50 bg-[var(--add-warning,#E7B155)]/10 p-4.5 dark:border-[var(--add-warning,#E7B155)]/40 dark:bg-[var(--add-warning,#E7B155)]/15"
+				class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--add-warning)]/50 bg-[var(--add-warning)]/10 p-4.5"
 			>
 				<div class="flex items-start gap-3">
-					<div class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--add-warning,#E7B155)]/20 text-[var(--add-warning-text,#845A13)] dark:text-[var(--add-warning,#E7B155)]">
+					<div class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--add-warning)]/20 text-[var(--add-warning-text)]">
 						<Icon name="carbon:locked" :size="18" />
 					</div>
 					<div class="flex flex-col gap-0.5">
-						<h4 class="text-sm font-bold text-[var(--add-warning-text,#845A13)] dark:text-[var(--add-warning,#E7B155)]">
+						<h4 class="text-sm font-bold text-[var(--add-warning-text)]">
 							{{ t("officeLeases.alerts.smartCollectionTitle", { count: blockedLeasesCount }, "تنبيه نظام التحصيل الذكي: ({count}) عقود مقفلة تلقائياً عن التجديد") }}
 						</h4>
-						<p class="text-xs text-[var(--add-warning-text,#845A13)]/90 dark:text-[var(--add-warning,#E7B155)]/90">
-							{{ t("officeLeases.alerts.smartCollectionDesc", "تم تقييد التجديد التلقائي لشركات عليها فواتير متأخرة تجاوزت شريحة 60 يوماً في كشف أعمار الديون حفاظاً على الانتظام المالي.") }}
+						<p class="text-xs text-[var(--add-warning-text)]/90">
+							{{ t("officeLeases.alerts.smartCollectionDesc") }}
 						</p>
 					</div>
 				</div>
 
 				<router-link
 					to="/provider/invoice-statement"
-					class="inline-flex items-center gap-1.5 rounded-xl border border-[var(--add-warning,#E7B155)]/60 bg-white/90 px-3.5 py-2 text-xs font-bold text-[var(--add-warning-text,#845A13)] shadow-2xs transition-all hover:bg-white dark:bg-neutral-900/90 dark:text-[var(--add-warning,#E7B155)]"
+					class="inline-flex items-center gap-1.5 rounded-xl border border-[var(--add-warning)]/60 bg-white/90 px-3.5 py-2 text-xs font-bold text-[var(--add-warning-text)] shadow-2xs transition-all hover:bg-white"
 				>
-					<span>{{ t("officeLeases.alerts.inspectDues", "فحص كشف المطالبات") }}</span>
+					<span>{{ t("officeLeases.alerts.inspectDues") }}</span>
 					<Icon name="carbon:arrow-left" :size="14" />
 				</router-link>
 			</div>
@@ -218,7 +207,7 @@
 			<!-- ════════════════════════════════════════════════════════════════════════════ -->
 			<!-- FILTERS & SEARCH ROW -->
 			<!-- ════════════════════════════════════════════════════════════════════════════ -->
-			<div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface-raised,#FFFFFF)] p-3.5 shadow-xs dark:border-neutral-800 dark:bg-neutral-900/60">
+			<div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--add-border)]/40 bg-[var(--add-surface-raised)] p-3.5 shadow-xs">
 				<div class="flex flex-1 flex-wrap items-center gap-2.5">
 					<!-- Search Input -->
 					<div class="min-w-[240px] flex-1">
@@ -229,7 +218,7 @@
 							class="rounded-xl"
 						>
 							<template #prefix>
-								<Icon name="carbon:search" :size="16" class="text-neutral-400" />
+								<Icon name="carbon:search" :size="16" class="text-[var(--add-text-muted)]" />
 							</template>
 						</n-input>
 					</div>
@@ -295,13 +284,13 @@
 			<!-- ════════════════════════════════════════════════════════════════════════════ -->
 			<!-- CONTRACTS DATA TABLE -->
 			<!-- ════════════════════════════════════════════════════════════════════════════ -->
-			<div class="overflow-hidden rounded-2xl border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface-raised,#FFFFFF)] shadow-xs dark:border-neutral-800 dark:bg-neutral-900/60">
+			<div class="overflow-hidden rounded-2xl border border-[var(--add-border)]/40 bg-[var(--add-surface-raised)] shadow-xs">
 				<n-data-table
-					:columns="columns"
+					:columns
 					:data="filteredData"
 					:loading="isLoading"
 					:bordered="false"
-					:row-key="rowKey"
+					:row-key
 					:pagination="false"
 					:scroll-x="1280"
 					size="small"
@@ -309,14 +298,14 @@
 				/>
 
 				<!-- Empty State -->
-				<div v-if="!isLoading && filteredData.length === 0" class="py-16 text-center text-sm text-[var(--add-text-muted,#5A606B)]">
+				<div v-if="!isLoading && filteredData.length === 0" class="py-16 text-center text-sm text-[var(--add-text-muted)]">
 					{{ t("officeLeases.empty", "لا توجد عقود إيجار مطابقة للبحث أو الفلاتر المحددة.") }}
 				</div>
 
 				<!-- Custom Pagination Footer -->
 				<div
 					v-if="filteredData.length > 0"
-					class="flex flex-col sm:flex-row items-center justify-between px-6 py-3.5 border-t border-[var(--add-border,#CDC2AF)]/30 dark:border-neutral-800 gap-3 text-xs text-[var(--add-text-secondary,#565B65)] dark:text-neutral-400 bg-[var(--add-surface,#F7F5F2)]/40 dark:bg-neutral-900/40"
+					class="flex flex-col sm:flex-row items-center justify-between px-6 py-3.5 border-t border-[var(--add-border)]/30 gap-3 text-xs text-[var(--add-text-secondary)] bg-[var(--add-surface)]/40"
 				>
 					<div>
 						{{ t('officeLeases.pagination.showing', {
@@ -354,6 +343,8 @@ import type { OfficeLease, OfficeLeaseFilterQuery } from "@/add-os/modules/membe
 import { NAlert, NButton, NDataTable, NInput, NPagination, NSelect, NSwitch, NTag, useMessage } from "naive-ui"
 import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { canCreateOfficeLeases, canViewOfficeLeases } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
@@ -406,21 +397,21 @@ const branchOptions = computed(() => branches.value.map(b => ({
 })))
 
 const statusOptions = computed(() => [
-	{ label: t("officeLeases.status.all", "حالة العقد (الكل)"), value: undefined as any },
+	{ label: t("officeLeases.status.all"), value: undefined as any },
 	{ label: t("officeLeases.status.active", "سارٍ ونشط"), value: "active" },
 	{ label: t("officeLeases.status.ended", "منتهي"), value: "ended" },
 	{ label: t("officeLeases.status.terminated", "مفسوخ"), value: "terminated" }
 ])
 
 const autoRenewOptions = computed<SelectOption[]>(() => [
-	{ label: t("officeLeases.filters.autoRenewAll", "التجديد التلقائي (الكل)"), value: null as any },
+	{ label: t("officeLeases.filters.autoRenewAll"), value: null as any },
 	{ label: t("officeLeases.autoRenew.enabled", "مفعّل تلقائياً"), value: "enabled" },
 	{ label: t("officeLeases.autoRenew.disabled", "معطّل / يدوي"), value: "disabled" },
-	{ label: t("officeLeases.autoRenew.blocked", "مقفل إدارياً"), value: "blocked" }
+	{ label: t("officeLeases.autoRenew.blocked"), value: "blocked" }
 ])
 
 const currencyOptions = computed<SelectOption[]>(() => [
-	{ label: t("officeLeases.filters.currencyAll", "العملة (الكل)"), value: null as any },
+	{ label: t("officeLeases.filters.currencyAll"), value: null as any },
 	{ label: "ل.س", value: "SYP" },
 	{ label: "USD ($)", value: "USD" }
 ])
@@ -465,7 +456,7 @@ const filteredData = computed(() => {
 const activeCount = computed(() => (data.value || []).filter(l => l.status === "active").length)
 
 const endingSoonCount = computed(() => {
-	const now = new Date().getTime()
+	const now = Date.now()
 	return (data.value || []).filter(l => {
 		if (l.status !== "active" || !l.ends_on) return false
 		const end = new Date(l.ends_on).getTime()
@@ -520,7 +511,7 @@ const blockedLeasesCount = computed(() => {
 function getDaysRemaining(endDate: string | null | undefined): number {
 	if (!endDate) return 0
 	const end = new Date(endDate).getTime()
-	const now = new Date().getTime()
+	const now = Date.now()
 	const diff = Math.ceil((end - now) / (1000 * 60 * 60 * 24))
 	return diff > 0 ? diff : 0
 }
@@ -529,7 +520,7 @@ function getProgressPercent(startIso: string | null | undefined, endIso: string 
 	if (!startIso || !endIso) return 50
 	const start = new Date(startIso).getTime()
 	const end = new Date(endIso).getTime()
-	const now = new Date().getTime()
+	const now = Date.now()
 	if (end <= start) return 100
 	const progress = Math.round(((now - start) / (end - start)) * 100)
 	return Math.min(100, Math.max(5, progress))
@@ -554,7 +545,7 @@ useOpenRecord(id => {
 })
 
 function handleCreateLease() {
-	message.info(t("officeLeases.create.notice", "لإنشاء عقد إيجار جديد، اختر طلباً من قائمة طلبات المكاتب الخاصة أو أنشئ طلباً جديداً."))
+	message.info(t("officeLeases.create.notice"))
 }
 
 function exportCsv() {
@@ -569,7 +560,7 @@ function exportCsv() {
 	]
 
 	const rows = filteredData.value.map(row => [
-		`"${row.reference || '#' + row.id}"`,
+		`"${row.reference || `#${row.id}`}"`,
 		`"${(row.company?.legal_name || "").replace(/"/g, '""')}"`,
 		`"${(row.space?.name || "").replace(/"/g, '""')}"`,
 		`"${formatReportMoney(row.monthly_amount, row.currency)}"`,
@@ -578,7 +569,7 @@ function exportCsv() {
 		`"${t(`officeLeases.status.${row.status}`, row.status)}"`
 	].join(","))
 
-	const csvContent = "\uFEFF" + [headers.join(","), ...rows].join("\n")
+	const csvContent = `\uFEFF${[headers.join(","), ...rows].join("\n")}`
 	const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
 	const url = URL.createObjectURL(blob)
 	const link = document.createElement("a")
@@ -599,11 +590,11 @@ const columns = computed<DataTableColumns<OfficeLease>>(() => [
 		align: "center",
 		render: row =>
 			h("div", { class: "inline-flex items-center justify-center gap-2" }, [
-				h(Icon, { name: "carbon:document", size: 16, class: "text-[var(--add-primary-text,#556843)]" }),
+				h(Icon, { name: "carbon:document", size: 16, class: "text-[var(--add-primary-text)]" }),
 				h(
 					"span",
 					{
-						class: "font-mono font-bold text-xs text-[var(--add-text-primary,#43474F)] dark:text-neutral-200 select-all cursor-pointer hover:underline",
+						class: "font-mono font-bold text-xs text-[var(--add-text-primary)] select-all cursor-pointer hover:underline",
 						onClick: () => openDetail(row)
 					},
 					row.reference || `LSE-2026-${String(row.id).padStart(5, '0')}`
@@ -622,14 +613,14 @@ const columns = computed<DataTableColumns<OfficeLease>>(() => [
 				h(
 					"span",
 					{
-						class: "font-bold text-sm text-[var(--add-text-primary,#43474F)] hover:text-[var(--add-primary-text,#556843)] hover:underline cursor-pointer dark:text-neutral-100",
+						class: "font-bold text-sm text-[var(--add-text-primary)] hover:text-[var(--add-primary-text)] hover:underline cursor-pointer",
 						onClick: () => openDetail(row)
 					},
 					row.company?.legal_name || "—"
 				),
 				h(
 					"span",
-					{ class: "text-xs text-[var(--add-text-muted,#5A606B)] dark:text-neutral-400" },
+					{ class: "text-xs text-[var(--add-text-muted)]" },
 					(row.company as any)?.industry || (row.company as any)?.sector || "حلول البرمجيات السحابية - فرع حلب"
 				)
 			])
@@ -645,8 +636,8 @@ const columns = computed<DataTableColumns<OfficeLease>>(() => [
 			const spaceName = resolveLocalized(row.space?.name, row.space?.id ? `مكتب #${row.space.id}` : "مكتب تنفيذي")
 			const spaceDetails = (row.space as any)?.building_wing || (row.space as any)?.wing || "المبنى C • الجناح الشمالي (85 م²)"
 			return h("div", { class: "flex flex-col items-center justify-center gap-0.5 py-1 text-center" }, [
-				h("span", { class: "font-bold text-sm text-[var(--add-text-primary,#43474F)] dark:text-neutral-200" }, spaceName),
-				h("span", { class: "text-xs text-[var(--add-text-muted,#5A606B)] dark:text-neutral-400" }, spaceDetails)
+				h("span", { class: "font-bold text-sm text-[var(--add-text-primary)]" }, spaceName),
+				h("span", { class: "text-xs text-[var(--add-text-muted)]" }, spaceDetails)
 			])
 		}
 	},
@@ -663,8 +654,8 @@ const columns = computed<DataTableColumns<OfficeLease>>(() => [
 			const hasOverdue = (row as any).overdue_invoices_count > 0 || row.id === 3
 
 			return h("div", { class: "flex flex-col items-center justify-center gap-0.5 py-1 text-center" }, [
-				h("span", { class: "font-mono font-bold text-sm text-[var(--add-text-primary,#43474F)] dark:text-neutral-100" }, formatted),
-				h("span", { class: "text-xs text-[var(--add-text-muted,#5A606B)] dark:text-neutral-400" }, cycleText),
+				h("span", { class: "font-mono font-bold text-sm text-[var(--add-text-primary)]" }, formatted),
+				h("span", { class: "text-xs text-[var(--add-text-muted)]" }, cycleText),
 				hasOverdue
 					? h(
 							NTag,
@@ -690,19 +681,19 @@ const columns = computed<DataTableColumns<OfficeLease>>(() => [
 			const isEndingSoon = days <= 30
 
 			return h("div", { class: "flex flex-col items-center justify-center gap-1 py-1 text-center" }, [
-				h("span", { class: "font-mono text-xs text-[var(--add-text-secondary,#565B65)] dark:text-neutral-300" }, `${start} - ${end}`),
+				h("span", { class: "font-mono text-xs text-[var(--add-text-secondary)]" }, `${start} - ${end}`),
 				h("div", { class: "flex items-center justify-center gap-2" }, [
 					h(
 						"span",
-						{ class: `text-xs font-bold ${isEndingSoon ? "text-[var(--add-warning-text,#845A13)] dark:text-[var(--add-warning,#E7B155)]" : "text-[var(--add-text-muted,#5A606B)]"}` },
+						{ class: `text-xs font-bold ${isEndingSoon ? "text-[var(--add-warning-text)]" : "text-[var(--add-text-muted)]"}` },
 						`متبقي ${days} يوماً`
 					),
 					h(
 						"div",
-						{ class: "h-1.5 w-16 overflow-hidden rounded-full bg-[var(--add-surface-sunken,#EDEAE8)] dark:bg-neutral-800" },
+						{ class: "h-1.5 w-16 overflow-hidden rounded-full bg-[var(--add-surface-sunken)]" },
 						[
 							h("div", {
-								class: `h-full transition-all duration-300 ${isEndingSoon ? "bg-[var(--add-warning,#E7B155)]" : "bg-[var(--add-primary,#657C50)]"}`,
+								class: `h-full transition-all duration-300 ${isEndingSoon ? "bg-[var(--add-warning)]" : "bg-[var(--add-primary)]"}`,
 								style: { width: `${progress}%` }
 							})
 						]
@@ -727,10 +718,10 @@ const columns = computed<DataTableColumns<OfficeLease>>(() => [
 					[
 						h(
 							"span",
-							{ class: "inline-flex items-center gap-1 rounded-md border border-[var(--add-danger,#D93D23)]/40 bg-[var(--add-danger,#D93D23)]/10 px-2 py-0.5 text-xs font-bold text-[var(--add-danger-text,#B4321D)] w-fit" },
+							{ class: "inline-flex items-center gap-1 rounded-md border border-[var(--add-danger)]/40 bg-[var(--add-danger)]/10 px-2 py-0.5 text-xs font-bold text-[var(--add-danger-text)] w-fit" },
 							[h(Icon, { name: "carbon:locked", size: 12 }), h("span", "مقفل إدارياً")]
 						),
-						h("span", { class: "text-[11px] text-[var(--add-danger-text,#B4321D)] font-mono" }, "ذمة > 60 يوم")
+						h("span", { class: "text-[11px] text-[var(--add-danger-text)] font-mono" }, "ذمة > 60 يوم")
 					]
 				)
 			}
@@ -746,7 +737,7 @@ const columns = computed<DataTableColumns<OfficeLease>>(() => [
 					}),
 					h(
 						"span",
-						{ class: "text-xs font-medium text-[var(--add-text-secondary,#565B65)] dark:text-neutral-300" },
+						{ class: "text-xs font-medium text-[var(--add-text-secondary)]" },
 						row.auto_renew ? "مفعل سنوياً" : "يدوي حسب الطلب"
 					)
 				]
@@ -768,9 +759,9 @@ const columns = computed<DataTableColumns<OfficeLease>>(() => [
 			if (isOverdue) {
 				return h(
 					"span",
-					{ class: "inline-flex items-center gap-1.5 rounded-full border border-[var(--add-danger,#D93D23)]/40 bg-[var(--add-danger,#D93D23)]/10 px-2.5 py-0.5 text-xs font-bold text-[var(--add-danger-text,#B4321D)]" },
+					{ class: "inline-flex items-center gap-1.5 rounded-full border border-[var(--add-danger)]/40 bg-[var(--add-danger)]/10 px-2.5 py-0.5 text-xs font-bold text-[var(--add-danger-text)]" },
 					[
-						h("span", { class: "h-1.5 w-1.5 rounded-full bg-[var(--add-danger,#D93D23)]" }),
+						h("span", { class: "h-1.5 w-1.5 rounded-full bg-[var(--add-danger)]" }),
 						h("span", "متأخر دفعات")
 					]
 				)
@@ -779,9 +770,9 @@ const columns = computed<DataTableColumns<OfficeLease>>(() => [
 			if (isEndingSoon) {
 				return h(
 					"span",
-					{ class: "inline-flex items-center gap-1.5 rounded-full border border-[var(--add-warning,#E7B155)]/50 bg-[var(--add-warning,#E7B155)]/10 px-2.5 py-0.5 text-xs font-bold text-[var(--add-warning-text,#845A13)]" },
+					{ class: "inline-flex items-center gap-1.5 rounded-full border border-[var(--add-warning)]/50 bg-[var(--add-warning)]/10 px-2.5 py-0.5 text-xs font-bold text-[var(--add-warning-text)]" },
 					[
-						h("span", { class: "h-1.5 w-1.5 rounded-full bg-[var(--add-warning,#E7B155)]" }),
+						h("span", { class: "h-1.5 w-1.5 rounded-full bg-[var(--add-warning)]" }),
 						h("span", "ينتهي قريباً")
 					]
 				)
@@ -789,9 +780,9 @@ const columns = computed<DataTableColumns<OfficeLease>>(() => [
 
 			return h(
 				"span",
-				{ class: "inline-flex items-center gap-1.5 rounded-full border border-[var(--add-success,#657C50)]/40 bg-[var(--add-success,#657C50)]/10 px-2.5 py-0.5 text-xs font-bold text-[var(--add-success-text,#556843)]" },
+				{ class: "inline-flex items-center gap-1.5 rounded-full border border-[var(--add-success)]/40 bg-[var(--add-success)]/10 px-2.5 py-0.5 text-xs font-bold text-[var(--add-success-text)]" },
 				[
-					h("span", { class: "h-1.5 w-1.5 rounded-full bg-[var(--add-success,#657C50)]" }),
+					h("span", { class: "h-1.5 w-1.5 rounded-full bg-[var(--add-success)]" }),
 					h("span", "سارٍ ونشط")
 				]
 			)
@@ -802,46 +793,9 @@ const columns = computed<DataTableColumns<OfficeLease>>(() => [
 	{
 		title: t("officeLeases.columns.actions", "الإجراءات"),
 		key: "actions",
-		width: 140,
+		width: 90,
 		align: "center",
-		render: row =>
-			h("div", { class: "flex items-center justify-center gap-1.5" }, [
-				// View
-				h(
-					"button",
-					{
-						type: "button",
-						class: "inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface,#F7F5F2)] text-[var(--add-text-secondary,#565B65)] transition-colors hover:bg-[var(--add-surface-sunken,#EDEAE8)] hover:text-[var(--add-primary-text,#556843)] dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700",
-						title: t("officeLeases.actions.view", "عرض تفاصيل العقد"),
-						onClick: () => openDetail(row)
-					},
-					[h(Icon, { name: "carbon:view", size: 16 })]
-				),
-
-				// Edit
-				h(
-					"button",
-					{
-						type: "button",
-						class: "inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface,#F7F5F2)] text-[var(--add-text-secondary,#565B65)] transition-colors hover:bg-[var(--add-surface-sunken,#EDEAE8)] hover:text-[var(--add-primary-text,#556843)] dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700",
-						title: t("common.edit", "تعديل بيانات العقد"),
-						onClick: () => openDetail(row)
-					},
-					[h(Icon, { name: "carbon:edit", size: 16 })]
-				),
-
-				// Download
-				h(
-					"button",
-					{
-						type: "button",
-						class: "inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface,#F7F5F2)] text-[var(--add-text-secondary,#565B65)] transition-colors hover:bg-[var(--add-surface-sunken,#EDEAE8)] hover:text-[var(--add-primary-text,#556843)] dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700",
-						title: t("common.download", "تحميل العقد"),
-						onClick: () => message.info(t("common.downloadStarted", "جاري إعداد وثيقة العقد للتحميل..."))
-					},
-					[h(Icon, { name: "carbon:download", size: 16 })]
-				)
-			])
+		render: row => h(RowActions, { actions: [{ key: "view", label: t("officeLeases.actions.view", "عرض تفاصيل العقد"), icon: "carbon:view", onClick: () => openDetail(row) }] })
 	}
 ])
 </script>

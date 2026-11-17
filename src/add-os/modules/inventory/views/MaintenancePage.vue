@@ -5,64 +5,64 @@
 
 		<!-- Stat Cards -->
 		<div v-if="!loadError" class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border)] bg-white p-4 shadow-xs">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ t("inventory.schedules.overdue") }}</span>
-					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400">
+					<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t("inventory.schedules.overdue") }}</span>
+					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--add-danger)_10%,transparent)] text-[var(--add-danger-text)]">
 						<Icon name="carbon:warning-alt" :size="18" />
 					</div>
 				</div>
 				<div class="flex items-baseline justify-between gap-1">
-					<span class="font-mono text-2xl font-bold tracking-tight text-rose-600 dark:text-rose-400">{{ overdueCount }}</span>
-					<span class="text-xs font-medium text-slate-400">{{ t("inventory.schedules.nextDue") }}</span>
+					<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-danger-text)]">{{ overdueCount }}</span>
+					<span class="text-xs font-medium text-[var(--add-text-muted)]">{{ t("inventory.schedules.nextDue") }}</span>
 				</div>
 			</div>
 
-			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border)] bg-white p-4 shadow-xs">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ t("inventory.maintenance.due") }}</span>
-					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
+					<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t("inventory.maintenance.due") }}</span>
+					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--add-info)_10%,transparent)] text-[var(--add-info-text)]">
 						<Icon name="carbon:calendar" :size="18" />
 					</div>
 				</div>
 				<div class="flex items-baseline justify-between gap-1">
-					<span class="font-mono text-2xl font-bold tracking-tight text-blue-600 dark:text-blue-400">{{ due.length }}</span>
-					<span class="text-xs font-medium text-slate-400">{{ t("inventory.maintenance.withinDays.other", { n: days }) }}</span>
+					<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-info-text)]">{{ due.length }}</span>
+					<span class="text-xs font-medium text-[var(--add-text-muted)]">{{ t("inventory.maintenance.withinDays.other", { n: days }) }}</span>
 				</div>
 			</div>
 
-			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border)] bg-white p-4 shadow-xs">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ t("inventory.maintenance.openOnes") }}</span>
-					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-500 dark:bg-amber-950/40 dark:text-amber-400">
+					<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t("inventory.maintenance.openOnes") }}</span>
+					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--add-warning)_10%,transparent)] text-[var(--add-warning-text)]">
 						<Icon name="carbon:tool-kit" :size="18" />
 					</div>
 				</div>
 				<div class="flex items-baseline justify-between gap-1">
-					<span class="font-mono text-2xl font-bold tracking-tight text-amber-500 dark:text-amber-400">{{ openRecordsCount }}</span>
-					<span class="text-xs font-medium text-slate-400">{{ t("inventory.maintenance.open") }}</span>
+					<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-warning-text)]">{{ openRecordsCount }}</span>
+					<span class="text-xs font-medium text-[var(--add-text-muted)]">{{ t("inventory.maintenance.open") }}</span>
 				</div>
 			</div>
 
-			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border)] bg-white p-4 shadow-xs">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ t("inventory.maintenance.cost") }}</span>
-					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+					<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t("inventory.maintenance.cost") }}</span>
+					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--add-success)_10%,transparent)] text-[var(--add-success-text)]">
 						<Icon name="carbon:currency" :size="18" />
 					</div>
 				</div>
 				<div class="flex items-baseline justify-between gap-1">
-					<span class="font-mono text-2xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400">{{ totalMaintenanceCost ? money(totalMaintenanceCost, records[0]?.currency) : EMPTY }}</span>
-					<span class="text-xs font-medium text-slate-400">{{ records[0]?.currency || "" }}</span>
+					<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-success-text)]">{{ totalMaintenanceCost ? money(totalMaintenanceCost, records[0]?.currency) : EMPTY }}</span>
+					<span class="text-xs font-medium text-[var(--add-text-muted)]">{{ records[0]?.currency || "" }}</span>
 				</div>
 			</div>
 		</div>
 
 		<!-- Filters: place and category narrow both lists; the rest the records. -->
-		<div class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+		<div class="rounded-2xl border border-[var(--add-border)] bg-white p-4 shadow-xs">
 			<div class="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
 				<n-input v-model:value="filters.search" :placeholder="t('inventory.maintenance.search')" clearable class="w-full">
-					<template #prefix><Icon name="carbon:search" :size="16" class="text-slate-400" /></template>
+					<template #prefix><Icon name="carbon:search" :size="16" class="text-[var(--add-text-muted)]" /></template>
 				</n-input>
 				<n-select v-model:value="filters.category_id" :options="categoryOptions" :placeholder="t('inventory.common.category')" clearable filterable class="w-full" />
 				<n-select v-model:value="filters.type" :options="typeOptions" :placeholder="t('inventory.maintenance.allTypes')" clearable class="w-full" />
@@ -71,7 +71,7 @@
 					<PlacePicker v-model:chain="placeChain" :value="place" inline />
 				</div>
 			</div>
-			<div v-if="hasActiveFilters" class="mt-3 flex items-center justify-end border-t border-slate-100 pt-3 dark:border-slate-800/80">
+			<div v-if="hasActiveFilters" class="mt-3 flex items-center justify-end border-t border-[var(--add-border)] pt-3">
 				<n-button quaternary size="small" @click="resetFilters">
 					<template #icon><Icon name="carbon:reset" :size="14" /></template>
 					{{ t("inventory.common.resetFilters") }}
@@ -82,11 +82,11 @@
 		<n-alert v-if="loadError" type="error" :title="loadError" />
 
 		<!-- Due Schedules Card -->
-		<n-card size="small" class="add-ledger-table rounded-2xl border border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900" :bordered="false">
+		<n-card size="small" class="add-ledger-table rounded-2xl border border-[var(--add-border)] shadow-xs" :bordered="false">
 			<template #header>
 				<div class="flex items-center gap-2">
 					<span class="font-bold">{{ t("inventory.maintenance.due") }}</span>
-					<span v-if="due.length" class="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
+					<span v-if="due.length" class="inline-flex items-center rounded-full bg-[color-mix(in_srgb,var(--add-info)_10%,transparent)] px-2 py-0.5 text-xs font-semibold text-[var(--add-info-text)]">
 						{{ due.length }}
 					</span>
 				</div>
@@ -94,10 +94,10 @@
 			<template #header-extra>
 				<n-select v-model:value="days" :options="dayOptions" size="small" class="w-44" />
 			</template>
-			<n-data-table :columns="dueColumns" :data="due" :loading="loading" :bordered="false" :row-props="row => assetRowProps(row.asset_id)" size="small" :scroll-x="740">
+			<n-data-table :columns="dueColumns" :data="due" :loading :bordered="false" :row-props="row => assetRowProps(row.asset_id)" size="small" :scroll-x="740">
 				<template #empty>
-					<div class="flex flex-col items-center justify-center py-8 text-slate-400 dark:text-slate-500">
-						<Icon name="carbon:checkmark-outline" :size="32" class="mb-1 text-emerald-500 opacity-60" />
+					<div class="flex flex-col items-center justify-center py-8 text-[var(--add-text-muted)]">
+						<Icon name="carbon:checkmark-outline" :size="32" class="mb-1 text-[var(--add-success-text)] opacity-60" />
 						<span>{{ t("inventory.maintenance.noneDue") }}</span>
 					</div>
 				</template>
@@ -105,7 +105,7 @@
 		</n-card>
 
 		<!-- Maintenance Records Card -->
-		<n-card size="small" class="add-ledger-table rounded-2xl border border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900" :bordered="false">
+		<n-card size="small" class="add-ledger-table rounded-2xl border border-[var(--add-border)] shadow-xs" :bordered="false">
 			<template #header>
 				<div class="flex items-center gap-3">
 					<span class="font-bold">{{ t("inventory.history.maintenance") }}</span>
@@ -115,9 +115,9 @@
 					</n-radio-group>
 				</div>
 			</template>
-			<n-data-table :columns="recordColumns" :data="records" :loading="loading" :bordered="false" :row-props="row => assetRowProps(row.asset_id)" size="small" :scroll-x="1180">
+			<n-data-table :columns="recordColumns" :data="records" :loading :bordered="false" :row-props="row => assetRowProps(row.asset_id)" size="small" :scroll-x="1180">
 				<template #empty>
-					<div class="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-500">
+					<div class="flex flex-col items-center justify-center py-12 text-[var(--add-text-muted)]">
 						<Icon name="carbon:tool-kit" :size="40" class="mb-2 opacity-50" />
 						<span>{{ t("inventory.maintenance.empty") }}</span>
 					</div>
@@ -205,7 +205,7 @@ const loadError = ref("")
 
 const overdueCount = computed(() => due.value.filter(s => s.overdue).length)
 const openRecordsCount = computed(() => records.value.filter(r => !r.closed_at).length)
-const totalMaintenanceCost = computed(() => records.value.reduce((sum, r) => sum + (parseFloat(r.cost ?? "") || 0), 0))
+const totalMaintenanceCost = computed(() => records.value.reduce((sum, r) => sum + (Number.parseFloat(r.cost ?? "") || 0), 0))
 
 onMounted(() => void quietly(() => listCategories("asset"), list => (categories.value = list)))
 
@@ -237,7 +237,7 @@ function openAsset(assetId: number) {
 
 function assetRowProps(assetId: number) {
 	return {
-		class: "cursor-pointer transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/40",
+		class: "cursor-pointer transition-colors hover:bg-[var(--add-surface-sunken)]",
 		onClick: () => openAsset(assetId)
 	}
 }
@@ -300,8 +300,8 @@ const recordColumns = computed<DataTableColumns<MaintenanceRecord>>(() => [
 		render: row => {
 			if (!row.opened_at) return EMPTY
 			return h("div", { class: "flex flex-col gap-0.5 leading-tight" }, [
-				h("span", { class: "font-medium text-xs whitespace-nowrap text-slate-800 dark:text-slate-200" }, formatDate(row.opened_at)),
-				h("span", { class: "text-[11px] text-slate-400 font-mono whitespace-nowrap mt-0.5" }, formatTime(row.opened_at))
+				h("span", { class: "font-medium text-xs whitespace-nowrap text-[var(--add-text-primary)]" }, formatDate(row.opened_at)),
+				h("span", { class: "text-[11px] text-[var(--add-text-muted)] font-mono whitespace-nowrap mt-0.5" }, formatTime(row.opened_at))
 			])
 		}
 	},
@@ -313,8 +313,8 @@ const recordColumns = computed<DataTableColumns<MaintenanceRecord>>(() => [
 		render: row =>
 			row.closed_at
 				? h("div", { class: "flex flex-col gap-0.5 leading-tight items-center" }, [
-						h("span", { class: "font-medium text-xs whitespace-nowrap text-slate-600 dark:text-slate-400" }, formatDate(row.closed_at)),
-						h("span", { class: "text-[11px] text-slate-400 font-mono whitespace-nowrap mt-0.5" }, formatTime(row.closed_at))
+						h("span", { class: "font-medium text-xs whitespace-nowrap text-[var(--add-text-secondary)]" }, formatDate(row.closed_at)),
+						h("span", { class: "text-[11px] text-[var(--add-text-muted)] font-mono whitespace-nowrap mt-0.5" }, formatTime(row.closed_at))
 				  ])
 				: h(NTag, { size: "small", round: true, type: "warning" }, () => t("inventory.maintenance.open"))
 	},

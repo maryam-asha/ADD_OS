@@ -18,7 +18,7 @@
 			</HrPageHeader>
 
 			<!-- A draft: approved, edited or deleted — nothing else until then. -->
-			<div v-if="draft" class="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+			<div v-if="draft" class="flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--add-border)] bg-white p-3 shadow-xs">
 				<span class="me-auto text-sm text-secondary">{{ t("inventory.assets.draftNote") }}</span>
 				<n-button v-if="may.approve" size="small" type="primary" :loading="busy" @click="approve">
 					<template #icon><Icon name="carbon:checkmark-outline" :size="15" /></template>{{ t("inventory.assets.approve") }}
@@ -26,18 +26,13 @@
 				<n-button v-if="may.manage" size="small" secondary @click="detailsVisible = true">
 					<template #icon><Icon name="carbon:document" :size="15" /></template>{{ t("inventory.assets.editDetails") }}
 				</n-button>
-				<n-popconfirm v-if="may.manage" @positive-click="removeDraft">
-					<template #trigger>
-						<n-button size="small" type="error" secondary :loading="busy">
-							<template #icon><Icon name="carbon:trash-can" :size="15" /></template>{{ t("inventory.assets.deleteDraft") }}
-						</n-button>
-					</template>
-					{{ t("inventory.assets.deleteDraftConfirm") }}
-				</n-popconfirm>
+				<n-button v-if="may.manage" size="small" type="error" secondary :loading="busy" @click="confirm({ title: t('inventory.assets.deleteDraft'), content: t('inventory.assets.deleteDraftConfirm'), onConfirm: removeDraft })">
+					<template #icon><Icon name="carbon:trash-can" :size="15" /></template>{{ t("inventory.assets.deleteDraft") }}
+				</n-button>
 			</div>
 
 			<!-- Action Buttons Ribbon -->
-			<div v-else-if="!disposed" class="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+			<div v-else-if="!disposed" class="flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--add-border)] bg-white p-3 shadow-xs">
 				<n-button v-if="may.manage && !asset.intangible" size="small" secondary @click="open('move')">
 					<template #icon><Icon name="carbon:location" :size="15" /></template>{{ t("inventory.actions.move.title") }}
 				</n-button>
@@ -70,10 +65,10 @@
 
 			<!-- 3 Info Cards Grid -->
 			<div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-				<n-card size="small" class="rounded-2xl border border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900" :bordered="false">
+				<n-card size="small" class="rounded-2xl border border-[var(--add-border)] shadow-xs" :bordered="false">
 					<template #header>
 						<div class="flex items-center gap-2">
-							<Icon name="carbon:location" :size="18" class="text-blue-500" />
+							<Icon name="carbon:location" :size="18" class="text-[var(--add-info-text)]" />
 							<span class="font-bold">{{ t("inventory.assets.whereAndWho") }}</span>
 						</div>
 					</template>
@@ -98,7 +93,7 @@
 						</div>
 						<div v-if="!asset.intangible">
 							<dt class="text-xs text-secondary">{{ t("inventory.assets.qr") }}</dt>
-							<dd class="break-all"><span dir="ltr" class="font-mono text-xs text-slate-500">{{ asset.qr_token }}</span></dd>
+							<dd class="break-all"><span dir="ltr" class="font-mono text-xs text-[var(--add-text-secondary)]">{{ asset.qr_token }}</span></dd>
 						</div>
 						<div>
 							<dt class="text-xs text-secondary">{{ t("inventory.assets.warrantyUntil") }}</dt>
@@ -107,10 +102,10 @@
 					</dl>
 				</n-card>
 
-				<n-card size="small" class="rounded-2xl border border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900" :bordered="false">
+				<n-card size="small" class="rounded-2xl border border-[var(--add-border)] shadow-xs" :bordered="false">
 					<template #header>
 						<div class="flex items-center gap-2">
-							<Icon name="carbon:currency" :size="18" class="text-emerald-500" />
+							<Icon name="carbon:currency" :size="18" class="text-[var(--add-success-text)]" />
 							<span class="font-bold">{{ t("inventory.assets.money") }}</span>
 						</div>
 					</template>
@@ -125,7 +120,7 @@
 						</div>
 						<div>
 							<dt class="text-xs text-secondary">{{ t("inventory.assets.cost") }}</dt>
-							<dd class="add-numeric font-mono font-semibold text-emerald-600 dark:text-emerald-400">{{ money(asset.purchase_cost, asset.currency) }}</dd>
+							<dd class="add-numeric font-mono font-semibold text-[var(--add-success-text)]">{{ money(asset.purchase_cost, asset.currency) }}</dd>
 						</div>
 						<div v-if="Number(asset.additions_total) > 0">
 							<dt class="text-xs text-secondary">{{ t("inventory.assets.totalCost") }}</dt>
@@ -162,10 +157,10 @@
 					</dl>
 				</n-card>
 
-				<n-card size="small" class="rounded-2xl border border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900" :bordered="false">
+				<n-card size="small" class="rounded-2xl border border-[var(--add-border)] shadow-xs" :bordered="false">
 					<template #header>
 						<div class="flex items-center gap-2">
-							<Icon name="carbon:chart-line" :size="18" class="text-amber-500" />
+							<Icon name="carbon:chart-line" :size="18" class="text-[var(--add-warning-text)]" />
 							<span class="font-bold">{{ asset.intangible ? t("inventory.assets.amortization") : t("inventory.assets.depreciation") }}</span>
 						</div>
 					</template>
@@ -177,11 +172,11 @@
 						</div>
 						<div>
 							<dt class="text-xs text-secondary">{{ t("inventory.assets.accumulated") }}</dt>
-							<dd class="add-numeric font-medium text-amber-600 dark:text-amber-400">{{ money(asset.depreciation.accumulated, asset.currency) }}</dd>
+							<dd class="add-numeric font-medium text-[var(--add-warning-text)]">{{ money(asset.depreciation.accumulated, asset.currency) }}</dd>
 						</div>
 						<div>
 							<dt class="text-xs text-secondary">{{ t("inventory.assets.bookValue") }}</dt>
-							<dd class="add-numeric font-mono font-bold text-emerald-600 dark:text-emerald-400">{{ money(asset.depreciation.book_value, asset.currency) }}</dd>
+							<dd class="add-numeric font-mono font-bold text-[var(--add-success-text)]">{{ money(asset.depreciation.book_value, asset.currency) }}</dd>
 						</div>
 						<div>
 							<dt class="text-xs text-secondary">{{ t("inventory.assets.elapsed") }}</dt>
@@ -196,15 +191,15 @@
 				</n-card>
 			</div>
 
-			<p v-if="asset.notes" class="rounded-xl border border-slate-200/60 bg-slate-50/50 p-3 text-sm text-secondary dark:border-slate-800 dark:bg-slate-800/30 whitespace-pre-line">{{ asset.notes }}</p>
+			<p v-if="asset.notes" class="rounded-xl border border-[var(--add-border)] bg-[var(--add-surface-sunken)] p-3 text-sm text-secondary whitespace-pre-line">{{ asset.notes }}</p>
 
 			<!-- History Card with Tabs -->
-			<n-card size="small" class="add-ledger-table rounded-2xl border border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900" :bordered="false">
+			<n-card size="small" class="add-ledger-table rounded-2xl border border-[var(--add-border)] shadow-xs" :bordered="false">
 				<n-tabs type="line" animated>
 					<n-tab-pane name="movements" :tab="t('inventory.history.movements')">
 						<n-data-table :columns="movementColumns" :data="asset.movements ?? []" :bordered="false" size="small" :scroll-x="780">
 							<template #empty>
-								<div class="flex flex-col items-center justify-center py-8 text-slate-400">
+								<div class="flex flex-col items-center justify-center py-8 text-[var(--add-text-muted)]">
 									<Icon name="carbon:location" :size="32" class="mb-1 opacity-50" />
 									<span class="text-sm">{{ t("inventory.stock.emptyMovements") }}</span>
 								</div>
@@ -214,7 +209,7 @@
 					<n-tab-pane name="custody" :tab="t('inventory.history.custody')">
 						<n-data-table :columns="custodyColumns" :data="asset.assignments ?? []" :bordered="false" size="small" :scroll-x="780">
 							<template #empty>
-								<div class="flex flex-col items-center justify-center py-8 text-slate-400">
+								<div class="flex flex-col items-center justify-center py-8 text-[var(--add-text-muted)]">
 									<Icon name="carbon:user-follow" :size="32" class="mb-1 opacity-50" />
 									<span class="text-sm">{{ t("inventory.custody.empty") }}</span>
 								</div>
@@ -224,7 +219,7 @@
 					<n-tab-pane name="maintenance" :tab="t('inventory.history.maintenance')">
 						<n-data-table :columns="maintenanceColumns" :data="asset.maintenance ?? []" :bordered="false" size="small" :scroll-x="880">
 							<template #empty>
-								<div class="flex flex-col items-center justify-center py-8 text-slate-400">
+								<div class="flex flex-col items-center justify-center py-8 text-[var(--add-text-muted)]">
 									<Icon name="carbon:tool-kit" :size="32" class="mb-1 opacity-50" />
 									<span class="text-sm">{{ t("inventory.maintenance.empty") }}</span>
 								</div>
@@ -239,7 +234,7 @@
 						</div>
 						<n-data-table :columns="additionColumns" :data="additions" :bordered="false" size="small" :scroll-x="720">
 							<template #empty>
-								<div class="flex flex-col items-center justify-center py-8 text-slate-400">
+								<div class="flex flex-col items-center justify-center py-8 text-[var(--add-text-muted)]">
 									<Icon name="carbon:currency" :size="32" class="mb-1 opacity-50" />
 									<span class="text-sm">{{ t("inventory.additions.empty") }}</span>
 								</div>
@@ -254,7 +249,7 @@
 						</div>
 						<n-data-table :columns="scheduleColumns" :data="asset.maintenance_schedules ?? []" :bordered="false" size="small" :scroll-x="680">
 							<template #empty>
-								<div class="flex flex-col items-center justify-center py-8 text-slate-400">
+								<div class="flex flex-col items-center justify-center py-8 text-[var(--add-text-muted)]">
 									<Icon name="carbon:calendar" :size="32" class="mb-1 opacity-50" />
 									<span class="text-sm">{{ t("inventory.maintenance.noneDue") }}</span>
 								</div>
@@ -276,10 +271,12 @@
 import type { DataTableColumns } from "naive-ui"
 import type { Asset, AssetAction, AssetAddition, AssetAssignment, AssetMovement, MaintenanceRecord, MaintenanceSchedule } from "@/add-os/modules/inventory/types/inventory"
 import type { InventorySettings } from "@/add-os/services/inventory"
-import { NAlert, NButton, NCard, NDataTable, NPopconfirm, NSpin, NTabPane, NTabs, NTag, NTooltip, useMessage } from "naive-ui"
+import { NAlert, NButton, NCard, NDataTable, NSpin, NTabPane, NTabs, NTag, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
+import RowActions from "@/add-os/components/page/RowActions.vue"
+import { useConfirm } from "@/add-os/components/page/useConfirm"
 import { canApproveAssets, canDisposeAssets, canManageAssets, canManageCustody, canManageMaintenance } from "@/add-os/config/permissions"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import { apiErrorMessage, quietly, serverMessage } from "@/add-os/modules/hr/utils/errors"
@@ -304,6 +301,7 @@ import Icon from "@/components/common/Icon.vue"
 defineProps<{ titleKey?: string }>()
 
 const { t } = useI18n()
+const confirm = useConfirm()
 const route = useRoute()
 const router = useRouter()
 const message = useMessage()
@@ -416,10 +414,10 @@ const additionColumns = computed<DataTableColumns<AssetAddition>>(() => [
 	{
 		title: "",
 		key: "actions",
-		width: 70,
+		width: 90,
 		render: row =>
 			may.manage && !disposed.value
-				? h(NPopconfirm, { onPositiveClick: () => removeAddition(row) }, { trigger: () => h(NButton, { size: "tiny", quaternary: true, type: "error" }, () => t("inventory.additions.remove")), default: () => t("inventory.additions.removeConfirm") })
+				? h(RowActions, { actions: [{ key: "delete", label: t("inventory.additions.remove"), icon: "carbon:trash-can", danger: true, confirm: t("inventory.additions.removeConfirm"), onClick: () => removeAddition(row) }] })
 				: null
 	}
 ])
@@ -431,8 +429,8 @@ const movementColumns = computed<DataTableColumns<AssetMovement>>(() => [
 		width: 150,
 		render: row =>
 			h("div", { class: "inline-flex flex-col text-xs leading-tight" }, [
-				h("span", { class: "font-medium text-slate-800 dark:text-slate-200" }, formatDate(row.moved_at)),
-				h("span", { class: "text-slate-500 text-[11px] add-numeric mt-0.5" }, formatTime(row.moved_at))
+				h("span", { class: "font-medium text-[var(--add-text-primary)]" }, formatDate(row.moved_at)),
+				h("span", { class: "text-[var(--add-text-secondary)] text-[11px] add-numeric mt-0.5" }, formatTime(row.moved_at))
 			])
 	},
 	{ title: t("inventory.history.from"), key: "from", ...PLACE_COLUMN, render: row => (row.from ? placeLabel(row.from) : t("inventory.history.registered")) },
@@ -449,8 +447,8 @@ const custodyColumns = computed<DataTableColumns<AssetAssignment>>(() => [
 		width: 150,
 		render: row =>
 			h("div", { class: "inline-flex flex-col text-xs leading-tight" }, [
-				h("span", { class: "font-medium text-slate-800 dark:text-slate-200" }, formatDate(row.assigned_at)),
-				h("span", { class: "text-slate-500 text-[11px] add-numeric mt-0.5" }, formatTime(row.assigned_at))
+				h("span", { class: "font-medium text-[var(--add-text-primary)]" }, formatDate(row.assigned_at)),
+				h("span", { class: "text-[var(--add-text-secondary)] text-[11px] add-numeric mt-0.5" }, formatTime(row.assigned_at))
 			])
 	},
 	{
@@ -461,8 +459,8 @@ const custodyColumns = computed<DataTableColumns<AssetAssignment>>(() => [
 		render: row =>
 			row.returned_at
 				? h("div", { class: "inline-flex flex-col text-xs leading-tight items-center" }, [
-						h("span", { class: "font-medium text-slate-800 dark:text-slate-200" }, formatDate(row.returned_at)),
-						h("span", { class: "text-slate-500 text-[11px] add-numeric mt-0.5" }, formatTime(row.returned_at))
+						h("span", { class: "font-medium text-[var(--add-text-primary)]" }, formatDate(row.returned_at)),
+						h("span", { class: "text-[var(--add-text-secondary)] text-[11px] add-numeric mt-0.5" }, formatTime(row.returned_at))
 				  ])
 				: h(NTag, { size: "small", round: true, type: "warning" }, () => t("inventory.history.stillHeld"))
 	},
@@ -489,8 +487,8 @@ const maintenanceColumns = computed<DataTableColumns<MaintenanceRecord>>(() => [
 		width: 150,
 		render: row =>
 			h("div", { class: "inline-flex flex-col text-xs leading-tight" }, [
-				h("span", { class: "font-medium text-slate-800 dark:text-slate-200" }, formatDate(row.opened_at)),
-				h("span", { class: "text-slate-500 text-[11px] add-numeric mt-0.5" }, formatTime(row.opened_at))
+				h("span", { class: "font-medium text-[var(--add-text-primary)]" }, formatDate(row.opened_at)),
+				h("span", { class: "text-[var(--add-text-secondary)] text-[11px] add-numeric mt-0.5" }, formatTime(row.opened_at))
 			])
 	},
 	{
@@ -501,8 +499,8 @@ const maintenanceColumns = computed<DataTableColumns<MaintenanceRecord>>(() => [
 		render: row =>
 			row.closed_at
 				? h("div", { class: "inline-flex flex-col text-xs leading-tight items-center" }, [
-						h("span", { class: "font-medium text-slate-800 dark:text-slate-200" }, formatDate(row.closed_at)),
-						h("span", { class: "text-slate-500 text-[11px] add-numeric mt-0.5" }, formatTime(row.closed_at))
+						h("span", { class: "font-medium text-[var(--add-text-primary)]" }, formatDate(row.closed_at)),
+						h("span", { class: "text-[var(--add-text-secondary)] text-[11px] add-numeric mt-0.5" }, formatTime(row.closed_at))
 				  ])
 				: h(NTag, { size: "small", round: true, type: "warning" }, () => t("inventory.maintenance.open"))
 	},
@@ -526,7 +524,7 @@ const scheduleColumns = computed<DataTableColumns<MaintenanceSchedule>>(() => [
 		render: row =>
 			h(
 				"span",
-				{ class: row.overdue ? "text-rose-600 dark:text-rose-400 font-semibold" : "" },
+				{ class: row.overdue ? "text-[var(--add-danger-text)] font-semibold" : "" },
 				formatDate(row.next_due_on)
 			)
 	},
@@ -549,34 +547,12 @@ const scheduleColumns = computed<DataTableColumns<MaintenanceSchedule>>(() => [
 		align: "center",
 		render: row =>
 			may.maintenance && !disposed.value
-				? h("div", { class: "flex items-center justify-center gap-1.5" }, [
-						h(
-							NTooltip,
-							{ trigger: "hover" },
-							{
-								trigger: () =>
-									h(
-										NButton,
-										{ size: "tiny", quaternary: true, circle: true, class: "text-slate-500 hover:text-primary", "aria-label": t("inventory.common.edit"), onClick: () => editSchedule(row) },
-										{ icon: () => h(Icon, { name: "carbon:edit", size: 16 }) }
-									),
-								default: () => t("inventory.common.edit")
-							}
-						),
-						h(
-							NPopconfirm,
-							{ onPositiveClick: () => void deleteSchedule(row) },
-							{
-								trigger: () =>
-									h(
-										NButton,
-										{ size: "tiny", quaternary: true, circle: true, class: "text-slate-500 hover:text-error", "aria-label": t("inventory.common.delete") },
-										{ icon: () => h(Icon, { name: "carbon:trash-can", size: 16 }) }
-									),
-								default: () => t("inventory.schedules.confirmDelete")
-							}
-						)
-					])
+				? h(RowActions, {
+						actions: [
+							{ key: "edit", label: t("inventory.common.edit"), icon: "carbon:edit", onClick: () => editSchedule(row) },
+							{ key: "delete", label: t("inventory.common.delete"), icon: "carbon:trash-can", danger: true, confirm: t("inventory.schedules.confirmDelete"), onClick: () => void deleteSchedule(row) }
+						]
+					})
 				: null
 	}
 ])

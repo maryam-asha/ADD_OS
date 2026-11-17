@@ -11,57 +11,57 @@
 
 		<!-- Stat Cards -->
 		<div v-if="!loadError && (balances.length || movements.length)" class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border)] bg-white p-4 shadow-xs">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ t("inventory.stock.balances") }}</span>
-					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-400">
+					<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t("inventory.stock.balances") }}</span>
+					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--add-info)_10%,transparent)] text-[var(--add-info-text)]">
 						<Icon name="carbon:layers" :size="18" />
 					</div>
 				</div>
 				<div class="flex items-baseline justify-between gap-1">
-					<span class="font-mono text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{{ tab === "balances" ? totalCount : balances.length }}</span>
-					<span class="text-xs font-medium text-slate-400">{{ t("inventory.stock.balances") }}</span>
+					<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-text-primary)]">{{ tab === "balances" ? totalCount : balances.length }}</span>
+					<span class="text-xs font-medium text-[var(--add-text-muted)]">{{ t("inventory.stock.balances") }}</span>
 				</div>
 			</div>
 
-			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border)] bg-white p-4 shadow-xs">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ t("inventory.stock.value") }}</span>
-					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+					<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t("inventory.stock.value") }}</span>
+					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--add-success)_10%,transparent)] text-[var(--add-success-text)]">
 						<Icon name="carbon:currency" :size="18" />
 					</div>
 				</div>
 				<div class="flex items-baseline justify-between gap-1">
-					<span class="font-mono text-2xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400">
+					<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-success-text)]">
 						{{ totalValue ? money(totalValue, primaryCurrency) : EMPTY }}
 					</span>
-					<span class="text-xs font-medium text-slate-400">{{ primaryCurrency }}</span>
+					<span class="text-xs font-medium text-[var(--add-text-muted)]">{{ primaryCurrency }}</span>
 				</div>
 			</div>
 
-			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border)] bg-white p-4 shadow-xs">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ t("inventory.stock.movements") }}</span>
-					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
+					<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t("inventory.stock.movements") }}</span>
+					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--add-info)_10%,transparent)] text-[var(--add-info-text)]">
 						<Icon name="carbon:arrows-vertical" :size="18" />
 					</div>
 				</div>
 				<div class="flex items-baseline justify-between gap-1">
-					<span class="font-mono text-2xl font-bold tracking-tight text-blue-600 dark:text-blue-400">{{ tab === "movements" ? totalCount : movements.length }}</span>
-					<span class="text-xs font-medium text-slate-400">{{ t("inventory.history.movements") }}</span>
+					<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-info-text)]">{{ tab === "movements" ? totalCount : movements.length }}</span>
+					<span class="text-xs font-medium text-[var(--add-text-muted)]">{{ t("inventory.history.movements") }}</span>
 				</div>
 			</div>
 		</div>
 
 		<!-- Filters -->
-		<div class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+		<div class="rounded-2xl border border-[var(--add-border)] bg-white p-4 shadow-xs">
 			<div class="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
 				<n-select v-model:value="warehouseId" :options="warehouseOptions" :placeholder="t('inventory.operations.allWarehouses')" clearable filterable class="w-full" />
 				<ItemSelect v-if="tab !== 'operations'" v-model:value="filters.item_id" kind="stock" :placeholder="t('inventory.stock.allItems')" class="w-full" />
 				<n-select v-if="tab === 'operations'" v-model:value="filters.kind" :options="operationKindOptions" :placeholder="t('inventory.operations.allTypes')" clearable class="w-full" />
 				<template v-if="tab !== 'operations'">
 					<n-input v-model:value="filters.search" :placeholder="t('inventory.itemExtras.searchHint')" clearable class="w-full">
-						<template #prefix><Icon name="carbon:search" :size="16" class="text-slate-400" /></template>
+						<template #prefix><Icon name="carbon:search" :size="16" class="text-[var(--add-text-muted)]" /></template>
 					</n-input>
 					<n-select v-model:value="filters.category_id" :options="categoryOptions" :placeholder="t('inventory.common.category')" clearable filterable class="w-full" />
 				</template>
@@ -76,7 +76,7 @@
 				</div>
 			</div>
 
-			<div v-if="hasActiveFilters" class="mt-3 flex flex-wrap items-center justify-end gap-2 border-t border-slate-100 pt-3 dark:border-slate-800/80">
+			<div v-if="hasActiveFilters" class="mt-3 flex flex-wrap items-center justify-end gap-2 border-t border-[var(--add-border)] pt-3">
 				<n-tag v-if="filters.operation_id" closable round @close="filters.operation_id = null">{{ t("inventory.operations.operation") }} · {{ filters.operation_id.slice(0, 8) }}</n-tag>
 				<n-button quaternary size="small" @click="resetFilters">
 					<template #icon><Icon name="carbon:reset" :size="14" /></template>
@@ -87,12 +87,12 @@
 
 		<n-alert v-if="loadError" type="error" :title="loadError" />
 
-		<n-card size="small" class="add-ledger-table rounded-2xl border border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900" :bordered="false">
+		<n-card size="small" class="add-ledger-table rounded-2xl border border-[var(--add-border)] shadow-xs" :bordered="false">
 			<n-tabs v-model:value="tab" type="line" animated>
 				<n-tab-pane name="balances" :tab="t('inventory.stock.balances')">
 					<n-data-table :columns="balanceColumns" :data="balances" :loading :bordered="false" size="small" :scroll-x="tableWidth(balanceColumns)">
 						<template #empty>
-							<div class="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-500">
+							<div class="flex flex-col items-center justify-center py-12 text-[var(--add-text-muted)]">
 								<Icon name="carbon:layers" :size="40" class="mb-2 opacity-50" />
 								<span>{{ t("inventory.stock.emptyBalances") }}</span>
 							</div>
@@ -102,7 +102,7 @@
 				<n-tab-pane name="operations" :tab="t('inventory.operations.operationsTab')">
 					<n-data-table :columns="operationColumns" :data="operations" :loading :bordered="false" size="small" :scroll-x="tableWidth(operationColumns)" :row-props="operationRowProps">
 						<template #empty>
-							<div class="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-500">
+							<div class="flex flex-col items-center justify-center py-12 text-[var(--add-text-muted)]">
 								<Icon name="carbon:arrows-vertical" :size="40" class="mb-2 opacity-50" />
 								<span>{{ t("inventory.operations.emptyOperations") }}</span>
 							</div>
@@ -112,7 +112,7 @@
 				<n-tab-pane name="movements" :tab="t('inventory.operations.ledgerTab')">
 					<n-data-table :columns="movementColumns" :data="movements" :loading :bordered="false" size="small" :scroll-x="tableWidth(movementColumns)" :row-props="movementRowProps">
 						<template #empty>
-							<div class="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-500">
+							<div class="flex flex-col items-center justify-center py-12 text-[var(--add-text-muted)]">
 								<Icon name="carbon:arrows-vertical" :size="40" class="mb-2 opacity-50" />
 								<span>{{ t("inventory.stock.emptyMovements") }}</span>
 							</div>
@@ -121,8 +121,8 @@
 				</n-tab-pane>
 			</n-tabs>
 
-			<div v-if="lastPage > 1" class="flex flex-col items-center justify-between gap-3 border-t border-slate-100 p-4 sm:flex-row dark:border-slate-800/80">
-				<span class="text-xs text-slate-400">{{ t("inventory.common.all") }}: {{ totalCount }}</span>
+			<div v-if="lastPage > 1" class="flex flex-col items-center justify-between gap-3 border-t border-[var(--add-border)] p-4 sm:flex-row">
+				<span class="text-xs text-[var(--add-text-muted)]">{{ t("inventory.common.all") }}: {{ totalCount }}</span>
 				<n-pagination v-model:page="page" :page-count="lastPage" :disabled="loading" />
 			</div>
 		</n-card>

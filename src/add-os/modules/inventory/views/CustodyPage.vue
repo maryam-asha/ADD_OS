@@ -5,51 +5,51 @@
 
 		<!-- Stat Cards -->
 		<div v-if="!loadError && rows.length" class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border)] bg-white p-4 shadow-xs">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ t("inventory.history.custody") }}</span>
-					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+					<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t("inventory.history.custody") }}</span>
+					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--add-surface-sunken)] text-[var(--add-text-secondary)]">
 						<Icon name="carbon:catalog" :size="18" />
 					</div>
 				</div>
 				<div class="flex items-baseline justify-between gap-1">
-					<span class="font-mono text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{{ totalCount }}</span>
-					<span class="text-xs font-medium text-slate-400">{{ t("inventory.common.all") }}</span>
+					<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-text-primary)]">{{ totalCount }}</span>
+					<span class="text-xs font-medium text-[var(--add-text-muted)]">{{ t("inventory.common.all") }}</span>
 				</div>
 			</div>
 
-			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border)] bg-white p-4 shadow-xs">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ t("inventory.history.stillHeld") }}</span>
-					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-500 dark:bg-amber-950/40 dark:text-amber-400">
+					<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t("inventory.history.stillHeld") }}</span>
+					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--add-warning)_10%,transparent)] text-[var(--add-warning-text)]">
 						<Icon name="carbon:user-follow" :size="18" />
 					</div>
 				</div>
 				<div class="flex items-baseline justify-between gap-1">
-					<span class="font-mono text-2xl font-bold tracking-tight text-amber-500 dark:text-amber-400">{{ activeHeldCount }}</span>
-					<span class="text-xs font-medium text-slate-400">{{ rows.length ? Math.round((activeHeldCount / rows.length) * 100) : 0 }}%</span>
+					<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-warning-text)]">{{ activeHeldCount }}</span>
+					<span class="text-xs font-medium text-[var(--add-text-muted)]">{{ rows.length ? Math.round((activeHeldCount / rows.length) * 100) : 0 }}%</span>
 				</div>
 			</div>
 
-			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border)] bg-white p-4 shadow-xs">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ t("inventory.history.returned") }}</span>
-					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+					<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t("inventory.history.returned") }}</span>
+					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--add-success)_10%,transparent)] text-[var(--add-success-text)]">
 						<Icon name="carbon:undo" :size="18" />
 					</div>
 				</div>
 				<div class="flex items-baseline justify-between gap-1">
-					<span class="font-mono text-2xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400">{{ returnedCount }}</span>
-					<span class="text-xs font-medium text-slate-400">{{ t("inventory.history.returned") }}</span>
+					<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-success-text)]">{{ returnedCount }}</span>
+					<span class="text-xs font-medium text-[var(--add-text-muted)]">{{ t("inventory.history.returned") }}</span>
 				</div>
 			</div>
 		</div>
 
 		<!-- Filters Section -->
-		<div class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+		<div class="rounded-2xl border border-[var(--add-border)] bg-white p-4 shadow-xs">
 			<div class="mb-3.5 grid grid-cols-1 gap-3.5 sm:grid-cols-2">
 				<n-input v-model:value="filters.search" :placeholder="t('inventory.assets.search')" clearable class="w-full">
-					<template #prefix><Icon name="carbon:search" :size="16" class="text-slate-400" /></template>
+					<template #prefix><Icon name="carbon:search" :size="16" class="text-[var(--add-text-muted)]" /></template>
 				</n-input>
 				<n-select v-model:value="filters.category_id" :options="categoryOptions" :placeholder="t('inventory.common.category')" clearable filterable class="w-full" />
 				<!-- Where the asset sits: a branch takes everything in it. -->
@@ -72,18 +72,18 @@
 		<n-alert v-if="loadError" type="error" :title="loadError" />
 
 		<!-- Table Card -->
-		<n-card class="add-ledger-table rounded-2xl border border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900" :bordered="false" size="small">
-			<n-data-table :columns="columns" :data="rows" :loading="loading" :bordered="false" :row-props="rowProps" size="small" :scroll-x="980">
+		<n-card class="add-ledger-table rounded-2xl border border-[var(--add-border)] shadow-xs" :bordered="false" size="small">
+			<n-data-table :columns :data="rows" :loading :bordered="false" :row-props size="small" :scroll-x="980">
 				<template #empty>
-					<div class="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-500">
+					<div class="flex flex-col items-center justify-center py-12 text-[var(--add-text-muted)]">
 						<Icon name="carbon:user-follow" :size="40" class="mb-2 opacity-50" />
 						<span>{{ t("inventory.custody.empty") }}</span>
 					</div>
 				</template>
 			</n-data-table>
 
-			<div v-if="lastPage > 1" class="flex flex-col items-center justify-between gap-3 border-t border-slate-100 p-4 sm:flex-row dark:border-slate-800/80">
-				<span class="text-xs text-slate-400">
+			<div v-if="lastPage > 1" class="flex flex-col items-center justify-between gap-3 border-t border-[var(--add-border)] p-4 sm:flex-row">
+				<span class="text-xs text-[var(--add-text-muted)]">
 					{{ t("inventory.common.all") }}: {{ totalCount }}
 				</span>
 				<n-pagination v-model:page="page" :page-count="lastPage" :disabled="loading" />
@@ -189,7 +189,7 @@ function openAsset(assetId: number) {
 
 function rowProps(row: AssetAssignment) {
 	return {
-		class: "cursor-pointer transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/40",
+		class: "cursor-pointer transition-colors hover:bg-[var(--add-surface-sunken)]",
 		onClick: () => openAsset(row.asset_id)
 	}
 }
@@ -236,7 +236,7 @@ const columns = computed<DataTableColumns<AssetAssignment>>(() => [
 			if (!row.assigned_at) return EMPTY
 			return h("div", { class: "flex flex-col gap-0.5 leading-tight" }, [
 				h("span", { class: "font-medium text-xs whitespace-nowrap" }, formatDate(row.assigned_at)),
-				h("span", { class: "text-[11px] text-slate-400 font-mono whitespace-nowrap" }, formatTime(row.assigned_at))
+				h("span", { class: "text-[11px] text-[var(--add-text-muted)] font-mono whitespace-nowrap" }, formatTime(row.assigned_at))
 			])
 		}
 	},
@@ -248,8 +248,8 @@ const columns = computed<DataTableColumns<AssetAssignment>>(() => [
 		render: row =>
 			row.returned_at
 				? h("div", { class: "flex flex-col gap-0.5 leading-tight" }, [
-						h("span", { class: "font-medium text-xs text-slate-600 dark:text-slate-400 whitespace-nowrap" }, formatDate(row.returned_at)),
-						h("span", { class: "text-[11px] text-slate-400 font-mono whitespace-nowrap" }, formatTime(row.returned_at))
+						h("span", { class: "font-medium text-xs text-[var(--add-text-secondary)] whitespace-nowrap" }, formatDate(row.returned_at)),
+						h("span", { class: "text-[11px] text-[var(--add-text-muted)] font-mono whitespace-nowrap" }, formatTime(row.returned_at))
 					])
 				: h(NTag, { size: "small", round: true, type: "warning" }, () => t("inventory.history.stillHeld"))
 	},

@@ -1,7 +1,7 @@
 <!-- src/add-os/modules/hr/views/core/DocumentTypesPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<HrPageHeader :title="t(titleKey || 'nav.pages.hrDocumentTypes')" />
+		<HrPageHeader :title="t(titleKey || 'nav.pages.hrDocumentTypes')" :description="t('pageDescriptions.hrDocumentTypes')" />
 		<HrResourcePanel
 			:api
 			:columns

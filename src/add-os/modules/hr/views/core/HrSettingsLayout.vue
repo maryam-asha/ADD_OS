@@ -3,18 +3,18 @@
 	<div class="flex flex-col gap-6 lg:flex-row lg:items-start">
 		<!-- Sidebar settings navigation matching reference card (Image 1) -->
 		<aside :aria-label="t('nav.sections.hrSettings')" class="shrink-0 print:hidden lg:w-80">
-			<div class="hidden lg:block overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+			<div class="hidden lg:block overflow-hidden rounded-2xl border border-[var(--add-border)] bg-white p-5 shadow-sm">
 				<!-- Header with title, subtitle and icon -->
-				<div class="mb-5 flex items-center justify-between gap-3 border-b border-slate-100 pb-4 dark:border-neutral-800">
+				<div class="mb-5 flex items-center justify-between gap-3 border-b border-[var(--add-border)] pb-4">
 					<div class="min-w-0 flex-1">
-						<h2 class="text-base font-bold text-slate-900 dark:text-white">
+						<h2 class="text-base font-bold text-[var(--add-text-primary)]">
 							{{ t("nav.sections.hrSettings") }}
 						</h2>
-						<p class="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
+						<p class="mt-0.5 text-xs text-[var(--add-text-secondary)]">
 							{{ t("hr.settings.subtitle") }}
 						</p>
 					</div>
-					<div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 dark:bg-neutral-800 dark:text-neutral-300">
+					<div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--add-surface-sunken)] text-[var(--add-text-primary)]">
 						<Icon name="carbon:user-avatar" :size="22" />
 					</div>
 				</div>
@@ -28,15 +28,15 @@
 						class="group flex w-full items-center justify-between rounded-xl px-3.5 py-3 text-sm transition-all text-start"
 						:class="[
 							active === page.name
-								? 'bg-emerald-50/80 font-bold text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300'
-								: 'text-slate-700 hover:bg-slate-50 dark:text-neutral-300 dark:hover:bg-neutral-800/60'
+								? 'bg-[color-mix(in_srgb,var(--add-success)_10%,transparent)] font-bold text-[var(--add-success-text)]'
+								: 'text-[var(--add-text-primary)] hover:bg-[var(--add-surface-sunken)]'
 						]"
 						@click="open(page.name)"
 					>
 						<span class="truncate">{{ page.label }}</span>
 						<span
-							class="text-slate-400 transition-transform group-hover:-translate-x-0.5 rtl:group-hover:translate-x-0.5 rtl:rotate-180"
-							:class="active === page.name ? 'text-emerald-700 dark:text-emerald-400 font-bold' : ''"
+							class="text-[var(--add-text-muted)] transition-transform group-hover:-translate-x-0.5 rtl:group-hover:translate-x-0.5 rtl:rotate-180"
+							:class="active === page.name ? 'text-[var(--add-success-text)] font-bold' : ''"
 						>
 							<Icon name="carbon:chevron-right" :size="16" />
 						</span>
@@ -45,8 +45,8 @@
 			</div>
 
 			<!-- Mobile and tablet selector -->
-			<div class="lg:hidden rounded-xl border border-slate-200/80 bg-white p-3 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-				<div class="mb-2 text-xs font-semibold text-slate-500">{{ t("nav.sections.hrSettings") }}</div>
+			<div class="lg:hidden rounded-xl border border-[var(--add-border)] bg-white p-3 shadow-sm">
+				<div class="mb-2 text-xs font-semibold text-[var(--add-text-secondary)]">{{ t("nav.sections.hrSettings") }}</div>
 				<n-select
 					:options="selectOptions"
 					:value="active"
@@ -59,7 +59,7 @@
 		<!-- Main content area -->
 		<div class="min-w-0 flex-1">
 			<RouterView v-slot="{ Component }">
-				<component :is="Component" :key="`${String(route.name)}${mainStore.forceRefresh}`" />
+				<component :is="Component" :key="`${routeInstanceKey(route)}${mainStore.forceRefresh}`" />
 			</RouterView>
 		</div>
 	</div>
@@ -72,6 +72,7 @@ import { computed } from "vue"
 import { useI18n } from "vue-i18n"
 import { RouterView, useRoute, useRouter } from "vue-router"
 import { menuPages } from "@/add-os/navigation/access"
+import { routeInstanceKey } from "@/add-os/navigation/pageKey"
 import { NAV_SECTIONS, navPageTitleKey, navRouteName, navRoutePath } from "@/add-os/navigation/sections"
 import Icon from "@/components/common/Icon.vue"
 import { useMainStore } from "@/stores/main"

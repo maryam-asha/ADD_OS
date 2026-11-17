@@ -22,12 +22,13 @@
 
 <script setup lang="ts" generic="T extends object">
 import type { DataTableColumns } from "naive-ui"
-import { NButton, NCard, NDataTable, useDialog } from "naive-ui"
+import type { RowAction } from "@/add-os/components/page/row-actions"
+import { NCard, NDataTable } from "naive-ui"
 import { computed, getCurrentInstance, h, inject } from "vue"
 import { useI18n } from "vue-i18n"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import TableRefreshButton from "@/add-os/components/resource/TableRefreshButton.vue"
 import { RESOURCE_REFETCH_KEY } from "@/add-os/composables/useResourceList"
-import Icon from "@/components/common/Icon.vue"
 
 const props = defineProps<{
 	columns: DataTableColumns<T>
@@ -42,7 +43,11 @@ const props = defineProps<{
 	 * this component owns no per-resource text.
 	 */
 	deleteWarning?: string
-	extraActions?: (row: T) => ReturnType<typeof h>[]
+	/**
+	 * The row's own actions beyond edit and delete, as data. Rendered by
+	 * RowActions with edit first and delete last, like every table.
+	 */
+	rowActions?: (row: T) => RowAction[]
 	/**
 	 * How to identify a row, for resources not keyed by an autoincrement `id` —
 	 * currencies are keyed by a 3-letter `code` string. Omit it and rows key on
@@ -72,7 +77,8 @@ function handleRefresh() {
 }
 
 const { t } = useI18n()
-const dialog = useDialog()
+
+const hasActions = computed(() => Boolean(props.onEdit || props.rowActions || props.onDelete))
 
 const tablePagination = computed(() => ({
 	pageSize: 10,
@@ -96,58 +102,42 @@ function resolveRowKey(row: T): string | number {
 }
 
 /**
- * A centered confirm dialog, not `n-popconfirm`: the popover's floating-ui
- * placement never got the RTL visual check RTL-REPORT.md §2 flagged as
- * outstanding, and it was rendering nowhere near its trigger. `useDialog()`
- * sidesteps anchored positioning entirely.
+ * The standard row (2026-11-17): edit, the page's own actions, then delete —
+ * as data, laid out by RowActions. Delete keeps its confirm, including the
+ * resource's cascade warning; RowActions confirms through a centred
+ * `useDialog()`, never `n-popconfirm` (its anchored placement was never
+ * verified in RTL, RTL-REPORT.md §2). The hand-built `extraActions` buttons
+ * this replaced were removed once the last page moved off them.
  */
-function confirmDelete(row: T) {
-	const onDelete = props.onDelete
-	if (!onDelete) return
-
-	dialog.warning({
-		title: t("resourceCrud.table.deleteAction"),
-		content: props.deleteWarning
-			? `${props.deleteWarning} ${t("resourceCrud.table.deleteConfirmTitle")}`
-			: t("resourceCrud.table.deleteConfirmTitle"),
-		positiveText: t("resourceCrud.table.deleteConfirmOk"),
-		negativeText: t("resourceCrud.table.deleteConfirmCancel"),
-		onPositiveClick: () => onDelete(row)
-	})
+function standardActions(row: T): RowAction[] {
+	const actions: RowAction[] = []
+	if (props.onEdit) {
+		const onEdit = props.onEdit
+		actions.push({ key: "edit", label: t("resourceCrud.table.editAction"), icon: "carbon:edit", onClick: () => onEdit(row) })
+	}
+	if (props.rowActions) actions.push(...props.rowActions(row))
+	if (props.onDelete) {
+		const onDelete = props.onDelete
+		actions.push({
+			key: "delete",
+			label: t("resourceCrud.table.deleteAction"),
+			icon: "carbon:trash-can",
+			danger: true,
+			confirm: props.deleteWarning
+				? `${props.deleteWarning} ${t("resourceCrud.table.deleteConfirmTitle")}`
+				: t("resourceCrud.table.deleteConfirmTitle"),
+			onClick: () => onDelete(row)
+		})
+	}
+	return actions
 }
 
 function renderActions(row: T) {
-	const editLabel = t("resourceCrud.table.editAction")
-	const deleteLabel = t("resourceCrud.table.deleteAction")
-
-	const buttons = []
-	if (props.onEdit) {
-		buttons.push(
-			h(
-				NButton,
-				{ text: true, type: "primary", "aria-label": editLabel, title: editLabel, onClick: () => props.onEdit!(row) },
-				{ icon: () => h(Icon, { name: "carbon:edit", size: 18 }) }
-			)
-		)
-	}
-	if (props.extraActions) {
-		buttons.push(...props.extraActions(row))
-	}
-	if (props.onDelete) {
-		buttons.push(
-			h(
-				NButton,
-				{ text: true, type: "error", "aria-label": deleteLabel, title: deleteLabel, onClick: () => confirmDelete(row) },
-				{ icon: () => h(Icon, { name: "carbon:trash-can", size: 18 }) }
-			)
-		)
-	}
-
-	return h("div", { class: "inline-flex items-center justify-center gap-2" }, buttons)
+	return h(RowActions, { actions: standardActions(row) })
 }
 
 /**
- * Unify all actions (edit, extraActions, delete) under a single "actions" column.
+ * Unify all actions (edit, rowActions, delete) under a single "actions" column.
  * This ensures action icons sit side by side without artificial table column spacing.
  */
 const tableColumns = computed<DataTableColumns<T>>(() => {
@@ -157,7 +147,7 @@ const tableColumns = computed<DataTableColumns<T>>(() => {
 		...col
 	}))
 
-	if (props.onEdit || props.extraActions || props.onDelete) {
+	if (hasActions.value) {
 		columns.push({
 			title: t("resourceCrud.table.actionsColumn"),
 			key: "actions",
@@ -172,11 +162,11 @@ const tableColumns = computed<DataTableColumns<T>>(() => {
 /**
  * Compute minimum horizontal scroll width:
  * - 160px per caller column (safe default that avoids wrapping)
- * - 100px for the unified actions column
+ * - 140px for the unified actions column (two icon buttons and "⋯")
  */
 const scrollX = computed(() => {
 	const callerColsWidth = props.columns.length * 160
-	const actionsColWidth = (props.onEdit || props.extraActions || props.onDelete) ? 100 : 0
+	const actionsColWidth = hasActions.value ? 140 : 0
 	return callerColsWidth + actionsColWidth
 })
 </script>

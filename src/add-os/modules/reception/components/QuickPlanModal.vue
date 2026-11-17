@@ -5,22 +5,14 @@
 	— there is one plan sale, not two.
 -->
 <template>
-	<n-modal
-		:show
-		preset="card"
-		:title="t('nav.pages.planPurchases')"
-		class="max-w-4xl rounded-2xl shadow-xl"
-		closable
-		content-style="max-height: 80vh; overflow-y: auto; padding-block: 0.5rem;"
-		@update:show="emit('update:show', $event)"
-	>
+	<FormModal :show :title="t('nav.pages.planPurchases')" size="lg" @update:show="emit('update:show', $event)">
 		<PlanPurchasesPage in-modal :preselected-user-id @success="emit('success')" />
-	</n-modal>
+	</FormModal>
 </template>
 
 <script setup lang="ts">
-import { NModal } from "naive-ui"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
 import PlanPurchasesPage from "@/add-os/modules/plans/views/PlanPurchasesPage.vue"
 
 defineProps<{

@@ -180,7 +180,7 @@ export function nameCell(name: string, sub: string, options: { code?: boolean } 
 		options.code
 			? h(
 					"span",
-					{ class: "inline-block w-fit font-mono text-[11px] text-slate-500 dark:text-slate-400", dir: "ltr" },
+					{ class: "inline-block w-fit font-mono text-[11px] text-[var(--add-text-secondary)]", dir: "ltr" },
 					sub
 				)
 			: h("span", { class: "truncate text-xs text-secondary", title: sub }, sub)
@@ -193,7 +193,7 @@ export function codeChip(code: string | null | undefined): VNode {
 	return h(
 		"span",
 		{
-			class: "inline-flex items-center rounded-md border border-slate-200/80 bg-slate-100/80 px-2 py-0.5 font-mono text-xs font-semibold text-slate-700 dark:border-slate-700/60 dark:bg-slate-800/80 dark:text-slate-300",
+			class: "inline-flex items-center rounded-md border border-[var(--add-border)] bg-[var(--add-surface-sunken)] px-2 py-0.5 font-mono text-xs font-semibold text-[var(--add-text-primary)]",
 			dir: "ltr"
 		},
 		code
@@ -219,7 +219,7 @@ export function viewActionColumn<T>(onView: (row: T) => void, tooltipText = "Ù…Ø
 								size: "tiny",
 								quaternary: true,
 								circle: true,
-								class: "text-slate-400 hover:text-primary transition-colors",
+								class: "text-[var(--add-text-muted)] hover:text-primary transition-colors",
 								onClick: (e: MouseEvent) => {
 									e.stopPropagation()
 									onView(row)

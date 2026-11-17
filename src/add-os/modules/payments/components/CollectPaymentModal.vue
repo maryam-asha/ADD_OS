@@ -1,6 +1,6 @@
 <!-- src/add-os/modules/payments/components/CollectPaymentModal.vue -->
 <template>
-	<n-modal :show preset="card" :title="t('collectPayment.title')" class="max-w-lg" @update:show="emit('update:show', $event)">
+	<FormModal :show :title="t('collectPayment.title')" size="md" @update:show="emit('update:show', $event)">
 		<n-spin :show="isLoading">
 			<n-alert v-if="loadFailed" type="error" :bordered="false" :title="t('collectPayment.loadError')" />
 			<n-alert v-else-if="!isLoading && items.length === 0" type="success" :bordered="false" :title="t('collectPayment.nothingOwed')" />
@@ -82,15 +82,16 @@
 				</n-button>
 			</div>
 		</template>
-	</n-modal>
+	</FormModal>
 </template>
 
 <script setup lang="ts">
 import type { SelectOption } from "naive-ui"
 import type { OutstandingItem, OutstandingPurpose, SettleAtReceptionResult } from "@/add-os/modules/booking/types/reception"
-import { NAlert, NButton, NForm, NFormItem, NInput, NModal, NRadio, NRadioGroup, NSelect, NSpin, useMessage } from "naive-ui"
+import { NAlert, NButton, NForm, NFormItem, NInput, NRadio, NRadioGroup, NSelect, NSpin, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
 import { ApiError } from "@/add-os/services/api"
 import { getOutstanding, settleAtReception } from "@/add-os/services/reception"
 import { formatCurrency, formatDateTime, formatNumber, isCurrencyCode } from "@/add-os/utils/format"

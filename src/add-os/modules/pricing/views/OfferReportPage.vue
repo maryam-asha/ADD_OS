@@ -8,16 +8,14 @@
 -->
 <template>
 	<div class="flex flex-col gap-6">
-		<div class="flex flex-wrap items-start justify-between gap-3">
-			<div class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.offerReport") }}</h1>
-				<p class="text-secondary">{{ t("offerReport.description") }}</p>
-			</div>
-			<n-button secondary size="small" :loading="isLoading" :disabled="!range" @click="fetchReport">
-				<template #icon><Icon name="carbon:renew" :size="16" /></template>
-				{{ t("offerReport.refresh") }}
-			</n-button>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.offerReport')" :description="t('offerReport.description')">
+			<template #actions>
+				<n-button secondary size="small" :loading="isLoading" :disabled="!range" @click="fetchReport">
+					<template #icon><Icon name="carbon:renew" :size="16" /></template>
+					{{ t("offerReport.refresh") }}
+				</n-button>
+			</template>
+		</PageHeader>
 
 		<n-card size="small">
 			<div class="flex flex-wrap items-center gap-3">
@@ -53,6 +51,7 @@ import type { OfferReportPeriod, OfferReportRow, OfferReportType } from "@/add-o
 import { NAlert, NButton, NButtonGroup, NCard, NDataTable, NDatePicker, NTag } from "naive-ui"
 import { computed, h, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { OFFER_REPORT_TYPES } from "@/add-os/modules/pricing/types/offer-report"
 import { discountLabel } from "@/add-os/modules/pricing/utils/coupon-form"
 import { ApiError } from "@/add-os/services/api"

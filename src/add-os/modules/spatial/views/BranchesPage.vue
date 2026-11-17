@@ -1,20 +1,18 @@
 <!-- src/add-os/modules/spatial/views/BranchesPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.branches") }}</h1>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.branches')" :description="t('branches.description')">
+			<template #actions>
+				<n-button v-if="canCreate" type="primary" @click="openCreate">
+					<template #icon><Icon name="carbon:add" :size="16" /></template>
+					{{ t("branches.create.button") }}
+				</n-button>
+			</template>
+		</PageHeader>
 
 		<ResourceStatCards v-if="!error && !isLoading" :cards="statCards" />
 
 		<n-alert v-if="error" type="error" :title="t('branches.loadError')" />
-
-		<div class="flex justify-end">
-			<n-button v-if="canCreate" type="primary" @click="openCreate">
-				<template #icon><Icon name="carbon:add" :size="16" /></template>
-				{{ t("branches.create.button") }}
-			</n-button>
-		</div>
 
 		<ResourceTable
 			:columns
@@ -39,8 +37,10 @@
 <script setup lang="ts">
 import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vue"
 import type { Branch, BranchPayload } from "@/add-os/modules/spatial/types/branch"
+import { NAlert, NButton } from "naive-ui"
 import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.vue"
 import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"

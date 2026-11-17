@@ -1,20 +1,18 @@
 <!-- src/add-os/modules/spatial/views/KiosksPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.kiosks") }}</h1>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.kiosks')" :description="t('kiosks.description')">
+			<template #actions>
+				<n-button v-if="canCreate" type="primary" data-testid="kiosk-create" @click="openCreate">
+					<template #icon><Icon name="carbon:add" :size="16" /></template>
+					{{ t("kiosks.create.button") }}
+				</n-button>
+			</template>
+		</PageHeader>
 
 		<ResourceStatCards v-if="!error && !isLoading" :cards="statCards" />
 
 		<n-alert v-if="error" type="error" :title="t('kiosks.loadError')" />
-
-		<div class="flex justify-end">
-			<n-button v-if="canCreate" type="primary" data-testid="kiosk-create" @click="openCreate">
-				<template #icon><Icon name="carbon:add" :size="16" /></template>
-				{{ t("kiosks.create.button") }}
-			</n-button>
-		</div>
 
 		<ResourceTable
 			:columns
@@ -23,7 +21,7 @@
 			:on-edit="canUpdate ? openEdit : undefined"
 			:on-delete="canDelete ? (async row => { await mutations.remove(row.id) }) : undefined"
 			:delete-warning="t('kiosks.delete.warning')"
-			:extra-actions="canPair ? renderPairingActions : undefined"
+			:row-actions="canPair ? pairingActions : undefined"
 		/>
 
 		<ResourceFormDrawer
@@ -40,12 +38,14 @@
 </template>
 
 <script setup lang="ts">
+import type { RowAction } from "@/add-os/components/page/row-actions"
 import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vue"
 import type { IssuedPairingCode, Kiosk, KioskPayload } from "@/add-os/modules/spatial/types/kiosk"
 import type { Space } from "@/add-os/modules/spatial/types/space"
 import { NAlert, NButton, useDialog, useMessage } from "naive-ui"
-import { computed, h, onMounted, ref } from "vue"
+import { computed, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.vue"
 import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
@@ -206,30 +206,24 @@ function confirmRevoke(row: Kiosk) {
 	})
 }
 
-function actionButton(label: string, icon: string, type: "primary" | "warning", onClick: () => void) {
-	return h(
-		NButton,
-		{ text: true, type, "aria-label": label, title: label, onClick },
-		{ icon: () => h(Icon, { name: icon, size: 18 }) }
-	)
-}
-
 /**
  * ADD Core refuses to pair a deactivated kiosk, so it gets no code. Revoking
  * stays on it: deactivating keeps the secret, and a lost device must still be
  * cut off.
  */
-function renderPairingActions(row: Kiosk) {
-	const buttons = []
+function pairingActions(row: Kiosk): RowAction[] {
+	const actions: RowAction[] = []
 
 	if (row.is_active) {
-		buttons.push(actionButton(t("kiosks.pairing.issue"), "carbon:password", "primary", () => requestCode(row)))
+		actions.push({ key: "issue", label: t("kiosks.pairing.issue"), icon: "carbon:password", onClick: () => requestCode(row) })
 	}
 
+	// Revoking cuts a device off, so it sits with delete in the menu; it keeps
+	// its own confirm, which names the kiosk.
 	if (row.is_paired) {
-		buttons.push(actionButton(t("kiosks.pairing.revoke"), "carbon:unlink", "warning", () => confirmRevoke(row)))
+		actions.push({ key: "revoke", label: t("kiosks.pairing.revoke"), icon: "carbon:unlink", danger: true, onClick: () => confirmRevoke(row) })
 	}
 
-	return buttons
+	return actions
 }
 </script>

@@ -1,10 +1,7 @@
 <!-- src/add-os/modules/plans/views/ItemSalesPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.itemSales") }}</h1>
-			<p class="max-w-3xl text-sm text-secondary">{{ t("retail.sell.description") }}</p>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.itemSales')" :description="t('retail.sell.description')" />
 
 		<n-card :title="t('retail.sell.title')" size="small">
 			<div class="grid grid-cols-1 gap-x-4 lg:grid-cols-2">
@@ -73,6 +70,7 @@ import type { SaleLine } from "@/add-os/modules/plans/utils/saleLines"
 import { NAlert, NButton, NCard, NDataTable, NFormItem, NInput, NInputNumber, NPagination, NRadioButton, NRadioGroup, NSelect, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import CurrencySelect from "@/add-os/modules/hr/components/payroll/CurrencySelect.vue"
 import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
 import { COLUMN, localized, warehouseLabel } from "@/add-os/modules/inventory/utils/display"

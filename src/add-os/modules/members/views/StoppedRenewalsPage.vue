@@ -1,10 +1,7 @@
 <!-- src/add-os/modules/members/views/StoppedRenewalsPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.stoppedRenewals") }}</h1>
-			<p>{{ t("renewals.description") }}</p>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.stoppedRenewals')" :description="t('renewals.description')" />
 
 		<n-alert v-if="!canManage" type="warning" :title="t('resourceCrud.mutations.permissionError')" />
 
@@ -15,7 +12,7 @@
 			<n-card>
 				<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
 					<div>
-						<label class="block text-xs text-neutral-500 mb-1">{{ t("renewals.filters.type") }}</label>
+						<label class="block text-xs text-[var(--add-text-secondary)] mb-1">{{ t("renewals.filters.type") }}</label>
 						<n-select
 							v-model:value="query.type"
 							:options="typeOptions"
@@ -25,7 +22,7 @@
 					</div>
 
 					<div>
-						<label class="block text-xs text-neutral-500 mb-1">{{ t("renewals.filters.provider") }}</label>
+						<label class="block text-xs text-[var(--add-text-secondary)] mb-1">{{ t("renewals.filters.provider") }}</label>
 						<n-select
 							v-model:value="query.provider_id"
 							:options="providerOptions"
@@ -37,7 +34,7 @@
 					</div>
 
 					<div>
-						<label class="block text-xs text-neutral-500 mb-1">{{ t("renewals.filters.reason") }}</label>
+						<label class="block text-xs text-[var(--add-text-secondary)] mb-1">{{ t("renewals.filters.reason") }}</label>
 						<n-select
 							v-model:value="query.reason"
 							:options="reasonOptions"
@@ -54,11 +51,11 @@
 					remote
 					size="small"
 					:scroll-x="950"
-					:columns="columns"
-					:data="data"
+					:columns
+					:data
 					:loading="isLoading"
 					:bordered="false"
-					:row-key="rowKey"
+					:row-key
 					:pagination="{
 						itemCount: meta?.total,
 						page: meta?.current_page,
@@ -81,9 +78,11 @@
 <script setup lang="ts">
 import type { DataTableColumns } from "naive-ui"
 import type { StoppedRenewalRow, StoppedRenewalsFilterQuery } from "@/add-os/modules/members/types/renewal"
-import { NAlert, NButton, NCard, NDataTable, NSelect, NTag, useDialog, useMessage } from "naive-ui"
+import { NAlert, NCard, NDataTable, NSelect, NTag, useDialog, useMessage } from "naive-ui"
 import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { canManageRenewals } from "@/add-os/config/permissions"
 import OfficeLeaseDetailModal from "@/add-os/modules/members/components/OfficeLeaseDetailModal.vue"
@@ -96,7 +95,6 @@ import {
 	setMembershipAutoRenew,
 	setOfficeLeaseAutoRenew
 } from "@/add-os/services/renewals"
-import Icon from "@/components/common/Icon.vue"
 
 defineProps<{ titleKey?: string }>()
 const { t } = useI18n()
@@ -147,7 +145,7 @@ function openLeaseDetail(id: number) {
 function handleRenewNow(row: StoppedRenewalRow) {
 	dialog.info({
 		title: t("renewals.actions.renewNow"),
-		content: t("officeLeases.detail.renewConfirm", "Renew this item now?"),
+		content: t("officeLeases.detail.renewConfirm"),
 		positiveText: t("renewals.actions.renewNow"),
 		negativeText: t("resourceCrud.form.cancel"),
 		onPositiveClick: async () => {
@@ -171,7 +169,7 @@ function handleRenewNow(row: StoppedRenewalRow) {
 function handleToggleAutoRenew(row: StoppedRenewalRow) {
 	dialog.info({
 		title: t("renewals.actions.toggleAutoRenew"),
-		content: t("officeLeases.detail.toggleAutoRenewConfirm", "Re-enable auto-renewal for this item?"),
+		content: t("officeLeases.detail.toggleAutoRenewConfirm"),
 		positiveText: t("resourceCrud.form.submit"),
 		negativeText: t("resourceCrud.form.cancel"),
 		onPositiveClick: async () => {
@@ -259,57 +257,14 @@ const columns = computed<DataTableColumns<StoppedRenewalRow>>(() => [
 		key: "actions",
 		align: "center",
 		width: 120,
-		render: row => {
-			const buttons = []
-
-			if (row.type === "lease") {
-				buttons.push(
-					h(
-						NButton,
-						{
-							text: true,
-							type: "default",
-							"aria-label": t("officeLeases.actions.view"),
-							title: t("officeLeases.actions.view"),
-							onClick: () => openLeaseDetail(row.id)
-						},
-						{ icon: () => h(Icon, { name: "carbon:view", size: 18 }) }
-					)
-				)
-			}
-
-			// Renew Now
-			buttons.push(
-				h(
-					NButton,
-					{
-						text: true,
-						type: "primary",
-						"aria-label": t("renewals.actions.renewNow"),
-						title: t("renewals.actions.renewNow"),
-						onClick: () => handleRenewNow(row)
-					},
-					{ icon: () => h(Icon, { name: "carbon:renew", size: 18 }) }
-				)
-			)
-
-			// Toggle Auto Renew (Turn Back On)
-			buttons.push(
-				h(
-					NButton,
-					{
-						text: true,
-						type: "info",
-						"aria-label": t("renewals.actions.toggleAutoRenew"),
-						title: t("renewals.actions.toggleAutoRenew"),
-						onClick: () => handleToggleAutoRenew(row)
-					},
-					{ icon: () => h(Icon, { name: "carbon:checkmark-filled", size: 18 }) }
-				)
-			)
-
-			return h("div", { class: "inline-flex items-center justify-center gap-2" }, buttons)
-		}
+		render: row =>
+			h(RowActions, {
+				actions: [
+					...(row.type === "lease" ? [{ key: "view", label: t("officeLeases.actions.view"), icon: "carbon:view", onClick: () => openLeaseDetail(row.id) }] : []),
+					{ key: "renew", label: t("renewals.actions.renewNow"), icon: "carbon:renew", onClick: () => handleRenewNow(row) },
+					{ key: "autoRenew", label: t("renewals.actions.toggleAutoRenew"), icon: "carbon:checkmark-filled", onClick: () => handleToggleAutoRenew(row) }
+				]
+			})
 	}
 ])
 </script>

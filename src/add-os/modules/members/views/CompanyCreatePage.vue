@@ -8,17 +8,14 @@
 					<Icon name="carbon:arrow-left" :size="18" class="rtl:rotate-180" />
 				</template>
 			</n-button>
-			<div class="flex flex-col gap-1 min-w-0">
-				<h1 class="text-2xl font-bold m-0">{{ t("officeLeases.create.title") }}</h1>
-				<p class="text-sm text-secondary m-0 max-w-3xl">{{ t("companies.createPage.subtitle") }}</p>
-			</div>
+			<PageHeader :title="t('officeLeases.create.title')" :description="t('companies.createPage.subtitle')" />
 		</header>
 
 		<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 			<!-- The wizard -->
 			<n-card class="lg:col-span-8 rounded-xl">
 				<!-- Steps, joined by a line that fills in as each is passed -->
-				<ol class="list-none m-0 p-0 flex items-center pb-5 mb-6 border-b border-stone-200" data-test="steps">
+				<ol class="list-none m-0 p-0 flex items-center pb-5 mb-6 border-b border-[var(--add-border)]" data-test="steps">
 					<li
 						v-for="(s, index) in STEPS"
 						:key="s"
@@ -39,7 +36,7 @@
 									? 'bg-[var(--add-primary)] border-[var(--add-primary)] text-white'
 									: index === step
 										? 'bg-[var(--add-primary)]/10 border-[var(--add-primary)] text-[var(--add-primary)]'
-										: 'bg-white border-stone-200 text-stone-400'"
+										: 'bg-white border-[var(--add-border)] text-[var(--add-text-muted)]'"
 							>
 								<Icon v-if="index < step" name="carbon:checkmark" :size="16" />
 								<span v-else>{{ formatNumber(index + 1) }}</span>
@@ -47,7 +44,7 @@
 							<!-- On a phone only the current step is named; the circles carry the rest. -->
 							<span
 								class="text-sm font-semibold whitespace-nowrap"
-								:class="index === step ? 'text-stone-900' : index < step ? 'text-stone-700 hidden md:inline' : 'text-stone-400 hidden md:inline'"
+								:class="index === step ? 'text-[var(--add-text-primary)]' : index < step ? 'text-[var(--add-text-primary)] hidden md:inline' : 'text-[var(--add-text-muted)] hidden md:inline'"
 							>
 								{{ t(`companies.createPage.steps.${s}`) }}
 							</span>
@@ -55,7 +52,7 @@
 						<span
 							v-if="index < STEPS.length - 1"
 							class="flex-1 h-0.5 mx-3 rounded-full transition-colors"
-							:class="index < step ? 'bg-[var(--add-primary)]' : 'bg-stone-200'"
+							:class="index < step ? 'bg-[var(--add-primary)]' : 'bg-[var(--add-surface-sunken)]'"
 							aria-hidden="true"
 						></span>
 					</li>
@@ -93,7 +90,7 @@
 								/>
 							</n-form-item>
 
-							<div v-if="selectedRequest" class="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 mb-6 rounded-xl bg-stone-50 border border-stone-200/80">
+							<div v-if="selectedRequest" class="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 mb-6 rounded-xl bg-[var(--add-surface-sunken)] border border-[var(--add-border)]">
 								<div class="flex flex-col gap-0.5 min-w-0">
 									<span class="text-xs text-secondary">{{ t("companies.createPage.request.contact") }}</span>
 									<span class="text-sm font-medium break-words">{{ selectedRequest.contact || "—" }}</span>
@@ -132,16 +129,16 @@
 
 							<div
 								class="flex items-center gap-4 p-4 rounded-xl border"
-								:class="selectedSpace ? 'bg-emerald-50/60 border-emerald-100' : 'border-dashed border-stone-200'"
+								:class="selectedSpace ? 'bg-[color-mix(in_srgb,var(--add-success)_10%,transparent)] border-[color-mix(in_srgb,var(--add-success)_35%,transparent)]' : 'border-dashed border-[var(--add-border)]'"
 							>
 								<span
 									class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
-									:class="selectedSpace ? 'bg-emerald-100 text-emerald-700' : 'bg-stone-100 text-stone-400'"
+									:class="selectedSpace ? 'bg-[color-mix(in_srgb,var(--add-success)_10%,transparent)] text-[var(--add-success-text)]' : 'bg-[var(--add-surface-sunken)] text-[var(--add-text-muted)]'"
 								>
 									<Icon name="carbon:building" :size="22" />
 								</span>
 								<div class="flex flex-col gap-0.5 min-w-0">
-									<span class="text-sm font-semibold truncate" :class="selectedSpace ? '' : 'text-stone-400'">
+									<span class="text-sm font-semibold truncate" :class="selectedSpace ? '' : 'text-[var(--add-text-muted)]'">
 										{{ selectedSpaceName || t("officeLeases.create.selectSpace") }}
 									</span>
 									<span class="text-xs text-secondary">{{ selectedSpaceCapacity || t("officeLeases.create.branchAuto") }}</span>
@@ -151,7 +148,7 @@
 
 						<!-- Step 3: term, price and renewal -->
 						<template v-else>
-							<h3 class="text-sm font-bold text-stone-700 m-0 mb-3">{{ t("companies.createPage.termsPeriod") }}</h3>
+							<h3 class="text-sm font-bold text-[var(--add-text-primary)] m-0 mb-3">{{ t("companies.createPage.termsPeriod") }}</h3>
 							<div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
 								<n-form-item path="starts_on" :label="t('officeLeases.create.startsOn')" v-bind="serverFeedback('starts_on')">
 									<n-date-picker v-model:formatted-value="form.starts_on" value-format="yyyy-MM-dd" type="date" class="w-full" />
@@ -171,7 +168,7 @@
 								<n-select v-model:value="form.billing_cycle_months" :options="billingCycleOptions" />
 							</n-form-item>
 
-							<h3 class="text-sm font-bold text-stone-700 m-0 mb-3 pt-5 border-t border-stone-200">{{ t("companies.createPage.termsPrice") }}</h3>
+							<h3 class="text-sm font-bold text-[var(--add-text-primary)] m-0 mb-3 pt-5 border-t border-[var(--add-border)]">{{ t("companies.createPage.termsPrice") }}</h3>
 							<div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
 								<n-form-item path="monthly_amount" :label="t('officeLeases.create.monthlyAmount')" v-bind="serverFeedback('monthly_amount')">
 									<n-input
@@ -194,7 +191,7 @@
 								<n-select v-model:value="form.billed_to" :options="payerOptions" />
 							</n-form-item>
 
-							<div class="flex items-center justify-between gap-4 p-4 rounded-xl border border-stone-200">
+							<div class="flex items-center justify-between gap-4 p-4 rounded-xl border border-[var(--add-border)]">
 								<div class="flex flex-col gap-0.5 min-w-0">
 									<span class="text-sm font-semibold">{{ t("officeLeases.create.autoRenew") }}</span>
 									<span class="text-xs text-secondary">{{ t("companies.createPage.autoRenewHint") }}</span>
@@ -240,7 +237,7 @@
 						v-for="(group, index) in summaryGroups"
 						:key="group.step"
 						class="flex flex-col gap-3 pb-4"
-						:class="{ 'border-t border-stone-200 pt-4 sm:border-t-0 sm:pt-0 lg:border-t lg:pt-4': index > 0 }"
+						:class="{ 'border-t border-[var(--add-border)] pt-4 sm:border-t-0 sm:pt-0 lg:border-t lg:pt-4': index > 0 }"
 					>
 						<div class="flex items-center justify-between gap-2">
 							<h3 class="text-sm font-bold m-0">{{ t(`companies.createPage.steps.${group.step}`) }}</h3>
@@ -249,7 +246,7 @@
 						<dl class="m-0 flex flex-col gap-2.5">
 							<div v-for="row in group.rows" :key="row.key" class="flex flex-col gap-0.5">
 								<dt class="text-xs font-normal text-secondary">{{ row.label }}</dt>
-								<dd class="m-0 text-sm font-semibold break-words" :class="row.value ? '' : 'text-stone-300 font-normal'">{{ row.value || "—" }}</dd>
+								<dd class="m-0 text-sm font-semibold break-words" :class="row.value ? '' : 'text-[var(--add-text-muted)] font-normal'">{{ row.value || "—" }}</dd>
 							</div>
 						</dl>
 					</section>
@@ -269,6 +266,7 @@ import { NButton, NCard, NDatePicker, NForm, NFormItem, NInput, NInputNumber, NS
 import { computed, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import { ApiError } from "@/add-os/services/api"

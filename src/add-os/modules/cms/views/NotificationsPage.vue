@@ -1,10 +1,7 @@
 <!-- src/add-os/modules/cms/views/NotificationsPage.vue -->
 <template>
 	<div class="flex flex-col gap-6">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.notifications") }}</h1>
-			<p class="text-secondary text-sm">{{ t("broadcastNotifications.description") }}</p>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.notifications')" :description="t('broadcastNotifications.description')" />
 
 		<n-card>
 			<n-form ref="formRef" :model="form" :rules label-placement="top">
@@ -54,7 +51,7 @@
 					class="!bg-[var(--add-primary)] hover:!bg-[var(--add-primary-hover)] !text-white font-medium shadow-sm px-6 py-2 rounded-lg"
 					@click="handleSend"
 				>
-					<template #icon><Icon name="carbon:send" :size="18" color="#ffffff" /></template>
+					<template #icon><Icon name="carbon:send" :size="18" /></template>
 					{{ t("broadcastNotifications.send") }}
 				</n-button>
 			</div>
@@ -68,6 +65,7 @@ import type { NotificationTarget } from "@/add-os/services/notifications"
 import { NButton, NCard, NForm, NFormItem, NInput, NSelect, useMessage } from "naive-ui"
 import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { broadcastNotification } from "@/add-os/services/notifications"
 import Icon from "@/components/common/Icon.vue"
 

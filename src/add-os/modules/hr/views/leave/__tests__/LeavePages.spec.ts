@@ -2,6 +2,7 @@ import { flushPromises, mount } from "@vue/test-utils"
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 import { nextTick } from "vue"
 import { createI18n } from "vue-i18n"
+import { pickFromRowMenu } from "@/add-os/components/page/__tests__/row-menu"
 
 import { setCurrentLocale } from "@/add-os/lang/currentLocale"
 import en from "@/add-os/lang/en/en.json"
@@ -121,10 +122,9 @@ describe("leave pages", () => {
 		await flushPromises()
 
 		expect(document.body.textContent).toContain("11 days")
-		const cancel = document.querySelector("button[aria-label='Cancel leave']") as HTMLButtonElement | null
-		expect(cancel).not.toBeNull()
-		cancel!.click()
-		await flushPromises()
+		// Cancelling sits under the row's "⋯".
+		const cancel = await pickFromRowMenu("Cancel leave")
+		expect(cancel).toBeTruthy()
 
 		expect(cancelMineMock).toHaveBeenCalledWith(3)
 		expect(myBalancesMock).toHaveBeenCalledTimes(2)

@@ -8,10 +8,7 @@
 -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.doorCodes") }}</h1>
-			<p class="text-sm text-secondary">{{ t("doorCodes.subtitle") }}</p>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.doorCodes')" :description="t('doorCodes.subtitle')" />
 
 		<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
 			<n-select v-model:value="lockId" :options="lockOptions" clearable :placeholder="t('doorCodes.filters.lock')" />
@@ -31,16 +28,17 @@
 <script setup lang="ts">
 import type { DataTableColumns } from "naive-ui"
 import type { AccessGrant, AccessGrantStatus, Device } from "@/add-os/modules/access/types/access"
-import { NAlert, NButton, NDataTable, NPagination, NSelect, NTag, useDialog, useMessage } from "naive-ui"
+import { NAlert, NDataTable, NPagination, NSelect, NTag, useDialog, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute } from "vue-router"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { can } from "@/add-os/config/permissions"
 import { listAccessGrants, listDevices, revokeAccessGrant } from "@/add-os/services/access"
 import { ApiError } from "@/add-os/services/api"
 import { formatDateTime } from "@/add-os/utils/format"
-import Icon from "@/components/common/Icon.vue"
 
 defineProps<{ titleKey?: string }>()
 
@@ -128,14 +126,10 @@ const columns = computed<DataTableColumns<AccessGrant>>(() => [
 	{
 		title: "",
 		key: "actions",
-		width: 60,
+		width: 90,
 		render: row =>
 			canRevoke.value && isLive(row) && row.source_type === "booking"
-				? h(
-						NButton,
-						{ text: true, type: "error", title: t("doorCodes.revoke.button"), "aria-label": t("doorCodes.revoke.button"), onClick: () => confirmRevoke(row) },
-						{ icon: () => h(Icon, { name: "carbon:close-outline", size: 18 }) }
-					)
+				? h(RowActions, { actions: [{ key: "revoke", label: t("doorCodes.revoke.button"), icon: "carbon:close-outline", danger: true, onClick: () => confirmRevoke(row) }] })
 				: null
 	}
 ])

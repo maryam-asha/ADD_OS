@@ -1,100 +1,93 @@
 <!-- src/add-os/modules/provider-portal/views/ProviderOfficeRequestsPage.vue -->
 <template>
-	<div class="flex flex-col gap-5 text-neutral-800 dark:text-neutral-100">
+	<div class="flex flex-col gap-5 text-[var(--add-text-primary)]">
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
 		<!-- HEADER & ACTIONS -->
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
-		<div class="flex flex-wrap items-center justify-between gap-3">
-			<div class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">
-					{{ t("providerOfficeRequests.title", "طلبات المكاتب الخاصة") }}
-				</h1>
-				<p class="text-sm text-neutral-500">
-					{{ t("providerOfficeRequests.description", "إدارة ومتابعة طلبات المكاتب الخاصة للشركات الحالية والجديدة وعروض الأسعار والتعاقد.") }}
-				</p>
-			</div>
-
-			<div class="flex items-center gap-2">
-				<n-button
-					secondary
-					class="rounded-lg"
-					:loading="isLoading"
-					@click="refetch"
-				>
-					<template #icon><Icon name="carbon:renew" :size="16" /></template>
-					{{ t("common.refresh", "تحديث") }}
-				</n-button>
-				<n-button
-					type="primary"
-					class="rounded-lg font-medium"
-					@click="openCreate"
-				>
-					<template #icon><Icon name="carbon:add" :size="16" /></template>
-					{{ t("providerOfficeRequests.newRequest", "طلب مكتب خاص جديد") }}
-				</n-button>
-			</div>
-		</div>
+		<PageHeader :title="t('providerOfficeRequests.title', 'طلبات المكاتب الخاصة')" :description="t('providerOfficeRequests.description', 'إدارة ومتابعة طلبات المكاتب الخاصة للشركات الحالية والجديدة وعروض الأسعار والتعاقد.')">
+			<template #actions>
+				<div class="flex items-center gap-2">
+					<n-button
+						secondary
+						class="rounded-lg"
+						:loading="isLoading"
+						@click="refetch"
+					>
+						<template #icon><Icon name="carbon:renew" :size="16" /></template>
+						{{ t("common.refresh") }}
+					</n-button>
+					<n-button
+						type="primary"
+						class="rounded-lg font-medium"
+						@click="openCreate"
+					>
+						<template #icon><Icon name="carbon:add" :size="16" /></template>
+						{{ t("providerOfficeRequests.newRequest", "طلب مكتب خاص جديد") }}
+					</n-button>
+				</div>
+			</template>
+		</PageHeader>
 
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
 		<!-- METRICS SUMMARY HIGHLIGHTS -->
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
 		<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
 			<!-- Total Requests -->
-			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface-raised,#FFFFFF)] p-4 shadow-xs dark:border-neutral-800 dark:bg-neutral-900/60">
+			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border)]/40 bg-[var(--add-surface-raised)] p-4 shadow-xs">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-[var(--add-text-muted,#5A606B)] dark:text-neutral-400">
+					<span class="text-xs font-semibold text-[var(--add-text-muted)]">
 						{{ t("providerOfficeRequests.stats.total", "إجمالي الطلبات") }}
 					</span>
-					<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--add-primary,#657C50)]/10 text-[var(--add-primary-text,#556843)] dark:bg-[var(--add-primary,#657C50)]/20 dark:text-[var(--add-primary,#657C50)]">
+					<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--add-primary)]/10 text-[var(--add-primary-text)]">
 						<Icon name="carbon:document-multiple-01" :size="18" />
 					</div>
 				</div>
-				<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-text-primary,#43474F)] dark:text-neutral-50">
+				<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-text-primary)]">
 					{{ meta?.total ?? data.length }}
 				</span>
 			</div>
 
 			<!-- Under Review / Requested -->
-			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface-raised,#FFFFFF)] p-4 shadow-xs dark:border-neutral-800 dark:bg-neutral-900/60">
+			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border)]/40 bg-[var(--add-surface-raised)] p-4 shadow-xs">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-[var(--add-text-muted,#5A606B)] dark:text-neutral-400">
+					<span class="text-xs font-semibold text-[var(--add-text-muted)]">
 						{{ t("providerOfficeRequests.stats.requested", "قيد المراجعة") }}
 					</span>
-					<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600 dark:bg-sky-500/20 dark:text-sky-400">
+					<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--add-info)]/10 text-[var(--add-info-text)]">
 						<Icon name="carbon:time" :size="18" />
 					</div>
 				</div>
-				<span class="font-mono text-2xl font-bold tracking-tight text-sky-600 dark:text-sky-400">
+				<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-info-text)]">
 					{{ requestedCount }}
 				</span>
 			</div>
 
 			<!-- Quoted -->
-			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface-raised,#FFFFFF)] p-4 shadow-xs dark:border-neutral-800 dark:bg-neutral-900/60">
+			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border)]/40 bg-[var(--add-surface-raised)] p-4 shadow-xs">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-[var(--add-text-muted,#5A606B)] dark:text-neutral-400">
+					<span class="text-xs font-semibold text-[var(--add-text-muted)]">
 						{{ t("providerOfficeRequests.stats.quoted", "مُسعَّرة") }}
 					</span>
-					<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--add-warning,#E7B155)]/10 text-[var(--add-warning-text,#845A13)] dark:bg-[var(--add-warning,#E7B155)]/20 dark:text-[var(--add-warning,#E7B155)]">
+					<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--add-warning)]/10 text-[var(--add-warning-text)]">
 						<Icon name="carbon:receipt" :size="18" />
 					</div>
 				</div>
-				<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-warning-text,#845A13)] dark:text-[var(--add-warning,#E7B155)]">
+				<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-warning-text)]">
 					{{ quotedCount }}
 				</span>
 			</div>
 
 			<!-- Contracted -->
-			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface-raised,#FFFFFF)] p-4 shadow-xs dark:border-neutral-800 dark:bg-neutral-900/60">
+			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border)]/40 bg-[var(--add-surface-raised)] p-4 shadow-xs">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-[var(--add-text-muted,#5A606B)] dark:text-neutral-400">
+					<span class="text-xs font-semibold text-[var(--add-text-muted)]">
 						{{ t("providerOfficeRequests.stats.contracted", "متعاقَد عليها") }}
 					</span>
-					<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--add-success,#657C50)]/10 text-[var(--add-success-text,#556843)] dark:bg-[var(--add-success,#657C50)]/20 dark:text-[var(--add-success,#657C50)]">
+					<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--add-success)]/10 text-[var(--add-success-text)]">
 						<Icon name="carbon:checkmark-filled" :size="18" />
 					</div>
 				</div>
-				<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-primary-text,#556843)] dark:text-[var(--add-primary,#657C50)]">
+				<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-primary-text)]">
 					{{ contractedCount }}
 				</span>
 			</div>
@@ -103,7 +96,7 @@
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
 		<!-- FILTERS SECTION -->
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
-		<div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface-raised,#FFFFFF)] p-3.5 shadow-xs dark:border-neutral-800 dark:bg-neutral-900/60">
+		<div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--add-border)]/40 bg-[var(--add-surface-raised)] p-3.5 shadow-xs">
 			<div class="flex flex-1 flex-wrap items-center gap-3">
 				<!-- Search -->
 				<div class="w-full sm:w-80">
@@ -114,7 +107,7 @@
 						class="rounded-xl"
 					>
 						<template #prefix>
-							<Icon name="carbon:search" :size="16" class="text-neutral-400" />
+							<Icon name="carbon:search" :size="16" class="text-[var(--add-text-muted)]" />
 						</template>
 					</n-input>
 				</div>
@@ -140,7 +133,7 @@
 				</div>
 			</div>
 
-			<div class="flex items-center gap-2 text-xs text-[var(--add-text-muted,#5A606B)]">
+			<div class="flex items-center gap-2 text-xs text-[var(--add-text-muted)]">
 				<span>{{ t('reports.common.totalCount', { count: filteredData.length }) }}</span>
 				<n-button
 					v-if="searchTerm || statusFilter !== 'all' || payerFilter !== 'all'"
@@ -158,48 +151,31 @@
 		<!-- MAIN DATA TABLE -->
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
 		<AddDataTable
-			:columns="columns"
+			v-model:page="page"
+			:columns
 			:data="filteredData"
 			:loading="isLoading"
-			:row-key="rowKey"
+			:row-key
 			:scroll-x="960"
 			:empty-text="t('providerOfficeRequests.empty', 'لا توجد طلبات مكاتب خاصة مطابقة لمعايير البحث.')"
-			:meta="meta"
-			v-model:page="page"
+			:meta
 		/>
 
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
 		<!-- CREATE REQUEST MODAL -->
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
-		<n-modal
+		<FormModal
 			v-model:show="showCreate"
-			preset="card"
-			class="w-full max-w-lg rounded-2xl border border-[var(--add-border,#CDC2AF)]/50 bg-[var(--add-surface-raised,#FFFFFF)] shadow-xl dark:border-neutral-800 dark:bg-neutral-900"
-			:header-style="{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--add-border,#CDC2AF)20' }"
-			:content-style="{ padding: '1.5rem' }"
-			:footer-style="{ padding: '1rem 1.5rem', borderTop: '1px solid var(--add-border,#CDC2AF)20', backgroundColor: 'var(--add-surface,#F7F5F2)40' }"
+			:title="t('providerOfficeRequests.createTitle', 'طلب مكتب خاص جديد')"
+			:subtitle="t('providerOfficeRequests.createSubtitle', 'تقديم طلب حجز مكتب خاص لعميل محتمل أو لشركة قائمة.')"
+			icon="carbon:document-add"
+			size="md"
 		>
-			<template #header>
-				<div class="flex items-center gap-2.5">
-					<div class="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--add-primary,#657C50)]/10 text-[var(--add-primary-text,#556843)]">
-						<Icon name="carbon:document-add" :size="18" />
-					</div>
-					<div>
-						<h3 class="text-base font-bold text-neutral-900 dark:text-neutral-50">
-							{{ t('providerOfficeRequests.createTitle', 'طلب مكتب خاص جديد') }}
-						</h3>
-						<p class="text-xs text-neutral-500">
-							{{ t('providerOfficeRequests.createSubtitle', 'تقديم طلب حجز مكتب خاص لعميل محتمل أو لشركة قائمة.') }}
-						</p>
-					</div>
-				</div>
-			</template>
-
-			<n-form ref="formRef" :model="form" :rules="rules" label-placement="top" class="flex flex-col gap-1">
+			<n-form ref="formRef" :model="form" :rules label-placement="top" class="flex flex-col gap-1">
 				<!-- Existing Company Select -->
 				<n-form-item path="company_id" :label="t('providerOfficeRequests.form.company', 'الشركة القائمة')">
 					<template #feedback>
-						<span class="text-[11px] text-neutral-400">
+						<span class="text-[11px] text-[var(--add-text-muted)]">
 							{{ t('providerOfficeRequests.form.companyHint', 'اختياري — في حال كان الطلب مخصصاً لشركة مسجلة مسبقاً لدى المزوّد.') }}
 						</span>
 					</template>
@@ -259,7 +235,7 @@
 					</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</FormModal>
 	</div>
 </template>
 
@@ -267,13 +243,15 @@
 import type { DataTableColumns, FormInst, FormRules, SelectOption } from "naive-ui"
 import type { Company } from "@/add-os/modules/members/types/company"
 import type { PrivateOfficeRequest } from "@/add-os/modules/members/types/private-office-request"
-import { NButton, NForm, NFormItem, NInput, NModal, NSelect, NTag, useMessage } from "naive-ui"
+import { NButton, NForm, NFormItem, NInput, NSelect, NTag, useMessage } from "naive-ui"
 import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
+import AddDataTable from "@/add-os/components/table/AddDataTable.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { ApiError } from "@/add-os/services/api"
 import { createPortalOfficeRequest, listPortalOfficeRequests, listProviderCompanies } from "@/add-os/services/provider-portal"
-import AddDataTable from "@/add-os/components/table/AddDataTable.vue"
 import Icon from "@/components/common/Icon.vue"
 
 const { t } = useI18n()
@@ -435,7 +413,7 @@ const columns = computed<DataTableColumns<PrivateOfficeRequest>>(() => [
 			h(
 				"span",
 				{
-					class: "inline-flex items-center px-2 py-0.5 rounded-md font-mono text-xs font-semibold bg-[var(--add-surface-sunken,#ECE7DE)]/60 text-[var(--add-text-secondary,#565B65)] dark:bg-neutral-800 dark:text-neutral-300"
+					class: "inline-flex items-center px-2 py-0.5 rounded-md font-mono text-xs font-semibold bg-[var(--add-surface-sunken)]/60 text-[var(--add-text-secondary)]"
 				},
 				`#${row.id}`
 			)
@@ -453,18 +431,18 @@ const columns = computed<DataTableColumns<PrivateOfficeRequest>>(() => [
 				h(
 					"div",
 					{
-						class: "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl font-bold text-xs bg-[var(--add-primary,#657C50)]/10 text-[var(--add-primary-text,#556843)] dark:bg-[var(--add-primary,#657C50)]/20 dark:text-[var(--add-primary,#657C50)]"
+						class: "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl font-bold text-xs bg-[var(--add-primary)]/10 text-[var(--add-primary-text)]"
 					},
 					initials
 				),
 				h("div", { class: "flex flex-col min-w-0" }, [
-					h("span", { class: "font-semibold text-sm text-[var(--add-text-primary,#43474F)] dark:text-neutral-100 truncate" }, row.prospect_name),
+					h("span", { class: "font-semibold text-sm text-[var(--add-text-primary)] truncate" }, row.prospect_name),
 					hasRegisteredCompany
-						? h("div", { class: "flex items-center gap-1 text-xs text-[var(--add-text-muted,#5A606B)] dark:text-neutral-400" }, [
+						? h("div", { class: "flex items-center gap-1 text-xs text-[var(--add-text-muted)]" }, [
 								h(Icon, { name: "carbon:enterprise", size: 12 }),
 								h("span", { class: "truncate" }, row.company?.legal_name)
 						  ])
-						: h("span", { class: "text-[11px] text-[var(--add-text-muted,#5A606B)] dark:text-neutral-500" }, t("providerOfficeRequests.form.newClient", "عميل جديد"))
+						: h("span", { class: "text-[11px] text-[var(--add-text-muted)]" }, t("providerOfficeRequests.form.newClient", "عميل جديد"))
 				])
 			])
 		}
@@ -475,8 +453,8 @@ const columns = computed<DataTableColumns<PrivateOfficeRequest>>(() => [
 		minWidth: 180,
 		align: "center",
 		render: row =>
-			h("div", { class: "inline-flex items-center justify-center gap-1.5 text-xs text-[var(--add-text-secondary,#565B65)] dark:text-neutral-300" }, [
-				h(Icon, { name: "carbon:email", size: 14, class: "text-[var(--add-text-muted,#5A606B)] shrink-0" }),
+			h("div", { class: "inline-flex items-center justify-center gap-1.5 text-xs text-[var(--add-text-secondary)]" }, [
+				h(Icon, { name: "carbon:email", size: 14, class: "text-[var(--add-text-muted)] shrink-0" }),
 				h("span", { class: "truncate font-mono" }, row.contact || "—")
 			])
 	},
@@ -495,8 +473,8 @@ const columns = computed<DataTableColumns<PrivateOfficeRequest>>(() => [
 					round: true,
 					bordered: false,
 					class: isProvider
-						? "bg-[var(--add-primary,#657C50)]/10 text-[var(--add-primary-text,#556843)] font-medium"
-						: "bg-[var(--add-surface-sunken,#ECE7DE)] text-[var(--add-text-primary,#43474F)] font-medium"
+						? "bg-[var(--add-primary)]/10 text-[var(--add-primary-text)] font-medium"
+						: "bg-[var(--add-surface-sunken)] text-[var(--add-text-primary)] font-medium"
 				},
 				{
 					default: () =>
@@ -534,11 +512,11 @@ const columns = computed<DataTableColumns<PrivateOfficeRequest>>(() => [
 				? h(
 						"span",
 						{
-							class: "inline-flex items-center px-2 py-0.5 rounded font-mono text-xs font-semibold border border-[var(--add-border,#CDC2AF)]/50 bg-[var(--add-surface-sunken,#ECE7DE)]/40 text-[var(--add-text-primary,#43474F)] dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
+							class: "inline-flex items-center px-2 py-0.5 rounded font-mono text-xs font-semibold border border-[var(--add-border)]/50 bg-[var(--add-surface-sunken)]/40 text-[var(--add-text-primary)]"
 						},
 						row.quote_ref
 				  )
-				: h("span", { class: "text-[var(--add-text-muted,#5A606B)]" }, "—")
+				: h("span", { class: "text-[var(--add-text-muted)]" }, "—")
 	}
 ])
 

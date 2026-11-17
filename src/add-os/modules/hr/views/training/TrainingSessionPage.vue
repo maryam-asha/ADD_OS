@@ -71,6 +71,7 @@ import { NAlert, NButton, NDataTable, NSkeleton, useDialog, useMessage } from "n
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { canManageTraining } from "@/add-os/config/permissions"
 import CompleteSessionModal from "@/add-os/modules/hr/components/training/CompleteSessionModal.vue"
 import EnrollModal from "@/add-os/modules/hr/components/training/EnrollModal.vue"
@@ -204,10 +205,10 @@ const columns = computed<DataTableColumns<Enrollment>>(() => [
 				{
 					title: "",
 					key: "actions",
-					width: 110,
+					width: 100,
 					render: (row: Enrollment) =>
 						session.value && canCancelEnrollment(row, session.value)
-							? h(NButton, { size: "tiny", type: "error", secondary: true, onClick: () => confirmCancelEnrollment(row) }, () => t("hrTraining.enrollments.cancel"))
+							? h(RowActions, { actions: [{ key: "cancel", label: t("hrTraining.enrollments.cancel"), icon: "carbon:close", danger: true, onClick: () => confirmCancelEnrollment(row) }] })
 							: null
 				}
 			]

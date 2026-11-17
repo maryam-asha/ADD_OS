@@ -1,18 +1,14 @@
 <template>
 	<div class="flex flex-col gap-6">
 		<!-- Header -->
-		<div class="flex flex-wrap items-start justify-between gap-3">
-			<div class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold">{{ t("nav.pages.providersReport", "تقرير المزوّدين") }}</h1>
-				<p class="text-sm text-neutral-500">
-					{{ t("reports.adminProviders.description", "صورة تشغيلية ومالية شاملة عن المزوّدين، حصصهم في فروع العمل المشترك، وعقود مكاتبهم ومستحقاتهم.") }}
-				</p>
-			</div>
-			<n-button secondary :loading="isLoading" @click="fetchData">
-				<template #icon><Icon name="carbon:renew" :size="16" /></template>
-				{{ t("common.refresh", "تحديث") }}
-			</n-button>
-		</div>
+		<PageHeader :title="t('nav.pages.providersReport', 'تقرير المزوّدين')" :description="t('reports.adminProviders.description', 'صورة تشغيلية ومالية شاملة عن المزوّدين، حصصهم في فروع العمل المشترك، وعقود مكاتبهم ومستحقاتهم.')">
+			<template #actions>
+				<n-button secondary :loading="isLoading" @click="fetchData">
+					<template #icon><Icon name="carbon:renew" :size="16" /></template>
+					{{ t("common.refresh") }}
+				</n-button>
+			</template>
+		</PageHeader>
 
 		<!-- Summary Metric Cards -->
 		<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -31,7 +27,7 @@
 					:value="providersWithOverdueCount"
 				>
 					<template v-if="providersWithOverdueCount > 0" #prefix>
-						<Icon name="carbon:warning" class="text-rose-500" :size="18" />
+						<Icon name="carbon:warning" class="text-[var(--add-danger-text)]" :size="18" />
 					</template>
 				</n-statistic>
 			</n-card>
@@ -46,10 +42,10 @@
 						clearable
 						:placeholder="t('reports.adminProviders.searchPlaceholder', 'بحث باسم المزوّد...')"
 					>
-						<template #prefix><Icon name="carbon:search" :size="16" class="text-neutral-400" /></template>
+						<template #prefix><Icon name="carbon:search" :size="16" class="text-[var(--add-text-muted)]" /></template>
 					</n-input>
 				</div>
-				<div class="text-xs text-neutral-400">
+				<div class="text-xs text-[var(--add-text-muted)]">
 					{{ t("reports.common.totalCount", { count: filteredRows.length }) }}
 				</div>
 			</div>
@@ -60,7 +56,7 @@
 			<n-data-table
 				size="small"
 				:scroll-x="1100"
-				:columns="columns"
+				:columns
 				:data="filteredRows"
 				:loading="isLoading"
 				:bordered="false"
@@ -77,6 +73,7 @@ import type { AdminProviderReportItem } from "@/add-os/services/reports"
 import { NButton, NCard, NDataTable, NInput, NProgress, NStatistic, NTag } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { formatReportMoney, getAdminProvidersReport } from "@/add-os/services/reports"
 import Icon from "@/components/common/Icon.vue"
 
@@ -121,13 +118,13 @@ const providersWithOverdueCount = computed(() => {
 
 const columns = computed<DataTableColumns<AdminProviderReportItem>>(() => [
 	{
-		title: t("providers.columns.name", "اسم المزوّد"),
+		title: t("providers.columns.name"),
 		key: "name",
 		minWidth: 180,
 		align: "center",
 		render: row =>
 			h("div", { class: "inline-flex flex-col items-center gap-0.5" }, [
-				h("span", { class: "font-semibold text-neutral-800 dark:text-neutral-100" }, row.name),
+				h("span", { class: "font-semibold text-[var(--add-text-primary)]" }, row.name),
 				h(
 					NTag,
 					{
@@ -146,7 +143,7 @@ const columns = computed<DataTableColumns<AdminProviderReportItem>>(() => [
 		key: "active_companies",
 		width: 110,
 		align: "center",
-		render: row => h("span", { class: "font-semibold font-mono text-neutral-800 dark:text-neutral-200" }, row.active_companies)
+		render: row => h("span", { class: "font-semibold font-mono text-[var(--add-text-primary)]" }, row.active_companies)
 	},
 	{
 		title: t("reports.adminProviders.totalSeats", "مجموع المقاعد"),
@@ -167,7 +164,7 @@ const columns = computed<DataTableColumns<AdminProviderReportItem>>(() => [
 		align: "center",
 		render: row => {
 			if (!row.branch_share || row.branch_share.length === 0) {
-				return h("span", { class: "text-neutral-400 text-sm" }, "—")
+				return h("span", { class: "text-[var(--add-text-muted)] text-sm" }, "—")
 			}
 			return h(
 				"div",
@@ -178,11 +175,11 @@ const columns = computed<DataTableColumns<AdminProviderReportItem>>(() => [
 
 					return h(
 						"div",
-						{ class: "flex flex-col gap-1 rounded-md p-1.5 bg-neutral-50 dark:bg-neutral-800/50 text-xs w-full text-start" },
+						{ class: "flex flex-col gap-1 rounded-md p-1.5 bg-[var(--add-surface-sunken)] text-xs w-full text-start" },
 						[
 							h("div", { class: "flex items-center justify-between gap-2" }, [
-								h("span", { class: "font-medium text-neutral-800 dark:text-neutral-200" }, b.branch_name || t("reports.adminProviders.unknownBranch", "فرع غير مسمى")),
-								h("span", { class: "text-neutral-500 font-mono text-[11px]" }, [
+								h("span", { class: "font-medium text-[var(--add-text-primary)]" }, b.branch_name || t("reports.adminProviders.unknownBranch", "فرع غير مسمى")),
+								h("span", { class: "text-[var(--add-text-secondary)] font-mono text-[11px]" }, [
 									h("span", `${b.seats} / ${b.capacity} ${t("reports.adminProviders.seatsShort", "مقعد")}`)
 								])
 							]),
@@ -197,9 +194,9 @@ const columns = computed<DataTableColumns<AdminProviderReportItem>>(() => [
 												status: percentValue > 50 ? "warning" : "default"
 											})
 										]),
-										h("span", { class: "font-semibold text-neutral-700 dark:text-neutral-300 w-8 text-right font-mono text-[11px]" }, `${percentValue}%`)
+										h("span", { class: "font-semibold text-[var(--add-text-primary)] w-8 text-right font-mono text-[11px]" }, `${percentValue}%`)
 									])
-								: h("span", { class: "text-neutral-400 font-mono text-xs" }, "—")
+								: h("span", { class: "text-[var(--add-text-muted)] font-mono text-xs" }, "—")
 						]
 					)
 				})
@@ -218,7 +215,7 @@ const columns = computed<DataTableColumns<AdminProviderReportItem>>(() => [
 						{ size: "small", type: "default", round: true, bordered: false },
 						{ default: () => `${row.active_leases} ${t("reports.adminProviders.officesUnit", "مكتب")}` }
 					)
-				: h("span", { class: "text-neutral-400" }, "0")
+				: h("span", { class: "text-[var(--add-text-muted)]" }, "0")
 	},
 	{
 		title: t("reports.adminProviders.outstandingDues", "المستحق لكل عملة"),
@@ -227,7 +224,7 @@ const columns = computed<DataTableColumns<AdminProviderReportItem>>(() => [
 		align: "center",
 		render: row => {
 			if (!row.outstanding || row.outstanding.length === 0) {
-				return h("span", { class: "text-neutral-400" }, "—")
+				return h("span", { class: "text-[var(--add-text-muted)]" }, "—")
 			}
 			return h(
 				"div",
@@ -236,9 +233,9 @@ const columns = computed<DataTableColumns<AdminProviderReportItem>>(() => [
 					const hasOverdue = Number.parseFloat(o.overdue) > 0
 					return h(
 						"div",
-						{ class: "flex items-center justify-between gap-2 text-xs rounded px-2 py-1 bg-neutral-50 dark:bg-neutral-800/60" },
+						{ class: "flex items-center justify-between gap-2 text-xs rounded px-2 py-1 bg-[var(--add-surface-sunken)]" },
 						[
-							h("span", { class: "font-mono font-medium text-neutral-600 dark:text-neutral-300" }, `${t("reports.common.remaining", "المتبقي:")} ${formatReportMoney(o.remaining, o.currency)}`),
+							h("span", { class: "font-mono font-medium text-[var(--add-text-secondary)]" }, `${t("reports.common.remaining", "المتبقي:")} ${formatReportMoney(o.remaining, o.currency)}`),
 							hasOverdue
 								? h(
 										NTag,

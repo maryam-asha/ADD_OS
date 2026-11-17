@@ -4,18 +4,18 @@
 		<!-- Main Table (rendered only when there is data or loading) -->
 		<n-data-table
 			v-if="data.length > 0 || loading"
-			:columns="columns"
-			:data="data"
-			:loading="loading"
+			:columns
+			:data
+			:loading
 			:bordered="false"
 			size="small"
 			:row-key="resolveRowKey"
 			:pagination="false"
-			:scroll-x="scrollX"
+			:scroll-x
 			v-bind="$attrs"
 		>
 			<template v-for="(_, name) in $slots" #[name]="slotProps">
-				<slot :name="name" v-bind="slotProps || {}" />
+				<slot :name v-bind="slotProps || {}" />
 			</template>
 		</n-data-table>
 
@@ -23,7 +23,7 @@
 		<div v-else class="flex flex-col items-center justify-center py-14 px-4 text-center text-sm text-[var(--add-text-muted,#5A606B)]">
 			<slot name="empty">
 				<Icon name="carbon:document-blank" :size="36" class="mb-2 opacity-40" />
-				<span>{{ emptyText || t("common.noData", "لا توجد بيانات متاحة.") }}</span>
+				<span>{{ emptyText || t("common.noData") }}</span>
 			</slot>
 		</div>
 
@@ -44,8 +44,8 @@
 					size="small"
 					@update:page="onPageChange"
 				>
-					<template #prev>{{ t("common.prev", "السابق") }}</template>
-					<template #next>{{ t("common.next", "التالي") }}</template>
+					<template #prev>{{ t("common.prev") }}</template>
+					<template #next>{{ t("common.next") }}</template>
 				</n-pagination>
 			</div>
 		</slot>

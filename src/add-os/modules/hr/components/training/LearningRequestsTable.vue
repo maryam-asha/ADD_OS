@@ -9,9 +9,10 @@
 <script setup lang="ts">
 import type { DataTableColumns } from "naive-ui"
 import type { LearningRequest } from "@/add-os/modules/hr/types/training"
-import { NButton, NDataTable } from "naive-ui"
+import { NDataTable } from "naive-ui"
 import { computed, h } from "vue"
 import { useI18n } from "vue-i18n"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import TrainingStatusTag from "@/add-os/modules/hr/components/training/TrainingStatusTag.vue"
 import { money } from "@/add-os/modules/hr/utils/money"
 import { EMPTY } from "@/add-os/modules/hr/utils/translated"
@@ -55,7 +56,10 @@ const columns = computed<DataTableColumns<LearningRequest>>(() => [
 					title: "",
 					key: "actions",
 					width: 100,
-					render: (row: LearningRequest) => (row.status === "pending" ? h(NButton, { size: "tiny", type: "error", secondary: true, onClick: () => props.onCancel?.(row) }, () => t("hrTraining.requests.withdraw")) : null)
+					render: (row: LearningRequest) =>
+						row.status === "pending"
+							? h(RowActions, { actions: [{ key: "withdraw", label: t("hrTraining.requests.withdraw"), icon: "carbon:undo", danger: true, onClick: () => props.onCancel?.(row) }] })
+							: null
 				}
 			]
 		: [])

@@ -4,6 +4,7 @@ import { createI18n } from "vue-i18n"
 import en from "@/add-os/lang/en/en.json"
 import { ApiError } from "@/add-os/services/api"
 import CouponsPage from "../CouponsPage.vue"
+import { rowMenus } from "@/add-os/components/page/__tests__/row-menu"
 
 interface RecordedDialog { title: string, content?: unknown, positiveText?: string, onPositiveClick?: () => unknown }
 
@@ -66,7 +67,7 @@ describe("couponsPage", () => {
 		Object.assign(gate, { create: false, update: false, delete: false })
 		const wrapper = await mountPage()
 		expect(wrapper.find("[data-test='coupon-new']").exists()).toBe(false)
-		expect(wrapper.find("[data-test='coupon-delete']").exists()).toBe(false)
+		expect((rowMenus(wrapper.element).length > 0)).toBe(false)
 		expect(wrapper.find("[aria-label='Edit']").exists()).toBe(false)
 		expect(wrapper.find("[data-test='coupon-active-switch']").exists()).toBe(false)
 	})
@@ -77,20 +78,20 @@ describe("couponsPage", () => {
 		expect(wrapper.find("[data-test='coupon-new']").exists()).toBe(false)
 		expect(wrapper.find("[aria-label='Edit']").exists()).toBe(false)
 		expect(wrapper.find("[data-test='coupon-active-switch']").exists()).toBe(false)
-		expect(wrapper.find("[data-test='coupon-delete']").exists()).toBe(true)
+		expect((rowMenus(wrapper.element).length > 0)).toBe(true)
 
 		Object.assign(gate, { create: true, update: true, delete: false })
 		const writer = await mountPage()
 		expect(writer.find("[data-test='coupon-new']").exists()).toBe(true)
 		expect(writer.find("[aria-label='Edit']").exists()).toBe(true)
 		expect(writer.find("[data-test='coupon-active-switch']").exists()).toBe(true)
-		expect(writer.find("[data-test='coupon-delete']").exists()).toBe(false)
+		expect((rowMenus(writer.element).length > 0)).toBe(false)
 	})
 
 	it("leaves a locked (used) coupon only its switch", async () => {
 		listMock.mockResolvedValue(page([row({ locked: true })]))
 		const wrapper = await mountPage()
-		expect(wrapper.find("[data-test='coupon-delete']").exists()).toBe(false)
+		expect((rowMenus(wrapper.element).length > 0)).toBe(false)
 		expect(wrapper.find("[aria-label='Edit']").exists()).toBe(false)
 		expect(wrapper.find("[data-test='coupon-active-switch']").exists()).toBe(true)
 	})
@@ -105,7 +106,9 @@ describe("couponsPage", () => {
 	it("on a 409 shows the server message and deactivates only after two confirmations", async () => {
 		deleteMock.mockRejectedValue(new ApiError(409, JSON.stringify({ message: "This code has already been used." })))
 		const wrapper = await mountPage()
-		await wrapper.get("[data-test='coupon-delete']").trigger("click")
+		rowMenus(wrapper.element)[0].click()
+		await flushPromises()
+		document.querySelector("[data-test='coupon-delete']")?.dispatchEvent(new MouseEvent("click", { bubbles: true }))
 		await dialogs[0].onPositiveClick?.()
 		await flushPromises()
 		expect(dialogs[1].content).toBe("This code has already been used.")

@@ -1,10 +1,7 @@
 <!-- src/add-os/modules/kitchen/views/KitchenOrdersPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t("nav.pages.orders") }}</h1>
-			<p>{{ t("kitchen.history.description") }}</p>
-		</div>
+		<PageHeader :title="t('nav.pages.orders')" :description="t('kitchen.history.description')" />
 
 		<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
 			<n-select v-model:value="statuses" :options="statusOptions" multiple clearable :placeholder="t('kitchen.history.filters.status')" />
@@ -28,8 +25,8 @@
 			</div>
 		</n-card>
 
-		<n-drawer v-model:show="drawerOpen" :width="520" :placement="isRtl ? 'left' : 'right'">
-			<n-drawer-content v-if="selected" :title="t('kitchen.card.order', { id: formatNumber(selected.id, { grouping: false }) })" closable>
+		<DetailDrawer v-model:show="drawerOpen" :title="selected ? t('kitchen.card.order', { id: formatNumber(selected.id, { grouping: false }) }) : ''">
+			<template v-if="selected">
 				<div class="flex flex-col gap-4" data-test="order-detail">
 					<div class="flex flex-wrap gap-2">
 						<n-tag :type="STATUS_TAG[selected.status]" size="small">{{ t(`kitchen.status.${selected.status}`) }}</n-tag>
@@ -59,8 +56,8 @@
 						<p class="mt-2 font-bold">{{ t("kitchen.card.total", { points: formatNumber(selected.total_points) }) }}</p>
 					</div>
 				</div>
-			</n-drawer-content>
-		</n-drawer>
+			</template>
+		</DetailDrawer>
 	</div>
 </template>
 
@@ -68,12 +65,13 @@
 import type { DataTableColumns, SelectOption } from "naive-ui"
 import type { KitchenOrder, KitchenOrderStatus } from "@/add-os/modules/kitchen/types/kitchen"
 import type { KitchenOrderQuery } from "@/add-os/services/kitchen"
-import { NAlert, NCard, NDataTable, NDatePicker, NDrawer, NDrawerContent, NPagination, NSelect, NTag } from "naive-ui"
+import { NAlert, NCard, NDataTable, NDatePicker, NPagination, NSelect, NTag } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import DetailDrawer from "@/add-os/components/page/DetailDrawer.vue"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { canListMembers } from "@/add-os/config/permissions"
-import { currentLocale } from "@/add-os/lang/currentLocale"
 import { KITCHEN_ORDER_STATUSES } from "@/add-os/modules/kitchen/types/kitchen"
 import { paymentLabelKey } from "@/add-os/modules/kitchen/utils/payment"
 import { ApiError } from "@/add-os/services/api"
@@ -91,7 +89,6 @@ import { formatDateTime, formatNumber } from "@/add-os/utils/format"
  */
 
 const { t } = useI18n()
-const isRtl = computed(() => currentLocale.value === "ar")
 
 const STATUS_TAG: Record<KitchenOrderStatus, "default" | "info" | "success" | "warning" | "error"> = {
 	awaiting_payment: "default",

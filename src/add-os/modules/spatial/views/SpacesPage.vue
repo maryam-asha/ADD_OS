@@ -1,20 +1,18 @@
 <!-- src/add-os/modules/spatial/views/SpacesPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.spaces") }}</h1>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.spaces')" :description="t('spaces.description')">
+			<template #actions>
+				<n-button type="primary" @click="openCreate">
+					<template #icon><Icon name="carbon:add" :size="16" /></template>
+					{{ t("spaces.create.button") }}
+				</n-button>
+			</template>
+		</PageHeader>
 
 		<ResourceStatCards v-if="!error && !isLoading" :cards="statCards" />
 
 		<n-alert v-if="error" type="error" :title="t('spaces.loadError')" />
-
-		<div class="flex justify-end">
-			<n-button type="primary" @click="openCreate">
-				<template #icon><Icon name="carbon:add" :size="16" /></template>
-				{{ t("spaces.create.button") }}
-			</n-button>
-		</div>
 
 		<ResourceTable
 			:columns
@@ -23,7 +21,7 @@
 			:on-edit="openEdit"
 			:on-delete="canDelete ? (async row => { await mutations.remove(row.id) }) : undefined"
 			:delete-warning="t('spaces.delete.cascadeWarning')"
-			:extra-actions="renderExtraActions"
+			:row-actions="spaceActions"
 		/>
 
 		<QrPointStickerModal v-model:show="stickerOpen" :point="stickerPoint" :label="stickerLabel" branch-name="" />
@@ -58,25 +56,27 @@
 </template>
 
 <script setup lang="ts">
-import type { QrPoint } from "@/add-os/modules/kitchen/types/kitchen"
+import type { RowAction } from "@/add-os/components/page/row-actions"
 import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vue"
+import type { QrPoint } from "@/add-os/modules/kitchen/types/kitchen"
 import type { Branch } from "@/add-os/modules/spatial/types/branch"
 import type { Building } from "@/add-os/modules/spatial/types/building"
 import type { OperationalStatus } from "@/add-os/modules/spatial/types/operational-status"
 import type { Space, SpaceAmenitiesPayload, SpacePayload, SpaceStatusPayload, SpaceType } from "@/add-os/modules/spatial/types/space"
 import type { Zone } from "@/add-os/modules/spatial/types/zone"
-import { NButton, useMessage } from "naive-ui"
-import { computed, h, ref } from "vue"
+import { NAlert, NButton, useMessage } from "naive-ui"
+import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.vue"
 import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
-import QrPointStickerModal from "@/add-os/modules/kitchen/components/QrPointStickerModal.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
 import { can, canDeleteSpatialResource } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
+import QrPointStickerModal from "@/add-os/modules/kitchen/components/QrPointStickerModal.vue"
 import {
 	buildSpaceAmenitiesFields,
 	buildSpaceColumns,
@@ -300,20 +300,10 @@ async function submitAmenitiesChange(payload: Record<string, unknown>) {
 	}
 }
 
-function renderExtraActions(row: Space) {
-	const statusLabel = t("spaces.changeStatus.button")
-	const amenitiesLabel = t("spaces.manageAmenities.button")
+function spaceActions(row: Space): RowAction[] {
 	return [
-		h(
-			NButton,
-			{ text: true, type: "primary", "aria-label": statusLabel, title: statusLabel, onClick: () => openStatusDrawer(row) },
-			{ icon: () => h(Icon, { name: "carbon:status-change", size: 18 }) }
-		),
-		h(
-			NButton,
-			{ text: true, type: "primary", "aria-label": amenitiesLabel, title: amenitiesLabel, onClick: () => openAmenitiesDrawer(row) },
-			{ icon: () => h(Icon, { name: "fluent:task-list-ltr-24-regular", size: 18 }) }
-		)
+		{ key: "status", label: t("spaces.changeStatus.button"), icon: "carbon:status-change", onClick: () => openStatusDrawer(row) },
+		{ key: "amenities", label: t("spaces.manageAmenities.button"), icon: "fluent:task-list-ltr-24-regular", onClick: () => openAmenitiesDrawer(row) }
 	]
 }
 </script>

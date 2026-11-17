@@ -1,16 +1,14 @@
 <!-- src/add-os/modules/plans/views/SaleItemsPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-wrap items-start justify-between gap-4">
-			<div class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.saleItems") }}</h1>
-				<p class="max-w-3xl text-sm text-secondary">{{ t("retail.saleItems.description") }}</p>
-			</div>
-			<n-button type="primary" @click="openCreate">
-				<template #icon><Icon name="carbon:add" :size="16" /></template>
-				{{ t("retail.saleItems.add") }}
-			</n-button>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.saleItems')" :description="t('retail.saleItems.description')">
+			<template #actions>
+				<n-button type="primary" @click="openCreate">
+					<template #icon><Icon name="carbon:add" :size="16" /></template>
+					{{ t("retail.saleItems.add") }}
+				</n-button>
+			</template>
+		</PageHeader>
 
 		<n-alert v-if="error" type="error" :title="t('retail.loadError')" />
 
@@ -34,6 +32,7 @@ import type { SaleItem, SaleItemPayload } from "@/add-os/modules/plans/types/ret
 import { NAlert, NButton, NTag } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.vue"
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"

@@ -26,12 +26,12 @@ export function getMonogram(name: string): string {
 }
 
 const AVATAR_PALETTES = [
-	"bg-emerald-100/80 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300",
-	"bg-blue-100/80 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300",
-	"bg-amber-100/80 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300",
-	"bg-purple-100/80 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300",
-	"bg-rose-100/80 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300",
-	"bg-cyan-100/80 text-cyan-800 dark:bg-cyan-950/60 dark:text-cyan-300"
+	"bg-[color-mix(in_srgb,var(--add-success)_10%,transparent)] text-[var(--add-success-text)]",
+	"bg-[color-mix(in_srgb,var(--add-info)_10%,transparent)] text-[var(--add-info-text)]",
+	"bg-[color-mix(in_srgb,var(--add-warning)_10%,transparent)] text-[var(--add-warning-text)]",
+	"bg-[color-mix(in_srgb,var(--add-info)_10%,transparent)] text-[var(--add-info-text)]",
+	"bg-[color-mix(in_srgb,var(--add-danger)_10%,transparent)] text-[var(--add-danger-text)]",
+	"bg-[color-mix(in_srgb,var(--add-info)_10%,transparent)] text-[var(--add-info-text)]"
 ]
 
 export function getAvatarPalette(id: number): string {
@@ -68,12 +68,12 @@ export function buildCompanyColumns(
 						h(
 							"span",
 							{
-								class: "font-bold text-sm text-slate-900 dark:text-slate-100 truncate cursor-pointer hover:underline",
+								class: "font-bold text-sm text-[var(--add-text-primary)] truncate cursor-pointer hover:underline",
 								onClick: () => options?.onOpenDetail?.(row)
 							},
 							row.legal_name
 						),
-						h("span", { class: "text-xs text-slate-400 dark:text-slate-500 font-mono" }, `CR: #${row.contract_ref}${spaceInfo}`)
+						h("span", { class: "text-xs text-[var(--add-text-muted)] font-mono" }, `CR: #${row.contract_ref}${spaceInfo}`)
 					])
 				])
 			}
@@ -89,7 +89,7 @@ export function buildCompanyColumns(
 				return h("div", { class: "flex flex-col items-center justify-center text-center whitespace-nowrap" }, [
 					h(
 						"span",
-						{ class: `text-sm ${isDirect ? "text-slate-500 dark:text-slate-400" : "font-medium text-slate-800 dark:text-slate-200"}` },
+						{ class: `text-sm ${isDirect ? "text-[var(--add-text-secondary)]" : "font-medium text-[var(--add-text-primary)]"}` },
 						row.provider?.name || t("companies.columns.directManagement", "إدارة المنطقة المباشرة")
 					)
 				])
@@ -106,8 +106,8 @@ export function buildCompanyColumns(
 				const lease = row.office_leases?.[0]
 				const spaceName = lease?.space?.name ? lease.space.name : null
 				return h("div", { class: "flex flex-col items-center justify-center gap-0.5 text-center whitespace-nowrap" }, [
-					h("span", { class: "text-sm font-medium text-slate-800 dark:text-slate-200" }, bName),
-					spaceName ? h("span", { class: "text-xs text-slate-400 dark:text-slate-500" }, spaceName) : null
+					h("span", { class: "text-sm font-medium text-[var(--add-text-primary)]" }, bName),
+					spaceName ? h("span", { class: "text-xs text-[var(--add-text-muted)]" }, spaceName) : null
 				])
 			}
 		},
@@ -120,7 +120,7 @@ export function buildCompanyColumns(
 			render: row => {
 				const lease = row.office_leases?.[0]
 				const dateStr = lease?.starts_on ? formatDate(lease.starts_on) : "—"
-				return h("span", { class: "text-sm text-slate-700 dark:text-slate-300 font-medium whitespace-nowrap font-mono" }, dateStr)
+				return h("span", { class: "text-sm text-[var(--add-text-primary)] font-medium whitespace-nowrap font-mono" }, dateStr)
 			}
 		},
 		{
@@ -131,11 +131,11 @@ export function buildCompanyColumns(
 			align: "center",
 			render: row => {
 				const lease = row.office_leases?.[0]
-				if (!lease) return h("span", { class: "text-sm text-slate-400 whitespace-nowrap" }, "—")
+				if (!lease) return h("span", { class: "text-sm text-[var(--add-text-muted)] whitespace-nowrap" }, "—")
 				const symbol = lease.currency === "USD" ? "$" : `${lease.currency} `
 				return h(
 					"span",
-					{ class: "text-sm font-bold text-slate-900 dark:text-slate-100 whitespace-nowrap font-mono" },
+					{ class: "text-sm font-bold text-[var(--add-text-primary)] whitespace-nowrap font-mono" },
 					`${symbol}${formatNumber(Number(lease.monthly_amount) || 0)} ${t("companies.columns.perMonth", "/ شهر")}`
 				)
 			}
@@ -154,9 +154,9 @@ export function buildCompanyColumns(
 						"span",
 						{
 							class:
-								"inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200/60 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800/60 whitespace-nowrap"
+								"inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[color-mix(in_srgb,var(--add-warning)_10%,transparent)] text-[var(--add-warning-text)] border border-[color-mix(in_srgb,var(--add-warning)_35%,transparent)] whitespace-nowrap"
 						},
-						[h("span", { class: "w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" }), t("companies.statusTags.underRenewal", "قيد التجديد")]
+						[h("span", { class: "w-1.5 h-1.5 rounded-full bg-[var(--add-warning)] shrink-0" }), t("companies.statusTags.underRenewal", "قيد التجديد")]
 					)
 				}
 				if (row.status === "active") {
@@ -164,18 +164,18 @@ export function buildCompanyColumns(
 						"span",
 						{
 							class:
-								"inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/60 whitespace-nowrap"
+								"inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[color-mix(in_srgb,var(--add-success)_10%,transparent)] text-[var(--add-success-text)] border border-[color-mix(in_srgb,var(--add-success)_35%,transparent)] whitespace-nowrap"
 						},
-						[h("span", { class: "w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" }), t("companies.status.active", "نشطة")]
+						[h("span", { class: "w-1.5 h-1.5 rounded-full bg-[var(--add-success)] shrink-0" }), t("companies.status.active", "نشطة")]
 					)
 				}
 				return h(
 					"span",
 					{
 						class:
-							"inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 whitespace-nowrap"
+							"inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--add-surface-sunken)] text-[var(--add-text-secondary)] border border-[var(--add-border)] whitespace-nowrap"
 					},
-					[h("span", { class: "w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" }), t("companies.status.inactive", "غير نشطة")]
+					[h("span", { class: "w-1.5 h-1.5 rounded-full bg-[var(--add-border)] shrink-0" }), t("companies.status.inactive", "غير نشطة")]
 				)
 			}
 		}

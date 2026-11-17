@@ -143,6 +143,7 @@ import type { JobGrade, JobGradePayload, OrgUnit, Position } from "@/add-os/modu
 import { NAlert, NButton, NDataTable, NForm, NFormItem, NInput, NSelect, NSpin, NSwitch, NTabPane, NTabs, NTree, useDialog, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { canManageOrgStructure } from "@/add-os/config/permissions"
 import ActiveTag from "@/add-os/modules/hr/components/ActiveTag.vue"
 import HrResourcePanel from "@/add-os/modules/hr/components/core/HrResourcePanel.vue"
@@ -294,10 +295,6 @@ function gradeLabel(id: number | null): string {
 	return grade ? `${grade.code} · ${translated(grade.name)}` : EMPTY
 }
 
-function iconButton(label: string, icon: string, type: "primary" | "error", onClick: () => void) {
-	return h(NButton, { text: true, type, "aria-label": label, title: label, onClick }, { icon: () => h(Icon, { name: icon, size: 18 }) })
-}
-
 const positionColumns = computed<DataTableColumns<Position>>(() => [
 	{ title: t("hr.org.code"), key: "code", minWidth: 100, render: row => (row.code ? h("span", { class: "font-mono", dir: "ltr" }, row.code) : EMPTY) },
 	{
@@ -316,11 +313,7 @@ const positionColumns = computed<DataTableColumns<Position>>(() => [
 					key: "actions",
 					width: 100,
 					align: "center" as const,
-					render: (row: Position) =>
-						h("div", { class: "flex justify-center gap-3" }, [
-							iconButton(t("hr.common.edit"), "carbon:edit", "primary", () => openPosition(row)),
-							iconButton(t("hr.common.delete"), "carbon:trash-can", "error", () => confirmDeletePosition(row))
-						])
+					render: (row: Position) => h(RowActions, { actions: [{ key: "edit", label: t("hr.common.edit"), icon: "carbon:edit", onClick: () => openPosition(row) }, { key: "delete", label: t("hr.common.delete"), icon: "carbon:trash-can", danger: true, onClick: () => confirmDeletePosition(row) }] })
 				}
 			]
 		: [])

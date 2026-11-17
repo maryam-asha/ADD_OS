@@ -165,3 +165,19 @@
 		font-weight: 500;
 	}
 }
+
+// ── Row actions (RowActions.vue) ────────────────────────────────────────────
+//
+// A destructive action in a row's "⋯" menu reads in the danger colour, label
+// and icon both. The menu is teleported out of the table, so this is global.
+// Naive puts an option's `props.class` on its body, not on the option itself.
+// `--add-danger-text` is the text-safe danger token, not the fill.
+
+// Naive colours an option through its own variables from a more specific rule,
+// so the override sets those variables rather than `color` itself.
+.n-dropdown-option-body.add-row-action--danger {
+	--n-option-text-color: var(--add-danger-text);
+	--n-option-text-color-hover: var(--add-danger-text);
+	--n-option-text-color-active: var(--add-danger-text);
+	--n-prefix-color: var(--add-danger-text);
+}

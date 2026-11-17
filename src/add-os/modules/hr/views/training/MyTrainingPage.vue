@@ -57,6 +57,7 @@ import type { Certification, Enrollment, LearningBudget, LearningRequest, Traini
 import { NAlert, NButton, NCard, NDataTable, NTabPane, NTabs, useDialog, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import BudgetLedger from "@/add-os/modules/hr/components/training/BudgetLedger.vue"
 import CertificationsTable from "@/add-os/modules/hr/components/training/CertificationsTable.vue"
 import LearningRequestModal from "@/add-os/modules/hr/components/training/LearningRequestModal.vue"
@@ -256,7 +257,7 @@ const enrollmentColumns = computed<DataTableColumns<Enrollment>>(() => [
 		title: "",
 		key: "actions",
 		minWidth: 110,
-		render: row => (canCancelMine(row, today) ? h(NButton, { size: "tiny", type: "error", secondary: true, onClick: () => confirmCancel(row) }, () => t("hrTraining.enrollments.cancel")) : null)
+		render: row => (canCancelMine(row, today) ? h(RowActions, { actions: [{ key: "cancel", label: t("hrTraining.enrollments.cancel"), icon: "carbon:close", danger: true, onClick: () => confirmCancel(row) }] }) : null)
 	}
 ])
 </script>

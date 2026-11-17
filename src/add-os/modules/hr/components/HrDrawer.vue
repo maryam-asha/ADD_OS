@@ -1,29 +1,20 @@
 <!-- src/add-os/modules/hr/components/HrDrawer.vue -->
 <template>
-	<n-drawer v-model:show="show" :width :placement>
-		<n-drawer-content :title closable>
-			<slot />
-			<template v-if="$slots.footer" #footer>
-				<slot name="footer" />
-			</template>
-		</n-drawer-content>
-	</n-drawer>
+	<DetailDrawer v-bind="props" v-model:show="show">
+		<template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
+			<slot :name="slotName" v-bind="slotProps ?? {}" />
+		</template>
+	</DetailDrawer>
 </template>
 
 <script setup lang="ts">
-import { NDrawer, NDrawerContent } from "naive-ui"
-import { computed } from "vue"
-import { currentLocale } from "@/add-os/lang/currentLocale"
+import DetailDrawer from "@/add-os/components/page/DetailDrawer.vue"
 
 /**
- * Every HR drawer. It slides in from the side reading ends on — the left in
- * Arabic, the right in English — and never grows past the screen, so on a
- * phone it is the whole width. `size` picks the reading width: `md` for a
- * form or a record, `lg` for one with a list inside (steps, tiers, items).
+ * Promoted 2026-11-17 to `@/add-os/components/page/DetailDrawer.vue`, the one
+ * implementation every module shares; this name stays so HR's pages need no
+ * edit. New code imports DetailDrawer directly.
  */
-const props = withDefaults(defineProps<{ title: string; size?: "md" | "lg" }>(), { size: "md" })
+const props = defineProps<{ title?: string; size?: "md" | "lg" }>()
 const show = defineModel<boolean>("show", { required: true })
-
-const width = computed(() => (props.size === "lg" ? "min(40rem, 100vw)" : "min(35rem, 100vw)"))
-const placement = computed(() => (currentLocale.value === "ar" ? "left" : "right"))
 </script>

@@ -413,7 +413,7 @@ function insertLink() {
 	const end = el.selectionEnd
 	const selected = model.value.substring(start, end)
 
-	const label = selected.length > 0 ? selected : t("markdown.linkLabel", "رابط")
+	const label = selected.length > 0 ? selected : t("markdown.linkLabel")
 	// A bare scheme, not a sample host: a placeholder domain would ship in the
 	// build and trip the network-isolation guard, and would publish as a live
 	// link if left in. The caret lands after it, ready for the address.
@@ -431,7 +431,7 @@ function insertLink() {
  * Inserts a sample Markdown table
  */
 function insertTable() {
-	const tableSnippet = `\n| ${t("markdown.col1", "العمود 1")} | ${t("markdown.col2", "العمود 2")} |\n| --- | --- |\n| ${t("markdown.val1", "بيانات 1")} | ${t("markdown.val2", "بيانات 2")} |\n`
+	const tableSnippet = `\n| ${t("markdown.col1", "العمود 1")} | ${t("markdown.col2", "العمود 2")} |\n| --- | --- |\n| ${t("markdown.val1")} | ${t("markdown.val2")} |\n`
 	applyWrap("", tableSnippet)
 }
 

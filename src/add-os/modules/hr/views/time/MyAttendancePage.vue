@@ -125,6 +125,7 @@ import type { AttendanceDay, AttendanceEntry, MyScheduleDay, OvertimeRequest, Te
 import { NAlert, NButton, NCard, NDataTable, NDatePicker, NFormItem, NInput, NInputNumber, NTabPane, NTabs, NTimePicker, useDialog, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import ApprovalStatusTag from "@/add-os/modules/hr/components/approvals/ApprovalStatusTag.vue"
 import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
@@ -268,7 +269,7 @@ function confirmCancel(call: () => Promise<{ message?: string }>) {
 }
 
 function cancelButton(onClick: () => void) {
-  return h(NButton, { text: true, type: "error", "aria-label": t("hrAttendance.me.cancel"), title: t("hrAttendance.me.cancel"), onClick }, { icon: () => h(Icon, { name: "carbon:close", size: 18 }) })
+	return h(RowActions, { actions: [{ key: "cancel", label: t("hrAttendance.me.cancel"), icon: "carbon:close", danger: true, onClick }] })
 }
 
 const entryColumns = computed<DataTableColumns<AttendanceEntry>>(() => [

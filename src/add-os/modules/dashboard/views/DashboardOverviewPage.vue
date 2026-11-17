@@ -11,10 +11,7 @@
 -->
 <template>
 	<div class="flex flex-col gap-6 text-[var(--add-text-primary)]">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold tracking-tight">{{ t("nav.sections.dashboard") }}</h1>
-			<p class="text-sm text-[var(--add-text-muted)]">{{ t("dashboard.description") }}</p>
-		</div>
+		<PageHeader :title="t('nav.sections.dashboard')" :description="t('dashboard.description')" />
 
 		<div
 			v-if="!visible.length"
@@ -127,6 +124,7 @@ import type { DashboardParams } from "@/add-os/services/dashboard"
 import { useLocalStorage } from "@vueuse/core"
 import { computed, reactive, ref, useTemplateRef, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { canViewDashboardSection, DASHBOARD_SECTIONS } from "@/add-os/config/permissions"
 import AttentionList from "@/add-os/modules/dashboard/components/AttentionList.vue"
 import DashboardTabBar from "@/add-os/modules/dashboard/components/DashboardTabBar.vue"

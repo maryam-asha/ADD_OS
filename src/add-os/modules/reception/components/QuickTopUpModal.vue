@@ -6,12 +6,10 @@
 	desk never meets a second top-up form with its own rules.
 -->
 <template>
-	<n-modal
+	<FormModal
 		:show="show && member === null"
-		preset="card"
 		:title="t('members.topUp.title')"
-		class="max-w-md rounded-2xl shadow-xl"
-		closable
+		size="sm"
 		@update:show="open => { if (!open) close() }"
 	>
 		<n-form-item :label="t('walletTopUps.searchMember')" :show-feedback="false">
@@ -24,7 +22,7 @@
 				:placeholder="t('walletTopUps.searchMemberPlaceholder')"
 			/>
 		</n-form-item>
-	</n-modal>
+	</FormModal>
 
 	<WalletTopUpDialog v-if="member" v-model:show="dialogShown" :member @success="emit('success')" />
 </template>
@@ -32,9 +30,10 @@
 <script setup lang="ts">
 import type { SelectOption } from "naive-ui"
 import type { Member } from "@/add-os/modules/members/types/member"
-import { NFormItem, NModal, NSelect, useMessage } from "naive-ui"
+import { NFormItem, NSelect, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
 import WalletTopUpDialog from "@/add-os/modules/members/components/WalletTopUpDialog.vue"
 import { ApiError } from "@/add-os/services/api"
 import { listMembers } from "@/add-os/services/members"

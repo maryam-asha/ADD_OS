@@ -58,16 +58,7 @@
 			</div>
 		</div>
 
-		<n-modal
-			v-model:show="assignVisible"
-			preset="dialog"
-			:title="t('memberships.desks.assignTitle')"
-			:positive-text="t('memberships.desks.save')"
-			:negative-text="t('memberships.desks.cancel')"
-			:loading="saving"
-			:positive-button-props="{ disabled: !canSave }"
-			@positive-click="saveAssign"
-		>
+		<FormModal v-model:show="assignVisible" :title="t('memberships.desks.assignTitle')" size="sm">
 			<div v-if="target" class="flex flex-col gap-3 pt-2">
 				<span class="text-sm">{{ target.owner?.name ?? `#${target.owner_id}` }} — {{ planName(target) }}</span>
 				<n-select
@@ -82,16 +73,24 @@
 					{{ t("memberships.desks.max", { seats: formatNumber(target.seats) }) }}
 				</span>
 			</div>
-		</n-modal>
+
+			<template #footer>
+				<div class="flex justify-end gap-2">
+					<n-button @click="assignVisible = false">{{ t("memberships.desks.cancel") }}</n-button>
+					<n-button type="primary" :loading="saving" :disabled="!canSave" @click="saveAssign">{{ t("memberships.desks.save") }}</n-button>
+				</div>
+			</template>
+		</FormModal>
 	</n-card>
 </template>
 
 <script setup lang="ts">
 import type { SelectOption } from "naive-ui"
 import type { Membership } from "@/add-os/modules/members/types/membership"
-import { NAlert, NButton, NCard, NModal, NPagination, NSelect, NSpin, NSwitch, NTag, useMessage } from "naive-ui"
+import { NAlert, NButton, NCard, NPagination, NSelect, NSpin, NSwitch, NTag, useMessage } from "naive-ui"
 import { computed, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import { ApiError } from "@/add-os/services/api"

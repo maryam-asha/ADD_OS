@@ -7,32 +7,30 @@
 -->
 <template>
 	<div class="flex flex-col gap-6">
-		<div class="flex flex-wrap items-start justify-between gap-3">
-			<div class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.paymentMethods") }}</h1>
-				<p class="text-secondary">{{ t("payments.methods.description") }}</p>
-			</div>
-			<n-button secondary size="small" :loading="isLoading" @click="load">
-				<template #icon><Icon name="carbon:renew" :size="16" /></template>
-				{{ t("payments.refresh") }}
-			</n-button>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.paymentMethods')" :description="t('payments.methods.description')">
+			<template #actions>
+				<n-button secondary size="small" :loading="isLoading" @click="load">
+					<template #icon><Icon name="carbon:renew" :size="16" /></template>
+					{{ t("payments.refresh") }}
+				</n-button>
+			</template>
+		</PageHeader>
 
 		<n-alert v-if="failed" type="error" :bordered="false">{{ t("payments.loadError") }}</n-alert>
 
 		<n-spin :show="isLoading && !methods.length">
 			<div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4 min-h-24">
-				<n-card v-for="(method, index) in methods" :key="method.key" size="small" class="shadow-sm border border-stone-200" :class="method.enabled ? '' : 'opacity-75'" data-test="payment-method">
+				<n-card v-for="(method, index) in methods" :key="method.key" size="small" class="shadow-sm border border-[var(--add-border)]" :class="method.enabled ? '' : 'opacity-75'" data-test="payment-method">
 					<div class="flex flex-col gap-4">
 						<!-- Name and state -->
 						<div class="flex items-start justify-between gap-3">
 							<div class="flex items-center gap-3">
-								<span class="flex items-center justify-center size-11 rounded-xl" :class="method.enabled ? 'bg-emerald-50 text-emerald-700' : 'bg-stone-100 text-stone-400'">
+								<span class="flex items-center justify-center size-11 rounded-xl" :class="method.enabled ? 'bg-[color-mix(in_srgb,var(--add-success)_10%,transparent)] text-[var(--add-success-text)]' : 'bg-[var(--add-surface-sunken)] text-[var(--add-text-muted)]'">
 									<Icon :name="methodIcon(method.key)" :size="22" />
 								</span>
 								<div class="flex flex-col">
-									<span class="font-bold text-stone-900">{{ method.label }}</span>
-									<span class="text-xs text-stone-500">
+									<span class="font-bold text-[var(--add-text-primary)]">{{ method.label }}</span>
+									<span class="text-xs text-[var(--add-text-secondary)]">
 										<bdi dir="ltr">{{ method.key }}</bdi> · {{ t("payments.methods.order", { order: formatNumber(index + 1) }) }}
 									</span>
 								</div>
@@ -47,16 +45,16 @@
 							</div>
 						</div>
 
-						<p class="text-sm text-stone-600">{{ te(`payments.methods.about.${method.key}`) ? t(`payments.methods.about.${method.key}`) : t("payments.methods.about.other") }}</p>
+						<p class="text-sm text-[var(--add-text-secondary)]">{{ te(`payments.methods.about.${method.key}`) ? t(`payments.methods.about.${method.key}`) : t("payments.methods.about.other") }}</p>
 
 						<!-- How it has been used -->
 						<div class="grid grid-cols-3 gap-2">
-							<div v-for="stat in stats(method)" :key="stat.label" class="flex flex-col gap-0.5 p-2.5 rounded-xl bg-stone-50 border border-stone-100">
-								<span class="text-xs text-stone-500">{{ stat.label }}</span>
-								<span class="text-lg font-extrabold" :class="stat.tone ?? 'text-stone-900'">{{ stat.value }}</span>
+							<div v-for="stat in stats(method)" :key="stat.label" class="flex flex-col gap-0.5 p-2.5 rounded-xl bg-[var(--add-surface-sunken)] border border-[var(--add-border)]">
+								<span class="text-xs text-[var(--add-text-secondary)]">{{ stat.label }}</span>
+								<span class="text-lg font-extrabold" :class="stat.tone ?? 'text-[var(--add-text-primary)]'">{{ stat.value }}</span>
 							</div>
 						</div>
-						<div class="flex flex-wrap items-center justify-between gap-2 text-xs text-stone-500">
+						<div class="flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--add-text-secondary)]">
 							<span>{{ method.usage.last_used_at ? t("payments.methods.lastUsed", { date: formatDateTime(method.usage.last_used_at) }) : t("payments.methods.neverUsed") }}</span>
 							<n-button v-if="method.usage.count" text size="tiny" type="primary" @click="openTransactions(method.key)">
 								{{ t("payments.methods.viewTransactions") }}
@@ -65,7 +63,7 @@
 
 						<!-- What it can pay for -->
 						<div class="flex flex-col gap-2">
-							<span class="text-xs font-semibold text-stone-700">{{ t("payments.methods.purposes") }}</span>
+							<span class="text-xs font-semibold text-[var(--add-text-primary)]">{{ t("payments.methods.purposes") }}</span>
 							<div class="flex flex-wrap gap-1.5">
 								<n-tag
 									v-for="purpose in listedPurposes(method)"
@@ -94,6 +92,7 @@ import { NAlert, NButton, NCard, NSpin, NTag } from "naive-ui"
 import { onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { ApiError } from "@/add-os/services/api"
 import { listPaymentMethods } from "@/add-os/services/payments"
 import { formatDateTime, formatNumber } from "@/add-os/utils/format"
@@ -115,8 +114,8 @@ function methodIcon(key: string): string {
 function stats(method: PaymentMethodInfo) {
 	return [
 		{ label: t("payments.methods.stats.accepted"), value: formatNumber(method.usage.accepted_count) },
-		{ label: t("payments.methods.stats.points"), value: formatNumber(method.usage.accepted_points), tone: "text-emerald-700" },
-		{ label: t("payments.methods.stats.open"), value: formatNumber(method.usage.open_count), tone: method.usage.open_count ? "text-amber-600" : undefined }
+		{ label: t("payments.methods.stats.points"), value: formatNumber(method.usage.accepted_points), tone: "text-[var(--add-success-text)]" },
+		{ label: t("payments.methods.stats.open"), value: formatNumber(method.usage.open_count), tone: method.usage.open_count ? "text-[var(--add-warning-text)]" : undefined }
 	]
 }
 

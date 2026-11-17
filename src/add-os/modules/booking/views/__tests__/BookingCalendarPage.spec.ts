@@ -489,7 +489,7 @@ describe("bookingCalendarPage", () => {
 			lastOptions!.eventClick?.({ event: { extendedProps: event.extendedProps } } as never)
 			await flushPromises()
 
-			const tags = [...document.body.querySelectorAll(".add-detail-modal .n-tag")].map(tag => tag.textContent?.trim())
+			const tags = [...document.body.querySelectorAll(".add-form-modal .n-tag")].map(tag => tag.textContent?.trim())
 			expect(tags).toContain("Ended")
 			expect(tags).toContain("Confirmed")
 

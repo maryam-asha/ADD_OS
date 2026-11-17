@@ -1,11 +1,12 @@
 // src/add-os/modules/booking/config/active-sessions.config.ts
 import type { DataTableColumns } from "naive-ui"
 import type { ComposerTranslation } from "vue-i18n"
+import type { RowAction } from "@/add-os/components/page/row-actions"
 import type { ActiveSession } from "@/add-os/modules/booking/types/reception"
-import { NButton, NTag } from "naive-ui"
+import { NTag } from "naive-ui"
 import { h } from "vue"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { formatDateTime } from "@/add-os/utils/format"
-import Icon from "@/components/common/Icon.vue"
 import { spaceTypeLabel } from "./space-type-label"
 
 /**
@@ -112,53 +113,15 @@ export function buildSessionColumns(t: ComposerTranslation, handlers: SessionHan
 		{
 			title: t("activeSessions.columns.actions"),
 			key: "actions",
-			minWidth: 260,
+			minWidth: 360,
 			align: "center",
 			render: row => {
-				const checkOutLabel = t("activeSessions.checkOut.button")
-				const detailsLabel = t("activeSessions.details")
 				const { onCheckOut, onExtend, onCancel } = handlers
-				const buttons = [
-					h(
-						NButton,
-						{ size: "small", secondary: true, "aria-label": detailsLabel, onClick: () => handlers.onDetails(row) },
-						{ icon: () => h(Icon, { name: "carbon:view", size: 16 }), default: () => detailsLabel }
-					)
-				]
-
-				if (onCheckOut) {
-					buttons.push(
-						h(
-							NButton,
-							{ size: "small", type: "primary", "aria-label": checkOutLabel, onClick: () => onCheckOut(row) },
-							{ icon: () => h(Icon, { name: "carbon:logout", size: 16 }), default: () => checkOutLabel }
-						)
-					)
-				}
-
-				if (row.type === "booking" && onExtend) {
-					const extendLabel = t("activeSessions.extend.button")
-					buttons.push(
-						h(
-							NButton,
-							{ size: "small", quaternary: true, "aria-label": extendLabel, title: extendLabel, onClick: () => onExtend(row) },
-							{ icon: () => h(Icon, { name: "carbon:time", size: 16 }) }
-						)
-					)
-				}
-
-				if (row.type === "booking" && onCancel) {
-					const cancelLabel = t("activeSessions.cancel.button")
-					buttons.push(
-						h(
-							NButton,
-							{ size: "small", quaternary: true, type: "error", "aria-label": cancelLabel, title: cancelLabel, onClick: () => onCancel(row) },
-							{ icon: () => h(Icon, { name: "carbon:close-outline", size: 16 }) }
-						)
-					)
-				}
-
-				return h("div", { class: "inline-flex items-center justify-center gap-2" }, buttons)
+				const actions: RowAction[] = [{ key: "details", label: t("activeSessions.details"), icon: "carbon:view", onClick: () => handlers.onDetails(row) }]
+				if (onCheckOut) actions.push({ key: "checkOut", label: t("activeSessions.checkOut.button"), icon: "carbon:logout", primary: true, onClick: () => onCheckOut(row) })
+				if (row.type === "booking" && onExtend) actions.push({ key: "extend", label: t("activeSessions.extend.button"), icon: "carbon:time", onClick: () => onExtend(row) })
+				if (row.type === "booking" && onCancel) actions.push({ key: "cancel", label: t("activeSessions.cancel.button"), icon: "carbon:close-outline", danger: true, onClick: () => onCancel(row) })
+				return h(RowActions, { actions, labelled: true })
 			}
 		}
 	]

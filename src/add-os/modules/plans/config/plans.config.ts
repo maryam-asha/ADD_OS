@@ -207,6 +207,80 @@ export function buildPlanColumns(t: ComposerTranslation, locale: SupportedLocale
 	]
 }
 
+/**
+ * A saved plan as the form edits it — every nested list copied, so editing
+ * never touches the row the list shows. Shared by the plans list and the
+ * plan editor page.
+ */
+export function planToPayload(row: Plan): PlanPayload {
+	return {
+	plan_module_id: row.plan_module_id ?? null,
+	name: { ...row.name },
+	subtitle: row.subtitle ? { ...row.subtitle } : { ar: "", en: "" },
+	is_subscription: row.is_subscription,
+	// Points in, points out: the form edits the same integer the backend
+	// stores.
+	price_points: row.price_points,
+	reference_plan_id: row.reference_plan_id ?? null,
+	reference_space_id: row.reference_space_id ?? null,
+	reference_units: row.reference_units ?? null,
+	duration_days: row.duration_days,
+	// A plan saved before plans stated their coworking terms reads as none.
+	coworking_seat: row.coworking_seat ?? "none",
+	coworking_hours: row.coworking_hours != null ? Number(row.coworking_hours) : null,
+	allowance_cycle: row.allowance_cycle ?? "period",
+	// Wall-clock strings, copied across untouched — they are not instants,
+	// so there is nothing here to parse, format or convert.
+	access_window_start: row.access_window_start ?? null,
+	access_window_end: row.access_window_end ?? null,
+	is_active: row.is_active,
+	// A plan saved before this column existed reads as undefined; treat that
+	// as public, matching the backend column's own default.
+	is_public: row.is_public ?? true,
+	order: row.order,
+	balances: (row.balances ?? []).map(b => ({
+		category: b.category,
+		amount_points: b.amount_points,
+		restricted_space_id: b.restricted_space_id ?? null,
+		description: b.description ? { ...b.description } : { ar: "", en: "" },
+		order: b.order ?? 0
+	})),
+	features: (row.features ?? []).map(f => ({
+		name: { ...f.name },
+		value: f.value ? { ...f.value } : { ar: "", en: "" },
+		icon: f.icon ?? "",
+		is_included: f.is_included,
+		order: f.order ?? 0
+	})),
+	discounts: (row.discounts ?? []).map(d => ({
+		percentage: d.percentage,
+		space_id: d.space_id ?? null,
+		space_type: d.space_type ?? null,
+		usage_limit: d.usage_limit ?? null,
+		description: d.description ? { ...d.description } : { ar: "", en: "" },
+		is_active: d.is_active,
+		order: d.order ?? 0,
+		targetMode: d.space_id != null ? "space" : d.space_type != null ? "space_type" : "all"
+	})),
+	space_hours: (row.space_hours ?? []).map(h => ({
+		id: h.id,
+		hours: Number(h.hours),
+		space_id: h.space_id ?? null,
+		space_type: h.space_type ?? null,
+		description: h.description ? { ...h.description } : { ar: "", en: "" },
+		order: h.order ?? 0,
+		targetMode: h.space_id != null ? "space" : "space_type"
+	})),
+	resource_grants: (row.resource_grants ?? []).map(g => ({
+		resource_type_id: g.resource_type_id,
+		resource_type: g.resource_type ? { ...g.resource_type } : null,
+		quantity: Number(g.quantity),
+		description: g.description ? { ...g.description } : { ar: "", en: "" },
+		order: g.order ?? 0
+	}))
+}
+}
+
 export function emptyPlanPayload(): PlanPayload {
 	return {
 		plan_module_id: null,

@@ -1,22 +1,20 @@
 <!-- src/add-os/modules/pm/views/ProjectsPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-wrap items-start justify-between gap-3">
-			<div class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold">{{ t("pm.projects.title") }}</h1>
-				<p>{{ t("pm.projects.description") }}</p>
-			</div>
-			<div class="flex items-center gap-4">
-				<label v-if="mayManage" class="flex cursor-pointer items-center gap-2">
-					<n-switch v-model:value="showArchived" size="small" data-test="show-archived" />
-					<span>{{ t("pm.projects.showArchived") }}</span>
-				</label>
-				<n-button v-if="mayManage" type="primary" data-test="new-project" @click="openForm(false)">
-					<template #icon><Icon name="carbon:add" :size="16" /></template>
-					{{ t("pm.projects.new") }}
-				</n-button>
-			</div>
-		</div>
+		<PageHeader :title="t('pm.projects.title')" :description="t('pm.projects.description')">
+			<template #actions>
+				<div class="flex items-center gap-4">
+					<label v-if="mayManage" class="flex cursor-pointer items-center gap-2">
+						<n-switch v-model:value="showArchived" size="small" data-test="show-archived" />
+						<span>{{ t("pm.projects.showArchived") }}</span>
+					</label>
+					<n-button v-if="mayManage" type="primary" data-test="new-project" @click="openForm(false)">
+						<template #icon><Icon name="carbon:add" :size="16" /></template>
+						{{ t("pm.projects.new") }}
+					</n-button>
+				</div>
+			</template>
+		</PageHeader>
 
 		<n-alert v-if="loadError" type="error" :title="t('pm.projects.loadError')" />
 
@@ -94,6 +92,7 @@ import { NAlert, NButton, NEmpty, NSpin, NSwitch, NTag, useMessage } from "naive
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { canManageProjects } from "@/add-os/config/permissions"
 import ProjectFormModal from "@/add-os/modules/pm/components/ProjectFormModal.vue"
 import ProjectHeader from "@/add-os/modules/pm/components/ProjectHeader.vue"

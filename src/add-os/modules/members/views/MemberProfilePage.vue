@@ -140,7 +140,7 @@
 					>
 						<div class="flex items-center justify-between gap-2">
 							<span class="text-xs font-medium text-[var(--add-text-muted)] truncate">{{ card.label }}</span>
-							<div :class="['w-6 h-6 rounded-md flex items-center justify-center shrink-0', card.iconBg, card.iconColor]">
+							<div class="w-6 h-6 rounded-md flex items-center justify-center shrink-0" :class="[card.iconBg, card.iconColor]">
 								<Icon :name="card.icon" :size="14" />
 							</div>
 						</div>
@@ -419,6 +419,7 @@ import { NAlert, NAvatar, NButton, NSpin, NTabPane, NTabs, NTag } from "naive-ui
 import { computed, defineComponent, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import ProfileTable from "@/add-os/modules/members/components/profile/ProfileTable.vue"
 import WalletTopUpDialog from "@/add-os/modules/members/components/WalletTopUpDialog.vue"
 import CollectPaymentModal from "@/add-os/modules/payments/components/CollectPaymentModal.vue"
@@ -695,7 +696,7 @@ const sessionColumns = computed<DataTableColumns<MemberSession>>(() => [
 	{
 		title: "",
 		key: "actions",
-		render: row => h(NButton, { size: "tiny", secondary: true, onClick: () => openSession(row.type, row.id) }, { default: () => t("memberProfile.details") })
+		render: row => h(RowActions, { actions: [{ key: "details", label: t("memberProfile.details"), icon: "carbon:view", onClick: () => openSession(row.type, row.id) }] })
 	}
 ])
 

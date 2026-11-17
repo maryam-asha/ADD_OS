@@ -6,16 +6,14 @@
 -->
 <template>
 	<div class="flex flex-col gap-6 text-[var(--add-text-primary)]">
-		<div class="flex flex-wrap items-center justify-between gap-3">
-			<div class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold tracking-tight">{{ t("nav.pages.collectionsReport") }}</h1>
-				<p class="text-sm text-[var(--add-text-muted)]">{{ t("dashboard.reports.collectionsDescription") }}</p>
-			</div>
-			<n-button size="small" secondary class="rounded-lg" :loading="isLoading" @click="reload">
-				<template #icon><Icon name="carbon:renew" :size="15" /></template>
-				{{ t("dashboard.refresh") }}
-			</n-button>
-		</div>
+		<PageHeader :title="t('nav.pages.collectionsReport')" :description="t('dashboard.reports.collectionsDescription')">
+			<template #actions>
+				<n-button size="small" secondary class="rounded-lg" :loading="isLoading" @click="reload">
+					<template #icon><Icon name="carbon:renew" :size="15" /></template>
+					{{ t("dashboard.refresh") }}
+				</n-button>
+			</template>
+		</PageHeader>
 
 		<DashboardFilterBar v-model:period="period" />
 
@@ -36,6 +34,7 @@
 import { NAlert, NButton, NSpin } from "naive-ui"
 import { ref } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import CollectedCards from "@/add-os/modules/dashboard/components/CollectedCards.vue"
 import DashboardFilterBar from "@/add-os/modules/dashboard/components/DashboardFilterBar.vue"
 import PointsByPurposeCard from "@/add-os/modules/dashboard/components/PointsByPurposeCard.vue"

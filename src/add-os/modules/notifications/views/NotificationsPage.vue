@@ -9,10 +9,7 @@
 <template>
 	<div class="mx-auto flex w-full max-w-3xl flex-col gap-6 text-[var(--add-text-primary)]">
 		<header class="flex flex-wrap items-start justify-between gap-4">
-			<div class="flex min-w-0 flex-col gap-1">
-				<h1 class="m-0 text-2xl font-bold tracking-tight">{{ t(titleKey || "nav.pages.myNotifications") }}</h1>
-				<p class="m-0 text-sm text-[var(--add-text-muted)]">{{ t("notifications.pageDescription") }}</p>
-			</div>
+			<PageHeader :title="t(titleKey || 'nav.pages.myNotifications')" :description="t('notifications.pageDescription')" />
 			<n-button v-if="unreadCount > 0" secondary type="primary" @click="markAllRead()">
 				<template #icon>
 					<Icon name="carbon:checkmark-outline" :size="16" />
@@ -84,6 +81,7 @@ import type { InboxNotification } from "@/add-os/services/notifications"
 import { NButton, NSkeleton } from "naive-ui"
 import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import BrowserPushPrompt from "@/add-os/notifications/components/BrowserPushPrompt.vue"
 import InboxEmpty from "@/add-os/notifications/components/InboxEmpty.vue"
 import NotificationRow from "@/add-os/notifications/components/NotificationRow.vue"

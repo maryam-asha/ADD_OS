@@ -7,10 +7,7 @@
 -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.accessLogs") }}</h1>
-			<p class="text-sm text-secondary">{{ t("accessLog.subtitle") }}</p>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.accessLogs')" :description="t('accessLog.subtitle')" />
 
 		<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
 			<n-select v-model:value="deviceId" :options="lockOptions" clearable :placeholder="t('accessLog.filters.lock')" />
@@ -36,6 +33,7 @@ import { NAlert, NDataTable, NDatePicker, NPagination, NSelect, NTag } from "nai
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute } from "vue-router"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { can } from "@/add-os/config/permissions"
 import { listAccessEvents, listDevices } from "@/add-os/services/access"

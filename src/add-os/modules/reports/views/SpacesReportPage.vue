@@ -6,16 +6,14 @@
 -->
 <template>
 	<div class="flex flex-col gap-6 text-[var(--add-text-primary)]">
-		<div class="flex flex-wrap items-center justify-between gap-3">
-			<div class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold tracking-tight">{{ t("nav.pages.spacesReport") }}</h1>
-				<p class="text-sm text-[var(--add-text-muted)]">{{ t("dashboard.reports.spacesDescription") }}</p>
-			</div>
-			<n-button size="small" secondary class="rounded-lg" @click="panel?.reload()">
-				<template #icon><Icon name="carbon:renew" :size="15" /></template>
-				{{ t("dashboard.refresh") }}
-			</n-button>
-		</div>
+		<PageHeader :title="t('nav.pages.spacesReport')" :description="t('dashboard.reports.spacesDescription')">
+			<template #actions>
+				<n-button size="small" secondary class="rounded-lg" @click="panel?.reload()">
+					<template #icon><Icon name="carbon:renew" :size="15" /></template>
+					{{ t("dashboard.refresh") }}
+				</n-button>
+			</template>
+		</PageHeader>
 
 		<DashboardFilterBar
 			v-model:period="period"
@@ -34,6 +32,7 @@ import type { DashboardParams, DashboardSpaceType } from "@/add-os/services/dash
 import { NButton } from "naive-ui"
 import { computed, ref, useTemplateRef } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import DashboardFilterBar from "@/add-os/modules/dashboard/components/DashboardFilterBar.vue"
 import SpacesPanel from "@/add-os/modules/dashboard/components/SpacesPanel.vue"
 import { useBranchOptions } from "@/add-os/modules/dashboard/composables/useBranchOptions"

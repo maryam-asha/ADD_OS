@@ -1,9 +1,7 @@
 <!-- src/add-os/modules/events/views/EventCategoriesPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.eventCategories") }}</h1>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.eventCategories')" :description="t('pageDescriptions.eventCategories')" />
 
 		<ResourceStatCards v-if="!error && !isLoading" :cards="statCards" />
 
@@ -27,7 +25,7 @@
 				@click="openCreate"
 			>
 				<template #icon>
-					<Icon name="carbon:add" :size="18" color="#ffffff" />
+					<Icon name="carbon:add" :size="18" />
 				</template>
 				{{ t("eventCategories.create.button") }}
 			</n-button>
@@ -60,6 +58,7 @@ import { NAlert, NButton } from "naive-ui"
 import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.vue"
 import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"

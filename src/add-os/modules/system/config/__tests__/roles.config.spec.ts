@@ -158,6 +158,17 @@ describe("displayRoleName", () => {
 		const custom: RoleRecord = { id: 4, name: "front-desk", protected: false, permissions: ["branches.view"] }
 		expect(displayRoleName(custom, translate)).toBe("front-desk")
 	})
+
+	it("translates a non-protected role a module seeded, when a translation exists", () => {
+		const seeded: RoleRecord = { id: 9, name: "store_keeper", protected: false, permissions: [] }
+		const hasTranslation = (key: string) => key === "roles.names.store_keeper"
+		expect(displayRoleName(seeded, translate, hasTranslation)).toBe("translated(roles.names.store_keeper)")
+	})
+
+	it("keeps an admin's own role name when no translation exists for it", () => {
+		const custom: RoleRecord = { id: 4, name: "front-desk", protected: false, permissions: [] }
+		expect(displayRoleName(custom, translate, () => false)).toBe("front-desk")
+	})
 })
 
 describe("displayModuleName", () => {

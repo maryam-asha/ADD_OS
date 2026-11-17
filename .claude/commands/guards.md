@@ -84,6 +84,16 @@ Then report, per spec file, pass/fail and what it protects:
   HR) carries exactly one of `permission` or `allStaff`, that `allStaff` sits only on
   ComingSoon placeholders and the two named no-API screens (dashboard overview, account
   security), and that no staff section names a role.
+- `ui-patterns.spec.ts` — one page, one table, one dialog (`docs/UI-PATTERNS.md`, decided
+  2026-11-17), over every module: the title comes from `PageHeader` (or HR's wrappers) with a
+  description, never a hand-built `<h1>`; the primary action is never on a page-level row of
+  its own; row actions go to `ResourceTable` as `rowActions` data; no `n-popconfirm`; no bare
+  `n-modal` (`FormModal`) or `n-drawer` (`DetailDrawer`); colours only through tokens — no hex,
+  no Tailwind palette class, no `dark:` variant (comments excluded). Files that cannot follow it
+  are in `EXEMPT` with a reason; files waiting on a decision are in `PENDING` with the one rule
+  they may break, and a stale `PENDING` entry fails. Also: the shared pieces exist in
+  `components/page/`, HR's kit only renders them, and `ResourceTable` has no `extraActions`.
+  Carries a negative control.
 - `theme/__tests__/tokens.spec.ts` — WCAG ratios, ΔE separations, and "guideline p.15 strict
   rule stays disengaged" (Antique Copper in no semantic and no component token).
 

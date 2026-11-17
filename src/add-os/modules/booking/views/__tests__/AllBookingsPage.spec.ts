@@ -405,6 +405,17 @@ describe("allBookingsPage details and cancel", () => {
 		return wrapper.findAll(`button[aria-label='${label}']`)
 	}
 
+	/** Cancelling sits under the row's "⋯" (RowActions, 2026-11-17); no message is given for its label here, so it reads as its key. */
+	const moreMenus = (wrapper: ReturnType<typeof mountPage>) => actionButtons(wrapper, "common.moreActions")
+
+	async function pickCancel(wrapper: ReturnType<typeof mountPage>) {
+		await moreMenus(wrapper)[0].trigger("click")
+		await flushPromises()
+		const option = Array.from(document.querySelectorAll(".n-dropdown-option-body")).find(el => el.textContent?.trim() === "Cancel booking")
+		option?.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+		await flushPromises()
+	}
+
 	it("offers every row its details", async () => {
 		const wrapper = mountPage()
 		await flushPromises()
@@ -426,7 +437,7 @@ describe("allBookingsPage details and cancel", () => {
 	it("offers cancel only on a booking still to happen, and only to an account that may book", async () => {
 		const withoutPermission = mountPage()
 		await flushPromises()
-		expect(actionButtons(withoutPermission, "Cancel booking")).toHaveLength(0)
+		expect(moreMenus(withoutPermission)).toHaveLength(0)
 		withoutPermission.unmount()
 
 		granted.add("reception.book")
@@ -434,7 +445,7 @@ describe("allBookingsPage details and cancel", () => {
 		await flushPromises()
 
 		// Row 1 only: row 2 played out, row 3 is checked in.
-		expect(actionButtons(wrapper, "Cancel booking")).toHaveLength(1)
+		expect(moreMenus(wrapper)).toHaveLength(1)
 	})
 
 	it("asks before cancelling, then cancels and reloads the list", async () => {
@@ -442,7 +453,7 @@ describe("allBookingsPage details and cancel", () => {
 		const wrapper = mountPage()
 		await flushPromises()
 
-		await actionButtons(wrapper, "Cancel booking")[0].trigger("click")
+		await pickCancel(wrapper)
 		expect(cancelBookingMock).not.toHaveBeenCalled()
 		expect(dialogWarningMock).toHaveBeenCalledTimes(1)
 
@@ -459,7 +470,7 @@ describe("allBookingsPage details and cancel", () => {
 		const wrapper = mountPage()
 		await flushPromises()
 
-		await actionButtons(wrapper, "Cancel booking")[0].trigger("click")
+		await pickCancel(wrapper)
 		await dialogWarningMock.mock.calls[0][0].onPositiveClick()
 		await flushPromises()
 

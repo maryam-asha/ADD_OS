@@ -1,19 +1,16 @@
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.privateOfficeRequests") }}</h1>
-			<p>{{ t("privateOfficeRequests.description") }}</p>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.privateOfficeRequests')" :description="t('privateOfficeRequests.description')">
+			<template #actions>
+				<n-button type="primary" @click="openCreate">
+					<template #icon><Icon name="carbon:add" :size="16" /></template>
+					{{ t("privateOfficeRequests.create.button") }}
+				</n-button>
+			</template>
+		</PageHeader>
 
 		<ResourceStatCards v-if="!error && !isLoading" :cards="statCards" />
 		<n-alert v-if="error" type="error" :title="t('privateOfficeRequests.loadError')" />
-
-		<div class="flex justify-end">
-			<n-button type="primary" @click="openCreate">
-				<template #icon><Icon name="carbon:add" :size="16" /></template>
-				{{ t("privateOfficeRequests.create.button") }}
-			</n-button>
-		</div>
 
 		<div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
 			<n-input v-model:value="query.search" clearable :placeholder="t('privateOfficeRequests.filters.search')" />
@@ -21,12 +18,12 @@
 			<n-select v-model:value="query.provider_id" :options="providerOptions" clearable filterable :placeholder="t('companies.filters.provider')" />
 		</div>
 		<n-card class="add-ledger-table">
-			<n-data-table v-if="data.length > 0 || isLoading" remote :columns="columns" :data="data" :loading="isLoading" :bordered="false" :row-key="rowKey" :row-class-name="rowClassName" :scroll-x="980" size="small" :pagination="{ itemCount: meta?.total, page: meta?.current_page, pageSize: meta?.per_page, onChange: (p) => page = p }" />
+			<n-data-table v-if="data.length > 0 || isLoading" remote :columns :data :loading="isLoading" :bordered="false" :row-key :row-class-name :scroll-x="980" size="small" :pagination="{ itemCount: meta?.total, page: meta?.current_page, pageSize: meta?.per_page, onChange: (p) => page = p }" />
 			<div v-else class="py-10 text-center">{{ t("privateOfficeRequests.empty") }}</div>
 		</n-card>
 
 		<!-- Custom Create Request Drawer supporting existing company and payer -->
-		<n-modal v-model:show="createDrawerVisible" preset="card" :title="t('privateOfficeRequests.create.title')" class="max-w-lg">
+		<FormModal v-model:show="createDrawerVisible" :title="t('privateOfficeRequests.create.title')" size="md">
 			<n-form ref="createFormRef" :model="createForm" :rules="createRules" label-placement="top">
 				<n-form-item path="prospect_name" :label="t('privateOfficeRequests.form.prospectName')">
 					<n-input v-model:value="createForm.prospect_name" />
@@ -61,7 +58,7 @@
 					<n-button type="primary" :loading="mutations.isSubmitting.value" @click="handleCustomCreate">{{ t("resourceCrud.form.submit") }}</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</FormModal>
 
 		<!-- Create Lease from Request Drawer -->
 		<CreateLeaseDrawer
@@ -71,7 +68,7 @@
 			@created="refetch"
 		/>
 
-		<n-modal v-model:show="quoteModalVisible" preset="card" :title="t('privateOfficeRequests.markAsQuoted.title')" class="max-w-md">
+		<FormModal v-model:show="quoteModalVisible" :title="t('privateOfficeRequests.markAsQuoted.title')" size="sm">
 			<n-form ref="quoteFormRef" :model="quoteForm" :rules="quoteRules">
 				<n-form-item path="quote_ref" :label="t('privateOfficeRequests.markAsQuoted.quoteRefLabel')">
 					<n-input v-model:value="quoteForm.quote_ref" :placeholder="t('privateOfficeRequests.markAsQuoted.quoteRefPlaceholder')" />
@@ -83,7 +80,7 @@
 					<n-button type="primary" :loading="mutations.isSubmitting.value" @click="submitQuote">{{ t("resourceCrud.form.submit") }}</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</FormModal>
 	</div>
 </template>
 
@@ -91,9 +88,11 @@
 import type { DataTableColumns, FormInst, FormRules } from "naive-ui"
 import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vue"
 import type { MarkAsQuotedPayload, PrivateOfficeRequest, PrivateOfficeRequestPayload } from "@/add-os/modules/members/types/private-office-request"
-import { NAlert, NButton, NCard, NDataTable, NForm, NFormItem, NInput, NModal, NSelect, useDialog, useMessage } from "naive-ui"
+import { NAlert, NButton, NCard, NDataTable, NForm, NFormItem, NInput, NSelect, useDialog, useMessage } from "naive-ui"
 import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useResourceMutations } from "@/add-os/composables/useResourceMutations"

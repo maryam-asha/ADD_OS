@@ -1,27 +1,26 @@
 <!-- src/add-os/modules/events/views/EventAttendeesPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex items-start justify-between gap-4">
-			<div class="flex flex-col gap-1 min-w-0">
-				<n-button text class="self-start" @click="router.push('/community/events')">
-					<template #icon>
-						<Icon name="carbon:arrow-left" :size="16" />
-					</template>
-					{{ t("nav.pages.events") }}
-				</n-button>
-				<h1 class="text-2xl font-bold truncate">{{ t("events.approval.title") }}</h1>
-				<span v-if="eventTitle" class="opacity-70 truncate">{{ eventTitle }}</span>
-			</div>
+		<n-button text class="self-start" @click="router.push('/community/events')">
+			<template #icon>
+				<Icon name="carbon:arrow-left" :size="16" />
+			</template>
+			{{ t("nav.pages.events") }}
+		</n-button>
 
-			<n-popconfirm v-if="pendingCount > 0" @positive-click="rejectAllPending">
-				<template #trigger>
-					<n-button type="warning" secondary :loading="isBulkRejecting">
-						{{ t("events.approval.rejectAll") }}
-					</n-button>
-				</template>
-				{{ t("events.approval.rejectAllConfirm") }}
-			</n-popconfirm>
-		</div>
+		<PageHeader :title="t('events.approval.title')" :description="eventTitle || t('pageDescriptions.eventAttendees')">
+			<template #actions>
+				<n-button
+					v-if="pendingCount > 0"
+					type="warning"
+					secondary
+					:loading="isBulkRejecting"
+					@click="confirm({ title: t('events.approval.rejectAll'), content: t('events.approval.rejectAllConfirm'), onConfirm: rejectAllPending })"
+				>
+					{{ t("events.approval.rejectAll") }}
+				</n-button>
+			</template>
+		</PageHeader>
 
 		<n-alert type="info" :bordered="false">
 			{{ t("events.approval.seatNote") }}
@@ -60,12 +59,7 @@
 		</div>
 
 		<!-- Rejection always states a reason: the API refuses an empty one. -->
-		<n-modal
-			v-model:show="rejectVisible"
-			preset="card"
-			:title="t('events.approval.reject')"
-			style="max-width: 26rem"
-		>
+		<FormModal v-model:show="rejectVisible" :title="t('events.approval.reject')" size="sm">
 			<n-form-item
 				:label="t('events.approval.rejectReason')"
 				:feedback="rejectError ?? undefined"
@@ -85,15 +79,10 @@
 					{{ t("events.approval.reject") }}
 				</n-button>
 			</div>
-		</n-modal>
+		</FormModal>
 
 		<!-- What the member answered, when the event asked anything. -->
-		<n-modal
-			v-model:show="answersVisible"
-			preset="card"
-			:title="t('events.approval.answers')"
-			style="max-width: 32rem"
-		>
+		<FormModal v-model:show="answersVisible" :title="t('events.approval.answers')" size="md">
 			<n-empty v-if="!viewingAnswers.length" :description="t('events.approval.noAnswers')" />
 			<n-descriptions v-else :column="1" bordered label-placement="left">
 				<n-descriptions-item
@@ -104,38 +93,26 @@
 					{{ formatAnswer(answer.value) }}
 				</n-descriptions-item>
 			</n-descriptions>
-		</n-modal>
+		</FormModal>
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns } from "naive-ui"
+import type { RowAction } from "@/add-os/components/page/row-actions"
 import type {
 	EventAttendee,
 	EventAttendeeAnswer,
 	EventRegistrationStatus
 } from "@/add-os/modules/events/types/event"
-import {
-	NAlert,
-	NButton,
-	NDataTable,
-	NDescriptions,
-	NDescriptionsItem,
-	NEmpty,
-	NFormItem,
-	NInput,
-	NModal,
-	NPagination,
-	NPopconfirm,
-	NSpin,
-	NTab,
-	NTabs,
-	NTag,
-	useMessage
-} from "naive-ui"
+import { NAlert, NButton, NDataTable, NDescriptions, NDescriptionsItem, NEmpty, NFormItem, NInput, NPagination, NSpin, NTab, NTabs, NTag, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
+import FormModal from "@/add-os/components/page/FormModal.vue"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
+import RowActions from "@/add-os/components/page/RowActions.vue"
+import { useConfirm } from "@/add-os/components/page/useConfirm"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import AppliedDiscountList from "@/add-os/modules/pricing/components/AppliedDiscountList.vue"
 import {
@@ -149,6 +126,7 @@ import { formatDateTime } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
 const { t } = useI18n()
+const confirm = useConfirm()
 const route = useRoute()
 const router = useRouter()
 const message = useMessage()
@@ -325,39 +303,20 @@ const columns = computed<DataTableColumns<EventAttendee>>(() => [
 	{
 		title: t("resourceCrud.table.actionsColumn"),
 		key: "actions",
-		width: 120,
+		minWidth: 260,
 		align: "center",
 		render: row => {
-			const buttons = []
-
-			if (row.answers?.length) {
-				buttons.push(
-					h(
-						NButton,
-						{ text: true, type: "info", title: t("events.approval.answers"), onClick: () => openAnswers(row) },
-						{ icon: () => h(Icon, { name: "carbon:document", size: 18 }) }
-					)
-				)
-			}
-
+			const actions: RowAction[] = []
+			if (row.answers?.length) actions.push({ key: "answers", label: t("events.approval.answers"), icon: "carbon:document", onClick: () => openAnswers(row) })
 			// Only a pending registration can be decided; the API returns 409
 			// for anything else, so offering the buttons would be a lie.
 			if (row.status === "pending") {
-				buttons.push(
-					h(
-						NButton,
-						{ text: true, type: "success", title: t("events.approval.approve"), onClick: () => approve(row) },
-						{ icon: () => h(Icon, { name: "carbon:checkmark", size: 18 }) }
-					),
-					h(
-						NButton,
-						{ text: true, type: "error", title: t("events.approval.reject"), onClick: () => openReject(row) },
-						{ icon: () => h(Icon, { name: "carbon:close", size: 18 }) }
-					)
+				actions.push(
+					{ key: "approve", label: t("events.approval.approve"), icon: "carbon:checkmark", primary: true, onClick: () => approve(row) },
+					{ key: "reject", label: t("events.approval.reject"), icon: "carbon:close", danger: true, onClick: () => openReject(row) }
 				)
 			}
-
-			return h("div", { class: "inline-flex items-center justify-center gap-2" }, buttons)
+			return h(RowActions, { actions, labelled: true })
 		}
 	}
 ])

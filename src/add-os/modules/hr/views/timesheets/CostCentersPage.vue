@@ -1,7 +1,7 @@
 <!-- src/add-os/modules/hr/views/timesheets/CostCentersPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<HrPageHeader :title="t(titleKey || 'nav.pages.hrCostCenters')" />
+		<HrPageHeader :title="t(titleKey || 'nav.pages.hrCostCenters')" :description="t('pageDescriptions.hrCostCenters')" />
 		<HrResourcePanel
 			:api
 			:columns

@@ -59,9 +59,21 @@ export function applyViewRule(previous: readonly string[], next: readonly string
  * roles do. Falling back to the raw `name` for a non-protected role is
  * correct, not a missing-translation bug: an operator-chosen role name (e.g.
  * "front-desk") was never meant to be translated.
+ *
+ * Added 2026-11-17: a non-protected role that DOES have a translation uses it.
+ * Module seeders create unprotected roles of their own (`store_keeper`,
+ * `technician`, `hr_manager`) whose names are identifiers, not words an admin
+ * chose, and the Users table showed them raw. Passing `hasTranslation` keeps
+ * an admin's own name untouched while those get a label.
  */
-export function displayRoleName(role: RoleRecord, translate: (key: string) => string): string {
-	return role.protected ? translate(`roles.names.${role.name}`) : role.name
+export function displayRoleName(
+	role: RoleRecord,
+	translate: (key: string) => string,
+	hasTranslation?: (key: string) => boolean
+): string {
+	const key = `roles.names.${role.name}`
+	if (role.protected) return translate(key)
+	return hasTranslation?.(key) ? translate(key) : role.name
 }
 
 /**

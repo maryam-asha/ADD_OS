@@ -9,14 +9,14 @@
 <script setup lang="ts">
 import type { DataTableColumns } from "naive-ui"
 import type { CycleStatus, Goal } from "@/add-os/modules/hr/types/performance"
-import { NButton, NDataTable, NProgress } from "naive-ui"
+import { NDataTable, NProgress } from "naive-ui"
 import { computed, h } from "vue"
 import { useI18n } from "vue-i18n"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import PerformanceStatusTag from "@/add-os/modules/hr/components/performance/PerformanceStatusTag.vue"
 import { goalsOpen } from "@/add-os/modules/hr/utils/performance"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
 import { formatDate, formatNumber } from "@/add-os/utils/format"
-import Icon from "@/components/common/Icon.vue"
 
 /**
  * Goals with their measure, weight, progress and state. `onEdit` and
@@ -59,17 +59,15 @@ const columns = computed<DataTableColumns<Goal>>(() => [
 				{
 					title: "",
 					key: "actions",
-					width: 90,
+					width: 100,
 					render: (row: Goal) => {
 						const closed = cycleOf(row)?.status === "closed"
-						return h("div", { class: "flex justify-end gap-3" }, [
-							props.onEdit && !closed
-								? h(NButton, { text: true, type: "primary", "aria-label": t("hr.common.edit"), title: t("hr.common.edit"), onClick: () => props.onEdit?.(row) }, { icon: () => h(Icon, { name: "carbon:edit", size: 18 }) })
-								: null,
-							props.onDelete && (!row.review_cycle_id || goalsOpen(cycleOf(row)?.status))
-								? h(NButton, { text: true, type: "error", "aria-label": t("hr.common.delete"), title: t("hr.common.delete"), onClick: () => props.onDelete?.(row) }, { icon: () => h(Icon, { name: "carbon:trash-can", size: 18 }) })
-								: null
-						])
+						return h(RowActions, {
+							actions: [
+								...(props.onEdit && !closed ? [{ key: "edit", label: t("hr.common.edit"), icon: "carbon:edit", onClick: () => props.onEdit?.(row) }] : []),
+								...(props.onDelete && (!row.review_cycle_id || goalsOpen(cycleOf(row)?.status)) ? [{ key: "delete", label: t("hr.common.delete"), icon: "carbon:trash-can", danger: true, onClick: () => props.onDelete?.(row) }] : [])
+							]
+						})
 					}
 				}
 			]

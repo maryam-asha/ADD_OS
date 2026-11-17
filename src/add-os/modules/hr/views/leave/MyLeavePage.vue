@@ -58,6 +58,7 @@ import { NAlert, NButton, NCard, NDataTable, NDatePicker, NPagination, NSpin, NT
 import { computed, h, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import ApprovalStatusTag from "@/add-os/modules/hr/components/approvals/ApprovalStatusTag.vue"
 import LeaveBalances from "@/add-os/modules/hr/components/leave/LeaveBalances.vue"
 import LeaveLedgerTable from "@/add-os/modules/hr/components/leave/LeaveLedgerTable.vue"
@@ -172,11 +173,7 @@ const columns = computed<DataTableColumns<LeaveRequest>>(() => [
 		align: "center",
 		render: row =>
 			cancellable(row)
-				? h(
-						NButton,
-						{ text: true, type: "error", "aria-label": t("hrLeave.detail.cancel"), title: t("hrLeave.detail.cancel"), onClick: () => confirmCancel(row) },
-						{ icon: () => h(Icon, { name: "carbon:close", size: 18 }) }
-					)
+				? h(RowActions, { actions: [{ key: "cancel", label: t("hrLeave.detail.cancel"), icon: "carbon:close", danger: true, onClick: () => confirmCancel(row) }] })
 				: null
 	}
 ])

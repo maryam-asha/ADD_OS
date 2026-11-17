@@ -8,10 +8,7 @@
 -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.locks") }}</h1>
-			<p class="text-sm text-secondary">{{ t("accessDevices.subtitle") }}</p>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.locks')" :description="t('accessDevices.subtitle')" />
 
 		<ResourceStatCards v-if="!error && !isLoading" :cards="statCards" />
 
@@ -36,7 +33,7 @@
 			:on-edit="canUpdate ? openEdit : undefined"
 			:on-delete="canDelete ? (async row => { await mutations.remove(row.id) }) : undefined"
 			:delete-warning="t('accessDevices.delete.warning')"
-			:extra-actions="renderActions"
+			:row-actions="deviceActions"
 		/>
 
 		<ResourceFormDrawer
@@ -61,14 +58,16 @@
 </template>
 
 <script setup lang="ts">
+import type { RowAction } from "@/add-os/components/page/row-actions"
 import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vue"
 import type { Device, DevicePayload, TTLockAccount } from "@/add-os/modules/access/types/access"
 import type { Branch } from "@/add-os/modules/spatial/types/branch"
 import type { Space } from "@/add-os/modules/spatial/types/space"
 import { NAlert, NButton, useDialog, useMessage } from "naive-ui"
-import { computed, h, onMounted, ref } from "vue"
+import { computed, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.vue"
 import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
@@ -320,36 +319,29 @@ function confirmRegenerate(row: Device) {
 	})
 }
 
-function actionButton(label: string, icon: string, type: "primary" | "warning" | "default", onClick: () => void, disabled = false) {
-	return h(
-		NButton,
-		{ text: true, type, disabled, "aria-label": label, title: label, onClick },
-		{ icon: () => h(Icon, { name: icon, size: 18 }) }
-	)
-}
-
-function renderActions(row: Device) {
-	const buttons = []
+/** A device's own actions, laid out by RowActions; lock and unlock stay disabled while one is in flight. */
+function deviceActions(row: Device): RowAction[] {
+	const actions: RowAction[] = []
 	const isLock = row.type === "lock"
 	const busy = busyId.value === row.id
 
 	if (isLock && canControl.value && row.external_ref) {
-		buttons.push(actionButton(t("accessDevices.unlock.button"), "carbon:unlocked", "warning", () => confirmUnlock(row), busy))
-		buttons.push(actionButton(t("accessDevices.lock.button"), "carbon:locked", "primary", () => control(row, lockDevice), busy))
+		actions.push({ key: "unlock", label: t("accessDevices.unlock.button"), icon: "carbon:unlocked", disabled: busy, onClick: () => confirmUnlock(row) })
+		actions.push({ key: "lock", label: t("accessDevices.lock.button"), icon: "carbon:locked", disabled: busy, onClick: () => control(row, lockDevice) })
 	}
 
 	if (isLock && row.qr_value) {
-		buttons.push(actionButton(t("accessDevices.qr.button"), "carbon:qr-code", "default", () => openQr(row)))
+		actions.push({ key: "qr", label: t("accessDevices.qr.button"), icon: "carbon:qr-code", onClick: () => openQr(row) })
 	}
 
 	if (isLock && canSeeCodes.value) {
-		buttons.push(actionButton(t("accessDevices.codes"), "carbon:password", "default", () => router.push({ name: "access.doorCodes", query: { lock_id: row.id } })))
+		actions.push({ key: "codes", label: t("accessDevices.codes"), icon: "carbon:password", onClick: () => router.push({ name: "access.doorCodes", query: { lock_id: row.id } }) })
 	}
 
 	if (canSeeLog.value) {
-		buttons.push(actionButton(t("accessDevices.log"), "carbon:activity", "default", () => router.push({ name: "access.accessLogs", query: { device_id: row.id } })))
+		actions.push({ key: "log", label: t("accessDevices.log"), icon: "carbon:activity", onClick: () => router.push({ name: "access.accessLogs", query: { device_id: row.id } }) })
 	}
 
-	return buttons
+	return actions
 }
 </script>

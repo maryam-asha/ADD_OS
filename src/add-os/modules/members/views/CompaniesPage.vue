@@ -2,89 +2,73 @@
 <template>
 	<div class="flex flex-col gap-6">
 		<!-- Page Header -->
-		<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-			<div class="flex flex-col gap-1">
-				<div class="flex items-center gap-3">
-					<h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-						{{ t(titleKey || "companies.title", "الشركات") }}
-					</h1>
-					<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/60 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/40">
-						{{ t("companies.registeredBadge", { count: meta?.total ?? data.length }) }}
-					</span>
-				</div>
-				<p class="text-xs text-slate-500 dark:text-slate-400">
-					{{ t("companies.description") }}
-				</p>
-			</div>
-
-			<div v-if="canCreateOfficeLeases()" class="shrink-0">
-				<n-button
-					type="primary"
-					@click="openCreate"
-				>
+		<PageHeader :title="t(titleKey || 'companies.title', 'الشركات')" :description="t('companies.description')">
+			<template #actions>
+				<n-tag round :bordered="false">{{ t("companies.registeredBadge", { count: meta?.total ?? data.length }) }}</n-tag>
+				<n-button v-if="canCreateOfficeLeases()" type="primary" @click="openCreate">
 					<template #icon><Icon name="carbon:add" :size="16" /></template>
 					{{ t("companies.create.button") }}
 				</n-button>
-			</div>
-		</div>
+			</template>
+		</PageHeader>
 
 		<!-- Stat Cards (3 Cards with dynamic computed values) -->
 		<div v-if="!error && !isLoading" class="grid grid-cols-1 md:grid-cols-3 gap-4">
 			<!-- Total Companies -->
-			<div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-xs flex flex-col justify-between gap-4">
+			<div class="bg-white border border-[var(--add-border)] rounded-2xl p-5 shadow-xs flex flex-col justify-between gap-4">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+					<span class="text-xs font-semibold text-[var(--add-text-secondary)]">
 						{{ t("companies.stats.total") }}
 					</span>
-					<div class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center shrink-0">
+					<div class="w-9 h-9 rounded-xl bg-[var(--add-surface-sunken)] text-[var(--add-text-secondary)] flex items-center justify-center shrink-0">
 						<Icon name="carbon:building" :size="18" />
 					</div>
 				</div>
 				<div class="flex items-baseline justify-between gap-2">
-					<span class="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 font-mono">
+					<span class="text-3xl font-bold tracking-tight text-[var(--add-text-primary)] font-mono">
 						{{ totalCount }}
 					</span>
-					<span class="text-xs text-slate-400 dark:text-slate-500 font-medium">
+					<span class="text-xs text-[var(--add-text-muted)] font-medium">
 						{{ t("companies.stats.totalSubtitle", { active: activeCount, inactive: inactiveCount }) }}
 					</span>
 				</div>
 			</div>
 
 			<!-- Active Companies -->
-			<div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-xs flex flex-col justify-between gap-4">
+			<div class="bg-white border border-[var(--add-border)] rounded-2xl p-5 shadow-xs flex flex-col justify-between gap-4">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+					<span class="text-xs font-semibold text-[var(--add-text-secondary)]">
 						{{ t("companies.stats.active") }}
 					</span>
-					<div class="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+					<div class="w-9 h-9 rounded-xl bg-[color-mix(in_srgb,var(--add-success)_10%,transparent)] text-[var(--add-success-text)] flex items-center justify-center shrink-0">
 						<Icon name="carbon:checkmark-outline" :size="18" />
 					</div>
 				</div>
 				<div class="flex items-baseline justify-between gap-2">
-					<span class="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 font-mono">
+					<span class="text-3xl font-bold tracking-tight text-[var(--add-text-primary)] font-mono">
 						{{ activeCount }}
 					</span>
-					<span class="text-xs text-slate-400 dark:text-slate-500 font-medium">
+					<span class="text-xs text-[var(--add-text-muted)] font-medium">
 						{{ t("companies.stats.percentOfTotal", { percent: activePct }) }}
 					</span>
 				</div>
 			</div>
 
 			<!-- Inactive Companies -->
-			<div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-xs flex flex-col justify-between gap-4">
+			<div class="bg-white border border-[var(--add-border)] rounded-2xl p-5 shadow-xs flex flex-col justify-between gap-4">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+					<span class="text-xs font-semibold text-[var(--add-text-secondary)]">
 						{{ t("companies.stats.inactive") }}
 					</span>
-					<div class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-500 dark:text-amber-400 flex items-center justify-center shrink-0">
+					<div class="w-9 h-9 rounded-xl bg-[color-mix(in_srgb,var(--add-warning)_10%,transparent)] text-[var(--add-warning-text)] flex items-center justify-center shrink-0">
 						<Icon name="carbon:warning-alt-filled" :size="18" />
 					</div>
 				</div>
 				<div class="flex items-baseline justify-between gap-2">
-					<span class="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 font-mono">
+					<span class="text-3xl font-bold tracking-tight text-[var(--add-text-primary)] font-mono">
 						{{ inactiveCount }}
 					</span>
-					<span class="text-xs text-slate-400 dark:text-slate-500 font-medium">
+					<span class="text-xs text-[var(--add-text-muted)] font-medium">
 						{{ t("companies.stats.percentOfTotal", { percent: inactivePct }) }}
 					</span>
 				</div>
@@ -94,7 +78,7 @@
 		<n-alert v-if="error" type="error" :title="t('companies.loadError')" />
 
 		<!-- Filter Section -->
-		<div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-3.5 shadow-xs flex flex-col gap-3">
+		<div class="bg-white border border-[var(--add-border)] rounded-2xl p-3.5 shadow-xs flex flex-col gap-3">
 			<!-- Search -->
 			<div class="w-full">
 				<n-input
@@ -104,7 +88,7 @@
 					class="!rounded-xl"
 				>
 					<template #prefix>
-						<Icon name="carbon:search" :size="16" class="text-slate-400" />
+						<Icon name="carbon:search" :size="16" class="text-[var(--add-text-muted)]" />
 					</template>
 				</n-input>
 			</div>
@@ -165,7 +149,7 @@
 		</div>
 
 		<!-- Table Card -->
-		<div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden add-ledger-table">
+		<div class="bg-white border border-[var(--add-border)] rounded-2xl shadow-xs overflow-hidden add-ledger-table">
 			<n-data-table
 				v-if="data.length > 0 || isLoading"
 				remote
@@ -178,12 +162,12 @@
 				:scroll-x="1180"
 				size="small"
 			/>
-			<div v-else class="py-16 text-center text-slate-500 text-sm">
+			<div v-else class="py-16 text-center text-[var(--add-text-secondary)] text-sm">
 				{{ t("companies.empty") }}
 			</div>
 
 			<!-- Custom Pagination Footer matching reference -->
-			<div v-if="data.length > 0" class="flex flex-col sm:flex-row items-center justify-between px-6 py-4 border-t border-slate-100 dark:border-slate-800 gap-3 text-xs text-slate-500">
+			<div v-if="data.length > 0" class="flex flex-col sm:flex-row items-center justify-between px-6 py-4 border-t border-[var(--add-border)] gap-3 text-xs text-[var(--add-text-secondary)]">
 				<div>
 					{{ t('companies.pagination.showing', {
 						from: meta ? ((meta.current_page - 1) * meta.per_page) + 1 : 1,
@@ -209,10 +193,12 @@
 import type { DataTableColumns, SelectOption } from "naive-ui"
 import type { Company, CompanyStatus } from "@/add-os/modules/members/types/company"
 import type { PrivateOfficeRequest } from "@/add-os/modules/members/types/private-office-request"
-import { NAlert, NButton, NDataTable, NInput, NPagination, NSelect, useDialog } from "naive-ui"
+import { NAlert, NButton, NDataTable, NInput, NPagination, NSelect, NTag, useDialog } from "naive-ui"
 import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { canCreateOfficeLeases } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
@@ -335,21 +321,7 @@ function openDetail(row: Company) {
 }
 
 function renderActions(row: Company) {
-	return h(
-		NButton,
-		{
-			size: "small",
-			secondary: true,
-			type: "primary",
-			class: "rounded-lg",
-			"aria-label": t("companies.actions.open"),
-			onClick: () => openDetail(row)
-		},
-		{
-			icon: () => h(Icon, { name: "carbon:arrow-right", size: 15, class: "rtl:rotate-180" }),
-			default: () => t("companies.actions.open")
-		}
-	)
+	return h(RowActions, { actions: [{ key: "open", label: t("companies.actions.open"), icon: "carbon:view", onClick: () => openDetail(row) }] })
 }
 
 const columns = computed<DataTableColumns<Company>>(() => {
@@ -376,7 +348,7 @@ function openCreate() {
 			content: t("companies.create.noQuotedRequestsBody"),
 			positiveText: t("companies.create.goToRequests"),
 			positiveButtonProps: { type: "primary" },
-			icon: () => h(Icon, { name: "carbon:information-filled", class: "text-emerald-600 dark:text-emerald-400", size: 24 }),
+			icon: () => h(Icon, { name: "carbon:information-filled", class: "text-[var(--add-success-text)]", size: 24 }),
 			onPositiveClick: () => router.push("/address/private-office-requests")
 		})
 		return

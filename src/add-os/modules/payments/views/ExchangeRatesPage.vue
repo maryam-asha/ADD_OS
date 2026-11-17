@@ -1,23 +1,21 @@
 <!-- src/add-os/modules/payments/views/ExchangeRatesPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.exchangeRates") }}</h1>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.exchangeRates')" :description="t('pageDescriptions.exchangeRates')" />
 
 		<!-- Daily Suggestion Card (sp-today) -->
 		<div
 			v-if="suggestion && suggestion.id"
-			class="rounded-xl border border-amber-300 dark:border-amber-700/60 bg-gradient-to-r from-amber-50/80 via-orange-50/50 to-amber-50/80 dark:from-amber-950/20 dark:via-orange-950/10 dark:to-amber-950/20 p-4 sm:p-5 shadow-xs transition-all"
+			class="rounded-xl border border-[color-mix(in_srgb,var(--add-warning)_35%,transparent)] bg-gradient-to-r from-amber-50/80 via-orange-50/50 to-amber-50/80 p-4 sm:p-5 shadow-xs transition-all"
 		>
 			<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
 				<div class="flex items-start gap-3">
-					<div class="w-10 h-10 rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+					<div class="w-10 h-10 rounded-lg bg-[var(--add-warning)]/15 text-[var(--add-warning-text)] flex items-center justify-center shrink-0 mt-0.5">
 						<Icon name="carbon:cloud-download" :size="22" />
 					</div>
 					<div class="flex flex-col gap-1">
 						<div class="flex items-center gap-2 flex-wrap">
-							<span class="font-bold text-base text-stone-900 dark:text-stone-100">
+							<span class="font-bold text-base text-[var(--add-text-primary)]">
 								{{ t("exchangeRates.suggestion.title") }}
 							</span>
 							<n-tag
@@ -32,13 +30,13 @@
 								{{ t("exchangeRates.suggestion.staleWarning") }}
 							</n-tag>
 						</div>
-						<p class="text-xs text-stone-600 dark:text-stone-300">
+						<p class="text-xs text-[var(--add-text-secondary)]">
 							{{ t("exchangeRates.suggestion.description") }}
 						</p>
-						<div class="flex items-center gap-4 text-xs text-stone-500 dark:text-stone-400 mt-1 flex-wrap">
-							<span class="font-medium text-stone-800 dark:text-stone-200">
+						<div class="flex items-center gap-4 text-xs text-[var(--add-text-secondary)] mt-1 flex-wrap">
+							<span class="font-medium text-[var(--add-text-primary)]">
 								{{ t("exchangeRates.suggestion.rate") }}:
-								<span class="text-sm font-bold text-teal-700 dark:text-teal-400">
+								<span class="text-sm font-bold text-[var(--add-info-text)]">
 									1 USD = {{ formatNumber(Number(suggestion.rate_usd_to_syp), { fractionDigits: 0 }) }} ل.س
 								</span>
 							</span>
@@ -111,7 +109,7 @@
 			>
 				<template #icon>
 					<span class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-						<Icon name="carbon:add" :size="14" color="#ffffff" />
+						<Icon name="carbon:add" :size="14" />
 					</span>
 				</template>
 				{{ t("exchangeRates.create.button") }}
@@ -123,7 +121,7 @@
 		<ResourceFormDrawer
 			v-model:show="drawerVisible"
 			v-model:model="form"
-			:fields="fields"
+			:fields
 			:title="t('exchangeRates.create.title')"
 			:submitting="mutations.isSubmitting.value"
 			:on-submit="submit"
@@ -138,6 +136,7 @@ import type { ExchangeRate, ExchangeRatePayload, ExchangeRateSuggestion } from "
 import { NAlert, NButton, NTag, useDialog, useMessage } from "naive-ui"
 import { computed, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.vue"
 import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"

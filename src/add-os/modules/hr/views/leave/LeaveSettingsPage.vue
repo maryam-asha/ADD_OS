@@ -125,6 +125,7 @@ import type { CoverageRule, CoverageRulePayload, Holiday, HolidayPayload, LeaveP
 import { NAlert, NButton, NDataTable, NSpin, useDialog, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { canManageHrSettings } from "@/add-os/config/permissions"
 import ActiveTag from "@/add-os/modules/hr/components/ActiveTag.vue"
 import HrResourcePanel from "@/add-os/modules/hr/components/core/HrResourcePanel.vue"
@@ -346,15 +347,7 @@ const policyColumns = computed<DataTableColumns<LeavePolicy>>(() => [
 					key: "actions",
 					width: 100,
 					align: "center" as const,
-					render: (row: LeavePolicy) =>
-						h("div", { class: "flex justify-center gap-3" }, [
-							h(NButton, { text: true, type: "primary", "aria-label": t("hr.common.edit"), title: t("hr.common.edit"), onClick: () => openPolicy(row) }, { icon: () => h(Icon, { name: "carbon:edit", size: 18 }) }),
-							h(
-								NButton,
-								{ text: true, type: "error", "aria-label": t("hr.common.delete"), title: t("hr.common.delete"), onClick: () => confirmDeletePolicy(row) },
-								{ icon: () => h(Icon, { name: "carbon:trash-can", size: 18 }) }
-							)
-						])
+					render: (row: LeavePolicy) => h(RowActions, { actions: [{ key: "edit", label: t("hr.common.edit"), icon: "carbon:edit", onClick: () => openPolicy(row) }, { key: "delete", label: t("hr.common.delete"), icon: "carbon:trash-can", danger: true, onClick: () => confirmDeletePolicy(row) }] })
 				}
 			]
 		: [])

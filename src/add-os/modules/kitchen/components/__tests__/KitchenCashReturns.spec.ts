@@ -8,7 +8,8 @@ import en from "@/add-os/lang/en"
 import { ApiError } from "@/add-os/services/api"
 import KitchenCashReturns from "../KitchenCashReturns.vue"
 
-const { listMock, returnedMock, creditMock, successMock, errorMock } = vi.hoisted(() => ({
+const { listMock, returnedMock, creditMock, successMock, errorMock, dialogCalls } = vi.hoisted(() => ({
+	dialogCalls: [] as { onPositiveClick: () => unknown }[],
 	listMock: vi.fn(),
 	returnedMock: vi.fn(),
 	creditMock: vi.fn(),
@@ -24,7 +25,12 @@ vi.mock("@/add-os/services/kitchen", () => ({
 
 vi.mock("naive-ui", async () => {
 	const actual = await vi.importActual<typeof import("naive-ui")>("naive-ui")
-	return { ...actual, useMessage: () => ({ success: successMock, error: errorMock, warning: vi.fn() }) }
+	return {
+		...actual,
+		useMessage: () => ({ success: successMock, error: errorMock, warning: vi.fn() }),
+		// The confirm is useConfirm's centred dialog (2026-11-17), captured here and answered by confirmAction.
+		useDialog: () => ({ warning: (options: { onPositiveClick: () => unknown }) => dialogCalls.push(options) })
+	}
 })
 
 function rowOf(id: number, overrides: Partial<CashReturnRow> = {}, order: Partial<KitchenOrder> = {}): CashReturnRow {
@@ -66,12 +72,11 @@ function mountIt(locale: "ar" | "en" = "en") {
 	return mount(KitchenCashReturns, { global: { plugins: [i18n], stubs: { Icon: true } }, attachTo: document.body })
 }
 
-/** Opens the row's popconfirm, then presses its positive button. */
+/** Opens the row's confirm dialog, then presses its positive button. */
 async function confirmAction(wrapper: ReturnType<typeof mountIt>, id: number, action: "returned" | "credit"): Promise<void> {
 	await wrapper.find(`[data-return='${id}'] [data-action='${action}']`).trigger("click")
 	await flushPromises()
-	const buttons = document.body.querySelectorAll<HTMLElement>(".n-popconfirm__action button")
-	buttons[buttons.length - 1].click()
+	await dialogCalls[dialogCalls.length - 1].onPositiveClick()
 	await flushPromises()
 }
 

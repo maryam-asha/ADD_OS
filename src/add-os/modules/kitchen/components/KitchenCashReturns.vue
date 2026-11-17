@@ -3,7 +3,7 @@
 	<section v-if="rows.length > 0" class="flex flex-col gap-3" data-test="cash-returns">
 		<div class="flex flex-col gap-1">
 			<h3 class="text-base font-bold">{{ t("kitchen.cashReturns.title") }}</h3>
-			<p class="text-sm text-stone-600">{{ t("kitchen.cashReturns.description") }}</p>
+			<p class="text-sm text-[var(--add-text-secondary)]">{{ t("kitchen.cashReturns.description") }}</p>
 		</div>
 
 		<div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
@@ -27,22 +27,12 @@
 					<p class="text-sm" dir="auto" data-test="why">{{ whyText(row.order) }}</p>
 
 					<div class="flex flex-wrap gap-2">
-						<n-popconfirm :positive-text="t('kitchen.cashReturns.returned.confirm')" :negative-text="t('kitchen.cashReturns.cancel')" @positive-click="act(row, 'returned')">
-							<template #trigger>
-								<n-button size="small" type="primary" :disabled="busyId === row.order.id" :loading="busyId === row.order.id" data-action="returned">
-									{{ t("kitchen.cashReturns.returned.label") }}
-								</n-button>
-							</template>
-							{{ t("kitchen.cashReturns.returned.prompt", { amount: receivedText(row) ?? t("kitchen.cashReturns.points", { points: formatNumber(row.points) }) }) }}
-						</n-popconfirm>
-						<n-popconfirm :positive-text="t('kitchen.cashReturns.credit.confirm')" :negative-text="t('kitchen.cashReturns.cancel')" @positive-click="act(row, 'credit')">
-							<template #trigger>
-								<n-button size="small" secondary :disabled="busyId === row.order.id" data-action="credit">
-									{{ t("kitchen.cashReturns.credit.label") }}
-								</n-button>
-							</template>
-							{{ t("kitchen.cashReturns.credit.prompt", { points: formatNumber(row.points) }) }}
-						</n-popconfirm>
+						<n-button size="small" type="primary" :disabled="busyId === row.order.id" :loading="busyId === row.order.id" data-action="returned" @click="confirm({ title: t('kitchen.cashReturns.returned.label'), content: t('kitchen.cashReturns.returned.prompt', { amount: receivedText(row) ?? t('kitchen.cashReturns.points', { points: formatNumber(row.points) }) }), positiveText: t('kitchen.cashReturns.returned.confirm'), onConfirm: () => act(row, 'returned') })">
+							{{ t("kitchen.cashReturns.returned.label") }}
+						</n-button>
+						<n-button size="small" secondary :disabled="busyId === row.order.id" data-action="credit" @click="confirm({ title: t('kitchen.cashReturns.credit.label'), content: t('kitchen.cashReturns.credit.prompt', { points: formatNumber(row.points) }), positiveText: t('kitchen.cashReturns.credit.confirm'), onConfirm: () => act(row, 'credit') })">
+							{{ t("kitchen.cashReturns.credit.label") }}
+						</n-button>
 					</div>
 				</div>
 			</n-card>
@@ -57,9 +47,10 @@
 <script setup lang="ts">
 import type { CashReturnRow, KitchenOrder } from "@/add-os/modules/kitchen/types/kitchen"
 import type { PaginationMeta } from "@/add-os/services/pagination"
-import { NButton, NCard, NPagination, NPopconfirm, NTag, useMessage } from "naive-ui"
+import { NButton, NCard, NPagination, NTag, useMessage } from "naive-ui"
 import { onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import { useConfirm } from "@/add-os/components/page/useConfirm"
 import { ApiError } from "@/add-os/services/api"
 import { creditCashAsPoints, listCashReturns, markCashReturned } from "@/add-os/services/kitchen"
 import { formatCurrency, formatNumber, isCurrencyCode } from "@/add-os/utils/format"
@@ -75,6 +66,7 @@ import { formatCurrency, formatNumber, isCurrencyCode } from "@/add-os/utils/for
 const emit = defineEmits<{ changed: [] }>()
 
 const { t } = useI18n()
+const confirm = useConfirm()
 const message = useMessage()
 
 const rows = ref<CashReturnRow[]>([])

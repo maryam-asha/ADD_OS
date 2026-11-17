@@ -9,9 +9,10 @@
 <script setup lang="ts">
 import type { DataTableColumns } from "naive-ui"
 import type { BenefitGrant } from "@/add-os/modules/hr/types/benefits"
-import { NButton, NDataTable, NTooltip, useDialog, useMessage } from "naive-ui"
+import { NDataTable, NTooltip, useDialog, useMessage } from "naive-ui"
 import { computed, h } from "vue"
 import { useI18n } from "vue-i18n"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import GrantStatusTag from "@/add-os/modules/hr/components/benefits/GrantStatusTag.vue"
 import { benefitValue, canCancelGrant, canRetryGrant, grantPeriodLabel } from "@/add-os/modules/hr/utils/benefits"
 import { employeeCell } from "@/add-os/modules/hr/utils/cells"
@@ -20,7 +21,6 @@ import { money } from "@/add-os/modules/hr/utils/money"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
 import { cancelGrant, retryGrant } from "@/add-os/services/hr/benefits"
 import { formatDate } from "@/add-os/utils/format"
-import Icon from "@/components/common/Icon.vue"
 
 /**
  * Benefit grants: what was granted, to whom, for which period, and whether
@@ -89,16 +89,14 @@ const columns = computed<DataTableColumns<BenefitGrant>>(() => [
 				{
 					title: "",
 					key: "actions",
-					width: 80,
+					width: 100,
 					render: (row: BenefitGrant) =>
-						h("div", { class: "flex justify-end gap-3" }, [
-							canRetryGrant(row)
-								? h(NButton, { text: true, type: "primary", "aria-label": t("hrBenefits.grants.retry"), title: t("hrBenefits.grants.retry"), onClick: () => void retry(row) }, { icon: () => h(Icon, { name: "carbon:renew", size: 18 }) })
-								: null,
-							canCancelGrant(row.status)
-								? h(NButton, { text: true, type: "error", "aria-label": t("hrBenefits.grants.cancel"), title: t("hrBenefits.grants.cancel"), onClick: () => confirmCancel(row) }, { icon: () => h(Icon, { name: "carbon:close", size: 18 }) })
-								: null
-						])
+						h(RowActions, {
+							actions: [
+								...(canRetryGrant(row) ? [{ key: "retry", label: t("hrBenefits.grants.retry"), icon: "carbon:renew", onClick: () => void retry(row) }] : []),
+								...(canCancelGrant(row.status) ? [{ key: "cancel", label: t("hrBenefits.grants.cancel"), icon: "carbon:close", danger: true, onClick: () => confirmCancel(row) }] : [])
+							]
+						})
 				}
 			]
 		: [])

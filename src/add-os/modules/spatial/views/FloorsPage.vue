@@ -1,18 +1,16 @@
 <!-- src/add-os/modules/spatial/views/FloorsPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.floors") }}</h1>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.floors')" :description="t('floors.description')">
+			<template #actions>
+				<n-button type="primary" @click="openCreate">
+					<template #icon><Icon name="carbon:add" :size="16" /></template>
+					{{ t("floors.create.button") }}
+				</n-button>
+			</template>
+		</PageHeader>
 
 		<n-alert v-if="error" type="error" :title="t('floors.loadError')" />
-
-		<div class="flex justify-end">
-			<n-button type="primary" @click="openCreate">
-				<template #icon><Icon name="carbon:add" :size="16" /></template>
-				{{ t("floors.create.button") }}
-			</n-button>
-		</div>
 
 		<ResourceTable
 			:columns
@@ -38,8 +36,10 @@
 import type { Branch } from "@/add-os/modules/spatial/types/branch"
 import type { Building } from "@/add-os/modules/spatial/types/building"
 import type { Floor, FloorPayload } from "@/add-os/modules/spatial/types/floor"
+import { NAlert, NButton } from "naive-ui"
 import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.vue"
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"

@@ -1,15 +1,6 @@
 <!-- src/add-os/modules/members/components/OfficeLeaseDetailModal.vue -->
 <template>
-	<n-modal
-		v-model:show="show"
-		preset="card"
-		:title="lease?.reference ? `${t('officeLeases.detail.title')} · ${lease.reference}` : t('officeLeases.detail.title')"
-		closable
-		class="max-w-2xl w-full !rounded-2xl shadow-xl my-6"
-		style="max-height: 86vh; display: flex; flex-direction: column;"
-		content-style="max-height: calc(86vh - 140px); overflow-y: auto;"
-		:segmented="{ content: 'soft', footer: 'soft' }"
-	>
+	<FormModal v-model:show="show" :title="lease?.reference ? `${t('officeLeases.detail.title')} · ${lease.reference}` : t('officeLeases.detail.title')" size="lg">
 		<div v-if="isLoading" class="py-16 flex items-center justify-center">
 			<n-spin size="large" />
 		</div>
@@ -18,21 +9,21 @@
 
 		<div v-else-if="lease" class="flex flex-col gap-5">
 			<!-- Header summary cards -->
-			<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-neutral-50 dark:bg-neutral-800/40 p-3.5 rounded-lg border border-black/5 dark:border-white/5 text-xs">
+			<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[var(--add-surface-sunken)] p-3.5 rounded-lg border border-black/5 text-xs">
 				<div class="flex flex-col gap-0.5">
-					<span class="text-neutral-500">{{ t('officeLeases.detail.space') }}</span>
+					<span class="text-[var(--add-text-secondary)]">{{ t('officeLeases.detail.space') }}</span>
 					<span class="font-semibold text-sm">{{ lease.space?.name || `#${lease.space?.id}` }}</span>
 				</div>
 				<div class="flex flex-col gap-0.5">
-					<span class="text-neutral-500">{{ t('officeLeases.detail.company') }}</span>
+					<span class="text-[var(--add-text-secondary)]">{{ t('officeLeases.detail.company') }}</span>
 					<span class="font-semibold text-sm">{{ lease.company?.legal_name || '—' }}</span>
 				</div>
 				<div class="flex flex-col gap-0.5">
-					<span class="text-neutral-500">{{ t('officeLeases.detail.provider') }}</span>
+					<span class="text-[var(--add-text-secondary)]">{{ t('officeLeases.detail.provider') }}</span>
 					<span class="font-semibold text-sm">{{ lease.provider?.name || t('companies.transferProvider.direct', 'Direct') }}</span>
 				</div>
 				<div class="flex flex-col gap-0.5">
-					<span class="text-neutral-500">{{ t('officeLeases.columns.status') }}</span>
+					<span class="text-[var(--add-text-secondary)]">{{ t('officeLeases.columns.status') }}</span>
 					<div>
 						<n-tag :type="statusTagType(lease.status)" size="small" round :bordered="true">
 							{{ t(`officeLeases.status.${lease.status}`) }}
@@ -42,31 +33,31 @@
 			</div>
 
 			<!-- Financial and Dates Details -->
-			<div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs bg-neutral-50/50 dark:bg-neutral-800/20 p-3 rounded-lg border border-black/5 dark:border-white/5">
+			<div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs bg-[var(--add-surface-sunken)] p-3 rounded-lg border border-black/5">
 				<div>
-					<span class="text-neutral-500">{{ t('officeLeases.detail.monthlyAmount') }}:</span>
+					<span class="text-[var(--add-text-secondary)]">{{ t('officeLeases.detail.monthlyAmount') }}:</span>
 					<div class="font-bold text-sm mt-0.5 text-primary">{{ lease.monthly_amount }} {{ lease.currency }}</div>
 				</div>
 				<div>
-					<span class="text-neutral-500">{{ t('officeLeases.detail.durationMonths') }}:</span>
+					<span class="text-[var(--add-text-secondary)]">{{ t('officeLeases.detail.durationMonths') }}:</span>
 					<div class="font-medium mt-0.5">{{ t('officeLeases.detail.durationValue', { months: lease.duration_months }) }}</div>
 				</div>
 				<div>
-					<span class="text-neutral-500">{{ t('officeLeases.detail.billingCycleMonths') }}:</span>
+					<span class="text-[var(--add-text-secondary)]">{{ t('officeLeases.detail.billingCycleMonths') }}:</span>
 					<div class="font-medium mt-0.5">
 						{{ lease.billing_cycle_months === lease.duration_months ? t('officeLeases.detail.billingCycleSingle') : t('officeLeases.detail.billingCycleValue', { months: lease.billing_cycle_months }) }}
 					</div>
 				</div>
 				<div>
-					<span class="text-neutral-500">{{ t('officeLeases.detail.startsOn') }}:</span>
+					<span class="text-[var(--add-text-secondary)]">{{ t('officeLeases.detail.startsOn') }}:</span>
 					<div class="font-medium mt-0.5">{{ lease.starts_on }}</div>
 				</div>
 				<div>
-					<span class="text-neutral-500">{{ t('officeLeases.detail.endsOn') }}:</span>
+					<span class="text-[var(--add-text-secondary)]">{{ t('officeLeases.detail.endsOn') }}:</span>
 					<div class="font-medium mt-0.5">{{ lease.ends_on }}</div>
 				</div>
 				<div>
-					<span class="text-neutral-500">{{ t('officeLeases.detail.billedTo') }}:</span>
+					<span class="text-[var(--add-text-secondary)]">{{ t('officeLeases.detail.billedTo') }}:</span>
 					<div class="font-medium mt-0.5">
 						{{ lease.billed_to === 'provider' ? t('officeLeases.detail.billedToProvider') : t('officeLeases.detail.billedToCompany') }}
 					</div>
@@ -74,10 +65,10 @@
 			</div>
 
 			<!-- Door Access Card -->
-			<div class="p-3.5 rounded-lg border border-black/5 dark:border-white/5 bg-neutral-50/70 dark:bg-neutral-800/30 flex flex-col gap-2">
+			<div class="p-3.5 rounded-lg border border-black/5 bg-[var(--add-surface-sunken)] flex flex-col gap-2">
 				<div class="flex items-center justify-between">
 					<div class="flex items-center gap-2">
-						<Icon name="carbon:locked" :size="16" class="text-neutral-600" />
+						<Icon name="carbon:locked" :size="16" class="text-[var(--add-text-secondary)]" />
 						<span class="font-bold text-sm">{{ t('officeLeases.detail.doorAccessTitle') }}</span>
 					</div>
 					<n-tag :type="lease.access?.status === 'active' ? 'success' : 'default'" size="small" round>
@@ -85,8 +76,8 @@
 					</n-tag>
 				</div>
 
-				<div v-if="lease.access_ends_on" class="text-xs text-neutral-500">
-					{{ t('officeLeases.detail.expiresAt') }}: <span class="font-semibold text-neutral-700 dark:text-neutral-300">{{ lease.access_ends_on }}</span>
+				<div v-if="lease.access_ends_on" class="text-xs text-[var(--add-text-secondary)]">
+					{{ t('officeLeases.detail.expiresAt') }}: <span class="font-semibold text-[var(--add-text-primary)]">{{ lease.access_ends_on }}</span>
 				</div>
 
 				<!-- Warning: Office has no lock -->
@@ -94,10 +85,10 @@
 			</div>
 
 			<!-- Renewal Section -->
-			<div class="p-3.5 rounded-lg border border-black/5 dark:border-white/5 bg-neutral-50/70 dark:bg-neutral-800/30 flex flex-col gap-2.5">
+			<div class="p-3.5 rounded-lg border border-black/5 bg-[var(--add-surface-sunken)] flex flex-col gap-2.5">
 				<div class="flex items-center justify-between flex-wrap gap-2">
 					<div class="flex items-center gap-2">
-						<Icon name="carbon:renew" :size="16" class="text-neutral-600" />
+						<Icon name="carbon:renew" :size="16" class="text-[var(--add-text-secondary)]" />
 						<span class="font-bold text-sm">{{ t('officeLeases.detail.autoRenew') }}</span>
 						<n-tag :type="lease.auto_renew ? 'success' : 'default'" size="small" round>
 							{{ lease.auto_renew ? t('officeLeases.detail.autoRenewYes') : t('officeLeases.detail.autoRenewNo') }}
@@ -125,8 +116,8 @@
 					</div>
 				</div>
 
-				<div class="flex items-center gap-4 text-xs text-neutral-500">
-					<span>{{ t('officeLeases.detail.renewalsCount') }}: <strong class="text-neutral-700 dark:text-neutral-300">{{ lease.renewals_count }}</strong></span>
+				<div class="flex items-center gap-4 text-xs text-[var(--add-text-secondary)]">
+					<span>{{ t('officeLeases.detail.renewalsCount') }}: <strong class="text-[var(--add-text-primary)]">{{ lease.renewals_count }}</strong></span>
 				</div>
 
 				<n-alert v-if="lease.renewal_stop_reason_label" type="error" class="mt-1">
@@ -142,12 +133,12 @@
 					<div
 						v-for="period in lease.periods"
 						:key="period.sequence"
-						class="p-3 rounded-lg border border-black/5 dark:border-white/5 bg-white dark:bg-neutral-800 flex flex-col gap-2 shadow-xs"
+						class="p-3 rounded-lg border border-black/5 bg-white flex flex-col gap-2 shadow-xs"
 					>
 						<div class="flex items-center justify-between">
 							<div class="flex items-center gap-2">
 								<span class="font-bold text-xs">{{ t('officeLeases.detail.periodSequence', { num: period.sequence }) }}</span>
-								<span class="text-xs text-neutral-500">({{ period.starts_on }} – {{ period.ends_on }})</span>
+								<span class="text-xs text-[var(--add-text-secondary)]">({{ period.starts_on }} – {{ period.ends_on }})</span>
 							</div>
 							<div class="flex items-center gap-2">
 								<span class="font-bold text-xs text-primary">{{ period.amount }} {{ lease.currency }}</span>
@@ -158,13 +149,13 @@
 						</div>
 
 						<!-- Invoice breakdown if exists -->
-						<div v-if="period.invoice" class="bg-neutral-50 dark:bg-neutral-900/40 p-2.5 rounded text-xs grid grid-cols-2 sm:grid-cols-5 gap-2 items-center">
+						<div v-if="period.invoice" class="bg-[var(--add-surface-sunken)] p-2.5 rounded text-xs grid grid-cols-2 sm:grid-cols-5 gap-2 items-center">
 							<div>
-								<span class="text-neutral-500 block">{{ t('officeLeases.detail.invoiceRef') }}</span>
+								<span class="text-[var(--add-text-secondary)] block">{{ t('officeLeases.detail.invoiceRef') }}</span>
 								<span class="font-semibold">{{ period.invoice.reference }}</span>
 							</div>
 							<div>
-								<span class="text-neutral-500 block">{{ t('officeLeases.detail.invoiceStatus') }}</span>
+								<span class="text-[var(--add-text-secondary)] block">{{ t('officeLeases.detail.invoiceStatus') }}</span>
 								<n-tag :type="period.invoice.status === 'paid' ? 'success' : 'warning'" size="tiny" round>
 									{{ period.invoice.status }}
 								</n-tag>
@@ -173,19 +164,19 @@
 								</n-tag>
 							</div>
 							<div>
-								<span class="text-neutral-500 block">{{ t('officeLeases.detail.invoicePaid') }}</span>
-								<span class="font-medium text-emerald-600">{{ period.invoice.paid_amount }} {{ lease.currency }}</span>
+								<span class="text-[var(--add-text-secondary)] block">{{ t('officeLeases.detail.invoicePaid') }}</span>
+								<span class="font-medium text-[var(--add-success-text)]">{{ period.invoice.paid_amount }} {{ lease.currency }}</span>
 							</div>
 							<div>
-								<span class="text-neutral-500 block">{{ t('officeLeases.detail.invoiceRemaining') }}</span>
-								<span class="font-medium text-rose-600">{{ period.invoice.remaining }} {{ lease.currency }}</span>
+								<span class="text-[var(--add-text-secondary)] block">{{ t('officeLeases.detail.invoiceRemaining') }}</span>
+								<span class="font-medium text-[var(--add-danger-text)]">{{ period.invoice.remaining }} {{ lease.currency }}</span>
 							</div>
 							<div>
-								<span class="text-neutral-500 block">{{ t('officeLeases.detail.invoiceDueAt') }}</span>
-								<span class="text-neutral-600">{{ period.invoice.due_at || '—' }}</span>
+								<span class="text-[var(--add-text-secondary)] block">{{ t('officeLeases.detail.invoiceDueAt') }}</span>
+								<span class="text-[var(--add-text-secondary)]">{{ period.invoice.due_at || '—' }}</span>
 							</div>
 						</div>
-						<div v-else class="text-xs text-neutral-400 italic">
+						<div v-else class="text-xs text-[var(--add-text-muted)] italic">
 							{{ t('officeLeases.detail.noInvoiceYet') }}
 						</div>
 					</div>
@@ -193,16 +184,16 @@
 			</div>
 
 			<!-- Exceptional Termination Section (if active and user has office-leases.terminate) -->
-			<div v-if="lease.status === 'active' && canTerminateOfficeLeases()" class="border-t border-black/5 dark:border-white/5 pt-4">
+			<div v-if="lease.status === 'active' && canTerminateOfficeLeases()" class="border-t border-black/5 pt-4">
 				<div v-if="!showTerminateForm" class="flex justify-end">
 					<n-button type="error" ghost size="small" @click="showTerminateForm = true">
 						{{ t('officeLeases.terminate.button') }}
 					</n-button>
 				</div>
 
-				<div v-else class="p-4 rounded-lg bg-red-50/50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 flex flex-col gap-3">
+				<div v-else class="p-4 rounded-lg bg-[color-mix(in_srgb,var(--add-danger)_10%,transparent)] border border-[color-mix(in_srgb,var(--add-danger)_35%,transparent)] flex flex-col gap-3">
 					<div class="flex items-center justify-between">
-						<span class="font-bold text-sm text-red-700 dark:text-red-400">{{ t('officeLeases.terminate.title') }}</span>
+						<span class="font-bold text-sm text-[var(--add-danger-text)]">{{ t('officeLeases.terminate.title') }}</span>
 						<n-button size="tiny" quaternary @click="showTerminateForm = false">{{ t('officeLeases.terminate.cancel') }}</n-button>
 					</div>
 
@@ -243,24 +234,24 @@
 				<n-button @click="show = false">{{ t('common.close', 'Close') }}</n-button>
 			</div>
 		</template>
-	</n-modal>
+	</FormModal>
 </template>
 
 <script setup lang="ts">
 import type { FormInst, FormRules } from "naive-ui"
-import type { OfficeLease, OfficeLeaseStatus, LeasePeriodStatus } from "../types/office-lease"
-import { NAlert, NButton, NDatePicker, NForm, NFormItem, NInput, NModal, NSpin, NTag, useMessage } from "naive-ui"
+import type { LeasePeriodStatus, OfficeLease, OfficeLeaseStatus } from "../types/office-lease"
+import { NAlert, NButton, NDatePicker, NForm, NFormItem, NInput, NSpin, NTag, useMessage } from "naive-ui"
 import { ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
 import { canManageRenewals, canTerminateOfficeLeases } from "@/add-os/config/permissions"
-import { getOfficeLease, renewOfficeLease, setOfficeLeaseAutoRenew, terminateOfficeLease } from "@/add-os/services/office-leases"
 import { ApiError } from "@/add-os/services/api"
+import { getOfficeLease, renewOfficeLease, setOfficeLeaseAutoRenew, terminateOfficeLease } from "@/add-os/services/office-leases"
 import Icon from "@/components/common/Icon.vue"
 
 const props = defineProps<{ leaseId: number | null }>()
-const show = defineModel<boolean>("show", { required: true })
 const emit = defineEmits<{ (e: "updated"): void }>()
-
+const show = defineModel<boolean>("show", { required: true })
 const { t } = useI18n()
 const message = useMessage()
 

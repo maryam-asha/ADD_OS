@@ -84,6 +84,7 @@ import type { AttendanceDay, AttendanceException, ExceptionResolution } from "@/
 import { NAlert, NButton, NCard, NDataTable, NDatePicker, NFormItem, NInput, NPagination, NSelect, NTabPane, NTabs, NTag, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { canCorrectAttendance, canViewEmployees } from "@/add-os/config/permissions"
 import EmployeeSelect from "@/add-os/modules/hr/components/EmployeeSelect.vue"
 import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
@@ -227,10 +228,12 @@ const exceptionColumns = computed<DataTableColumns<AttendanceException>>(() => [
 				{
 					title: t("hr.employees.columns.actions"),
 					key: "actions",
-					width: 110,
+					width: 130,
 					align: "center" as const,
 					render: (row: AttendanceException) =>
-						row.status === "open" ? h(NButton, { size: "small", onClick: () => openResolve(row) }, { default: () => t("hrAttendance.exceptions.resolve") }) : null
+						row.status === "open"
+							? h(RowActions, { labelled: true, actions: [{ key: "resolve", label: t("hrAttendance.exceptions.resolve"), icon: "carbon:checkmark", primary: true, onClick: () => openResolve(row) }] })
+							: null
 				}
 			]
 		: [])

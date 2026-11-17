@@ -5,16 +5,14 @@
 
 		<template v-else>
 			<!-- Header -->
-			<div class="flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-border-subtle bg-surface p-4">
-				<div>
-					<h1 class="text-xl font-bold">{{ t("inventory.operations.pageTitle", { kind: t(`inventory.operations.kind.${kind}.title`) }) }}</h1>
-					<p class="mt-1 text-sm text-secondary">{{ t("inventory.operations.pageHint") }}</p>
-				</div>
-				<div class="flex gap-2">
-					<n-button @click="leave">{{ t("inventory.common.cancel") }}</n-button>
-					<n-button type="primary" :loading="saving" :disabled="problem !== null" @click="save">{{ t("inventory.operations.record") }}</n-button>
-				</div>
-			</div>
+			<PageHeader :title="t('inventory.operations.pageTitle', { kind: t(`inventory.operations.kind.${kind}.title`) })" :description="t('inventory.operations.pageHint')">
+				<template #actions>
+					<div class="flex gap-2">
+						<n-button @click="leave">{{ t("inventory.common.cancel") }}</n-button>
+						<n-button type="primary" :loading="saving" :disabled="problem !== null" @click="save">{{ t("inventory.operations.record") }}</n-button>
+					</div>
+				</template>
+			</PageHeader>
 
 			<!-- The operation -->
 			<section class="rounded-2xl border border-border-subtle bg-surface p-4">
@@ -77,6 +75,7 @@ import { NAlert, NButton, NDatePicker, NFormItem, NInput, NRadioButton, NRadioGr
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { apiErrorMessage, quietly } from "@/add-os/modules/hr/utils/errors"
 import AttachmentField from "@/add-os/modules/inventory/components/AttachmentField.vue"
 import StockLinesEditor from "@/add-os/modules/inventory/components/StockLinesEditor.vue"

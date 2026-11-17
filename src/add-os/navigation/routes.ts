@@ -31,6 +31,7 @@ import { NAV_SECTIONS, navPageTitleKey, navRouteName, navRoutePath, navSectionTi
 const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"system.roles": () => import("@/add-os/modules/system/views/RolesPage.vue"),
 	"system.users": () => import("@/add-os/modules/system/views/UsersPage.vue"),
+	"system.errorLogs": () => import("@/add-os/modules/system/views/ErrorLogsPage.vue"),
 	"settings.accountSecurity": () => import("@/add-os/modules/settings/views/AccountSecurityPage.vue"),
 	"settings.systemSettings": () => import("@/add-os/modules/settings/views/SystemSettingsPage.vue"),
 	"spatial.branches": () => import("@/add-os/modules/spatial/views/BranchesPage.vue"),
@@ -67,6 +68,8 @@ const PAGE_COMPONENTS: Record<string, () => Promise<unknown>> = {
 	"members.officeLeases": () => import("@/add-os/modules/members/views/OfficeLeasesPage.vue"),
 	"members.stoppedRenewals": () => import("@/add-os/modules/members/views/StoppedRenewalsPage.vue"),
 	"plans.packages": () => import("@/add-os/modules/plans/views/PlansPage.vue"),
+	"plans.packageCreate": () => import("@/add-os/modules/plans/views/PlanEditorPage.vue"),
+	"plans.packageEdit": () => import("@/add-os/modules/plans/views/PlanEditorPage.vue"),
 	"plans.modules": () => import("@/add-os/modules/plans/views/PlanModulesPage.vue"),
 	"plans.resourceTypes": () => import("@/add-os/modules/plans/views/ResourceTypesPage.vue"),
 	"plans.coupons": () => import("@/add-os/modules/pricing/views/CouponsPage.vue"),

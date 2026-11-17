@@ -5,7 +5,7 @@
 	and nothing else. Prints alone on a page through `printSticker`.
 -->
 <template>
-	<n-modal v-model:show="show" preset="card" :title="t('kitchen.qr.sticker.title')" class="max-w-sm" :bordered="false">
+	<FormModal v-model:show="show" :title="t('kitchen.qr.sticker.title')" size="sm">
 		<div v-if="point" class="flex flex-col items-center gap-3">
 			<div ref="sticker" class="rounded-lg bg-white p-4">
 				<n-qr-code :value="point.scan_value" :size="220" error-correction-level="M" />
@@ -24,14 +24,15 @@
 				</n-button>
 			</div>
 		</div>
-	</n-modal>
+	</FormModal>
 </template>
 
 <script setup lang="ts">
 import type { QrPoint } from "@/add-os/modules/kitchen/types/kitchen"
-import { NButton, NModal, NQrCode } from "naive-ui"
+import { NButton, NQrCode } from "naive-ui"
 import { useTemplateRef } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import { downloadSticker } from "@/add-os/utils/downloadSticker"
 import { printSticker } from "@/add-os/utils/printSticker"

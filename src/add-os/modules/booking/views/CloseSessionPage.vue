@@ -6,32 +6,30 @@
 -->
 <template>
 	<div class="flex flex-col gap-6" :class="embedded ? '' : 'max-w-5xl mx-auto p-4 sm:p-6'">
-		<div class="flex items-center justify-between flex-wrap gap-3" :class="embedded ? '' : 'border-b border-stone-200/80 pb-4'">
-			<div v-if="!embedded" class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold text-stone-900">{{ t("closeSession.title") }}</h1>
-				<span class="text-xs text-stone-500">{{ t("closeSession.subtitle") }}</span>
-			</div>
-			<n-button secondary round class="ms-auto" :loading="isLoading" @click="load">
-				<template #icon><Icon name="carbon:renew" :size="18" /></template>
-				{{ t("closeSession.refresh") }}
-			</n-button>
-		</div>
+		<PageHeader v-if="!embedded" :title="t('closeSession.title')" :description="t('closeSession.subtitle')">
+			<template #actions>
+				<n-button secondary round class="ms-auto" :loading="isLoading" @click="load">
+					<template #icon><Icon name="carbon:renew" :size="18" /></template>
+					{{ t("closeSession.refresh") }}
+				</n-button>
+			</template>
+		</PageHeader>
 
 		<n-spin :show="isLoading && requests.length === 0">
-			<div v-if="!isLoading && requests.length === 0" class="py-10 text-center text-sm text-stone-500">
+			<div v-if="!isLoading && requests.length === 0" class="py-10 text-center text-sm text-[var(--add-text-secondary)]">
 				{{ t("closeSession.empty") }}
 			</div>
 
 			<div class="flex flex-col gap-3">
-				<n-card v-for="session in requests" :key="`${session.type}-${session.id}`" size="small" class="shadow-sm border border-stone-200">
+				<n-card v-for="session in requests" :key="`${session.type}-${session.id}`" size="small" class="shadow-sm border border-[var(--add-border)]">
 					<div class="flex items-center justify-between flex-wrap gap-3">
 						<div class="flex items-center gap-3">
-							<n-avatar round :size="44" :src="session.member?.avatar_url ?? undefined" class="bg-amber-700 text-white font-bold">
+							<n-avatar round :size="44" :src="session.member?.avatar_url ?? undefined" class="bg-[var(--add-warning-text)] text-white font-bold">
 								{{ initials(session.member?.name ?? session.user_name) }}
 							</n-avatar>
 							<div class="flex flex-col gap-0.5">
-								<span class="font-bold text-stone-900">{{ session.member?.name ?? session.user_name }}</span>
-								<span class="text-xs text-stone-500">
+								<span class="font-bold text-[var(--add-text-primary)]">{{ session.member?.name ?? session.user_name }}</span>
+								<span class="text-xs text-[var(--add-text-secondary)]">
 									{{ t("closeSession.requestedAt", { time: formatTime(session.end_request!.requested_at!) }) }}
 									<template v-if="session.member?.phone"> · <bdi dir="ltr">{{ session.member.phone }}</bdi></template>
 								</span>
@@ -60,6 +58,7 @@ import { NAvatar, NButton, NCard, NSpin, NTag, useMessage } from "naive-ui"
 import { computed, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { useReceptionRealtime } from "@/add-os/modules/booking/composables/useReceptionRealtime"
 import { ApiError } from "@/add-os/services/api"
 import { listActiveSessions } from "@/add-os/services/reception"

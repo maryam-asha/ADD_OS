@@ -1,19 +1,12 @@
 <template>
-	<div class="min-h-screen flex items-center justify-center p-4 bg-neutral-50 dark:bg-neutral-900">
+	<div class="min-h-screen flex items-center justify-center p-4 bg-[var(--add-surface-sunken)]">
 		<n-card class="max-w-md w-full text-center shadow-lg rounded-2xl p-6" :bordered="false">
 			<div class="flex flex-col items-center gap-4">
-				<div class="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-950/50 flex items-center justify-center text-amber-600 dark:text-amber-400">
+				<div class="w-16 h-16 rounded-full bg-[color-mix(in_srgb,var(--add-warning)_10%,transparent)] flex items-center justify-center text-[var(--add-warning-text)]">
 					<Icon name="carbon:warning-alt" :size="36" />
 				</div>
 
-				<div class="flex flex-col gap-2">
-					<h1 class="text-xl font-bold text-neutral-900 dark:text-neutral-100">
-						{{ t("providerPortal.suspended.title", "حساب المزوّد موقوف، يرجى التواصل مع الإدارة") }}
-					</h1>
-					<p class="text-sm text-neutral-500 dark:text-neutral-400">
-						{{ t("providerPortal.suspended.message", "حساب المزوّد هذا غير فعّال. يرجى التواصل مع إدارة لوحة التحكم لتفعيل الحساب.") }}
-					</p>
-				</div>
+				<PageHeader :title="t('providerPortal.suspended.title', 'حساب المزوّد موقوف، يرجى التواصل مع الإدارة')" :description="t('providerPortal.suspended.message', 'حساب المزوّد هذا غير فعّال. يرجى التواصل مع إدارة لوحة التحكم لتفعيل الحساب.')" />
 
 				<div class="pt-4 w-full">
 					<n-button
@@ -35,10 +28,11 @@
 </template>
 
 <script setup lang="ts">
+import { NButton, NCard } from "naive-ui"
 import { ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
-import { NButton, NCard } from "naive-ui"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { logout } from "@/add-os/services/auth"
 import Icon from "@/components/common/Icon.vue"
 import { useAuthStore } from "@/stores/auth"

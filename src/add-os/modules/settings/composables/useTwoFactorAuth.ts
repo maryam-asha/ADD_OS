@@ -24,21 +24,46 @@ export function useTwoFactorAuth(withConfirmation: <T>(action: () => Promise<T>)
 	const busy = ref(false)
 	const confirmCodeError = ref<string | null>(null)
 
+	/** The raw probe: lets a 423 through, so `withConfirmation` can react to it. */
+	async function probeStatus(): Promise<void> {
+		const svg = await getTwoFactorQrCode()
+		if (svg) {
+			qrSvg.value = svg
+			phase.value = "active"
+			recoveryCodes.value = await getTwoFactorRecoveryCodes()
+		} else {
+			phase.value = "disabled"
+			qrSvg.value = null
+			recoveryCodes.value = []
+		}
+	}
+
+	/**
+	 * Safe to call on mount: a 423 (the password-confirmation window has
+	 * lapsed) is not a failure, it means the status cannot be read yet. That
+	 * lands on `"locked"` rather than opening a password prompt nobody asked for.
+	 */
 	async function loadStatus(): Promise<void> {
 		loading.value = true
 		try {
-			const svg = await getTwoFactorQrCode()
-			if (svg) {
-				qrSvg.value = svg
-				phase.value = "active"
-				recoveryCodes.value = await getTwoFactorRecoveryCodes()
-			} else {
-				phase.value = "disabled"
-				qrSvg.value = null
-				recoveryCodes.value = []
-			}
+			await probeStatus()
+		} catch (err) {
+			if (!(err instanceof ApiError && err.status === 423)) throw err
+			phase.value = "locked"
+			qrSvg.value = null
+			recoveryCodes.value = []
 		} finally {
 			loading.value = false
+		}
+	}
+
+	/** From `"locked"`: confirm the password, then read the real status. */
+	async function unlock(): Promise<void> {
+		busy.value = true
+		try {
+			await withConfirmation(() => probeStatus())
+		} finally {
+			busy.value = false
 		}
 	}
 
@@ -92,5 +117,5 @@ export function useTwoFactorAuth(withConfirmation: <T>(action: () => Promise<T>)
 		}
 	}
 
-	return { phase, loading, qrSvg, recoveryCodes, busy, confirmCodeError, loadStatus, enable, confirm, regenerateRecoveryCodes, disable }
+	return { phase, loading, qrSvg, recoveryCodes, busy, confirmCodeError, loadStatus, unlock, enable, confirm, regenerateRecoveryCodes, disable }
 }

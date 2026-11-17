@@ -17,6 +17,11 @@
  * there are now FOUR:
  *
  *   `GET /api/v1/admin/error-logs`                          "25 per page"
+ *     (screen since 2026-11-17: `services/error-logs.ts` → `ErrorLogsPage.vue`.
+ *     ADD Core's `ErrorLogController::index` returns
+ *     `ErrorLogResource::collection($query->paginate(25))`, read from its
+ *     source, not from a response — so Laravel's full `meta`, `per_page`
+ *     included, is expected here but still unobserved, like the rest.)
  *   `GET /api/v1/member-directory`                          "20 per page" (public)
  *   `GET /api/v1/admin/reception/arrival-requests`          no screen built yet
  *   `GET /api/v1/admin/reception/bookings/pending-approval` "25/page"

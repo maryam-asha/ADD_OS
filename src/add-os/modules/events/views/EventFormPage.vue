@@ -2,40 +2,8 @@
 <template>
 	<div class="flex flex-col gap-6 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
 		<!-- Page Header -->
-		<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-200/80 dark:border-stone-800">
-			<div class="flex items-center gap-3">
-				<n-button
-					circle
-					secondary
-					:aria-label="t('common.back')"
-					:title="t('common.back')"
-					@click="router.push('/community/events')"
-				>
-					<template #icon>
-						<Icon :name="isRtl ? 'carbon:arrow-right' : 'carbon:arrow-left'" :size="18" />
-					</template>
-				</n-button>
-				<div class="flex flex-col gap-0.5">
-					<div class="flex items-center gap-2">
-						<span class="text-xs font-semibold text-secondary uppercase tracking-wider">
-							{{ t("nav.pages.events") }}
-						</span>
-						<span class="text-xs text-stone-300 dark:text-stone-600">/</span>
-						<span class="text-xs font-medium text-stone-500">
-							{{ isEdit ? t("events.edit.title") : t("events.create.title") }}
-						</span>
-					</div>
-					<h1 class="text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100">
-						{{ isEdit ? t("events.edit.title") : t("events.create.title") }}
-					</h1>
-					<p class="text-xs text-secondary mt-0.5">
-						{{ isEdit ? t("events.edit.subtitle") : t("events.create.subtitle") }}
-					</p>
-				</div>
-			</div>
-
-			<!-- Top Actions -->
-			<div class="flex items-center gap-2 shrink-0">
+		<PageHeader :eyebrow="t('nav.pages.events')" :title="isEdit ? t('events.edit.title') : t('events.create.title')" :description="isEdit ? t('events.edit.subtitle') : t('events.create.subtitle')">
+			<template #actions>
 				<n-button
 					secondary
 					:disabled="isSubmitting || isLoadingEvent"
@@ -45,18 +13,17 @@
 				</n-button>
 				<n-button
 					type="primary"
-					class="!bg-[var(--add-primary)] hover:!bg-[var(--add-primary-hover)] !text-white font-medium shadow-sm px-5 inline-flex items-center gap-2"
 					:loading="isSubmitting"
 					:disabled="isSubmitting || isLoadingEvent"
 					@click="handleSubmit"
 				>
 					<template #icon>
-						<Icon name="carbon:checkmark" :size="18" color="#ffffff" />
+						<Icon name="carbon:checkmark" :size="18" />
 					</template>
 					{{ isEdit ? t("events.edit.actions.submit") : t("events.create.actions.submit") }}
 				</n-button>
-			</div>
-		</div>
+			</template>
+		</PageHeader>
 
 		<!-- General Error Banner -->
 		<n-alert v-if="generalError" type="error" closable @close="generalError = null">
@@ -75,14 +42,14 @@
 						<!-- Card 1: Basic Information -->
 						<n-card
 							size="small"
-							class="shadow-xs border border-stone-200/80 dark:border-stone-800 rounded-xl"
+							class="shadow-xs border border-[var(--add-border)] rounded-xl"
 						>
 							<template #header>
 								<div class="flex items-center gap-2">
 									<div class="w-7 h-7 rounded-lg bg-[var(--add-primary)]/10 text-[var(--add-primary)] flex items-center justify-center shrink-0">
 										<Icon name="carbon:information" :size="16" />
 									</div>
-									<span class="text-base font-semibold text-stone-900 dark:text-stone-100">
+									<span class="text-base font-semibold text-[var(--add-text-primary)]">
 										{{ t("events.create.sections.basic") }}
 									</span>
 								</div>
@@ -91,8 +58,8 @@
 							<div class="flex flex-col gap-4">
 								<!-- Event Title (Bilingual) -->
 								<div class="flex flex-col gap-2">
-									<span class="text-sm font-medium text-stone-700 dark:text-stone-300">
-										{{ t("events.form.title") }} <span class="text-red-500">*</span>
+									<span class="text-sm font-medium text-[var(--add-text-primary)]">
+										{{ t("events.form.title") }} <span class="text-[var(--add-danger-text)]">*</span>
 									</span>
 									<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 										<n-form-item
@@ -107,7 +74,7 @@
 												clearable
 											>
 												<template #prefix>
-													<span class="text-xs font-bold text-stone-400 select-none">AR</span>
+													<span class="text-xs font-bold text-[var(--add-text-muted)] select-none">AR</span>
 												</template>
 											</n-input>
 										</n-form-item>
@@ -124,7 +91,7 @@
 												clearable
 											>
 												<template #prefix>
-													<span class="text-xs font-bold text-stone-400 select-none">EN</span>
+													<span class="text-xs font-bold text-[var(--add-text-muted)] select-none">EN</span>
 												</template>
 											</n-input>
 										</n-form-item>
@@ -149,7 +116,7 @@
 
 								<!-- Description (Bilingual) -->
 								<div class="flex flex-col gap-2">
-									<span class="text-sm font-medium text-stone-700 dark:text-stone-300">
+									<span class="text-sm font-medium text-[var(--add-text-primary)]">
 										{{ t("events.form.description") }}
 									</span>
 									<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -188,14 +155,14 @@
 						<!-- Card 2: Schedule & Location -->
 						<n-card
 							size="small"
-							class="shadow-xs border border-stone-200/80 dark:border-stone-800 rounded-xl"
+							class="shadow-xs border border-[var(--add-border)] rounded-xl"
 						>
 							<template #header>
 								<div class="flex items-center gap-2">
 									<div class="w-7 h-7 rounded-lg bg-[var(--add-primary)]/10 text-[var(--add-primary)] flex items-center justify-center shrink-0">
 										<Icon name="carbon:calendar" :size="16" />
 									</div>
-									<span class="text-base font-semibold text-stone-900 dark:text-stone-100">
+									<span class="text-base font-semibold text-[var(--add-text-primary)]">
 										{{ t("events.create.sections.schedule") }}
 									</span>
 								</div>
@@ -233,7 +200,7 @@
 										clearable
 									>
 										<template #prefix>
-											<Icon name="carbon:location" :size="16" class="text-stone-400" />
+											<Icon name="carbon:location" :size="16" class="text-[var(--add-text-muted)]" />
 										</template>
 									</n-input>
 								</n-form-item>
@@ -243,14 +210,14 @@
 						<!-- Card 3: Registration & Capacity -->
 						<n-card
 							size="small"
-							class="shadow-xs border border-stone-200/80 dark:border-stone-800 rounded-xl"
+							class="shadow-xs border border-[var(--add-border)] rounded-xl"
 						>
 							<template #header>
 								<div class="flex items-center gap-2">
 									<div class="w-7 h-7 rounded-lg bg-[var(--add-primary)]/10 text-[var(--add-primary)] flex items-center justify-center shrink-0">
 										<Icon name="carbon:user-multiple" :size="16" />
 									</div>
-									<span class="text-base font-semibold text-stone-900 dark:text-stone-100">
+									<span class="text-base font-semibold text-[var(--add-text-primary)]">
 										{{ t("events.create.sections.registration") }}
 									</span>
 								</div>
@@ -259,7 +226,7 @@
 							<div class="flex flex-col gap-5">
 								<!-- Registration Source Selector -->
 								<div class="flex flex-col gap-2">
-									<span class="text-sm font-medium text-stone-700 dark:text-stone-300">
+									<span class="text-sm font-medium text-[var(--add-text-primary)]">
 										{{ t("events.form.registrationSource") }}
 									</span>
 									<n-radio-group v-model:value="form.registration_source" name="registration_source">
@@ -268,12 +235,12 @@
 												class="p-3.5 rounded-xl border cursor-pointer transition-all flex items-start gap-3"
 												:class="form.registration_source === 'internal'
 													? 'border-[var(--add-primary)] bg-[var(--add-primary)]/5 shadow-2xs'
-													: 'border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700'"
+													: 'border-[var(--add-border)] hover:border-[var(--add-border-strong)]'"
 												@click="form.registration_source = 'internal'"
 											>
 												<n-radio value="internal" class="mt-0.5" />
 												<div class="flex flex-col gap-0.5">
-													<span class="text-sm font-semibold text-stone-900 dark:text-stone-100">
+													<span class="text-sm font-semibold text-[var(--add-text-primary)]">
 														{{ t("events.form.registrationSourceInternal") }}
 													</span>
 													<span class="text-xs text-secondary">
@@ -286,12 +253,12 @@
 												class="p-3.5 rounded-xl border cursor-pointer transition-all flex items-start gap-3"
 												:class="form.registration_source === 'external'
 													? 'border-[var(--add-primary)] bg-[var(--add-primary)]/5 shadow-2xs'
-													: 'border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700'"
+													: 'border-[var(--add-border)] hover:border-[var(--add-border-strong)]'"
 												@click="form.registration_source = 'external'"
 											>
 												<n-radio value="external" class="mt-0.5" />
 												<div class="flex flex-col gap-0.5">
-													<span class="text-sm font-semibold text-stone-900 dark:text-stone-100">
+													<span class="text-sm font-semibold text-[var(--add-text-primary)]">
 														{{ t("events.form.registrationSourceExternal") }}
 													</span>
 													<span class="text-xs text-secondary">
@@ -318,7 +285,7 @@
 											clearable
 										>
 											<template #prefix>
-												<Icon name="carbon:link" :size="16" class="text-stone-400" />
+												<Icon name="carbon:link" :size="16" class="text-[var(--add-text-muted)]" />
 											</template>
 										</n-input>
 									</n-form-item>
@@ -353,7 +320,7 @@
 											:validation-status="fieldErrors.requires_approval ? 'error' : undefined"
 											class="!mb-0"
 										>
-											<div class="flex items-center justify-between w-full h-9 px-3 rounded-lg border border-stone-200 dark:border-stone-800">
+											<div class="flex items-center justify-between w-full h-9 px-3 rounded-lg border border-[var(--add-border)]">
 												<span class="text-xs text-secondary">
 													{{ t("events.create.hints.approval") }}
 												</span>
@@ -364,7 +331,7 @@
 								</template>
 
 								<!-- Registration Window -->
-								<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-stone-100 dark:border-stone-800">
+								<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-[var(--add-border)]">
 									<!-- Opens At -->
 									<n-form-item
 										:label="t('events.form.registrationOpensAt')"
@@ -387,9 +354,9 @@
 								</div>
 
 								<!-- Mark as Full Switch -->
-								<div class="flex items-center justify-between p-3 rounded-xl border border-stone-200 dark:border-stone-800">
+								<div class="flex items-center justify-between p-3 rounded-xl border border-[var(--add-border)]">
 									<div class="flex flex-col gap-0.5">
-										<span class="text-sm font-medium text-stone-900 dark:text-stone-100">
+										<span class="text-sm font-medium text-[var(--add-text-primary)]">
 											{{ t("events.form.isMarkedFull") }}
 										</span>
 										<span class="text-xs text-secondary">
@@ -407,14 +374,14 @@
 						<!-- Card 4: Event Image -->
 						<n-card
 							size="small"
-							class="shadow-xs border border-stone-200/80 dark:border-stone-800 rounded-xl"
+							class="shadow-xs border border-[var(--add-border)] rounded-xl"
 						>
 							<template #header>
 								<div class="flex items-center gap-2">
 									<div class="w-7 h-7 rounded-lg bg-[var(--add-primary)]/10 text-[var(--add-primary)] flex items-center justify-center shrink-0">
 										<Icon name="carbon:image" :size="16" />
 									</div>
-									<span class="text-base font-semibold text-stone-900 dark:text-stone-100">
+									<span class="text-base font-semibold text-[var(--add-text-primary)]">
 										{{ t("events.create.sections.media") }}
 									</span>
 								</div>
@@ -424,7 +391,7 @@
 								<!-- Image Preview State -->
 								<div
 									v-if="form.image_url"
-									class="w-full flex flex-col gap-3 p-2.5 border border-stone-200 dark:border-stone-800 rounded-xl bg-stone-50 dark:bg-stone-900/50"
+									class="w-full flex flex-col gap-3 p-2.5 border border-[var(--add-border)] rounded-xl bg-[var(--add-surface-sunken)]"
 								>
 									<div class="relative w-full rounded-lg overflow-hidden border border-black/10 bg-black/5 aspect-video flex items-center justify-center">
 										<img
@@ -432,7 +399,7 @@
 											alt="Cover preview"
 											class="w-full h-full object-cover"
 										/>
-										<div class="absolute top-2 start-2 flex items-center gap-1.5 bg-emerald-600 text-white text-xs font-medium px-2.5 py-0.5 rounded-full shadow-md backdrop-blur-sm">
+										<div class="absolute top-2 start-2 flex items-center gap-1.5 bg-[var(--add-success)] text-white text-xs font-medium px-2.5 py-0.5 rounded-full shadow-md backdrop-blur-sm">
 											<Icon name="carbon:checkmark-filled" :size="14" />
 											<span>{{ t("resourceCrud.form.uploadSuccess") }}</span>
 										</div>
@@ -481,7 +448,7 @@
 											<Icon name="carbon:cloud-upload" :size="28" />
 										</div>
 										<div class="flex flex-col items-center text-center gap-1">
-											<span class="text-sm font-semibold text-stone-900 dark:text-stone-100">
+											<span class="text-sm font-semibold text-[var(--add-text-primary)]">
 												{{ t("resourceCrud.form.uploadImagesPrompt") }}
 											</span>
 											<span class="text-xs text-secondary">
@@ -500,14 +467,14 @@
 						<!-- Card 5: Pricing & Visibility -->
 						<n-card
 							size="small"
-							class="shadow-xs border border-stone-200/80 dark:border-stone-800 rounded-xl"
+							class="shadow-xs border border-[var(--add-border)] rounded-xl"
 						>
 							<template #header>
 								<div class="flex items-center gap-2">
 									<div class="w-7 h-7 rounded-lg bg-[var(--add-primary)]/10 text-[var(--add-primary)] flex items-center justify-center shrink-0">
 										<Icon name="carbon:currency" :size="16" />
 									</div>
-									<span class="text-base font-semibold text-stone-900 dark:text-stone-100">
+									<span class="text-base font-semibold text-[var(--add-text-primary)]">
 										{{ t("events.create.sections.pricing") }}
 									</span>
 								</div>
@@ -515,9 +482,9 @@
 
 							<div class="flex flex-col gap-4">
 								<!-- Free Event Switch -->
-								<div class="flex items-center justify-between p-3 rounded-xl border border-stone-200 dark:border-stone-800">
+								<div class="flex items-center justify-between p-3 rounded-xl border border-[var(--add-border)]">
 									<div class="flex flex-col gap-0.5">
-										<span class="text-sm font-medium text-stone-900 dark:text-stone-100">
+										<span class="text-sm font-medium text-[var(--add-text-primary)]">
 											{{ t("events.form.isFree") }}
 										</span>
 										<span class="text-xs text-secondary">
@@ -542,7 +509,7 @@
 										class="w-full"
 									>
 										<template #suffix>
-											<span class="text-xs text-stone-400 select-none">PTS</span>
+											<span class="text-xs text-[var(--add-text-muted)] select-none">PTS</span>
 										</template>
 									</n-input-number>
 								</n-form-item>
@@ -580,7 +547,7 @@
 						<!-- Bottom Sticky Actions Card -->
 						<n-card
 							size="small"
-							class="shadow-xs border border-stone-200/80 dark:border-stone-800 rounded-xl bg-stone-50/50 dark:bg-stone-900/40"
+							class="shadow-xs border border-[var(--add-border)] rounded-xl bg-[var(--add-surface-sunken)]"
 						>
 							<div class="flex flex-col gap-3">
 								<n-button
@@ -592,7 +559,7 @@
 									@click="handleSubmit"
 								>
 									<template #icon>
-										<Icon name="carbon:checkmark" :size="18" color="#ffffff" />
+										<Icon name="carbon:checkmark" :size="18" />
 									</template>
 									{{ isEdit ? t("events.edit.actions.submit") : t("events.create.actions.submit") }}
 								</n-button>
@@ -640,6 +607,7 @@ import { computed, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
 import DateTimeInput from "@/add-os/components/form/DateTimeInput.vue"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import SessionsField from "@/add-os/components/resource/SessionsField.vue"
 import { currentLocale } from "@/add-os/lang/currentLocale"
@@ -657,7 +625,6 @@ const router = useRouter()
 const message = useMessage()
 const dialog = useDialog()
 
-const isRtl = computed(() => currentLocale.value === "ar")
 const isEdit = computed(() => Boolean(route.params.id))
 const eventId = computed(() => (route.params.id ? Number(route.params.id) : null))
 

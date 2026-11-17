@@ -1,18 +1,16 @@
 <!-- src/add-os/modules/booking/views/BookingCalendarPage.vue -->
 <template>
 	<div class="add-booking-calendar flex flex-col gap-5">
-		<div class="flex items-start justify-between gap-4">
-			<div class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.calendar") }}</h1>
-				<p>{{ t("bookingCalendar.description") }}</p>
-			</div>
-			<n-button type="primary" @click="openCreate()">
-				<template #icon>
-					<Icon name="carbon:calendar-add" :size="18" />
-				</template>
-				{{ t("bookingCalendar.create.button") }}
-			</n-button>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.calendar')" :description="t('bookingCalendar.description')">
+			<template #actions>
+				<n-button type="primary" @click="openCreate()">
+					<template #icon>
+						<Icon name="carbon:calendar-add" :size="18" />
+					</template>
+					{{ t("bookingCalendar.create.button") }}
+				</n-button>
+			</template>
+		</PageHeader>
 
 		<n-alert v-if="error" type="error" :title="t('bookingCalendar.loadError')" />
 
@@ -190,13 +188,7 @@
 		</n-card>
 
 		<!-- Booking detail -->
-		<n-modal
-			v-model:show="detailVisible"
-			preset="card"
-			class="max-w-md add-detail-modal"
-			:title="t('bookingCalendar.detail.title')"
-			content-style="max-height: calc(88vh - 130px); overflow-y: auto; overflow-x: hidden;"
-		>
+		<FormModal v-model:show="detailVisible" :title="t('bookingCalendar.detail.title')" size="sm">
 			<template #header-extra>
 				<n-tag v-if="selected" :type="STATUS_TAG_TYPE[selected.displayStatus]" size="small" :bordered="false" class="font-semibold">
 					{{ selected.displayLabel }}
@@ -233,16 +225,10 @@
 					{{ selected.checkedOutAt ? formatDateTime(selected.checkedOutAt) : t("bookingCalendar.detail.notCheckedOut") }}
 				</n-descriptions-item>
 			</n-descriptions>
-		</n-modal>
+		</FormModal>
 
 		<!-- A day's bookings — what "+N" opens -->
-		<n-modal
-			v-model:show="dayListVisible"
-			preset="card"
-			class="max-w-md add-day-list-modal"
-			:title="dayList?.dateLabel"
-			content-style="max-height: calc(88vh - 130px); overflow-y: auto; overflow-x: hidden;"
-		>
+		<FormModal v-model:show="dayListVisible" :title="dayList?.dateLabel ?? ''" size="sm">
 			<template #header-extra>
 				<n-tag v-if="dayList" size="small" :bordered="false" class="font-semibold">
 					{{ t("bookingCalendar.dayList.count", { count: formatNumber(dayList.items.length) }) }}
@@ -262,16 +248,10 @@
 					</button>
 				</li>
 			</ul>
-		</n-modal>
+		</FormModal>
 
 		<!-- Create booking -->
-		<n-modal
-			v-model:show="createVisible"
-			preset="card"
-			class="max-w-lg md:max-w-xl add-create-booking-modal"
-			:title="t('bookingCalendar.create.title')"
-			content-style="max-height: calc(88vh - 130px); overflow-y: auto; overflow-x: hidden;"
-		>
+		<FormModal v-model:show="createVisible" :title="t('bookingCalendar.create.title')" size="md">
 			<template #header-extra>
 				<div class="add-modal-badge">
 					<Icon name="carbon:calendar-add" :size="18" class="text-[var(--primary-color)]" />
@@ -504,7 +484,7 @@
 					</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</FormModal>
 	</div>
 </template>
 
@@ -521,28 +501,11 @@ import interactionPlugin from "@fullcalendar/interaction"
 import listPlugin from "@fullcalendar/list"
 import timeGridPlugin from "@fullcalendar/timegrid"
 import FullCalendar from "@fullcalendar/vue3"
-import {
-	NAlert,
-	NButton,
-	NCard,
-	NCollapseTransition,
-	NDatePicker,
-	NDescriptions,
-	NDescriptionsItem,
-	NForm,
-	NFormItem,
-	NInput,
-	NModal,
-	NRadio,
-	NRadioButton,
-	NRadioGroup,
-	NSelect,
-	NSpin,
-	NTag,
-	useMessage
-} from "naive-ui"
+import { NAlert, NButton, NCard, NCollapseTransition, NDatePicker, NDescriptions, NDescriptionsItem, NForm, NFormItem, NInput, NRadio, NRadioButton, NRadioGroup, NSelect, NSpin, NTag, useMessage } from "naive-ui"
 import { computed, onBeforeUnmount, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import CoworkingPoolPanel from "@/add-os/modules/booking/components/CoworkingPoolPanel.vue"
 import { spaceTypeLabel } from "@/add-os/modules/booking/config/space-type-label"
 import { SPACE_TYPES } from "@/add-os/modules/spatial/types/space"
@@ -1646,10 +1609,10 @@ defineExpose({
 
 	:deep(.fc) {
 		--fc-border-color: var(--border-color);
-		--fc-page-bg-color: var(--bg-default-color, #ffffff);
-		--fc-neutral-bg-color: var(--bg-secondary-color, #f7f5f2);
+		--fc-page-bg-color: var(--bg-default-color);
+		--fc-neutral-bg-color: var(--bg-secondary-color);
 		--fc-today-bg-color: rgba(var(--primary-color-rgb) / 0.06);
-		--fc-event-text-color: var(--fg-default-color, #333333);
+		--fc-event-text-color: var(--fg-default-color);
 		--fc-event-border-color: var(--border-color);
 		--fc-event-bg-color: var(--bg-secondary-color);
 		--fc-now-indicator-color: var(--primary-color);
@@ -1690,7 +1653,7 @@ defineExpose({
 				&.fc-button-active {
 					background-color: var(--primary-color) !important;
 					border-color: var(--primary-color) !important;
-					color: #ffffff !important;
+					color: var(--add-primary-on) !important;
 					font-weight: 600;
 				}
 
@@ -1726,7 +1689,7 @@ defineExpose({
 		}
 
 		.fc-scrollgrid-section-sticky > * {
-			background: var(--bg-default-color, #ffffff) !important;
+			background: var(--bg-default-color) !important;
 		}
 
 		.fc-col-header-cell {
@@ -2043,7 +2006,7 @@ defineExpose({
 
 			&:hover {
 				background-color: var(--primary-color) !important;
-				color: #ffffff !important;
+				color: var(--add-primary-on) !important;
 				transform: translateY(-1px);
 				box-shadow: 0 2px 6px rgba(var(--primary-color-rgb) / 0.3);
 			}
@@ -2185,7 +2148,7 @@ defineExpose({
 		border-radius: 9999px;
 
 		&:hover {
-			background: var(--primary-color, #638356);
+			background: var(--primary-color);
 		}
 	}
 
@@ -2211,7 +2174,7 @@ defineExpose({
 	padding: 2px 8px;
 	border-radius: 6px;
 	background: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.1);
-	color: var(--primary-color, #638356);
+	color: var(--primary-color);
 }
 
 .add-quote-card {
@@ -2228,7 +2191,7 @@ defineExpose({
 	border-radius: 6px;
 	font-size: 0.75rem;
 	font-weight: 600;
-	background: var(--add-surface-raised, #ffffff);
+	background: var(--add-surface-raised);
 	border: 1px solid var(--border-color);
 	color: var(--fg-default-color);
 }
@@ -2237,7 +2200,7 @@ defineExpose({
 	padding: 10px 12px;
 	border-radius: 12px;
 	border: 1.5px solid var(--border-color);
-	background: var(--bg-secondary-color, #f9fafb);
+	background: var(--bg-secondary-color);
 	cursor: pointer;
 	transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
 	display: flex;
@@ -2301,7 +2264,7 @@ defineExpose({
 	min-height: 58px;
 	border-radius: 14px;
 	border: 1.5px solid var(--border-color);
-	background: var(--add-surface-raised, #ffffff);
+	background: var(--add-surface-raised);
 	color: var(--fg-default-color);
 	cursor: pointer;
 	direction: ltr;
@@ -2339,15 +2302,15 @@ defineExpose({
 	// ── Endpoint (Start or End of range, or single slot): Solid olive green like mobile app ──
 	&--endpoint,
 	&--active:not(&--middle) {
-		background: #638356 !important;
-		background: var(--primary-color, #638356) !important;
-		border-color: var(--primary-color, #638356) !important;
-		color: #ffffff !important;
+		background: var(--add-primary) !important;
+		background: var(--primary-color) !important;
+		border-color: var(--primary-color) !important;
+		color: var(--add-primary-on) !important;
 		box-shadow: 0 4px 12px rgba(99, 131, 86, 0.35) !important;
 
 		.add-slot__start,
 		> span:first-child {
-			color: #ffffff !important;
+			color: var(--add-primary-on) !important;
 			font-weight: 700 !important;
 		}
 
@@ -2359,21 +2322,21 @@ defineExpose({
 
 	// ── Middle of selected range: Soft mint/sage green tint like mobile app ──
 	&--middle {
-		background: #ebf3e7 !important;
+		background: color-mix(in srgb, var(--add-primary) 12%, transparent) !important;
 		background: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.15) !important;
 		border-color: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.4) !important;
 		box-shadow: none !important;
 
 		.add-slot__start,
 		> span:first-child {
-			color: #3b5a2a !important;
-			color: var(--primary-color, #3b5a2a) !important;
+			color: var(--add-primary-text) !important;
+			color: var(--primary-color) !important;
 			font-weight: 700 !important;
 		}
 
 		.add-slot__meta {
-			color: #4b7038 !important;
-			color: var(--primary-color, #4b7038) !important;
+			color: var(--add-primary-text) !important;
+			color: var(--primary-color) !important;
 			opacity: 0.85;
 			font-weight: 600 !important;
 		}
@@ -2384,7 +2347,7 @@ defineExpose({
 	&:disabled {
 		opacity: 0.45 !important;
 		cursor: not-allowed !important;
-		background: var(--bg-secondary-color, #f9fafb) !important;
+		background: var(--bg-secondary-color) !important;
 		border-color: transparent !important;
 		box-shadow: none !important;
 
@@ -2447,8 +2410,8 @@ defineExpose({
 			align-items: center;
 			padding: 4px 12px;
 			border-radius: 8px;
-			background: #f3e8dc;
-			color: #8c532b;
+			background: color-mix(in srgb, var(--add-warning) 18%, transparent);
+			color: var(--add-warning-text);
 			font-weight: 700;
 			font-size: 0.8125rem;
 			white-space: nowrap;
@@ -2469,60 +2432,6 @@ defineExpose({
 	font-weight: 600;
 	font-size: 0.8125rem;
 	margin: 0;
-}
-
-:global(.theme-dark) {
-	.add-slot {
-		background: var(--bg-default-color, #1e1e24);
-		border-color: var(--border-color);
-
-		&--middle {
-			background: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.2) !important;
-		}
-
-		&--taken,
-		&:disabled {
-			background: var(--bg-secondary-color, #26262e) !important;
-		}
-	}
-
-	.add-slot-counts--selected {
-		background-color: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.12);
-		border-color: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.3);
-
-		.add-slot-duration-badge {
-			background: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.25);
-			color: #e2c09f;
-		}
-	}
-
-	.add-slot-grid {
-		scrollbar-color: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.5) rgba(255, 255, 255, 0.05);
-
-		&::-webkit-scrollbar-track {
-			background: rgba(255, 255, 255, 0.05);
-		}
-		&::-webkit-scrollbar-thumb {
-			background: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.45);
-		}
-	}
-
-	.add-quote-card {
-		background: linear-gradient(135deg, rgba(var(--primary-color-rgb, 99, 131, 86) / 0.14) 0%, rgba(var(--primary-color-rgb, 99, 131, 86) / 0.04) 100%);
-		border-color: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.3);
-	}
-
-	.add-quote-currency-pill {
-		background: var(--bg-secondary-color, #26262e);
-	}
-
-	.add-payment-tile {
-		background: var(--bg-secondary-color, #26262e);
-
-		&--active {
-			background: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.18) !important;
-		}
-	}
 }
 
 .add-create-booking-modal,
@@ -2558,7 +2467,7 @@ defineExpose({
 			border-radius: 9999px;
 
 			&:hover {
-				background: var(--primary-color, #638356);
+				background: var(--primary-color);
 			}
 		}
 	}
@@ -2698,7 +2607,7 @@ defineExpose({
 			border-radius: 9999px !important;
 
 			&:hover {
-				background: var(--primary-color, #638356) !important;
+				background: var(--primary-color) !important;
 			}
 		}
 	}
@@ -2707,21 +2616,6 @@ defineExpose({
 	.n-card__action {
 		flex-shrink: 0 !important;
 		border-top: 1px solid var(--border-color) !important;
-	}
-}
-
-.theme-dark .n-modal-container .n-modal.add-create-booking-modal,
-.theme-dark .n-modal-container .n-modal.add-detail-modal,
-.theme-dark .n-modal-container .n-modal.add-day-list-modal {
-	.n-card__content {
-		scrollbar-color: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.5) rgba(255, 255, 255, 0.05) !important;
-
-		&::-webkit-scrollbar-track {
-			background: rgba(255, 255, 255, 0.05) !important;
-		}
-		&::-webkit-scrollbar-thumb {
-			background: rgba(var(--primary-color-rgb, 99, 131, 86) / 0.45) !important;
-		}
 	}
 }
 </style>

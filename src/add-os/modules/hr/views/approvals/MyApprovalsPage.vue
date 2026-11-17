@@ -62,6 +62,7 @@ import type { ApprovalRequest, Delegation } from "@/add-os/modules/hr/types/appr
 import { NAlert, NBadge, NButton, NCard, NDataTable, NPagination, NTabPane, NTabs, useDialog, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import ApprovalDetailDrawer from "@/add-os/modules/hr/components/approvals/ApprovalDetailDrawer.vue"
 import DelegationModal from "@/add-os/modules/hr/components/approvals/DelegationModal.vue"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
@@ -208,14 +209,9 @@ const delegationColumns = computed<DataTableColumns<Delegation>>(() => [
 	{
 		title: t("hr.employees.columns.actions"),
 		key: "actions",
-		width: 80,
+		width: 90,
 		align: "center",
-		render: row =>
-			h(
-				NButton,
-				{ text: true, type: "error", "aria-label": t("hrApprovals.delegations.remove"), title: t("hrApprovals.delegations.remove"), onClick: () => confirmRemove(row) },
-				{ icon: () => h(Icon, { name: "carbon:trash-can", size: 18 }) }
-			)
+		render: row => h(RowActions, { actions: [{ key: "delete", label: t("hrApprovals.delegations.remove"), icon: "carbon:trash-can", danger: true, onClick: () => confirmRemove(row) }] })
 	}
 ])
 </script>

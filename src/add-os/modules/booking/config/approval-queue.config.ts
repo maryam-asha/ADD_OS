@@ -2,10 +2,9 @@
 import type { DataTableColumns } from "naive-ui"
 import type { ComposerTranslation } from "vue-i18n"
 import type { PendingApprovalBooking } from "@/add-os/modules/booking/types/reception"
-import { NButton } from "naive-ui"
 import { h } from "vue"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { formatDateTime, formatTime } from "@/add-os/utils/format"
-import Icon from "@/components/common/Icon.vue"
 import { spaceTypeLabel } from "./space-type-label"
 
 /**
@@ -46,21 +45,16 @@ export function buildApprovalColumns(
 		{
 			title: t("approvalQueue.columns.actions"),
 			key: "actions",
-			width: 180,
+			width: 200,
 			align: "center",
 			render: row =>
-				h("div", { class: "inline-flex items-center justify-center gap-2" }, [
-					h(
-						NButton,
-						{ size: "small", type: "primary", "aria-label": t("approvalQueue.approve.button"), onClick: () => onApprove(row) },
-						{ icon: () => h(Icon, { name: "carbon:checkmark", size: 16 }), default: () => t("approvalQueue.approve.button") }
-					),
-					h(
-						NButton,
-						{ size: "small", type: "error", ghost: true, "aria-label": t("approvalQueue.reject.button"), onClick: () => onReject(row) },
-						{ icon: () => h(Icon, { name: "carbon:close", size: 16 }), default: () => t("approvalQueue.reject.button") }
-					)
-				])
+				h(RowActions, {
+					labelled: true,
+					actions: [
+						{ key: "approve", label: t("approvalQueue.approve.button"), icon: "carbon:checkmark", primary: true, onClick: () => onApprove(row) },
+						{ key: "reject", label: t("approvalQueue.reject.button"), icon: "carbon:close", danger: true, onClick: () => onReject(row) }
+					]
+				})
 		}
 	]
 }

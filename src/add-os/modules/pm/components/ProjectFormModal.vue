@@ -1,6 +1,6 @@
 <!-- src/add-os/modules/pm/components/ProjectFormModal.vue -->
 <template>
-	<n-modal v-model:show="show" preset="card" :title="project ? t('pm.form.editTitle') : t('pm.form.newTitle')" class="w-full! max-w-xl!" :mask-closable="!saving">
+	<FormModal v-model:show="show" :title="project ? t('pm.form.editTitle') : t('pm.form.newTitle')" :mask-closable="!saving" size="md">
 		<n-form label-placement="top" @submit.prevent="save">
 			<n-alert v-if="serverError" type="error" class="mb-4" data-test="form-error">{{ serverError }}</n-alert>
 
@@ -57,14 +57,15 @@
 				<n-button type="primary" attr-type="submit" :loading="saving" data-test="save">{{ t("pm.form.save") }}</n-button>
 			</div>
 		</n-form>
-	</n-modal>
+	</FormModal>
 </template>
 
 <script setup lang="ts">
 import type { Person, Project, ProjectPayload, ProjectTone } from "@/add-os/modules/pm/types/pm"
-import { NAlert, NButton, NCheckbox, NDatePicker, NForm, NFormItem, NInput, NModal, NSelect, useMessage } from "naive-ui"
+import { NAlert, NButton, NCheckbox, NDatePicker, NForm, NFormItem, NInput, NSelect, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
 import PeopleSelect from "@/add-os/modules/pm/components/PeopleSelect.vue"
 import { PROJECT_TONES } from "@/add-os/modules/pm/types/pm"
 import { refusalText } from "@/add-os/modules/pm/utils/display"

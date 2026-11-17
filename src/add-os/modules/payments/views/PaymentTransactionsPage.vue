@@ -6,35 +6,33 @@
 -->
 <template>
 	<div class="flex flex-col gap-6">
-		<div class="flex flex-wrap items-start justify-between gap-3">
-			<div class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.transactions") }}</h1>
-				<p class="text-secondary">{{ t("payments.transactions.description") }}</p>
-			</div>
-			<n-button secondary size="small" :loading="isLoading || summaryLoading" @click="reload">
-				<template #icon><Icon name="carbon:renew" :size="16" /></template>
-				{{ t("payments.refresh") }}
-			</n-button>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.transactions')" :description="t('payments.transactions.description')">
+			<template #actions>
+				<n-button secondary size="small" :loading="isLoading || summaryLoading" @click="reload">
+					<template #icon><Icon name="carbon:renew" :size="16" /></template>
+					{{ t("payments.refresh") }}
+				</n-button>
+			</template>
+		</PageHeader>
 
 		<!-- Totals over the filtered payments -->
 		<div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4" data-test="payments-summary">
-			<n-card v-for="card in cards" :key="card.key" size="small" class="border border-stone-200" :class="card.onClick ? 'cursor-pointer hover:border-emerald-600' : ''" @click="card.onClick?.()">
+			<n-card v-for="card in cards" :key="card.key" size="small" class="border border-[var(--add-border)]" :class="card.onClick ? 'cursor-pointer hover:border-[var(--add-success)]' : ''" @click="card.onClick?.()">
 				<div class="flex flex-col gap-1">
-					<span class="flex items-center gap-2 text-xs text-stone-500">
-						<Icon :name="card.icon" :size="16" class="text-emerald-700" />{{ card.label }}
+					<span class="flex items-center gap-2 text-xs text-[var(--add-text-secondary)]">
+						<Icon :name="card.icon" :size="16" class="text-[var(--add-success-text)]" />{{ card.label }}
 					</span>
 					<template v-if="card.lines">
-						<span v-if="!card.lines.length" class="text-2xl font-extrabold text-stone-900">—</span>
-						<bdi v-for="line in card.lines" :key="line" dir="ltr" class="text-lg font-extrabold text-stone-900 leading-tight">{{ line }}</bdi>
+						<span v-if="!card.lines.length" class="text-2xl font-extrabold text-[var(--add-text-primary)]">—</span>
+						<bdi v-for="line in card.lines" :key="line" dir="ltr" class="text-lg font-extrabold text-[var(--add-text-primary)] leading-tight">{{ line }}</bdi>
 					</template>
-					<span v-else class="text-2xl font-extrabold" :class="card.tone ?? 'text-stone-900'">{{ card.value }}</span>
-					<span v-if="card.hint" class="text-xs text-stone-500">{{ card.hint }}</span>
+					<span v-else class="text-2xl font-extrabold" :class="card.tone ?? 'text-[var(--add-text-primary)]'">{{ card.value }}</span>
+					<span v-if="card.hint" class="text-xs text-[var(--add-text-secondary)]">{{ card.hint }}</span>
 				</div>
 			</n-card>
 		</div>
 
-		<n-card size="small" class="add-ledger-table shadow-sm border border-stone-200">
+		<n-card size="small" class="add-ledger-table shadow-sm border border-[var(--add-border)]">
 			<div class="flex flex-col gap-4">
 				<!-- Filters -->
 				<div class="flex flex-wrap items-center gap-3">
@@ -47,7 +45,7 @@
 						<n-select v-model:value="filters[filter.key]" :options="filter.options" :placeholder="filter.placeholder" clearable size="small" class="w-full" />
 					</div>
 					<n-date-picker v-model:formatted-value="range" type="daterange" value-format="yyyy-MM-dd" clearable size="small" class="w-64 shrink-0" />
-					<span class="text-xs text-stone-500 ms-auto">{{ t("payments.resultCount", { count: formatNumber(total) }) }}</span>
+					<span class="text-xs text-[var(--add-text-secondary)] ms-auto">{{ t("payments.resultCount", { count: formatNumber(total) }) }}</span>
 				</div>
 
 				<n-alert v-if="failed" type="error" :bordered="false">{{ t("payments.loadError") }}</n-alert>
@@ -69,25 +67,19 @@
 		</n-card>
 
 		<!-- One payment, in full -->
-		<n-modal
-			v-model:show="detailVisible"
-			preset="card"
-			class="max-w-lg w-full !rounded-2xl shadow-xl"
-			:title="selected ? t('payments.transactions.detailTitle', { id: selected.id }) : ''"
-			closable
-		>
+		<FormModal v-model:show="detailVisible" :title="selected ? t('payments.transactions.detailTitle', { id: selected.id }) : ''" size="md">
 			<div v-if="selected" class="flex flex-col gap-4 text-sm" data-test="payment-detail">
-				<div class="flex items-center justify-between p-3 bg-stone-50 rounded-xl border border-stone-200/80">
-					<span class="flex items-center gap-2 font-semibold text-stone-900">
-						<Icon :name="methodIcon(selected.method)" :size="20" class="text-emerald-700" />{{ selected.method_label }}
+				<div class="flex items-center justify-between p-3 bg-[var(--add-surface-sunken)] rounded-xl border border-[var(--add-border)]">
+					<span class="flex items-center gap-2 font-semibold text-[var(--add-text-primary)]">
+						<Icon :name="methodIcon(selected.method)" :size="20" class="text-[var(--add-success-text)]" />{{ selected.method_label }}
 					</span>
 					<n-tag :type="statusType(selected.status)" size="small" round>{{ statusLabel(selected.status) }}</n-tag>
 				</div>
 
 				<dl class="flex flex-col divide-y divide-stone-100">
 					<div v-for="field in detailFields" :key="field.label" class="flex justify-between gap-4 py-2.5">
-						<dt class="text-stone-500">{{ field.label }}</dt>
-						<dd class="font-medium text-stone-900 text-end break-all">
+						<dt class="text-[var(--add-text-secondary)]">{{ field.label }}</dt>
+						<dd class="font-medium text-[var(--add-text-primary)] text-end break-all">
 							<bdi v-if="field.ltr" dir="ltr">{{ field.value }}</bdi>
 							<template v-else>{{ field.value }}</template>
 						</dd>
@@ -95,7 +87,7 @@
 				</dl>
 
 				<div v-if="selected.discounts?.length" class="flex flex-col gap-2" data-test="payment-discounts">
-					<span class="text-stone-500 font-medium">{{ t("payments.transactions.discounts") }}</span>
+					<span class="text-[var(--add-text-secondary)] font-medium">{{ t("payments.transactions.discounts") }}</span>
 					<AppliedDiscountList :discounts="selected.discounts" />
 				</div>
 
@@ -103,7 +95,7 @@
 					{{ selected.review_reason }}
 				</n-alert>
 
-				<div v-if="selected.user || canReverse(selected)" class="flex flex-wrap justify-end gap-2 pt-2 border-t border-stone-100">
+				<div v-if="selected.user || canReverse(selected)" class="flex flex-wrap justify-end gap-2 pt-2 border-t border-[var(--add-border)]">
 					<n-button v-if="selected.user" secondary size="small" @click="openMember(selected.user.id)">
 						<template #icon><Icon name="carbon:user" :size="16" /></template>
 						{{ t("payments.transactions.openMember") }}
@@ -114,17 +106,19 @@
 					</n-button>
 				</div>
 			</div>
-		</n-modal>
+		</FormModal>
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
 import type { AdminPayment, PaymentMethodInfo, PaymentsSummary, PaymentStatus } from "@/add-os/modules/payments/types/payment"
-import { NAlert, NButton, NCard, NDataTable, NDatePicker, NInput, NModal, NSelect, NTag, useDialog, useMessage } from "naive-ui"
+import { NAlert, NButton, NCard, NDataTable, NDatePicker, NInput, NSelect, NTag, useDialog, useMessage } from "naive-ui"
 import { computed, h, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
+import FormModal from "@/add-os/components/page/FormModal.vue"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { PAYMENT_PURPOSES, PAYMENT_STATUSES } from "@/add-os/modules/payments/types/payment"
 import AppliedDiscountList from "@/add-os/modules/pricing/components/AppliedDiscountList.vue"
 import { useOpenRecord } from "@/add-os/notifications/useOpenRecord"
@@ -243,7 +237,7 @@ const cards = computed(() => {
 	const count = (status: PaymentStatus) => s?.by_status[status] ?? 0
 	return [
 		{ key: "total", icon: "carbon:receipt", label: t("payments.transactions.cards.total"), value: formatNumber(s?.total ?? 0), hint: t("payments.transactions.cards.acceptedHint", { count: formatNumber(s?.accepted.count ?? 0) }) },
-		{ key: "points", icon: "carbon:star", label: t("payments.transactions.cards.points"), value: formatNumber(s?.accepted.points ?? 0), tone: "text-emerald-700" },
+		{ key: "points", icon: "carbon:star", label: t("payments.transactions.cards.points"), value: formatNumber(s?.accepted.points ?? 0), tone: "text-[var(--add-success-text)]" },
 		{ key: "cash", icon: "carbon:money", label: t("payments.transactions.cards.cash"), lines: (s?.cash ?? []).map(line => money(line.amount, line.currency)) },
 		{ key: "card", icon: "carbon:currency", label: t("payments.transactions.cards.card"), lines: (s?.card ?? []).map(line => money(line.amount, line.currency)) },
 		{
@@ -251,7 +245,7 @@ const cards = computed(() => {
 			icon: "carbon:warning-alt",
 			label: t("payments.transactions.cards.open"),
 			value: formatNumber(count("pending") + count("needs_review")),
-			tone: count("needs_review") ? "text-amber-600" : "text-stone-900",
+			tone: count("needs_review") ? "text-[var(--add-warning-text)]" : "text-[var(--add-text-primary)]",
 			hint: t("payments.transactions.cards.openHint", { review: formatNumber(count("needs_review")) }),
 			onClick: () => showStatus(count("needs_review") ? "needs_review" : "pending")
 		}
@@ -272,7 +266,7 @@ const columns = computed<DataTableColumns<AdminPayment>>(() => [
 		key: "id",
 		width: 70,
 		align: "center",
-		render: row => h("span", { class: "font-mono font-medium text-stone-600" }, row.id)
+		render: row => h("span", { class: "font-mono font-medium text-[var(--add-text-secondary)]" }, row.id)
 	},
 	{
 		title: t("payments.columns.date"),
@@ -280,7 +274,7 @@ const columns = computed<DataTableColumns<AdminPayment>>(() => [
 		width: 170,
 		minWidth: 160,
 		align: "center",
-		render: row => (row.created_at ? h("span", { class: "text-xs font-medium text-stone-700 leading-tight" }, formatDateTime(row.created_at)) : "—")
+		render: row => (row.created_at ? h("span", { class: "text-xs font-medium text-[var(--add-text-primary)] leading-tight" }, formatDateTime(row.created_at)) : "—")
 	},
 	{
 		title: t("payments.columns.member"),
@@ -290,8 +284,8 @@ const columns = computed<DataTableColumns<AdminPayment>>(() => [
 		align: "center",
 		render: row => (row.user
 			? h("div", { class: "flex flex-col items-center justify-center text-center leading-tight gap-0.5" }, [
-					h("span", { class: "font-semibold text-stone-900 whitespace-nowrap" }, row.user.name),
-					row.user.phone ? h("bdi", { dir: "ltr", class: "text-xs text-stone-500 font-mono" }, row.user.phone) : null
+					h("span", { class: "font-semibold text-[var(--add-text-primary)] whitespace-nowrap" }, row.user.name),
+					row.user.phone ? h("bdi", { dir: "ltr", class: "text-xs text-[var(--add-text-secondary)] font-mono" }, row.user.phone) : null
 				])
 			: "—")
 	},
@@ -301,7 +295,7 @@ const columns = computed<DataTableColumns<AdminPayment>>(() => [
 		width: 140,
 		minWidth: 130,
 		align: "center",
-		render: row => h("span", { class: "text-xs font-medium text-stone-700 leading-tight" }, t(`payments.purpose.${row.purpose}`))
+		render: row => h("span", { class: "text-xs font-medium text-[var(--add-text-primary)] leading-tight" }, t(`payments.purpose.${row.purpose}`))
 	},
 	{
 		title: t("payments.columns.method"),
@@ -310,8 +304,8 @@ const columns = computed<DataTableColumns<AdminPayment>>(() => [
 		minWidth: 150,
 		align: "center",
 		render: row => h("div", { class: "inline-flex items-center justify-center gap-1.5 whitespace-nowrap" }, [
-			h(Icon, { name: methodIcon(row.method), size: 14, class: "text-emerald-700 shrink-0" }),
-			h("span", { class: "text-xs font-medium text-stone-700" }, row.method_label)
+			h(Icon, { name: methodIcon(row.method), size: 14, class: "text-[var(--add-success-text)] shrink-0" }),
+			h("span", { class: "text-xs font-medium text-[var(--add-text-primary)]" }, row.method_label)
 		])
 	},
 	{
@@ -320,7 +314,7 @@ const columns = computed<DataTableColumns<AdminPayment>>(() => [
 		width: 110,
 		minWidth: 100,
 		align: "center",
-		render: row => (pointsOf(row) ? h("span", { class: "font-semibold text-stone-900" }, formatNumber(pointsOf(row) as number)) : "—")
+		render: row => (pointsOf(row) ? h("span", { class: "font-semibold text-[var(--add-text-primary)]" }, formatNumber(pointsOf(row) as number)) : "—")
 	},
 	{
 		title: t("payments.columns.amount"),
@@ -328,7 +322,7 @@ const columns = computed<DataTableColumns<AdminPayment>>(() => [
 		width: 150,
 		minWidth: 140,
 		align: "center",
-		render: row => (moneyOf(row) ? h("bdi", { dir: "ltr", class: "font-semibold text-stone-900 whitespace-nowrap" }, moneyOf(row) as string) : "—")
+		render: row => (moneyOf(row) ? h("bdi", { dir: "ltr", class: "font-semibold text-[var(--add-text-primary)] whitespace-nowrap" }, moneyOf(row) as string) : "—")
 	},
 	{
 		title: t("payments.columns.status"),

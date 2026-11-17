@@ -27,7 +27,7 @@ export function buildAnnouncementColumns(t: ComposerTranslation): DataTableColum
 							"div",
 							{
 								class:
-									"w-11 h-11 rounded-lg bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-neutral-400 border border-black/5"
+									"w-11 h-11 rounded-lg bg-[var(--add-surface-sunken)] flex items-center justify-center text-[var(--add-text-muted)] border border-black/5"
 							},
 							[h(Icon, { name: "carbon:image", size: 18 })]
 						)

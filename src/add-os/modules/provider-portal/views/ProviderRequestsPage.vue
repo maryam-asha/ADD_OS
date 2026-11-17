@@ -1,6 +1,6 @@
 <template>
 	<div class="flex flex-col gap-5">
-		<h1 class="text-2xl font-bold">{{ t("providerPortal.requests") }}</h1>
+		<PageHeader :title="t('providerPortal.requests')" :description="t('pageDescriptions.providerRequests')" />
 		<div class="flex flex-wrap items-center justify-between gap-3">
 			<div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
 				<n-select v-model:value="query.status" :options="statusOptions" clearable :placeholder="t('providerRequests.status')" class="w-48" />
@@ -17,8 +17,8 @@
 				remote
 				size="small"
 				:scroll-x="850"
-				:columns="columns"
-				:data="data"
+				:columns
+				:data
 				:loading="isLoading"
 				:bordered="false"
 				:row-key="(row: ProviderRequest) => row.id"
@@ -27,8 +27,8 @@
 		</n-card>
 
 		<!-- New request: the fields follow the type, sent flat as the API reads them -->
-		<n-modal v-model:show="showCreate" preset="card" :title="t('providerRequests.create.title')" class="max-w-lg">
-			<n-form ref="formRef" :model="form" :rules="rules" label-placement="top">
+		<FormModal v-model:show="showCreate" :title="t('providerRequests.create.title')" size="md">
+			<n-form ref="formRef" :model="form" :rules label-placement="top">
 				<n-form-item path="type" :label="t('providerRequests.fields.type')">
 					<n-select v-model:value="form.type" :options="typeOptions" @update:value="onTypeChanged" />
 				</n-form-item>
@@ -106,18 +106,18 @@
 					<n-button type="primary" :loading="isSubmitting" @click="submitCreate">{{ t("resourceCrud.form.submit") }}</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</FormModal>
 
-		<n-modal v-model:show="detailVisible" preset="card" :title="detailTitle" style="width: min(42rem, 95vw)">
+		<FormModal v-model:show="detailVisible" :title="detailTitle" size="md">
 			<div v-if="isLoadingDetail" class="flex justify-center py-12"><n-spin size="large" /></div>
 			<n-alert v-else-if="isNotFound" type="warning" :title="t('common.notFound')" />
 			<n-alert v-else-if="detailError" type="error" :title="detailError" />
 			<div v-else-if="requestDetail" class="flex flex-col gap-4">
 				<div class="flex flex-wrap items-center gap-2 text-sm">
 					<n-tag size="small" round :type="STATUS_TAG[requestDetail.status]">{{ t(`providerRequests.statusOptions.${requestDetail.status}`) }}</n-tag>
-					<span class="text-neutral-500">{{ formatDateTime(requestDetail.created_at) }}</span>
+					<span class="text-[var(--add-text-secondary)]">{{ formatDateTime(requestDetail.created_at) }}</span>
 				</div>
-				<ProviderRequestSummary :request="requestDetail" :plan-names="planNames" />
+				<ProviderRequestSummary :request="requestDetail" :plan-names />
 				<n-alert v-if="requestDetail.rejection_reason" type="error" :title="t('providerRequests.rejectionReason')">{{ requestDetail.rejection_reason }}</n-alert>
 				<p v-if="requestDetail.invoice" class="text-sm">
 					{{ t("providerRequests.invoice.issued", { reference: requestDetail.invoice.reference, amount: formatMoney(requestDetail.invoice.amount, requestDetail.invoice.currency) }) }}
@@ -132,16 +132,19 @@
 					<n-button @click="detailVisible = false">{{ t("common.close") }}</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</FormModal>
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns, FormInst, FormItemRule, FormRules, SelectOption } from "naive-ui"
 import type { ProviderRequest, ProviderRequestStatus, ProviderRequestType } from "@/add-os/modules/providers/types"
-import { NAlert, NButton, NCard, NDataTable, NForm, NFormItem, NInput, NInputNumber, NModal, NSelect, NSpin, NSwitch, NTag, useDialog, useMessage } from "naive-ui"
+import { NAlert, NButton, NCard, NDataTable, NForm, NFormItem, NInput, NInputNumber, NSelect, NSpin, NSwitch, NTag, useDialog, useMessage } from "naive-ui"
 import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { currentLocale } from "@/add-os/lang/currentLocale"
@@ -206,15 +209,15 @@ const columns = computed<DataTableColumns<ProviderRequest>>(() => [
 	{
 		title: t("common.actions"),
 		key: "actions",
-		width: 140,
+		width: 100,
 		align: "center",
 		render: row =>
-			h("div", { class: "inline-flex items-center justify-center gap-2" }, [
-				h(NButton, { size: "small", type: "primary", text: true, onClick: () => openDetail(row.id) }, { icon: () => h(Icon, { name: "carbon:view", size: 16 }), default: () => t("common.view") }),
-				row.status === "pending"
-					? h(NButton, { size: "small", type: "error", text: true, onClick: () => confirmCancel(row) }, { default: () => t("providerRequests.cancel.button") })
-					: null
-			])
+			h(RowActions, {
+				actions: [
+					{ key: "view", label: t("common.view"), icon: "carbon:view", onClick: () => openDetail(row.id) },
+					...(row.status === "pending" ? [{ key: "cancel", label: t("providerRequests.cancel.button"), icon: "carbon:close", danger: true, onClick: () => confirmCancel(row) }] : [])
+				]
+			})
 	}
 ])
 
@@ -273,11 +276,13 @@ const isSubmitting = ref(false)
 const formRef = ref<FormInst | null>(null)
 const form = ref<RequestForm>(emptyForm())
 
-const required = (types: ProviderRequestType[], kind: "number" | "string" = "string"): FormItemRule => ({
+function required(types: ProviderRequestType[], kind: "number" | "string" = "string"): FormItemRule {
+  return {
 	validator: (_rule, value: unknown) => !types.includes(form.value.type) || (kind === "number" ? typeof value === "number" : typeof value === "string" && value.trim() !== ""),
 	message: t("resourceCrud.form.required"),
 	trigger: ["blur", "change", "input"]
-})
+}
+}
 const rules: FormRules = {
 	company_id: required(["plan_assignment", "wallet_top_up", "company_member", "company_admin"], "number"),
 	plan_id: required(["plan_assignment"], "number"),

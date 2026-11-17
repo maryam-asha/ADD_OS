@@ -1,15 +1,9 @@
 <template>
-	<n-modal
-		:show
-		preset="card"
-		class="max-w-lg w-full rounded-2xl"
-		:title="t('operationsRequests.actions.updateStatus')"
-		@update:show="emit('update:show', $event)"
-	>
+	<FormModal :show :title="t('operationsRequests.actions.updateStatus')" size="md" @update:show="emit('update:show', $event)">
 		<div v-if="request" class="flex flex-col gap-4">
-			<div class="flex items-center justify-between p-3 bg-stone-50 rounded-xl border border-stone-200">
-				<span class="text-xs text-stone-500 font-mono">REQ-{{ request.id }}</span>
-				<span class="text-sm font-bold text-stone-800">{{ request.service_type?.name }}</span>
+			<div class="flex items-center justify-between p-3 bg-[var(--add-surface-sunken)] rounded-xl border border-[var(--add-border)]">
+				<span class="text-xs text-[var(--add-text-secondary)] font-mono">REQ-{{ request.id }}</span>
+				<span class="text-sm font-bold text-[var(--add-text-primary)]">{{ request.service_type?.name }}</span>
 			</div>
 
 			<n-form-item :label="t('operationsRequests.details.status')">
@@ -40,7 +34,7 @@
 				</n-form-item>
 			</div>
 
-			<div class="flex items-center justify-end gap-3 pt-4 border-t border-stone-200">
+			<div class="flex items-center justify-end gap-3 pt-4 border-t border-[var(--add-border)]">
 				<n-button secondary @click="emit('update:show', false)">
 					{{ t('operationsRequests.actions.close') }}
 				</n-button>
@@ -53,14 +47,15 @@
 				</n-button>
 			</div>
 		</div>
-	</n-modal>
+	</FormModal>
 </template>
 
 <script setup lang="ts">
 import type { ServiceRequest, ServiceRequestStatus } from "../types/service"
-import { NButton, NFormItem, NInput, NModal, NSelect } from "naive-ui"
+import { NButton, NFormItem, NInput, NSelect } from "naive-ui"
 import { ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
 
 const props = defineProps<{
 	show: boolean

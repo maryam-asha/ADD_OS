@@ -46,6 +46,7 @@ import type { PipelineStage } from "@/add-os/modules/hr/types/recruitment"
 import { NAlert, NButton, NCard, NCheckbox, NDataTable, NFormItem, NInput, NInputNumber, NTag, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { canManageRecruitment } from "@/add-os/config/permissions"
 import ActiveTag from "@/add-os/modules/hr/components/ActiveTag.vue"
 import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
@@ -138,11 +139,8 @@ const columns = computed<DataTableColumns<PipelineStage>>(() => [
 				{
 					title: "",
 					key: "actions",
-					width: 70,
-					render: (row: PipelineStage) =>
-						row.type === "open"
-							? h(NButton, { text: true, type: "primary", "aria-label": t("hr.common.edit"), title: t("hr.common.edit"), onClick: () => openEditor(row) }, { icon: () => h(Icon, { name: "carbon:edit", size: 18 }) })
-							: null
+					width: 90,
+					render: (row: PipelineStage) => (row.type === "open" ? h(RowActions, { actions: [{ key: "edit", label: t("hr.common.edit"), icon: "carbon:edit", onClick: () => openEditor(row) }] }) : null)
 				}
 			]
 		: [])

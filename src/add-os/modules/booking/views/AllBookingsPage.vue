@@ -2,19 +2,16 @@
 <template>
 	<div class="flex flex-col gap-5">
 		<!-- Header: title on the start side, live result count on the end side -->
-		<div class="flex flex-wrap items-start justify-between gap-3">
-			<div class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.allBookings") }}</h1>
-				<p class="add-bookings__lede">{{ t("allBookings.description") }}</p>
-			</div>
-
-			<!-- The count answers "how many match what I just typed", so it is
-			     part of the filter feedback loop, not decoration. -->
-			<div v-if="meta && !error" class="add-bookings__count">
-				<span class="add-bookings__count-value">{{ formatNumber(meta.total) }}</span>
-				<span class="add-bookings__count-label">{{ t("allBookings.resultCount") }}</span>
-			</div>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.allBookings')" :description="t('allBookings.description')">
+			<template #actions>
+				<!-- The count answers "how many match what I just typed", so it is
+				     part of the filter feedback loop, not decoration. -->
+				<div v-if="meta && !error" class="add-bookings__count">
+					<span class="add-bookings__count-value">{{ formatNumber(meta.total) }}</span>
+					<span class="add-bookings__count-label">{{ t("allBookings.resultCount") }}</span>
+				</div>
+			</template>
+		</PageHeader>
 
 		<n-alert v-if="error" type="error" :title="t('allBookings.loadError')" />
 
@@ -125,6 +122,7 @@ import { NAlert, NButton, NCard, NDataTable, NDatePicker, NInput, NPagination, N
 import { computed, ref, useTemplateRef, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute } from "vue-router"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { canBookAtReception } from "@/add-os/config/permissions"
 import BookingDetailDrawer from "@/add-os/modules/booking/components/BookingDetailDrawer.vue"

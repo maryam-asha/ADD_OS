@@ -9,14 +9,14 @@
 <script setup lang="ts">
 import type { DataTableColumns } from "naive-ui"
 import type { Certification } from "@/add-os/modules/hr/types/training"
-import { NButton, NDataTable, NTag } from "naive-ui"
+import { NDataTable, NTag } from "naive-ui"
 import { computed, h } from "vue"
 import { useI18n } from "vue-i18n"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { todayIso } from "@/add-os/modules/hr/utils/leave"
 import { isExpired } from "@/add-os/modules/hr/utils/training"
 import { EMPTY, translated } from "@/add-os/modules/hr/utils/translated"
 import { formatDate } from "@/add-os/utils/format"
-import Icon from "@/components/common/Icon.vue"
 
 /**
  * Certifications with who issued them, when, and until when — an expired
@@ -63,16 +63,14 @@ const columns = computed<DataTableColumns<Certification>>(() => [
 				{
 					title: "",
 					key: "actions",
-					width: 90,
+					width: 100,
 					render: (row: Certification) =>
-						h("div", { class: "flex justify-end gap-3" }, [
-							props.onEdit
-								? h(NButton, { text: true, type: "primary", "aria-label": t("hr.common.edit"), title: t("hr.common.edit"), onClick: () => props.onEdit?.(row) }, { icon: () => h(Icon, { name: "carbon:edit", size: 18 }) })
-								: null,
-							props.onDelete
-								? h(NButton, { text: true, type: "error", "aria-label": t("hr.common.delete"), title: t("hr.common.delete"), onClick: () => props.onDelete?.(row) }, { icon: () => h(Icon, { name: "carbon:trash-can", size: 18 }) })
-								: null
-						])
+						h(RowActions, {
+							actions: [
+								...(props.onEdit ? [{ key: "edit", label: t("hr.common.edit"), icon: "carbon:edit", onClick: () => props.onEdit?.(row) }] : []),
+								...(props.onDelete ? [{ key: "delete", label: t("hr.common.delete"), icon: "carbon:trash-can", danger: true, onClick: () => props.onDelete?.(row) }] : [])
+							]
+						})
 				}
 			]
 		: [])

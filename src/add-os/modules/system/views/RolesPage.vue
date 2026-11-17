@@ -1,19 +1,15 @@
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.roles") }}</h1>
-			<p>{{ t("roles.description") }}</p>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.roles')" :description="t('roles.description')">
+			<template #actions>
+				<n-button v-if="canCreate" type="primary" @click="openCreate">
+					<template #icon><Icon name="carbon:add" :size="16" /></template>
+					{{ t("roles.create.button") }}
+				</n-button>
+			</template>
+		</PageHeader>
 
 		<n-alert v-if="loadError" type="error" :title="t('roles.loadError')" />
-
-		<!-- Action bar with generous spacing before table -->
-		<div class="flex justify-end mb-4">
-			<n-button v-if="canCreate" type="primary" @click="openCreate">
-				<template #icon><Icon name="carbon:add" :size="16" /></template>
-				{{ t("roles.create.button") }}
-			</n-button>
-		</div>
 
 		<!-- Roles Table -->
 		<n-card class="add-ledger-table">
@@ -21,14 +17,7 @@
 		</n-card>
 
 		<!-- Role Create / Edit Modal -->
-		<n-modal
-			v-model:show="modalVisible"
-			preset="card"
-			:title="mode === 'create' ? t('roles.create.title') : t('roles.edit.title')"
-			closable
-			style="max-width: 46rem"
-			content-style="max-height: 72vh; overflow-y: auto"
-		>
+		<FormModal v-model:show="modalVisible" :title="mode === 'create' ? t('roles.create.title') : t('roles.edit.title')" size="lg">
 			<n-form ref="formRef" :model="form" :rules label-placement="top">
 				<n-form-item path="name" :label="t('roles.form.name')">
 					<n-input
@@ -41,13 +30,13 @@
 				<!-- Permissions Section -->
 				<n-form-item :label="t('roles.form.permissions')">
 					<div class="flex flex-col gap-3 w-full">
-						<p class="text-xs text-neutral-500 dark:text-neutral-400">
+						<p class="text-xs text-[var(--add-text-secondary)]">
 							{{ t("roles.form.viewRuleHint") }}
 						</p>
 						<!-- Permissions Toolbar: count + select/clear all -->
 						<div class="flex items-center justify-between gap-2 pb-1">
 							<div class="flex items-center gap-2">
-								<span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300">
+								<span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-[var(--add-surface-sunken)] text-[var(--add-text-secondary)]">
 									{{ t("roles.form.selectedCount", { selected: form.permissions.length, total: totalPermissionsCount }) }}
 								</span>
 							</div>
@@ -71,7 +60,7 @@
 							class="mb-1"
 						>
 							<template #prefix>
-								<Icon name="carbon:search" :size="16" class="text-neutral-400" />
+								<Icon name="carbon:search" :size="16" class="text-[var(--add-text-muted)]" />
 							</template>
 						</n-input>
 
@@ -80,21 +69,21 @@
 							<div
 								v-for="group in filteredModules"
 								:key="group.module"
-								class="rounded-xl border border-neutral-200/90 dark:border-neutral-800/90 bg-neutral-50/40 dark:bg-neutral-900/30 p-3.5 mb-3 transition-all hover:border-neutral-300 dark:hover:border-neutral-700"
+								class="rounded-xl border border-[var(--add-border)] bg-[var(--add-surface-sunken)] p-3.5 mb-3 transition-all hover:border-[var(--add-border-strong)]"
 							>
 								<!-- Module Header with translated title and count badge -->
-								<div class="flex items-center justify-between pb-2 mb-2.5 border-b border-neutral-200/60 dark:border-neutral-800/60">
+								<div class="flex items-center justify-between pb-2 mb-2.5 border-b border-[var(--add-border)]">
 									<div class="flex items-center gap-2">
-										<h3 class="font-semibold text-sm sm:text-base text-neutral-800 dark:text-neutral-100">
+										<h3 class="font-semibold text-sm sm:text-base text-[var(--add-text-primary)]">
 											{{ displayModuleName(group.module, t, te) }}
 										</h3>
 										<span
 											class="text-xs px-2 py-0.5 rounded-full font-medium transition-colors"
 											:class="isModuleFullySelected(group, form.permissions)
-												? 'bg-[#007F91]/15 text-[#007F91]'
+												? 'bg-[var(--add-info)]/15 text-[var(--add-info-text)]'
 												: isModulePartiallySelected(group, form.permissions)
-													? 'bg-[#A97C57]/15 text-[#A97C57]'
-													: 'bg-neutral-200/60 dark:bg-neutral-800 text-neutral-500'"
+													? 'bg-[var(--add-warning)]/15 text-[var(--add-warning-text)]'
+													: 'bg-[var(--add-surface-sunken)] text-[var(--add-text-secondary)]'"
 										>
 											{{ getModuleSelectedCount(group) }}/{{ group.actions.length }}
 										</span>
@@ -115,8 +104,8 @@
 										:key="action.name"
 										class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border transition-all cursor-pointer select-none"
 										:class="form.permissions.includes(action.name)
-											? 'border-[#007F91]/50 bg-[#007F91]/10 text-neutral-900 dark:text-neutral-100 font-medium'
-											: 'border-neutral-200/80 dark:border-neutral-800/80 bg-white dark:bg-neutral-900/60 text-neutral-700 dark:text-neutral-300 hover:border-neutral-300 dark:hover:border-neutral-700'"
+											? 'border-[var(--add-info)]/50 bg-[var(--add-info)]/10 text-[var(--add-text-primary)] font-medium'
+											: 'border-[var(--add-border)] bg-white text-[var(--add-text-primary)] hover:border-[var(--add-border-strong)]'"
 										@click="toggleAction(action.name)"
 									>
 										<n-checkbox
@@ -132,7 +121,7 @@
 								</div>
 							</div>
 
-							<div v-if="filteredModules.length === 0" class="py-6 text-center text-neutral-400 text-sm">
+							<div v-if="filteredModules.length === 0" class="py-6 text-center text-[var(--add-text-muted)] text-sm">
 								{{ t("roles.form.noModulesFound") }}
 							</div>
 						</n-checkbox-group>
@@ -147,30 +136,19 @@
 					</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</FormModal>
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns, FormInst, FormRules } from "naive-ui"
 import type { PermissionModule, RoleRecord } from "@/add-os/modules/system/types/role"
-import {
-	NAlert,
-	NButton,
-	NCard,
-	NCheckbox,
-	NCheckboxGroup,
-	NDataTable,
-	NForm,
-	NFormItem,
-	NInput,
-	NModal,
-	NTag,
-	useDialog,
-	useMessage
-} from "naive-ui"
+import { NAlert, NButton, NCard, NCheckbox, NCheckboxGroup, NDataTable, NForm, NFormItem, NInput, NTag, useDialog, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { canCreateRoles, canDeleteRoles, canUpdateRoles } from "@/add-os/config/permissions"
 import {
 	applyViewRule,
@@ -204,7 +182,7 @@ function rowKey(row: RoleRecord): number {
 }
 
 function renderNameCell(row: RoleRecord) {
-	const name = displayRoleName(row, t)
+	const name = displayRoleName(row, t, te)
 	if (!row.protected) return name
 
 	return h("div", { class: "inline-flex items-center justify-center gap-2" }, [
@@ -226,29 +204,12 @@ function renderNameCell(row: RoleRecord) {
  * the "admin" role.
  */
 function renderActions(row: RoleRecord) {
-	const editLabel = t("roles.edit.button")
-	const deleteLabel = t("roles.delete.button")
-
-	const buttons = []
-	if (row.name !== "member" && canUpdateRoles()) {
-		buttons.push(
-			h(
-				NButton,
-				{ text: true, type: "primary", "aria-label": editLabel, title: editLabel, onClick: () => openEdit(row) },
-				{ icon: () => h(Icon, { name: "carbon:edit", size: 18 }) }
-			)
-		)
-	}
-	if (!row.protected && canDeleteRoles()) {
-		buttons.push(
-			h(
-				NButton,
-				{ text: true, type: "error", "aria-label": deleteLabel, title: deleteLabel, onClick: () => confirmDelete(row) },
-				{ icon: () => h(Icon, { name: "carbon:trash-can", size: 18 }) }
-			)
-		)
-	}
-	return h("div", { class: "inline-flex items-center justify-center gap-2" }, buttons)
+	return h(RowActions, {
+		actions: [
+			...(row.name !== "member" && canUpdateRoles() ? [{ key: "edit", label: t("roles.edit.button"), icon: "carbon:edit", onClick: () => openEdit(row) }] : []),
+			...(!row.protected && canDeleteRoles() ? [{ key: "delete", label: t("roles.delete.button"), icon: "carbon:trash-can", danger: true, onClick: () => confirmDelete(row) }] : [])
+		]
+	})
 }
 
 const columns = computed<DataTableColumns<RoleRecord>>(() => [

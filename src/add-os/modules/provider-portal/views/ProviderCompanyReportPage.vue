@@ -1,18 +1,14 @@
 <template>
 	<div class="flex flex-col gap-5">
 		<!-- Header -->
-		<div class="flex flex-wrap items-start justify-between gap-3">
-			<div class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold">{{ t("nav.pages.companyReport", "تقرير شركاتي") }}</h1>
-				<p class="text-sm text-neutral-500">
-					{{ t("reports.providerCompanies.description", "نظرة شاملة على الشركات، الاشتراكات السارية، المكاتب المؤجرة، والمبالغ المستحقة.") }}
-				</p>
-			</div>
-			<n-button secondary :loading="isLoading" @click="fetchData">
-				<template #icon><Icon name="carbon:renew" :size="16" /></template>
-				{{ t("common.refresh", "تحديث") }}
-			</n-button>
-		</div>
+		<PageHeader :title="t('nav.pages.companyReport', 'تقرير شركاتي')" :description="t('reports.providerCompanies.description', 'نظرة شاملة على الشركات، الاشتراكات السارية، المكاتب المؤجرة، والمبالغ المستحقة.')">
+			<template #actions>
+				<n-button secondary :loading="isLoading" @click="fetchData">
+					<template #icon><Icon name="carbon:renew" :size="16" /></template>
+					{{ t("common.refresh") }}
+				</n-button>
+			</template>
+		</PageHeader>
 
 		<!-- Quick Metric Highlights -->
 		<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -28,7 +24,7 @@
 					:value="stoppedRenewalsCount"
 				>
 					<template v-if="stoppedRenewalsCount > 0" #prefix>
-						<Icon name="carbon:warning-alt" class="text-amber-500" :size="18" />
+						<Icon name="carbon:warning-alt" class="text-[var(--add-warning-text)]" :size="18" />
 					</template>
 				</n-statistic>
 			</n-card>
@@ -38,7 +34,7 @@
 					:value="companiesWithOverdueCount"
 				>
 					<template v-if="companiesWithOverdueCount > 0" #prefix>
-						<Icon name="carbon:warning" class="text-rose-500" :size="18" />
+						<Icon name="carbon:warning" class="text-[var(--add-danger-text)]" :size="18" />
 					</template>
 				</n-statistic>
 			</n-card>
@@ -53,10 +49,10 @@
 						clearable
 						:placeholder="t('reports.providerCompanies.searchPlaceholder', 'بحث باسم الشركة...')"
 					>
-						<template #prefix><Icon name="carbon:search" :size="16" class="text-neutral-400" /></template>
+						<template #prefix><Icon name="carbon:search" :size="16" class="text-[var(--add-text-muted)]" /></template>
 					</n-input>
 				</div>
-				<div class="text-xs text-neutral-400">
+				<div class="text-xs text-[var(--add-text-muted)]">
 					{{ t("reports.common.totalCount", { count: filteredRows.length }) }}
 				</div>
 			</div>
@@ -67,12 +63,12 @@
 			<n-data-table
 				size="small"
 				:scroll-x="900"
-				:columns="columns"
+				:columns
 				:data="filteredRows"
 				:loading="isLoading"
 				:bordered="false"
 				:row-key="(r: ProviderCompanyReportItem) => r.id"
-				:pagination="pagination"
+				:pagination
 			/>
 		</n-card>
 	</div>
@@ -84,6 +80,7 @@ import type { ProviderCompanyReportItem } from "@/add-os/services/reports"
 import { NButton, NCard, NDataTable, NInput, NStatistic, NTag, NTooltip } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { formatReportMoney, getProviderCompaniesReport } from "@/add-os/services/reports"
 import { formatDate } from "@/add-os/utils/format/dates"
 import Icon from "@/components/common/Icon.vue"
@@ -137,7 +134,7 @@ const columns = computed<DataTableColumns<ProviderCompanyReportItem>>(() => [
 		align: "center",
 		render: row =>
 			h("div", { class: "inline-flex flex-col items-center gap-0.5" }, [
-				h("span", { class: "font-semibold text-neutral-800 dark:text-neutral-100" }, row.legal_name),
+				h("span", { class: "font-semibold text-[var(--add-text-primary)]" }, row.legal_name),
 				h(
 					NTag,
 					{
@@ -165,7 +162,7 @@ const columns = computed<DataTableColumns<ProviderCompanyReportItem>>(() => [
 		align: "center",
 		render: row => {
 			if (!row.membership) {
-				return h("span", { class: "text-neutral-400 text-sm" }, "—")
+				return h("span", { class: "text-[var(--add-text-muted)] text-sm" }, "—")
 			}
 			const m = row.membership
 			const isRenewalStopped = !m.auto_renew || !!m.renewal_stop_reason
@@ -173,14 +170,14 @@ const columns = computed<DataTableColumns<ProviderCompanyReportItem>>(() => [
 
 			return h("div", { class: "inline-flex flex-col items-center gap-1 py-1" }, [
 				h("div", { class: "flex items-center justify-center gap-1.5 flex-wrap" }, [
-					h("span", { class: "font-medium text-sm text-neutral-800 dark:text-neutral-200" }, m.plan_name || "—"),
+					h("span", { class: "font-medium text-sm text-[var(--add-text-primary)]" }, m.plan_name || "—"),
 					h(
 						NTag,
 						{ size: "tiny", type: "info", bordered: false, round: true },
 						{ default: () => `${m.seats} ${t("reports.providerCompanies.seats", "مقاعد")}` }
 					)
 				]),
-				h("div", { class: "flex items-center justify-center gap-2 text-xs text-neutral-500" }, [
+				h("div", { class: "flex items-center justify-center gap-2 text-xs text-[var(--add-text-secondary)]" }, [
 					h("span", `${t("reports.providerCompanies.endsAt", "ينتهي:")} ${m.current_period_end ? formatDate(m.current_period_end, { style: "short" }) : "—"}`)
 				]),
 				isRenewalStopped
@@ -191,7 +188,7 @@ const columns = computed<DataTableColumns<ProviderCompanyReportItem>>(() => [
 								trigger: () =>
 									h(
 										"div",
-										{ class: "flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400 font-medium cursor-help" },
+										{ class: "flex items-center gap-1 text-xs text-[var(--add-warning-text)] font-medium cursor-help" },
 										[
 											h(Icon, { name: "carbon:warning-alt", size: 14 }),
 											h("span", stopReasonText)
@@ -220,7 +217,7 @@ const columns = computed<DataTableColumns<ProviderCompanyReportItem>>(() => [
 						{ size: "small", type: "info", round: true, bordered: false },
 						{ default: () => `${row.active_leases_count} ${t("reports.providerCompanies.offices", "مكتب")}` }
 					)
-				: h("span", { class: "text-neutral-400" }, "0")
+				: h("span", { class: "text-[var(--add-text-muted)]" }, "0")
 	},
 	{
 		title: t("reports.providerCompanies.outstandingDues", "المستحق عليها"),
@@ -229,7 +226,7 @@ const columns = computed<DataTableColumns<ProviderCompanyReportItem>>(() => [
 		align: "center",
 		render: row => {
 			if (!row.outstanding || row.outstanding.length === 0) {
-				return h("span", { class: "text-neutral-400" }, "—")
+				return h("span", { class: "text-[var(--add-text-muted)]" }, "—")
 			}
 			return h(
 				"div",
@@ -238,9 +235,9 @@ const columns = computed<DataTableColumns<ProviderCompanyReportItem>>(() => [
 					const hasOverdue = Number.parseFloat(o.overdue) > 0
 					return h(
 						"div",
-						{ class: "flex items-center justify-between gap-2 text-xs rounded px-2 py-1 bg-neutral-50 dark:bg-neutral-800/60" },
+						{ class: "flex items-center justify-between gap-2 text-xs rounded px-2 py-1 bg-[var(--add-surface-sunken)]" },
 						[
-							h("span", { class: "font-mono font-medium text-neutral-600 dark:text-neutral-300" }, `${t("reports.common.remaining", "المتبقي:")} ${formatReportMoney(o.remaining, o.currency)}`),
+							h("span", { class: "font-mono font-medium text-[var(--add-text-secondary)]" }, `${t("reports.common.remaining", "المتبقي:")} ${formatReportMoney(o.remaining, o.currency)}`),
 							hasOverdue
 								? h(
 										NTag,

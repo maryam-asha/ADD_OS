@@ -1,11 +1,12 @@
 // src/add-os/modules/members/config/private-office-requests.config.ts
 import type { DataTableColumns } from "naive-ui"
 import type { ComposerTranslation } from "vue-i18n"
+import type { RowAction } from "@/add-os/components/page/row-actions"
 import type { FieldDescriptor } from "@/add-os/components/resource/field-types"
 import type { PrivateOfficeRequest, PrivateOfficeRequestPayload } from "@/add-os/modules/members/types/private-office-request"
-import { NButton, NTag, NTooltip } from "naive-ui"
+import { NTag, NTooltip } from "naive-ui"
 import { h } from "vue"
-import Icon from "@/components/common/Icon.vue"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 
 const STATUS_TAG_TYPE: Record<PrivateOfficeRequest["status"], "info" | "warning" | "success"> = {
 	requested: "info",
@@ -40,68 +41,24 @@ export function buildRequestColumns(
 			width: 150,
 			align: "center",
 			render: row => {
-				const buttons = []
-
-				if (row.status === "requested") {
-					const label = t("privateOfficeRequests.markAsQuoted.button")
-					buttons.push(
-						h(
-							NButton,
-							{ text: true, type: "primary", "aria-label": label, title: label, onClick: () => onQuote(row) },
-							{ icon: () => h(Icon, { name: "carbon:currency", size: 18 }) }
-						)
-					)
-				}
-
+				const actions: RowAction[] = []
+				if (row.status === "requested") actions.push({ key: "quote", label: t("privateOfficeRequests.markAsQuoted.button"), icon: "carbon:currency", onClick: () => onQuote(row) })
 				if (row.status === "quoted" && (row.company_id || row.company) && onCreateLease && (!canCreateLease || canCreateLease())) {
-					const leaseLabel = t("privateOfficeRequests.createLease.button")
-					buttons.push(
-						h(
-							NButton,
-							{ text: true, type: "success", "aria-label": leaseLabel, title: leaseLabel, onClick: () => onCreateLease(row) },
-							{ icon: () => h(Icon, { name: "carbon:document-add", size: 18 }) }
-						)
-					)
+					actions.push({ key: "lease", label: t("privateOfficeRequests.createLease.button"), icon: "carbon:document-add", onClick: () => onCreateLease(row) })
 				}
+				// Prevented in the UI with an explanation, not silently omitted.
+				if (row.status === "contracted") actions.push({ key: "locked", label: t("privateOfficeRequests.contractedLocked"), icon: "carbon:locked", disabled: true, onClick: () => {} })
+				actions.push({ key: "delete", label: t("resourceCrud.table.deleteAction"), icon: "carbon:trash-can", danger: true, onClick: () => onDelete(row) })
 
+				const row_ = h(RowActions, { actions })
 				// A quoted request for a new company becomes a company (and its lease) from the Companies page.
 				if (row.status === "quoted" && !row.company_id && !row.company) {
-					buttons.push(
-						h(
-							NTooltip,
-							{},
-							{
-								trigger: () => h(NTag, { size: "small", round: true, type: "info" }, { default: () => t("privateOfficeRequests.nextStepNewCompany") }),
-								default: () => t("privateOfficeRequests.nextStepNewCompanyHint")
-							}
-						)
-					)
+					return h("div", { class: "inline-flex items-center justify-center gap-2" }, [
+						h(NTooltip, {}, { trigger: () => h(NTag, { size: "small", round: true, type: "info" }, { default: () => t("privateOfficeRequests.nextStepNewCompany") }), default: () => t("privateOfficeRequests.nextStepNewCompanyHint") }),
+						row_
+					])
 				}
-
-				if (row.status === "contracted") {
-					// Prevented in the UI with an explanation, not silently omitted.
-					buttons.push(
-						h(
-							NTooltip,
-							{},
-							{
-								trigger: () => h(NButton, { text: true, disabled: true }, { icon: () => h(Icon, { name: "carbon:locked", size: 18 }) }),
-								default: () => t("privateOfficeRequests.contractedLocked")
-							}
-						)
-					)
-				}
-
-				const deleteLabel = t("resourceCrud.table.deleteAction")
-				buttons.push(
-					h(
-						NButton,
-						{ text: true, type: "error", "aria-label": deleteLabel, title: deleteLabel, onClick: () => onDelete(row) },
-						{ icon: () => h(Icon, { name: "carbon:trash-can", size: 18 }) }
-					)
-				)
-
-				return h("div", { class: "inline-flex items-center justify-center gap-2" }, buttons)
+				return row_
 			}
 		}
 	]

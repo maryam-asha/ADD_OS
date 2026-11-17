@@ -29,6 +29,7 @@ import { NAlert, NButton, NCard, NDataTable, useDialog, useMessage } from "naive
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { canManageHrSettings } from "@/add-os/config/permissions"
 import ActiveTag from "@/add-os/modules/hr/components/ActiveTag.vue"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
@@ -116,15 +117,7 @@ const columns = computed<DataTableColumns<PayComponent>>(() => [
 					key: "actions",
 					width: 100,
 					align: "center" as const,
-					render: (row: PayComponent) =>
-						h("div", { class: "flex justify-center gap-3" }, [
-							h(NButton, { text: true, type: "primary", "aria-label": t("hr.common.edit"), title: t("hr.common.edit"), onClick: () => openEditor(row) }, { icon: () => h(Icon, { name: "carbon:edit", size: 18 }) }),
-							h(
-								NButton,
-								{ text: true, type: "error", "aria-label": t("hr.common.delete"), title: t("hr.common.delete"), onClick: () => confirmDelete(row) },
-								{ icon: () => h(Icon, { name: "carbon:trash-can", size: 18 }) }
-							)
-						])
+					render: (row: PayComponent) => h(RowActions, { actions: [{ key: "edit", label: t("hr.common.edit"), icon: "carbon:edit", onClick: () => openEditor(row) }, { key: "delete", label: t("hr.common.delete"), icon: "carbon:trash-can", danger: true, onClick: () => confirmDelete(row) }] })
 				}
 			]
 		: [])

@@ -9,16 +9,14 @@
 <template>
 	<div class="flex flex-col gap-6">
 		<!-- Header -->
-		<div class="flex flex-wrap items-start justify-between gap-3">
-			<div class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold text-stone-900">{{ t(titleKey || "nav.pages.discountReport") }}</h1>
-				<p class="text-sm text-stone-500 leading-relaxed max-w-4xl">{{ t("discountReport.description") }}</p>
-			</div>
-			<n-button secondary size="small" :loading="isLoading" @click="fetchPage">
-				<template #icon><Icon name="carbon:renew" :size="16" /></template>
-				{{ t("discountReport.refresh") }}
-			</n-button>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.discountReport')" :description="t('discountReport.description')">
+			<template #actions>
+				<n-button secondary size="small" :loading="isLoading" @click="fetchPage">
+					<template #icon><Icon name="carbon:renew" :size="16" /></template>
+					{{ t("discountReport.refresh") }}
+				</n-button>
+			</template>
+		</PageHeader>
 
 		<!-- Totals over the filtered discounts -->
 		<div v-if="totals" class="flex flex-col gap-2.5" data-test="report-totals">
@@ -27,10 +25,10 @@
 					v-for="card in summaryCards"
 					:key="card.key"
 					size="small"
-					class="border border-stone-200 shadow-xs hover:border-stone-300 transition-colors"
+					class="border border-[var(--add-border)] shadow-xs hover:border-[var(--add-border-strong)] transition-colors"
 				>
 					<div class="flex flex-col gap-1.5">
-						<span class="flex items-center gap-1.5 text-xs font-medium text-stone-500 truncate">
+						<span class="flex items-center gap-1.5 text-xs font-medium text-[var(--add-text-secondary)] truncate">
 							<Icon :name="card.icon" :size="15" class="shrink-0" :class="card.iconClass" />
 							{{ card.label }}
 						</span>
@@ -40,14 +38,14 @@
 					</div>
 				</n-card>
 			</div>
-			<p class="text-xs text-stone-500 flex items-center gap-1.5">
-				<Icon name="carbon:information" :size="14" class="shrink-0 text-stone-400" />
+			<p class="text-xs text-[var(--add-text-secondary)] flex items-center gap-1.5">
+				<Icon name="carbon:information" :size="14" class="shrink-0 text-[var(--add-text-muted)]" />
 				{{ t("discountReport.totals.note") }}
 			</p>
 		</div>
 
 		<!-- Table Card with Integrated Filters -->
-		<n-card size="small" class="add-ledger-table shadow-sm border border-stone-200">
+		<n-card size="small" class="add-ledger-table shadow-sm border border-[var(--add-border)]">
 			<div class="flex flex-col gap-4">
 				<!-- Filters Bar -->
 				<div class="flex flex-wrap items-center gap-3">
@@ -95,13 +93,13 @@
 						v-if="hasActiveFilters"
 						quaternary
 						size="small"
-						class="text-stone-500 hover:text-stone-800"
+						class="text-[var(--add-text-secondary)] hover:text-[var(--add-text-primary)]"
 						@click="resetFilters"
 					>
 						<template #icon><Icon name="carbon:filter-reset" :size="16" /></template>
 						{{ t("discountReport.filters.reset") }}
 					</n-button>
-					<span class="text-xs text-stone-500 ms-auto shrink-0">
+					<span class="text-xs text-[var(--add-text-secondary)] ms-auto shrink-0">
 						{{ t("reports.common.totalCount", { count: formatNumber(total) }) }}
 					</span>
 				</div>
@@ -121,7 +119,7 @@
 					@update:page="onPage"
 				>
 					<template #empty>
-						<div class="flex flex-col items-center justify-center py-8 text-stone-400 gap-2">
+						<div class="flex flex-col items-center justify-center py-8 text-[var(--add-text-muted)] gap-2">
 							<Icon name="carbon:document-blank" :size="32" class="opacity-50" />
 							<span class="text-sm">{{ t("discountReport.empty") }}</span>
 						</div>
@@ -138,6 +136,7 @@ import type { DiscountReportFilters, DiscountReportRow, DiscountReportTotals, Re
 import { NAlert, NButton, NCard, NDataTable, NDatePicker, NSelect, NTag } from "naive-ui"
 import { computed, h, reactive, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { PRICING_PURPOSES } from "@/add-os/modules/pricing/types/coupon"
 import { DISCOUNT_KINDS, REPORT_STATUSES } from "@/add-os/modules/pricing/types/discount-report"
 import { ApiError } from "@/add-os/services/api"
@@ -147,7 +146,18 @@ import Icon from "@/components/common/Icon.vue"
 
 defineProps<{ titleKey?: string }>()
 
-const { t } = useI18n()
+const { t, te } = useI18n()
+
+/**
+ * A row's `status` is its record's own status (a booking's, a payment's, an
+ * event registration's) or a walk-in's payment state, so it comes from four
+ * vocabularies. Each known value has a label; one the API adds later shows
+ * as sent rather than as a raw translation key.
+ */
+function recordStatusLabel(status: string): string {
+	const key = `discountReport.recordStatus.${status}`
+	return te(key) ? t(key) : status
+}
 
 const PAGE_SIZE = 20
 const filters = reactive<DiscountReportFilters>({ from: null, to: null, kind: null, purpose: null, status: null })
@@ -193,66 +203,66 @@ const summaryCards = computed(() => {
 		{
 			key: "operations",
 			icon: "carbon:receipt",
-			iconClass: "text-stone-500",
+			iconClass: "text-[var(--add-text-secondary)]",
 			label: t("discountReport.totals.operations"),
 			value: formatNumber(sum.operations),
-			tone: "text-stone-900"
+			tone: "text-[var(--add-text-primary)]"
 		},
 		{
 			key: "list",
 			icon: "carbon:tag",
-			iconClass: "text-stone-400",
+			iconClass: "text-[var(--add-text-muted)]",
 			label: t("discountReport.totals.list"),
 			value: formatNumber(sum.list_points),
-			tone: "text-stone-800"
+			tone: "text-[var(--add-text-primary)]"
 		},
 		{
 			key: "final",
 			icon: "carbon:wallet",
-			iconClass: "text-emerald-600",
+			iconClass: "text-[var(--add-success-text)]",
 			label: t("discountReport.totals.final"),
 			value: formatNumber(sum.final_points),
-			tone: "text-emerald-700 font-extrabold"
+			tone: "text-[var(--add-success-text)] font-extrabold"
 		},
 		{
 			key: "effective",
 			icon: "carbon:percentage",
-			iconClass: "text-violet-600",
+			iconClass: "text-[var(--add-info-text)]",
 			label: t("discountReport.totals.effective"),
 			value: `${formatNumber(sum.effective_percent)}%`,
-			tone: "text-violet-700 font-extrabold"
+			tone: "text-[var(--add-info-text)] font-extrabold"
 		},
 		{
 			key: "offer",
 			icon: "carbon:star",
-			iconClass: "text-amber-500",
+			iconClass: "text-[var(--add-warning-text)]",
 			label: t("discountReport.kind.offer"),
 			value: formatNumber(sum.points_by_kind.offer),
-			tone: "text-stone-900"
+			tone: "text-[var(--add-text-primary)]"
 		},
 		{
 			key: "plan_discount",
 			icon: "carbon:badge",
-			iconClass: "text-sky-500",
+			iconClass: "text-[var(--add-info-text)]",
 			label: t("discountReport.kind.plan_discount"),
 			value: formatNumber(sum.points_by_kind.plan_discount),
-			tone: "text-stone-900"
+			tone: "text-[var(--add-text-primary)]"
 		},
 		{
 			key: "coupon",
 			icon: "carbon:shopping-cart",
-			iconClass: "text-rose-500",
+			iconClass: "text-[var(--add-danger-text)]",
 			label: t("discountReport.kind.coupon"),
 			value: formatNumber(sum.points_by_kind.coupon),
-			tone: "text-stone-900"
+			tone: "text-[var(--add-text-primary)]"
 		},
 		{
 			key: "savings",
 			icon: "carbon:money",
-			iconClass: "text-teal-600",
+			iconClass: "text-[var(--add-info-text)]",
 			label: t("discountReport.totals.savings"),
 			value: formatNumber(sum.saving_points),
-			tone: "text-teal-700"
+			tone: "text-[var(--add-info-text)]"
 		}
 	]
 })
@@ -275,8 +285,8 @@ const columns = computed<DataTableColumns<DiscountReportRow>>(() => [
 		minWidth: 130,
 		align: "center",
 		render: row => h("div", { class: "flex flex-col items-center justify-center text-center gap-0.5 leading-tight" }, [
-			h("span", { class: "font-semibold text-stone-900" }, t(`discountReport.record.${row.record.type}`)),
-			h("bdi", { dir: "ltr", class: "text-xs text-stone-500 font-mono" }, row.record.reference ?? `#${row.record.id}`)
+			h("span", { class: "font-semibold text-[var(--add-text-primary)]" }, t(`discountReport.record.${row.record.type}`)),
+			h("bdi", { dir: "ltr", class: "text-xs text-[var(--add-text-secondary)] font-mono" }, row.record.reference ?? `#${row.record.id}`)
 		])
 	},
 	{
@@ -285,10 +295,12 @@ const columns = computed<DataTableColumns<DiscountReportRow>>(() => [
 		width: 170,
 		minWidth: 150,
 		align: "center",
-		render: row => (row.member ? h("div", { class: "flex flex-col items-center justify-center text-center gap-0.5 leading-tight" }, [
-			h("span", { class: "font-semibold text-stone-900 whitespace-nowrap" }, row.member.name),
-			h("bdi", { dir: "ltr", class: "text-xs text-stone-500 font-mono" }, row.member.phone)
-		]) : h("span", { class: "text-stone-400" }, "—"))
+		render: row => (row.member
+? h("div", { class: "flex flex-col items-center justify-center text-center gap-0.5 leading-tight" }, [
+			h("span", { class: "font-semibold text-[var(--add-text-primary)] whitespace-nowrap" }, row.member.name),
+			h("bdi", { dir: "ltr", class: "text-xs text-[var(--add-text-secondary)] font-mono" }, row.member.phone)
+		])
+: h("span", { class: "text-[var(--add-text-muted)]" }, "—"))
 	},
 	{
 		title: t("discountReport.columns.purpose"),
@@ -296,7 +308,7 @@ const columns = computed<DataTableColumns<DiscountReportRow>>(() => [
 		width: 130,
 		minWidth: 120,
 		align: "center",
-		render: row => h(NTag, { size: "small", round: true, bordered: false, class: "!bg-stone-100 !text-stone-700 font-medium whitespace-nowrap" }, { default: () => t(`pricing.purpose.${row.purpose}`) })
+		render: row => h(NTag, { size: "small", round: true, bordered: false, class: "!bg-[var(--add-surface-sunken)] !text-[var(--add-text-primary)] font-medium whitespace-nowrap" }, { default: () => t(`pricing.purpose.${row.purpose}`) })
 	},
 	{
 		title: t("discountReport.columns.at"),
@@ -304,7 +316,7 @@ const columns = computed<DataTableColumns<DiscountReportRow>>(() => [
 		width: 160,
 		minWidth: 150,
 		align: "center",
-		render: row => h("span", { class: "text-xs font-medium text-stone-700 whitespace-nowrap" }, formatDateTime(row.at))
+		render: row => h("span", { class: "text-xs font-medium text-[var(--add-text-primary)] whitespace-nowrap" }, formatDateTime(row.at))
 	},
 	{
 		title: t("discountReport.columns.status"),
@@ -314,7 +326,7 @@ const columns = computed<DataTableColumns<DiscountReportRow>>(() => [
 		align: "center",
 		render: row => h("div", { class: "flex flex-col items-center justify-center gap-1 leading-tight" }, [
 			h(NTag, { size: "small", round: true, bordered: false, type: row.counted ? "success" : "default" }, { default: () => t(row.counted ? "discountReport.counted.yes" : "discountReport.counted.no") }),
-			row.status ? h("span", { class: "text-[11px] text-stone-500 font-medium whitespace-nowrap" }, row.status) : null
+			row.status ? h("span", { class: "text-xs text-[var(--add-text-secondary)] font-medium whitespace-nowrap" }, recordStatusLabel(row.status)) : null
 		])
 	},
 	{
@@ -325,8 +337,8 @@ const columns = computed<DataTableColumns<DiscountReportRow>>(() => [
 		align: "center",
 		// Two lines, not "list → final": a fixed arrow points the wrong way in RTL.
 		render: row => h("div", { class: "flex flex-col items-center justify-center gap-0.5 text-xs font-mono leading-tight" }, [
-			h("span", { class: "text-stone-400 line-through text-[11px]" }, row.list_points === null ? "—" : formatNumber(row.list_points)),
-			h("span", { class: "font-bold text-stone-900" }, row.final_points === null ? "—" : formatNumber(row.final_points))
+			h("span", { class: "text-[var(--add-text-muted)] line-through text-[11px]" }, row.list_points === null ? "—" : formatNumber(row.list_points)),
+			h("span", { class: "font-bold text-[var(--add-text-primary)]" }, row.final_points === null ? "—" : formatNumber(row.final_points))
 		])
 	},
 	{
@@ -337,9 +349,9 @@ const columns = computed<DataTableColumns<DiscountReportRow>>(() => [
 		align: "center",
 		render: row => (row.discounts.length
 			? h("div", { class: "flex flex-col items-center justify-center gap-1 text-xs w-full py-0.5" }, row.discounts.map(discount =>
-				h("span", { class: "inline-block px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 text-[11px] font-medium border border-emerald-200/60 max-w-full text-center truncate" }, discountText(discount))
+				h("span", { class: "inline-block px-2.5 py-1 rounded-md bg-[color-mix(in_srgb,var(--add-success)_10%,transparent)] text-[var(--add-success-text)] text-[11px] font-medium border border-[color-mix(in_srgb,var(--add-success)_35%,transparent)] max-w-full text-center truncate" }, discountText(discount))
 			))
-			: h("span", { class: "text-stone-400" }, "—"))
+			: h("span", { class: "text-[var(--add-text-muted)]" }, "—"))
 	},
 	{
 		title: t("discountReport.columns.saving"),
@@ -348,10 +360,8 @@ const columns = computed<DataTableColumns<DiscountReportRow>>(() => [
 		minWidth: 170,
 		align: "center",
 		render: row => (row.saving
-			? h("span", { class: "inline-block px-2.5 py-1 rounded-md bg-sky-50 text-sky-800 text-[11px] font-medium border border-sky-200/60 text-center leading-normal" },
-				t("discountReport.saving", { points: formatNumber(row.saving.points), percent: formatNumber(row.saving.percent), name: row.saving.reference_name ?? "—" })
-			)
-			: h("span", { class: "text-stone-400" }, "—"))
+			? h("span", { class: "inline-block px-2.5 py-1 rounded-md bg-[color-mix(in_srgb,var(--add-info)_10%,transparent)] text-[var(--add-info-text)] text-[11px] font-medium border border-[color-mix(in_srgb,var(--add-info)_35%,transparent)] text-center leading-normal" }, t("discountReport.saving", { points: formatNumber(row.saving.points), percent: formatNumber(row.saving.percent), name: row.saving.reference_name ?? "—" }))
+			: h("span", { class: "text-[var(--add-text-muted)]" }, "—"))
 	}
 ])
 

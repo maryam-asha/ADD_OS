@@ -11,67 +11,67 @@
 
 		<!-- Stat Cards -->
 		<div v-if="!loadError && items.length" class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border)] bg-white p-4 shadow-xs">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ t("inventory.reports.items") }}</span>
-					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+					<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t("inventory.reports.items") }}</span>
+					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--add-surface-sunken)] text-[var(--add-text-secondary)]">
 						<Icon name="carbon:catalog" :size="18" />
 					</div>
 				</div>
 				<div class="flex items-baseline justify-between gap-1">
-					<span class="font-mono text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{{ totalCount }}</span>
-					<span class="text-xs font-medium text-slate-400">{{ t("inventory.common.all") }}</span>
+					<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-text-primary)]">{{ totalCount }}</span>
+					<span class="text-xs font-medium text-[var(--add-text-muted)]">{{ t("inventory.common.all") }}</span>
 				</div>
 			</div>
 
-			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border)] bg-white p-4 shadow-xs">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ t("inventory.kind.asset") }}</span>
-					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
+					<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t("inventory.kind.asset") }}</span>
+					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--add-info)_10%,transparent)] text-[var(--add-info-text)]">
 						<Icon name="carbon:box" :size="18" />
 					</div>
 				</div>
 				<div class="flex items-baseline justify-between gap-1">
-					<span class="font-mono text-2xl font-bold tracking-tight text-blue-600 dark:text-blue-400">{{ assetItemsCount }}</span>
-					<span class="text-xs font-medium text-slate-400">{{ items.length ? Math.round((assetItemsCount / items.length) * 100) : 0 }}%</span>
+					<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-info-text)]">{{ assetItemsCount }}</span>
+					<span class="text-xs font-medium text-[var(--add-text-muted)]">{{ items.length ? Math.round((assetItemsCount / items.length) * 100) : 0 }}%</span>
 				</div>
 			</div>
 
-			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border)] bg-white p-4 shadow-xs">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ t("inventory.kind.stock") }}</span>
-					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-400">
+					<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t("inventory.kind.stock") }}</span>
+					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--add-info)_10%,transparent)] text-[var(--add-info-text)]">
 						<Icon name="carbon:layers" :size="18" />
 					</div>
 				</div>
 				<div class="flex items-baseline justify-between gap-1">
-					<span class="font-mono text-2xl font-bold tracking-tight text-purple-600 dark:text-purple-400">{{ stockItemsCount }}</span>
-					<span class="text-xs font-medium text-slate-400">{{ items.length ? Math.round((stockItemsCount / items.length) * 100) : 0 }}%</span>
+					<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-info-text)]">{{ stockItemsCount }}</span>
+					<span class="text-xs font-medium text-[var(--add-text-muted)]">{{ items.length ? Math.round((stockItemsCount / items.length) * 100) : 0 }}%</span>
 				</div>
 			</div>
 
-			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border)] bg-white p-4 shadow-xs">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ t("inventory.common.active") }}</span>
-					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+					<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t("inventory.common.active") }}</span>
+					<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--add-success)_10%,transparent)] text-[var(--add-success-text)]">
 						<Icon name="carbon:checkmark-outline" :size="18" />
 					</div>
 				</div>
 				<div class="flex items-baseline justify-between gap-1">
-					<span class="font-mono text-2xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400">{{ activeItemsCount }}</span>
-					<span class="text-xs font-medium text-slate-400">{{ items.length ? Math.round((activeItemsCount / items.length) * 100) : 0 }}%</span>
+					<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-success-text)]">{{ activeItemsCount }}</span>
+					<span class="text-xs font-medium text-[var(--add-text-muted)]">{{ items.length ? Math.round((activeItemsCount / items.length) * 100) : 0 }}%</span>
 				</div>
 			</div>
 		</div>
 
 		<!-- Filters Section: Two rows side by side (2x2 grid) -->
-		<div class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+		<div class="rounded-2xl border border-[var(--add-border)] bg-white p-4 shadow-xs">
 			<div class="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
 				<!-- Row 1: Search + Kind -->
 				<div>
 					<n-input v-model:value="filters.search" :placeholder="t('inventory.itemExtras.searchHint')" clearable class="w-full">
 						<template #prefix>
-							<Icon name="carbon:search" :size="16" class="text-slate-400" />
+							<Icon name="carbon:search" :size="16" class="text-[var(--add-text-muted)]" />
 						</template>
 					</n-input>
 				</div>
@@ -88,7 +88,7 @@
 				</div>
 			</div>
 
-			<div v-if="hasActiveFilters" class="mt-3 flex items-center justify-end border-t border-slate-100 pt-3 dark:border-slate-800/80">
+			<div v-if="hasActiveFilters" class="mt-3 flex items-center justify-end border-t border-[var(--add-border)] pt-3">
 				<n-button quaternary size="small" @click="resetFilters">
 					<template #icon><Icon name="carbon:reset" :size="14" /></template>
 					{{ t("inventory.common.resetFilters") }}
@@ -110,25 +110,25 @@
 			</n-radio-group>
 		</div>
 
-		<n-card v-if="filters.view === 'tree'" class="rounded-2xl border border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900" :bordered="false" size="small">
+		<n-card v-if="filters.view === 'tree'" class="rounded-2xl border border-[var(--add-border)] shadow-xs" :bordered="false" size="small">
 			<n-spin :show="loading">
 				<ItemsTree :items :categories @open="item => mayManage && edit(item)" />
 			</n-spin>
 		</n-card>
 
 		<!-- Table Card -->
-		<n-card v-else class="add-ledger-table rounded-2xl border border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900" :bordered="false" size="small">
+		<n-card v-else class="add-ledger-table rounded-2xl border border-[var(--add-border)] shadow-xs" :bordered="false" size="small">
 			<n-data-table :columns :data="items" :loading :bordered="false" size="small" :scroll-x="1000">
 				<template #empty>
-					<div class="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-500">
+					<div class="flex flex-col items-center justify-center py-12 text-[var(--add-text-muted)]">
 						<Icon name="carbon:catalog" :size="40" class="mb-2 opacity-50" />
 						<span>{{ t("inventory.items.empty") }}</span>
 					</div>
 				</template>
 			</n-data-table>
 
-			<div v-if="lastPage > 1" class="flex flex-col items-center justify-between gap-3 border-t border-slate-100 p-4 sm:flex-row dark:border-slate-800/80">
-				<span class="text-xs text-slate-400">
+			<div v-if="lastPage > 1" class="flex flex-col items-center justify-between gap-3 border-t border-[var(--add-border)] p-4 sm:flex-row">
+				<span class="text-xs text-[var(--add-text-muted)]">
 					{{ t("inventory.items.count", { n: totalCount }) }}
 				</span>
 				<n-pagination v-model:page="page" :page-count="lastPage" :disabled="loading" />
@@ -142,9 +142,10 @@
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
 import type { AttributeDefinition, Category, Item, ItemKind, Unit } from "@/add-os/modules/inventory/types/inventory"
-import { NAlert, NButton, NCard, NDataTable, NInput, NPagination, NPopconfirm, NRadioButton, NRadioGroup, NSelect, NSpin, NTag, NTooltip, useMessage } from "naive-ui"
+import { NAlert, NButton, NCard, NDataTable, NInput, NPagination, NRadioButton, NRadioGroup, NSelect, NSpin, NTag, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { canManageInventoryCatalog } from "@/add-os/config/permissions"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
@@ -307,7 +308,7 @@ const columns = computed<DataTableColumns<Item>>(() => [
 				"span",
 				{
 					class:
-						"inline-flex items-center justify-center font-medium text-xs px-3 py-1 rounded-full bg-slate-100/90 text-slate-800 dark:bg-slate-800/80 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700/60 shadow-2xs"
+						"inline-flex items-center justify-center font-medium text-xs px-3 py-1 rounded-full bg-[var(--add-surface-sunken)] text-[var(--add-text-primary)] border border-[var(--add-border)] shadow-2xs"
 				},
 				label
 			)
@@ -339,47 +340,12 @@ const columns = computed<DataTableColumns<Item>>(() => [
 		align: "center",
 		render: row =>
 			mayManage
-				? h("div", { class: "flex items-center justify-center gap-1.5" }, [
-						h(
-							NTooltip,
-							{ trigger: "hover" },
-							{
-								trigger: () =>
-									h(
-										NButton,
-										{
-											size: "tiny",
-											quaternary: true,
-											circle: true,
-											class: "text-slate-500 hover:text-primary",
-											"aria-label": t("inventory.common.edit"),
-											onClick: () => edit(row)
-										},
-										{ icon: () => h(Icon, { name: "carbon:edit", size: 16 }) }
-									),
-								default: () => t("inventory.common.edit")
-							}
-						),
-						h(
-							NPopconfirm,
-							{ onPositiveClick: () => void remove(row) },
-							{
-								trigger: () =>
-									h(
-										NButton,
-										{
-											size: "tiny",
-											quaternary: true,
-											circle: true,
-											class: "text-slate-500 hover:text-error",
-											"aria-label": t("inventory.common.delete")
-										},
-										{ icon: () => h(Icon, { name: "carbon:trash-can", size: 16 }) }
-									),
-								default: () => t("inventory.items.confirmDelete")
-							}
-						)
-					])
+				? h(RowActions, {
+						actions: [
+							{ key: "edit", label: t("inventory.common.edit"), icon: "carbon:edit", onClick: () => edit(row) },
+							{ key: "delete", label: t("inventory.common.delete"), icon: "carbon:trash-can", danger: true, confirm: t("inventory.items.confirmDelete"), onClick: () => void remove(row) }
+						]
+					})
 				: null
 	}
 ])

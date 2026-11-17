@@ -24,7 +24,20 @@
 		"pay": "Pay",
 		"status": "Status",
 		"notFound": "Not found",
-		"view": "View"
+		"view": "View",
+		"noData": "No data available.",
+		"prev": "Previous",
+		"next": "Next",
+		"refresh": "Refresh",
+		"reset": "Reset",
+		"edit": "Edit",
+		"download": "Download",
+		"downloadStarted": "Preparing the download…",
+		"confirm": "Confirm",
+		"deleted": "Removed.",
+		"savedSuccessfully": "Changes saved.",
+		"noMatchingResults": "No matching results.",
+		"moreActions": "More actions"
 	},
 	"errors": {
 		"backHome": "Back to home",
@@ -102,7 +115,11 @@
 		"names": {
 			"member": "Member",
 			"operations": "Operations",
-			"admin": "Admin"
+			"admin": "Admin",
+			"provider": "Provider",
+			"hr_manager": "HR manager",
+			"store_keeper": "Storekeeper",
+			"technician": "Maintenance technician"
 		},
 		"builtIn": "Built-in",
 		"columns": {
@@ -447,7 +464,9 @@
 			"confirmSuccess": "Two-factor authentication confirmed.",
 			"recoveryCodesTitle": "Recovery codes",
 			"regenerateButton": "Regenerate recovery codes",
-			"disableButton": "Disable two-factor authentication"
+			"disableButton": "Disable two-factor authentication",
+			"lockedNotice": "Confirm your password to see whether two-factor authentication is on.",
+			"unlockButton": "Confirm password"
 		},
 		"confirmPassword": {
 			"title": "Confirm your password",
@@ -527,9 +546,11 @@
 		},
 		"hire": {
 			"button": "Hire"
-		}
+		},
+		"noRole": "No role"
 	},
 	"branches": {
+		"description": "ADD's sites, each with its own time zone and status.",
 		"columns": {
 			"name": "Name",
 			"city": "City",
@@ -565,6 +586,7 @@
 		}
 	},
 	"buildings": {
+		"description": "The buildings in each branch, and the floors they hold.",
 		"columns": {
 			"branch": "Branch",
 			"name": "Name",
@@ -595,6 +617,7 @@
 		}
 	},
 	"floors": {
+		"description": "Each building's floors, where zones and spaces sit.",
 		"columns": {
 			"building": "Building",
 			"label": "Label",
@@ -622,6 +645,7 @@
 		"loadError": "Couldn't load floors. You may not have permission to view this page."
 	},
 	"zones": {
+		"description": "The parts of a floor that group neighbouring spaces.",
 		"columns": {
 			"floor": "Floor",
 			"label": "Label",
@@ -655,6 +679,7 @@
 		"retired": "Retired"
 	},
 	"spaces": {
+		"description": "The bookable rooms and areas, with their capacity, hourly price and status.",
 		"columns": {
 			"image": "Image",
 			"name": "Name",
@@ -772,6 +797,7 @@
 		}
 	},
 	"kiosks": {
+		"description": "The reception screens in each branch, and pairing each one to its device.",
 		"loadError": "Could not load the kiosks.",
 		"isActiveYes": "Active",
 		"isActiveNo": "Inactive",
@@ -824,6 +850,7 @@
 		}
 	},
 	"seatsDesks": {
+		"description": "The individual seats and desks inside spaces, each with its own QR code.",
 		"columns": {
 			"code": "Code",
 			"space": "Space",
@@ -856,6 +883,7 @@
 		"loadError": "Couldn't load seats & desks. You may not have permission to view this page."
 	},
 	"businessHours": {
+		"description": "Each branch's weekly opening hours, and exceptions such as holidays.",
 		"branchLabel": "Branch",
 		"branchPlaceholder": "Select a branch",
 		"tabs": {
@@ -1016,9 +1044,18 @@
 		},
 		"coworking": {
 			"title": "Does this plan include the shared workspace?",
-			"none": { "title": "No seat", "hint": "No seat is held. You can still give a shared-workspace benefit under Benefits." },
-			"flexible": { "title": "Flexible seat", "hint": "A seat is held for the member in the branch pool; they sit at any free desk." },
-			"dedicated": { "title": "Dedicated desk", "hint": "A named desk staff tie to the subscription. Always unlimited." },
+			"none": {
+				"title": "No seat",
+				"hint": "No seat is held. You can still give a shared-workspace benefit under Benefits."
+			},
+			"flexible": {
+				"title": "Flexible seat",
+				"hint": "A seat is held for the member in the branch pool; they sit at any free desk."
+			},
+			"dedicated": {
+				"title": "Dedicated desk",
+				"hint": "A named desk staff tie to the subscription. Always unlimited."
+			},
 			"hoursTitle": "Usage hours",
 			"unlimited": "Unlimited",
 			"hours": "Hours",
@@ -1047,10 +1084,22 @@
 			"continue": "Continue",
 			"change": "Change",
 			"current": "Template",
-			"monthlyUnlimited": { "title": "Monthly unlimited", "hint": "Flexible seat · 30 days · any hours" },
-			"setHours": { "title": "Set hours", "hint": "Flexible seat · hours per month" },
-			"dedicatedDesk": { "title": "Dedicated desk", "hint": "A fixed desk tied to the member" },
-			"noSeat": { "title": "No seat", "hint": "Discounts and benefits only" }
+			"monthlyUnlimited": {
+				"title": "Monthly unlimited",
+				"hint": "Flexible seat · 30 days · any hours"
+			},
+			"setHours": {
+				"title": "Set hours",
+				"hint": "Flexible seat · hours per month"
+			},
+			"dedicatedDesk": {
+				"title": "Dedicated desk",
+				"hint": "A fixed desk tied to the member"
+			},
+			"noSeat": {
+				"title": "No seat",
+				"hint": "Discounts and benefits only"
+			}
 		},
 		"benefits": {
 			"description": "Each space or space type takes one benefit: free hours or a discount.",
@@ -1063,7 +1112,12 @@
 			"coworkingOnCoworkingPlan": "A shared-workspace plan already includes it.",
 			"add": "Add benefit",
 			"empty": "No benefits yet. Add a discount, free hours, a balance or a resource.",
-			"menu": { "discount": "Discount on a space", "hours": "Free hours on a space", "balance": "Balance", "resource": "Resource (printing, locker…)" }
+			"menu": {
+				"discount": "Discount on a space",
+				"hours": "Free hours on a space",
+				"balance": "Balance",
+				"resource": "Resource (printing, locker…)"
+			}
 		},
 		"sections": {
 			"basics": "Basics",
@@ -1985,6 +2039,7 @@
 			"businessHours": "Business Hours",
 			"users": "Users",
 			"roles": "Roles & permissions",
+			"errorLogs": "App error logs",
 			"individuals": "Individuals",
 			"companies": "Companies",
 			"companyCreate": "New company",
@@ -2149,7 +2204,9 @@
 			"inventoryReports": "Inventory reports",
 			"inventorySettings": "Warehouse settings",
 			"itemSales": "Item Sales",
-			"saleItems": "Sale Items"
+			"saleItems": "Sale Items",
+			"packageCreate": "New plan",
+			"packageEdit": "Edit plan"
 		}
 	},
 	"resourceCrud": {
@@ -2275,11 +2332,13 @@
 			"contractStartDate": "Contract Start Date",
 			"monthlyAmount": "Monthly Amount",
 			"directManagement": "Direct District Management",
-			"perMonth": "/ mo"
+			"perMonth": "/ mo",
+			"sectorDefault": "Technology and software"
 		},
 		"status": {
 			"active": "Active",
-			"inactive": "Inactive"
+			"inactive": "Inactive",
+			"all": "Status: all"
 		},
 		"create": {
 			"button": "New company",
@@ -3508,7 +3567,9 @@
 			"coworking_session": "Coworking session",
 			"wallet_top_up": "Wallet top-up",
 			"plan_purchase": "Plan purchase",
-			"event_registration": "Event registration"
+			"event_registration": "Event registration",
+			"item_sale": "Item sale",
+			"kitchen_order": "Kitchen order"
 		},
 		"filters": {
 			"status": "Status",
@@ -3792,7 +3853,25 @@
 			"savings": "Package savings (points)",
 			"note": "Totals count only operations that still count. Package savings are shown apart and never taken off the list price."
 		},
-		"saving": "{points} points ({percent}%) against {name}"
+		"saving": "{points} points ({percent}%) against {name}",
+		"recordStatus": {
+			"awaiting_payment": "Awaiting payment",
+			"pending": "Pending",
+			"confirmed": "Confirmed",
+			"completed": "Completed",
+			"no_show": "No-show",
+			"rejected": "Rejected",
+			"cancelled": "Cancelled",
+			"accepted": "Accepted",
+			"failed": "Failed",
+			"canceled": "Cancelled",
+			"reversed": "Reversed",
+			"expired": "Expired",
+			"needs_review": "Needs review",
+			"paid": "Paid",
+			"unpaid": "Unpaid",
+			"approved": "Approved"
+		}
 	},
 	"offerReport": {
 		"description": "Which offers ran in the period: each stretch an offer was switched on and inside its dates, on the terms it had then, and what it gave. Changed or deleted offers still show where they ran.",
@@ -3931,6 +4010,9 @@
 		"empty": {
 			"title": "No Providers Found",
 			"desc": "No providers match the current search or filter criteria."
+		},
+		"columns": {
+			"name": "Provider name"
 		}
 	},
 	"providerRequests": {
@@ -4128,7 +4210,8 @@
 				"officeLeases": "View & Manage Office Leases",
 				"companies": "View & Manage Companies"
 			}
-		}
+		},
+		"addMemberNotice": "To add an employee, submit a membership request through the requests portal or contact the centre's administration."
 	},
 	"providerOfficeRequests": {
 		"title": "Private Office Requests",
@@ -4278,12 +4361,15 @@
 			"days7": "7 days",
 			"days14": "14 days",
 			"days30": "30 days",
-			"days60": "60 days"
+			"days60": "60 days",
+			"autoRenewAll": "Auto-renewal (all)",
+			"currencyAll": "Currency (all)"
 		},
 		"status": {
 			"active": "Active",
 			"ended": "Ended",
-			"terminated": "Terminated"
+			"terminated": "Terminated",
+			"all": "Lease status (all)"
 		},
 		"columns": {
 			"reference": "Contract Ref",
@@ -4300,7 +4386,8 @@
 		},
 		"autoRenew": {
 			"enabled": "Enabled",
-			"disabled": "Disabled"
+			"disabled": "Disabled",
+			"blocked": "Locked by admin"
 		},
 		"actions": {
 			"view": "View details"
@@ -4354,7 +4441,9 @@
 			"invoiceRemaining": "Remaining",
 			"invoiceOverdue": "Overdue",
 			"invoiceDueAt": "Due Date",
-			"noInvoiceYet": "No invoice issued yet for this period"
+			"noInvoiceYet": "No invoice issued yet for this period",
+			"renewConfirm": "Renew this item now?",
+			"toggleAutoRenewConfirm": "Re-enable auto-renewal for this item?"
 		},
 		"terminate": {
 			"button": "Terminate Early",
@@ -4394,11 +4483,28 @@
 				"full": "Single payment for full term ({months} months)"
 			},
 			"payerProvider": "Provider",
-			"payerCompany": "Company"
+			"payerCompany": "Company",
+			"notice": "To create a lease, pick a request from the private office requests list or create a new request."
 		},
 		"billedTo": {
 			"provider": "Provider",
 			"company": "Company"
+		},
+		"stats": {
+			"totalActive": "Total active leases",
+			"activeCountUnit": "leases in force",
+			"vacantOffices": "Vacant, available offices",
+			"readyOffices": "offices ready",
+			"endingSoon": "Leases ending soon (< 30 days)",
+			"dueContracts": "leases due",
+			"requiresAction": "Need action and follow-up",
+			"allHealthy": "Every lease is within a safe period",
+			"monthlyReturns": "Monthly rental income",
+			"collectionQuarter": "94% collected this quarter"
+		},
+		"alerts": {
+			"smartCollectionDesc": "Auto-renewal is restricted for companies with invoices more than 60 days overdue in the ageing statement, to keep collections regular.",
+			"inspectDues": "Review the claims statement"
 		}
 	},
 	"renewals": {
@@ -4454,7 +4560,8 @@
 			"from": "From Date",
 			"to": "To Date",
 			"provider": "Filter by Provider:",
-			"allProviders": "All Providers"
+			"allProviders": "All Providers",
+			"allCompanies": "All companies"
 		},
 		"common": {
 			"billed": "Billed",
@@ -4468,7 +4575,12 @@
 			"company": "Company",
 			"companies": "Companies",
 			"noDataTitle": "No invoices in this period",
-			"noDataDesc": "No invoices were issued matching the selected period. Try expanding your search range."
+			"noDataDesc": "No invoices were issued matching the selected period. Try expanding your search range.",
+			"exportStatement": "Export leases statement",
+			"exportCsv": "Export CSV",
+			"status": "Status",
+			"currency": "Currency",
+			"recordNumber": "Record / ID"
 		},
 		"aging": {
 			"lowRisk": "Low Risk",
@@ -4507,7 +4619,11 @@
 			"payerProvider": "Billed to Provider",
 			"payerCompanies": "Billed to Companies",
 			"byCompanyTitle": "Invoices by Company",
-			"totalsPerCurrency": "Amounts per Currency"
+			"totalsPerCurrency": "Amounts per Currency",
+			"exportStatement": "Export statement",
+			"payerComparisonSubtitle": "Provider obligations compared with those of directly paying companies",
+			"directVsProvider": "Direct payer vs provider",
+			"companyTableDesc": "Each company with its invoiced, paid and overdue amounts"
 		},
 		"adminProviders": {
 			"description": "Operational and financial overview of providers, branch co-working pool shares, leases, and dues.",
@@ -4538,6 +4654,12 @@
 			"payerType": "Type",
 			"payerName": "Payer",
 			"noOverduePayers": "No overdue payers in this period."
+		},
+		"status": {
+			"noInvoices": "No invoices",
+			"unpaidFully": "Fully unpaid",
+			"partialOverdue": "Partly paid, overdue",
+			"paidFully": "Fully paid"
 		}
 	},
 	"dashboard": {
@@ -4811,7 +4933,10 @@
 		"placeholder": "Write markdown content here...",
 		"emptyPreview": "Preview is empty. Write in the editor to see formatted result.",
 		"words": "words",
-		"chars": "chars"
+		"chars": "chars",
+		"linkLabel": "link",
+		"val1": "Data 1",
+		"val2": "Data 2"
 	},
 	"helpSupport": {
 		"title": "Help & Support",
@@ -5037,6 +5162,55 @@
 			"done": "Code stopped."
 		}
 	},
+	"errorLogs": {
+		"description": "Errors and crashes the member app reported, newest first. Open one to read its stack trace.",
+		"loadError": "Couldn't load the error logs.",
+		"empty": "No errors reported.",
+		"filters": {
+			"type": "Error type (exact), then Enter",
+			"platform": "Platform"
+		},
+		"platform": {
+			"android": "Android",
+			"ios": "iOS"
+		},
+		"columns": {
+			"at": "Occurred",
+			"type": "Type",
+			"message": "Message",
+			"platform": "Platform",
+			"version": "App version",
+			"device": "Device",
+			"screen": "Screen",
+			"actions": "Actions"
+		},
+		"detail": {
+			"title": "Error details",
+			"occurredAt": "Occurred",
+			"receivedAt": "Received",
+			"type": "Type",
+			"platform": "Platform",
+			"appVersion": "App version",
+			"buildNumber": "Build",
+			"os": "OS",
+			"device": "Device",
+			"screen": "Screen",
+			"user": "User",
+			"noUser": "Not signed in",
+			"session": "Session",
+			"message": "Message",
+			"stackTrace": "Stack trace",
+			"noStackTrace": "The app sent no stack trace.",
+			"metadata": "Extra context"
+		},
+		"actions": {
+			"view": "View details",
+			"delete": "Delete",
+			"deleteConfirm": "Delete this error report? This can't be undone.",
+			"deleteSuccess": "Error report deleted.",
+			"deleteError": "Couldn't delete the error report."
+		}
+	},
 	"accessLog": {
 		"subtitle": "Every door opened, locked or refused. Keypad entries are not reported by the lock.",
 		"loadError": "The access log could not be loaded.",
@@ -5085,5 +5259,31 @@
 		"openConfirm": "Open this room's door now? Anyone there can walk in.",
 		"opened": "Door opened.",
 		"confirm": "Yes"
+	},
+	"pageDescriptions": {
+		"announcements": "The announcements members see in the app, and when each one shows.",
+		"contactLinks": "The contact channels listed on the site and in the app.",
+		"founders": "The founders shown on the public site, with a photo and a short bio.",
+		"partners": "The partner organisations shown on the public site.",
+		"community": "The members listed in the community directory.",
+		"eventCategories": "The categories that what's on at ADD is grouped under.",
+		"events": "What's on at ADD: dates, registration and status.",
+		"hrDocumentTypes": "The kinds of document kept on an employee's file, and which of them expire.",
+		"hrCostCenters": "The cost centres that time and pay are charged to.",
+		"currencies": "The currencies payments are taken in, and the base currency.",
+		"exchangeRates": "Exchange rates against the base currency, newest first.",
+		"planModules": "The modules plans are built from.",
+		"planPurchases": "Subscribe a member or a company to a plan at the desk.",
+		"packages": "The plans members subscribe to, with their price and what each includes.",
+		"resourceTypes": "The kinds of resource a plan can grant.",
+		"providerSummary": "An overview of your companies, invoices and requests.",
+		"eventAttendees": "Registrations for this event, to accept or decline.",
+		"receptionDesk": "Today's arrivals and what is waiting on the desk: entry, end and payment requests in one place.",
+		"invoices": "Company and provider invoices, what each owes, and whether it is paid.",
+		"providerRequests": "Your requests to ADD for your companies, and where each one stands.",
+		"closeSessionDetail": "The session's price so far, and how it is ended and paid.",
+		"invoiceStatement": "What your companies were invoiced, paid and still owe, over a period you choose.",
+		"planEditor": "The plan's name, price, duration and what it grants, step by step, with a preview of what the member sees.",
+		"planNotFound": "This plan could not be found."
 	}
 }

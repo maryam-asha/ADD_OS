@@ -1,10 +1,7 @@
 <!-- src/add-os/modules/members/views/IndividualMembersPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.individuals") }}</h1>
-			<p>{{ t("members.description") }}</p>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.individuals')" :description="t('members.description')" />
 
 		<ResourceStatCards v-if="!loadError && !loading" :cards="statCards" />
 
@@ -60,13 +57,7 @@
 		/>
 
 		<!-- Change status modal -->
-		<n-modal
-			v-model:show="statusModalVisible"
-			preset="card"
-			:title="t('members.changeStatus.title')"
-			closable
-			style="max-width: 28rem"
-		>
+		<FormModal v-model:show="statusModalVisible" :title="t('members.changeStatus.title')" size="sm">
 			<n-alert type="warning" :title="t('members.changeStatus.warning')" class="mb-4" />
 			<n-form>
 				<n-form-item :label="t('members.columns.status')">
@@ -90,7 +81,7 @@
 					</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</FormModal>
 	</div>
 </template>
 
@@ -98,10 +89,13 @@
 import type { DataTableColumns, SelectOption } from "naive-ui"
 import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vue"
 import type { Member, MemberStatus, UpdateMemberStatusPayload } from "@/add-os/modules/members/types/member"
-import { NAlert, NAvatar, NButton, NCard, NDataTable, NForm, NFormItem, NInput, NModal, NSelect, NTag, useMessage } from "naive-ui"
+import { NAlert, NAvatar, NButton, NCard, NDataTable, NForm, NFormItem, NInput, NSelect, NTag, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
+import FormModal from "@/add-os/components/page/FormModal.vue"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import MemberDetailPanel from "@/add-os/modules/members/components/MemberDetailPanel.vue"
 import WalletTopUpDialog from "@/add-os/modules/members/components/WalletTopUpDialog.vue"
@@ -276,45 +270,13 @@ async function submitStatusChange() {
 
 // ── Table columns ─────────────────────────────────────────────────────────────
 function renderActions(row: Member) {
-	const detailLabel = t("members.detail.button")
-	const topUpLabel = t("members.topUp.button")
-	const statusLabel = t("members.changeStatus.button")
-
-	return h("div", { class: "inline-flex items-center justify-center gap-2" }, [
-		h(
-			NButton,
-			{
-				text: true,
-				type: "primary",
-				"aria-label": detailLabel,
-				title: detailLabel,
-				onClick: () => openDetail(row)
-			},
-			{ icon: () => h(Icon, { name: "carbon:view", size: 18 }) }
-		),
-		h(
-			NButton,
-			{
-				text: true,
-				type: "info",
-				"aria-label": topUpLabel,
-				title: topUpLabel,
-				onClick: () => openTopUp(row)
-			},
-			{ icon: () => h(Icon, { name: "carbon:wallet", size: 18 }) }
-		),
-		h(
-			NButton,
-			{
-				text: true,
-				type: "warning",
-				"aria-label": statusLabel,
-				title: statusLabel,
-				onClick: () => openStatusModal(row)
-			},
-			{ icon: () => h(Icon, { name: "carbon:status-change", size: 18 }) }
-		)
-	])
+	return h(RowActions, {
+		actions: [
+			{ key: "detail", label: t("members.detail.button"), icon: "carbon:view", onClick: () => openDetail(row) },
+			{ key: "topUp", label: t("members.topUp.button"), icon: "carbon:wallet", onClick: () => openTopUp(row) },
+			{ key: "status", label: t("members.changeStatus.button"), icon: "carbon:status-change", onClick: () => openStatusModal(row) }
+		]
+	})
 }
 
 const columns = computed<DataTableColumns<Member>>(() => [
@@ -330,9 +292,9 @@ const columns = computed<DataTableColumns<Member>>(() => [
 			return h("div", { class: "inline-flex items-center gap-3 py-1 text-start" }, [
 				avatar
 					? h(NAvatar, { round: true, size: 36, src: avatar, class: "shrink-0 ring-1 ring-emerald-600/20" })
-					: h(NAvatar, { round: true, size: 36, class: "shrink-0 bg-emerald-700 text-white font-bold text-xs" }, { default: () => initials }),
+					: h(NAvatar, { round: true, size: 36, class: "shrink-0 bg-[var(--add-success)] text-white font-bold text-xs" }, { default: () => initials }),
 				h("div", { class: "flex flex-col gap-0.5" }, [
-					h("span", { class: "font-semibold text-sm leading-snug text-stone-900" }, row.name),
+					h("span", { class: "font-semibold text-sm leading-snug text-[var(--add-text-primary)]" }, row.name),
 					h("span", { class: "text-xs text-secondary leading-snug font-mono", dir: "ltr" }, row.phone)
 				])
 			])

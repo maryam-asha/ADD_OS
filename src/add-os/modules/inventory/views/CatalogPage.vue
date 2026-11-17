@@ -19,7 +19,7 @@
 				<!-- One search for both views, and the choice of view: the tree, or a table of every category with its path. -->
 				<div class="mb-4 flex flex-wrap items-center gap-3">
 					<n-input v-model:value="treeSearch" :placeholder="t('inventory.catalog.searchTree')" clearable size="small" class="max-w-sm flex-1">
-						<template #prefix><Icon name="carbon:search" :size="14" class="text-slate-400" /></template>
+						<template #prefix><Icon name="carbon:search" :size="14" class="text-[var(--add-text-muted)]" /></template>
 					</n-input>
 					<n-radio-group v-model:value="categoryView" size="small" class="ms-auto">
 						<n-radio-button value="tree">
@@ -33,10 +33,10 @@
 
 				<div :class="categoryView === 'tree' ? 'grid grid-cols-1 gap-4 lg:grid-cols-5' : 'flex flex-col gap-4'">
 					<!-- Categories Tree Card -->
-					<n-card v-if="categoryView === 'tree'" size="small" class="rounded-2xl border border-slate-200/80 shadow-xs lg:col-span-2 dark:border-slate-800 dark:bg-slate-900" :bordered="false">
+					<n-card v-if="categoryView === 'tree'" size="small" class="rounded-2xl border border-[var(--add-border)] shadow-xs lg:col-span-2" :bordered="false">
 						<n-spin :show="loading">
 							<n-tree v-if="filteredTree.length" :data="filteredTree" block-line selectable :selected-keys="selected ? [selected.id] : []" default-expand-all @update:selected-keys="select" />
-							<div v-else class="flex flex-col items-center justify-center py-8 text-slate-400">
+							<div v-else class="flex flex-col items-center justify-center py-8 text-[var(--add-text-muted)]">
 								<Icon name="carbon:catalog" :size="32" class="mb-1 opacity-50" />
 								<p class="text-sm">{{ t("inventory.catalog.empty") }}</p>
 							</div>
@@ -44,10 +44,10 @@
 					</n-card>
 
 					<!-- Categories Table Card: a row opens the category below. -->
-					<n-card v-else size="small" class="add-ledger-table rounded-2xl border border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900" :bordered="false">
+					<n-card v-else size="small" class="add-ledger-table rounded-2xl border border-[var(--add-border)] shadow-xs" :bordered="false">
 						<n-data-table :columns="categoryColumns" :data="tableRows" :loading :bordered="false" size="small" :scroll-x="tableWidth(categoryColumns)" :row-props="categoryRowProps" :row-class-name="row => (selected?.id === row.category.id ? 'bg-primary/5' : '')">
 							<template #empty>
-								<div class="flex flex-col items-center justify-center py-8 text-slate-400">
+								<div class="flex flex-col items-center justify-center py-8 text-[var(--add-text-muted)]">
 									<Icon name="carbon:catalog" :size="32" class="mb-1 opacity-50" />
 									<p class="text-sm">{{ t("inventory.catalog.empty") }}</p>
 								</div>
@@ -56,7 +56,7 @@
 					</n-card>
 
 					<!-- Selected Category Detail Card -->
-					<n-card v-if="selected" size="small" class="rounded-2xl border border-slate-200/80 shadow-xs lg:col-span-3 dark:border-slate-800 dark:bg-slate-900" :bordered="false" :title="localized(selected.name)">
+					<n-card v-if="selected" size="small" class="rounded-2xl border border-[var(--add-border)] shadow-xs lg:col-span-3" :bordered="false" :title="localized(selected.name)">
 						<template #header-extra>
 							<div class="flex items-center gap-2">
 								<n-tag size="small" round :type="selected.kind === 'asset' ? 'info' : 'default'">{{ t(`inventory.kind.${selected.kind}`) }}</n-tag>
@@ -73,34 +73,29 @@
 							<n-button size="small" type="primary" secondary @click="editField(null)">
 								<template #icon><Icon name="carbon:list-boxes" :size="15" /></template>{{ t("inventory.fields.add") }}
 							</n-button>
-							<n-popconfirm @positive-click="deleteCategory(selected)">
-								<template #trigger>
-									<n-button size="small" type="error" secondary>
-										<template #icon><Icon name="carbon:trash-can" :size="15" /></template>{{ t("inventory.common.delete") }}
-									</n-button>
-								</template>
-								{{ t("inventory.catalog.confirmDelete") }}
-							</n-popconfirm>
+							<n-button size="small" type="error" secondary @click="confirm({ title: t('inventory.common.delete'), content: t('inventory.catalog.confirmDelete'), onConfirm: () => selected && deleteCategory(selected) })">
+								<template #icon><Icon name="carbon:trash-can" :size="15" /></template>{{ t("inventory.common.delete") }}
+							</n-button>
 						</div>
 						<p class="mb-2 text-sm text-secondary">{{ t("inventory.fields.description") }}</p>
 						<n-data-table :columns="fieldColumns" :data="selected.fields ?? []" :bordered="false" size="small" :scroll-x="680">
 							<template #empty>
-								<div class="flex flex-col items-center justify-center py-8 text-slate-400">
+								<div class="flex flex-col items-center justify-center py-8 text-[var(--add-text-muted)]">
 									<Icon name="carbon:list-boxes" :size="32" class="mb-1 opacity-50" />
 									<span class="text-sm">{{ t("inventory.fields.empty") }}</span>
 								</div>
 							</template>
 						</n-data-table>
 					</n-card>
-					<n-card v-else-if="categoryView === 'tree'" size="small" class="flex flex-col items-center justify-center rounded-2xl border border-slate-200/80 py-16 text-center shadow-xs lg:col-span-3 dark:border-slate-800 dark:bg-slate-900" :bordered="false">
-						<Icon name="carbon:catalog" :size="48" class="mb-2 text-slate-300 dark:text-slate-600" />
+					<n-card v-else-if="categoryView === 'tree'" size="small" class="flex flex-col items-center justify-center rounded-2xl border border-[var(--add-border)] py-16 text-center shadow-xs lg:col-span-3" :bordered="false">
+						<Icon name="carbon:catalog" :size="48" class="mb-2 text-[var(--add-text-muted)]" />
 						<p class="text-sm text-secondary">{{ t("inventory.catalog.pick") }}</p>
 					</n-card>
 				</div>
 			</n-tab-pane>
 
 			<n-tab-pane name="units" :tab="t('inventory.units.title')">
-				<n-card size="small" class="add-ledger-table rounded-2xl border border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900" :bordered="false">
+				<n-card size="small" class="add-ledger-table rounded-2xl border border-[var(--add-border)] shadow-xs" :bordered="false">
 					<n-data-table :columns="unitColumns" :data="units" :loading :bordered="false" size="small" :scroll-x="600" />
 				</n-card>
 			</n-tab-pane>
@@ -117,9 +112,11 @@
 <script setup lang="ts">
 import type { DataTableColumns, TreeOption } from "naive-ui"
 import type { AttributeDefinition, Category, Unit } from "@/add-os/modules/inventory/types/inventory"
-import { NAlert, NButton, NCard, NDataTable, NInput, NPopconfirm, NRadioButton, NRadioGroup, NSpin, NTabPane, NTabs, NTag, NTooltip, NTree, useMessage } from "naive-ui"
+import { NAlert, NButton, NCard, NDataTable, NInput, NRadioButton, NRadioGroup, NSpin, NTabPane, NTabs, NTag, NTree, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import RowActions from "@/add-os/components/page/RowActions.vue"
+import { useConfirm } from "@/add-os/components/page/useConfirm"
 import { canManageInventoryCatalog } from "@/add-os/config/permissions"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import { apiErrorMessage } from "@/add-os/modules/hr/utils/errors"
@@ -140,6 +137,7 @@ import Icon from "@/components/common/Icon.vue"
 defineProps<{ titleKey?: string }>()
 
 const { t } = useI18n()
+const confirm = useConfirm()
 const message = useMessage()
 const mayManage = canManageInventoryCatalog()
 
@@ -310,36 +308,9 @@ async function deleteCategory(category: Category) {
 	}, t("inventory.common.deleted"))
 }
 
-function actionCell(onEdit: () => void, onDelete: () => void, confirm: string) {
+function actionCell(onEdit: () => void, onDelete: () => void, confirmText: string) {
 	return mayManage
-		? h("div", { class: "flex items-center justify-center gap-2" }, [
-				h(
-					NTooltip,
-					{ trigger: "hover" },
-					{
-						trigger: () =>
-							h(
-								NButton,
-								{ size: "tiny", quaternary: true, circle: true, class: "text-slate-500 hover:text-primary", "aria-label": t("inventory.common.edit"), onClick: onEdit },
-								{ icon: () => h(Icon, { name: "carbon:edit", size: 16 }) }
-							),
-						default: () => t("inventory.common.edit")
-					}
-				),
-				h(
-					NPopconfirm,
-					{ onPositiveClick: onDelete },
-					{
-						trigger: () =>
-							h(
-								NButton,
-								{ size: "tiny", quaternary: true, circle: true, class: "text-slate-500 hover:text-error", "aria-label": t("inventory.common.delete") },
-								{ icon: () => h(Icon, { name: "carbon:trash-can", size: 16 }) }
-							),
-						default: () => confirm
-					}
-				)
-			])
+		? h(RowActions, { actions: [{ key: "edit", label: t("inventory.common.edit"), icon: "carbon:edit", onClick: onEdit }, { key: "delete", label: t("inventory.common.delete"), icon: "carbon:trash-can", danger: true, confirm: confirmText, onClick: onDelete }] })
 		: null
 }
 

@@ -87,7 +87,7 @@
 		</n-collapse-transition>
 
 		<!-- Lend a room to co-working, or take it back -->
-		<n-modal v-model:show="lendVisible" preset="card" class="max-w-lg" :title="t('coworkingPool.lend.title')">
+		<FormModal v-model:show="lendVisible" :title="t('coworkingPool.lend.title')" size="md">
 			<p class="mb-4 text-xs">{{ t("coworkingPool.lend.hint") }}</p>
 
 			<n-form label-placement="top">
@@ -140,31 +140,17 @@
 					</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</FormModal>
 	</n-card>
 </template>
 
 <script setup lang="ts">
 import type { SelectOption } from "naive-ui"
 import type { CoworkingPool, CoworkingWindow } from "@/add-os/modules/booking/types/coworking"
-import {
-	NAlert,
-	NButton,
-	NCard,
-	NCollapseTransition,
-	NDatePicker,
-	NForm,
-	NFormItem,
-	NInputNumber,
-	NModal,
-	NSelect,
-	NSpin,
-	NTimePicker,
-	useDialog,
-	useMessage
-} from "naive-ui"
+import { NAlert, NButton, NCard, NCollapseTransition, NDatePicker, NForm, NFormItem, NInputNumber, NSelect, NSpin, NTimePicker, useDialog, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
 import { ApiError } from "@/add-os/services/api"
 import { getCoworkingPool, lendRoom, listCoworkingWindows, takeRoomBack } from "@/add-os/services/coworking"
 import { formatDate, formatNumber, formatTime } from "@/add-os/utils/format"

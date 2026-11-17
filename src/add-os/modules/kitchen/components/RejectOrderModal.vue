@@ -1,6 +1,6 @@
 <!-- src/add-os/modules/kitchen/components/RejectOrderModal.vue -->
 <template>
-	<n-modal v-model:show="show" preset="card" :title="t('kitchen.reject.title', { id: orderLabel })" class="max-w-md">
+	<FormModal v-model:show="show" :title="t('kitchen.reject.title', { id: orderLabel })" size="sm">
 		<n-form-item :label="t('kitchen.reject.reasonLabel')" :feedback="error ?? undefined" :validation-status="error ? 'error' : undefined">
 			<n-input
 				v-model:value="reason"
@@ -15,16 +15,17 @@
 		<template #footer>
 			<div class="flex justify-end gap-2">
 				<n-button @click="show = false">{{ t("resourceCrud.form.cancel") }}</n-button>
-				<n-button type="error" :loading="loading" data-test="reject-submit" @click="submit">{{ t("kitchen.reject.submit") }}</n-button>
+				<n-button type="error" :loading data-test="reject-submit" @click="submit">{{ t("kitchen.reject.submit") }}</n-button>
 			</div>
 		</template>
-	</n-modal>
+	</FormModal>
 </template>
 
 <script setup lang="ts">
-import { NButton, NFormItem, NInput, NModal } from "naive-ui"
+import { NButton, NFormItem, NInput } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
 import { formatNumber } from "@/add-os/utils/format"
 
 /**

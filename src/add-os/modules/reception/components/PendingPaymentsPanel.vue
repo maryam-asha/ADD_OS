@@ -9,7 +9,7 @@
 <template>
 	<div class="flex flex-col gap-4">
 		<div class="flex items-center justify-between gap-3 flex-wrap">
-			<p class="text-sm text-stone-600">{{ t("reception.pendingPayments.description") }}</p>
+			<p class="text-sm text-[var(--add-text-secondary)]">{{ t("reception.pendingPayments.description") }}</p>
 			<n-input v-model:value="search" clearable size="small" style="width: 18rem; max-width: 100%" :placeholder="t('reception.pendingPayments.searchPlaceholder')">
 				<template #prefix><Icon name="carbon:search" :size="16" /></template>
 			</n-input>
@@ -19,7 +19,7 @@
 
 		<n-card class="add-ledger-table">
 			<n-data-table v-if="rows.length > 0 || isLoading" :columns :data="rows" :loading="isLoading" :bordered="false" :row-key size="small" :scroll-x="820" />
-			<div v-else-if="!error" class="py-10 text-center text-sm text-stone-500">{{ t("reception.pendingPayments.empty") }}</div>
+			<div v-else-if="!error" class="py-10 text-center text-sm text-[var(--add-text-secondary)]">{{ t("reception.pendingPayments.empty") }}</div>
 
 			<div v-if="meta && meta.last_page > 1" class="mt-4 flex justify-end">
 				<n-pagination v-model:page="page" :page-count="meta.last_page" :disabled="isLoading" />
@@ -33,10 +33,11 @@
 <script setup lang="ts">
 import type { DataTableColumns } from "naive-ui"
 import type { OutstandingItem } from "@/add-os/modules/booking/types/reception"
-import { NAlert, NButton, NCard, NDataTable, NInput, NPagination, NTag } from "naive-ui"
+import { NAlert, NCard, NDataTable, NInput, NPagination, NTag } from "naive-ui"
 import { computed, h, onBeforeUnmount, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { RouterLink } from "vue-router"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { canSettleAtReception } from "@/add-os/config/permissions"
 import { useReceptionRealtime } from "@/add-os/modules/booking/composables/useReceptionRealtime"
@@ -120,8 +121,8 @@ const columns = computed<DataTableColumns<OutstandingItem>>(() => {
 			minWidth: 170,
 			render: row => row.member
 				? h("div", { class: "flex flex-col" }, [
-						h(RouterLink, { to: { name: "members.memberProfile", params: { id: row.member.id } }, class: "font-semibold text-stone-900 hover:underline" }, () => row.member?.name ?? "—"),
-						row.member.phone ? h("bdi", { dir: "ltr", class: "text-xs text-stone-500 add-numeric" }, row.member.phone) : null
+						h(RouterLink, { to: { name: "members.memberProfile", params: { id: row.member.id } }, class: "font-semibold text-[var(--add-text-primary)] hover:underline" }, () => row.member?.name ?? "—"),
+						row.member.phone ? h("bdi", { dir: "ltr", class: "text-xs text-[var(--add-text-secondary)] add-numeric" }, row.member.phone) : null
 					])
 				: "—"
 		},
@@ -147,19 +148,19 @@ const columns = computed<DataTableColumns<OutstandingItem>>(() => {
 			minWidth: 140,
 			render: row => h("div", { class: "flex flex-col" }, [
 				h("bdi", { dir: "ltr", class: "font-bold add-numeric" }, formatAmount(row.amount)),
-				h("span", { class: "text-xs text-stone-500" }, t("collectPayment.duePoints", { points: formatNumber(row.amount_points) }))
+				h("span", { class: "text-xs text-[var(--add-text-secondary)]" }, t("collectPayment.duePoints", { points: formatNumber(row.amount_points) }))
 			])
 		},
 		{
 			title: "",
 			key: "actions",
-			width: 120,
+			width: 130,
 			align: "center",
-			render: row => h(
-				NButton,
-				{ size: "small", type: "primary", disabled: !row.member, onClick: () => collect(row) },
-				{ icon: () => h(Icon, { name: "carbon:money", size: 16 }), default: () => t("reception.pendingPayments.collect") }
-			)
+			render: row =>
+				h(RowActions, {
+					labelled: true,
+					actions: [{ key: "collect", label: t("reception.pendingPayments.collect"), icon: "carbon:money", primary: true, disabled: !row.member, onClick: () => collect(row) }]
+				})
 		}
 	]
 	// Taking money is `reception.settle_payment`; without it the list is read-only.

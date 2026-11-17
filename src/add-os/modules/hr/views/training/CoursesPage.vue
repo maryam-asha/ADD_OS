@@ -23,7 +23,6 @@
 				</template>
 			</n-data-table>
 		</n-card>
-
 	</div>
 </template>
 
@@ -34,6 +33,7 @@ import { NAlert, NButton, NCard, NDataTable, NSelect } from "naive-ui"
 import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { canManageTraining } from "@/add-os/config/permissions"
 import ActiveTag from "@/add-os/modules/hr/components/ActiveTag.vue"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
@@ -105,14 +105,14 @@ const columns = computed<DataTableColumns<Course>>(() => [
 	{
 		title: "",
 		key: "actions",
-		width: 150,
+		width: 100,
 		render: row =>
-			h("div", { class: "flex items-center justify-end gap-3" }, [
-				h(NButton, { size: "tiny", onClick: () => void router.push({ name: "hrTalent.hrTrainingSessions", query: { course_id: row.id } }) }, () => t("hrTraining.courses.sessions")),
-				mayManage
-					? h(NButton, { text: true, type: "primary", "aria-label": t("hr.common.edit"), title: t("hr.common.edit"), onClick: () => openEditor(row) }, { icon: () => h(Icon, { name: "carbon:edit", size: 18 }) })
-					: null
-			])
+			h(RowActions, {
+				actions: [
+					{ key: "sessions", label: t("hrTraining.courses.sessions"), icon: "carbon:calendar", onClick: () => void router.push({ name: "hrTalent.hrTrainingSessions", query: { course_id: row.id } }) },
+					...(mayManage ? [{ key: "edit", label: t("hr.common.edit"), icon: "carbon:edit", onClick: () => openEditor(row) }] : [])
+				]
+			})
 	}
 ])
 </script>

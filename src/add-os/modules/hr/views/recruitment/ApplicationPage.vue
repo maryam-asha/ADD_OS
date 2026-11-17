@@ -121,6 +121,7 @@
 
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
+import type { RowAction } from "@/add-os/components/page/row-actions"
 import type { PayComponent } from "@/add-os/modules/hr/types/payroll"
 import type { Application, Interview, Offer, PipelineStage, Requisition } from "@/add-os/modules/hr/types/recruitment"
 import type { UpdateResult } from "@/add-os/services/hr/core"
@@ -128,6 +129,7 @@ import { NAlert, NButton, NDataTable, NDescriptions, NDescriptionsItem, NFormIte
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { RouterLink, useRoute, useRouter } from "vue-router"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { canHireEmployees, canManageRecruitment, canViewEmployees } from "@/add-os/config/permissions"
 import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import HireCandidateModal from "@/add-os/modules/hr/components/recruitment/HireCandidateModal.vue"
@@ -296,10 +298,13 @@ function scorecardsCell(row: Interview) {
 
 function interviewActions(row: Interview) {
 	if (!mayManage || row.status !== "scheduled") return null
-	return h("div", { class: "flex justify-end gap-2" }, [
-		h(NButton, { size: "tiny", onClick: () => void act(`complete-${row.id}`, () => completeInterview(row.id)) }, () => t("hrRecruitment.interviews.complete")),
-		h(NButton, { size: "tiny", type: "error", secondary: true, onClick: () => confirmThen(t("hrRecruitment.interviews.cancel"), t("hrRecruitment.interviews.cancelConfirm"), () => cancelInterview(row.id)) }, () => t("hrRecruitment.interviews.cancel"))
-	])
+	return h(RowActions, {
+		labelled: true,
+		actions: [
+			{ key: "complete", label: t("hrRecruitment.interviews.complete"), icon: "carbon:checkmark", primary: true, onClick: () => void act(`complete-${row.id}`, () => completeInterview(row.id)) },
+			{ key: "cancel", label: t("hrRecruitment.interviews.cancel"), icon: "carbon:close", danger: true, onClick: () => confirmThen(t("hrRecruitment.interviews.cancel"), t("hrRecruitment.interviews.cancelConfirm"), () => cancelInterview(row.id)) }
+		]
+	})
 }
 
 const interviewColumns = computed<DataTableColumns<Interview>>(() => [
@@ -320,15 +325,17 @@ function confirmThen(title: string, content: string, call: () => Promise<UpdateR
 /** The candidate's answer to an approved offer; HR records it. A live offer can be withdrawn. */
 function offerActions(row: Offer) {
 	if (!mayManage) return null
-	const buttons = []
+	const actions: RowAction[] = []
 	if (row.status === "approved") {
-		buttons.push(h(NButton, { size: "tiny", type: "primary", onClick: () => confirmThen(t("hrRecruitment.offers.accept"), t("hrRecruitment.offers.acceptConfirm"), () => acceptOffer(row.id)) }, () => t("hrRecruitment.offers.accept")))
-		buttons.push(h(NButton, { size: "tiny", onClick: () => confirmThen(t("hrRecruitment.offers.decline"), t("hrRecruitment.offers.declineConfirm"), () => declineOffer(row.id, null)) }, () => t("hrRecruitment.offers.decline")))
+		actions.push(
+			{ key: "accept", label: t("hrRecruitment.offers.accept"), icon: "carbon:checkmark", primary: true, onClick: () => confirmThen(t("hrRecruitment.offers.accept"), t("hrRecruitment.offers.acceptConfirm"), () => acceptOffer(row.id)) },
+			{ key: "decline", label: t("hrRecruitment.offers.decline"), icon: "carbon:close", onClick: () => confirmThen(t("hrRecruitment.offers.decline"), t("hrRecruitment.offers.declineConfirm"), () => declineOffer(row.id, null)) }
+		)
 	}
 	if (["pending", "approved", "accepted"].includes(row.status)) {
-		buttons.push(h(NButton, { size: "tiny", type: "error", secondary: true, onClick: () => confirmThen(t("hrRecruitment.offers.withdraw"), t("hrRecruitment.offers.withdrawConfirm"), () => withdrawOffer(row.id)) }, () => t("hrRecruitment.offers.withdraw")))
+		actions.push({ key: "withdraw", label: t("hrRecruitment.offers.withdraw"), icon: "carbon:undo", danger: true, onClick: () => confirmThen(t("hrRecruitment.offers.withdraw"), t("hrRecruitment.offers.withdrawConfirm"), () => withdrawOffer(row.id)) })
 	}
-	return buttons.length ? h("div", { class: "flex flex-wrap justify-end gap-2" }, buttons) : null
+	return actions.length ? h(RowActions, { labelled: true, actions }) : null
 }
 
 const offerColumns = computed<DataTableColumns<Offer>>(() => [

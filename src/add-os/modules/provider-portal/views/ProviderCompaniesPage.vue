@@ -1,101 +1,94 @@
 <!-- src/add-os/modules/provider-portal/views/ProviderCompaniesPage.vue -->
 <template>
-	<div class="flex flex-col gap-5 text-neutral-800 dark:text-neutral-100">
+	<div class="flex flex-col gap-5 text-[var(--add-text-primary)]">
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
 		<!-- HEADER & ACTIONS -->
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
-		<div class="flex flex-wrap items-center justify-between gap-3">
-			<div class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">
-					{{ t("providerPortal.companies", "الشركات") }}
-				</h1>
-				<p class="text-sm text-neutral-500">
-					{{ t("companies.description", "إدارة وتتبع بيانات الشركات المسجلة، اشتراكاتها المكانية، عقود الإيجار، والمستحقات المالية.") }}
-				</p>
-			</div>
-
-			<div class="flex items-center gap-2">
-				<n-button
-					secondary
-					class="rounded-lg"
-					:loading="isLoading"
-					@click="refetch"
-				>
-					<template #icon><Icon name="carbon:renew" :size="16" /></template>
-					{{ t("common.refresh", "تحديث") }}
-				</n-button>
-				<n-button
-					type="primary"
-					class="rounded-lg font-medium"
-					:disabled="isLoading || !data.length"
-					@click="exportCsv"
-				>
-					<template #icon><Icon name="carbon:download" :size="16" /></template>
-					{{ t("reports.common.exportCsv", "تصدير CSV") }}
-				</n-button>
-			</div>
-		</div>
+		<PageHeader :title="t('providerPortal.companies', 'الشركات')" :description="t('companies.description', 'إدارة وتتبع بيانات الشركات المسجلة، اشتراكاتها المكانية، عقود الإيجار، والمستحقات المالية.')">
+			<template #actions>
+				<div class="flex items-center gap-2">
+					<n-button
+						secondary
+						class="rounded-lg"
+						:loading="isLoading"
+						@click="refetch"
+					>
+						<template #icon><Icon name="carbon:renew" :size="16" /></template>
+						{{ t("common.refresh") }}
+					</n-button>
+					<n-button
+						type="primary"
+						class="rounded-lg font-medium"
+						:disabled="isLoading || !data.length"
+						@click="exportCsv"
+					>
+						<template #icon><Icon name="carbon:download" :size="16" /></template>
+						{{ t("reports.common.exportCsv") }}
+					</n-button>
+				</div>
+			</template>
+		</PageHeader>
 
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
 		<!-- METRICS SUMMARY HIGHLIGHTS -->
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
 		<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
 			<!-- Total Companies -->
-			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface-raised,#FFFFFF)] p-4 shadow-xs dark:border-neutral-800 dark:bg-neutral-900/60">
+			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border)]/40 bg-[var(--add-surface-raised)] p-4 shadow-xs">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-[var(--add-text-muted,#5A606B)] dark:text-neutral-400">
+					<span class="text-xs font-semibold text-[var(--add-text-muted)]">
 						{{ t("reports.providerCompanies.totalCompanies", "إجمالي الشركات") }}
 					</span>
-					<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--add-primary,#657C50)]/10 text-[var(--add-primary-text,#556843)] dark:bg-[var(--add-primary,#657C50)]/20 dark:text-[var(--add-primary,#657C50)]">
+					<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--add-primary)]/10 text-[var(--add-primary-text)]">
 						<Icon name="carbon:enterprise" :size="18" />
 					</div>
 				</div>
-				<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-text-primary,#43474F)] dark:text-neutral-50">
+				<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-text-primary)]">
 					{{ meta?.total ?? data.length }}
 				</span>
 			</div>
 
 			<!-- Active Subscriptions -->
-			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface-raised,#FFFFFF)] p-4 shadow-xs dark:border-neutral-800 dark:bg-neutral-900/60">
+			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border)]/40 bg-[var(--add-surface-raised)] p-4 shadow-xs">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-[var(--add-text-muted,#5A606B)] dark:text-neutral-400">
+					<span class="text-xs font-semibold text-[var(--add-text-muted)]">
 						{{ t("reports.providerCompanies.subscribedCompanies", "شركات باشتراك سارٍ") }}
 					</span>
-					<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--add-success,#657C50)]/10 text-[var(--add-success-text,#556843)] dark:bg-[var(--add-success,#657C50)]/20 dark:text-[var(--add-success,#657C50)]">
+					<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--add-success)]/10 text-[var(--add-success-text)]">
 						<Icon name="carbon:id-management" :size="18" />
 					</div>
 				</div>
-				<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-primary-text,#556843)] dark:text-[var(--add-primary,#657C50)]">
+				<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-primary-text)]">
 					{{ activeSubscriptionsCount }}
 				</span>
 			</div>
 
 			<!-- Stopped Renewals -->
-			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface-raised,#FFFFFF)] p-4 shadow-xs dark:border-neutral-800 dark:bg-neutral-900/60">
+			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border)]/40 bg-[var(--add-surface-raised)] p-4 shadow-xs">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-[var(--add-text-muted,#5A606B)] dark:text-neutral-400">
+					<span class="text-xs font-semibold text-[var(--add-text-muted)]">
 						{{ t("reports.providerCompanies.stoppedRenewals", "تجديد متوقف") }}
 					</span>
-					<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--add-warning,#E7B155)]/10 text-[var(--add-warning-text,#845A13)] dark:bg-[var(--add-warning,#E7B155)]/20 dark:text-[var(--add-warning,#E7B155)]">
+					<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--add-warning)]/10 text-[var(--add-warning-text)]">
 						<Icon name="carbon:warning-alt" :size="18" />
 					</div>
 				</div>
-				<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-warning-text,#845A13)] dark:text-[var(--add-warning,#E7B155)]">
+				<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-warning-text)]">
 					{{ stoppedRenewalsCount }}
 				</span>
 			</div>
 
 			<!-- Companies with Overdue -->
-			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface-raised,#FFFFFF)] p-4 shadow-xs dark:border-neutral-800 dark:bg-neutral-900/60">
+			<div class="flex flex-col justify-between gap-2 rounded-2xl border border-[var(--add-border)]/40 bg-[var(--add-surface-raised)] p-4 shadow-xs">
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-[var(--add-text-muted,#5A606B)] dark:text-neutral-400">
+					<span class="text-xs font-semibold text-[var(--add-text-muted)]">
 						{{ t("reports.providerCompanies.withOverdue", "شركات عليها متأخرات") }}
 					</span>
-					<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--add-danger,#D93D23)]/10 text-[var(--add-danger-text,#B4321D)] dark:bg-[var(--add-danger,#D93D23)]/20 dark:text-[var(--add-danger,#D93D23)]">
+					<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--add-danger)]/10 text-[var(--add-danger-text)]">
 						<Icon name="carbon:warning" :size="18" />
 					</div>
 				</div>
-				<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-danger-text,#B4321D)] dark:text-[var(--add-danger,#D93D23)]">
+				<span class="font-mono text-2xl font-bold tracking-tight text-[var(--add-danger-text)]">
 					{{ overdueCompaniesCount }}
 				</span>
 			</div>
@@ -104,7 +97,7 @@
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
 		<!-- FILTERS SECTION -->
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
-		<div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface-raised,#FFFFFF)] p-3.5 shadow-xs dark:border-neutral-800 dark:bg-neutral-900/60">
+		<div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--add-border)]/40 bg-[var(--add-surface-raised)] p-3.5 shadow-xs">
 			<div class="flex flex-1 flex-wrap items-center gap-3">
 				<!-- Search -->
 				<div class="w-full sm:w-72">
@@ -115,7 +108,7 @@
 						class="rounded-xl"
 					>
 						<template #prefix>
-							<Icon name="carbon:search" :size="16" class="text-neutral-400" />
+							<Icon name="carbon:search" :size="16" class="text-[var(--add-text-muted)]" />
 						</template>
 					</n-input>
 				</div>
@@ -131,7 +124,7 @@
 				</div>
 			</div>
 
-			<div class="flex items-center gap-2 text-xs text-[var(--add-text-muted,#5A606B)]">
+			<div class="flex items-center gap-2 text-xs text-[var(--add-text-muted)]">
 				<span>{{ t('reports.common.totalCount', { count: filteredData.length }) }}</span>
 				<n-button
 					v-if="searchTerm || statusFilter !== 'all'"
@@ -149,14 +142,14 @@
 		<!-- MAIN DATA TABLE -->
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
 		<AddDataTable
-			:columns="columns"
+			v-model:page="page"
+			:columns
 			:data="filteredData"
 			:loading="isLoading"
-			:row-key="rowKey"
+			:row-key
 			:scroll-x="1100"
 			:empty-text="t('companies.empty', 'لا توجد شركات مطابقة لمعايير البحث.')"
-			:meta="meta"
-			v-model:page="page"
+			:meta
 		/>
 
 		<!-- ════════════════════════════════════════════════════════════════════════════ -->
@@ -176,13 +169,15 @@ import type { Company } from "@/add-os/modules/members/types/company"
 import { NButton, NInput, NSelect, NTag, NTooltip } from "naive-ui"
 import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
+import RowActions from "@/add-os/components/page/RowActions.vue"
+import AddDataTable from "@/add-os/components/table/AddDataTable.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import ProviderCompanyDetailModal from "@/add-os/modules/provider-portal/components/ProviderCompanyDetailModal.vue"
 import { useOpenRecord } from "@/add-os/notifications/useOpenRecord"
 import { listProviderCompanies } from "@/add-os/services/provider-portal"
 import { formatReportMoney } from "@/add-os/services/reports"
 import { formatDate } from "@/add-os/utils/format/dates"
-import AddDataTable from "@/add-os/components/table/AddDataTable.vue"
 import Icon from "@/components/common/Icon.vue"
 
 const { t } = useI18n()
@@ -217,7 +212,7 @@ function rowKey(row: Company) {
 }
 
 const statusOptions = computed<SelectOption[]>(() => [
-	{ label: t("companies.status.all", "الحالة: الجميع"), value: "all" },
+	{ label: t("companies.status.all"), value: "all" },
 	{ label: t("companies.status.active", "نشط"), value: "active" },
 	{ label: t("companies.status.inactive", "غير نشط"), value: "inactive" }
 ])
@@ -269,7 +264,6 @@ const overdueCompaniesCount = computed(() => {
 	}).length
 })
 
-
 function getMonogram(name: string): string {
 	if (!name) return "—"
 	const cleaned = name.replace(/^(شركة|مؤسسة|مجموعة|مكتب)\s+/, "").trim()
@@ -289,7 +283,7 @@ function exportCsv() {
 		t("providerPortal.seats", "المقاعد"),
 		t("providerPortal.members", "الموظفون"),
 		t("providerPortal.companyLeases", "المكاتب المؤجرة"),
-		t("reports.common.status", "الحالة")
+		t("reports.common.status")
 	]
 
 	const rows = filteredData.value.map(row => {
@@ -308,7 +302,7 @@ function exportCsv() {
 		].join(",")
 	})
 
-	const csvContent = "\uFEFF" + [headers.join(","), ...rows].join("\n")
+	const csvContent = `\uFEFF${[headers.join(","), ...rows].join("\n")}`
 	const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
 	const url = URL.createObjectURL(blob)
 	const link = document.createElement("a")
@@ -333,7 +327,7 @@ const columns = computed<DataTableColumns<Company>>(() => [
 				h(
 					"div",
 					{
-						class: "flex h-10 w-10 shrink-0 select-none items-center justify-center rounded-xl border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface-sunken,#EDEAE8)] text-xs font-bold text-[var(--add-text-primary,#43474F)] dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200"
+						class: "flex h-10 w-10 shrink-0 select-none items-center justify-center rounded-xl border border-[var(--add-border)]/40 bg-[var(--add-surface-sunken)] text-xs font-bold text-[var(--add-text-primary)]"
 					},
 					monogram
 				),
@@ -341,7 +335,7 @@ const columns = computed<DataTableColumns<Company>>(() => [
 					h(
 						"span",
 						{
-							class: "cursor-pointer truncate text-sm font-bold text-[var(--add-text-primary,#43474F)] hover:text-[var(--add-primary-text,#556843)] hover:underline dark:text-neutral-100",
+							class: "cursor-pointer truncate text-sm font-bold text-[var(--add-text-primary)] hover:text-[var(--add-primary-text)] hover:underline",
 							title: row.legal_name,
 							onClick: () => openDetail(row)
 						},
@@ -349,7 +343,7 @@ const columns = computed<DataTableColumns<Company>>(() => [
 					),
 					h(
 						"span",
-						{ class: "font-mono text-xs text-[var(--add-text-muted,#5A606B)] dark:text-neutral-400" },
+						{ class: "font-mono text-xs text-[var(--add-text-muted)]" },
 						`CR: #${row.contract_ref || row.id}`
 					)
 				])
@@ -366,7 +360,7 @@ const columns = computed<DataTableColumns<Company>>(() => [
 		render: row => {
 			const m = (row as any).membership
 			if (!m) {
-				return h("span", { class: "text-xs text-[var(--add-text-muted,#5A606B)]" }, "—")
+				return h("span", { class: "text-xs text-[var(--add-text-muted)]" }, "—")
 			}
 
 			const isRenewalStopped = !m.auto_renew || !!m.renewal_stop_reason
@@ -374,7 +368,7 @@ const columns = computed<DataTableColumns<Company>>(() => [
 
 			return h("div", { class: "inline-flex flex-col items-center gap-1 py-1" }, [
 				h("div", { class: "flex flex-wrap items-center justify-center gap-1.5" }, [
-					h("span", { class: "text-xs font-bold text-[var(--add-text-primary,#43474F)] dark:text-neutral-200" }, m.plan_name || "خطة اشتراك"),
+					h("span", { class: "text-xs font-bold text-[var(--add-text-primary)]" }, m.plan_name || "خطة اشتراك"),
 					h(
 						NTag,
 						{
@@ -387,7 +381,7 @@ const columns = computed<DataTableColumns<Company>>(() => [
 						{ default: () => `${m.seats || 0} ${t("reports.providerCompanies.seats", "مقاعد")}` }
 					)
 				]),
-				h("div", { class: "flex items-center justify-center gap-2 text-xs text-[var(--add-text-muted,#5A606B)] dark:text-neutral-400" }, [
+				h("div", { class: "flex items-center justify-center gap-2 text-xs text-[var(--add-text-muted)]" }, [
 					h("span", `${t("reports.providerCompanies.endsAt", "ينتهي:")} ${m.current_period_end ? formatDate(m.current_period_end) : "—"}`)
 				]),
 				isRenewalStopped
@@ -398,7 +392,7 @@ const columns = computed<DataTableColumns<Company>>(() => [
 								trigger: () =>
 									h(
 										"div",
-										{ class: "flex items-center gap-1 text-xs font-medium text-[var(--add-warning-text,#845A13)] dark:text-[var(--add-warning,#E7B155)] cursor-help" },
+										{ class: "flex items-center gap-1 text-xs font-medium text-[var(--add-warning-text)] cursor-help" },
 										[
 											h(Icon, { name: "carbon:warning-alt", size: 14 }),
 											h("span", stopReasonText)
@@ -428,8 +422,8 @@ const columns = computed<DataTableColumns<Company>>(() => [
 				"div",
 				{ class: "flex items-center justify-center gap-1.5" },
 				[
-					h(Icon, { name: "carbon:user", size: 14, class: "text-[var(--add-text-muted,#5A606B)]" }),
-					h("span", { class: "font-mono font-bold text-xs text-[var(--add-text-primary,#43474F)] dark:text-neutral-100" }, `${count}`)
+					h(Icon, { name: "carbon:user", size: 14, class: "text-[var(--add-text-muted)]" }),
+					h("span", { class: "font-mono font-bold text-xs text-[var(--add-text-primary)]" }, `${count}`)
 				]
 			)
 		}
@@ -447,7 +441,7 @@ const columns = computed<DataTableColumns<Company>>(() => [
 			const leasesCount = (row as any).active_leases_count ?? leases.length
 
 			if (leasesCount === 0) {
-				return h("span", { class: "text-xs text-[var(--add-text-muted,#5A606B)]" }, "0 مكتب")
+				return h("span", { class: "text-xs text-[var(--add-text-muted)]" }, "0 مكتب")
 			}
 
 			return h("div", { class: "inline-flex flex-col items-center gap-0.5" }, [
@@ -457,9 +451,9 @@ const columns = computed<DataTableColumns<Company>>(() => [
 						{ size: "tiny", type: "info", round: true, bordered: false },
 						{ default: () => `${leasesCount} ${t("reports.providerCompanies.offices", "مكتب")}` }
 					),
-					lease?.space?.name ? h("span", { class: "text-xs font-semibold text-[var(--add-text-primary,#43474F)] dark:text-neutral-200" }, lease.space.name) : null
+					lease?.space?.name ? h("span", { class: "text-xs font-semibold text-[var(--add-text-primary)]" }, lease.space.name) : null
 				]),
-				lease?.starts_on ? h("span", { class: "font-mono text-xs text-[var(--add-text-muted,#5A606B)] dark:text-neutral-400" }, `${lease.starts_on} → ${lease.ends_on || "—"}`) : null
+				lease?.starts_on ? h("span", { class: "font-mono text-xs text-[var(--add-text-muted)]" }, `${lease.starts_on} → ${lease.ends_on || "—"}`) : null
 			])
 		}
 	},
@@ -475,11 +469,11 @@ const columns = computed<DataTableColumns<Company>>(() => [
 			if (lease?.monthly_amount) {
 				return h(
 					"span",
-					{ class: "font-mono text-xs font-bold text-[var(--add-text-primary,#43474F)] dark:text-neutral-100" },
+					{ class: "font-mono text-xs font-bold text-[var(--add-text-primary)]" },
 					formatReportMoney(lease.monthly_amount, lease.currency || "SYP")
 				)
 			}
-			return h("span", { class: "text-xs text-[var(--add-text-muted,#5A606B)]" }, "—")
+			return h("span", { class: "text-xs text-[var(--add-text-muted)]" }, "—")
 		}
 	},
 
@@ -493,10 +487,10 @@ const columns = computed<DataTableColumns<Company>>(() => [
 			h(
 				"span",
 				{
-					class: "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold " +
-						(row.status === "active"
-							? "border border-[var(--add-success,#657C50)]/40 bg-[var(--add-success,#657C50)]/10 text-[var(--add-success-text,#556843)] dark:bg-[var(--add-success,#657C50)]/20 dark:text-[var(--add-success,#657C50)]"
-							: "border border-[var(--add-border,#CDC2AF)] bg-[var(--add-surface-sunken,#EDEAE8)] text-[var(--add-text-secondary,#565B65)] dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300")
+					class: `inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${
+						row.status === "active"
+							? "border border-[var(--add-success)]/40 bg-[var(--add-success)]/10 text-[var(--add-success-text)]"
+							: "border border-[var(--add-border)] bg-[var(--add-surface-sunken)] text-[var(--add-text-secondary)]"}`
 				},
 				t(`companies.status.${row.status}`, row.status === "active" ? "نشط" : "غير نشط")
 			)
@@ -508,18 +502,7 @@ const columns = computed<DataTableColumns<Company>>(() => [
 		key: "actions",
 		width: 90,
 		align: "center",
-		render: row =>
-			h(
-				"button",
-				{
-					type: "button",
-					class: "inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--add-border,#CDC2AF)]/40 bg-[var(--add-surface,#F7F5F2)] text-[var(--add-text-secondary,#565B65)] transition-colors hover:bg-[var(--add-surface-sunken,#EDEAE8)] hover:text-[var(--add-primary-text,#556843)] dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700",
-					"aria-label": t("common.view", "عرض تفاصيل الشركة"),
-					title: t("common.view", "عرض تفاصيل الشركة"),
-					onClick: () => openDetail(row)
-				},
-				[h(Icon, { name: "carbon:view", size: 16 })]
-			)
+		render: row => h(RowActions, { actions: [{ key: "view", label: t("common.view", "عرض تفاصيل الشركة"), icon: "carbon:view", onClick: () => openDetail(row) }] })
 	}
 ])
 </script>

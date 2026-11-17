@@ -1,4 +1,4 @@
-import type { VNode } from "vue"
+import type { RowAction } from "@/add-os/components/page/row-actions"
 import type { Kiosk } from "@/add-os/modules/spatial/types/kiosk"
 import { flushPromises, mount } from "@vue/test-utils"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -75,12 +75,13 @@ type Page = Awaited<ReturnType<typeof mountPage>>
 const table = (page: Page) => page.findComponent({ name: "ResourceTable" })
 const modal = (page: Page) => page.findComponent({ name: "KioskPairingCodeModal" })
 
-function actions(page: Page, row: Kiosk): VNode[] {
-	const build = table(page).props("extraActions") as ((row: Kiosk) => VNode[]) | undefined
+/** The row's own actions, as the data RowActions lays out (2026-11-17). */
+function actions(page: Page, row: Kiosk): RowAction[] {
+	const build = table(page).props("rowActions") as ((row: Kiosk) => RowAction[]) | undefined
 	return build ? build(row) : []
 }
 
-const labelsOf = (nodes: VNode[]) => nodes.map(node => node.props?.["aria-label"])
+const labelsOf = (items: RowAction[]) => items.map(item => item.label)
 
 beforeEach(() => {
 	vi.clearAllMocks()
@@ -153,7 +154,7 @@ describe("kiosks page pairing", () => {
 		const page = await mountPage("kiosks.view", "kiosks.pair")
 		const row = kiosk()
 
-		actions(page, row)[0].props!.onClick()
+		actions(page, row)[0].onClick()
 		await flushPromises()
 
 		expect(dialogWarning).not.toHaveBeenCalled()
@@ -168,7 +169,7 @@ describe("kiosks page pairing", () => {
 		issueMock.mockResolvedValue(issued)
 		const page = await mountPage("kiosks.view", "kiosks.pair")
 
-		actions(page, kiosk({ is_paired: true }))[0].props!.onClick()
+		actions(page, kiosk({ is_paired: true }))[0].onClick()
 
 		expect(issueMock).not.toHaveBeenCalled()
 		expect(dialogWarning).toHaveBeenCalledOnce()
@@ -185,7 +186,7 @@ describe("kiosks page pairing", () => {
 		issueMock.mockRejectedValue(new ApiError(403, JSON.stringify({ message: "This action is unauthorized." })))
 		const page = await mountPage("kiosks.view", "kiosks.pair")
 
-		actions(page, kiosk())[0].props!.onClick()
+		actions(page, kiosk())[0].onClick()
 		await flushPromises()
 
 		expect(messageError).toHaveBeenCalledWith("This action is unauthorized.")
@@ -197,7 +198,7 @@ describe("kiosks page pairing", () => {
 		const page = await mountPage("kiosks.view", "kiosks.pair")
 		const row = kiosk({ is_paired: true })
 
-		actions(page, row)[1].props!.onClick()
+		actions(page, row)[1].onClick()
 
 		expect(revokeMock).not.toHaveBeenCalled()
 		expect(dialogWarning).toHaveBeenCalledOnce()

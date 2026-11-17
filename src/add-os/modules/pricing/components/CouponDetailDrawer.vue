@@ -7,42 +7,41 @@
 	can be read back.
 -->
 <template>
-	<n-drawer v-model:show="show" :width="620" :placement="isRtl ? 'left' : 'right'">
-		<n-drawer-content :title="drawerTitle" closable>
-			<n-spin :show="loading">
-				<n-alert v-if="failed" type="error" :bordered="false">{{ t("coupons.detail.loadError") }}</n-alert>
-				<div v-if="coupon" class="flex flex-col gap-4 text-sm">
-					<dl class="flex flex-col divide-y divide-[var(--border-color)]">
-						<div v-for="field in fields" :key="field.label" class="flex justify-between gap-4 py-2">
-							<dt class="text-secondary">{{ field.label }}</dt>
-							<dd class="text-end font-medium">
-								<bdi v-if="field.ltr" dir="ltr">{{ field.value }}</bdi>
-								<template v-else>{{ field.value }}</template>
-							</dd>
-						</div>
-					</dl>
+	<DetailDrawer v-model:show="show" :title="drawerTitle" size="lg">
+		<n-spin :show="loading">
+			<n-alert v-if="failed" type="error" :bordered="false">{{ t("coupons.detail.loadError") }}</n-alert>
+			<div v-if="coupon" class="flex flex-col gap-4 text-sm">
+				<dl class="flex flex-col divide-y divide-[var(--border-color)]">
+					<div v-for="field in fields" :key="field.label" class="flex justify-between gap-4 py-2">
+						<dt class="text-secondary">{{ field.label }}</dt>
+						<dd class="text-end font-medium">
+							<bdi v-if="field.ltr" dir="ltr">{{ field.value }}</bdi>
+							<template v-else>{{ field.value }}</template>
+						</dd>
+					</div>
+				</dl>
 
-					<h3 class="font-semibold">{{ t("coupons.detail.redemptions") }}</h3>
-					<n-data-table remote size="small" class="add-ledger-table" :scroll-x="600" :columns :data="redemptions" :loading="redemptionsLoading" :pagination :bordered="false" @update:page="loadRedemptions" />
+				<h3 class="font-semibold">{{ t("coupons.detail.redemptions") }}</h3>
+				<n-data-table remote size="small" class="add-ledger-table" :scroll-x="600" :columns :data="redemptions" :loading="redemptionsLoading" :pagination :bordered="false" @update:page="loadRedemptions" />
 
-					<section class="flex flex-col gap-2" data-test="coupon-history">
-						<h3 class="font-semibold">{{ t("coupons.history.title") }}</h3>
-						<p class="text-xs text-secondary">{{ t("coupons.history.description") }}</p>
-						<n-alert v-if="historyFailed" type="error" :bordered="false">{{ t("coupons.history.loadError") }}</n-alert>
-						<n-data-table remote size="small" class="add-ledger-table" :scroll-x="600" :columns="historyColumns" :data="revisions" :loading="historyLoading" :pagination="historyPagination" :bordered="false" @update:page="loadRevisions" />
-					</section>
-				</div>
-			</n-spin>
-		</n-drawer-content>
-	</n-drawer>
+				<section class="flex flex-col gap-2" data-test="coupon-history">
+					<h3 class="font-semibold">{{ t("coupons.history.title") }}</h3>
+					<p class="text-xs text-secondary">{{ t("coupons.history.description") }}</p>
+					<n-alert v-if="historyFailed" type="error" :bordered="false">{{ t("coupons.history.loadError") }}</n-alert>
+					<n-data-table remote size="small" class="add-ledger-table" :scroll-x="600" :columns="historyColumns" :data="revisions" :loading="historyLoading" :pagination="historyPagination" :bordered="false" @update:page="loadRevisions" />
+				</section>
+			</div>
+		</n-spin>
+	</DetailDrawer>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns } from "naive-ui"
 import type { Coupon, CouponRedemption, CouponRevision, CouponTarget } from "@/add-os/modules/pricing/types/coupon"
-import { NAlert, NDataTable, NDrawer, NDrawerContent, NSpin, NTag } from "naive-ui"
+import { NAlert, NDataTable, NSpin, NTag } from "naive-ui"
 import { computed, h, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import DetailDrawer from "@/add-os/components/page/DetailDrawer.vue"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import { usePricingPickers } from "@/add-os/modules/pricing/composables/usePricingPickers"
@@ -55,7 +54,6 @@ const props = defineProps<{ couponId: number | null }>()
 const show = defineModel<boolean>("show", { required: true })
 const { t } = useI18n()
 const pickers = usePricingPickers()
-const isRtl = computed(() => currentLocale.value === "ar")
 
 const PAGE_SIZE = 10
 const coupon = ref<Coupon | null>(null)

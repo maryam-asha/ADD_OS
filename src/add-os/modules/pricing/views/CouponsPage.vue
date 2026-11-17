@@ -12,22 +12,20 @@
 -->
 <template>
 	<div class="flex flex-col gap-6">
-		<div class="flex flex-wrap items-start justify-between gap-3">
-			<div class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.coupons") }}</h1>
-				<p class="text-secondary">{{ t("coupons.page.description") }}</p>
-			</div>
-			<div class="flex gap-2">
-				<n-button secondary size="small" :loading="isLoading" @click="fetchPage">
-					<template #icon><Icon name="carbon:renew" :size="16" /></template>
-					{{ t("coupons.page.refresh") }}
-				</n-button>
-				<n-button v-if="canCreate" type="primary" size="small" data-test="coupon-new" @click="openForm(null)">
-					<template #icon><Icon name="carbon:add" :size="16" /></template>
-					{{ t(automatic ? "coupons.page.newOffer" : "coupons.page.new") }}
-				</n-button>
-			</div>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.coupons')" :description="t('coupons.page.description')">
+			<template #actions>
+				<div class="flex gap-2">
+					<n-button secondary size="small" :loading="isLoading" @click="fetchPage">
+						<template #icon><Icon name="carbon:renew" :size="16" /></template>
+						{{ t("coupons.page.refresh") }}
+					</n-button>
+					<n-button v-if="canCreate" type="primary" size="small" data-test="coupon-new" @click="openForm(null)">
+						<template #icon><Icon name="carbon:add" :size="16" /></template>
+						{{ t(automatic ? "coupons.page.newOffer" : "coupons.page.new") }}
+					</n-button>
+				</div>
+			</template>
+		</PageHeader>
 
 		<n-card size="small" class="add-ledger-table">
 			<div class="flex flex-col gap-4">
@@ -61,6 +59,8 @@ import type { Coupon } from "@/add-os/modules/pricing/types/coupon"
 import { NAlert, NButton, NCard, NDataTable, NInput, NSwitch, NTag, useDialog, useMessage } from "naive-ui"
 import { computed, h, reactive, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import { canCreateCoupons, canDeleteCoupons, canUpdateCoupons } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
@@ -178,10 +178,14 @@ const columns = computed<DataTableColumns<Coupon>>(() => [
 				// A used coupon or offer is only switched off — never edited or deleted.
 				render: (row: Coupon) => row.locked
 					? null
-					: h("div", { class: "inline-flex items-center justify-center gap-3" }, [
-					canUpdate ? h(NButton, { text: true, type: "primary", "aria-label": t("coupons.edit"), title: t("coupons.edit"), onClick: only(() => openForm(row.id)) }, { icon: () => h(Icon, { name: "carbon:edit", size: 18 }) }) : null,
-					canDelete ? h(NButton, { text: true, type: "error", "data-test": "coupon-delete", "aria-label": t("coupons.delete.action"), title: t("coupons.delete.action"), onClick: only(() => confirmDelete(row)) }, { icon: () => h(Icon, { name: "carbon:trash-can", size: 18 }) }) : null
-				])
+					: h("div", { onClick: (e: Event) => e.stopPropagation() }, [
+							h(RowActions, {
+								actions: [
+									...(canUpdate ? [{ key: "edit", label: t("coupons.edit"), icon: "carbon:edit", onClick: () => openForm(row.id) }] : []),
+									...(canDelete ? [{ key: "delete", label: t("coupons.delete.action"), icon: "carbon:trash-can", danger: true, testId: "coupon-delete", onClick: () => confirmDelete(row) }] : [])
+								]
+							})
+						])
 			}]
 		: [])
 ])

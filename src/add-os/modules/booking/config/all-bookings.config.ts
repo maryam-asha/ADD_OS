@@ -1,13 +1,14 @@
 // src/add-os/modules/booking/config/all-bookings.config.ts
 import type { DataTableColumns } from "naive-ui"
 import type { ComposerTranslation } from "vue-i18n"
+import type { RowAction } from "@/add-os/components/page/row-actions"
 import type { AdminBooking, BookingStatus } from "@/add-os/modules/booking/types/calendar"
-import { NButton, NTag } from "naive-ui"
+import { NTag } from "naive-ui"
 import { h } from "vue"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { spaceTypeLabel } from "@/add-os/modules/booking/config/space-type-label"
 import AppliedDiscountList from "@/add-os/modules/pricing/components/AppliedDiscountList.vue"
 import { formatDate, formatTime } from "@/add-os/utils/format"
-import Icon from "@/components/common/Icon.vue"
 
 /**
  * Columns for the general bookings index.
@@ -162,31 +163,15 @@ export function buildAllBookingsColumns(t: ComposerTranslation, handlers?: AllBo
 	columns.push({
 		title: t("allBookings.columns.actions"),
 		key: "actions",
-		minWidth: 170,
+		minWidth: 120,
 		align: "center",
 		render: (row) => {
-			const detailsLabel = t("allBookings.detail.button")
-			const buttons = [
-				h(
-					NButton,
-					{ size: "small", secondary: true, "aria-label": detailsLabel, onClick: () => handlers.onDetails(row) },
-					{ icon: () => h(Icon, { name: "carbon:view", size: 16 }), default: () => detailsLabel }
-				)
-			]
-
+			const actions: RowAction[] = [{ key: "details", label: t("allBookings.detail.button"), icon: "carbon:view", onClick: () => handlers.onDetails(row) }]
 			if (handlers.onCancel && isCancellable(row)) {
 				const onCancel = handlers.onCancel
-				const cancelLabel = t("allBookings.cancel.button")
-				buttons.push(
-					h(
-						NButton,
-						{ size: "small", quaternary: true, type: "error", "aria-label": cancelLabel, title: cancelLabel, onClick: () => onCancel(row) },
-						{ icon: () => h(Icon, { name: "carbon:close-outline", size: 16 }) }
-					)
-				)
+				actions.push({ key: "cancel", label: t("allBookings.cancel.button"), icon: "carbon:close-outline", danger: true, onClick: () => onCancel(row) })
 			}
-
-			return h("div", { class: "inline-flex items-center justify-center gap-2" }, buttons)
+			return h(RowActions, { actions })
 		}
 	})
 

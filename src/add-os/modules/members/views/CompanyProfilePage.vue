@@ -183,6 +183,7 @@ import { NAlert, NButton, NDataTable, NSelect, NSpin, NSwitch, NTabPane, NTabs, 
 import { computed, h, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { canViewOfficeLeases } from "@/add-os/config/permissions"
@@ -348,12 +349,7 @@ const memberColumns = computed<DataTableColumns<CompanyMember>>(() => [
 		title: t("resourceCrud.table.actionsColumn"),
 		key: "actions",
 		width: 100,
-		render: row =>
-			h(
-				NButton,
-				{ text: true, type: "error", "aria-label": t("resourceCrud.table.deleteAction"), onClick: () => confirmRemove(row) },
-				{ icon: () => h(Icon, { name: "carbon:trash-can", size: 18 }) }
-			)
+		render: row => h(RowActions, { actions: [{ key: "remove", label: t("resourceCrud.table.deleteAction"), icon: "carbon:trash-can", danger: true, onClick: () => confirmRemove(row) }] })
 	}
 ])
 
@@ -389,15 +385,7 @@ const leaseColumns = computed<DataTableColumns<OfficeLease>>(() => [
 	{
 		title: t("resourceCrud.table.actionsColumn"),
 		key: "actions",
-		render: row =>
-			h(
-				NButton,
-				{ size: "small", quaternary: true, onClick: () => openLeaseDetail(row) },
-				{
-					icon: () => h(Icon, { name: "carbon:view", size: 15 }),
-					default: () => t("common.view")
-				}
-			)
+		render: row => h(RowActions, { actions: [{ key: "view", label: t("common.view"), icon: "carbon:view", onClick: () => openLeaseDetail(row) }] })
 	}
 ])
 

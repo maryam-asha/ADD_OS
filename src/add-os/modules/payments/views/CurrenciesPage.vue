@@ -1,28 +1,26 @@
 <!-- src/add-os/modules/payments/views/CurrenciesPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.currencies") }}</h1>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.currencies')" :description="t('pageDescriptions.currencies')">
+			<template #actions>
+				<n-button
+					type="primary"
+					class="!bg-[var(--add-primary)] hover:!bg-[var(--add-primary-hover)] !text-white font-medium shadow-sm px-4 py-2 rounded-lg inline-flex items-center gap-2"
+					@click="openCreate"
+				>
+					<template #icon>
+						<span class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+							<Icon name="carbon:add" :size="14" />
+						</span>
+					</template>
+					{{ t("currencies.create.button") }}
+				</n-button>
+			</template>
+		</PageHeader>
 
 		<ResourceStatCards v-if="!error && !isLoading" :cards="statCards" />
 
 		<n-alert v-if="error" type="error" :title="t('currencies.loadError')" />
-
-		<div class="flex justify-end">
-			<n-button
-				type="primary"
-				class="!bg-[var(--add-primary)] hover:!bg-[var(--add-primary-hover)] !text-white font-medium shadow-sm px-4 py-2 rounded-lg inline-flex items-center gap-2"
-				@click="openCreate"
-			>
-				<template #icon>
-					<span class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-						<Icon name="carbon:add" :size="14" color="#ffffff" />
-					</span>
-				</template>
-				{{ t("currencies.create.button") }}
-			</n-button>
-		</div>
 
 		<ResourceTable
 			:columns
@@ -30,7 +28,7 @@
 			:loading="isLoading"
 			:row-key="currencyRowKey"
 			:on-edit="openEdit"
-			:extra-actions="rowActions"
+			:row-actions
 		/>
 
 		<ResourceFormDrawer
@@ -45,13 +43,15 @@
 </template>
 
 <script setup lang="ts">
+import type { RowAction } from "@/add-os/components/page/row-actions"
 import type { FieldDescriptor } from "@/add-os/components/resource/field-types"
 import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vue"
 import type { Currency, CurrencyCreatePayload, CurrencyUpdatePayload } from "@/add-os/modules/payments/types/currency"
 import type { MessageResponse } from "@/add-os/services/resource-factory"
 import { NAlert, NButton, useDialog, useMessage } from "naive-ui"
-import { computed, h, ref } from "vue"
+import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.vue"
 import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
@@ -223,29 +223,17 @@ function confirmSetBase(row: Currency) {
  * currencies may become the base lives on the server, and this page does not
  * keep a second copy of it.
  */
-function rowActions(row: Currency) {
+function rowActions(row: Currency): RowAction[] {
 	if (row.is_base) return []
 
-	const statusLabel = t(row.is_active ? "currencies.actions.deactivate" : "currencies.actions.activate")
-	const baseLabel = t("currencies.actions.setBase")
-
 	return [
-		h(
-			NButton,
-			{
-				text: true,
-				type: row.is_active ? "warning" : "success",
-				"aria-label": statusLabel,
-				title: statusLabel,
-				onClick: () => toggleStatus(row)
-			},
-			{ icon: () => h(Icon, { name: row.is_active ? "carbon:close-outline" : "carbon:checkmark-outline", size: 18 }) }
-		),
-		h(
-			NButton,
-			{ text: true, type: "primary", "aria-label": baseLabel, title: baseLabel, onClick: () => confirmSetBase(row) },
-			{ icon: () => h(Icon, { name: "carbon:star", size: 18 }) }
-		)
+		{
+			key: "status",
+			label: t(row.is_active ? "currencies.actions.deactivate" : "currencies.actions.activate"),
+			icon: row.is_active ? "carbon:close-outline" : "carbon:checkmark-outline",
+			onClick: () => toggleStatus(row)
+		},
+		{ key: "base", label: t("currencies.actions.setBase"), icon: "carbon:star", onClick: () => confirmSetBase(row) }
 	]
 }
 

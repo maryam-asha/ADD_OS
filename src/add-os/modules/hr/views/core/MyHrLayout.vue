@@ -14,7 +14,7 @@
 		<!-- Keyed as App.vue keys a page, which no longer remounts this frame. -->
 		<div class="min-w-0 flex-1">
 			<RouterView v-slot="{ Component }">
-				<component :is="Component" :key="`${String(route.name)}${mainStore.forceRefresh}`" />
+				<component :is="Component" :key="`${routeInstanceKey(route)}${mainStore.forceRefresh}`" />
 			</RouterView>
 		</div>
 	</div>
@@ -27,6 +27,7 @@ import { computed, h } from "vue"
 import { useI18n } from "vue-i18n"
 import { RouterLink, RouterView, useRoute, useRouter } from "vue-router"
 import { menuPages } from "@/add-os/navigation/access"
+import { routeInstanceKey } from "@/add-os/navigation/pageKey"
 import { NAV_SECTIONS, navPageTitleKey, navRouteName, navRoutePath } from "@/add-os/navigation/sections"
 import { useMainStore } from "@/stores/main"
 import { renderIcon } from "@/utils"

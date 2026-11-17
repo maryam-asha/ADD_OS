@@ -3,6 +3,7 @@ import type { PayComponent } from "@/add-os/modules/hr/types/payroll"
 import { flushPromises, mount } from "@vue/test-utils"
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 import { createI18n } from "vue-i18n"
+import { pickFromRowMenu, rowMenus } from "@/add-os/components/page/__tests__/row-menu"
 
 import { setCurrentLocale } from "@/add-os/lang/currentLocale"
 import en from "@/add-os/lang/en/en.json"
@@ -257,7 +258,8 @@ describe("benefit forms", () => {
 			await flushPromises()
 
 			expect(document.querySelectorAll("[aria-label='Try again']")).toHaveLength(1)
-			expect(document.querySelectorAll("[aria-label='Cancel grant']")).toHaveLength(2)
+			// Cancelling sits under each row's "⋯": the failed and the pending grant have one.
+			expect(rowMenus()).toHaveLength(2)
 			wrapper.unmount()
 		})
 
@@ -271,8 +273,7 @@ describe("benefit forms", () => {
 			await flushPromises()
 			expect(mocks.warning).toHaveBeenCalledWith("The employee has no wallet: their account is not registered as a member.")
 
-			;(document.querySelector("[aria-label='Cancel grant']") as HTMLButtonElement).click()
-			await flushPromises()
+			await pickFromRowMenu("Cancel grant")
 			expect(mocks.cancel).toHaveBeenCalledWith(2)
 			expect(mocks.success).toHaveBeenCalledWith("The grant has been cancelled.")
 			expect(wrapper.emitted("changed")).toHaveLength(2)

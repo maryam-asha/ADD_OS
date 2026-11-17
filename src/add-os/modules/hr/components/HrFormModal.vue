@@ -1,48 +1,20 @@
 <!-- src/add-os/modules/hr/components/HrFormModal.vue -->
 <template>
-	<n-modal
-		v-model:show="show"
-		preset="card"
-		closable
-		class="hr-form-modal"
-		:segmented="{ content: true, footer: true }"
-		:style="{ maxWidth: WIDTHS[size], width: '95vw' }"
-		content-style="flex: 1 1 auto; min-height: 0; overflow-y: auto;"
-	>
-		<template #header>
-			<div class="flex items-center gap-3">
-				<span v-if="icon" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-add-default bg-[var(--add-surface-sunken)] text-primary">
-					<Icon :name="icon" :size="18" />
-				</span>
-				<span class="text-base font-semibold">{{ title }}</span>
-			</div>
+	<FormModal v-bind="props" v-model:show="show">
+		<template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
+			<slot :name="slotName" v-bind="slotProps ?? {}" />
 		</template>
-		<slot />
-		<template v-if="$slots.footer" #footer>
-			<slot name="footer" />
-		</template>
-	</n-modal>
+	</FormModal>
 </template>
 
 <script setup lang="ts">
-import { NModal } from "naive-ui"
-import Icon from "@/components/common/Icon.vue"
+import FormModal from "@/add-os/components/page/FormModal.vue"
 
 /**
- * An HR short action: a dialog in the middle of the page, as
- * ResourceFormDrawer shows the dashboard's own forms — the full width of a
- * phone, a reading width beyond it, and a body that scrolls while the title
- * and the buttons stay put. `size` picks that width: `md` for a form, `lg`
- * for one with a list inside, `sm` for a short action (steps, tiers, items); `icon` sits in a tile
- * beside the title. Reading a record stays in a side drawer (HrDrawer).
- *
- * Until 2026-11-09 this framed every HR add or edit form. The larger ones
- * now have pages of their own (HrFormPage); this keeps the short actions.
- * Which is which: docs/hr/FORMS-AS-PAGES.md.
+ * Promoted 2026-11-17 to `@/add-os/components/page/FormModal.vue`, the one
+ * implementation every module shares; this name stays so HR's pages need no
+ * edit. New code imports FormModal directly.
  */
-withDefaults(defineProps<{ title: string; size?: "sm" | "md" | "lg"; icon?: string }>(), { size: "md" })
-
-/** `sm` for a short action of a field or two (a reason, a note, a date). */
-const WIDTHS = { sm: "28rem", md: "36rem", lg: "46rem" } as const
+const props = defineProps<{ title: string; subtitle?: string; size?: "sm" | "md" | "lg"; icon?: string }>()
 const show = defineModel<boolean>("show", { required: true })
 </script>

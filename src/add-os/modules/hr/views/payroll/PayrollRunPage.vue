@@ -136,6 +136,7 @@ import { NAlert, NButton, NCard, NCheckbox, NDataTable, NFormItem, NInput, NPagi
 import { computed, h, onMounted, reactive, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { canApprovePayroll, canManagePayroll, canPayPayroll, canViewEmployees } from "@/add-os/config/permissions"
 import HrFormModal from "@/add-os/modules/hr/components/HrFormModal.vue"
 import AdjustmentModal from "@/add-os/modules/hr/components/payroll/AdjustmentModal.vue"
@@ -497,13 +498,8 @@ const adjustmentColumns = computed<DataTableColumns<PayrollAdjustment>>(() => [
 				{
 					title: "",
 					key: "actions",
-					width: 60,
-					render: (row: PayrollAdjustment) =>
-						h(
-							NButton,
-							{ text: true, type: "error", "aria-label": t("hr.common.delete"), title: t("hr.common.delete"), onClick: () => confirmRemove(row) },
-							{ icon: () => h(Icon, { name: "carbon:trash-can", size: 18 }) }
-						)
+					width: 90,
+					render: (row: PayrollAdjustment) => h(RowActions, { actions: [{ key: "delete", label: t("hr.common.delete"), icon: "carbon:trash-can", danger: true, onClick: () => confirmRemove(row) }] })
 				}
 			]
 		: [])

@@ -49,11 +49,13 @@
 
 // ── Fixed header & footer with scrollable body ──────────────────────────────
 //
-// For dialogs using HrFormModal (.hr-form-modal):
+// For dialogs using FormModal (.add-form-modal) and the HR dialogs that still
+// carry .hr-form-modal (EmployeeViewModal):
 // Pins the header at the top and the footer at the bottom while allowing the
 // body content in between to scroll smoothly. Prevents the whole modal from
 // exceeding the viewport and pushing the header or footer off screen.
 
+.n-modal-container .n-modal.n-card.add-form-modal,
 .n-modal-container .n-modal.n-card.hr-form-modal {
 	display: flex !important;
 	flex-direction: column !important;
@@ -94,6 +96,7 @@
 }
 
 @media (max-width: 640px) {
+	.n-modal-container .n-modal.n-card.add-form-modal,
 	.n-modal-container .n-modal.n-card.hr-form-modal {
 		max-height: calc(100vh - 1.5rem) !important;
 		margin: 0.75rem auto !important;

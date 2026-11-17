@@ -66,6 +66,7 @@ import type { Goal, Review } from "@/add-os/modules/hr/types/performance"
 import { NAlert, NButton, NCard, NDataTable, NSelect, NTabPane, NTabs } from "naive-ui"
 import { computed, h, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import GoalModal from "@/add-os/modules/hr/components/performance/GoalModal.vue"
 import GoalsTable from "@/add-os/modules/hr/components/performance/GoalsTable.vue"
 import PerformanceStatusTag from "@/add-os/modules/hr/components/performance/PerformanceStatusTag.vue"
@@ -203,25 +204,30 @@ function onReviewSubmitted() {
 
 /** What I can do with my review now: fill in the self review, read the result, or wait. */
 function myReviewAction(row: Review) {
-	if (row.cycle.status === "self_review" && row.status === "open") return h(NButton, { size: "tiny", type: "primary", onClick: () => openForm(row.id, "self") }, () => t("hrPerformance.mine.fillSelf"))
+	if (row.cycle.status === "self_review" && row.status === "open") {
+		return h(RowActions, { labelled: true, actions: [{ key: "self", label: t("hrPerformance.mine.fillSelf"), icon: "carbon:edit", primary: true, onClick: () => openForm(row.id, "self") }] })
+	}
 	if (row.status === "finalized") {
-		return h(
-			NButton,
-			{
-				size: "tiny",
+		return h(RowActions, {
+			labelled: true,
+			actions: [{
+				key: "result",
+				label: t("hrPerformance.mine.readResult"),
+				icon: "carbon:view",
 				onClick: () => {
 					resultReview.value = row.id
 					resultVisible.value = true
 				}
-			},
-			() => t("hrPerformance.mine.readResult")
-		)
-}
+			}]
+		})
+	}
 	return null
 }
 
 function conductAction(row: Review) {
-	if (row.cycle.status === "manager_review" && ["open", "self_submitted"].includes(row.status)) return h(NButton, { size: "tiny", type: "primary", onClick: () => openForm(row.id, "manager") }, () => t("hrPerformance.mine.rate"))
+	if (row.cycle.status === "manager_review" && ["open", "self_submitted"].includes(row.status)) {
+		return h(RowActions, { labelled: true, actions: [{ key: "rate", label: t("hrPerformance.mine.rate"), icon: "carbon:star", primary: true, onClick: () => openForm(row.id, "manager") }] })
+	}
 	return null
 }
 

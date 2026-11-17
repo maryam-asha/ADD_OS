@@ -4,6 +4,7 @@ import { NDialogProvider } from "naive-ui"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { h, nextTick } from "vue"
 import { createI18n } from "vue-i18n"
+import { pickFromRowMenu } from "@/add-os/components/page/__tests__/row-menu"
 
 import { ApiError } from "@/add-os/services/api"
 import { isModuleFullySelected, isModulePartiallySelected } from "../../config/roles.config"
@@ -166,7 +167,7 @@ describe("rolesPage", () => {
 			const memberRow = rows.find(row => row.text().includes("Member"))
 
 			expect(memberRow?.find('[aria-label="Edit"]').exists()).toBe(false)
-			expect(memberRow?.find('[aria-label="Delete"]').exists()).toBe(false)
+			expect(memberRow?.find('[aria-label="common.moreActions"]').exists()).toBe(false)
 			wrapper.unmount()
 		})
 
@@ -178,7 +179,7 @@ describe("rolesPage", () => {
 			const adminRow = rows.find(row => row.text().includes("Admin"))
 
 			expect(adminRow?.find('[aria-label="Edit"]').exists()).toBe(true)
-			expect(adminRow?.find('[aria-label="Delete"]').exists()).toBe(false)
+			expect(adminRow?.find('[aria-label="common.moreActions"]').exists()).toBe(false)
 			wrapper.unmount()
 		})
 
@@ -190,7 +191,7 @@ describe("rolesPage", () => {
 			const customRow = rows.find(row => row.text().includes("front-desk"))
 
 			expect(customRow?.find('[aria-label="Edit"]').exists()).toBe(true)
-			expect(customRow?.find('[aria-label="Delete"]').exists()).toBe(true)
+			expect(customRow?.find('[aria-label="common.moreActions"]').exists()).toBe(true)
 			wrapper.unmount()
 		})
 
@@ -211,9 +212,9 @@ describe("rolesPage", () => {
 			const customRow = rows.find(row => row.text().includes("front-desk"))
 
 			expect(adminRow?.find('[aria-label="Edit"]').exists()).toBe(false)
-			expect(adminRow?.find('[aria-label="Delete"]').exists()).toBe(false)
+			expect(adminRow?.find('[aria-label="common.moreActions"]').exists()).toBe(false)
 			expect(customRow?.find('[aria-label="Edit"]').exists()).toBe(false)
-			expect(customRow?.find('[aria-label="Delete"]').exists()).toBe(false)
+			expect(customRow?.find('[aria-label="common.moreActions"]').exists()).toBe(false)
 			wrapper.unmount()
 		})
 	})
@@ -225,7 +226,7 @@ describe("rolesPage", () => {
 			await flushPromises()
 			const customRow = wrapper.findAll("tbody tr").find(row => row.text().includes("front-desk"))
 			expect(customRow?.find('[aria-label="Edit"]').exists()).toBe(false)
-			expect(customRow?.find('[aria-label="Delete"]').exists()).toBe(true)
+			expect(customRow?.find('[aria-label="common.moreActions"]').exists()).toBe(true)
 			expect(wrapper.findAll("button").some(b => b.text().includes("New role"))).toBe(false)
 			wrapper.unmount()
 
@@ -234,7 +235,7 @@ describe("rolesPage", () => {
 			await flushPromises()
 			const editableRow = editor.findAll("tbody tr").find(row => row.text().includes("front-desk"))
 			expect(editableRow?.find('[aria-label="Edit"]').exists()).toBe(true)
-			expect(editableRow?.find('[aria-label="Delete"]').exists()).toBe(false)
+			expect(editableRow?.find('[aria-label="common.moreActions"]').exists()).toBe(false)
 			editor.unmount()
 		})
 	})
@@ -492,7 +493,7 @@ describe("rolesPage", () => {
 
 			const rows = wrapper.findAll("tbody tr")
 			const customRow = rows.find(row => row.text().includes("front-desk"))
-			await customRow!.find('[aria-label="Delete"]').trigger("click")
+			await pickFromRowMenu("Delete", 0, customRow!.element)
 			await nextTick()
 
 			expect(removeRoleMock).not.toHaveBeenCalled()
@@ -505,7 +506,7 @@ describe("rolesPage", () => {
 
 			const rows = wrapper.findAll("tbody tr")
 			const customRow = rows.find(row => row.text().includes("front-desk"))
-			await customRow!.find('[aria-label="Delete"]').trigger("click")
+			await pickFromRowMenu("Delete", 0, customRow!.element)
 			await nextTick()
 
 			// The dialog is teleported to document.body, outside the wrapper's own
@@ -531,7 +532,7 @@ describe("rolesPage", () => {
 
 			const rows = wrapper.findAll("tbody tr")
 			const customRow = rows.find(row => row.text().includes("front-desk"))
-			await customRow!.find('[aria-label="Delete"]').trigger("click")
+			await pickFromRowMenu("Delete", 0, customRow!.element)
 			await nextTick()
 
 			const positiveButton = Array.from(document.querySelectorAll(".n-dialog__action button")).find(

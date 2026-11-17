@@ -22,14 +22,14 @@ export function buildPartnerColumns(t: ComposerTranslation, locale: SupportedLoc
 							src: row.logo_url,
 							class: "rounded-lg overflow-hidden flex items-center justify-center",
 							imgProps: {
-								class: "rounded-lg object-contain w-11 h-11 p-1 border border-black/10 shadow-2xs bg-white dark:bg-neutral-900"
+								class: "rounded-lg object-contain w-11 h-11 p-1 border border-black/10 shadow-2xs bg-white"
 							}
 						})
 					: h(
 							"div",
 							{
 								class:
-									"w-11 h-11 rounded-lg bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-neutral-400 border border-black/5"
+									"w-11 h-11 rounded-lg bg-[var(--add-surface-sunken)] flex items-center justify-center text-[var(--add-text-muted)] border border-black/5"
 							},
 							[h(Icon, { name: "carbon:image", size: 18 })]
 						)

@@ -4,7 +4,7 @@
 		<HrPageHeader :title="t(titleKey || 'nav.pages.inventoryReports')" :description="t('inventory.reports.description')" />
 
 		<!-- Where: both reports narrow to it (a branch takes everything in it). -->
-		<div class="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+		<div class="flex flex-wrap items-center gap-3 rounded-2xl border border-[var(--add-border)] bg-white p-4 shadow-xs">
 			<div class="min-w-0 flex-1">
 				<PlacePicker v-model:chain="placeChain" :value="place" inline />
 			</div>
@@ -17,22 +17,22 @@
 		<n-alert v-if="loadError" type="error" :title="loadError" />
 
 		<!-- Stock Valuation Card -->
-		<n-card size="small" class="add-ledger-table rounded-2xl border border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900" :bordered="false">
+		<n-card size="small" class="add-ledger-table rounded-2xl border border-[var(--add-border)] shadow-xs" :bordered="false">
 			<template #header>
 				<div class="flex items-center gap-2">
-					<Icon name="carbon:layers" :size="20" class="text-purple-500" />
+					<Icon name="carbon:layers" :size="20" class="text-[var(--add-info-text)]" />
 					<span class="font-bold">{{ t("inventory.reports.stockValuation") }}</span>
 				</div>
 			</template>
 			<template #header-extra>
-				<span v-if="valuation" class="add-numeric font-mono text-base font-bold text-emerald-600 dark:text-emerald-400">
+				<span v-if="valuation" class="add-numeric font-mono text-base font-bold text-[var(--add-success-text)]">
 					{{ money(valuation.total, valuation.currency) }}
 				</span>
 			</template>
 
 			<n-data-table :columns="valuationColumns" :data="valuation?.warehouses ?? []" :loading :bordered="false" size="small" :scroll-x="640">
 				<template #empty>
-					<div class="flex flex-col items-center justify-center py-8 text-slate-400">
+					<div class="flex flex-col items-center justify-center py-8 text-[var(--add-text-muted)]">
 						<Icon name="carbon:layers" :size="32" class="mb-1 opacity-50" />
 						<span class="text-sm">{{ t("inventory.stock.emptyBalances") }}</span>
 					</div>
@@ -41,10 +41,10 @@
 		</n-card>
 
 		<!-- Asset Register Card -->
-		<n-card size="small" class="add-ledger-table rounded-2xl border border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900" :bordered="false">
+		<n-card size="small" class="add-ledger-table rounded-2xl border border-[var(--add-border)] shadow-xs" :bordered="false">
 			<template #header>
 				<div class="flex items-center gap-2">
-					<Icon name="carbon:box" :size="20" class="text-blue-500" />
+					<Icon name="carbon:box" :size="20" class="text-[var(--add-info-text)]" />
 					<span class="font-bold">{{ t("inventory.reports.assetRegister") }}</span>
 				</div>
 			</template>
@@ -57,22 +57,22 @@
 			</template>
 
 			<div v-if="register?.totals.length" class="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
-				<div v-for="total in register.totals" :key="total.currency" class="flex flex-col gap-2 rounded-2xl border border-slate-200/80 bg-slate-50/60 p-4 shadow-2xs dark:border-slate-800 dark:bg-slate-800/40">
-					<div class="flex items-center justify-between border-b border-slate-200/60 pb-2 dark:border-slate-700/60">
-						<span class="font-mono text-sm font-bold text-slate-700 dark:text-slate-200">{{ total.currency }}</span>
+				<div v-for="total in register.totals" :key="total.currency" class="flex flex-col gap-2 rounded-2xl border border-[var(--add-border)] bg-[var(--add-surface-sunken)] p-4 shadow-2xs">
+					<div class="flex items-center justify-between border-b border-[var(--add-border)] pb-2">
+						<span class="font-mono text-sm font-bold text-[var(--add-text-primary)]">{{ total.currency }}</span>
 						<span class="text-xs text-secondary">{{ t("inventory.reports.assetRegister") }}</span>
 					</div>
 					<div class="flex items-center justify-between text-xs text-secondary">
 						<span>{{ t("inventory.assets.cost") }}:</span>
-						<span class="add-numeric font-medium text-slate-800 dark:text-slate-200">{{ money(total.cost, total.currency) }}</span>
+						<span class="add-numeric font-medium text-[var(--add-text-primary)]">{{ money(total.cost, total.currency) }}</span>
 					</div>
 					<div class="flex items-center justify-between text-xs text-secondary">
 						<span>{{ t("inventory.assets.accumulated") }}:</span>
-						<span class="add-numeric text-amber-600 dark:text-amber-400">{{ money(total.accumulated, total.currency) }}</span>
+						<span class="add-numeric text-[var(--add-warning-text)]">{{ money(total.accumulated, total.currency) }}</span>
 					</div>
-					<div class="flex items-center justify-between pt-1 text-sm font-bold text-slate-900 dark:text-slate-100">
+					<div class="flex items-center justify-between pt-1 text-sm font-bold text-[var(--add-text-primary)]">
 						<span>{{ t("inventory.assets.bookValue") }}:</span>
-						<span class="add-numeric font-mono text-emerald-600 dark:text-emerald-400">{{ money(total.book_value, total.currency) }}</span>
+						<span class="add-numeric font-mono text-[var(--add-success-text)]">{{ money(total.book_value, total.currency) }}</span>
 					</div>
 				</div>
 			</div>
@@ -162,7 +162,7 @@ const valuationColumns = computed<DataTableColumns<ValuationRow>>(() => [
 		key: "value",
 		width: 160,
 		align: ALIGN_END,
-		render: row => h("span", { class: "add-numeric font-semibold text-emerald-600 dark:text-emerald-400" }, money(row.value, valuation.value?.currency))
+		render: row => h("span", { class: "add-numeric font-semibold text-[var(--add-success-text)]" }, money(row.value, valuation.value?.currency))
 	}
 ])
 
@@ -205,14 +205,14 @@ const registerColumns = computed<DataTableColumns<AssetRegisterRow>>(() => [
 		key: "accumulated",
 		width: 130,
 		align: ALIGN_END,
-		render: row => h("span", { class: "add-numeric text-amber-600 dark:text-amber-400" }, money(row.accumulated, row.currency))
+		render: row => h("span", { class: "add-numeric text-[var(--add-warning-text)]" }, money(row.accumulated, row.currency))
 	},
 	{
 		title: t("inventory.assets.bookValue"),
 		key: "book_value",
 		width: 140,
 		align: ALIGN_END,
-		render: row => h("span", { class: "add-numeric font-semibold text-emerald-600 dark:text-emerald-400" }, money(row.book_value, row.currency))
+		render: row => h("span", { class: "add-numeric font-semibold text-[var(--add-success-text)]" }, money(row.book_value, row.currency))
 	}
 ])
 </script>

@@ -1,10 +1,7 @@
 <!-- src/add-os/modules/kitchen/views/KitchenStoresPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t("nav.pages.stores") }}</h1>
-			<p>{{ t("kitchen.stores.description") }}</p>
-		</div>
+		<PageHeader :title="t('nav.pages.stores')" :description="t('kitchen.stores.description')" />
 
 		<n-alert v-if="loadError" type="error" :title="t('kitchen.stores.loadError')" />
 		<n-alert v-if="warehousesUnavailable && mayUpdate" type="warning" :title="t('kitchen.stores.warehousesUnavailable')" />
@@ -51,6 +48,7 @@ import type { KitchenStoreRow } from "@/add-os/modules/kitchen/types/kitchen"
 import { NAlert, NButton, NCard, NSelect, NSpin, NText, useMessage } from "naive-ui"
 import { onMounted, reactive, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { canUpdateKitchenStores } from "@/add-os/config/permissions"
 import { localized } from "@/add-os/modules/inventory/utils/display"
 import { ApiError } from "@/add-os/services/api"

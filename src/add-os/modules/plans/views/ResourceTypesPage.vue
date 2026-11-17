@@ -1,23 +1,22 @@
 <!-- src/add-os/modules/plans/views/ResourceTypesPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex items-center justify-between">
-			<div class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold">{{ t("packages.resourceTypes.title") }}</h1>
-			</div>
-			<div class="flex items-center gap-2">
-				<router-link to="/plans/packages">
-					<n-button secondary>
-						<template #icon><Icon name="carbon:arrow-left" class="rtl:rotate-180" :size="16" /></template>
-						{{ t("packages.modules.backToPlans") }}
+		<PageHeader :title="t('packages.resourceTypes.title')" :description="t('pageDescriptions.resourceTypes')">
+			<template #actions>
+				<div class="flex items-center gap-2">
+					<router-link to="/plans/packages">
+						<n-button secondary>
+							<template #icon><Icon name="carbon:arrow-left" class="rtl:rotate-180" :size="16" /></template>
+							{{ t("packages.modules.backToPlans") }}
+						</n-button>
+					</router-link>
+					<n-button type="primary" @click="openCreate">
+						<template #icon><Icon name="carbon:add" :size="16" /></template>
+						{{ t("packages.resourceTypes.create.button") }}
 					</n-button>
-				</router-link>
-				<n-button type="primary" @click="openCreate">
-					<template #icon><Icon name="carbon:add" :size="16" /></template>
-					{{ t("packages.resourceTypes.create.button") }}
-				</n-button>
-			</div>
-		</div>
+				</div>
+			</template>
+		</PageHeader>
 
 		<ResourceStatCards v-if="!error && !isLoading" :cards="statCards" />
 
@@ -49,6 +48,7 @@ import type { ResourceType, ResourceTypePayload } from "@/add-os/modules/plans/t
 import { NAlert, NButton, useMessage } from "naive-ui"
 import { computed, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.vue"
 import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"

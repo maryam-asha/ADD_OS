@@ -1,10 +1,7 @@
 <!-- src/add-os/modules/spatial/views/SpaceTypeAmenitiesPage.vue -->
 <template>
-	<div class="flex flex-col gap-6">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t("amenities.manage.title") }}</h1>
-			<p class="text-secondary">{{ t("amenities.manage.description") }}</p>
-		</div>
+	<div class="flex flex-col gap-5">
+		<PageHeader :title="t('amenities.manage.title')" :description="t('amenities.manage.description')" />
 
 		<n-alert v-if="error" type="error" :title="t('amenities.manage.loadError')" />
 
@@ -12,7 +9,7 @@
 			<n-data-table :columns :data="rows" :loading="isLoading" :bordered="false" size="small" :scroll-x="700" />
 		</n-card>
 
-		<n-modal v-model:show="dialogVisible" preset="card" :title="dialogTitle" class="max-w-md">
+		<FormModal v-model:show="dialogVisible" :title="dialogTitle" size="sm">
 			<div class="flex flex-col gap-1">
 				<div
 					v-for="amenity in selectable"
@@ -31,16 +28,19 @@
 					<n-button type="primary" :loading="isSaving" @click="save">{{ t("amenities.manage.save") }}</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</FormModal>
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns } from "naive-ui"
 import type { Amenity, SpaceTypeAmenities } from "@/add-os/modules/spatial/types/amenity"
-import { NAlert, NButton, NCard, NDataTable, NModal, NSwitch, NTag, useMessage } from "naive-ui"
+import { NAlert, NButton, NCard, NDataTable, NSwitch, NTag, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import { amenityLabel, listAmenities } from "@/add-os/services/amenities"
 import { listSpaceTypeAmenities, updateSpaceTypeAmenities } from "@/add-os/services/space-type-amenities"
@@ -91,12 +91,7 @@ const columns = computed<DataTableColumns<SpaceTypeAmenities>>(() => [
 		key: "actions",
 		width: 140,
 		align: "center",
-		render: row =>
-			h(
-				NButton,
-				{ size: "small", type: "primary", secondary: true, onClick: () => openEdit(row) },
-				{ default: () => t("amenities.manage.editButton") }
-			)
+		render: row => h(RowActions, { actions: [{ key: "edit", label: t("amenities.manage.editButton"), icon: "carbon:edit", onClick: () => openEdit(row) }] })
 	}
 ])
 

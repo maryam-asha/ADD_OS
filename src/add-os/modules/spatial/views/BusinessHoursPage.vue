@@ -1,30 +1,34 @@
 <!-- src/add-os/modules/spatial/views/BusinessHoursPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.businessHours") }}</h1>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.businessHours')" :description="t('businessHours.description')">
+			<template v-if="selectedBranchId !== null" #actions>
+				<n-button v-if="activeTab === 'weekly'" type="primary" @click="openBulkCreate">
+					<template #icon><Icon name="carbon:add" :size="16" /></template>
+					{{ t("businessHours.create.button") }}
+				</n-button>
+				<n-button v-else type="primary" @click="openCreateException">
+					<template #icon><Icon name="carbon:add" :size="16" /></template>
+					{{ t("businessHours.exceptions.create.button") }}
+				</n-button>
+			</template>
+		</PageHeader>
 
 		<n-alert v-if="branchesError" type="error" :title="t('businessHours.loadError')" />
 
-		<n-select
-			v-model:value="selectedBranchId"
-			class="max-w-sm"
-			:placeholder="t('businessHours.branchPlaceholder')"
-			:options="branchOptions"
-		/>
+		<FilterToolbar>
+			<n-select
+				v-model:value="selectedBranchId"
+				class="sm:w-72!"
+				:placeholder="t('businessHours.branchPlaceholder')"
+				:options="branchOptions"
+			/>
+		</FilterToolbar>
 
-		<n-tabs v-if="selectedBranchId !== null" type="line">
+		<n-tabs v-if="selectedBranchId !== null" v-model:value="activeTab" type="line">
 			<n-tab-pane name="weekly" :tab="t('businessHours.tabs.weeklySchedule')">
 				<div class="flex flex-col gap-5">
 					<n-alert v-if="hoursError" type="error" :title="t('businessHours.loadError')" />
-
-					<div class="flex justify-end mb-4">
-						<n-button type="primary" @click="openBulkCreate">
-							<template #icon><Icon name="carbon:add" :size="16" /></template>
-							{{ t("businessHours.create.button") }}
-						</n-button>
-					</div>
 
 					<ResourceTable
 						:columns="groupedHourColumns"
@@ -36,18 +40,11 @@
 				</div>
 
 				<!-- Bulk create / edit modal -->
-				<n-modal
-					v-model:show="bulkDrawerVisible"
-					preset="card"
-					:title="t('businessHours.bulkCreate.title')"
-					closable
-					style="max-width: 32rem"
-					content-style="max-height: 70vh; overflow-y: auto"
-				>
+				<FormModal v-model:show="bulkDrawerVisible" :title="t('businessHours.bulkCreate.title')">
 					<n-form label-placement="top">
 						<!-- Days header row with full width & generous space -->
 						<div class="flex items-center justify-between w-full mb-3">
-							<span class="text-sm font-semibold" style="color: #A97C57">
+							<span class="text-sm font-semibold">
 								{{ t("businessHours.bulkCreate.days") }} *
 							</span>
 							<div class="flex items-center gap-2">
@@ -77,25 +74,22 @@
 								:key="day"
 								class="border rounded-lg p-2 text-center cursor-pointer transition-all flex flex-col items-center justify-center min-h-[52px] select-none"
 								:class="bulkForm.days.includes(day)
-									? 'border-[#007F91] bg-[#007F91]/10 text-[#007F91]'
-									: 'border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 text-neutral-700 dark:text-neutral-300'"
+									? 'border-[var(--add-primary)] bg-[var(--add-surface-sunken)] text-primary'
+									: 'border-[var(--add-border)] text-secondary hover:border-[var(--add-primary)]'"
 								@click="toggleBulkDay(day)"
 							>
-								<span
-									class="text-xs font-semibold"
-									style="color: #A97C57"
-								>
+								<span class="text-xs font-semibold">
 									{{ t(`businessHours.days.${day}`) }}
 								</span>
 								<Icon
 									v-if="bulkForm.days.includes(day)"
 									name="carbon:checkmark-filled"
 									:size="14"
-									class="text-[#007F91] mt-0.5"
+									class="text-primary mt-0.5"
 								/>
 							</div>
 						</div>
-						<p v-if="bulkDaysError" class="text-xs text-red-500 mb-3">{{ bulkDaysError }}</p>
+						<p v-if="bulkDaysError" class="text-xs text-error mb-3">{{ bulkDaysError }}</p>
 
 						<!-- Times row: side by side -->
 						<div class="grid grid-cols-2 gap-4 mb-3">
@@ -136,7 +130,7 @@
 							</n-button>
 						</div>
 					</template>
-				</n-modal>
+				</FormModal>
 
 				<!-- Single-day drawer fallback -->
 				<ResourceFormDrawer
@@ -153,13 +147,6 @@
 				<div class="flex flex-col gap-5">
 					<n-alert v-if="exceptionsError" type="error" :title="t('businessHours.loadError')" />
 
-					<div class="flex justify-end mb-4">
-						<n-button type="primary" @click="openCreateException">
-							<template #icon><Icon name="carbon:add" :size="16" /></template>
-							{{ t("businessHours.exceptions.create.button") }}
-						</n-button>
-					</div>
-
 					<ResourceTable
 						:columns="exceptionColumns"
 						:data="exceptions"
@@ -170,13 +157,9 @@
 				</div>
 
 				<!-- Custom exceptions modal -->
-				<n-modal
+				<FormModal
 					v-model:show="exceptionModalVisible"
-					preset="card"
 					:title="exceptionMode === 'create' ? t('businessHours.exceptions.create.title') : t('businessHours.exceptions.edit.title')"
-					closable
-					style="max-width: 32rem"
-					content-style="max-height: 70vh; overflow-y: auto"
 				>
 					<n-form label-placement="top">
 						<!-- Date Picker -->
@@ -248,7 +231,7 @@
 							</n-button>
 						</div>
 					</template>
-				</n-modal>
+				</FormModal>
 			</n-tab-pane>
 		</n-tabs>
 	</div>
@@ -256,13 +239,16 @@
 
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
+import type { BulkHourForm } from "@/add-os/modules/spatial/config/business-hours.config"
 import type { Branch } from "@/add-os/modules/spatial/types/branch"
 import type { BusinessHour, BusinessHourPayload, DayOfWeek } from "@/add-os/modules/spatial/types/business-hour"
 import type { BusinessHourException, BusinessHourExceptionPayload } from "@/add-os/modules/spatial/types/business-hour-exception"
-import type { BulkHourForm } from "@/add-os/modules/spatial/config/business-hours.config"
-import { NAlert, NButton, NDatePicker, NForm, NFormItem, NInput, NModal, NSelect, NSwitch, NTabs, NTabPane, NTimePicker, useMessage } from "naive-ui"
+import { NAlert, NButton, NDatePicker, NForm, NFormItem, NInput, NSelect, NSwitch, NTabPane, NTabs, NTimePicker, useMessage } from "naive-ui"
 import { computed, h, reactive, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import FilterToolbar from "@/add-os/components/page/FilterToolbar.vue"
+import FormModal from "@/add-os/components/page/FormModal.vue"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.vue"
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
@@ -270,28 +256,20 @@ import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
 import { canDeleteBusinessHourExceptions, canDeleteBusinessHours } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
-import {
-	DAYS_OF_WEEK_ORDERED,
-	WORK_DAYS,
-	buildBusinessHourExceptionColumns,
-	businessHourFields,
-	emptyBulkHourForm,
-	emptyBusinessHourExceptionPayload,
-	emptyBusinessHourPayload
-} from "@/add-os/modules/spatial/config/business-hours.config"
+import { buildBusinessHourExceptionColumns, businessHourFields, DAYS_OF_WEEK_ORDERED, emptyBulkHourForm, emptyBusinessHourExceptionPayload, emptyBusinessHourPayload, WORK_DAYS } from "@/add-os/modules/spatial/config/business-hours.config"
 import { listBranches } from "@/add-os/services/branches"
-import {
-	createBusinessHour,
-	listBusinessHours,
-	removeBusinessHour,
-	updateBusinessHour
-} from "@/add-os/services/business-hours"
 import {
 	createBusinessHourException,
 	listBusinessHourExceptions,
 	removeBusinessHourException,
 	updateBusinessHourException
 } from "@/add-os/services/business-hour-exceptions"
+import {
+	createBusinessHour,
+	listBusinessHours,
+	removeBusinessHour,
+	updateBusinessHour
+} from "@/add-os/services/business-hours"
 import { formatClockTime } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
@@ -309,6 +287,8 @@ const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
 // ── Branches ───────────────────────────────────────────────────────────────
 const { data: branches, error: branchesError } = useResourceList<Branch>(listBranches)
 const selectedBranchId = ref<number | null>(null)
+/** The open tab — its "New …" action is the one PageHeader shows. */
+const activeTab = ref<"weekly" | "exceptions">("weekly")
 
 const branchOptions = computed<SelectOption[]>(() =>
 	branches.value.map(branch => ({
@@ -344,7 +324,7 @@ const {
 	data: hours,
 	isLoading: hoursLoading,
 	error: hoursError,
-	refetch: refetchHours,
+	refetch: refetchHours
 } = useResourceList<BusinessHour>(listBusinessHoursForBranch, branchQuery)
 
 export interface GroupedBusinessHour {
@@ -429,7 +409,7 @@ function groupHoursByTime(rawHours: BusinessHour[]): GroupedBusinessHour[] {
 				close_time: hour.close_time,
 				itemIds: [hour.id],
 				branch_id: hour.branch_id,
-				firstId: hour.id,
+				firstId: hour.id
 			})
 		}
 	}
@@ -445,7 +425,7 @@ function groupHoursByTime(rawHours: BusinessHour[]): GroupedBusinessHour[] {
 			daysLabel: formatDaysLabel(entry.days),
 			open_time: entry.open_time,
 			close_time: entry.close_time,
-			itemIds: entry.itemIds,
+			itemIds: entry.itemIds
 		})
 	}
 
@@ -467,17 +447,17 @@ const groupedHourColumns = computed<DataTableColumns<GroupedBusinessHour>>(() =>
 		key: "daysLabel",
 		render: row =>
 			h("div", { class: "flex items-center gap-2" }, [
-				h("span", { class: "font-semibold text-neutral-800 dark:text-neutral-100" }, row.daysLabel),
+				h("span", { class: "font-semibold" }, row.daysLabel),
 				row.days.length > 1
 					? h(
 							"span",
 							{
-								class: "text-xs px-2.5 py-0.5 rounded-full bg-[#007F91]/10 text-[#007F91] font-semibold",
+								class: "text-xs px-2.5 py-0.5 rounded-full border border-[var(--add-border)] bg-[var(--add-surface-sunken)] text-primary font-semibold"
 							},
 							`${row.days.length} ${currentLocale.value === "ar" ? "أيام" : "days"}`
 					  )
-					: null,
-			]),
+					: null
+			])
 	},
 	{
 		title: t("businessHours.columns.openTime"),
@@ -488,7 +468,7 @@ const groupedHourColumns = computed<DataTableColumns<GroupedBusinessHour>>(() =>
 		title: t("businessHours.columns.closeTime"),
 		key: "close_time",
 		render: row => h("span", { class: "font-mono font-medium" }, row.close_time ? formatClockTime(row.close_time) : "—")
-	},
+	}
 ])
 
 async function removeGroupedHour(id: number) {
@@ -598,7 +578,7 @@ async function submitBulkHour() {
 				branch_id: selectedBranchId.value ?? 0,
 				day_of_week: day,
 				open_time: bulkForm.open_time,
-				close_time: bulkForm.close_time,
+				close_time: bulkForm.close_time
 			}
 
 			if (existing.length === 0) {
@@ -658,7 +638,7 @@ const {
 	data: exceptions,
 	isLoading: exceptionsLoading,
 	error: exceptionsError,
-	refetch: refetchExceptions,
+	refetch: refetchExceptions
 } = useResourceList<BusinessHourException>(listBusinessHourExceptionsForBranch, branchQuery)
 
 const exceptionColumns = computed(() => buildBusinessHourExceptionColumns(t))
@@ -776,4 +756,3 @@ watch(selectedBranchId, () => {
 	editingExceptionId.value = null
 })
 </script>
-

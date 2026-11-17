@@ -13,6 +13,7 @@ const i18n = createI18n({
 	locale: "en",
 	messages: {
 		en: {
+			common: { moreActions: "More actions" },
 			resourceCrud: {
 				table: {
 					actionsColumn: "Actions",
@@ -55,6 +56,24 @@ function mountTable(overrides: Record<string, unknown> = {}) {
 			attachTo: document.body
 		}
 	)
+}
+
+/**
+ * Since 2026-11-17 delete lives in the row's "⋯" menu (RowActions), not
+ * inline. The menu is teleported to document.body, so it is opened through
+ * its trigger and its option is found on the document.
+ */
+async function pickFromMenu(wrapper: ReturnType<typeof mountTable>, label: string) {
+	const more = wrapper.findAll("button").find(button => button.attributes("aria-label") === "More actions")
+	await more?.trigger("click")
+	await nextTick()
+	await nextTick()
+	const option = Array.from(document.querySelectorAll(".n-dropdown-option-body")).find(
+		element => element.textContent?.trim() === label
+	)
+	option?.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+	await nextTick()
+	return option
 }
 
 describe("resourceTable", () => {
@@ -165,10 +184,9 @@ describe("resourceTable", () => {
 		const onDelete = vi.fn()
 		const wrapper = mountTable({ onDelete })
 
-		// The trigger is icon-only now — found by its aria-label, not visible text.
-		const deleteButton = wrapper.findAll("button").find(button => button.attributes("aria-label") === "Delete")
-		await deleteButton?.trigger("click")
+		const option = await pickFromMenu(wrapper, "Delete")
 
+		expect(option).toBeTruthy()
 		expect(onDelete).not.toHaveBeenCalled()
 		wrapper.unmount()
 	})
@@ -177,9 +195,7 @@ describe("resourceTable", () => {
 		const onDelete = vi.fn()
 		const wrapper = mountTable({ onDelete })
 
-		const deleteButton = wrapper.findAll("button").find(button => button.attributes("aria-label") === "Delete")
-		await deleteButton?.trigger("click")
-		await nextTick()
+		await pickFromMenu(wrapper, "Delete")
 
 		// The dialog is teleported to document.body — outside the wrapper's own
 		// root node — same as n-modal in ResourceFormDrawer.spec.ts, so it's
@@ -195,25 +211,12 @@ describe("resourceTable", () => {
 		wrapper.unmount()
 	})
 
-	it("renders extraActions buttons alongside edit/delete when provided", async () => {
-		const onExtra = vi.fn()
-		const wrapper = mountTable({
-			extraActions: (row: Row) => [h("button", { onClick: () => onExtra(row) }, "Extra")]
-		})
-
-		const extraButton = wrapper.findAll("button").find(button => button.text() === "Extra")
-		expect(extraButton?.exists()).toBe(true)
-		await extraButton?.trigger("click")
-
-		expect(onExtra).toHaveBeenCalledWith({ id: 1, label: "Row A" })
-		wrapper.unmount()
-	})
-
-	it("renders no delete button when onDelete is absent — hidden, not disabled", () => {
+	it("renders no delete action when onDelete is absent — hidden, not disabled", () => {
 		const wrapper = mountTable({ onDelete: undefined })
 
-		const deleteButton = wrapper.findAll("button").find(button => button.attributes("aria-label") === "Delete")
-		expect(deleteButton).toBeUndefined()
+		// Edit alone stays inline, so there is no "⋯" menu to hold a delete.
+		const more = wrapper.findAll("button").find(button => button.attributes("aria-label") === "More actions")
+		expect(more).toBeUndefined()
 
 		wrapper.unmount()
 	})
@@ -230,11 +233,41 @@ describe("resourceTable", () => {
 	it("includes deleteWarning text in the confirm dialog when provided", async () => {
 		const wrapper = mountTable({ deleteWarning: "This also deletes everything under it." })
 
-		const deleteButton = wrapper.findAll("button").find(button => button.attributes("aria-label") === "Delete")
-		await deleteButton?.trigger("click")
-		await nextTick()
+		await pickFromMenu(wrapper, "Delete")
 
 		expect(document.body.textContent).toContain("This also deletes everything under it.")
+		wrapper.unmount()
+	})
+
+	it("never puts delete inline — it sits in the \"⋯\" menu", () => {
+		const wrapper = mountTable()
+
+		const inlineDelete = wrapper.findAll("button").find(button => button.attributes("aria-label") === "Delete")
+		expect(inlineDelete).toBeUndefined()
+		const more = wrapper.findAll("button").find(button => button.attributes("aria-label") === "More actions")
+		expect(more).toBeTruthy()
+
+		wrapper.unmount()
+	})
+
+	it("shows the first rowActions inline after edit and folds the rest into the menu", async () => {
+		const onArchive = vi.fn()
+		const wrapper = mountTable({
+			onDelete: undefined,
+			rowActions: () => [
+				{ key: "status", label: "Status", icon: "carbon:status-change", onClick: vi.fn() },
+				{ key: "archive", label: "Archive", icon: "carbon:edit", onClick: onArchive }
+			]
+		})
+
+		const labels = wrapper.findAll("button").map(button => button.attributes("aria-label"))
+		expect(labels).toContain("Edit")
+		expect(labels).toContain("Status")
+		expect(labels).not.toContain("Archive")
+
+		await pickFromMenu(wrapper, "Archive")
+		expect(onArchive).toHaveBeenCalledOnce()
+
 		wrapper.unmount()
 	})
 
@@ -244,19 +277,6 @@ describe("resourceTable", () => {
 		expect(wrapper.text()).not.toContain("Actions")
 		const editButton = wrapper.findAll("button").find(button => button.attributes("aria-label") === "Edit")
 		expect(editButton).toBeUndefined()
-
-		wrapper.unmount()
-	})
-
-	it("still renders extraActions when onEdit is absent but extraActions is provided", () => {
-		const onExtra = vi.fn()
-		const wrapper = mountTable({
-			onEdit: undefined,
-			extraActions: (row: Row) => [h("button", { onClick: () => onExtra(row) }, "Extra")]
-		})
-
-		const extraButton = wrapper.findAll("button").find(button => button.text() === "Extra")
-		expect(extraButton?.exists()).toBe(true)
 
 		wrapper.unmount()
 	})

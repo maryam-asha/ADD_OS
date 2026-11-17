@@ -1,9 +1,6 @@
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.accountSecurity") }}</h1>
-			<p>{{ t("account.description") }}</p>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.accountSecurity')" :description="t('account.description')" />
 
 		<n-card :title="t('account.profile.title')">
 			<n-form ref="profileFormRef" :model="profileForm" :rules="profileRules" label-placement="top">
@@ -47,6 +44,13 @@
 				<template v-if="twoFactorPhase === 'disabled'">
 					<n-button type="primary" :loading="twoFactorBusy" @click="enableTwoFactor">
 						{{ t("account.twoFactor.enableButton") }}
+					</n-button>
+				</template>
+
+				<template v-else-if="twoFactorPhase === 'locked'">
+					<p class="text-secondary mb-4">{{ t("account.twoFactor.lockedNotice") }}</p>
+					<n-button :loading="twoFactorBusy" @click="unlockTwoFactor">
+						{{ t("account.twoFactor.unlockButton") }}
 					</n-button>
 				</template>
 
@@ -104,6 +108,7 @@ import { NAlert, NButton, NCard, NForm, NFormItem, NInput, NSpin, useMessage } f
 import { onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import ConfirmPasswordModal from "@/add-os/components/ConfirmPasswordModal.vue"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { usePasswordConfirmation } from "@/add-os/composables/usePasswordConfirmation"
 import { isValidPassword } from "@/add-os/modules/system/utils/validation"
 import { changePassword, updateProfileInformation } from "@/add-os/services/account"
@@ -127,6 +132,7 @@ const {
 	busy: twoFactorBusy,
 	confirmCodeError,
 	loadStatus: loadTwoFactorStatus,
+	unlock: unlockTwoFactor,
 	enable: enableTwoFactor,
 	confirm: confirmTwoFactorCode,
 	regenerateRecoveryCodes,

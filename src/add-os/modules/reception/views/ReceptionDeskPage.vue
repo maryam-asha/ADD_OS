@@ -11,33 +11,23 @@
 -->
 <template>
 	<div class="flex flex-col gap-4">
-		<!-- Date, the desk's sales, refresh -->
-		<div class="flex items-center justify-between flex-wrap gap-3 pb-4 border-b border-stone-200/70">
-			<div class="flex items-center gap-3">
-				<Icon name="carbon:calendar" :size="20" class="text-stone-500" />
-				<span class="text-base font-semibold text-stone-800">{{ formatDate(new Date(), { style: "long" }) }}</span>
-			</div>
-
-			<div class="flex items-center gap-2 flex-wrap">
-				<n-button
-					v-for="action in quickActions"
-					:key="action.key"
-					:type="action.type"
-					size="small"
-					secondary
-					class="font-semibold"
-					@click="action.open"
-				>
-					<template #icon><Icon :name="action.icon" :size="16" /></template>
-					{{ action.label }}
-				</n-button>
-
-				<n-button secondary size="small" :loading="summaryLoading" @click="refreshSummary">
+		<!-- The desk's title with today's date over it; the desk's sales and refresh at the far end -->
+		<PageHeader
+			:eyebrow="formatDate(new Date(), { style: 'long' })"
+			:title="t('nav.pages.receptionDesk')"
+			:description="t('pageDescriptions.receptionDesk')"
+		>
+			<template #actions>
+				<n-button secondary :loading="summaryLoading" @click="refreshSummary">
 					<template #icon><Icon name="carbon:renew" :size="16" /></template>
 					{{ t("closeSession.refresh") }}
 				</n-button>
-			</div>
-		</div>
+				<n-button v-for="action in quickActions" :key="action.key" secondary @click="action.open">
+					<template #icon><Icon :name="action.icon" :size="16" /></template>
+					{{ action.label }}
+				</n-button>
+			</template>
+		</PageHeader>
 
 		<n-alert v-if="summaryFailed" type="error" :bordered="false">{{ t("reception.loadFailed") }}</n-alert>
 
@@ -57,9 +47,9 @@
 							<div class="w-9 h-9 rounded-full flex items-center justify-center" :class="stat.iconBg">
 								<Icon :name="stat.icon" :size="20" />
 							</div>
-							<span class="text-3xl font-extrabold text-stone-900 tracking-tight">{{ formatNumber(stat.value) }}</span>
+							<span class="text-3xl font-extrabold text-[var(--add-text-primary)] tracking-tight">{{ formatNumber(stat.value) }}</span>
 						</div>
-						<h3 class="text-xs font-semibold text-stone-600 leading-tight">{{ stat.title }}</h3>
+						<h3 class="text-xs font-semibold text-[var(--add-text-secondary)] leading-tight">{{ stat.title }}</h3>
 					</div>
 				</n-card>
 			</div>
@@ -75,12 +65,12 @@
 				</template>
 
 				<!-- Up next: end requests, arrivals and today's bookings, soonest first -->
-				<n-card size="small" class="shadow-sm border border-stone-200 mt-4">
+				<n-card size="small" class="shadow-sm border border-[var(--add-border)] mt-4">
 					<template #header>
-						<span class="text-base font-bold text-stone-900">{{ t("reception.upNextTitle") }}</span>
+						<span class="text-base font-bold text-[var(--add-text-primary)]">{{ t("reception.upNextTitle") }}</span>
 					</template>
 
-					<div v-if="summary && summary.upcoming.length === 0" class="py-6 text-center text-sm text-stone-500">
+					<div v-if="summary && summary.upcoming.length === 0" class="py-6 text-center text-sm text-[var(--add-text-secondary)]">
 						{{ t("reception.upNextEmpty") }}
 					</div>
 
@@ -88,7 +78,7 @@
 						<div
 							v-for="item in summary?.upcoming ?? []"
 							:key="`${item.kind}-${item.id}`"
-							class="py-3 flex items-center justify-between hover:bg-stone-50/80 px-2 rounded-lg transition-colors cursor-pointer"
+							class="py-3 flex items-center justify-between hover:bg-[var(--add-surface-sunken)] px-2 rounded-lg transition-colors cursor-pointer"
 							@click="open(item)"
 						>
 							<div class="flex items-center gap-3">
@@ -96,15 +86,15 @@
 									<Icon :name="KIND_STYLE[item.kind].icon" :size="18" />
 								</div>
 								<div class="flex flex-col">
-									<span class="font-bold text-stone-900 text-sm">{{ item.member.name ?? "—" }}</span>
-									<span class="text-xs text-stone-500">
+									<span class="font-bold text-[var(--add-text-primary)] text-sm">{{ item.member.name ?? "—" }}</span>
+									<span class="text-xs text-[var(--add-text-secondary)]">
 										{{ t(`reception.upNextKinds.${item.kind}`) }}<template v-if="item.space"> · {{ item.space }}</template>
 										<template v-if="item.payment_method"> · {{ t(`closeSession.paymentMethods.${methodKey(item.payment_method)}`) }}</template>
 									</span>
 								</div>
 							</div>
 
-							<div class="flex items-center gap-2 text-stone-500 text-xs sm:text-sm">
+							<div class="flex items-center gap-2 text-[var(--add-text-secondary)] text-xs sm:text-sm">
 								<!-- A booking waiting for its member starts here, as soon as its check-in window opens. -->
 								<n-button
 									v-if="item.kind === 'booking' && canCheckInAtReception()"
@@ -221,6 +211,7 @@ import { NAlert, NBadge, NButton, NCard, NSpin, NTabPane, NTabs, useMessage } fr
 import { computed, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { canApproveBookings, canBookAtReception, canCheckInAtReception, canReviewKitchenOrders, canSellPlans, canTopUpWallets } from "@/add-os/config/permissions"
 import { useReceptionRealtime } from "@/add-os/modules/booking/composables/useReceptionRealtime"
 import ActiveSessionsPage from "@/add-os/modules/booking/views/ActiveSessionsPage.vue"
@@ -258,7 +249,6 @@ interface QuickAction {
 	key: string
 	label: string
 	icon: string
-	type: "default" | "info" | "warning"
 	open: () => void
 }
 
@@ -272,13 +262,13 @@ function opener(dialog: Ref<boolean>): () => void {
 const quickActions = computed<QuickAction[]>(() => {
 	const actions: QuickAction[] = []
 	if (canBookAtReception()) {
-		actions.push({ key: "book", label: t("reception.actions.bookSpace"), icon: "carbon:calendar-add", type: "info", open: opener(bookingModalOpen) })
+		actions.push({ key: "book", label: t("reception.actions.bookSpace"), icon: "carbon:calendar-add", open: opener(bookingModalOpen) })
 	}
 	if (canTopUpWallets()) {
-		actions.push({ key: "topUp", label: t("reception.actions.topUpWallet"), icon: "carbon:wallet", type: "warning", open: opener(topUpModalOpen) })
+		actions.push({ key: "topUp", label: t("reception.actions.topUpWallet"), icon: "carbon:wallet", open: opener(topUpModalOpen) })
 	}
 	if (canSellPlans()) {
-		actions.push({ key: "plan", label: t("reception.actions.subscribePlan"), icon: "carbon:upgrade", type: "default", open: opener(planModalOpen) })
+		actions.push({ key: "plan", label: t("reception.actions.subscribePlan"), icon: "carbon:upgrade", open: opener(planModalOpen) })
 	}
 	return actions
 })
@@ -342,20 +332,20 @@ const pendingPayments = computed(() => summary.value?.stats.pending_payments ?? 
 const statCards = computed(() => {
 	const stats = summary.value?.stats
 	return [
-		{ key: "active", title: t("reception.stats.activeSessions"), value: stats?.active_sessions ?? 0, icon: "carbon:user-activity", iconBg: "bg-blue-50 text-blue-700", tab: "sessions" as TabName },
-		{ key: "expected", title: t("reception.stats.expectedBookings"), value: stats?.expected_bookings ?? 0, icon: "carbon:calendar", iconBg: "bg-amber-50 text-amber-700", tab: "arrivals" as TabName },
-		{ key: "arrivals", title: t("reception.stats.pendingGuests"), value: stats?.pending_arrivals ?? 0, icon: "carbon:group", iconBg: "bg-emerald-50 text-emerald-700", tab: "arrivals" as TabName },
-		{ key: "endRequests", title: t("reception.stats.pendingEndRequests"), value: stats?.pending_end_requests ?? 0, icon: "carbon:logout", iconBg: "bg-orange-50 text-orange-700", tab: "end-requests" as TabName },
-		{ key: "payments", title: t("reception.stats.pendingPayments"), value: stats?.pending_payments ?? 0, icon: "carbon:wallet", iconBg: "bg-amber-50 text-amber-800", tab: "payments" as TabName }
+		{ key: "active", title: t("reception.stats.activeSessions"), value: stats?.active_sessions ?? 0, icon: "carbon:user-activity", iconBg: "bg-[color-mix(in_srgb,var(--add-info)_10%,transparent)] text-[var(--add-info-text)]", tab: "sessions" as TabName },
+		{ key: "expected", title: t("reception.stats.expectedBookings"), value: stats?.expected_bookings ?? 0, icon: "carbon:calendar", iconBg: "bg-[color-mix(in_srgb,var(--add-warning)_10%,transparent)] text-[var(--add-warning-text)]", tab: "arrivals" as TabName },
+		{ key: "arrivals", title: t("reception.stats.pendingGuests"), value: stats?.pending_arrivals ?? 0, icon: "carbon:group", iconBg: "bg-[color-mix(in_srgb,var(--add-success)_10%,transparent)] text-[var(--add-success-text)]", tab: "arrivals" as TabName },
+		{ key: "endRequests", title: t("reception.stats.pendingEndRequests"), value: stats?.pending_end_requests ?? 0, icon: "carbon:logout", iconBg: "bg-[color-mix(in_srgb,var(--add-warning)_10%,transparent)] text-[var(--add-warning-text)]", tab: "end-requests" as TabName },
+		{ key: "payments", title: t("reception.stats.pendingPayments"), value: stats?.pending_payments ?? 0, icon: "carbon:wallet", iconBg: "bg-[color-mix(in_srgb,var(--add-warning)_10%,transparent)] text-[var(--add-warning-text)]", tab: "payments" as TabName }
 	]
 })
 
 /* ── Up next ──────────────────────────────────────────────────────────────── */
 
 const KIND_STYLE: Record<UpcomingItem["kind"], { icon: string, bg: string }> = {
-	end_request: { icon: "carbon:logout", bg: "bg-orange-50 text-orange-700" },
-	arrival: { icon: "carbon:user-avatar", bg: "bg-amber-50 text-amber-700" },
-	booking: { icon: "carbon:calendar", bg: "bg-stone-100 text-stone-700" }
+	end_request: { icon: "carbon:logout", bg: "bg-[color-mix(in_srgb,var(--add-warning)_10%,transparent)] text-[var(--add-warning-text)]" },
+	arrival: { icon: "carbon:user-avatar", bg: "bg-[color-mix(in_srgb,var(--add-warning)_10%,transparent)] text-[var(--add-warning-text)]" },
+	booking: { icon: "carbon:calendar", bg: "bg-[var(--add-surface-sunken)] text-[var(--add-text-primary)]" }
 }
 
 /** A payment method the labels know, or `none` for anything else. */

@@ -5,21 +5,14 @@
   Opened from IndividualMembersPage when the operator clicks the "Details" action.
 -->
 <template>
-	<n-modal
-		v-model:show="show"
-		preset="card"
-		:title="currentMember?.name ?? t('members.detail.title')"
-		closable
-		style="width: min(44rem, 95vw)"
-		content-style="max-height: 82vh; overflow-y: auto"
-	>
+	<FormModal v-model:show="show" :title="currentMember?.name ?? t('members.detail.title')" size="md">
 		<div v-if="isLoadingMember" class="py-12 flex items-center justify-center">
 			<n-spin size="large" />
 		</div>
 
 		<div v-else-if="currentMember" class="flex flex-col gap-5">
 			<!-- Header Card: Avatar + Basic Info -->
-			<div class="flex items-start gap-4 p-4 rounded-xl bg-neutral-50 dark:bg-neutral-800/40 border border-black/5">
+			<div class="flex items-start gap-4 p-4 rounded-xl bg-[var(--add-surface-sunken)] border border-black/5">
 				<n-avatar
 					v-if="avatarUrl"
 					round
@@ -32,14 +25,14 @@
 					v-else
 					round
 					:size="68"
-					class="shrink-0 bg-emerald-700 text-white font-bold text-xl shadow-xs"
+					class="shrink-0 bg-[var(--add-success)] text-white font-bold text-xl shadow-xs"
 				>
 					{{ memberInitials }}
 				</n-avatar>
 
 				<div class="flex flex-col gap-1 flex-1 min-w-0">
 					<div class="flex items-center justify-between gap-2 flex-wrap">
-						<h2 class="text-lg font-bold text-stone-900 leading-tight truncate">
+						<h2 class="text-lg font-bold text-[var(--add-text-primary)] leading-tight truncate">
 							{{ currentMember.name }}
 						</h2>
 						<n-tag :type="STATUS_TYPE[currentMember.status]" size="small" round :bordered="true">
@@ -61,7 +54,7 @@
 						</span>
 					</div>
 
-					<div v-if="primaryCompany" class="text-xs text-stone-600 font-medium flex items-center gap-1 mt-1">
+					<div v-if="primaryCompany" class="text-xs text-[var(--add-text-secondary)] font-medium flex items-center gap-1 mt-1">
 						<Icon name="carbon:enterprise" :size="13" />
 						<span>{{ primaryCompany.legal_name }}</span>
 						<n-tag v-if="primaryCompany.is_admin" size="tiny" type="warning" round class="scale-90">
@@ -80,18 +73,18 @@
 						{{ t("members.profile.personalTitle") }}
 					</span>
 
-					<p v-if="personalProfile.bio" class="text-sm text-stone-800 leading-relaxed whitespace-pre-line bg-neutral-50/60 p-2.5 rounded-lg border border-black/5">
+					<p v-if="personalProfile.bio" class="text-sm text-[var(--add-text-primary)] leading-relaxed whitespace-pre-line bg-[var(--add-surface-sunken)] p-2.5 rounded-lg border border-black/5">
 						{{ personalProfile.bio }}
 					</p>
 
 					<div class="grid grid-cols-2 gap-3 text-xs">
 						<div v-if="personalProfile.city" class="flex flex-col gap-0.5">
 							<span class="text-secondary">{{ t("members.profile.city") }}</span>
-							<span class="font-medium text-stone-900">{{ personalProfile.city }}</span>
+							<span class="font-medium text-[var(--add-text-primary)]">{{ personalProfile.city }}</span>
 						</div>
 						<div v-if="personalProfile.gender" class="flex flex-col gap-0.5">
 							<span class="text-secondary">{{ t("members.profile.gender") }}</span>
-							<span class="font-medium text-stone-900">
+							<span class="font-medium text-[var(--add-text-primary)]">
 								{{ personalProfile.gender === 'male' ? t("members.profile.genderMale") : t("members.profile.genderFemale") }}
 							</span>
 						</div>
@@ -108,15 +101,15 @@
 					<div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
 						<div v-if="professionalProfile.job_title" class="flex flex-col gap-0.5">
 							<span class="text-secondary">{{ t("members.profile.jobTitle") }}</span>
-							<span class="font-semibold text-stone-900">{{ professionalProfile.job_title }}</span>
+							<span class="font-semibold text-[var(--add-text-primary)]">{{ professionalProfile.job_title }}</span>
 						</div>
 						<div v-if="professionalProfile.company_name" class="flex flex-col gap-0.5">
 							<span class="text-secondary">{{ t("members.profile.companyName") }}</span>
-							<span class="font-semibold text-stone-900">{{ professionalProfile.company_name }}</span>
+							<span class="font-semibold text-[var(--add-text-primary)]">{{ professionalProfile.company_name }}</span>
 						</div>
 						<div v-if="professionalProfile.industry" class="flex flex-col gap-0.5">
 							<span class="text-secondary">{{ t("members.profile.industry") }}</span>
-							<span class="font-semibold text-stone-900">{{ professionalProfile.industry }}</span>
+							<span class="font-semibold text-[var(--add-text-primary)]">{{ professionalProfile.industry }}</span>
 						</div>
 					</div>
 				</div>
@@ -134,7 +127,7 @@
 							:href="profileLinks.linkedin_url"
 							target="_blank"
 							rel="noopener noreferrer"
-							class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-200 text-xs font-medium text-stone-700 bg-stone-50 hover:bg-stone-100 hover:text-blue-700 transition-colors"
+							class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--add-border)] text-xs font-medium text-[var(--add-text-primary)] bg-[var(--add-surface-sunken)] hover:bg-[var(--add-surface-sunken)] hover:text-[var(--add-info-text)] transition-colors"
 						>
 							<Icon name="carbon:logo-linkedin" :size="14" />
 							LinkedIn
@@ -144,7 +137,7 @@
 							:href="profileLinks.instagram_url"
 							target="_blank"
 							rel="noopener noreferrer"
-							class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-200 text-xs font-medium text-stone-700 bg-stone-50 hover:bg-stone-100 hover:text-pink-700 transition-colors"
+							class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--add-border)] text-xs font-medium text-[var(--add-text-primary)] bg-[var(--add-surface-sunken)] hover:bg-[var(--add-surface-sunken)] hover:text-[var(--add-danger-text)] transition-colors"
 						>
 							<Icon name="carbon:logo-instagram" :size="14" />
 							Instagram
@@ -154,7 +147,7 @@
 							:href="profileLinks.behance_url"
 							target="_blank"
 							rel="noopener noreferrer"
-							class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-200 text-xs font-medium text-stone-700 bg-stone-50 hover:bg-stone-100 hover:text-blue-600 transition-colors"
+							class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--add-border)] text-xs font-medium text-[var(--add-text-primary)] bg-[var(--add-surface-sunken)] hover:bg-[var(--add-surface-sunken)] hover:text-[var(--add-info-text)] transition-colors"
 						>
 							<Icon name="carbon:link" :size="14" />
 							Behance
@@ -164,7 +157,7 @@
 							:href="profileLinks.website_url"
 							target="_blank"
 							rel="noopener noreferrer"
-							class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-200 text-xs font-medium text-stone-700 bg-stone-50 hover:bg-stone-100 hover:text-teal-700 transition-colors"
+							class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--add-border)] text-xs font-medium text-[var(--add-text-primary)] bg-[var(--add-surface-sunken)] hover:bg-[var(--add-surface-sunken)] hover:text-[var(--add-info-text)] transition-colors"
 						>
 							<Icon name="carbon:earth" :size="14" />
 							Website
@@ -179,7 +172,7 @@
 					<Icon name="carbon:wallet" :size="15" />
 					{{ t("members.detail.walletBalance") }}
 				</h3>
-				<div class="p-4 rounded-xl border border-black/5 bg-neutral-50 flex items-center justify-between shadow-2xs">
+				<div class="p-4 rounded-xl border border-black/5 bg-[var(--add-surface-sunken)] flex items-center justify-between shadow-2xs">
 					<div v-if="isLoadingBalance" class="flex items-center gap-2 text-sm text-secondary">
 						<n-spin :size="16" />
 						{{ t("members.detail.loadingBalance") }}
@@ -189,7 +182,7 @@
 					</div>
 					<div v-else-if="balance" class="flex flex-col gap-0.5">
 						<span class="text-xs text-secondary">{{ t("members.detail.generalBalance") }}</span>
-						<span class="text-2xl font-bold font-mono add-numeric text-teal-800">
+						<span class="text-2xl font-bold font-mono add-numeric text-[var(--add-info-text)]">
 							{{ balance.general_balance }}
 							<span class="text-sm font-normal text-secondary ml-1">{{ balance.currency }}</span>
 						</span>
@@ -214,7 +207,7 @@
 				<div v-else-if="sessionsError" class="text-sm text-error py-2">
 					{{ t("members.detail.sessionsError") }}
 				</div>
-				<div v-else-if="sessions.length === 0" class="py-4 text-center text-sm text-secondary bg-neutral-50/50 rounded-xl border border-black/5">
+				<div v-else-if="sessions.length === 0" class="py-4 text-center text-sm text-secondary bg-[var(--add-surface-sunken)] rounded-xl border border-black/5">
 					{{ t("members.detail.noActiveSessions") }}
 				</div>
 				<div v-else class="flex flex-col gap-2">
@@ -222,7 +215,7 @@
 						v-for="session in sessions"
 						:key="session.id"
 						class="flex items-center justify-between px-3.5 py-2.5 rounded-xl border transition-all"
-						:class="session.is_overdue ? 'border-error/30 bg-error/5' : 'border-black/5 bg-neutral-50'"
+						:class="session.is_overdue ? 'border-error/30 bg-error/5' : 'border-black/5 bg-[var(--add-surface-sunken)]'"
 					>
 						<div class="flex flex-col gap-0.5">
 							<div class="flex items-center gap-2">
@@ -244,19 +237,20 @@
 				</div>
 			</div>
 		</div>
-	</n-modal>
+	</FormModal>
 </template>
 
 <script setup lang="ts">
 import type { Member, MemberActiveSession, MemberStatus, MemberWalletBalance } from "@/add-os/modules/members/types/member"
-import { NAvatar, NButton, NModal, NSpin, NTag } from "naive-ui"
+import { NAvatar, NButton, NSpin, NTag } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
+import { ApiError } from "@/add-os/services/api"
 import { getMember, getMemberActiveSessions, getMemberWalletBalance } from "@/add-os/services/members"
 import { STATUS_ICONS } from "@/add-os/theme/tokens"
 import { formatDateTime } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
-import { ApiError } from "@/add-os/services/api"
 
 const props = defineProps<{ member: Member | null }>()
 const show = defineModel<boolean>("show", { required: true })

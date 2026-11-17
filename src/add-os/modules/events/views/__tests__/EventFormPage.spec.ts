@@ -94,8 +94,8 @@ describe("eventFormPage", () => {
 	})
 
 	it("translates create and edit titles and actions via vue-i18n", () => {
-		expect(source).toContain('t("events.create.title")')
-		expect(source).toContain('t("events.edit.title")')
+		expect(source).toContain("t('events.create.title')")
+		expect(source).toContain("t('events.edit.title')")
 		expect(source).toContain('t("events.create.actions.submit")')
 		expect(source).toContain('t("events.edit.actions.submit")')
 	})

@@ -1,10 +1,7 @@
 <!-- src/add-os/modules/members/views/MembershipsPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.memberships") }}</h1>
-			<p>{{ t("memberships.description") }}</p>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.memberships')" :description="t('memberships.description')" />
 
 		<!--
 			Activation needs `memberships.create` on the backend (until 2026-10-27
@@ -105,7 +102,7 @@
 						server's own count — so a sale that would not fit is visible
 						before it is refused.
 					-->
-					<div v-if="poolPreview" class="flex flex-col gap-1 p-3 rounded-lg border border-black/5 text-xs" :class="fitsPool ? 'bg-neutral-50' : 'add-pool-short'">
+					<div v-if="poolPreview" class="flex flex-col gap-1 p-3 rounded-lg border border-black/5 text-xs" :class="fitsPool ? 'bg-[var(--add-surface-sunken)]' : 'add-pool-short'">
 						<span class="font-semibold">{{ t("memberships.activate.poolTitle") }}</span>
 						<span class="add-numeric">
 							{{ t("memberships.activate.poolNow", { free: formatNumber(poolPreview.free_now), seats: formatNumber(poolPreview.capacity_now) }) }}
@@ -131,7 +128,7 @@
 						so the operator should see what they are about to hand over
 						before they hand it over.
 					-->
-					<div v-if="selectedPlan" class="flex flex-col gap-2 p-3 bg-neutral-50 rounded-lg border border-black/5">
+					<div v-if="selectedPlan" class="flex flex-col gap-2 p-3 bg-[var(--add-surface-sunken)] rounded-lg border border-black/5">
 						<div class="flex items-center justify-between gap-2">
 							<span class="text-sm font-bold">{{ pickLocalized(selectedPlan.name, locale) }}</span>
 							<n-tag v-if="!selectedPlan.is_public" size="small" round type="warning">
@@ -184,6 +181,7 @@ import type { SeatDesk } from "@/add-os/modules/spatial/types/seat-desk"
 import { NAlert, NButton, NCard, NForm, NFormItem, NInputNumber, NSelect, NSwitch, NTag, useMessage } from "naive-ui"
 import { computed, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import { canActivateMemberships } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"

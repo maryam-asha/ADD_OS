@@ -190,7 +190,9 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		status: "active",
 		pages: [
 			{ key: "users", path: "users", permission: "users.view" },
-			{ key: "roles", path: "roles", permission: "roles.view" }
+			{ key: "roles", path: "roles", permission: "roles.view" },
+			// Errors and crashes the member app reported (POST /api/v1/errors).
+			{ key: "errorLogs", path: "error-logs", permission: "error-logs.view" }
 		]
 	},
 	{
@@ -283,6 +285,8 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		status: "active",
 		pages: [
 			{ key: "packages", path: "packages", permission: "plans.view" },
+			{ key: "packageCreate", path: "packages/create", hidden: true, permission: "plans.view" },
+			{ key: "packageEdit", path: "packages/:id/edit", hidden: true, permission: "plans.view" },
 			{ key: "modules", path: "modules", permission: "plan-modules.view" },
 			{ key: "resourceTypes", path: "resource-types", permission: "resource-types.view" },
 			// ComingSoon: no API yet.

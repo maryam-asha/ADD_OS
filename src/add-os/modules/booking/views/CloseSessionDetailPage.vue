@@ -9,13 +9,14 @@
 -->
 <template>
 	<div class="flex flex-col gap-6 max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
-		<div class="flex items-center justify-between border-b border-stone-200/80 pb-4">
-			<h1 class="text-2xl font-bold text-stone-900">{{ t(fromBoard ? "closeSession.detail.sessionTitle" : "closeSession.detail.title") }}</h1>
-			<n-button secondary round @click="backToList">
-				<template #icon><Icon name="carbon:arrow-left" :size="18" class="rtl:rotate-180" /></template>
-				{{ t(fromBoard ? "closeSession.detail.backToSessions" : "closeSession.detail.back") }}
-			</n-button>
-		</div>
+		<PageHeader :title="t(fromBoard ? 'closeSession.detail.sessionTitle' : 'closeSession.detail.title')" :description="t('pageDescriptions.closeSessionDetail')">
+			<template #actions>
+				<n-button secondary @click="backToList">
+					<template #icon><Icon name="carbon:arrow-left" :size="18" class="rtl:rotate-180" /></template>
+					{{ t(fromBoard ? "closeSession.detail.backToSessions" : "closeSession.detail.back") }}
+				</n-button>
+			</template>
+		</PageHeader>
 
 		<n-spin :show="isLoading && !report">
 			<n-alert v-if="loadFailed" type="error" :bordered="false">{{ t("closeSession.detail.notFound") }}</n-alert>
@@ -23,84 +24,84 @@
 			<div v-if="report" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 				<!-- The session -->
 				<div class="lg:col-span-7 flex flex-col gap-6">
-					<n-card size="small" class="shadow-sm border border-stone-200">
+					<n-card size="small" class="shadow-sm border border-[var(--add-border)]">
 						<div class="flex items-start gap-4">
-							<n-avatar round :size="56" class="bg-amber-700 text-white font-bold text-lg">{{ initials(report.member.name) }}</n-avatar>
+							<n-avatar round :size="56" class="bg-[var(--add-warning-text)] text-white font-bold text-lg">{{ initials(report.member.name) }}</n-avatar>
 							<div class="flex flex-col gap-1 flex-1">
-								<span class="text-lg font-bold text-stone-900">{{ report.member.name }}</span>
-								<bdi v-if="report.member.phone" dir="ltr" class="text-xs text-stone-500 font-medium">{{ report.member.phone }}</bdi>
-								<div class="mt-3 pt-3 border-t border-stone-100 text-xs">
-									<span class="text-stone-400 block">{{ t("closeSession.detail.space") }}</span>
-									<span class="font-semibold text-stone-800">{{ report.session.space.name }}</span>
+								<span class="text-lg font-bold text-[var(--add-text-primary)]">{{ report.member.name }}</span>
+								<bdi v-if="report.member.phone" dir="ltr" class="text-xs text-[var(--add-text-secondary)] font-medium">{{ report.member.phone }}</bdi>
+								<div class="mt-3 pt-3 border-t border-[var(--add-border)] text-xs">
+									<span class="text-[var(--add-text-muted)] block">{{ t("closeSession.detail.space") }}</span>
+									<span class="font-semibold text-[var(--add-text-primary)]">{{ report.session.space.name }}</span>
 								</div>
 							</div>
 						</div>
 					</n-card>
 
-					<n-card size="small" class="shadow-sm border border-stone-200">
+					<n-card size="small" class="shadow-sm border border-[var(--add-border)]">
 						<div class="grid gap-3 text-center text-xs" :class="hasBookedSlot ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3'">
 							<template v-if="report.session.start_at && report.session.end_at">
-								<div class="flex flex-col gap-1 items-center p-3 rounded-xl bg-stone-50">
-									<span class="text-stone-400 font-medium">{{ t("closeSession.detail.bookingStart") }}</span>
-									<span class="font-bold text-stone-900 text-base" data-test="booking-start">{{ formatTime(report.session.start_at) }}</span>
+								<div class="flex flex-col gap-1 items-center p-3 rounded-xl bg-[var(--add-surface-sunken)]">
+									<span class="text-[var(--add-text-muted)] font-medium">{{ t("closeSession.detail.bookingStart") }}</span>
+									<span class="font-bold text-[var(--add-text-primary)] text-base" data-test="booking-start">{{ formatTime(report.session.start_at) }}</span>
 								</div>
-								<div class="flex flex-col gap-1 items-center p-3 rounded-xl bg-stone-50">
-									<span class="text-stone-400 font-medium">{{ t("closeSession.detail.bookingEnd") }}</span>
-									<span class="font-bold text-stone-900 text-base" data-test="booking-end">{{ formatTime(report.session.end_at) }}</span>
+								<div class="flex flex-col gap-1 items-center p-3 rounded-xl bg-[var(--add-surface-sunken)]">
+									<span class="text-[var(--add-text-muted)] font-medium">{{ t("closeSession.detail.bookingEnd") }}</span>
+									<span class="font-bold text-[var(--add-text-primary)] text-base" data-test="booking-end">{{ formatTime(report.session.end_at) }}</span>
 								</div>
 							</template>
-							<div class="flex flex-col gap-1 items-center p-3 rounded-xl bg-stone-50">
-								<span class="text-stone-400 font-medium">{{ t("closeSession.detail.checkIn") }}</span>
-								<span class="font-bold text-stone-900 text-base" data-test="session-check-in">{{ formatTime(report.session.checked_in_at) }}</span>
-								<span v-if="report.session.started_via" class="text-stone-500">{{ t(`activeSessions.startedVia.${report.session.started_via}`) }}</span>
+							<div class="flex flex-col gap-1 items-center p-3 rounded-xl bg-[var(--add-surface-sunken)]">
+								<span class="text-[var(--add-text-muted)] font-medium">{{ t("closeSession.detail.checkIn") }}</span>
+								<span class="font-bold text-[var(--add-text-primary)] text-base" data-test="session-check-in">{{ formatTime(report.session.checked_in_at) }}</span>
+								<span v-if="report.session.started_via" class="text-[var(--add-text-secondary)]">{{ t(`activeSessions.startedVia.${report.session.started_via}`) }}</span>
 							</div>
-							<div class="flex flex-col gap-1 items-center p-3 rounded-xl bg-stone-50">
-								<span class="text-stone-400 font-medium">{{ t("closeSession.detail.checkOut") }}</span>
-								<span class="font-bold text-stone-900 text-base" data-test="session-check-out">{{ leftAt ? formatTime(leftAt) : "—" }}</span>
+							<div class="flex flex-col gap-1 items-center p-3 rounded-xl bg-[var(--add-surface-sunken)]">
+								<span class="text-[var(--add-text-muted)] font-medium">{{ t("closeSession.detail.checkOut") }}</span>
+								<span class="font-bold text-[var(--add-text-primary)] text-base" data-test="session-check-out">{{ leftAt ? formatTime(leftAt) : "—" }}</span>
 							</div>
-							<div class="flex flex-col gap-1 items-center p-3 rounded-xl bg-emerald-50/50 border border-emerald-100" :class="{ 'col-span-full': hasBookedSlot }">
-								<span class="text-emerald-700 font-medium">{{ t("closeSession.detail.duration") }}</span>
-								<span class="font-extrabold text-emerald-800 text-base"><bdi dir="ltr">{{ durationLabel(durationSeconds) }}</bdi></span>
+							<div class="flex flex-col gap-1 items-center p-3 rounded-xl bg-[color-mix(in_srgb,var(--add-success)_10%,transparent)] border border-[color-mix(in_srgb,var(--add-success)_35%,transparent)]" :class="{ 'col-span-full': hasBookedSlot }">
+								<span class="text-[var(--add-success-text)] font-medium">{{ t("closeSession.detail.duration") }}</span>
+								<span class="font-extrabold text-[var(--add-success-text)] text-base"><bdi dir="ltr">{{ durationLabel(durationSeconds) }}</bdi></span>
 							</div>
 						</div>
 					</n-card>
 
-					<n-card size="small" class="shadow-sm border border-stone-200">
+					<n-card size="small" class="shadow-sm border border-[var(--add-border)]">
 						<template #header>
-							<span class="text-base font-bold text-stone-900">{{ t("closeSession.detail.statement") }}</span>
+							<span class="text-base font-bold text-[var(--add-text-primary)]">{{ t("closeSession.detail.statement") }}</span>
 						</template>
 						<div class="flex flex-col gap-3 text-sm">
-							<div v-for="(line, index) in report.lines" :key="index" class="flex justify-between items-center text-stone-700 p-2.5 rounded-lg hover:bg-stone-50" :data-line="line.kind">
+							<div v-for="(line, index) in report.lines" :key="index" class="flex justify-between items-center text-[var(--add-text-primary)] p-2.5 rounded-lg hover:bg-[var(--add-surface-sunken)]" :data-line="line.kind">
 								<span class="flex flex-wrap items-center gap-2">
-									<Icon v-if="line.kind === 'order'" name="carbon:restaurant" :size="16" class="text-emerald-700" />
+									<Icon v-if="line.kind === 'order'" name="carbon:restaurant" :size="16" class="text-[var(--add-success-text)]" />
 									{{ line.label }}
-									<span v-if="line.quantity !== null" class="text-stone-400">({{ formatNumber(line.quantity) }} {{ line.unit }})</span>
+									<span v-if="line.quantity !== null" class="text-[var(--add-text-muted)]">({{ formatNumber(line.quantity) }} {{ line.unit }})</span>
 									<n-tag v-if="line.kind === 'order'" size="small" round :bordered="false" :type="line.paid ? 'success' : 'warning'" data-test="order-paid">
 										{{ t(line.paid ? "closeSession.detail.orders.paid" : "closeSession.detail.orders.unpaid") }}
 									</n-tag>
 								</span>
-								<span v-if="line.points !== null" class="font-semibold text-stone-900">{{ t("closeSession.detail.points", { points: formatNumber(line.points) }) }}</span>
+								<span v-if="line.points !== null" class="font-semibold text-[var(--add-text-primary)]">{{ t("closeSession.detail.points", { points: formatNumber(line.points) }) }}</span>
 							</div>
-							<div v-if="closing && closing.covered_seconds > 0" class="text-xs text-emerald-700 px-2.5">
+							<div v-if="closing && closing.covered_seconds > 0" class="text-xs text-[var(--add-success-text)] px-2.5">
 								{{ t("closeSession.detail.planCovered", { duration: durationLabel(closing.covered_seconds) }) }}
 							</div>
-							<div v-if="closing" class="flex justify-between items-center text-lg font-extrabold text-stone-900 p-3 bg-stone-100/70 rounded-xl">
+							<div v-if="closing" class="flex justify-between items-center text-lg font-extrabold text-[var(--add-text-primary)] p-3 bg-[var(--add-surface-sunken)] rounded-xl">
 								<span>{{ t("closeSession.detail.total") }}</span>
 								<span class="flex flex-col items-end">
-									<span class="text-emerald-700">{{ t("closeSession.detail.points", { points: formatNumber(closing.points) }) }}</span>
-									<span class="text-xs font-semibold text-stone-500 flex gap-2">
+									<span class="text-[var(--add-success-text)]">{{ t("closeSession.detail.points", { points: formatNumber(closing.points) }) }}</span>
+									<span class="text-xs font-semibold text-[var(--add-text-secondary)] flex gap-2">
 										<bdi v-for="amount in closing.amounts" :key="amount.currency" dir="ltr">{{ formatAmount(amount) }}</bdi>
 									</span>
 								</span>
 							</div>
 							<template v-if="unpaidOrderPoints > 0">
-								<div class="flex justify-between items-center text-stone-700 px-3" data-test="orders-unpaid">
+								<div class="flex justify-between items-center text-[var(--add-text-primary)] px-3" data-test="orders-unpaid">
 									<span>{{ t("closeSession.detail.orders.unpaidTotal") }}</span>
-									<span class="font-semibold text-stone-900">{{ t("closeSession.detail.points", { points: formatNumber(unpaidOrderPoints) }) }}</span>
+									<span class="font-semibold text-[var(--add-text-primary)]">{{ t("closeSession.detail.points", { points: formatNumber(unpaidOrderPoints) }) }}</span>
 								</div>
-								<div v-if="closing" class="flex justify-between items-center font-extrabold text-stone-900 px-3" data-test="grand-total">
+								<div v-if="closing" class="flex justify-between items-center font-extrabold text-[var(--add-text-primary)] px-3" data-test="grand-total">
 									<span>{{ t("closeSession.detail.orders.grandTotal") }}</span>
-									<span class="text-emerald-700">{{ t("closeSession.detail.points", { points: formatNumber(closing.points + unpaidOrderPoints) }) }}</span>
+									<span class="text-[var(--add-success-text)]">{{ t("closeSession.detail.points", { points: formatNumber(closing.points + unpaidOrderPoints) }) }}</span>
 								</div>
 							</template>
 						</div>
@@ -110,63 +111,63 @@
 				<!-- The clock, paying and ending -->
 				<div class="lg:col-span-5 flex flex-col gap-6 lg:sticky lg:top-6">
 					<!-- Live while the session is open; the session's length once it is closed -->
-					<n-card size="small" class="shadow-sm border" :class="isOpen ? 'border-emerald-200 bg-emerald-50/30' : 'border-stone-200'">
+					<n-card size="small" class="shadow-sm border" :class="isOpen ? 'border-[color-mix(in_srgb,var(--add-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--add-success)_10%,transparent)]' : 'border-[var(--add-border)]'">
 						<div class="flex flex-col items-center gap-1 py-2">
-							<span class="text-xs font-medium" :class="isOpen ? 'text-emerald-700' : 'text-stone-500'">
-								<span v-if="isOpen" class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse me-1" />
+							<span class="text-xs font-medium" :class="isOpen ? 'text-[var(--add-success-text)]' : 'text-[var(--add-text-secondary)]'">
+								<span v-if="isOpen" class="inline-block w-2 h-2 rounded-full bg-[var(--add-success)] animate-pulse me-1" />
 								{{ t(isOpen ? "closeSession.detail.timer" : "closeSession.detail.closedTimer") }}
 							</span>
-							<bdi dir="ltr" class="text-4xl font-extrabold tabular-nums text-stone-900" data-test="session-timer">{{ clockLabel(liveSeconds) }}</bdi>
+							<bdi dir="ltr" class="text-4xl font-extrabold tabular-nums text-[var(--add-text-primary)]" data-test="session-timer">{{ clockLabel(liveSeconds) }}</bdi>
 						</div>
 					</n-card>
 
 					<!-- How it was paid: the method, the points and their worth, the money and its currency -->
-					<n-card v-if="report.payments.length || (!isOpen && report.totals)" size="small" class="shadow-sm border border-stone-200">
+					<n-card v-if="report.payments.length || (!isOpen && report.totals)" size="small" class="shadow-sm border border-[var(--add-border)]">
 						<div class="flex flex-col gap-3 text-sm">
 							<div class="flex items-center justify-between">
-								<span class="font-bold text-stone-900">{{ t("closeSession.detail.payment.title") }}</span>
+								<span class="font-bold text-[var(--add-text-primary)]">{{ t("closeSession.detail.payment.title") }}</span>
 								<n-tag v-if="report.totals?.payment_state" :type="report.totals.payment_state === 'paid' ? 'success' : 'warning'" size="small" round>
 									{{ t(`closeSession.detail.payment.state.${report.totals.payment_state}`) }}
 								</n-tag>
 							</div>
 
-							<div v-for="payment in report.payments" :key="payment.id" class="flex flex-col gap-1.5 p-3 rounded-xl bg-stone-50 border border-stone-100" data-test="session-payment">
+							<div v-for="payment in report.payments" :key="payment.id" class="flex flex-col gap-1.5 p-3 rounded-xl bg-[var(--add-surface-sunken)] border border-[var(--add-border)]" data-test="session-payment">
 								<div class="flex items-center justify-between gap-2">
-									<span class="flex items-center gap-2 font-semibold text-stone-900">
-										<Icon :name="payment.method === 'wallet' ? 'carbon:wallet' : payment.method === 'cash' ? 'carbon:money' : 'carbon:currency'" :size="16" class="text-emerald-700" />
+									<span class="flex items-center gap-2 font-semibold text-[var(--add-text-primary)]">
+										<Icon :name="payment.method === 'wallet' ? 'carbon:wallet' : payment.method === 'cash' ? 'carbon:money' : 'carbon:currency'" :size="16" class="text-[var(--add-success-text)]" />
 										{{ payment.method_label }}
 									</span>
 									<n-tag size="small" round :bordered="false" :type="payment.status === 'accepted' ? 'success' : 'warning'">
 										{{ te(`memberProfile.paymentStatus.${payment.status}`) ? t(`memberProfile.paymentStatus.${payment.status}`) : payment.status }}
 									</n-tag>
 								</div>
-								<div v-if="payment.points" class="flex justify-between text-stone-700">
+								<div v-if="payment.points" class="flex justify-between text-[var(--add-text-primary)]">
 									<span>{{ t("closeSession.detail.payment.points") }}</span>
 									<span class="text-end">
 										<span class="font-bold">{{ t("closeSession.detail.points", { points: formatNumber(payment.points) }) }}</span>
-										<span v-if="payment.points_value.length" class="block text-xs text-stone-500">
+										<span v-if="payment.points_value.length" class="block text-xs text-[var(--add-text-secondary)]">
 											≈ <bdi v-for="(value, index) in payment.points_value" :key="value.currency" dir="ltr">{{ index ? " · " : "" }}{{ formatAmount(value) }}</bdi>
 										</span>
 									</span>
 								</div>
-								<div v-if="payment.cash" class="flex justify-between text-stone-700">
+								<div v-if="payment.cash" class="flex justify-between text-[var(--add-text-primary)]">
 									<span>{{ t("closeSession.detail.payment.cashReceived") }}</span>
 									<span class="text-end">
 										<bdi dir="ltr" class="font-bold">{{ formatAmount({ value: payment.cash.amount, currency: payment.cash.currency ?? "" }) }}</bdi>
-										<span v-if="payment.cash.received_by" class="block text-xs text-stone-500">{{ t("closeSession.detail.payment.receivedBy", { name: payment.cash.received_by }) }}</span>
+										<span v-if="payment.cash.received_by" class="block text-xs text-[var(--add-text-secondary)]">{{ t("closeSession.detail.payment.receivedBy", { name: payment.cash.received_by }) }}</span>
 									</span>
 								</div>
-								<div v-if="payment.card" class="flex justify-between text-stone-700">
+								<div v-if="payment.card" class="flex justify-between text-[var(--add-text-primary)]">
 									<span>{{ t("closeSession.detail.payment.cardCharged") }}</span>
 									<span class="text-end">
 										<bdi dir="ltr" class="font-bold">{{ formatAmount({ value: payment.card.amount, currency: payment.card.currency ?? "" }) }}</bdi>
-										<span v-if="payment.card.reference" class="block text-xs text-stone-500">{{ t("closeSession.detail.payment.reference", { reference: payment.card.reference }) }}</span>
+										<span v-if="payment.card.reference" class="block text-xs text-[var(--add-text-secondary)]">{{ t("closeSession.detail.payment.reference", { reference: payment.card.reference }) }}</span>
 									</span>
 								</div>
-								<span v-if="payment.at" class="text-xs text-stone-400">{{ formatDateTime(payment.at) }}</span>
+								<span v-if="payment.at" class="text-xs text-[var(--add-text-muted)]">{{ formatDateTime(payment.at) }}</span>
 							</div>
 
-							<span v-if="!report.payments.length" class="text-stone-500">
+							<span v-if="!report.payments.length" class="text-[var(--add-text-secondary)]">
 								{{ t(report.totals?.payment_state === "paid" ? "closeSession.detail.payment.coveredByPlan" : "closeSession.detail.payment.none") }}
 							</span>
 						</div>
@@ -178,32 +179,32 @@
 							<n-alert :type="fromBoard ? 'info' : 'warning'" :bordered="false">
 								{{ t(fromBoard ? "closeSession.detail.noRequestActive" : "closeSession.detail.noRequest") }}
 							</n-alert>
-							<n-card v-if="closing" size="small" class="shadow-sm border border-stone-200">
+							<n-card v-if="closing" size="small" class="shadow-sm border border-[var(--add-border)]">
 								<div class="flex flex-col gap-2 text-sm">
 									<div class="flex justify-between items-center">
-										<span class="text-stone-500">{{ t("closeSession.detail.costSoFar") }}</span>
-										<span class="text-lg font-extrabold text-emerald-700">{{ t("closeSession.detail.points", { points: formatNumber(closing.points) }) }}</span>
+										<span class="text-[var(--add-text-secondary)]">{{ t("closeSession.detail.costSoFar") }}</span>
+										<span class="text-lg font-extrabold text-[var(--add-success-text)]">{{ t("closeSession.detail.points", { points: formatNumber(closing.points) }) }}</span>
 									</div>
-									<span class="flex justify-end gap-2 text-xs font-semibold text-stone-500">
+									<span class="flex justify-end gap-2 text-xs font-semibold text-[var(--add-text-secondary)]">
 										<bdi v-for="amount in closing.amounts" :key="amount.currency" dir="ltr">{{ formatAmount(amount) }}</bdi>
 									</span>
-									<span class="text-xs text-stone-400">{{ t("closeSession.detail.costSoFarNote") }}</span>
+									<span class="text-xs text-[var(--add-text-muted)]">{{ t("closeSession.detail.costSoFarNote") }}</span>
 								</div>
 							</n-card>
 						</template>
 					</template>
 
-					<n-card v-else size="small" class="shadow-sm border border-stone-200">
+					<n-card v-else size="small" class="shadow-sm border border-[var(--add-border)]">
 						<div class="flex flex-col gap-4 text-sm">
 							<div class="flex justify-between items-center">
-								<span class="text-stone-500">{{ t("closeSession.detail.chosenMethod") }}</span>
+								<span class="text-[var(--add-text-secondary)]">{{ t("closeSession.detail.chosenMethod") }}</span>
 								<n-tag :type="method === 'none' ? 'default' : 'success'" round>{{ t(`closeSession.paymentMethods.${method}`) }}</n-tag>
 							</div>
 
 							<n-alert v-if="closing?.already_paid" type="success" :bordered="false">{{ t("closeSession.detail.alreadyPaid") }}</n-alert>
 
 							<template v-else-if="method === 'wallet'">
-								<div class="flex justify-between text-stone-700">
+								<div class="flex justify-between text-[var(--add-text-primary)]">
 									<span>{{ t("closeSession.detail.walletBalance") }}</span>
 									<span class="font-bold">{{ t("closeSession.detail.points", { points: formatNumber(report.wallet_points) }) }}</span>
 								</div>
@@ -215,9 +216,9 @@
 							</template>
 
 							<template v-else-if="method === 'cash'">
-								<div class="flex flex-col gap-1 bg-amber-50/40 border border-amber-100 rounded-xl p-3">
-									<span class="text-stone-600">{{ t("closeSession.detail.cashCollect") }}</span>
-									<bdi v-for="amount in closing?.amounts ?? []" :key="amount.currency" dir="ltr" class="text-lg font-extrabold text-stone-900">{{ formatAmount(amount) }}</bdi>
+								<div class="flex flex-col gap-1 bg-[color-mix(in_srgb,var(--add-warning)_10%,transparent)] border border-[color-mix(in_srgb,var(--add-warning)_35%,transparent)] rounded-xl p-3">
+									<span class="text-[var(--add-text-secondary)]">{{ t("closeSession.detail.cashCollect") }}</span>
+									<bdi v-for="amount in closing?.amounts ?? []" :key="amount.currency" dir="ltr" class="text-lg font-extrabold text-[var(--add-text-primary)]">{{ formatAmount(amount) }}</bdi>
 								</div>
 							</template>
 
@@ -259,6 +260,7 @@ import { NAlert, NAvatar, NButton, NCard, NSpin, NTag, useDialog, useMessage } f
 import { computed, onBeforeUnmount, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { canCheckInAtReception, canSettleAtReception } from "@/add-os/config/permissions"
 import CollectPaymentModal from "@/add-os/modules/payments/components/CollectPaymentModal.vue"
 import { ApiError } from "@/add-os/services/api"

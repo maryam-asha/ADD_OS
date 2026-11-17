@@ -7,7 +7,7 @@
 	(damaged or doubtful sticker) stops the old one at once, so it asks first.
 -->
 <template>
-	<n-modal v-model:show="show" preset="card" :title="t('accessDevices.qr.title')" class="max-w-sm" :bordered="false">
+	<FormModal v-model:show="show" :title="t('accessDevices.qr.title')" size="sm">
 		<div v-if="device" class="flex flex-col items-center gap-3">
 			<div ref="sticker" class="rounded-lg bg-white p-4">
 				<n-qr-code v-if="device.qr_value" :value="device.qr_value" :size="220" error-correction-level="M" />
@@ -30,14 +30,15 @@
 				</n-button>
 			</div>
 		</div>
-	</n-modal>
+	</FormModal>
 </template>
 
 <script setup lang="ts">
 import type { Device } from "@/add-os/modules/access/types/access"
-import { NButton, NModal, NQrCode } from "naive-ui"
+import { NButton, NQrCode } from "naive-ui"
 import { useTemplateRef } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import { printSticker } from "@/add-os/utils/printSticker"
 import Icon from "@/components/common/Icon.vue"

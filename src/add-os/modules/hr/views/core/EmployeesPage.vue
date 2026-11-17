@@ -112,6 +112,7 @@ import { NAlert, NButton, NCard, NCheckbox, NDataTable, NInput, NPagination, NRa
 import { computed, h, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { canHireEmployees, canUpdateEmployees } from "@/add-os/config/permissions"
 import EmployeeCard from "@/add-os/modules/hr/components/core/EmployeeCard.vue"
 import EmployeeViewModal from "@/add-os/modules/hr/components/core/EmployeeViewModal.vue"
@@ -335,24 +336,6 @@ function rowProps(row: EmployeeSummary) {
 }
 
 // ── Table ───────────────────────────────────────────────────────────────────
-function actionButton(icon: string, label: string, onClick: () => void) {
-	return h(
-		NButton,
-		{
-			quaternary: true,
-			circle: true,
-			size: "small",
-			type: "primary",
-			"aria-label": label,
-			title: label,
-			onClick: (event: MouseEvent) => {
-				event.stopPropagation()
-				onClick()
-			}
-		},
-		{ icon: () => h(Icon, { name: icon, size: 18 }) }
-	)
-}
 
 /**
  * The name over the email beside the initials — the table's first column.
@@ -399,11 +382,13 @@ const columns = computed<DataTableColumns<EmployeeSummary>>(() => [
 		width: 130,
 		align: "center",
 		render: row =>
-			h("div", { class: "flex items-center justify-center gap-1" }, [
-				actionButton("carbon:view", t("hr.common.view"), () => openView(row.id)),
-				actionButton("carbon:printer", t("hr.employees.print"), () => openView(row.id, true)),
-				mayEdit ? actionButton("carbon:edit", t("hr.common.edit"), () => openEdit(row.id)) : null
-			])
+			h(RowActions, {
+				actions: [
+					{ key: "view", label: t("hr.common.view"), icon: "carbon:view", onClick: () => openView(row.id) },
+					...(mayEdit ? [{ key: "edit", label: t("hr.common.edit"), icon: "carbon:edit", onClick: () => openEdit(row.id) }] : []),
+					{ key: "print", label: t("hr.employees.print"), icon: "carbon:printer", onClick: () => openView(row.id, true) }
+				]
+			})
 	}
 ])
 </script>

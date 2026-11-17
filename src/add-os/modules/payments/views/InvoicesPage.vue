@@ -1,8 +1,8 @@
 <template>
 	<div class="flex flex-col gap-5">
-		<h1 class="text-2xl font-bold">{{ t("invoices.title") }}</h1>
+		<PageHeader :title="t('invoices.title')" :description="t('pageDescriptions.invoices')" />
 
-		<n-card class="add-ledger-table shadow-sm border border-stone-200">
+		<n-card class="add-ledger-table shadow-sm border border-[var(--add-border)]">
 			<div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
 				<n-select v-model:value="query.status" :options="statusOptions" clearable :placeholder="t('invoices.filters.status')" />
 				<n-select v-model:value="query.billed_to" :options="payerOptions" clearable :placeholder="t('invoices.filters.billedTo')" />
@@ -11,19 +11,19 @@
 			</div>
 			<n-data-table
 				remote
-				:columns="columns"
-				:data="data"
+				:columns
+				:data
 				:loading="isLoading"
 				:bordered="false"
 				:scroll-x="1350"
 				size="small"
 				:row-key="(row: Invoice) => row.id"
-				:row-class-name="rowClassName"
+				:row-class-name
 				:pagination="{ itemCount: meta?.total, page: meta?.current_page, pageSize: meta?.per_page, onChange: (p: number) => (page = p) }"
 			/>
 		</n-card>
 
-		<n-modal v-model:show="showPayment" preset="card" :title="t('invoices.payment.title')" class="max-w-lg">
+		<FormModal v-model:show="showPayment" :title="t('invoices.payment.title')" size="md">
 			<p v-if="paymentTarget" class="mb-3 text-sm">
 				{{ t("invoices.payment.remaining", { amount: formatMoney(paymentTarget.remaining, paymentTarget.currency) }) }}
 			</p>
@@ -52,9 +52,9 @@
 					<n-button type="primary" :loading="isSubmitting" @click="submitPayment">{{ t("resourceCrud.form.submit") }}</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</FormModal>
 
-		<n-modal v-model:show="showCancel" preset="card" :title="t('invoices.cancel.title')" class="max-w-md">
+		<FormModal v-model:show="showCancel" :title="t('invoices.cancel.title')" size="sm">
 			<n-form ref="cancelFormRef" :model="cancelForm" :rules="cancelRules" label-placement="top">
 				<n-form-item path="reason" :label="t('invoices.cancel.reason')">
 					<n-input v-model:value="cancelForm.reason" type="textarea" :autosize="{ minRows: 2 }" />
@@ -66,16 +66,19 @@
 					<n-button type="error" :loading="isSubmitting" @click="submitCancel">{{ t("invoices.cancel.confirm") }}</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</FormModal>
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns, FormInst, FormRules, SelectOption } from "naive-ui"
 import type { Invoice, InvoicePaymentMethod, InvoiceStatus, RecordInvoicePaymentPayload } from "@/add-os/modules/providers/types"
-import { NButton, NCard, NDataTable, NDatePicker, NForm, NFormItem, NInput, NModal, NSelect, NTag, useMessage } from "naive-ui"
+import { NButton, NCard, NDataTable, NDatePicker, NForm, NFormItem, NInput, NSelect, NTag, useMessage } from "naive-ui"
 import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { canCancelInvoice, canRecordInvoicePayment } from "@/add-os/config/permissions"
 import { useOpenRecord } from "@/add-os/notifications/useOpenRecord"
@@ -127,7 +130,7 @@ const columns = computed<DataTableColumns<Invoice>>(() => [
 		width: 140,
 		minWidth: 120,
 		align: "center",
-		render: row => h("span", { class: "font-mono font-bold text-stone-800 text-xs" }, row.reference)
+		render: row => h("span", { class: "font-mono font-bold text-[var(--add-text-primary)] text-xs" }, row.reference)
 	},
 	{
 		title: t("invoices.columns.company"),
@@ -135,7 +138,7 @@ const columns = computed<DataTableColumns<Invoice>>(() => [
 		width: 180,
 		minWidth: 150,
 		align: "center",
-		render: row => h("span", { class: "font-medium text-stone-900" }, row.company?.legal_name ?? "—")
+		render: row => h("span", { class: "font-medium text-[var(--add-text-primary)]" }, row.company?.legal_name ?? "—")
 	},
 	{
 		title: t("invoices.columns.provider"),
@@ -143,7 +146,7 @@ const columns = computed<DataTableColumns<Invoice>>(() => [
 		width: 160,
 		minWidth: 140,
 		align: "center",
-		render: row => h("span", { class: "text-stone-700 font-medium text-xs" }, row.provider?.name ?? t("invoices.direct"))
+		render: row => h("span", { class: "text-[var(--add-text-primary)] font-medium text-xs" }, row.provider?.name ?? t("invoices.direct"))
 	},
 	{
 		title: t("invoices.columns.billedTo"),
@@ -151,7 +154,7 @@ const columns = computed<DataTableColumns<Invoice>>(() => [
 		width: 130,
 		minWidth: 120,
 		align: "center",
-		render: row => h("span", { class: "text-xs font-medium text-stone-600" }, t(`invoices.payerOptions.${row.billed_to}`))
+		render: row => h("span", { class: "text-xs font-medium text-[var(--add-text-secondary)]" }, t(`invoices.payerOptions.${row.billed_to}`))
 	},
 	{
 		title: t("invoices.columns.amount"),
@@ -159,7 +162,7 @@ const columns = computed<DataTableColumns<Invoice>>(() => [
 		width: 140,
 		minWidth: 130,
 		align: "center",
-		render: row => h("bdi", { dir: "ltr", class: "font-bold text-stone-900 whitespace-nowrap" }, formatMoney(row.amount, row.currency))
+		render: row => h("bdi", { dir: "ltr", class: "font-bold text-[var(--add-text-primary)] whitespace-nowrap" }, formatMoney(row.amount, row.currency))
 	},
 	{
 		title: t("invoices.columns.paid"),
@@ -167,7 +170,7 @@ const columns = computed<DataTableColumns<Invoice>>(() => [
 		width: 140,
 		minWidth: 130,
 		align: "center",
-		render: row => h("bdi", { dir: "ltr", class: "font-semibold text-emerald-700 whitespace-nowrap" }, formatMoney(row.paid_amount, row.currency))
+		render: row => h("bdi", { dir: "ltr", class: "font-semibold text-[var(--add-success-text)] whitespace-nowrap" }, formatMoney(row.paid_amount, row.currency))
 	},
 	{
 		title: t("invoices.columns.remaining"),
@@ -175,7 +178,7 @@ const columns = computed<DataTableColumns<Invoice>>(() => [
 		width: 140,
 		minWidth: 130,
 		align: "center",
-		render: row => h("bdi", { dir: "ltr", class: "font-semibold text-stone-800 whitespace-nowrap" }, formatMoney(row.remaining, row.currency))
+		render: row => h("bdi", { dir: "ltr", class: "font-semibold text-[var(--add-text-primary)] whitespace-nowrap" }, formatMoney(row.remaining, row.currency))
 	},
 	{
 		title: t("invoices.columns.dueAt"),
@@ -183,7 +186,7 @@ const columns = computed<DataTableColumns<Invoice>>(() => [
 		width: 140,
 		minWidth: 130,
 		align: "center",
-		render: row => h("span", { class: "text-xs font-medium text-stone-600 whitespace-nowrap" }, row.due_at ?? "—")
+		render: row => h("span", { class: "text-xs font-medium text-[var(--add-text-secondary)] whitespace-nowrap" }, row.due_at ?? "—")
 	},
 	{
 		title: t("invoices.columns.status"),
@@ -200,21 +203,20 @@ const columns = computed<DataTableColumns<Invoice>>(() => [
 	{
 		title: t("common.actions"),
 		key: "actions",
-		width: 180,
-		minWidth: 160,
+		width: 200,
+		minWidth: 180,
 		align: "center",
 		render: row => {
 			const canPay = canRecordInvoicePayment() && (row.status === "unpaid" || row.status === "partially_paid")
 			const canCancel = canCancelInvoice() && row.status === "unpaid"
 			if (!canPay && !canCancel) return "—"
-			return h("div", { class: "inline-flex items-center justify-center gap-1.5" }, [
-				canPay
-					? h(NButton, { size: "small", type: "success", secondary: true, onClick: () => openPayment(row) }, { default: () => t("invoices.payment.button") })
-					: null,
-				canCancel
-					? h(NButton, { size: "small", type: "error", secondary: true, onClick: () => openCancel(row) }, { default: () => t("invoices.cancel.button") })
-					: null
-			])
+			return h(RowActions, {
+				labelled: true,
+				actions: [
+					...(canPay ? [{ key: "pay", label: t("invoices.payment.button"), icon: "carbon:money", primary: true, onClick: () => openPayment(row) }] : []),
+					...(canCancel ? [{ key: "cancel", label: t("invoices.cancel.button"), icon: "carbon:close", danger: true, onClick: () => openCancel(row) }] : [])
+				]
+			})
 		}
 	}
 ])

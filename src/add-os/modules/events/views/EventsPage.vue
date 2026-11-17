@@ -1,9 +1,7 @@
 <!-- src/add-os/modules/events/views/EventsPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.events") }}</h1>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.events')" :description="t('pageDescriptions.events')" />
 
 		<ResourceStatCards v-if="!error && !isLoading" :cards="statCards" />
 
@@ -27,7 +25,7 @@
 				@click="openCreate"
 			>
 				<template #icon>
-					<Icon name="carbon:add" :size="18" color="#ffffff" />
+					<Icon name="carbon:add" :size="18" />
 				</template>
 				{{ t("events.create.button") }}
 			</n-button>
@@ -38,7 +36,7 @@
 			:data
 			:loading="isLoading"
 			:on-edit="openEdit"
-			:extra-actions="registrationFormAction"
+			:row-actions="registrationFormAction"
 			:on-delete="async row => { await removeEvent(row.id); refetch() }"
 		/>
 
@@ -51,12 +49,14 @@
 </template>
 
 <script setup lang="ts">
+import type { RowAction } from "@/add-os/components/page/row-actions"
 import type { StatCard } from "@/add-os/components/resource/ResourceStatCards.vue"
 import type { Event } from "@/add-os/modules/events/types/event"
 import { NAlert, NButton } from "naive-ui"
-import { computed, h, ref } from "vue"
+import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
@@ -93,37 +93,14 @@ const fieldsEventId = ref<number | null>(null)
  * than in the edit screen because the fields are their own resource with
  * their own endpoints — saving the event does not save them.
  */
-function registrationFormAction(row: Event) {
-	const label = t("events.fields.manage")
-	const attendeesLabel = t("events.approval.title")
-
+function registrationFormAction(row: Event): RowAction[] {
 	if (row.external_form_url) {
 		return []
 	}
 
 	return [
-		h(
-			NButton,
-			{
-				text: true,
-				type: row.requires_approval ? "warning" : "default",
-				"aria-label": attendeesLabel,
-				title: attendeesLabel,
-				onClick: () => router.push(`/community/events/${row.id}/attendees`)
-			},
-			{ icon: () => h(Icon, { name: "carbon:user-multiple", size: 18 }) }
-		),
-		h(
-			NButton,
-			{
-				text: true,
-				type: row.has_registration_form ? "primary" : "default",
-				"aria-label": label,
-				title: label,
-				onClick: () => openRegistrationFields(row)
-			},
-			{ icon: () => h(Icon, { name: "carbon:license-draft", size: 18 }) }
-		)
+		{ key: "attendees", label: t("events.approval.title"), icon: "carbon:user-multiple", onClick: () => router.push(`/community/events/${row.id}/attendees`) },
+		{ key: "fields", label: t("events.fields.manage"), icon: "carbon:license-draft", onClick: () => openRegistrationFields(row) }
 	]
 }
 

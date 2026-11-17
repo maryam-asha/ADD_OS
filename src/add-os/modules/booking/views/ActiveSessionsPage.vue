@@ -1,10 +1,7 @@
 <!-- src/add-os/modules/booking/views/ActiveSessionsPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div v-if="!embedded" class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.activeSessions") }}</h1>
-			<p>{{ t("activeSessions.description") }}</p>
-		</div>
+		<PageHeader v-if="!embedded" :title="t(titleKey || 'nav.pages.activeSessions')" :description="t('activeSessions.description')" />
 
 		<n-alert v-if="error" type="error" :title="t('activeSessions.loadError')" />
 
@@ -20,7 +17,7 @@
 			<div v-else-if="!error" class="py-10 text-center">{{ t("activeSessions.empty") }}</div>
 		</n-card>
 
-		<n-modal v-model:show="checkOutModalVisible" preset="card" :title="t('activeSessions.checkOut.title')" class="max-w-md">
+		<FormModal v-model:show="checkOutModalVisible" :title="t('activeSessions.checkOut.title')" size="sm">
 			<n-form :model="checkOutForm" label-placement="top">
 				<n-form-item
 					path="checked_out_at"
@@ -55,9 +52,9 @@
 					</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</FormModal>
 
-		<n-modal v-model:show="extendModalVisible" preset="card" :title="t('activeSessions.extend.title')" class="max-w-md">
+		<FormModal v-model:show="extendModalVisible" :title="t('activeSessions.extend.title')" size="sm">
 			<n-spin :show="extendOptionsLoading">
 				<n-alert v-if="extendOptionsError" type="error" :title="t('activeSessions.extend.loadError')" />
 				<n-alert v-else-if="extendOptions && !extendOptions.can_extend" type="warning" :title="extendOptions.reason_label ?? ''" />
@@ -92,7 +89,7 @@
 					</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</FormModal>
 
 		<CollectPaymentModal
 			v-model:show="collectVisible"
@@ -108,24 +105,12 @@ import type { DataTableColumns, SelectOption } from "naive-ui"
 import type { FieldErrors } from "@/add-os/modules/booking/composables/useReceptionAction"
 import type { ActiveSession, BookingExtensionOptions, ExtensionOption, OutstandingPurpose } from "@/add-os/modules/booking/types/reception"
 import type { PaymentMethod } from "@/add-os/modules/payments/types/wallet-top-up"
-import {
-	NAlert,
-	NButton,
-	NCard,
-	NDataTable,
-	NDatePicker,
-	NForm,
-	NFormItem,
-	NModal,
-	NRadio,
-	NRadioGroup,
-	NSelect,
-	NSpin,
-	useDialog
-} from "naive-ui"
+import { NAlert, NButton, NCard, NDataTable, NDatePicker, NForm, NFormItem, NRadio, NRadioGroup, NSelect, NSpin, useDialog } from "naive-ui"
 import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
+import FormModal from "@/add-os/components/page/FormModal.vue"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { canBookAtReception, canCheckInAtReception, canSettleAtReception } from "@/add-os/config/permissions"
 import { useReceptionAction } from "@/add-os/modules/booking/composables/useReceptionAction"

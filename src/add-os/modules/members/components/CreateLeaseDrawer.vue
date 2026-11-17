@@ -1,136 +1,134 @@
 <!-- src/add-os/modules/members/components/CreateLeaseDrawer.vue -->
 <template>
-	<n-drawer v-model:show="show" :width="540" placement="right">
-		<n-drawer-content :title="t('privateOfficeRequests.createLease.title')" closable>
-			<div v-if="request" class="flex flex-col gap-4">
-				<!-- Context banner -->
-				<div class="p-3 bg-neutral-50 dark:bg-neutral-800/40 rounded-lg border border-black/5 dark:border-white/5 text-xs flex flex-col gap-1">
-					<div class="flex items-center justify-between">
-						<span class="text-neutral-500">{{ t('privateOfficeRequests.columns.company') }}:</span>
-						<span class="font-semibold">{{ request.company?.legal_name || request.prospect_name }}</span>
-					</div>
-					<div v-if="request.quote_ref" class="flex items-center justify-between">
-						<span class="text-neutral-500">{{ t('privateOfficeRequests.markAsQuoted.quoteRefLabel') }}:</span>
-						<span class="font-semibold">{{ request.quote_ref }}</span>
-					</div>
-					<div v-if="request.provider" class="flex items-center justify-between">
-						<span class="text-neutral-500">{{ t('officeLeases.detail.provider') }}:</span>
-						<span class="font-semibold">{{ request.provider.name }}</span>
-					</div>
+	<FormModal v-model:show="show" :title="t('privateOfficeRequests.createLease.title')" size="md">
+		<div v-if="request" class="flex flex-col gap-4">
+			<!-- Context banner -->
+			<div class="p-3 bg-[var(--add-surface-sunken)] rounded-lg border border-black/5 text-xs flex flex-col gap-1">
+				<div class="flex items-center justify-between">
+					<span class="text-[var(--add-text-secondary)]">{{ t('privateOfficeRequests.columns.company') }}:</span>
+					<span class="font-semibold">{{ request.company?.legal_name || request.prospect_name }}</span>
 				</div>
-
-				<n-form ref="formRef" :model="form" :rules="rules" label-placement="top">
-					<n-form-item path="contract_ref" :label="t('officeLeases.create.contractRef')">
-						<n-input v-model:value="form.contract_ref" placeholder="C-2026-..." />
-					</n-form-item>
-
-					<!-- Office Selection: any branch -->
-					<n-form-item path="space_id" :label="t('officeLeases.create.space')">
-						<n-select
-							v-model:value="form.space_id"
-							:options="officeOptions"
-							:loading="isLoadingSpaces"
-							:placeholder="t('officeLeases.create.selectSpace')"
-							filterable
-						/>
-					</n-form-item>
-
-					<!-- Dates and duration -->
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<n-form-item path="starts_on" :label="t('officeLeases.create.startsOn')">
-							<n-date-picker
-								v-model:formatted-value="form.starts_on"
-								value-format="yyyy-MM-dd"
-								type="date"
-								class="w-full"
-							/>
-						</n-form-item>
-
-						<n-form-item path="duration_months" :label="t('officeLeases.create.durationMonths')">
-							<n-input-number
-								v-model:value="form.duration_months"
-								:min="1"
-								:max="120"
-								class="w-full"
-								@update:value="onDurationChanged"
-							/>
-						</n-form-item>
-					</div>
-
-					<!-- Billing Cycle -->
-					<n-form-item path="billing_cycle_months" :label="t('officeLeases.create.billingCycleMonths')">
-						<n-select
-							v-model:value="form.billing_cycle_months"
-							:options="billingCycleOptions"
-						/>
-					</n-form-item>
-
-					<!-- Pricing: Monthly Amount & Currency -->
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<n-form-item path="monthly_amount" :label="t('officeLeases.create.monthlyAmount')">
-							<n-input :value="String(form.monthly_amount)" placeholder="500.00" @update:value="v => (form.monthly_amount = v)" />
-						</n-form-item>
-
-						<n-form-item path="currency" :label="t('officeLeases.create.currency')">
-							<n-select
-								v-model:value="form.currency"
-								:options="currencyOptions"
-								:loading="isLoadingCurrencies"
-							/>
-						</n-form-item>
-					</div>
-
-					<!-- Billed To (Payer) - only for provider's company -->
-					<n-form-item v-if="request.provider_id" path="billed_to" :label="t('officeLeases.create.billedTo')">
-						<n-select
-							v-model:value="form.billed_to"
-							:options="payerOptions"
-						/>
-					</n-form-item>
-
-					<!-- Auto-renew -->
-					<div class="flex items-center justify-between p-3 bg-neutral-50 dark:bg-neutral-800/40 rounded-lg border border-black/5 dark:border-white/5 mt-2">
-						<div class="flex flex-col gap-0.5">
-							<span class="text-sm font-semibold">{{ t('officeLeases.create.autoRenew') }}</span>
-							<span class="text-xs text-neutral-500">{{ form.auto_renew ? t('officeLeases.detail.autoRenewYes') : t('officeLeases.detail.autoRenewNo') }}</span>
-						</div>
-						<n-switch v-model:value="form.auto_renew" />
-					</div>
-				</n-form>
+				<div v-if="request.quote_ref" class="flex items-center justify-between">
+					<span class="text-[var(--add-text-secondary)]">{{ t('privateOfficeRequests.markAsQuoted.quoteRefLabel') }}:</span>
+					<span class="font-semibold">{{ request.quote_ref }}</span>
+				</div>
+				<div v-if="request.provider" class="flex items-center justify-between">
+					<span class="text-[var(--add-text-secondary)]">{{ t('officeLeases.detail.provider') }}:</span>
+					<span class="font-semibold">{{ request.provider.name }}</span>
+				</div>
 			</div>
 
-			<template #footer>
-				<div class="flex justify-end gap-3">
-					<n-button @click="show = false">{{ t('resourceCrud.form.cancel') }}</n-button>
-					<n-button type="primary" :loading="isSubmitting" @click="handleSubmit">
-						{{ t('resourceCrud.form.submit') }}
-					</n-button>
+			<n-form ref="formRef" :model="form" :rules label-placement="top">
+				<n-form-item path="contract_ref" :label="t('officeLeases.create.contractRef')">
+					<n-input v-model:value="form.contract_ref" placeholder="C-2026-..." />
+				</n-form-item>
+
+				<!-- Office Selection: any branch -->
+				<n-form-item path="space_id" :label="t('officeLeases.create.space')">
+					<n-select
+						v-model:value="form.space_id"
+						:options="officeOptions"
+						:loading="isLoadingSpaces"
+						:placeholder="t('officeLeases.create.selectSpace')"
+						filterable
+					/>
+				</n-form-item>
+
+				<!-- Dates and duration -->
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<n-form-item path="starts_on" :label="t('officeLeases.create.startsOn')">
+						<n-date-picker
+							v-model:formatted-value="form.starts_on"
+							value-format="yyyy-MM-dd"
+							type="date"
+							class="w-full"
+						/>
+					</n-form-item>
+
+					<n-form-item path="duration_months" :label="t('officeLeases.create.durationMonths')">
+						<n-input-number
+							v-model:value="form.duration_months"
+							:min="1"
+							:max="120"
+							class="w-full"
+							@update:value="onDurationChanged"
+						/>
+					</n-form-item>
 				</div>
-			</template>
-		</n-drawer-content>
-	</n-drawer>
+
+				<!-- Billing Cycle -->
+				<n-form-item path="billing_cycle_months" :label="t('officeLeases.create.billingCycleMonths')">
+					<n-select
+						v-model:value="form.billing_cycle_months"
+						:options="billingCycleOptions"
+					/>
+				</n-form-item>
+
+				<!-- Pricing: Monthly Amount & Currency -->
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<n-form-item path="monthly_amount" :label="t('officeLeases.create.monthlyAmount')">
+						<n-input :value="String(form.monthly_amount)" placeholder="500.00" @update:value="v => (form.monthly_amount = v)" />
+					</n-form-item>
+
+					<n-form-item path="currency" :label="t('officeLeases.create.currency')">
+						<n-select
+							v-model:value="form.currency"
+							:options="currencyOptions"
+							:loading="isLoadingCurrencies"
+						/>
+					</n-form-item>
+				</div>
+
+				<!-- Billed To (Payer) - only for provider's company -->
+				<n-form-item v-if="request.provider_id" path="billed_to" :label="t('officeLeases.create.billedTo')">
+					<n-select
+						v-model:value="form.billed_to"
+						:options="payerOptions"
+					/>
+				</n-form-item>
+
+				<!-- Auto-renew -->
+				<div class="flex items-center justify-between p-3 bg-[var(--add-surface-sunken)] rounded-lg border border-black/5 mt-2">
+					<div class="flex flex-col gap-0.5">
+						<span class="text-sm font-semibold">{{ t('officeLeases.create.autoRenew') }}</span>
+						<span class="text-xs text-[var(--add-text-secondary)]">{{ form.auto_renew ? t('officeLeases.detail.autoRenewYes') : t('officeLeases.detail.autoRenewNo') }}</span>
+					</div>
+					<n-switch v-model:value="form.auto_renew" />
+				</div>
+			</n-form>
+		</div>
+
+		<template #footer>
+			<div class="flex justify-end gap-3">
+				<n-button @click="show = false">{{ t('resourceCrud.form.cancel') }}</n-button>
+				<n-button type="primary" :loading="isSubmitting" @click="handleSubmit">
+					{{ t('resourceCrud.form.submit') }}
+				</n-button>
+			</div>
+		</template>
+	</FormModal>
 </template>
 
 <script setup lang="ts">
 import type { FormInst, FormRules, SelectOption } from "naive-ui"
-import type { PrivateOfficeRequest } from "../types/private-office-request"
 import type { CreateLeaseFromRequestPayload } from "../types/office-lease"
-import type { Space } from "@/add-os/modules/spatial/types/space"
+import type { PrivateOfficeRequest } from "../types/private-office-request"
 import type { Currency } from "@/add-os/modules/payments/types/currency"
-import { NButton, NDatePicker, NDrawer, NDrawerContent, NForm, NFormItem, NInput, NInputNumber, NSelect, NSwitch, useMessage } from "naive-ui"
+import type { Space } from "@/add-os/modules/spatial/types/space"
+import { NButton, NDatePicker, NForm, NFormItem, NInput, NInputNumber, NSelect, NSwitch, useMessage } from "naive-ui"
 import { computed, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import { currentLocale } from "@/add-os/lang/currentLocale"
-import { createLeaseFromRequest } from "@/add-os/services/office-leases"
-import { listCurrencies } from "@/add-os/services/currencies"
-import { listSpaces } from "@/add-os/services/spaces"
 import { ApiError } from "@/add-os/services/api"
+import { listCurrencies } from "@/add-os/services/currencies"
+import { createLeaseFromRequest } from "@/add-os/services/office-leases"
+import { listSpaces } from "@/add-os/services/spaces"
 
 const props = defineProps<{ request: PrivateOfficeRequest | null }>()
-const show = defineModel<boolean>("show", { required: true })
 const emit = defineEmits<{ (e: "created"): void }>()
-
+const show = defineModel<boolean>("show", { required: true })
 const { t } = useI18n()
 const message = useMessage()
 const formRef = ref<FormInst | null>(null)

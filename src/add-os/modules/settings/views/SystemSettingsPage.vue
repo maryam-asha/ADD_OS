@@ -1,10 +1,7 @@
 <!-- src/add-os/modules/settings/views/SystemSettingsPage.vue -->
 <template>
 	<div class="flex flex-col gap-6">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.systemSettings") }}</h1>
-			<p class="text-secondary">{{ t("systemSettings.description") }}</p>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.systemSettings')" :description="t('systemSettings.description')" />
 
 		<n-alert v-if="error" type="error" :title="t('systemSettings.loadError')" />
 
@@ -37,12 +34,7 @@
 		</n-card>
 
 		<!-- Edit Setting Modal -->
-		<n-modal
-			v-model:show="editModalVisible"
-			preset="card"
-			:title="`${t('systemSettings.editTitle')}: ${currentEditing ? labelOf(currentEditing.key) : ''}`"
-			class="max-w-lg"
-		>
+		<FormModal v-model:show="editModalVisible" :title="`${t('systemSettings.editTitle')}: ${currentEditing ? labelOf(currentEditing.key) : ''}`" size="md">
 			<div v-if="currentEditing" class="flex flex-col gap-4">
 				<!--
 					Editing the point rate is not a local change: every price in the
@@ -106,16 +98,19 @@
 					</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</FormModal>
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns } from "naive-ui"
 import type { SettingItem, SettingType } from "@/add-os/modules/settings/types/setting"
-import { NAlert, NButton, NCard, NDataTable, NInput, NInputNumber, NModal, NSwitch, NTag, useMessage } from "naive-ui"
+import { NAlert, NButton, NCard, NDataTable, NInput, NInputNumber, NSwitch, NTag, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { settingHint, settingLabel } from "@/add-os/modules/settings/utils/settingText"
 import { listSettings, updateSetting } from "@/add-os/services/settings"
 import Icon from "@/components/common/Icon.vue"
@@ -223,14 +218,9 @@ const columns = computed<DataTableColumns<SettingItem>>(() => [
 	{
 		title: t("systemSettings.columns.actions"),
 		key: "actions",
-		width: 120,
+		width: 90,
 		align: "center",
-		render: row =>
-			h(
-				NButton,
-				{ size: "small", type: "primary", secondary: true, onClick: () => openEdit(row) },
-				{ default: () => t("systemSettings.editButton") }
-			)
+		render: row => h(RowActions, { actions: [{ key: "edit", label: t("systemSettings.editButton"), icon: "carbon:edit", onClick: () => openEdit(row) }] })
 	}
 ])
 

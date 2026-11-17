@@ -1,9 +1,7 @@
 <template>
 	<div class="flex flex-col gap-8" :class="inModal ? '' : 'page page-wrapped'">
 		<!-- Inside the reception desk's dialog, the dialog carries the title. -->
-		<div v-if="!inModal" class="flex items-center justify-between">
-			<h1 class="text-2xl font-bold tracking-tight text-slate-900">{{ t('nav.pages.planPurchases') }}</h1>
-		</div>
+		<PageHeader v-if="!inModal" :title="t('nav.pages.planPurchases')" :description="t('pageDescriptions.planPurchases')" />
 
 		<div class="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
 			<n-card class="lg:col-span-8">
@@ -95,7 +93,6 @@
 							</n-button>
 						</div>
 					</n-form-item>
-
 				</n-form>
 			</n-card>
 
@@ -103,7 +100,7 @@
 				<n-card :title="t('planPurchases.summary')">
 					<div class="flex flex-col gap-4">
 						<div class="flex items-center justify-between">
-							<span class="text-slate-500">{{ t('planPurchases.currentBalance') }}</span>
+							<span class="text-[var(--add-text-secondary)]">{{ t('planPurchases.currentBalance') }}</span>
 							<span class="font-medium">
 								<template v-if="isLoadingBalance">...</template>
 								<template v-else>{{ currentBalancePoints !== null ? `${currentBalancePoints} points` : '-' }}</template>
@@ -111,14 +108,14 @@
 						</div>
 
 						<n-spin :show="isLoadingPreview">
-							<div v-if="previewData" class="flex flex-col gap-3 rounded-lg bg-slate-50 p-4 border border-slate-200">
+							<div v-if="previewData" class="flex flex-col gap-3 rounded-lg bg-[var(--add-surface-sunken)] p-4 border border-[var(--add-border)]">
 								<div class="flex items-center justify-between text-sm">
-									<span class="text-slate-500">{{ t('planPurchases.planPrice') }}</span>
-									<span class="font-medium" :class="{ 'line-through text-slate-400': previewData.points < previewData.list_points }">
+									<span class="text-[var(--add-text-secondary)]">{{ t('planPurchases.planPrice') }}</span>
+									<span class="font-medium" :class="{ 'line-through text-[var(--add-text-muted)]': previewData.points < previewData.list_points }">
 										{{ previewData.list_points }} points
 									</span>
 								</div>
-								<div v-if="previewData.offer" class="flex flex-col gap-1 rounded-md bg-emerald-50 p-2 text-sm text-emerald-700" data-test="plan-offer">
+								<div v-if="previewData.offer" class="flex flex-col gap-1 rounded-md bg-[color-mix(in_srgb,var(--add-success)_10%,transparent)] p-2 text-sm text-[var(--add-success-text)]" data-test="plan-offer">
 									<div class="flex items-center justify-between gap-2">
 										<span class="font-semibold">{{ previewData.offer.name || t('planPurchases.offer') }}</span>
 										<span class="font-semibold" dir="ltr">−{{ previewData.offer.saved_points }} points</span>
@@ -129,39 +126,39 @@
 									</div>
 								</div>
 								<div v-if="previewData.coupon" data-test="plan-coupon">
-									<div v-if="previewData.coupon.applied" class="flex items-center justify-between rounded-md bg-emerald-50 p-2 text-sm text-emerald-700">
+									<div v-if="previewData.coupon.applied" class="flex items-center justify-between rounded-md bg-[color-mix(in_srgb,var(--add-success)_10%,transparent)] p-2 text-sm text-[var(--add-success-text)]">
 										<span class="font-semibold">{{ t('planPurchases.coupon') }} {{ previewData.coupon.code }}</span>
 										<span class="font-semibold" dir="ltr">−{{ previewData.coupon.points_discounted }} points</span>
 									</div>
-									<div v-else class="rounded-md bg-amber-50 p-2 text-xs text-amber-700">
+									<div v-else class="rounded-md bg-[color-mix(in_srgb,var(--add-warning)_10%,transparent)] p-2 text-xs text-[var(--add-warning-text)]">
 										{{ t('planPurchases.coupon') }} {{ previewData.coupon.code }}: {{ previewData.coupon.message }}
 									</div>
 								</div>
-								<div v-if="previewData.points < previewData.list_points" class="flex items-center justify-between text-sm font-semibold text-emerald-600">
+								<div v-if="previewData.points < previewData.list_points" class="flex items-center justify-between text-sm font-semibold text-[var(--add-success-text)]">
 									<span>{{ t('planPurchases.finalPrice') }}</span>
 									<span class="font-bold">{{ previewData.points }} points</span>
 								</div>
-								<div v-if="form.payment_method === 'cash'" class="mt-2 flex items-center justify-between gap-4 border-t border-slate-200 pt-2 font-semibold">
+								<div v-if="form.payment_method === 'cash'" class="mt-2 flex items-center justify-between gap-4 border-t border-[var(--add-border)] pt-2 font-semibold">
 									<span>{{ t('planPurchases.requiredAmountCash') }}</span>
-									<span class="text-lg text-emerald-600 whitespace-nowrap" dir="ltr">
+									<span class="text-lg text-[var(--add-success-text)] whitespace-nowrap" dir="ltr">
 										{{ formatCurrency(previewData.payment_amount, previewData.payment_currency) }}
 									</span>
 								</div>
 								<template v-else>
-									<div class="mt-2 flex items-center justify-between border-t border-slate-200 pt-2 font-semibold">
+									<div class="mt-2 flex items-center justify-between border-t border-[var(--add-border)] pt-2 font-semibold">
 										<span>{{ t('planPurchases.deductedFromPoints') }}</span>
-										<span class="text-lg text-emerald-600">{{ previewData.points }} points</span>
+										<span class="text-lg text-[var(--add-success-text)]">{{ previewData.points }} points</span>
 									</div>
 									<div class="flex items-center justify-between text-sm">
-										<span class="text-slate-500">{{ t('planPurchases.balanceAfter') }}</span>
+										<span class="text-[var(--add-text-secondary)]">{{ t('planPurchases.balanceAfter') }}</span>
 										<span class="font-medium">{{ previewData.balance_points - previewData.points }} points</span>
 									</div>
 								</template>
-								<div v-if="!previewData.wallet_covers" class="text-xs text-slate-500">
+								<div v-if="!previewData.wallet_covers" class="text-xs text-[var(--add-text-secondary)]">
 									{{ t('planPurchases.pointsDoNotCover') }}
 								</div>
 							</div>
-							<div v-else-if="previewError" class="rounded-lg bg-red-50 p-4 text-sm text-red-700">
+							<div v-else-if="previewError" class="rounded-lg bg-[color-mix(in_srgb,var(--add-danger)_10%,transparent)] p-4 text-sm text-[var(--add-danger-text)]">
 								{{ previewError }}
 							</div>
 							<div v-else-if="isLoadingPreview" class="h-32 rounded-lg border border-transparent"></div>
@@ -183,22 +180,22 @@
 		</div>
 
 		<!-- Receipt Modal -->
-		<n-modal v-model:show="receiptModalVisible" preset="card" class="max-w-md" :title="t('planPurchases.receipt')">
+		<FormModal v-model:show="receiptModalVisible" :title="t('planPurchases.receipt')" size="sm">
 			<div v-if="lastReceipt" class="flex flex-col gap-4 p-4">
 				<div class="text-center font-bold text-xl mb-4">{{ t('planPurchases.paymentReceipt') }}</div>
 
 				<div class="flex justify-between border-b pb-2">
-					<span class="text-slate-500">{{ t('planPurchases.transactionCode') }}</span>
+					<span class="text-[var(--add-text-secondary)]">{{ t('planPurchases.transactionCode') }}</span>
 					<span class="font-medium">{{ lastReceipt.transaction_code }}</span>
 				</div>
 
 				<div class="flex justify-between border-b pb-2">
-					<span class="text-slate-500">{{ t('planPurchases.plan') }}</span>
+					<span class="text-[var(--add-text-secondary)]">{{ t('planPurchases.plan') }}</span>
 					<span class="font-medium">{{ lastReceipt.plan_name }}</span>
 				</div>
 
 				<div class="flex justify-between border-b pb-2">
-					<span class="text-slate-500">{{ t('planPurchases.amountPaid') }}</span>
+					<span class="text-[var(--add-text-secondary)]">{{ t('planPurchases.amountPaid') }}</span>
 					<span class="font-bold whitespace-nowrap" dir="ltr">
 						<template v-if="lastReceipt.payment_amount !== null && lastReceipt.payment_currency">
 							{{ formatCurrency(lastReceipt.payment_amount, lastReceipt.payment_currency) }}
@@ -208,32 +205,32 @@
 				</div>
 
 				<div v-if="lastReceipt.discounts?.length" class="flex justify-between gap-4 border-b pb-2" data-test="receipt-discounts">
-					<span class="text-slate-500">{{ t('planPurchases.discounts') }}</span>
+					<span class="text-[var(--add-text-secondary)]">{{ t('planPurchases.discounts') }}</span>
 					<AppliedDiscountList :discounts="lastReceipt.discounts" />
 				</div>
 
 				<div class="flex justify-between border-b pb-2">
-					<span class="text-slate-500">{{ t('planPurchases.pointsCharged') }}</span>
+					<span class="text-[var(--add-text-secondary)]">{{ t('planPurchases.pointsCharged') }}</span>
 					<span class="font-medium">{{ lastReceipt.points_charged }}</span>
 				</div>
 
 				<div class="flex justify-between border-b pb-2">
-					<span class="text-slate-500">{{ t('planPurchases.recipient') }}</span>
+					<span class="text-[var(--add-text-secondary)]">{{ t('planPurchases.recipient') }}</span>
 					<span class="font-medium">{{ lastReceipt.recipient_name }}</span>
 				</div>
 
 				<div class="flex justify-between border-b pb-2">
-					<span class="text-slate-500">{{ t('planPurchases.performedBy') }}</span>
+					<span class="text-[var(--add-text-secondary)]">{{ t('planPurchases.performedBy') }}</span>
 					<span class="font-medium">{{ lastReceipt.performed_by_name }}</span>
 				</div>
 
 				<div class="flex justify-between border-b pb-2">
-					<span class="text-slate-500">{{ t('planPurchases.previousBalance') }}</span>
+					<span class="text-[var(--add-text-secondary)]">{{ t('planPurchases.previousBalance') }}</span>
 					<span class="font-medium">{{ lastReceipt.previous_balance_points }}</span>
 				</div>
 
 				<div class="flex justify-between border-b pb-2">
-					<span class="text-slate-500">{{ t('planPurchases.newBalance') }}</span>
+					<span class="text-[var(--add-text-secondary)]">{{ t('planPurchases.newBalance') }}</span>
 					<span class="font-medium">{{ lastReceipt.new_balance_points }}</span>
 				</div>
 
@@ -242,16 +239,18 @@
 					<n-button type="primary" @click="handlePrintReceipt">{{ t('planPurchases.print') }}</n-button>
 				</div>
 			</div>
-		</n-modal>
+		</FormModal>
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { FormInst, FormRules } from "naive-ui"
 import type { PlanPurchaseOffer, PlanPurchasePaymentMethod, PlanPurchasePreview, PlanPurchasePreviewPayload, PlanPurchaseReceipt } from "@/add-os/services/reception"
-import { NButton, NCard, NForm, NFormItem, NInput, NModal, NRadioButton, NRadioGroup, NSelect, NSpin, useMessage } from "naive-ui"
+import { NButton, NCard, NForm, NFormItem, NInput, NRadioButton, NRadioGroup, NSelect, NSpin, useMessage } from "naive-ui"
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import AppliedDiscountList from "@/add-os/modules/pricing/components/AppliedDiscountList.vue"
 import { ApiError } from "@/add-os/services/api"
 import { listCompanies } from "@/add-os/services/companies"

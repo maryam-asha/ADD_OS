@@ -1,22 +1,10 @@
 <template>
 	<div class="flex flex-col gap-6">
-		<!-- Page Header -->
-		<div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-			<div class="flex flex-col gap-1">
-				<div class="flex items-center gap-3">
-					<h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-						{{ t("providerRequests.title") }}
-					</h1>
-					<span
-						v-if="counts.pending"
-						class="inline-flex items-center rounded-full border border-amber-200/60 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800 dark:border-amber-800/40 dark:bg-amber-950/40 dark:text-amber-300"
-					>
-						{{ t("providerRequests.pendingBadge", { count: formatNumber(counts.pending) }) }}
-					</span>
-				</div>
-				<p class="text-xs text-slate-500 dark:text-slate-400">{{ t("providerRequests.subtitle") }}</p>
-			</div>
-		</div>
+		<PageHeader :title="t('providerRequests.title')" :description="t('providerRequests.subtitle')">
+			<template v-if="counts.pending" #actions>
+				<n-tag type="warning" round :bordered="false">{{ t("providerRequests.pendingBadge", { count: formatNumber(counts.pending) }) }}</n-tag>
+			</template>
+		</PageHeader>
 
 		<!-- Stat Cards: one per status; a card is also the status filter -->
 		<div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -24,22 +12,22 @@
 				v-for="card in statCards"
 				:key="card.status"
 				type="button"
-				class="flex flex-col justify-between gap-4 rounded-2xl border bg-white p-5 text-start shadow-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 dark:bg-slate-900"
-				:class="query.status === card.status ? 'border-emerald-500 ring-1 ring-emerald-500/30' : 'border-slate-200/80 hover:border-slate-300 dark:border-slate-800'"
+				class="flex flex-col justify-between gap-4 rounded-2xl border bg-white p-5 text-start shadow-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+				:class="query.status === card.status ? 'border-[var(--add-success)] ring-1 ring-emerald-500/30' : 'border-[var(--add-border)] hover:border-[var(--add-border-strong)]'"
 				:aria-pressed="query.status === card.status"
 				@click="query.status = card.status"
 			>
 				<div class="flex items-center justify-between">
-					<span class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ t(`providerRequests.statusOptions.${card.status}`) }}</span>
+					<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t(`providerRequests.statusOptions.${card.status}`) }}</span>
 					<div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl" :class="card.iconClass">
 						<Icon :name="card.icon" :size="18" />
 					</div>
 				</div>
 				<div class="flex items-baseline justify-between gap-2">
-					<span class="font-mono text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+					<span class="font-mono text-3xl font-bold tracking-tight text-[var(--add-text-primary)]">
 						{{ counts[card.status] === null ? "–" : formatNumber(counts[card.status] ?? 0) }}
 					</span>
-					<span class="text-xs font-medium text-slate-400 dark:text-slate-500">{{ t(`providerRequests.stats.${card.status}`) }}</span>
+					<span class="text-xs font-medium text-[var(--add-text-muted)]">{{ t(`providerRequests.stats.${card.status}`) }}</span>
 				</div>
 			</button>
 		</div>
@@ -47,7 +35,7 @@
 		<n-alert v-if="error" type="error" :title="t('providerRequests.loadError')" />
 
 		<!-- Filter Section -->
-		<div class="flex flex-col gap-3 rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+		<div class="flex flex-col gap-3 rounded-2xl border border-[var(--add-border)] bg-white p-3.5 shadow-xs">
 			<div class="grid w-full grid-cols-1 gap-3 sm:grid-cols-3">
 				<n-select v-model:value="query.type" :options="typeOptions" clearable :placeholder="t('providerRequests.filters.typeAll')" class="w-full" />
 				<n-select v-model:value="query.provider_id" :options="providerOptions" clearable filterable :placeholder="t('providerRequests.filters.providerAll')" class="w-full" />
@@ -61,7 +49,7 @@
 		</div>
 
 		<!-- Table Card -->
-		<div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900 add-ledger-table">
+		<div class="overflow-hidden rounded-2xl border border-[var(--add-border)] bg-white shadow-xs add-ledger-table">
 			<n-data-table
 				v-if="data.length > 0 || isLoading"
 				remote
@@ -76,16 +64,16 @@
 				:scroll-x="1100"
 			/>
 			<div v-else class="flex flex-col items-center gap-2 py-16 text-center">
-				<div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-500 dark:bg-slate-800">
+				<div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--add-surface-sunken)] text-[var(--add-text-secondary)]">
 					<Icon :name="query.status === 'pending' ? 'carbon:checkmark-outline' : 'carbon:document'" :size="22" />
 				</div>
-				<p class="text-sm font-semibold text-slate-800 dark:text-slate-200">
+				<p class="text-sm font-semibold text-[var(--add-text-primary)]">
 					{{ query.status === "pending" ? t("providerRequests.empty.pendingTitle") : t("providerRequests.empty.title") }}
 				</p>
-				<p class="text-xs text-slate-500">{{ query.status === "pending" ? t("providerRequests.empty.pendingBody") : t("providerRequests.empty.body") }}</p>
+				<p class="text-xs text-[var(--add-text-secondary)]">{{ query.status === "pending" ? t("providerRequests.empty.pendingBody") : t("providerRequests.empty.body") }}</p>
 			</div>
 
-			<div v-if="data.length > 0 && meta" class="flex flex-col items-center justify-between gap-3 border-t border-slate-100 px-6 py-4 text-xs text-slate-500 sm:flex-row dark:border-slate-800">
+			<div v-if="data.length > 0 && meta" class="flex flex-col items-center justify-between gap-3 border-t border-[var(--add-border)] px-6 py-4 text-xs text-[var(--add-text-secondary)] sm:flex-row">
 				<div>
 					{{ t("companies.pagination.showing", { from: (meta.current_page - 1) * meta.per_page + 1, to: Math.min(meta.current_page * meta.per_page, meta.total), total: meta.total }) }}
 				</div>
@@ -98,7 +86,7 @@
 
 		<!-- Review Dialog -->
 		<n-modal :show="selectedId !== null" @update:show="(value: boolean) => !value && (selectedId = null)">
-			<div class="flex max-h-[90vh] w-[min(46rem,95vw)] flex-col overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900">
+			<div class="flex max-h-[90vh] w-[min(46rem,95vw)] flex-col overflow-hidden rounded-2xl bg-white shadow-xl">
 				<ProviderRequestDetail
 					:request-id="selectedId"
 					:plan-names
@@ -115,9 +103,11 @@
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
 import type { ProviderRequest, ProviderRequestStatus, ProviderRequestType } from "@/add-os/modules/providers/types"
-import { NAlert, NButton, NDataTable, NModal, NPagination, NSelect } from "naive-ui"
+import { NAlert, NButton, NDataTable, NModal, NPagination, NSelect, NTag } from "naive-ui"
 import { computed, h, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { currentLocale } from "@/add-os/lang/currentLocale"
@@ -190,33 +180,33 @@ async function loadCounts() {
 watch(() => [query.value.type, query.value.provider_id, query.value.company_id], loadCounts, { immediate: true })
 
 const statCards = computed(() => [
-	{ status: "pending" as const, icon: "carbon:hourglass", iconClass: "bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400" },
-	{ status: "approved" as const, icon: "carbon:checkmark-outline", iconClass: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400" },
-	{ status: "rejected" as const, icon: "carbon:close-outline", iconClass: "bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400" },
-	{ status: "cancelled" as const, icon: "carbon:document", iconClass: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300" }
+	{ status: "pending" as const, icon: "carbon:hourglass", iconClass: "bg-[color-mix(in_srgb,var(--add-warning)_10%,transparent)] text-[var(--add-warning-text)]" },
+	{ status: "approved" as const, icon: "carbon:checkmark-outline", iconClass: "bg-[color-mix(in_srgb,var(--add-success)_10%,transparent)] text-[var(--add-success-text)]" },
+	{ status: "rejected" as const, icon: "carbon:close-outline", iconClass: "bg-[color-mix(in_srgb,var(--add-danger)_10%,transparent)] text-[var(--add-danger-text)]" },
+	{ status: "cancelled" as const, icon: "carbon:document", iconClass: "bg-[var(--add-surface-sunken)] text-[var(--add-text-secondary)]" }
 ])
 
 // ── Table ─────────────────────────────────────────────────────────────────────
 const STATUS_PILL: Record<ProviderRequestStatus, { pill: string; dot: string }> = {
 	pending: {
-		pill: "bg-amber-50 text-amber-700 border-amber-200/60 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800/60",
-		dot: "bg-amber-500"
+		pill: "bg-[color-mix(in_srgb,var(--add-warning)_10%,transparent)] text-[var(--add-warning-text)] border-[color-mix(in_srgb,var(--add-warning)_35%,transparent)]",
+		dot: "bg-[var(--add-warning)]"
 	},
 	approved: {
-		pill: "bg-emerald-50 text-emerald-700 border-emerald-200/60 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/60",
-		dot: "bg-emerald-500"
+		pill: "bg-[color-mix(in_srgb,var(--add-success)_10%,transparent)] text-[var(--add-success-text)] border-[color-mix(in_srgb,var(--add-success)_35%,transparent)]",
+		dot: "bg-[var(--add-success)]"
 	},
 	rejected: {
-		pill: "bg-rose-50 text-rose-700 border-rose-200/60 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-800/60",
-		dot: "bg-rose-500"
+		pill: "bg-[color-mix(in_srgb,var(--add-danger)_10%,transparent)] text-[var(--add-danger-text)] border-[color-mix(in_srgb,var(--add-danger)_35%,transparent)]",
+		dot: "bg-[var(--add-danger)]"
 	},
 	cancelled: {
-		pill: "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700",
-		dot: "bg-slate-400"
+		pill: "bg-[var(--add-surface-sunken)] text-[var(--add-text-secondary)] border-[var(--add-border)]",
+		dot: "bg-[var(--add-border)]"
 	}
 }
 
-const WAIT_TEXT = { fresh: "text-slate-400 dark:text-slate-500", aging: "text-amber-600 dark:text-amber-400", late: "text-rose-600 dark:text-rose-400" }
+const WAIT_TEXT = { fresh: "text-[var(--add-text-muted)]", aging: "text-[var(--add-warning-text)]", late: "text-[var(--add-danger-text)]" }
 
 function rowKey(row: ProviderRequest) {
 	return row.id
@@ -237,12 +227,12 @@ const columns = computed<DataTableColumns<ProviderRequest>>(() => [
 		align: "center",
 		render: row =>
 			h("div", { class: "inline-flex items-center gap-3 py-1 whitespace-nowrap text-start" }, [
-				h("div", { class: "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400" }, [
+				h("div", { class: "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-[color-mix(in_srgb,var(--add-success)_10%,transparent)] text-[var(--add-success-text)]" }, [
 					h(Icon, { name: REQUEST_TYPE_ICON[row.type], size: 18 })
 				]),
 				h("div", { class: "flex flex-col gap-0.5 min-w-0" }, [
-					h("span", { class: "font-bold text-sm text-slate-900 dark:text-slate-100" }, t(`providerRequests.typeOptions.${row.type}`)),
-					h("span", { class: "text-xs text-slate-400 dark:text-slate-500 font-mono" }, `#${row.id}`)
+					h("span", { class: "font-bold text-sm text-[var(--add-text-primary)]" }, t(`providerRequests.typeOptions.${row.type}`)),
+					h("span", { class: "text-xs text-[var(--add-text-muted)] font-mono" }, `#${row.id}`)
 				])
 			])
 	},
@@ -251,21 +241,21 @@ const columns = computed<DataTableColumns<ProviderRequest>>(() => [
 		key: "provider",
 		minWidth: 150,
 		align: "center",
-		render: row => h("span", { class: "text-sm font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap" }, row.provider?.name ?? "—")
+		render: row => h("span", { class: "text-sm font-medium text-[var(--add-text-primary)] whitespace-nowrap" }, row.provider?.name ?? "—")
 	},
 	{
 		title: t("providerRequests.columns.company"),
 		key: "company",
 		minWidth: 160,
 		align: "center",
-		render: row => h("span", { class: "text-sm text-slate-700 dark:text-slate-300 whitespace-nowrap" }, row.company?.legal_name ?? "—")
+		render: row => h("span", { class: "text-sm text-[var(--add-text-primary)] whitespace-nowrap" }, row.company?.legal_name ?? "—")
 	},
 	{
 		title: t("providerRequests.columns.summary"),
 		key: "payload",
 		minWidth: 200,
 		align: "center",
-		render: row => h("span", { class: "text-sm text-slate-700 dark:text-slate-300" }, requestSummary(row, t, planNames.value))
+		render: row => h("span", { class: "text-sm text-[var(--add-text-primary)]" }, requestSummary(row, t, planNames.value))
 	},
 	{
 		title: t("providerRequests.columns.submittedAt"),
@@ -283,7 +273,7 @@ const columns = computed<DataTableColumns<ProviderRequest>>(() => [
 						)
 					: null
 			return h("div", { class: "inline-flex flex-col items-center gap-0.5 whitespace-nowrap" }, [
-				h("span", { class: "text-sm text-slate-700 dark:text-slate-300 font-medium" }, formatDate(row.created_at)),
+				h("span", { class: "text-sm text-[var(--add-text-primary)] font-medium" }, formatDate(row.created_at)),
 				waiting
 			])
 		}
@@ -303,22 +293,23 @@ const columns = computed<DataTableColumns<ProviderRequest>>(() => [
 	{
 		title: t("common.actions"),
 		key: "actions",
-		width: 120,
+		width: 130,
 		align: "center",
 		render: row =>
-			h(
-				NButton,
-				{
-					size: "small",
-					type: row.status === "pending" ? "primary" : "default",
-					secondary: row.status !== "pending",
-					onClick: (event: MouseEvent) => {
-						event.stopPropagation()
-						selectedId.value = row.id
-					}
-				},
-				{ default: () => (row.status === "pending" ? t("providerRequests.review") : t("common.view")) }
-			)
+			h("div", { onClick: (e: Event) => e.stopPropagation() }, [
+				h(RowActions, {
+					labelled: true,
+					actions: [{
+						key: "review",
+						label: row.status === "pending" ? t("providerRequests.review") : t("common.view"),
+						icon: row.status === "pending" ? "carbon:task-view" : "carbon:view",
+						primary: row.status === "pending",
+						onClick: () => {
+							selectedId.value = row.id
+						}
+					}]
+				})
+			])
 	}
 ])
 

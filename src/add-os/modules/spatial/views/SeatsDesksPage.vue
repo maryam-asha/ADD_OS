@@ -1,18 +1,16 @@
 <!-- src/add-os/modules/spatial/views/SeatsDesksPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.seatsDesks") }}</h1>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.seatsDesks')" :description="t('seatsDesks.description')">
+			<template #actions>
+				<n-button type="primary" @click="openCreate">
+					<template #icon><Icon name="carbon:add" :size="16" /></template>
+					{{ t("seatsDesks.create.button") }}
+				</n-button>
+			</template>
+		</PageHeader>
 
 		<n-alert v-if="error" type="error" :title="t('seatsDesks.loadError')" />
-
-		<div class="flex justify-end">
-			<n-button type="primary" @click="openCreate">
-				<template #icon><Icon name="carbon:add" :size="16" /></template>
-				{{ t("seatsDesks.create.button") }}
-			</n-button>
-		</div>
 
 		<ResourceTable
 			:columns
@@ -36,23 +34,24 @@
 </template>
 
 <script setup lang="ts">
-import type { Branch } from "@/add-os/modules/spatial/types/branch"
 import type { QrPoint } from "@/add-os/modules/kitchen/types/kitchen"
+import type { Branch } from "@/add-os/modules/spatial/types/branch"
 import type { SeatDesk, SeatDeskPayload } from "@/add-os/modules/spatial/types/seat-desk"
+import { NAlert, NButton, useMessage } from "naive-ui"
 import { computed, ref } from "vue"
-import { useMessage } from "naive-ui"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.vue"
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"
-import QrPointStickerModal from "@/add-os/modules/kitchen/components/QrPointStickerModal.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useResourceMutations } from "@/add-os/composables/useResourceMutations"
 import { can, canDeleteSpatialResource } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
+import QrPointStickerModal from "@/add-os/modules/kitchen/components/QrPointStickerModal.vue"
 import { buildSeatDeskColumns, buildSeatDeskFields, emptySeatDeskPayload } from "@/add-os/modules/spatial/config/seats-desks.config"
 import { ApiError } from "@/add-os/services/api"
-import { createQrPoint } from "@/add-os/services/kitchen"
 import { listBranches } from "@/add-os/services/branches"
+import { createQrPoint } from "@/add-os/services/kitchen"
 import { createSeatDesk, listSeatsDesks, removeSeatDesk, updateSeatDesk } from "@/add-os/services/seats-desks"
 import Icon from "@/components/common/Icon.vue"
 

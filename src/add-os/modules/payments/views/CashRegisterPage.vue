@@ -1,10 +1,7 @@
 <!-- src/add-os/modules/payments/views/CashRegisterPage.vue -->
 <template>
 	<div class="flex flex-col gap-6">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.cashRegister") }}</h1>
-			<p class="text-secondary">{{ t("cashRegister.description") }}</p>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.cashRegister')" :description="t('cashRegister.description')" />
 
 		<!-- Current Session Status Card -->
 		<n-card :bordered="true" class="shadow-sm">
@@ -53,7 +50,7 @@
 					class="!bg-[var(--add-primary)] hover:!bg-[var(--add-primary-hover)] !text-white"
 					@click="openOpenModal"
 				>
-					<template #icon><Icon name="carbon:add" :size="18" color="#ffffff" /></template>
+					<template #icon><Icon name="carbon:add" :size="18" /></template>
 					{{ t("cashRegister.openButton") }}
 				</n-button>
 			</div>
@@ -75,7 +72,7 @@
 		</div>
 
 		<!-- Open Session Modal -->
-		<n-modal v-model:show="openModalVisible" preset="card" :title="t('cashRegister.openModal.title')" class="max-w-md">
+		<FormModal v-model:show="openModalVisible" :title="t('cashRegister.openModal.title')" size="sm">
 			<n-form ref="openFormRef" :model="openForm" :rules="openRules" label-placement="top">
 				<n-form-item path="opening_balance" :label="t('cashRegister.openModal.openingBalance')">
 					<n-input v-model:value="openForm.opening_balance" placeholder="0.00" inputmode="decimal" />
@@ -90,10 +87,10 @@
 					<n-button type="primary" :loading="submittingOpen" @click="handleOpenSubmit">{{ t("resourceCrud.form.submit") }}</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</FormModal>
 
 		<!-- Close Session Modal -->
-		<n-modal v-model:show="closeModalVisible" preset="card" :title="t('cashRegister.closeModal.title')" class="max-w-md">
+		<FormModal v-model:show="closeModalVisible" :title="t('cashRegister.closeModal.title')" size="sm">
 			<n-form ref="closeFormRef" :model="closeForm" :rules="closeRules" label-placement="top">
 				<n-form-item path="closing_balance" :label="t('cashRegister.closeModal.closingBalance')">
 					<n-input v-model:value="closeForm.closing_balance" placeholder="0.00" inputmode="decimal" />
@@ -108,16 +105,18 @@
 					<n-button type="primary" :loading="submittingClose" @click="handleCloseSubmit">{{ t("resourceCrud.form.submit") }}</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</FormModal>
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns, FormInst, FormRules } from "naive-ui"
 import type { CashRegisterSession } from "@/add-os/modules/payments/types/cash-register"
-import { NButton, NCard, NDataTable, NForm, NFormItem, NInput, NModal, NSpin, NTag, useMessage } from "naive-ui"
+import { NButton, NCard, NDataTable, NForm, NFormItem, NInput, NSpin, NTag, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import {

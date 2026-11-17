@@ -7,14 +7,7 @@
 	and a refusal comes back as its own message.
 -->
 <template>
-	<n-modal
-		:show
-		preset="card"
-		:title="t('bookingCalendar.create.title')"
-		class="max-w-lg rounded-2xl shadow-xl"
-		closable
-		@update:show="emit('update:show', $event)"
-	>
+	<FormModal :show :title="t('bookingCalendar.create.title')" size="md" @update:show="emit('update:show', $event)">
 		<n-form ref="formRef" :model="form" :rules label-placement="top" class="flex flex-col gap-3">
 			<n-form-item :label="t('bookingCalendar.create.member')" path="user_id">
 				<n-select
@@ -49,16 +42,16 @@
 			</div>
 
 			<n-spin :show="isLoadingQuote">
-				<div v-if="quote" class="flex flex-col gap-1.5 p-3 rounded-xl border border-stone-200 bg-stone-50 text-xs">
-					<div class="flex items-center justify-between text-stone-700">
+				<div v-if="quote" class="flex flex-col gap-1.5 p-3 rounded-xl border border-[var(--add-border)] bg-[var(--add-surface-sunken)] text-xs">
+					<div class="flex items-center justify-between text-[var(--add-text-primary)]">
 						<span>{{ t("reception.quickBooking.duration") }}</span>
 						<span class="font-bold">{{ t("reception.quickBooking.minutes", { minutes: formatNumber(quote.minutes) }) }}</span>
 					</div>
-					<div class="flex items-center justify-between text-stone-700">
+					<div class="flex items-center justify-between text-[var(--add-text-primary)]">
 						<span>{{ t("bookingCalendar.create.quoteTitle") }}</span>
-						<span class="font-extrabold text-stone-900 text-sm">{{ t("bookingCalendar.create.quotePoints", { points: formatNumber(quote.total_points) }) }}</span>
+						<span class="font-extrabold text-[var(--add-text-primary)] text-sm">{{ t("bookingCalendar.create.quotePoints", { points: formatNumber(quote.total_points) }) }}</span>
 					</div>
-					<div v-if="quote.amounts.length" class="flex items-center justify-between text-stone-500 pt-1 border-t border-stone-200">
+					<div v-if="quote.amounts.length" class="flex items-center justify-between text-[var(--add-text-secondary)] pt-1 border-t border-[var(--add-border)]">
 						<span>{{ t("reception.quickBooking.inCash") }}</span>
 						<span class="flex gap-2 font-bold">
 							<bdi v-for="amount in quote.amounts" :key="amount.currency" dir="ltr">{{ formatAmount(amount) }}</bdi>
@@ -93,7 +86,7 @@
 				</n-button>
 			</div>
 		</template>
-	</n-modal>
+	</FormModal>
 </template>
 
 <script setup lang="ts">
@@ -101,9 +94,10 @@ import type { FormInst, FormRules, SelectOption } from "naive-ui"
 import type { CreateReceptionBookingPayload, ReceptionBookingPayment, ReceptionBookingQuote } from "@/add-os/modules/booking/types/reception"
 import type { Space } from "@/add-os/modules/spatial/types/space"
 import type { User } from "@/add-os/modules/system/types/user"
-import { NButton, NDatePicker, NForm, NFormItem, NInput, NModal, NRadio, NRadioGroup, NSelect, NSpin, useMessage } from "naive-ui"
+import { NButton, NDatePicker, NForm, NFormItem, NInput, NRadio, NRadioGroup, NSelect, NSpin, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import { spaceTypeLabel } from "@/add-os/modules/booking/config/space-type-label"

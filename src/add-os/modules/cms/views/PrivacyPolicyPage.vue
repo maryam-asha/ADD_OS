@@ -2,35 +2,20 @@
 <template>
 	<div class="flex flex-col gap-6">
 		<!-- ── Page Header ─────────────────────────────────────────────────────── -->
-		<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-			<div class="flex flex-col gap-1">
-				<div class="flex items-center gap-2.5">
-					<div class="p-2 rounded-lg bg-[var(--add-primary)]/10 text-[var(--add-primary)]">
-						<Icon name="carbon:security" :size="22" />
-					</div>
-					<h1 class="text-2xl font-bold tracking-tight">
-						{{ t("privacyPolicy.title") }}
-					</h1>
-				</div>
-				<p class="text-sm text-[var(--add-text-secondary,#5A606B)]">
-					{{ t("privacyPolicy.subtitle") }}
-				</p>
-			</div>
-
-			<!-- Action buttons & status -->
-			<div class="flex flex-wrap items-center gap-3">
+		<PageHeader :title="t('privacyPolicy.title')" :description="t('privacyPolicy.subtitle')">
+			<template #actions>
 				<!-- Dirty / Saved status badge -->
 				<div
 					class="px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 transition-colors border"
 					:class="
 						isDirty
-							? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20'
-							: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20'
+							? 'bg-[var(--add-warning)]/10 text-[var(--add-warning-text)] border-[var(--add-warning)]/20'
+							: 'bg-[var(--add-success)]/10 text-[var(--add-success-text)] border-[var(--add-success)]/20'
 					"
 				>
 					<span
 						class="w-2 h-2 rounded-full"
-						:class="isDirty ? 'bg-amber-500' : 'bg-emerald-500'"
+						:class="isDirty ? 'bg-[var(--add-warning)]' : 'bg-[var(--add-success)]'"
 					/>
 					<span>{{ isDirty ? t("privacyPolicy.unsavedChanges") : t("privacyPolicy.allSaved") }}</span>
 				</div>
@@ -52,12 +37,12 @@
 					@click="handleSave"
 				>
 					<template #icon>
-						<Icon name="carbon:save" :size="16" color="#ffffff" />
+						<Icon name="carbon:save" :size="16" />
 					</template>
 					{{ t("privacyPolicy.saveButton") }}
 				</n-button>
-			</div>
-		</div>
+			</template>
+		</PageHeader>
 
 		<!-- Error Alert if GET failed -->
 		<n-alert v-if="loadError" type="error" :title="t('privacyPolicy.loadError')" class="rounded-xl">
@@ -69,7 +54,7 @@
 
 		<!-- ── Main Editor Card ────────────────────────────────────────────────── -->
 		<n-spin :show="isFetching">
-			<div class="rounded-2xl border border-[var(--add-border,#CDC2AF)]/60 bg-[var(--add-surface-raised,#FFFFFF)] p-4 md:p-6 shadow-xs flex flex-col gap-4">
+			<div class="rounded-2xl border border-[var(--add-border)]/60 bg-[var(--add-surface-raised)] p-4 md:p-6 shadow-xs flex flex-col gap-4">
 				<!-- Language & View Mode Tabs -->
 				<n-tabs v-model:value="activeTab" type="segment" class="w-full">
 					<n-tab name="ar">
@@ -104,7 +89,7 @@
 
 				<!-- Tab 1: Arabic Policy -->
 				<div v-show="activeTab === 'ar'" class="flex flex-col gap-2">
-					<div class="flex items-center justify-between text-xs text-[var(--add-text-secondary,#5A606B)] px-1">
+					<div class="flex items-center justify-between text-xs text-[var(--add-text-secondary)] px-1">
 						<span>{{ t("privacyPolicy.arPlaceholder") }}</span>
 					</div>
 					<MarkdownEditor
@@ -117,7 +102,7 @@
 
 				<!-- Tab 2: English Policy -->
 				<div v-show="activeTab === 'en'" class="flex flex-col gap-2">
-					<div class="flex items-center justify-between text-xs text-[var(--add-text-secondary,#5A606B)] px-1">
+					<div class="flex items-center justify-between text-xs text-[var(--add-text-secondary)] px-1">
 						<span>{{ t("privacyPolicy.enPlaceholder") }}</span>
 					</div>
 					<MarkdownEditor
@@ -157,11 +142,11 @@
 				<!-- Footer metadata -->
 				<div
 					v-if="lastUpdated"
-					class="pt-3 border-t border-[var(--add-border,#CDC2AF)]/30 flex items-center justify-between text-xs text-[var(--add-text-secondary,#5A606B)]"
+					class="pt-3 border-t border-[var(--add-border)]/30 flex items-center justify-between text-xs text-[var(--add-text-secondary)]"
 				>
 					<span>
 						{{ t("privacyPolicy.lastUpdated") }}:
-						<strong class="font-mono text-neutral-700 dark:text-neutral-300">{{ formatDateTime(lastUpdated) }}</strong>
+						<strong class="font-mono text-[var(--add-text-primary)]">{{ formatDateTime(lastUpdated) }}</strong>
 					</span>
 				</div>
 			</div>
@@ -175,6 +160,7 @@ import { NAlert, NButton, NSpin, NTab, NTabs, useMessage } from "naive-ui"
 import { computed, onMounted, reactive, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import MarkdownEditor from "@/add-os/components/form/MarkdownEditor.vue"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { getPrivacyPolicy, updatePrivacyPolicy } from "@/add-os/services/privacy-policy"
 import { formatDateTime } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"

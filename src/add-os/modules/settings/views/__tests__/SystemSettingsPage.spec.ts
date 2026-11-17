@@ -14,12 +14,12 @@ describe("systemSettingsPage wiring", () => {
 
 	it("renders search input, data table and edit modal", () => {
 		expect(source).toContain("<n-data-table")
-		expect(source).toContain("<n-modal")
+		expect(source).toContain("<FormModal")
 		expect(source).toContain("editModalVisible")
 	})
 
 	it("translates titles and operations via vue-i18n", () => {
-		expect(source).toContain('t("systemSettings.description")')
+		expect(source).toContain("t('systemSettings.description')")
 		expect(source).toContain('t("systemSettings.refresh")')
 	})
 

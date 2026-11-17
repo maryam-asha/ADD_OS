@@ -1,10 +1,7 @@
 <!-- src/add-os/modules/pm/views/MyTasksPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t("pm.myTasks.title") }}</h1>
-			<p>{{ t("pm.myTasks.description") }}</p>
-		</div>
+		<PageHeader :title="t('pm.myTasks.title')" :description="t('pm.myTasks.description')" />
 
 		<div class="grid grid-cols-2 gap-3 lg:grid-cols-4" :title="t('pm.myTasks.countersHint')">
 			<n-card v-for="item in COUNTERS" :key="item" size="small" :data-counter="item">
@@ -98,6 +95,7 @@ import type { DueGroup } from "@/add-os/modules/pm/utils/pm"
 import { NAlert, NButton, NCard, NEmpty, NSpin, NTag } from "naive-ui"
 import { computed, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import PriorityTag from "@/add-os/modules/pm/components/PriorityTag.vue"
 import QuickAddTask from "@/add-os/modules/pm/components/QuickAddTask.vue"
 import TaskPanel from "@/add-os/modules/pm/components/TaskPanel.vue"

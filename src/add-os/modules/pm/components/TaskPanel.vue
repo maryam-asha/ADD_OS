@@ -1,99 +1,93 @@
 <!-- src/add-os/modules/pm/components/TaskPanel.vue -->
 <template>
-	<n-drawer v-model:show="show" :width :placement>
-		<n-drawer-content closable>
-			<template #header>
-				<div class="flex items-center justify-between gap-3">
-					<span class="min-w-0 break-words" dir="auto">{{ panelTitle }}</span>
-					<n-button v-if="canComplete" type="success" secondary size="small" :loading="moving" data-test="complete" @click="changeStatus('done')">
-						<template #icon><Icon name="carbon:checkmark" :size="16" /></template>
-						{{ t("pm.task.markComplete") }}
-					</n-button>
-				</div>
-			</template>
+	<DetailDrawer v-model:show="show" size="lg">
+		<template #header>
+			<div class="flex items-center justify-between gap-3">
+				<span class="min-w-0 break-words" dir="auto">{{ panelTitle }}</span>
+				<n-button v-if="canComplete" type="success" secondary size="small" :loading="moving" data-test="complete" @click="changeStatus('done')">
+					<template #icon><Icon name="carbon:checkmark" :size="16" /></template>
+					{{ t("pm.task.markComplete") }}
+				</n-button>
+			</div>
+		</template>
 
-			<n-alert v-if="loadError" type="error" :title="t('pm.task.loadError')" />
+		<n-alert v-if="loadError" type="error" :title="t('pm.task.loadError')" />
 
-			<n-spin v-else-if="loading" class="flex justify-center py-12" data-test="task-loading" />
+		<n-spin v-else-if="loading" class="flex justify-center py-12" data-test="task-loading" />
 
-			<div v-else-if="project" class="flex flex-col gap-4">
-				<n-alert v-if="serverError" type="error" data-test="form-error">{{ serverError }}</n-alert>
-				<n-alert v-else-if="!canEdit && !isNew" type="info" data-test="read-only">{{ t("pm.task.readOnly") }}</n-alert>
+		<div v-else-if="project" class="flex flex-col gap-4">
+			<n-alert v-if="serverError" type="error" data-test="form-error">{{ serverError }}</n-alert>
+			<n-alert v-else-if="!canEdit && !isNew" type="info" data-test="read-only">{{ t("pm.task.readOnly") }}</n-alert>
 
-				<div class="grid grid-cols-1 gap-x-6 sm:grid-cols-2">
-					<div>
-						<n-form-item :label="t('pm.task.title')" :feedback="titleError ?? undefined" :validation-status="titleError ? 'error' : undefined">
-							<n-input v-model:value="title" :maxlength="255" :disabled="!canEdit" data-test="title" />
-						</n-form-item>
-						<n-form-item :label="t('pm.task.description')" :feedback="errorOf('description')" :validation-status="errorOf('description') ? 'error' : undefined">
-							<n-input v-model:value="description" type="textarea" :autosize="{ minRows: 4, maxRows: 12 }" :maxlength="10000" :disabled="!canEdit" data-test="description" />
-						</n-form-item>
-					</div>
-
-					<div>
-						<n-form-item :label="t('pm.task.status')">
-							<n-select :value="status" :options="statusOptions" :disabled="!canSetStatus || moving" data-test="status" @update:value="onStatus" />
-						</n-form-item>
-						<n-form-item :label="t('pm.task.assignees')" :feedback="errorOf('assignee_ids')" :validation-status="errorOf('assignee_ids') ? 'error' : undefined">
-							<n-select v-model:value="assigneeIds" :options="peopleOptions" multiple :disabled="!canAssign" :placeholder="t('pm.people.placeholder')" data-test="assignees" />
-						</n-form-item>
-						<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
-							<n-form-item :label="t('pm.task.startsOn')" :feedback="errorOf('starts_on')" :validation-status="errorOf('starts_on') ? 'error' : undefined" data-test="start-field">
-								<n-date-picker :formatted-value="startsOn" type="date" value-format="yyyy-MM-dd" clearable :disabled="!canEdit" class="w-full" @update:formatted-value="startsOn = $event" />
-							</n-form-item>
-							<n-form-item :label="t('pm.task.dueOn')" :feedback="errorOf('due_on')" :validation-status="errorOf('due_on') ? 'error' : undefined" data-test="due-field">
-								<n-date-picker :formatted-value="dueOn" type="date" value-format="yyyy-MM-dd" clearable :disabled="!canEdit" class="w-full" @update:formatted-value="dueOn = $event" />
-							</n-form-item>
-						</div>
-						<n-form-item :label="t('pm.priority.label')" :feedback="errorOf('priority')" :validation-status="errorOf('priority') ? 'error' : undefined">
-							<n-select v-model:value="priority" :options="priorityOptions" clearable :disabled="!canEdit" data-test="priority" />
-						</n-form-item>
-						<n-form-item v-if="tagOptions.length > 0" :label="t('pm.task.tags')" :feedback="errorOf('tag_ids')" :validation-status="errorOf('tag_ids') ? 'error' : undefined">
-							<n-select v-model:value="tagIds" :options="tagOptions" multiple :disabled="!canEdit" data-test="tags" />
-						</n-form-item>
-						<n-form-item :label="t('pm.task.estimate')" :feedback="errorOf('estimate_hours')" :validation-status="errorOf('estimate_hours') ? 'error' : undefined">
-							<n-input-number v-model:value="estimate" :min="0" :max="999" :show-button="false" clearable :disabled="!canEdit" class="w-full" data-test="estimate">
-								<template #suffix>{{ t("pm.task.hours") }}</template>
-							</n-input-number>
-						</n-form-item>
-					</div>
+			<div class="grid grid-cols-1 gap-x-6 sm:grid-cols-2">
+				<div>
+					<n-form-item :label="t('pm.task.title')" :feedback="titleError ?? undefined" :validation-status="titleError ? 'error' : undefined">
+						<n-input v-model:value="title" :maxlength="255" :disabled="!canEdit" data-test="title" />
+					</n-form-item>
+					<n-form-item :label="t('pm.task.description')" :feedback="errorOf('description')" :validation-status="errorOf('description') ? 'error' : undefined">
+						<n-input v-model:value="description" type="textarea" :autosize="{ minRows: 4, maxRows: 12 }" :maxlength="10000" :disabled="!canEdit" data-test="description" />
+					</n-form-item>
 				</div>
 
-				<SubtaskList
-					v-if="task && task.parent_id === null"
-					:subtasks="task.subtasks ?? []"
-					:parent-id="task.id"
-					:project-id
-					:can-add="mayAdd"
-					@changed="onSubtasksChanged"
-				/>
+				<div>
+					<n-form-item :label="t('pm.task.status')">
+						<n-select :value="status" :options="statusOptions" :disabled="!canSetStatus || moving" data-test="status" @update:value="onStatus" />
+					</n-form-item>
+					<n-form-item :label="t('pm.task.assignees')" :feedback="errorOf('assignee_ids')" :validation-status="errorOf('assignee_ids') ? 'error' : undefined">
+						<n-select v-model:value="assigneeIds" :options="peopleOptions" multiple :disabled="!canAssign" :placeholder="t('pm.people.placeholder')" data-test="assignees" />
+					</n-form-item>
+					<div class="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+						<n-form-item :label="t('pm.task.startsOn')" :feedback="errorOf('starts_on')" :validation-status="errorOf('starts_on') ? 'error' : undefined" data-test="start-field">
+							<n-date-picker :formatted-value="startsOn" type="date" value-format="yyyy-MM-dd" clearable :disabled="!canEdit" class="w-full" @update:formatted-value="startsOn = $event" />
+						</n-form-item>
+						<n-form-item :label="t('pm.task.dueOn')" :feedback="errorOf('due_on')" :validation-status="errorOf('due_on') ? 'error' : undefined" data-test="due-field">
+							<n-date-picker :formatted-value="dueOn" type="date" value-format="yyyy-MM-dd" clearable :disabled="!canEdit" class="w-full" @update:formatted-value="dueOn = $event" />
+						</n-form-item>
+					</div>
+					<n-form-item :label="t('pm.priority.label')" :feedback="errorOf('priority')" :validation-status="errorOf('priority') ? 'error' : undefined">
+						<n-select v-model:value="priority" :options="priorityOptions" clearable :disabled="!canEdit" data-test="priority" />
+					</n-form-item>
+					<n-form-item v-if="tagOptions.length > 0" :label="t('pm.task.tags')" :feedback="errorOf('tag_ids')" :validation-status="errorOf('tag_ids') ? 'error' : undefined">
+						<n-select v-model:value="tagIds" :options="tagOptions" multiple :disabled="!canEdit" data-test="tags" />
+					</n-form-item>
+					<n-form-item :label="t('pm.task.estimate')" :feedback="errorOf('estimate_hours')" :validation-status="errorOf('estimate_hours') ? 'error' : undefined">
+						<n-input-number v-model:value="estimate" :min="0" :max="999" :show-button="false" clearable :disabled="!canEdit" class="w-full" data-test="estimate">
+							<template #suffix>{{ t("pm.task.hours") }}</template>
+						</n-input-number>
+					</n-form-item>
+				</div>
 			</div>
 
-			<template v-if="project && !loading && !loadError && (canEdit || canDelete)" #footer>
-				<div class="flex w-full items-center justify-between gap-2">
-					<n-popconfirm v-if="canDelete" :positive-text="t('pm.task.delete')" @positive-click="remove">
-						<template #trigger>
-							<n-button type="error" secondary :loading="deleting" data-test="delete">
-								<template #icon><Icon name="carbon:trash-can" :size="16" /></template>
-								{{ t("pm.task.delete") }}
-							</n-button>
-						</template>
-						{{ t("pm.task.deleteConfirm") }}
-					</n-popconfirm>
-					<span v-else />
-					<n-button v-if="canEdit" type="primary" :loading="saving" data-test="save" @click="save">{{ t("pm.task.save") }}</n-button>
-				</div>
-			</template>
-		</n-drawer-content>
-	</n-drawer>
+			<SubtaskList
+				v-if="task && task.parent_id === null"
+				:subtasks="task.subtasks ?? []"
+				:parent-id="task.id"
+				:project-id
+				:can-add="mayAdd"
+				@changed="onSubtasksChanged"
+			/>
+		</div>
+
+		<template v-if="project && !loading && !loadError && (canEdit || canDelete)" #footer>
+			<div class="flex w-full items-center justify-between gap-2">
+				<n-button v-if="canDelete" type="error" secondary :loading="deleting" data-test="delete" @click="confirm({ title: t('pm.task.delete'), content: t('pm.task.deleteConfirm'), positiveText: t('pm.task.delete'), onConfirm: remove })">
+					<template #icon><Icon name="carbon:trash-can" :size="16" /></template>
+					{{ t("pm.task.delete") }}
+				</n-button>
+				<span v-else />
+				<n-button v-if="canEdit" type="primary" :loading="saving" data-test="save" @click="save">{{ t("pm.task.save") }}</n-button>
+			</div>
+		</template>
+	</DetailDrawer>
 </template>
 
 <script setup lang="ts">
 import type { Project, Tag, Task, TaskPayload, TaskPriority, TaskStatus } from "@/add-os/modules/pm/types/pm"
-import { NAlert, NButton, NDatePicker, NDrawer, NDrawerContent, NFormItem, NInput, NInputNumber, NPopconfirm, NSelect, NSpin, useMessage } from "naive-ui"
+import { NAlert, NButton, NDatePicker, NFormItem, NInput, NInputNumber, NSelect, NSpin, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
-import { currentLocale } from "@/add-os/lang/currentLocale"
+import DetailDrawer from "@/add-os/components/page/DetailDrawer.vue"
+import { useConfirm } from "@/add-os/components/page/useConfirm"
 import SubtaskList from "@/add-os/modules/pm/components/SubtaskList.vue"
 import { TASK_PRIORITIES, TASK_STATUSES } from "@/add-os/modules/pm/types/pm"
 import { mayAddTasks, refusalText } from "@/add-os/modules/pm/utils/display"
@@ -120,11 +114,9 @@ const emit = defineEmits<{ saved: [], deleted: [] }>()
 const show = defineModel<boolean>("show", { default: false })
 
 const { t } = useI18n()
+const confirm = useConfirm()
 const message = useMessage()
 const authStore = useAuthStore()
-
-const width = "min(48rem, 100vw)"
-const placement = computed(() => (currentLocale.value === "ar" ? "left" : "right"))
 
 const task = ref<Task | null>(null)
 const project = ref<Project | null>(null)

@@ -1,15 +1,19 @@
 <!-- src/add-os/modules/hr/components/ui/HrToolbar.vue -->
 <template>
-	<div class="flex flex-wrap items-center justify-between gap-3 rounded-add-large border border-[var(--add-border)] bg-[var(--add-surface-raised)] p-3">
-		<div class="flex min-w-0 flex-1 flex-wrap items-center gap-3">
-			<slot />
-		</div>
-		<div v-if="$slots.actions" class="flex flex-wrap items-center gap-2">
-			<slot name="actions" />
-		</div>
-	</div>
+	<FilterToolbar v-bind="$attrs">
+		<template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
+			<slot :name="slotName" v-bind="slotProps ?? {}" />
+		</template>
+	</FilterToolbar>
 </template>
 
 <script setup lang="ts">
-/** A list's filters in one card above it, with the list's own action at the far end. */
+import FilterToolbar from "@/add-os/components/page/FilterToolbar.vue"
+
+/**
+ * HR's filter toolbar. Promoted 2026-11-17 to `@/add-os/components/page/FilterToolbar.vue`, the one
+ * implementation every module shares; this name stays so HR's pages need no
+ * edit. New code imports FilterToolbar directly.
+ */
+defineOptions({ inheritAttrs: false })
 </script>

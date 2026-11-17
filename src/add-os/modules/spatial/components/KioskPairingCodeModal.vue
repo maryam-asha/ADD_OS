@@ -1,6 +1,6 @@
 <!-- src/add-os/modules/spatial/components/KioskPairingCodeModal.vue -->
 <template>
-	<n-modal :show preset="card" class="max-w-lg" :title="t('kiosks.pairing.title')" @update:show="emit('update:show', $event)">
+	<FormModal :show :title="t('kiosks.pairing.title')" size="md" @update:show="emit('update:show', $event)">
 		<div v-if="kiosk && issued" class="flex flex-col gap-4">
 			<p class="font-medium">{{ kiosk.name }}</p>
 
@@ -24,14 +24,15 @@
 				{{ t("kiosks.pairing.replacesDevice") }}
 			</n-alert>
 		</div>
-	</n-modal>
+	</FormModal>
 </template>
 
 <script setup lang="ts">
 import type { IssuedPairingCode, Kiosk } from "@/add-os/modules/spatial/types/kiosk"
 import { useClipboard } from "@vueuse/core"
-import { NAlert, NButton, NModal } from "naive-ui"
+import { NAlert, NButton } from "naive-ui"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
 import { formatDateTime } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 

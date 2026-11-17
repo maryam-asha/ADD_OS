@@ -1,14 +1,6 @@
 <!-- src/add-os/modules/members/components/WalletTopUpDialog.vue -->
 <template>
-	<n-modal
-		v-model:show="show"
-		preset="card"
-		:title="t('members.topUp.title')"
-		closable
-		class="rounded-2xl border border-[var(--add-border)]/70 shadow-lg bg-[var(--add-surface-raised)]"
-		style="width: min(34rem, 95vw)"
-		content-style="max-height: 72vh; overflow-y: auto; padding-inline-end: 6px"
-	>
+	<FormModal v-model:show="show" :title="t('members.topUp.title')" size="md">
 		<!--
 			The same cards as the Wallet Top-up page — recipient and balance, one
 			points-or-cash box with its currency and quick adds, payment methods, and
@@ -154,7 +146,7 @@
 				</n-button>
 			</div>
 		</n-form>
-	</n-modal>
+	</FormModal>
 </template>
 
 <script setup lang="ts">
@@ -162,10 +154,11 @@ import type { FormInst, FormRules, SelectOption } from "naive-ui"
 import type { InputHTMLAttributes } from "vue"
 import type { Member } from "@/add-os/modules/members/types/member"
 import type { PaymentMethod, WalletTopUpPayload } from "@/add-os/modules/payments/types/wallet-top-up"
-import { NAvatar, NButton, NForm, NFormItem, NInput, NModal, NRadioButton, NRadioGroup, NSelect, NTag, useMessage } from "naive-ui"
+import { NAvatar, NButton, NForm, NFormItem, NInput, NRadioButton, NRadioGroup, NSelect, NTag, useMessage } from "naive-ui"
 import { getActivePinia } from "pinia"
 import { computed, defineComponent, h, provide, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
 import { usePoints } from "@/add-os/modules/payments/composables/usePoints"
 import { useTopUpQuote } from "@/add-os/modules/payments/composables/useTopUpQuote"
 import { ApiError } from "@/add-os/services/api"

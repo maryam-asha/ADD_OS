@@ -1,27 +1,34 @@
 <!-- src/add-os/modules/plans/components/PlanFormDrawer.vue -->
 <template>
-	<n-modal
-		v-model:show="show"
-		:mask-closable="true"
-		class="!p-0"
-	>
-		<div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-neutral-200/80 w-[92vw] max-w-[1040px] flex flex-col max-h-[85vh]">
+	<!-- In a modal, or (inline) as the content of the plan editor page — decided 2026-11-17: a form this wide is a page. -->
+	<component :is="inline ? 'div' : NModal" v-bind="frameAttrs">
+		<div
+			class="overflow-hidden border border-[var(--add-border)] flex flex-col"
+			:class="inline ? 'rounded-add-large bg-[var(--add-surface-raised)]' : 'bg-white rounded-2xl shadow-xl w-[92vw] max-w-[1040px] max-h-[85vh]'"
+		>
+			<!-- Inline: the page header carries the title; only the template line stays -->
+			<div v-if="inline && isCreateMode && templateKey && !showTemplatePicker" class="px-5 py-2.5 border-b border-[var(--add-border)] text-xs text-[var(--add-text-secondary)] flex items-center gap-1">
+				{{ t('packages.templates.current') }}: {{ t(`packages.templates.${templateKey}.title`) }}
+				<button type="button" data-test="plan-template-change" class="text-[var(--add-primary-text)] font-semibold hover:underline cursor-pointer" @click="showTemplatePicker = true">
+					{{ t('packages.templates.change') }}
+				</button>
+			</div>
 			<!-- Header: Start-aligned title & icon according to language direction, close button at end -->
-			<div class="px-5 py-3.5 border-b border-neutral-100 flex items-center justify-between bg-white shrink-0">
+			<div v-if="!inline" class="px-5 py-3.5 border-b border-[var(--add-border)] flex items-center justify-between bg-white shrink-0">
 				<div class="flex items-center gap-2.5">
-					<div class="w-8 h-8 rounded-lg bg-[#f0f7ee] text-[#4d783f] border border-[#d6e8d2] flex items-center justify-center shrink-0">
+					<div class="w-8 h-8 rounded-lg bg-[color-mix(in_srgb,var(--add-primary)_10%,transparent)] text-[var(--add-primary-text)] border border-[color-mix(in_srgb,var(--add-primary)_35%,transparent)] flex items-center justify-center shrink-0">
 						<Icon :name="isCreateMode ? 'carbon:add' : 'carbon:edit'" :size="16" />
 					</div>
 					<div class="flex flex-col">
-						<h2 class="text-sm md:text-base font-bold text-neutral-800 leading-tight">
+						<h2 class="text-sm md:text-base font-bold text-[var(--add-text-primary)] leading-tight">
 							{{ modeTitle }}
 						</h2>
-						<span class="text-xs text-neutral-400 font-normal mt-0.5">
+						<span class="text-xs text-[var(--add-text-muted)] font-normal mt-0.5">
 							{{ headerSubtitle }}
 						</span>
-						<span v-if="isCreateMode && templateKey && !showTemplatePicker" class="text-[11px] text-neutral-500 mt-0.5 flex items-center gap-1">
+						<span v-if="isCreateMode && templateKey && !showTemplatePicker" class="text-[11px] text-[var(--add-text-secondary)] mt-0.5 flex items-center gap-1">
 							{{ t('packages.templates.current') }}: {{ t(`packages.templates.${templateKey}.title`) }}
-							<button type="button" data-test="plan-template-change" class="text-[#557e46] font-semibold hover:underline cursor-pointer" @click="showTemplatePicker = true">
+							<button type="button" data-test="plan-template-change" class="text-[var(--add-primary-text)] font-semibold hover:underline cursor-pointer" @click="showTemplatePicker = true">
 								{{ t('packages.templates.change') }}
 							</button>
 						</span>
@@ -31,7 +38,7 @@
 				<!-- Close button -->
 				<button
 					type="button"
-					class="w-7 h-7 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+					class="w-7 h-7 rounded-lg text-[var(--add-text-muted)] hover:text-[var(--add-text-primary)] hover:bg-[var(--add-surface-sunken)] flex items-center justify-center transition-colors cursor-pointer shrink-0"
 					aria-label="Close"
 					@click="show = false"
 				>
@@ -40,20 +47,20 @@
 			</div>
 
 			<!-- Steps: any one can be opened; the plan is saved on the last -->
-			<div v-if="!showTemplatePicker" class="flex items-center gap-1.5 px-5 py-2.5 border-b border-neutral-100 bg-white shrink-0 overflow-x-auto">
+			<div v-if="!showTemplatePicker" class="flex items-center gap-1.5 px-5 py-2.5 border-b border-[var(--add-border)] bg-white shrink-0 overflow-x-auto">
 				<template v-for="(name, i) in PLAN_STEPS" :key="name">
-					<span v-if="i > 0" class="h-px w-4 md:w-8 bg-neutral-200 shrink-0" />
+					<span v-if="i > 0" class="h-px w-4 md:w-8 bg-[var(--add-surface-sunken)] shrink-0" />
 					<button
 						type="button"
 						:data-test="`plan-step-${name}`"
 						:aria-current="step === i ? 'step' : undefined"
 						class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer shrink-0"
-						:class="step === i ? 'bg-[#f0f7ee] text-[#4d783f]' : 'text-neutral-500 hover:bg-neutral-50'"
+						:class="step === i ? 'bg-[color-mix(in_srgb,var(--add-primary)_10%,transparent)] text-[var(--add-primary-text)]' : 'text-[var(--add-text-secondary)] hover:bg-[var(--add-surface-sunken)]'"
 						@click="step = i"
 					>
 						<span
 							class="w-5 h-5 rounded-full text-[11px] font-bold flex items-center justify-center add-numeric"
-							:class="step === i ? 'bg-[#557e46] text-white' : step > i ? 'bg-[#dcebd7] text-[#4d783f]' : 'bg-neutral-100 text-neutral-500'"
+							:class="step === i ? 'bg-[var(--add-primary)] text-white' : step > i ? 'bg-[color-mix(in_srgb,var(--add-primary)_20%,transparent)] text-[var(--add-primary-text)]' : 'bg-[var(--add-surface-sunken)] text-[var(--add-text-secondary)]'"
 						>
 							<Icon v-if="step > i" name="carbon:checkmark" :size="12" />
 							<template v-else>{{ i + 1 }}</template>
@@ -64,21 +71,21 @@
 			</div>
 
 			<!-- Scrollable Content Area -->
-			<div class="overflow-y-auto flex-1 p-4 md:p-5 bg-[#faf9f8] flex flex-col gap-3.5">
+			<div class="overflow-y-auto flex-1 p-4 md:p-5 bg-[color-mix(in_srgb,var(--add-warning)_10%,transparent)] flex flex-col gap-3.5">
 				<PlanTemplatePicker v-if="showTemplatePicker" v-model="templateKey" @choose="chooseTemplate" />
 
 				<div v-else class="flex flex-col md:flex-row gap-4 items-start">
 					<div class="flex-1 min-w-0 flex flex-col gap-3.5">
 						<section v-show="step === 0" data-test="plan-section-basics" class="flex flex-col gap-3.5">
 							<div class="flex items-center gap-2 px-1">
-								<span class="w-6 h-6 rounded-full bg-[#557e46] text-white text-xs font-bold flex items-center justify-center shrink-0 add-numeric">1</span>
-								<Icon name="carbon:tag" :size="16" class="text-[#4d783f]" />
-								<h3 class="text-sm md:text-base font-bold text-neutral-800">{{ t('packages.sections.basics') }}</h3>
+								<span class="w-6 h-6 rounded-full bg-[var(--add-primary)] text-white text-xs font-bold flex items-center justify-center shrink-0 add-numeric">1</span>
+								<Icon name="carbon:tag" :size="16" class="text-[var(--add-primary-text)]" />
+								<h3 class="text-sm md:text-base font-bold text-[var(--add-text-primary)]">{{ t('packages.sections.basics') }}</h3>
 							</div>
 							<!-- Card 1: المعلومات الأساسية -->
-							<div class="border border-neutral-200/70 rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs">
-								<div class="flex items-center gap-2 text-xs md:text-sm font-bold text-neutral-800">
-									<div class="w-6 h-6 rounded-md bg-[#eef7ec] text-[#4d783f] flex items-center justify-center shrink-0">
+							<div class="border border-[var(--add-border)] rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs">
+								<div class="flex items-center gap-2 text-xs md:text-sm font-bold text-[var(--add-text-primary)]">
+									<div class="w-6 h-6 rounded-md bg-[color-mix(in_srgb,var(--add-primary)_10%,transparent)] text-[var(--add-primary-text)] flex items-center justify-center shrink-0">
 										<Icon name="carbon:tag" :size="14" />
 									</div>
 									<span>{{ t('packages.sections.basicInfo') }}</span>
@@ -87,40 +94,40 @@
 								<!-- Row 1: Name Arabic and English -->
 								<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.name') }} (عربي) *</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.form.name') }} (عربي) *</span>
 										<input
 											v-model="model.name.ar"
-											class="w-full h-9 text-xs md:text-sm border border-neutral-200 rounded-lg px-3 bg-white focus:outline-none focus:border-[#557e46] transition-colors"
+											class="w-full h-9 text-xs md:text-sm border border-[var(--add-border)] rounded-lg px-3 bg-white focus:outline-none focus:border-[var(--add-primary)] transition-colors"
 											:placeholder="t('resourceCrud.form.arabicPlaceholder')"
 										/>
-										<span v-if="errors['name.ar']" class="text-xs text-red-500">{{ errors['name.ar'][0] }}</span>
+										<span v-if="errors['name.ar']" class="text-xs text-[var(--add-danger-text)]">{{ errors['name.ar'][0] }}</span>
 									</div>
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">Name (English) *</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">Name (English) *</span>
 										<input
 											v-model="model.name.en"
-											class="w-full h-9 text-xs md:text-sm border border-neutral-200 rounded-lg px-3 bg-white focus:outline-none focus:border-[#557e46] transition-colors"
+											class="w-full h-9 text-xs md:text-sm border border-[var(--add-border)] rounded-lg px-3 bg-white focus:outline-none focus:border-[var(--add-primary)] transition-colors"
 											:placeholder="t('resourceCrud.form.englishPlaceholder')"
 										/>
-										<span v-if="errors['name.en']" class="text-xs text-red-500">{{ errors['name.en'][0] }}</span>
+										<span v-if="errors['name.en']" class="text-xs text-[var(--add-danger-text)]">{{ errors['name.en'][0] }}</span>
 									</div>
 								</div>
 
 								<!-- Row 2: Subtitle Arabic and English -->
 								<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.subtitle') }} (عربي)</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.form.subtitle') }} (عربي)</span>
 										<input
 											v-model="subtitleAr"
-											class="w-full h-9 text-xs md:text-sm border border-neutral-200 rounded-lg px-3 bg-white focus:outline-none focus:border-[#557e46] transition-colors"
+											class="w-full h-9 text-xs md:text-sm border border-[var(--add-border)] rounded-lg px-3 bg-white focus:outline-none focus:border-[var(--add-primary)] transition-colors"
 											:placeholder="t('resourceCrud.form.arabicPlaceholder')"
 										/>
 									</div>
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">Subtitle (English)</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">Subtitle (English)</span>
 										<input
 											v-model="subtitleEn"
-											class="w-full h-9 text-xs md:text-sm border border-neutral-200 rounded-lg px-3 bg-white focus:outline-none focus:border-[#557e46] transition-colors"
+											class="w-full h-9 text-xs md:text-sm border border-[var(--add-border)] rounded-lg px-3 bg-white focus:outline-none focus:border-[var(--add-primary)] transition-colors"
 											:placeholder="t('resourceCrud.form.englishPlaceholder')"
 										/>
 									</div>
@@ -128,9 +135,9 @@
 							</div>
 
 							<!-- Card 2: التسعير -->
-							<div class="border border-neutral-200/70 rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs">
-								<div class="flex items-center gap-2 text-xs md:text-sm font-bold text-neutral-800">
-									<div class="w-6 h-6 rounded-md bg-[#fdf3e9] text-[#cf7024] flex items-center justify-center shrink-0">
+							<div class="border border-[var(--add-border)] rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs">
+								<div class="flex items-center gap-2 text-xs md:text-sm font-bold text-[var(--add-text-primary)]">
+									<div class="w-6 h-6 rounded-md bg-[color-mix(in_srgb,var(--add-warning)_10%,transparent)] text-[var(--add-warning-text)] flex items-center justify-center shrink-0">
 										<Icon name="carbon:currency-dollar" :size="14" />
 									</div>
 									<span>{{ t('packages.sections.pricing') }}</span>
@@ -139,7 +146,7 @@
 								<!-- Row 1: Price (points), Module -->
 								<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.pricePoints') }} *</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.form.pricePoints') }} *</span>
 										<PlanStepper v-model="model.price_points" :min="0" :step="1" integer />
 										<!--
 									Read-only, and read straight off the server's own rendering of
@@ -147,21 +154,21 @@
 									change it, so a value computed here would be a second, drifting
 									copy of the same rule.
 								-->
-										<span v-if="serverPriceUsdHint" class="text-[11px] text-neutral-400 add-numeric">
+										<span v-if="serverPriceUsdHint" class="text-[11px] text-[var(--add-text-muted)] add-numeric">
 											≈ {{ serverPriceUsdHint }}
 										</span>
-										<span v-if="errors.price_points" class="text-xs text-red-500">{{ errors.price_points[0] }}</span>
+										<span v-if="errors.price_points" class="text-xs text-[var(--add-danger-text)]">{{ errors.price_points[0] }}</span>
 									</div>
 									<!-- The module follows the seat (ADDCore PlanModule::slugForSeat()); staff choose the seat only. -->
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.durationDays') }} *</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.form.durationDays') }} *</span>
 										<PlanStepper v-model="model.duration_days" :min="1" :step="1" />
 									</div>
 								</div>
 
 								<!-- Saving reference: a plan or a space's hourly rate, times units — one or neither. -->
-								<div class="flex flex-col gap-2 border-t border-neutral-100 pt-3" data-test="plan-reference">
-									<span class="text-xs font-semibold text-neutral-600">{{ t('packages.reference.section') }}</span>
+								<div class="flex flex-col gap-2 border-t border-[var(--add-border)] pt-3" data-test="plan-reference">
+									<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.reference.section') }}</span>
 									<n-radio-group :value="referenceKind" size="small" @update:value="setReferenceKind">
 										<n-radio value="none">{{ t('packages.reference.none') }}</n-radio>
 										<n-radio value="plan">{{ t('packages.reference.plan') }}</n-radio>
@@ -169,18 +176,18 @@
 									</n-radio-group>
 									<div v-if="referenceKind !== 'none'" class="grid grid-cols-1 md:grid-cols-2 gap-3">
 										<div class="flex flex-col gap-1">
-											<span class="text-xs text-neutral-500">{{ t(referenceKind === 'plan' ? 'packages.reference.planLabel' : 'packages.reference.spaceLabel') }}</span>
+											<span class="text-xs text-[var(--add-text-secondary)]">{{ t(referenceKind === 'plan' ? 'packages.reference.planLabel' : 'packages.reference.spaceLabel') }}</span>
 											<n-select v-if="referenceKind === 'plan'" v-model:value="model.reference_plan_id" :options="referencePlanOptions" filterable size="small" />
 											<n-select v-else v-model:value="model.reference_space_id" :options="spaceOptions" filterable size="small" />
 										</div>
 										<div class="flex flex-col gap-1">
-											<span class="text-xs text-neutral-500">{{ t(referenceKind === 'plan' ? 'packages.reference.unitsPlan' : 'packages.reference.unitsHours') }}</span>
+											<span class="text-xs text-[var(--add-text-secondary)]">{{ t(referenceKind === 'plan' ? 'packages.reference.unitsPlan' : 'packages.reference.unitsHours') }}</span>
 											<n-input-number v-model:value="model.reference_units" :min="1" :precision="0" clearable size="small" />
 										</div>
 									</div>
-									<span class="text-xs text-neutral-400">{{ t('packages.reference.hint') }}</span>
-									<span v-for="key in referenceErrorKeys" :key class="text-xs text-red-500" data-test="plan-reference-error">{{ errors[key][0] }}</span>
-									<span v-if="saving" class="text-xs font-semibold text-neutral-700" data-test="plan-saving">
+									<span class="text-xs text-[var(--add-text-muted)]">{{ t('packages.reference.hint') }}</span>
+									<span v-for="key in referenceErrorKeys" :key class="text-xs text-[var(--add-danger-text)]" data-test="plan-reference-error">{{ errors[key][0] }}</span>
+									<span v-if="saving" class="text-xs font-semibold text-[var(--add-text-primary)]" data-test="plan-saving">
 										{{ t('packages.reference.saving', { percent: formatNumber(saving.saving_percent), points: formatNumber(saving.saving_points), name: saving.reference_name ?? '—', units: formatNumber(saving.units) }) }}
 									</span>
 								</div>
@@ -189,14 +196,14 @@
 
 						<section v-show="step === 1" data-test="plan-section-workspace" class="flex flex-col gap-3.5">
 							<div class="flex items-center gap-2 px-1">
-								<span class="w-6 h-6 rounded-full bg-[#557e46] text-white text-xs font-bold flex items-center justify-center shrink-0 add-numeric">2</span>
-								<Icon name="carbon:workspace" :size="16" class="text-[#4d783f]" />
-								<h3 class="text-sm md:text-base font-bold text-neutral-800">{{ t('packages.sections.workspace') }}</h3>
+								<span class="w-6 h-6 rounded-full bg-[var(--add-primary)] text-white text-xs font-bold flex items-center justify-center shrink-0 add-numeric">2</span>
+								<Icon name="carbon:workspace" :size="16" class="text-[var(--add-primary-text)]" />
+								<h3 class="text-sm md:text-base font-bold text-[var(--add-text-primary)]">{{ t('packages.sections.workspace') }}</h3>
 							</div>
 							<div class="flex flex-col gap-3.5" data-test="plan-coworking">
-								<div class="border border-neutral-200/70 rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs">
-									<div class="flex items-center gap-2 text-xs md:text-sm font-bold text-neutral-800">
-										<div class="w-6 h-6 rounded-md bg-[#eef7ec] text-[#4d783f] flex items-center justify-center shrink-0">
+								<div class="border border-[var(--add-border)] rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs">
+									<div class="flex items-center gap-2 text-xs md:text-sm font-bold text-[var(--add-text-primary)]">
+										<div class="w-6 h-6 rounded-md bg-[color-mix(in_srgb,var(--add-primary)_10%,transparent)] text-[var(--add-primary-text)] flex items-center justify-center shrink-0">
 											<Icon name="carbon:workspace" :size="14" />
 										</div>
 										<span>{{ t('packages.coworking.title') }}</span>
@@ -210,63 +217,63 @@
 											:data-test="`coworking-seat-${option.value}`"
 											class="text-start rounded-lg border p-3 flex flex-col gap-1 transition-colors cursor-pointer" :class="[
 												model.coworking_seat === option.value
-													? 'border-[#557e46] bg-[#f0f7ee]'
-													: 'border-neutral-200 bg-white hover:border-neutral-300'
+													? 'border-[var(--add-primary)] bg-[color-mix(in_srgb,var(--add-primary)_10%,transparent)]'
+													: 'border-[var(--add-border)] bg-white hover:border-[var(--add-border-strong)]'
 											]"
 											@click="setCoworkingSeat(option.value)"
 										>
-											<span class="flex items-center gap-1.5 text-xs md:text-sm font-bold text-neutral-800">
+											<span class="flex items-center gap-1.5 text-xs md:text-sm font-bold text-[var(--add-text-primary)]">
 												<Icon :name="option.icon" :size="15" />
 												{{ t(`packages.coworking.${option.value}.title`) }}
 											</span>
-											<span class="text-[11px] text-neutral-500">{{ t(`packages.coworking.${option.value}.hint`) }}</span>
+											<span class="text-[11px] text-[var(--add-text-secondary)]">{{ t(`packages.coworking.${option.value}.hint`) }}</span>
 										</button>
 									</div>
-									<span v-if="errors.coworking_seat" class="text-xs text-red-500">{{ errors.coworking_seat[0] }}</span>
+									<span v-if="errors.coworking_seat" class="text-xs text-[var(--add-danger-text)]">{{ errors.coworking_seat[0] }}</span>
 								</div>
 
-								<div v-if="model.coworking_seat !== 'none'" class="border border-neutral-200/70 rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs">
-									<div class="flex items-center gap-2 text-xs md:text-sm font-bold text-neutral-800">
-										<div class="w-6 h-6 rounded-md bg-[#fdf3e9] text-[#c26d25] flex items-center justify-center shrink-0">
+								<div v-if="model.coworking_seat !== 'none'" class="border border-[var(--add-border)] rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs">
+									<div class="flex items-center gap-2 text-xs md:text-sm font-bold text-[var(--add-text-primary)]">
+										<div class="w-6 h-6 rounded-md bg-[color-mix(in_srgb,var(--add-warning)_10%,transparent)] text-[var(--add-warning-text)] flex items-center justify-center shrink-0">
 											<Icon name="carbon:hourglass" :size="14" />
 										</div>
 										<span>{{ t('packages.coworking.hoursTitle') }}</span>
 									</div>
 
-									<span v-if="model.coworking_seat === 'dedicated'" class="text-xs text-neutral-600">{{ t('packages.coworking.dedicatedUnlimited') }}</span>
+									<span v-if="model.coworking_seat === 'dedicated'" class="text-xs text-[var(--add-text-secondary)]">{{ t('packages.coworking.dedicatedUnlimited') }}</span>
 									<template v-else>
-										<div class="flex items-center justify-between gap-2 p-2 px-3 bg-neutral-50 rounded-lg border border-neutral-100">
-											<span class="text-xs font-semibold text-neutral-700">{{ t('packages.coworking.unlimited') }}</span>
+										<div class="flex items-center justify-between gap-2 p-2 px-3 bg-[var(--add-surface-sunken)] rounded-lg border border-[var(--add-border)]">
+											<span class="text-xs font-semibold text-[var(--add-text-primary)]">{{ t('packages.coworking.unlimited') }}</span>
 											<n-switch :value="coworkingHoursUnlimited" :rail-style size="small" @update:value="setCoworkingHoursUnlimited" />
 										</div>
 										<div v-if="!coworkingHoursUnlimited" class="flex flex-col gap-1">
-											<span class="text-xs font-semibold text-neutral-600">{{ t('packages.coworking.hours') }}</span>
+											<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.coworking.hours') }}</span>
 											<PlanStepper v-model="coworkingHoursValue" :min="1" :step="1" />
-											<span v-if="errors.coworking_hours" class="text-xs text-red-500">{{ errors.coworking_hours[0] }}</span>
+											<span v-if="errors.coworking_hours" class="text-xs text-[var(--add-danger-text)]">{{ errors.coworking_hours[0] }}</span>
 										</div>
-										<span class="text-[11px] text-neutral-500">{{ t('packages.coworking.hoursHint') }}</span>
+										<span class="text-[11px] text-[var(--add-text-secondary)]">{{ t('packages.coworking.hoursHint') }}</span>
 									</template>
 								</div>
 
 								<template v-if="model.coworking_seat !== 'none'">
 									<!-- Card 4: وقت الباقة -->
-									<div class="border border-neutral-200/70 rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs">
-										<div class="flex items-center gap-2 text-xs md:text-sm font-bold text-neutral-800">
-											<div class="w-6 h-6 rounded-md bg-[#eef2fb] text-[#3f5b8f] flex items-center justify-center shrink-0">
+									<div class="border border-[var(--add-border)] rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs">
+										<div class="flex items-center gap-2 text-xs md:text-sm font-bold text-[var(--add-text-primary)]">
+											<div class="w-6 h-6 rounded-md bg-[color-mix(in_srgb,var(--add-info)_10%,transparent)] text-[var(--add-info-text)] flex items-center justify-center shrink-0">
 												<Icon name="carbon:time" :size="14" />
 											</div>
 											<span>{{ t('packages.coworking.windowTitle') }}</span>
 										</div>
 
-										<div class="flex items-center justify-between gap-2 p-2 px-3 bg-neutral-50 rounded-lg border border-neutral-100">
-											<span class="text-xs font-semibold text-neutral-700">{{ t('packages.coworking.allDay') }}</span>
+										<div class="flex items-center justify-between gap-2 p-2 px-3 bg-[var(--add-surface-sunken)] rounded-lg border border-[var(--add-border)]">
+											<span class="text-xs font-semibold text-[var(--add-text-primary)]">{{ t('packages.coworking.allDay') }}</span>
 											<n-switch :value="!hasAccessWindow" :rail-style size="small" @update:value="(allDay: boolean) => toggleAccessWindow(!allDay)" />
 										</div>
 
 										<template v-if="hasAccessWindow">
 											<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 												<div class="flex flex-col gap-1">
-													<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.accessWindowStart') }} *</span>
+													<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.form.accessWindowStart') }} *</span>
 													<n-time-picker
 														:formatted-value="toPickerTimeValue(model.access_window_start)"
 														format="hh:mm a" use-12-hours
@@ -275,10 +282,10 @@
 														size="small"
 														@update:formatted-value="(value: string | null) => (model.access_window_start = value)"
 													/>
-													<span v-if="errors.access_window_start" class="text-xs text-red-500">{{ errors.access_window_start[0] }}</span>
+													<span v-if="errors.access_window_start" class="text-xs text-[var(--add-danger-text)]">{{ errors.access_window_start[0] }}</span>
 												</div>
 												<div class="flex flex-col gap-1">
-													<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.accessWindowEnd') }} *</span>
+													<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.form.accessWindowEnd') }} *</span>
 													<n-time-picker
 														:formatted-value="toPickerTimeValue(model.access_window_end)"
 														format="hh:mm a" use-12-hours
@@ -287,7 +294,7 @@
 														size="small"
 														@update:formatted-value="(value: string | null) => (model.access_window_end = value)"
 													/>
-													<span v-if="errors.access_window_end" class="text-xs text-red-500">{{ errors.access_window_end[0] }}</span>
+													<span v-if="errors.access_window_end" class="text-xs text-[var(--add-danger-text)]">{{ errors.access_window_end[0] }}</span>
 												</div>
 											</div>
 
@@ -297,20 +304,20 @@
 									package this field exists for. So this explains the
 									consequence instead of warning about a mistake.
 								-->
-											<div v-if="accessWindowWraps" class="flex items-start gap-2 p-2 px-3 bg-[#eef2fb] rounded-lg border border-[#d9e2f4] text-[11px] text-[#3f5b8f]">
+											<div v-if="accessWindowWraps" class="flex items-start gap-2 p-2 px-3 bg-[color-mix(in_srgb,var(--add-info)_10%,transparent)] rounded-lg border border-[color-mix(in_srgb,var(--add-info)_35%,transparent)] text-[11px] text-[var(--add-info-text)]">
 												<Icon name="carbon:information" :size="14" class="shrink-0 mt-px" />
 												<span>{{ t('packages.form.accessWindowWraps') }}</span>
 											</div>
 
-											<span class="text-[11px] text-neutral-500">{{ t('packages.form.accessWindowHint') }}</span>
+											<span class="text-[11px] text-[var(--add-text-secondary)]">{{ t('packages.form.accessWindowHint') }}</span>
 										</template>
 									</div>
 								</template>
-								<div v-if="model.coworking_seat !== 'none' || spaceHoursList.length" class="border border-neutral-200/70 rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs">
+								<div v-if="model.coworking_seat !== 'none' || spaceHoursList.length" class="border border-[var(--add-border)] rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs">
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.allowanceCycle.label') }}</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.form.allowanceCycle.label') }}</span>
 										<n-select v-model:value="model.allowance_cycle" :options="allowanceCycleOptions" size="small" />
-										<span class="text-[11px] text-neutral-500">{{ t('packages.form.allowanceCycle.hint') }}</span>
+										<span class="text-[11px] text-[var(--add-text-secondary)]">{{ t('packages.form.allowanceCycle.hint') }}</span>
 									</div>
 								</div>
 							</div>
@@ -318,31 +325,31 @@
 
 						<section v-show="step === 2" data-test="plan-section-benefits" class="flex flex-col gap-3">
 							<div class="flex items-center gap-2 px-1">
-								<span class="w-6 h-6 rounded-full bg-[#557e46] text-white text-xs font-bold flex items-center justify-center shrink-0 add-numeric">3</span>
-								<Icon name="carbon:gift" :size="16" class="text-[#4d783f]" />
-								<h3 class="text-sm md:text-base font-bold text-neutral-800">{{ t('packages.sections.benefits') }}</h3>
+								<span class="w-6 h-6 rounded-full bg-[var(--add-primary)] text-white text-xs font-bold flex items-center justify-center shrink-0 add-numeric">3</span>
+								<Icon name="carbon:gift" :size="16" class="text-[var(--add-primary-text)]" />
+								<h3 class="text-sm md:text-base font-bold text-[var(--add-text-primary)]">{{ t('packages.sections.benefits') }}</h3>
 							</div>
 							<div class="flex items-center justify-between gap-2">
-								<span class="text-xs font-semibold text-neutral-500">{{ t('packages.benefits.description') }}</span>
+								<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.benefits.description') }}</span>
 								<div class="relative shrink-0">
 									<button
 										type="button"
 										data-test="plan-benefit-add"
-										class="h-8 px-3 text-xs font-semibold rounded-lg bg-[#f0f7ee] hover:bg-[#e4f1e1] text-[#4d783f] border border-[#d6e8d2] flex items-center gap-1.5 transition-colors cursor-pointer"
+										class="h-8 px-3 text-xs font-semibold rounded-lg bg-[color-mix(in_srgb,var(--add-primary)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--add-primary)_16%,transparent)] text-[var(--add-primary-text)] border border-[color-mix(in_srgb,var(--add-primary)_35%,transparent)] flex items-center gap-1.5 transition-colors cursor-pointer"
 										@click="benefitMenuOpen = !benefitMenuOpen"
 									>
 										<Icon name="carbon:add" :size="14" />
 										<span>{{ t('packages.benefits.add') }}</span>
 										<Icon name="carbon:chevron-down" :size="12" />
 									</button>
-									<div v-if="benefitMenuOpen" class="absolute end-0 top-9 z-10 w-56 bg-white border border-neutral-200 rounded-xl shadow-lg p-1 flex flex-col">
+									<div v-if="benefitMenuOpen" class="absolute end-0 top-9 z-10 w-56 bg-white border border-[var(--add-border)] rounded-xl shadow-lg p-1 flex flex-col">
 										<button
 											v-for="item in benefitMenu"
 											:key="item.kind"
 											type="button"
 											:data-test="`plan-benefit-add-${item.kind}`"
 											:disabled="item.disabled"
-											class="text-start px-3 py-2 rounded-lg text-xs font-semibold text-neutral-700 hover:bg-neutral-50 flex items-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+											class="text-start px-3 py-2 rounded-lg text-xs font-semibold text-[var(--add-text-primary)] hover:bg-[var(--add-surface-sunken)] flex items-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
 											@click="addBenefit(item.kind)"
 										>
 											<Icon :name="item.icon" :size="14" />
@@ -352,7 +359,7 @@
 								</div>
 							</div>
 
-							<div v-if="!benefitCount" class="py-8 text-center text-neutral-400 bg-white rounded-xl border border-dashed border-neutral-200 text-xs">
+							<div v-if="!benefitCount" class="py-8 text-center text-[var(--add-text-muted)] bg-white rounded-xl border border-dashed border-[var(--add-border)] text-xs">
 								{{ t('packages.benefits.empty') }}
 							</div>
 
@@ -360,20 +367,20 @@
 							<div
 								v-for="(discount, idx) in discountsList"
 								:key="`discount-${idx}`" data-test="plan-benefit-row"
-								class="border border-neutral-200/80 rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs relative"
+								class="border border-[var(--add-border)] rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs relative"
 							>
 								<!-- Card Header -->
 								<div class="flex items-center justify-between">
 									<div class="flex items-center gap-2">
-										<div class="w-7 h-7 rounded-lg flex items-center justify-center border text-xs shrink-0 bg-[#fdf3e9] text-[#c26d25] border-[#f5dfcb]">
+										<div class="w-7 h-7 rounded-lg flex items-center justify-center border text-xs shrink-0 bg-[color-mix(in_srgb,var(--add-warning)_10%,transparent)] text-[var(--add-warning-text)] border-[color-mix(in_srgb,var(--add-warning)_35%,transparent)]">
 											<Icon name="carbon:percentage" :size="15" />
 										</div>
-										<span class="font-bold text-xs md:text-sm text-neutral-800">{{ getDiscountTargetLabel(discount) }}</span>
+										<span class="font-bold text-xs md:text-sm text-[var(--add-text-primary)]">{{ getDiscountTargetLabel(discount) }}</span>
 									</div>
 
 									<button
 										type="button"
-										class="w-7 h-7 rounded-lg bg-[#fef1f1] hover:bg-[#fde2e2] text-[#e04545] border border-[#fbd4d4] flex items-center justify-center transition-colors cursor-pointer"
+										class="w-7 h-7 rounded-lg bg-[color-mix(in_srgb,var(--add-danger)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--add-danger)_16%,transparent)] text-[var(--add-danger-text)] border border-[color-mix(in_srgb,var(--add-danger)_35%,transparent)] flex items-center justify-center transition-colors cursor-pointer"
 										title="Remove"
 										@click="removeDiscount(idx)"
 									>
@@ -384,41 +391,41 @@
 								<!-- Row 1: Percentage, Target (and space/space-type if targeted) -->
 								<div class="grid gap-3" :class="[(discount.targetMode ?? 'all') === 'all' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 md:grid-cols-3']">
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.discounts.percentage') }}</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.discounts.percentage') }}</span>
 										<PlanStepper v-model="discount.percentage" :min="1" :max="100" integer />
 									</div>
 
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.discounts.target.label') }}</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.discounts.target.label') }}</span>
 										<n-select :value="discount.targetMode ?? 'all'" :options="targetModeOptions" size="small" @update:value="(mode: 'all' | 'space' | 'space_type') => setDiscountTarget(discount, mode)" />
 									</div>
 
 									<div v-if="discount.targetMode === 'space'" class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.discounts.selectSpace') }}</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.discounts.selectSpace') }}</span>
 										<n-select v-model:value="discount.space_id" :options="benefitSpaceOptions" :placeholder="t('packages.discounts.selectSpace')" size="small" clearable />
 									</div>
 
 									<div v-else-if="discount.targetMode === 'space_type'" class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.discounts.selectSpaceType') }}</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.discounts.selectSpaceType') }}</span>
 										<n-select v-model:value="discount.space_type" :options="benefitSpaceTypeOptions" :placeholder="t('packages.discounts.selectSpaceType')" size="small" clearable />
 									</div>
 								</div>
-								<span v-if="benefitErrors[`discounts.${idx}`]" class="text-xs text-red-500">{{ benefitErrors[`discounts.${idx}`] }}</span>
+								<span v-if="benefitErrors[`discounts.${idx}`]" class="text-xs text-[var(--add-danger-text)]">{{ benefitErrors[`discounts.${idx}`] }}</span>
 
 								<!-- Row 2: Usage limit toggle (+ count), Active toggle -->
 								<div class="grid gap-3 items-center" :class="[discountUsageLimited(discount).value ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2']">
-									<div class="flex items-center justify-between gap-2 p-2 px-3 bg-neutral-50 rounded-lg border border-neutral-100">
-										<span class="text-xs font-semibold text-neutral-700">{{ t('packages.discounts.limitUsage') }}</span>
+									<div class="flex items-center justify-between gap-2 p-2 px-3 bg-[var(--add-surface-sunken)] rounded-lg border border-[var(--add-border)]">
+										<span class="text-xs font-semibold text-[var(--add-text-primary)]">{{ t('packages.discounts.limitUsage') }}</span>
 										<n-switch v-model:value="discountUsageLimited(discount).value" :rail-style size="small" />
 									</div>
 
 									<div v-if="discountUsageLimited(discount).value" class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.discounts.usageLimit') }}</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.discounts.usageLimit') }}</span>
 										<PlanStepper v-model="discountUsageValue(discount).value" :min="1" :step="1" integer />
 									</div>
 
-									<div class="flex items-center justify-between gap-2 p-2 px-3 bg-neutral-50 rounded-lg border border-neutral-100">
-										<span class="text-xs font-semibold text-neutral-700">{{ t('packages.discounts.isActive') }}</span>
+									<div class="flex items-center justify-between gap-2 p-2 px-3 bg-[var(--add-surface-sunken)] rounded-lg border border-[var(--add-border)]">
+										<span class="text-xs font-semibold text-[var(--add-text-primary)]">{{ t('packages.discounts.isActive') }}</span>
 										<n-switch v-model:value="discount.is_active" :rail-style size="small" />
 									</div>
 								</div>
@@ -426,19 +433,19 @@
 								<!-- Row 3: Description Arabic and English -->
 								<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.discounts.descriptionField') }} (عربي)</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.discounts.descriptionField') }} (عربي)</span>
 										<input
 											v-model="discountDesc(discount).ar"
-											class="w-full h-9 text-xs md:text-sm border border-neutral-200 rounded-lg px-3 bg-white focus:outline-none focus:border-[#557e46] transition-colors"
+											class="w-full h-9 text-xs md:text-sm border border-[var(--add-border)] rounded-lg px-3 bg-white focus:outline-none focus:border-[var(--add-primary)] transition-colors"
 											:placeholder="t('resourceCrud.form.arabicPlaceholder')"
 										/>
 									</div>
 
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">Description (English)</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">Description (English)</span>
 										<input
 											v-model="discountDesc(discount).en"
-											class="w-full h-9 text-xs md:text-sm border border-neutral-200 rounded-lg px-3 bg-white focus:outline-none focus:border-[#557e46] transition-colors"
+											class="w-full h-9 text-xs md:text-sm border border-[var(--add-border)] rounded-lg px-3 bg-white focus:outline-none focus:border-[var(--add-primary)] transition-colors"
 											:placeholder="t('resourceCrud.form.englishPlaceholder')"
 										/>
 									</div>
@@ -448,18 +455,18 @@
 							<div
 								v-for="(row, idx) in spaceHoursList"
 								:key="`hours-${idx}`" data-test="plan-benefit-row"
-								class="border border-neutral-200/80 rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs"
+								class="border border-[var(--add-border)] rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs"
 							>
 								<div class="flex items-center justify-between">
 									<div class="flex items-center gap-2">
-										<div class="w-7 h-7 rounded-lg flex items-center justify-center border text-xs shrink-0 bg-[#eef2fb] text-[#3f5b8f] border-[#d9e2f4]">
+										<div class="w-7 h-7 rounded-lg flex items-center justify-center border text-xs shrink-0 bg-[color-mix(in_srgb,var(--add-info)_10%,transparent)] text-[var(--add-info-text)] border-[color-mix(in_srgb,var(--add-info)_35%,transparent)]">
 											<Icon name="carbon:time" :size="15" />
 										</div>
-										<span class="font-bold text-xs md:text-sm text-neutral-800">{{ getBenefitTargetLabel(row) }}</span>
+										<span class="font-bold text-xs md:text-sm text-[var(--add-text-primary)]">{{ getBenefitTargetLabel(row) }}</span>
 									</div>
 									<button
 										type="button"
-										class="w-7 h-7 rounded-lg bg-[#fef1f1] hover:bg-[#fde2e2] text-[#e04545] border border-[#fbd4d4] flex items-center justify-center transition-colors cursor-pointer"
+										class="w-7 h-7 rounded-lg bg-[color-mix(in_srgb,var(--add-danger)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--add-danger)_16%,transparent)] text-[var(--add-danger-text)] border border-[color-mix(in_srgb,var(--add-danger)_35%,transparent)] flex items-center justify-center transition-colors cursor-pointer"
 										title="Remove"
 										@click="removeSpaceHours(idx)"
 									>
@@ -469,29 +476,29 @@
 
 								<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.benefits.hours') }}</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.benefits.hours') }}</span>
 										<PlanStepper v-model="row.hours" :min="1" :step="1" />
 									</div>
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.benefits.target') }}</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.benefits.target') }}</span>
 										<n-select :value="row.targetMode ?? 'space_type'" :options="hoursTargetModeOptions" size="small" @update:value="(mode: 'space' | 'space_type') => setSpaceHoursTarget(row, mode)" />
 									</div>
 									<div v-if="row.targetMode === 'space'" class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.discounts.selectSpace') }}</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.discounts.selectSpace') }}</span>
 										<n-select v-model:value="row.space_id" :options="benefitSpaceOptions" :placeholder="t('packages.discounts.selectSpace')" size="small" clearable />
 									</div>
 									<div v-else class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.discounts.selectSpaceType') }}</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.discounts.selectSpaceType') }}</span>
 										<n-select v-model:value="row.space_type" :options="benefitSpaceTypeOptions" :placeholder="t('packages.discounts.selectSpaceType')" size="small" clearable />
 									</div>
 								</div>
-								<span v-if="benefitErrors[`space_hours.${idx}`]" class="text-xs text-red-500">{{ benefitErrors[`space_hours.${idx}`] }}</span>
+								<span v-if="benefitErrors[`space_hours.${idx}`]" class="text-xs text-[var(--add-danger-text)]">{{ benefitErrors[`space_hours.${idx}`] }}</span>
 							</div>
 							<!-- Balances list -->
 							<div
 								v-for="(balance, idx) in balancesList"
 								:key="`balance-${idx}`" data-test="plan-benefit-row"
-								class="border border-neutral-200/80 rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs relative"
+								class="border border-[var(--add-border)] rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs relative"
 							>
 								<!-- Card Header -->
 								<div class="flex items-center justify-between">
@@ -499,12 +506,12 @@
 										<div class="w-7 h-7 rounded-lg flex items-center justify-center border text-xs shrink-0" :class="[getCategoryBadgeClass(balance.category)]">
 											<Icon :name="getCategoryIcon(balance.category)" :size="15" />
 										</div>
-										<span class="font-bold text-xs md:text-sm text-neutral-800">{{ getCategoryTitle(balance.category) }}</span>
+										<span class="font-bold text-xs md:text-sm text-[var(--add-text-primary)]">{{ getCategoryTitle(balance.category) }}</span>
 									</div>
 
 									<button
 										type="button"
-										class="w-7 h-7 rounded-lg bg-[#fef1f1] hover:bg-[#fde2e2] text-[#e04545] border border-[#fbd4d4] flex items-center justify-center transition-colors cursor-pointer"
+										class="w-7 h-7 rounded-lg bg-[color-mix(in_srgb,var(--add-danger)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--add-danger)_16%,transparent)] text-[var(--add-danger-text)] border border-[color-mix(in_srgb,var(--add-danger)_35%,transparent)] flex items-center justify-center transition-colors cursor-pointer"
 										title="Remove"
 										@click="removeBalance(idx)"
 									>
@@ -515,17 +522,17 @@
 								<!-- Row 1: Amount, Category Select (and space if specific) -->
 								<div class="grid gap-3" :class="[balance.category === 'space_specific' ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2']">
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.balances.amountPoints') }}</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.balances.amountPoints') }}</span>
 										<PlanStepper v-model="balance.amount_points" :min="0" :step="1" integer />
 									</div>
 
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.balances.category') }}</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.balances.category') }}</span>
 										<n-select v-model:value="balance.category" :options="categoryOptions" size="small" />
 									</div>
 
 									<div v-if="balance.category === 'space_specific'" class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.balances.restrictedSpace') }}</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.balances.restrictedSpace') }}</span>
 										<n-select
 											v-model:value="balance.restricted_space_id"
 											:options="spaceOptions"
@@ -539,19 +546,19 @@
 								<!-- Row 2: Note Arabic and English -->
 								<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.balances.description') }} (عربي)</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.balances.description') }} (عربي)</span>
 										<input
 											v-model="balanceDesc(balance).ar"
-											class="w-full h-9 text-xs md:text-sm border border-neutral-200 rounded-lg px-3 bg-white focus:outline-none focus:border-[#557e46] transition-colors"
+											class="w-full h-9 text-xs md:text-sm border border-[var(--add-border)] rounded-lg px-3 bg-white focus:outline-none focus:border-[var(--add-primary)] transition-colors"
 											:placeholder="t('resourceCrud.form.arabicPlaceholder')"
 										/>
 									</div>
 
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">Note (English)</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">Note (English)</span>
 										<input
 											v-model="balanceDesc(balance).en"
-											class="w-full h-9 text-xs md:text-sm border border-neutral-200 rounded-lg px-3 bg-white focus:outline-none focus:border-[#557e46] transition-colors"
+											class="w-full h-9 text-xs md:text-sm border border-[var(--add-border)] rounded-lg px-3 bg-white focus:outline-none focus:border-[var(--add-primary)] transition-colors"
 											:placeholder="t('resourceCrud.form.englishPlaceholder')"
 										/>
 									</div>
@@ -559,7 +566,7 @@
 							</div>
 
 							<!-- Bottom Summary Banner -->
-							<div v-if="balancesList.length" class="bg-[#f0f7ee] border border-[#d6e8d2] text-[#38642e] rounded-xl p-3 px-4 flex items-center justify-between">
+							<div v-if="balancesList.length" class="bg-[color-mix(in_srgb,var(--add-primary)_10%,transparent)] border border-[color-mix(in_srgb,var(--add-primary)_35%,transparent)] text-[var(--add-primary-text)] rounded-xl p-3 px-4 flex items-center justify-between">
 								<span class="text-xs font-bold">{{ t('packages.balances.totalIncluded') }}</span>
 								<span class="text-sm md:text-base font-bold add-numeric">{{ formatPoints(totalBalancePoints) }}</span>
 							</div>
@@ -567,20 +574,20 @@
 							<div
 								v-for="(grant, idx) in resourceGrantsList"
 								:key="`resource-${idx}`" data-test="plan-benefit-row"
-								class="border border-neutral-200/80 rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs relative"
+								class="border border-[var(--add-border)] rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs relative"
 							>
 								<!-- Card Header -->
 								<div class="flex items-center justify-between">
 									<div class="flex items-center gap-2">
-										<div class="w-7 h-7 rounded-lg flex items-center justify-center border text-xs shrink-0 bg-[#ebf3fd] text-[#2c75d8] border-[#d4e4f9]">
+										<div class="w-7 h-7 rounded-lg flex items-center justify-center border text-xs shrink-0 bg-[color-mix(in_srgb,var(--add-info)_10%,transparent)] text-[var(--add-info-text)] border-[color-mix(in_srgb,var(--add-info)_35%,transparent)]">
 											<Icon name="carbon:box" :size="15" />
 										</div>
-										<span class="font-bold text-xs md:text-sm text-neutral-800">{{ getResourceTypeLabel(grant) }}</span>
+										<span class="font-bold text-xs md:text-sm text-[var(--add-text-primary)]">{{ getResourceTypeLabel(grant) }}</span>
 									</div>
 
 									<button
 										type="button"
-										class="w-7 h-7 rounded-lg bg-[#fef1f1] hover:bg-[#fde2e2] text-[#e04545] border border-[#fbd4d4] flex items-center justify-center transition-colors cursor-pointer"
+										class="w-7 h-7 rounded-lg bg-[color-mix(in_srgb,var(--add-danger)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--add-danger)_16%,transparent)] text-[var(--add-danger-text)] border border-[color-mix(in_srgb,var(--add-danger)_35%,transparent)] flex items-center justify-center transition-colors cursor-pointer"
 										title="Remove"
 										@click="removeResourceGrant(idx)"
 									>
@@ -591,12 +598,12 @@
 								<!-- Row 1: Resource type, Quantity -->
 								<div class="grid gap-3 grid-cols-1 md:grid-cols-2">
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.resources.resourceType') }}</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.resources.resourceType') }}</span>
 										<n-select v-model:value="grant.resource_type_id" :options="resourceTypeOptions" size="small" />
 									</div>
 
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">
 											{{ t('packages.resources.quantity') }}
 											<template v-if="resourceTypeUnitLabel(grant)"> ({{ resourceTypeUnitLabel(grant) }})</template>
 										</span>
@@ -607,19 +614,19 @@
 								<!-- Row 2: Description Arabic and English -->
 								<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.resources.descriptionField') }} (عربي)</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.resources.descriptionField') }} (عربي)</span>
 										<input
 											v-model="resourceGrantDesc(grant).ar"
-											class="w-full h-9 text-xs md:text-sm border border-neutral-200 rounded-lg px-3 bg-white focus:outline-none focus:border-[#557e46] transition-colors"
+											class="w-full h-9 text-xs md:text-sm border border-[var(--add-border)] rounded-lg px-3 bg-white focus:outline-none focus:border-[var(--add-primary)] transition-colors"
 											:placeholder="t('resourceCrud.form.arabicPlaceholder')"
 										/>
 									</div>
 
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">Description (English)</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">Description (English)</span>
 										<input
 											v-model="resourceGrantDesc(grant).en"
-											class="w-full h-9 text-xs md:text-sm border border-neutral-200 rounded-lg px-3 bg-white focus:outline-none focus:border-[#557e46] transition-colors"
+											class="w-full h-9 text-xs md:text-sm border border-[var(--add-border)] rounded-lg px-3 bg-white focus:outline-none focus:border-[var(--add-primary)] transition-colors"
 											:placeholder="t('resourceCrud.form.englishPlaceholder')"
 										/>
 									</div>
@@ -629,14 +636,14 @@
 
 						<section v-show="step === 3" data-test="plan-section-display" class="flex flex-col gap-3">
 							<div class="flex items-center gap-2 px-1">
-								<span class="w-6 h-6 rounded-full bg-[#557e46] text-white text-xs font-bold flex items-center justify-center shrink-0 add-numeric">4</span>
-								<Icon name="carbon:mobile" :size="16" class="text-[#4d783f]" />
-								<h3 class="text-sm md:text-base font-bold text-neutral-800">{{ t('packages.sections.display') }}</h3>
+								<span class="w-6 h-6 rounded-full bg-[var(--add-primary)] text-white text-xs font-bold flex items-center justify-center shrink-0 add-numeric">4</span>
+								<Icon name="carbon:mobile" :size="16" class="text-[var(--add-primary-text)]" />
+								<h3 class="text-sm md:text-base font-bold text-[var(--add-text-primary)]">{{ t('packages.sections.display') }}</h3>
 							</div>
 							<!-- Card 3: إعدادات العرض -->
-							<div class="border border-neutral-200/70 rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs">
-								<div class="flex items-center gap-2 text-xs md:text-sm font-bold text-neutral-800">
-									<div class="w-6 h-6 rounded-md bg-[#eef7ec] text-[#4d783f] flex items-center justify-center shrink-0">
+							<div class="border border-[var(--add-border)] rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs">
+								<div class="flex items-center gap-2 text-xs md:text-sm font-bold text-[var(--add-text-primary)]">
+									<div class="w-6 h-6 rounded-md bg-[color-mix(in_srgb,var(--add-primary)_10%,transparent)] text-[var(--add-primary-text)] flex items-center justify-center shrink-0">
 										<Icon name="carbon:settings" :size="14" />
 									</div>
 									<span>{{ t('packages.sections.displaySettings') }}</span>
@@ -644,22 +651,22 @@
 
 								<div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.form.order') }}</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.form.order') }}</span>
 										<PlanStepper v-model="model.order" :min="0" :step="1" />
 									</div>
 
-									<div class="flex items-center justify-between gap-2 p-2 px-3 bg-neutral-50 rounded-lg border border-neutral-100">
-										<span class="text-xs font-semibold text-neutral-700">{{ t('packages.form.isActive') }}</span>
+									<div class="flex items-center justify-between gap-2 p-2 px-3 bg-[var(--add-surface-sunken)] rounded-lg border border-[var(--add-border)]">
+										<span class="text-xs font-semibold text-[var(--add-text-primary)]">{{ t('packages.form.isActive') }}</span>
 										<n-switch v-model:value="model.is_active" :rail-style size="small" />
 									</div>
 
-									<div class="flex items-center justify-between gap-2 p-2 px-3 bg-neutral-50 rounded-lg border border-neutral-100">
-										<span class="text-xs font-semibold text-neutral-700">{{ t('packages.form.isSubscription') }}</span>
+									<div class="flex items-center justify-between gap-2 p-2 px-3 bg-[var(--add-surface-sunken)] rounded-lg border border-[var(--add-border)]">
+										<span class="text-xs font-semibold text-[var(--add-text-primary)]">{{ t('packages.form.isSubscription') }}</span>
 										<n-switch v-model:value="model.is_subscription" :rail-style size="small" />
 									</div>
 
-									<div class="flex items-center justify-between gap-2 p-2 px-3 bg-neutral-50 rounded-lg border border-neutral-100">
-										<span class="text-xs font-semibold text-neutral-700">{{ t('packages.form.isPublic') }}</span>
+									<div class="flex items-center justify-between gap-2 p-2 px-3 bg-[var(--add-surface-sunken)] rounded-lg border border-[var(--add-border)]">
+										<span class="text-xs font-semibold text-[var(--add-text-primary)]">{{ t('packages.form.isPublic') }}</span>
 										<n-switch v-model:value="model.is_public" :rail-style size="small" />
 									</div>
 								</div>
@@ -667,10 +674,10 @@
 
 							<!-- Top Action Bar -->
 							<div class="flex items-center justify-between">
-								<span class="text-xs font-semibold text-neutral-500">{{ t('packages.features.userVisible') }}</span>
+								<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.features.userVisible') }}</span>
 								<button
 									type="button"
-									class="h-8 px-3 text-xs font-semibold rounded-lg bg-[#f0f7ee] hover:bg-[#e4f1e1] text-[#4d783f] border border-[#d6e8d2] flex items-center gap-1.5 transition-colors cursor-pointer"
+									class="h-8 px-3 text-xs font-semibold rounded-lg bg-[color-mix(in_srgb,var(--add-primary)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--add-primary)_16%,transparent)] text-[var(--add-primary-text)] border border-[color-mix(in_srgb,var(--add-primary)_35%,transparent)] flex items-center gap-1.5 transition-colors cursor-pointer"
 									@click="openAddFeature"
 								>
 									<Icon name="carbon:add" :size="14" />
@@ -681,31 +688,31 @@
 							<!-- Inline Feature Form (when adding or editing) -->
 							<div
 								v-if="isEditingFeature"
-								class="border border-[#557e46]/40 rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs"
+								class="border border-[var(--add-primary)]/40 rounded-xl p-3.5 bg-white flex flex-col gap-3 shadow-2xs"
 							>
-								<div class="flex items-center justify-between border-b border-neutral-100 pb-2">
-									<span class="text-xs font-bold text-neutral-800">
+								<div class="flex items-center justify-between border-b border-[var(--add-border)] pb-2">
+									<span class="text-xs font-bold text-[var(--add-text-primary)]">
 										{{ featureFormIndex === null ? t('packages.features.add') : t('packages.features.edit') }}
 									</span>
-									<button type="button" class="text-neutral-400 hover:text-neutral-700 text-xs" @click="cancelFeatureEdit">
+									<button type="button" class="text-[var(--add-text-muted)] hover:text-[var(--add-text-primary)] text-xs" @click="cancelFeatureEdit">
 										{{ t('packages.actions.cancel') }}
 									</button>
 								</div>
 
 								<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.features.name') }} (عربي) *</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.features.name') }} (عربي) *</span>
 										<input
 											v-model="featureForm.name.ar"
-											class="w-full h-9 text-xs md:text-sm border border-neutral-200 rounded-lg px-3 bg-white focus:outline-none focus:border-[#557e46]"
+											class="w-full h-9 text-xs md:text-sm border border-[var(--add-border)] rounded-lg px-3 bg-white focus:outline-none focus:border-[var(--add-primary)]"
 											:placeholder="t('resourceCrud.form.arabicPlaceholder')"
 										/>
 									</div>
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">Feature Name (English) *</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">Feature Name (English) *</span>
 										<input
 											v-model="featureForm.name.en"
-											class="w-full h-9 text-xs md:text-sm border border-neutral-200 rounded-lg px-3 bg-white focus:outline-none focus:border-[#557e46]"
+											class="w-full h-9 text-xs md:text-sm border border-[var(--add-border)] rounded-lg px-3 bg-white focus:outline-none focus:border-[var(--add-primary)]"
 											:placeholder="t('resourceCrud.form.englishPlaceholder')"
 										/>
 									</div>
@@ -713,18 +720,18 @@
 
 								<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.features.value') }} (عربي)</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.features.value') }} (عربي)</span>
 										<input
 											v-model="featureForm.value.ar"
-											class="w-full h-9 text-xs md:text-sm border border-neutral-200 rounded-lg px-3 bg-white focus:outline-none focus:border-[#557e46]"
+											class="w-full h-9 text-xs md:text-sm border border-[var(--add-border)] rounded-lg px-3 bg-white focus:outline-none focus:border-[var(--add-primary)]"
 											:placeholder="t('resourceCrud.form.arabicPlaceholder')"
 										/>
 									</div>
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">Value / Details (English)</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">Value / Details (English)</span>
 										<input
 											v-model="featureForm.value.en"
-											class="w-full h-9 text-xs md:text-sm border border-neutral-200 rounded-lg px-3 bg-white focus:outline-none focus:border-[#557e46]"
+											class="w-full h-9 text-xs md:text-sm border border-[var(--add-border)] rounded-lg px-3 bg-white focus:outline-none focus:border-[var(--add-primary)]"
 											:placeholder="t('resourceCrud.form.englishPlaceholder')"
 										/>
 									</div>
@@ -732,34 +739,34 @@
 
 								<div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.features.icon') }}</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.features.icon') }}</span>
 										<input
 											v-model="featureForm.icon"
-											class="w-full h-9 text-xs md:text-sm border border-neutral-200 rounded-lg px-3 bg-white focus:outline-none focus:border-[#557e46]"
+											class="w-full h-9 text-xs md:text-sm border border-[var(--add-border)] rounded-lg px-3 bg-white focus:outline-none focus:border-[var(--add-primary)]"
 											placeholder="carbon:calendar"
 										/>
 									</div>
 									<div class="flex flex-col gap-1">
-										<span class="text-xs font-semibold text-neutral-600">{{ t('packages.features.order') }}</span>
+										<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('packages.features.order') }}</span>
 										<PlanStepper v-model="featureForm.order" :min="0" :step="1" />
 									</div>
-									<div class="flex items-center justify-between gap-2 p-2 px-3 bg-neutral-50 rounded-lg border border-neutral-100 mt-4">
-										<span class="text-xs font-semibold text-neutral-700">{{ t('packages.features.isIncluded') }}</span>
+									<div class="flex items-center justify-between gap-2 p-2 px-3 bg-[var(--add-surface-sunken)] rounded-lg border border-[var(--add-border)] mt-4">
+										<span class="text-xs font-semibold text-[var(--add-text-primary)]">{{ t('packages.features.isIncluded') }}</span>
 										<n-switch v-model:value="featureForm.is_included" :rail-style size="small" />
 									</div>
 								</div>
 
-								<div class="flex justify-end gap-2 pt-2 border-t border-neutral-100">
+								<div class="flex justify-end gap-2 pt-2 border-t border-[var(--add-border)]">
 									<button
 										type="button"
-										class="h-8 px-3 rounded-lg border border-neutral-200 text-xs font-medium text-neutral-600 hover:bg-neutral-50"
+										class="h-8 px-3 rounded-lg border border-[var(--add-border)] text-xs font-medium text-[var(--add-text-secondary)] hover:bg-[var(--add-surface-sunken)]"
 										@click="cancelFeatureEdit"
 									>
 										{{ t('packages.actions.cancel') }}
 									</button>
 									<button
 										type="button"
-										class="h-8 px-4 rounded-lg bg-[#557e46] hover:bg-[#466939] text-white text-xs font-bold"
+										class="h-8 px-4 rounded-lg bg-[var(--add-primary)] hover:bg-[var(--add-primary-hover)] text-white text-xs font-bold"
 										@click="saveFeatureEdit"
 									>
 										{{ t('packages.features.save') }}
@@ -768,7 +775,7 @@
 							</div>
 
 							<!-- Empty state -->
-							<div v-if="featuresList.length === 0" class="py-10 text-center text-neutral-400 bg-white rounded-xl border border-dashed border-neutral-200 text-xs">
+							<div v-if="featuresList.length === 0" class="py-10 text-center text-[var(--add-text-muted)] bg-white rounded-xl border border-dashed border-[var(--add-border)] text-xs">
 								{{ t('packages.features.empty') }}
 							</div>
 
@@ -776,18 +783,18 @@
 							<div
 								v-for="(feature, idx) in featuresList"
 								:key="idx"
-								class="border border-neutral-200/70 rounded-xl p-2.5 px-3 bg-white flex items-center justify-between gap-3 shadow-2xs hover:border-neutral-300 transition-colors"
+								class="border border-[var(--add-border)] rounded-xl p-2.5 px-3 bg-white flex items-center justify-between gap-3 shadow-2xs hover:border-[var(--add-border-strong)] transition-colors"
 							>
 								<!-- Start side (in RTL: Right): Icon + Title & Subtitle -->
 								<div class="flex items-center gap-2.5 overflow-hidden">
-									<div class="w-8 h-8 rounded-lg bg-neutral-50 text-neutral-700 flex items-center justify-center shrink-0 border border-neutral-200/70">
+									<div class="w-8 h-8 rounded-lg bg-[var(--add-surface-sunken)] text-[var(--add-text-primary)] flex items-center justify-center shrink-0 border border-[var(--add-border)]">
 										<Icon :name="resolveFeatureIcon(feature.icon)" :size="16" />
 									</div>
 									<div class="flex flex-col gap-0.5 overflow-hidden">
-										<span class="text-xs md:text-sm font-bold text-neutral-900 truncate">
+										<span class="text-xs md:text-sm font-bold text-[var(--add-text-primary)] truncate">
 											{{ pickLocalized(feature.name, currentLocale) }}
 										</span>
-										<span class="text-[11px] text-neutral-400 truncate">
+										<span class="text-[11px] text-[var(--add-text-muted)] truncate">
 											{{ getFeatureSubtitleText(feature) }}
 										</span>
 									</div>
@@ -797,7 +804,7 @@
 								<div class="flex items-center gap-2 shrink-0">
 									<button
 										type="button"
-										class="w-7 h-7 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 flex items-center justify-center transition-colors cursor-pointer"
+										class="w-7 h-7 rounded-lg text-[var(--add-text-muted)] hover:text-[var(--add-text-primary)] hover:bg-[var(--add-surface-sunken)] flex items-center justify-center transition-colors cursor-pointer"
 										title="Edit"
 										@click="editFeature(idx)"
 									>
@@ -805,7 +812,7 @@
 									</button>
 									<button
 										type="button"
-										class="w-7 h-7 rounded-lg text-neutral-400 hover:text-red-500 hover:bg-red-50 flex items-center justify-center transition-colors cursor-pointer"
+										class="w-7 h-7 rounded-lg text-[var(--add-text-muted)] hover:text-[var(--add-danger-text)] hover:bg-[color-mix(in_srgb,var(--add-danger)_10%,transparent)] flex items-center justify-center transition-colors cursor-pointer"
 										title="Delete"
 										@click="removeFeature(idx)"
 									>
@@ -823,21 +830,21 @@
 			</div>
 
 			<!-- Fixed Footer -->
-			<div class="p-3.5 px-5 border-t border-neutral-100 bg-white flex items-center justify-between gap-3 shrink-0">
+			<div class="p-3.5 px-5 border-t border-[var(--add-border)] bg-white flex items-center justify-between gap-3 shrink-0">
 				<button
 					type="button"
-					class="h-9 px-5 rounded-lg border border-neutral-200 text-xs md:text-sm font-semibold text-neutral-700 hover:bg-neutral-50 transition-colors cursor-pointer"
+					class="h-9 px-5 rounded-lg border border-[var(--add-border)] text-xs md:text-sm font-semibold text-[var(--add-text-primary)] hover:bg-[var(--add-surface-sunken)] transition-colors cursor-pointer"
 					@click="show = false"
 				>
 					{{ t('packages.actions.cancel') }}
 				</button>
 
 				<div v-if="!showTemplatePicker" class="flex items-center gap-2">
-					<button v-if="step > 0" type="button" data-test="plan-step-back" class="h-9 px-5 rounded-lg border border-neutral-200 text-xs md:text-sm font-semibold text-neutral-700 hover:bg-neutral-50 transition-colors cursor-pointer flex items-center gap-1.5" @click="step--">
+					<button v-if="step > 0" type="button" data-test="plan-step-back" class="h-9 px-5 rounded-lg border border-[var(--add-border)] text-xs md:text-sm font-semibold text-[var(--add-text-primary)] hover:bg-[var(--add-surface-sunken)] transition-colors cursor-pointer flex items-center gap-1.5" @click="step--">
 						<Icon name="carbon:arrow-left" :size="14" class="rtl:rotate-180" />
 						<span>{{ t('packages.actions.back') }}</span>
 					</button>
-					<button v-if="step < PLAN_STEPS.length - 1" type="button" data-test="plan-step-next" class="h-9 px-6 rounded-lg bg-[#557e46] hover:bg-[#476a3a] text-white text-xs md:text-sm font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 min-w-[130px]" @click="step++">
+					<button v-if="step < PLAN_STEPS.length - 1" type="button" data-test="plan-step-next" class="h-9 px-6 rounded-lg bg-[var(--add-primary)] hover:bg-[var(--add-primary-hover)] text-white text-xs md:text-sm font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 min-w-[130px]" @click="step++">
 						<span>{{ t('packages.actions.next') }}</span>
 						<Icon name="carbon:arrow-right" :size="14" class="rtl:rotate-180" />
 					</button>
@@ -846,7 +853,7 @@
 						type="button"
 						data-test="plan-save"
 						:disabled="submitting"
-						class="h-9 px-6 rounded-lg bg-[#557e46] hover:bg-[#476a3a] text-white text-xs md:text-sm font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 min-w-[130px]"
+						class="h-9 px-6 rounded-lg bg-[var(--add-primary)] hover:bg-[var(--add-primary-hover)] text-white text-xs md:text-sm font-bold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 min-w-[130px]"
 						@click="handleSubmit"
 					>
 						<Icon v-if="submitting" name="carbon:circle-dash" class="animate-spin" :size="16" />
@@ -855,7 +862,7 @@
 				</div>
 			</div>
 		</div>
-	</n-modal>
+	</component>
 </template>
 
 <script setup lang="ts">
@@ -881,6 +888,8 @@ import { formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
 const props = defineProps<{
+	/** Render as page content (the plan editor page) instead of in a modal. Cancelling sets `show` false. */
+	inline?: boolean
 	title: string
 	submitting: boolean
 	onSubmit: (payload: PlanPayload) => Promise<void>
@@ -905,6 +914,13 @@ const props = defineProps<{
 }>()
 
 const show = defineModel<boolean>("show", { required: true })
+
+/** The modal's own attributes; inline, the form is plain page content. */
+const frameAttrs = computed(() =>
+	props.inline
+		? {}
+		: { show: show.value, "onUpdate:show": (value: boolean) => (show.value = value), maskClosable: true, class: "!p-0" }
+)
 const model = defineModel<PlanPayload>("model", { required: true })
 
 const { t } = useI18n()
@@ -977,7 +993,7 @@ const referenceErrorKeys = computed(() => ["reference_plan_id", "reference_space
 
 function railStyle({ checked }: { checked: boolean }) {
   return {
-	background: checked ? "#557e46" : "#d1d5db"
+	background: checked ? "var(--add-primary)" : "var(--add-border-strong)"
 }
 }
 
@@ -1298,13 +1314,13 @@ function getCategoryIcon(category: string): string {
 function getCategoryBadgeClass(category: string): string {
 	switch (category) {
 		case "cafe":
-			return "bg-[#fdf4eb] text-[#c26d25] border-[#f5dfcb]"
+			return "bg-[color-mix(in_srgb,var(--add-warning)_10%,transparent)] text-[var(--add-warning-text)] border-[color-mix(in_srgb,var(--add-warning)_35%,transparent)]"
 		case "printing_internet":
-			return "bg-[#ebf3fd] text-[#2c75d8] border-[#d4e4f9]"
+			return "bg-[color-mix(in_srgb,var(--add-info)_10%,transparent)] text-[var(--add-info-text)] border-[color-mix(in_srgb,var(--add-info)_35%,transparent)]"
 		case "space_specific":
-			return "bg-[#f4edf9] text-[#7d3cb5] border-[#e6d8f2]"
+			return "bg-[color-mix(in_srgb,var(--add-info)_10%,transparent)] text-[var(--add-info-text)] border-[color-mix(in_srgb,var(--add-info)_35%,transparent)]"
 		default:
-			return "bg-[#eef8ed] text-[#3d8332] border-[#d6e8d2]"
+			return "bg-[color-mix(in_srgb,var(--add-primary)_10%,transparent)] text-[var(--add-primary-text)] border-[color-mix(in_srgb,var(--add-primary)_35%,transparent)]"
 	}
 }
 

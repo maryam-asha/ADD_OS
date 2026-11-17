@@ -1,20 +1,17 @@
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.users") }}</h1>
-			<p>{{ t("users.description") }}</p>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.users')" :description="t('users.description')">
+			<template #actions>
+				<n-button type="primary" @click="openCreate">
+					<template #icon><Icon name="carbon:add" :size="16" /></template>
+					{{ t("users.create.button") }}
+				</n-button>
+			</template>
+		</PageHeader>
 
 		<ResourceStatCards v-if="!loadError && !loading" :cards="statCards" />
 
 		<n-alert v-if="loadError" type="error" :title="t('users.loadError')" />
-
-		<div class="flex justify-end">
-			<n-button type="primary" @click="openCreate">
-				<template #icon><Icon name="carbon:add" :size="16" /></template>
-				{{ t("users.create.button") }}
-			</n-button>
-		</div>
 
 		<div class="flex items-center gap-3">
 			<n-input v-model:value="search" :placeholder="t('users.searchPlaceholder')" clearable class="flex-1" />
@@ -31,14 +28,7 @@
 			<n-data-table :columns :data="filteredUsers" :loading :bordered="false" :row-key size="small" :scroll-x="960" />
 		</n-card>
 
-		<n-modal
-			v-model:show="drawerVisible"
-			preset="card"
-			:title="mode === 'create' ? t('users.create.title') : t('users.edit.title')"
-			closable
-			style="max-width: 28rem"
-			content-style="max-height: 60vh; overflow-y: auto"
-		>
+		<FormModal v-model:show="drawerVisible" :title="mode === 'create' ? t('users.create.title') : t('users.edit.title')" size="sm">
 			<n-form ref="formRef" :model="form" :rules label-placement="top">
 				<n-form-item path="name" :label="t('users.form.name')">
 					<n-input v-model:value="form.name" />
@@ -72,15 +62,9 @@
 					<n-button type="primary" :loading="submitting" @click="mode === 'create' ? submitCreate() : submitEdit()">{{ t("users.form.submit") }}</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</FormModal>
 
-		<n-modal
-			v-model:show="statusModalVisible"
-			preset="card"
-			:title="t('users.changeStatus.title')"
-			closable
-			style="max-width: 28rem"
-		>
+		<FormModal v-model:show="statusModalVisible" :title="t('users.changeStatus.title')" size="sm">
 			<n-alert type="warning" :title="t('users.changeStatus.warning')" class="mb-4" />
 			<n-form>
 				<n-form-item :label="t('users.columns.status')">
@@ -101,15 +85,9 @@
 					<n-button type="primary" :loading="submittingStatus" @click="submitStatusChange">{{ t("users.form.submit") }}</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</FormModal>
 
-		<n-modal
-			v-model:show="roleModalVisible"
-			preset="card"
-			:title="t('users.changeRole.title')"
-			closable
-			style="max-width: 28rem"
-		>
+		<FormModal v-model:show="roleModalVisible" :title="t('users.changeRole.title')" size="sm">
 			<n-form>
 				<n-form-item :label="t('users.columns.role')">
 					<n-select v-model:value="roleForm" :options="roleFilterOptions" />
@@ -121,7 +99,7 @@
 					<n-button type="primary" :loading="submittingRole" @click="submitRoleChange">{{ t("users.form.submit") }}</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</FormModal>
 	</div>
 </template>
 
@@ -138,10 +116,13 @@ import type {
 	UserRole,
 	UserStatus
 } from "@/add-os/modules/system/types/user"
-import { NAlert, NButton, NCard, NDataTable, NForm, NFormItem, NInput, NModal, NSelect, NTag, useMessage } from "naive-ui"
+import { NAlert, NButton, NCard, NDataTable, NForm, NFormItem, NInput, NSelect, NTag, useMessage } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
+import FormModal from "@/add-os/components/page/FormModal.vue"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import { canHireEmployees } from "@/add-os/config/permissions"
 import { displayRoleName } from "@/add-os/modules/system/config/roles.config"
@@ -156,7 +137,7 @@ import Icon from "@/components/common/Icon.vue"
 
 defineProps<{ titleKey?: string }>()
 
-const { t } = useI18n()
+const { t, te } = useI18n()
 
 /**
  * Sourced from `GET /api/v1/admin/roles` — the same call `RolesPage.vue`
@@ -210,7 +191,7 @@ const loadError = ref(false)
 const search = ref("")
 const roleFilter = ref<UserRole | null>(null)
 
-const roleFilterOptions = computed<SelectOption[]>(() => roles.value.map(role => ({ label: displayRoleName(role, t), value: role.name })))
+const roleFilterOptions = computed<SelectOption[]>(() => roles.value.map(role => ({ label: displayRoleName(role, t, te), value: role.name })))
 
 const filteredUsers = computed(() => {
 	const term = search.value.trim().toLowerCase()
@@ -238,10 +219,13 @@ function rowKey(row: User): number {
 }
 
 function renderRoleTag(row: User) {
+	// An account with no role is a real state (never assigned, or removed), not
+	// a blank: an empty pill read as a rendering fault.
+	if (!row.roles.length) return h("span", { class: "text-secondary text-sm" }, t("users.noRole"))
 	return h(
 		NTag,
 		{ round: true, bordered: true },
-		{ default: () => row.roles.map(role => displayRoleName(roleRecordFor(role), t)).join(", ") }
+		{ default: () => row.roles.map(role => displayRoleName(roleRecordFor(role), t, te)).join(", ") }
 	)
 }
 
@@ -278,35 +262,14 @@ async function hire(row: User) {
 }
 
 function renderActions(row: User) {
-	const editLabel = t("users.edit.button")
-	const statusLabel = t("users.changeStatus.button")
-	const roleLabel = t("users.changeRole.button")
-	const hireLabel = t("users.hire.button")
-
-	return h("div", { class: "inline-flex items-center justify-center gap-2" }, [
-		h(
-			NButton,
-			{ text: true, type: "primary", "aria-label": editLabel, title: editLabel, onClick: () => openEdit(row) },
-			{ icon: () => h(Icon, { name: "carbon:edit", size: 18 }) }
-		),
-		h(
-			NButton,
-			{ text: true, type: "warning", "aria-label": statusLabel, title: statusLabel, onClick: () => openStatusModal(row) },
-			{ icon: () => h(Icon, { name: "carbon:status-change", size: 18 }) }
-		),
-		h(
-			NButton,
-			{ text: true, "aria-label": roleLabel, title: roleLabel, onClick: () => openRoleModal(row) },
-			{ icon: () => h(Icon, { name: "carbon:user-role", size: 18 }) }
-		),
-		mayHire
-			? h(
-					NButton,
-					{ text: true, type: "success", "aria-label": hireLabel, title: hireLabel, onClick: () => void hire(row) },
-					{ icon: () => h(Icon, { name: "carbon:user-follow", size: 18 }) }
-				)
-			: null
-	])
+	return h(RowActions, {
+		actions: [
+			{ key: "edit", label: t("users.edit.button"), icon: "carbon:edit", onClick: () => openEdit(row) },
+			{ key: "status", label: t("users.changeStatus.button"), icon: "carbon:status-change", onClick: () => openStatusModal(row) },
+			{ key: "role", label: t("users.changeRole.button"), icon: "carbon:user-role", onClick: () => openRoleModal(row) },
+			...(mayHire ? [{ key: "hire", label: t("users.hire.button"), icon: "carbon:user-follow", onClick: () => void hire(row) }] : [])
+		]
+	})
 }
 
 const columns = computed<DataTableColumns<User>>(() => [
@@ -362,7 +325,7 @@ const form = ref<CreateUserPayload>(emptyForm())
 
 /** `StoreUserRequest` never accepts `member` — member accounts self-register from the app. */
 const createRoleOptions = computed<SelectOption[]>(() =>
-	roles.value.filter(role => role.name !== "member").map(role => ({ label: displayRoleName(role, t), value: role.name }))
+	roles.value.filter(role => role.name !== "member").map(role => ({ label: displayRoleName(role, t, te), value: role.name }))
 )
 
 const rules = computed<FormRules>(() => ({

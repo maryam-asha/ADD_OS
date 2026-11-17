@@ -1,11 +1,8 @@
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t("providerPortal.invoices") }}</h1>
-			<p class="text-sm text-neutral-500">{{ t("invoices.readOnlyDescription") }}</p>
-		</div>
+		<PageHeader :title="t('providerPortal.invoices')" :description="t('invoices.readOnlyDescription')" />
 
-		<n-card class="add-ledger-table shadow-sm border border-stone-200">
+		<n-card class="add-ledger-table shadow-sm border border-[var(--add-border)]">
 			<div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
 				<n-select v-model:value="query.status" :options="statusOptions" clearable :placeholder="t('invoices.filters.status')" />
 				<n-select v-model:value="query.billed_to" :options="payerOptions" clearable :placeholder="t('invoices.filters.billedTo')" />
@@ -13,8 +10,8 @@
 			</div>
 			<n-data-table
 				remote
-				:columns="columns"
-				:data="data"
+				:columns
+				:data
 				:loading="isLoading"
 				:bordered="false"
 				:scroll-x="1100"
@@ -24,7 +21,7 @@
 			/>
 		</n-card>
 
-		<n-modal v-model:show="detailVisible" preset="card" :title="invoiceDetail ? `#${invoiceDetail.reference}` : t('invoices.title')" style="width: min(42rem, 95vw)">
+		<FormModal v-model:show="detailVisible" :title="invoiceDetail ? `#${invoiceDetail.reference}` : t('invoices.title')" size="md">
 			<div v-if="isLoadingDetail" class="flex justify-center py-12">
 				<n-spin size="large" />
 			</div>
@@ -34,36 +31,36 @@
 			<div v-else-if="invoiceDetail" class="flex flex-col gap-4 text-sm">
 				<div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
 					<div>
-						<div class="text-neutral-500">{{ t("invoices.columns.amount") }}</div>
+						<div class="text-[var(--add-text-secondary)]">{{ t("invoices.columns.amount") }}</div>
 						<div class="font-bold">{{ formatMoney(invoiceDetail.amount, invoiceDetail.currency) }}</div>
 					</div>
 					<div>
-						<div class="text-neutral-500">{{ t("invoices.columns.paid") }}</div>
+						<div class="text-[var(--add-text-secondary)]">{{ t("invoices.columns.paid") }}</div>
 						<div class="font-bold">{{ formatMoney(invoiceDetail.paid_amount, invoiceDetail.currency) }}</div>
 					</div>
 					<div>
-						<div class="text-neutral-500">{{ t("invoices.columns.remaining") }}</div>
+						<div class="text-[var(--add-text-secondary)]">{{ t("invoices.columns.remaining") }}</div>
 						<div class="font-bold">{{ formatMoney(invoiceDetail.remaining, invoiceDetail.currency) }}</div>
 					</div>
 					<div>
-						<div class="text-neutral-500">{{ t("invoices.columns.status") }}</div>
+						<div class="text-[var(--add-text-secondary)]">{{ t("invoices.columns.status") }}</div>
 						<n-tag size="small" round :type="STATUS_TAG[invoiceDetail.status]">{{ t(`invoices.statusOptions.${invoiceDetail.status}`) }}</n-tag>
 						<n-tag v-if="invoiceDetail.is_overdue" size="small" round type="error" class="ms-1">{{ t("invoices.overdue") }}</n-tag>
 					</div>
 					<div>
-						<div class="text-neutral-500">{{ t("invoices.columns.issuedAt") }}</div>
+						<div class="text-[var(--add-text-secondary)]">{{ t("invoices.columns.issuedAt") }}</div>
 						<div>{{ invoiceDetail.issued_at ?? "—" }}</div>
 					</div>
 					<div>
-						<div class="text-neutral-500">{{ t("invoices.columns.dueAt") }}</div>
+						<div class="text-[var(--add-text-secondary)]">{{ t("invoices.columns.dueAt") }}</div>
 						<div>{{ invoiceDetail.due_at ?? "—" }}</div>
 					</div>
 					<div>
-						<div class="text-neutral-500">{{ t("invoices.columns.company") }}</div>
+						<div class="text-[var(--add-text-secondary)]">{{ t("invoices.columns.company") }}</div>
 						<div>{{ invoiceDetail.company?.legal_name ?? "—" }}</div>
 					</div>
 					<div>
-						<div class="text-neutral-500">{{ t("invoices.columns.billedTo") }}</div>
+						<div class="text-[var(--add-text-secondary)]">{{ t("invoices.columns.billedTo") }}</div>
 						<div>{{ t(`invoices.payerOptions.${invoiceDetail.billed_to}`) }}</div>
 					</div>
 				</div>
@@ -73,7 +70,7 @@
 					<h3 class="font-bold">{{ t("invoices.payments") }}</h3>
 					<div v-for="payment in invoiceDetail.payments" :key="payment.id" class="flex justify-between gap-2 rounded border border-black/5 p-2">
 						<span>{{ payment.paid_at ?? "—" }} · {{ t(`invoices.methods.${payment.method}`) }}</span>
-						<span :class="{ 'line-through text-neutral-400': payment.voided }">{{ formatMoney(payment.amount, invoiceDetail.currency) }}</span>
+						<span :class="{ 'line-through text-[var(--add-text-muted)]': payment.voided }">{{ formatMoney(payment.amount, invoiceDetail.currency) }}</span>
 					</div>
 				</div>
 			</div>
@@ -83,22 +80,24 @@
 					<n-button @click="detailVisible = false">{{ t("common.close") }}</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</FormModal>
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
 import type { Invoice, InvoiceStatus } from "@/add-os/modules/providers/types"
-import { NAlert, NButton, NCard, NDataTable, NModal, NSelect, NSpin, NTag } from "naive-ui"
+import { NAlert, NButton, NCard, NDataTable, NSelect, NSpin, NTag } from "naive-ui"
 import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { useOpenRecord } from "@/add-os/notifications/useOpenRecord"
 import { ApiError } from "@/add-os/services/api"
 import { getPortalInvoice, listPortalInvoices } from "@/add-os/services/provider-portal"
 import { formatReportMoney as formatMoney } from "@/add-os/services/reports"
-import Icon from "@/components/common/Icon.vue"
 
 const { t } = useI18n()
 const query = ref<Record<string, string | number | undefined>>({})
@@ -154,7 +153,7 @@ const columns = computed<DataTableColumns<Invoice>>(() => [
 		width: 140,
 		minWidth: 120,
 		align: "center",
-		render: row => h("span", { class: "font-mono font-bold text-stone-800 text-xs" }, row.reference)
+		render: row => h("span", { class: "font-mono font-bold text-[var(--add-text-primary)] text-xs" }, row.reference)
 	},
 	{
 		title: t("invoices.columns.company"),
@@ -162,7 +161,7 @@ const columns = computed<DataTableColumns<Invoice>>(() => [
 		width: 200,
 		minWidth: 160,
 		align: "center",
-		render: row => h("span", { class: "font-medium text-stone-900" }, row.company?.legal_name ?? "—")
+		render: row => h("span", { class: "font-medium text-[var(--add-text-primary)]" }, row.company?.legal_name ?? "—")
 	},
 	{
 		title: t("invoices.columns.billedTo"),
@@ -170,7 +169,7 @@ const columns = computed<DataTableColumns<Invoice>>(() => [
 		width: 130,
 		minWidth: 120,
 		align: "center",
-		render: row => h("span", { class: "text-xs font-medium text-stone-600" }, t(`invoices.payerOptions.${row.billed_to}`))
+		render: row => h("span", { class: "text-xs font-medium text-[var(--add-text-secondary)]" }, t(`invoices.payerOptions.${row.billed_to}`))
 	},
 	{
 		title: t("invoices.columns.amount"),
@@ -178,7 +177,7 @@ const columns = computed<DataTableColumns<Invoice>>(() => [
 		width: 140,
 		minWidth: 130,
 		align: "center",
-		render: row => h("bdi", { dir: "ltr", class: "font-bold text-stone-900 whitespace-nowrap" }, formatMoney(row.amount, row.currency))
+		render: row => h("bdi", { dir: "ltr", class: "font-bold text-[var(--add-text-primary)] whitespace-nowrap" }, formatMoney(row.amount, row.currency))
 	},
 	{
 		title: t("invoices.columns.remaining"),
@@ -186,7 +185,7 @@ const columns = computed<DataTableColumns<Invoice>>(() => [
 		width: 140,
 		minWidth: 130,
 		align: "center",
-		render: row => h("bdi", { dir: "ltr", class: "font-semibold text-stone-800 whitespace-nowrap" }, formatMoney(row.remaining, row.currency))
+		render: row => h("bdi", { dir: "ltr", class: "font-semibold text-[var(--add-text-primary)] whitespace-nowrap" }, formatMoney(row.remaining, row.currency))
 	},
 	{
 		title: t("invoices.columns.dueAt"),
@@ -194,7 +193,7 @@ const columns = computed<DataTableColumns<Invoice>>(() => [
 		width: 140,
 		minWidth: 130,
 		align: "center",
-		render: row => h("span", { class: "text-xs font-medium text-stone-600 whitespace-nowrap" }, row.due_at ?? "—")
+		render: row => h("span", { class: "text-xs font-medium text-[var(--add-text-secondary)] whitespace-nowrap" }, row.due_at ?? "—")
 	},
 	{
 		title: t("invoices.columns.status"),
@@ -211,15 +210,10 @@ const columns = computed<DataTableColumns<Invoice>>(() => [
 	{
 		title: t("common.actions"),
 		key: "actions",
-		width: 120,
-		minWidth: 110,
+		width: 90,
+		minWidth: 90,
 		align: "center",
-		render: row =>
-			h(
-				NButton,
-				{ size: "small", type: "primary", secondary: true, onClick: () => openDetail(row.id) },
-				{ icon: () => h(Icon, { name: "carbon:view", size: 16 }), default: () => t("common.view") }
-			)
+		render: row => h(RowActions, { actions: [{ key: "view", label: t("common.view"), icon: "carbon:view", onClick: () => openDetail(row.id) }] })
 	}
 ])
 </script>

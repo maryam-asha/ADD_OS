@@ -1,10 +1,7 @@
 <!-- src/add-os/modules/booking/views/ApprovalQueuePage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div v-if="!embedded" class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.approvalQueue") }}</h1>
-			<p>{{ t("approvalQueue.description") }}</p>
-		</div>
+		<PageHeader v-if="!embedded" :title="t(titleKey || 'nav.pages.approvalQueue')" :description="t('approvalQueue.description')" />
 
 		<n-alert v-if="error" type="error" :title="t('approvalQueue.loadError')" />
 
@@ -17,7 +14,7 @@
 			</div>
 		</n-card>
 
-		<n-modal v-model:show="rejectModalVisible" preset="card" :title="t('approvalQueue.reject.title')" class="max-w-md">
+		<FormModal v-model:show="rejectModalVisible" :title="t('approvalQueue.reject.title')" size="sm">
 			<n-form :model="rejectForm">
 				<n-form-item
 					path="rejection_reason"
@@ -41,7 +38,7 @@
 					</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</FormModal>
 	</div>
 </template>
 
@@ -49,9 +46,11 @@
 import type { DataTableColumns } from "naive-ui"
 import type { FieldErrors } from "@/add-os/modules/booking/composables/useReceptionAction"
 import type { PendingApprovalBooking } from "@/add-os/modules/booking/types/reception"
-import { NAlert, NButton, NCard, NDataTable, NForm, NFormItem, NInput, NModal, NPagination } from "naive-ui"
+import { NAlert, NButton, NCard, NDataTable, NForm, NFormItem, NInput, NPagination } from "naive-ui"
 import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { canApproveBookings } from "@/add-os/config/permissions"
 import { useReceptionAction } from "@/add-os/modules/booking/composables/useReceptionAction"

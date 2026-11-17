@@ -1,26 +1,24 @@
 <!-- src/add-os/modules/cms/views/AnnouncementsPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-1">
-			<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.announcements") }}</h1>
-		</div>
+		<PageHeader :title="t(titleKey || 'nav.pages.announcements')" :description="t('pageDescriptions.announcements')">
+			<template #actions>
+				<n-button
+					type="primary"
+					class="!bg-[var(--add-primary)] hover:!bg-[var(--add-primary-hover)] !text-white font-medium shadow-sm px-4 py-2 rounded-lg inline-flex items-center gap-2"
+					@click="openCreate"
+				>
+					<template #icon>
+						<Icon name="carbon:add" :size="18" />
+					</template>
+					{{ t("announcements.create.button") }}
+				</n-button>
+			</template>
+		</PageHeader>
 
 		<ResourceStatCards v-if="!error && !isLoading" :cards="statCards" />
 
 		<n-alert v-if="error" type="error" :title="t('announcements.loadError')" />
-
-		<div class="flex justify-end">
-			<n-button
-				type="primary"
-				class="!bg-[var(--add-primary)] hover:!bg-[var(--add-primary-hover)] !text-white font-medium shadow-sm px-4 py-2 rounded-lg inline-flex items-center gap-2"
-				@click="openCreate"
-			>
-				<template #icon>
-					<Icon name="carbon:add" :size="18" color="#ffffff" />
-				</template>
-				{{ t("announcements.create.button") }}
-			</n-button>
-		</div>
 
 		<ResourceTable
 			:columns
@@ -47,6 +45,7 @@ import type { Announcement, AnnouncementOptions, AnnouncementPayload } from "@/a
 import { NAlert, NButton } from "naive-ui"
 import { computed, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import ResourceFormDrawer from "@/add-os/components/resource/ResourceFormDrawer.vue"
 import ResourceStatCards from "@/add-os/components/resource/ResourceStatCards.vue"
 import ResourceTable from "@/add-os/components/resource/ResourceTable.vue"

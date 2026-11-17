@@ -73,6 +73,7 @@ import { NAlert, NButton, NDataTable, NDatePicker, NFormItem, NPagination, NSkel
 import { computed, h, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRoute, useRouter } from "vue-router"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { canManageBenefits } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
 import ActiveTag from "@/add-os/modules/hr/components/ActiveTag.vue"
@@ -222,16 +223,14 @@ const assignmentColumns = computed<DataTableColumns<BenefitAssignment>>(() => [
 				{
 					title: "",
 					key: "actions",
-					width: 150,
+					width: 100,
 					render: (row: BenefitAssignment) =>
-						h("div", { class: "flex items-center justify-end gap-2" }, [
-							!row.effective_to || row.effective_to >= today ? h(NButton, { size: "tiny", onClick: () => openEnd(row) }, () => t("hrBenefits.assignments.end")) : null,
-							h(
-								NButton,
-								{ text: true, type: "error", "aria-label": t("hr.common.delete"), title: t("hr.common.delete"), onClick: () => confirmDelete(row) },
-								{ icon: () => h(Icon, { name: "carbon:trash-can", size: 18 }) }
-							)
-						])
+						h(RowActions, {
+							actions: [
+								...(!row.effective_to || row.effective_to >= today ? [{ key: "end", label: t("hrBenefits.assignments.end"), icon: "carbon:stop", onClick: () => openEnd(row) }] : []),
+								{ key: "delete", label: t("hr.common.delete"), icon: "carbon:trash-can", danger: true, onClick: () => confirmDelete(row) }
+							]
+						})
 				}
 			]
 		: [])

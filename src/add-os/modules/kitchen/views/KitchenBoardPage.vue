@@ -1,19 +1,17 @@
 <!-- src/add-os/modules/kitchen/views/KitchenBoardPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-wrap items-start justify-between gap-3">
-			<div class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold">{{ t("nav.pages.board") }}</h1>
-				<p>{{ t("kitchen.board.description") }}</p>
-			</div>
-			<div class="ms-auto flex flex-wrap items-center gap-2">
-				<ChimeMuteButton />
-				<n-button :loading="isLoading" @click="load">
-					<template #icon><Icon name="carbon:renew" :size="16" /></template>
-					{{ t("kitchen.board.refresh") }}
-				</n-button>
-			</div>
-		</div>
+		<PageHeader :title="t('nav.pages.board')" :description="t('kitchen.board.description')">
+			<template #actions>
+				<div class="ms-auto flex flex-wrap items-center gap-2">
+					<ChimeMuteButton />
+					<n-button :loading="isLoading" @click="load">
+						<template #icon><Icon name="carbon:renew" :size="16" /></template>
+						{{ t("kitchen.board.refresh") }}
+					</n-button>
+				</div>
+			</template>
+		</PageHeader>
 
 		<n-alert v-if="loadError" type="error" :title="t('kitchen.board.loadError')" />
 
@@ -60,6 +58,7 @@ import type { KitchenOrder, KitchenOrderStatus, KitchenStoreRow } from "@/add-os
 import { NAlert, NButton, NCard, NTag, useMessage } from "naive-ui"
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { useNewArrivalChime } from "@/add-os/composables/useNewArrivalChime"
 import { canManageKitchenOrders, canUpdateKitchenStores, canViewKitchenStores } from "@/add-os/config/permissions"
 import { useBranchOptions } from "@/add-os/modules/dashboard/composables/useBranchOptions"

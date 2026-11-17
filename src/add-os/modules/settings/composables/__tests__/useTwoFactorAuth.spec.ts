@@ -41,6 +41,36 @@ describe("useTwoFactorAuth", () => {
 		expect(twoFactor.recoveryCodes.value).toEqual(["code-1", "code-2"])
 	})
 
+	it("loadStatus lands on locked, without throwing, when the probe answers 423", async () => {
+		accountMocks.getTwoFactorQrCode.mockRejectedValue(new ApiError(423, JSON.stringify({ message: "Password confirmation required." })))
+		const twoFactor = useTwoFactorAuth(passthroughGate)
+
+		await twoFactor.loadStatus()
+
+		expect(twoFactor.phase.value).toBe("locked")
+		expect(twoFactor.loading.value).toBe(false)
+	})
+
+	it("loadStatus re-throws a failure that is not a 423", async () => {
+		accountMocks.getTwoFactorQrCode.mockRejectedValue(new ApiError(500, JSON.stringify({ message: "Server error." })))
+		const twoFactor = useTwoFactorAuth(passthroughGate)
+
+		await expect(twoFactor.loadStatus()).rejects.toBeInstanceOf(ApiError)
+	})
+
+	it("unlock probes through the gate and reports the real status", async () => {
+		accountMocks.getTwoFactorQrCode.mockResolvedValue("<svg>...</svg>")
+		accountMocks.getTwoFactorRecoveryCodes.mockResolvedValue(["code-1"])
+		const gate = vi.fn(passthroughGate)
+		const twoFactor = useTwoFactorAuth(gate as typeof passthroughGate)
+
+		await twoFactor.unlock()
+
+		expect(gate).toHaveBeenCalledOnce()
+		expect(twoFactor.phase.value).toBe("active")
+		expect(twoFactor.busy.value).toBe(false)
+	})
+
 	it("enable calls the service through the gate and reloads status", async () => {
 		accountMocks.enableTwoFactorAuthentication.mockResolvedValue(undefined)
 		accountMocks.getTwoFactorQrCode.mockResolvedValue("<svg>...</svg>")

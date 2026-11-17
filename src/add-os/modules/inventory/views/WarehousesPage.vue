@@ -9,10 +9,10 @@
 			</template>
 		</HrPageHeader>
 
-		<div class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+		<div class="rounded-2xl border border-[var(--add-border)] bg-white p-4 shadow-xs">
 			<div class="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
 				<n-input v-model:value="filters.search" :placeholder="t('inventory.warehouses.search')" clearable class="w-full">
-					<template #prefix><Icon name="carbon:search" :size="16" class="text-slate-400" /></template>
+					<template #prefix><Icon name="carbon:search" :size="16" class="text-[var(--add-text-muted)]" /></template>
 				</n-input>
 				<n-select v-model:value="filters.active" :options="statusOptions" :placeholder="t('inventory.common.status')" clearable class="w-full" />
 				<StaffSelect v-model:value="filters.manager_id" :placeholder="t('inventory.warehouses.allManagers')" class="w-full" />
@@ -20,7 +20,7 @@
 					<PlacePicker v-model:chain="placeChain" :value="place" inline />
 				</div>
 			</div>
-			<div v-if="hasActiveFilters" class="mt-3 flex items-center justify-end border-t border-slate-100 pt-3 dark:border-slate-800/80">
+			<div v-if="hasActiveFilters" class="mt-3 flex items-center justify-end border-t border-[var(--add-border)] pt-3">
 				<n-button quaternary size="small" @click="resetFilters">
 					<template #icon><Icon name="carbon:reset" :size="14" /></template>
 					{{ t("inventory.common.resetFilters") }}
@@ -30,18 +30,18 @@
 
 		<n-alert v-if="loadError" type="error" :title="loadError" />
 
-		<n-card class="add-ledger-table rounded-2xl border border-slate-200/80 shadow-xs dark:border-slate-800 dark:bg-slate-900" :bordered="false" size="small">
+		<n-card class="add-ledger-table rounded-2xl border border-[var(--add-border)] shadow-xs" :bordered="false" size="small">
 			<n-data-table :columns :data="warehouses" :loading :bordered="false" size="small" :scroll-x="tableWidth(columns)">
 				<template #empty>
-					<div class="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-500">
+					<div class="flex flex-col items-center justify-center py-12 text-[var(--add-text-muted)]">
 						<Icon name="carbon:inventory-management" :size="40" class="mb-2 opacity-50" />
 						<span>{{ t("inventory.warehouses.empty") }}</span>
 					</div>
 				</template>
 			</n-data-table>
 
-			<div v-if="lastPage > 1" class="flex flex-col items-center justify-between gap-3 border-t border-slate-100 p-4 sm:flex-row dark:border-slate-800/80">
-				<span class="text-xs text-slate-400">{{ t("inventory.warehouses.count", { n: totalCount }) }}</span>
+			<div v-if="lastPage > 1" class="flex flex-col items-center justify-between gap-3 border-t border-[var(--add-border)] p-4 sm:flex-row">
+				<span class="text-xs text-[var(--add-text-muted)]">{{ t("inventory.warehouses.count", { n: totalCount }) }}</span>
 				<n-pagination v-model:page="page" :page-count="lastPage" :disabled="loading" />
 			</div>
 		</n-card>
@@ -54,9 +54,10 @@
 <script setup lang="ts">
 import type { DataTableColumns, SelectOption } from "naive-ui"
 import type { Warehouse } from "@/add-os/modules/inventory/types/inventory"
-import { NAlert, NButton, NCard, NDataTable, NInput, NPagination, NPopconfirm, NSelect, NTag, NTooltip, useMessage } from "naive-ui"
+import { NAlert, NButton, NCard, NDataTable, NInput, NPagination, NSelect, NTag, useMessage } from "naive-ui"
 import { computed, h, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { canManageWarehouses } from "@/add-os/config/permissions"
 import HrPageHeader from "@/add-os/modules/hr/components/ui/HrPageHeader.vue"
 import { useRouteFilters } from "@/add-os/modules/hr/composables/useRouteFilters"
@@ -157,20 +158,6 @@ async function run(action: () => Promise<unknown>, done: string) {
 	}
 }
 
-/** Full class strings, so Tailwind sees each one. */
-const TONES = { primary: "text-slate-500 hover:text-primary", warning: "text-slate-500 hover:text-warning" } as const
-
-function iconButton(icon: string, label: string, onClick: () => void, tone: keyof typeof TONES = "primary") {
-	return h(
-		NTooltip,
-		{ trigger: "hover" },
-		{
-			trigger: () => h(NButton, { size: "tiny", quaternary: true, circle: true, class: TONES[tone], "aria-label": label, onClick }, { icon: () => h(Icon, { name: icon, size: 16 }) }),
-			default: () => label
-		}
-	)
-}
-
 const columns = computed<DataTableColumns<Warehouse>>(() => [
 	{
 		title: t("inventory.warehouses.name"),
@@ -199,29 +186,23 @@ const columns = computed<DataTableColumns<Warehouse>>(() => [
 		key: "actions",
 		width: 140,
 		render: row =>
-			h("div", { class: "flex items-center justify-end gap-1" }, [
-				iconButton("carbon:view", t("inventory.common.view"), () => void view(row)),
-				...(mayManage
-					? [
-							iconButton("carbon:edit", t("inventory.common.edit"), () => void edit(row)),
-							iconButton(
-								"carbon:power",
-								t(row.is_active ? "inventory.warehouses.deactivate" : "inventory.warehouses.activate"),
-								() => void run(() => updateWarehouse(row.id, { is_active: !row.is_active }), t("inventory.common.saved")),
-								"warning"
-							),
-							h(
-								NPopconfirm,
-								{ onPositiveClick: () => void run(() => removeWarehouse(row.id), t("inventory.common.deleted")) },
+			h(RowActions, {
+				actions: [
+					{ key: "view", label: t("inventory.common.view"), icon: "carbon:view", onClick: () => void view(row) },
+					...(mayManage
+						? [
+								{ key: "edit", label: t("inventory.common.edit"), icon: "carbon:edit", onClick: () => void edit(row) },
 								{
-									trigger: () =>
-										h(NButton, { size: "tiny", quaternary: true, circle: true, class: "text-slate-500 hover:text-error", "aria-label": t("inventory.common.delete") }, { icon: () => h(Icon, { name: "carbon:trash-can", size: 16 }) }),
-									default: () => t("inventory.warehouses.confirmDelete")
-								}
-							)
-						]
-					: [])
-			])
+									key: "power",
+									label: t(row.is_active ? "inventory.warehouses.deactivate" : "inventory.warehouses.activate"),
+									icon: "carbon:power",
+									onClick: () => void run(() => updateWarehouse(row.id, { is_active: !row.is_active }), t("inventory.common.saved"))
+								},
+								{ key: "delete", label: t("inventory.common.delete"), icon: "carbon:trash-can", danger: true, confirm: t("inventory.warehouses.confirmDelete"), onClick: () => void run(() => removeWarehouse(row.id), t("inventory.common.deleted")) }
+							]
+						: [])
+				]
+			})
 	}
 ])
 </script>

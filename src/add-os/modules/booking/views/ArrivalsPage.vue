@@ -1,16 +1,14 @@
 <!-- src/add-os/modules/booking/views/ArrivalsPage.vue -->
 <template>
 	<div class="flex flex-col gap-5">
-		<div class="flex flex-wrap items-start justify-between gap-3">
-			<div v-if="!embedded" class="flex flex-col gap-1">
-				<h1 class="text-2xl font-bold">{{ t(titleKey || "nav.pages.arrivals") }}</h1>
-				<p>{{ t("arrivals.description") }}</p>
-			</div>
-			<n-button :loading="isLoading" class="ms-auto" @click="refetchAll">
-				<template #icon><Icon name="carbon:renew" :size="16" /></template>
-				{{ t("activeSessions.refresh") }}
-			</n-button>
-		</div>
+		<PageHeader v-if="!embedded" :title="t(titleKey || 'nav.pages.arrivals')" :description="t('arrivals.description')">
+			<template #actions>
+				<n-button :loading="isLoading" class="ms-auto" @click="refetchAll">
+					<template #icon><Icon name="carbon:renew" :size="16" /></template>
+					{{ t("activeSessions.refresh") }}
+				</n-button>
+			</template>
+		</PageHeader>
 
 		<!-- Members who pressed "I have arrived" in the app -->
 		<n-card class="add-ledger-table" :title="t('arrivals.requests.title')">
@@ -26,7 +24,7 @@
 			<div v-else class="py-8 text-center">{{ t("arrivals.expected.empty") }}</div>
 		</n-card>
 
-		<n-modal v-model:show="spaceModalVisible" preset="card" :title="t('arrivals.requests.walkInTitle')" class="max-w-md">
+		<FormModal v-model:show="spaceModalVisible" :title="t('arrivals.requests.walkInTitle')" size="sm">
 			<p class="mb-3 text-sm">{{ t("arrivals.requests.walkInBody") }}</p>
 			<n-select v-model:value="walkInSpaceId" :options="coSpaceOptions" :loading="spacesLoading" :placeholder="t('arrivals.requests.spacePlaceholder')" />
 			<template #footer>
@@ -37,7 +35,7 @@
 					</n-button>
 				</div>
 			</template>
-		</n-modal>
+		</FormModal>
 	</div>
 </template>
 
@@ -46,9 +44,12 @@ import type { DataTableColumns, SelectOption } from "naive-ui"
 import type { AdminBooking } from "@/add-os/modules/booking/types/calendar"
 import type { ArrivalRequest } from "@/add-os/modules/booking/types/reception"
 import type { Space } from "@/add-os/modules/spatial/types/space"
-import { NAlert, NAvatar, NButton, NCard, NDataTable, NModal, NSelect, NTag } from "naive-ui"
+import { NAlert, NAvatar, NButton, NCard, NDataTable, NSelect, NTag } from "naive-ui"
 import { computed, h, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
+import PageHeader from "@/add-os/components/page/PageHeader.vue"
+import RowActions from "@/add-os/components/page/RowActions.vue"
 import { pickLocalized } from "@/add-os/components/resource/field-types"
 import { canCheckInAtReception } from "@/add-os/config/permissions"
 import { currentLocale } from "@/add-os/lang/currentLocale"
@@ -202,11 +203,17 @@ const bookingColumns = computed<DataTableColumns<AdminBooking>>(() => actionsIfA
 		align: "center",
 		render: (row) => {
 			const opens = opensAt(row)
-			return h(
-				NButton,
-				{ size: "small", type: "primary", disabled: opens !== null, title: opens ? t("arrivals.expected.opensAt", { time: formatTime(opens) }) : undefined, onClick: () => checkIn(row) },
-				{ icon: () => h(Icon, { name: "carbon:login", size: 16 }), default: () => opens ? t("arrivals.expected.opensAt", { time: formatTime(opens) }) : t("arrivals.expected.checkIn") }
-			)
+			return h(RowActions, {
+				labelled: true,
+				actions: [{
+					key: "checkIn",
+					label: opens ? t("arrivals.expected.opensAt", { time: formatTime(opens) }) : t("arrivals.expected.checkIn"),
+					icon: "carbon:login",
+					primary: true,
+					disabled: opens !== null,
+					onClick: () => checkIn(row)
+				}]
+			})
 		}
 	}
 ]))
@@ -286,7 +293,7 @@ const requestColumns = computed<DataTableColumns<ArrivalRequest>>(() => actionsI
 		minWidth: 180,
 		// The photo, so the desk can see it is the person standing there.
 		render: row => h("div", { class: "flex items-center gap-2" }, [
-			h(NAvatar, { round: true, size: 28, src: row.user?.avatar_url ?? undefined, class: "bg-amber-700 text-white font-bold text-xs" }, { default: () => initials(row.user?.name) }),
+			h(NAvatar, { round: true, size: 28, src: row.user?.avatar_url ?? undefined, class: "bg-[var(--add-warning-text)] text-white font-bold text-xs" }, { default: () => initials(row.user?.name) }),
 			h("span", row.user?.name ?? "—")
 		])
 	},
@@ -324,10 +331,14 @@ const requestColumns = computed<DataTableColumns<ArrivalRequest>>(() => actionsI
 		key: "actions",
 		minWidth: 200,
 		align: "center",
-		render: row => h("div", { class: "flex justify-center gap-2" }, [
-			h(NButton, { size: "small", type: "primary", onClick: () => confirm(row) }, { icon: () => h(Icon, { name: "carbon:checkmark", size: 16 }), default: () => t("arrivals.requests.confirm") }),
-			h(NButton, { size: "small", secondary: true, onClick: () => reject(row) }, { icon: () => h(Icon, { name: "carbon:close", size: 16 }), default: () => t("arrivals.requests.reject") })
-		])
+		render: row =>
+			h(RowActions, {
+				labelled: true,
+				actions: [
+					{ key: "confirm", label: t("arrivals.requests.confirm"), icon: "carbon:checkmark", primary: true, onClick: () => confirm(row) },
+					{ key: "reject", label: t("arrivals.requests.reject"), icon: "carbon:close", danger: true, onClick: () => reject(row) }
+				]
+			})
 	}
 ]))
 

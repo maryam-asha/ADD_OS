@@ -1,15 +1,6 @@
 <!-- src/add-os/modules/provider-portal/components/ProviderOfficeLeaseDetailModal.vue -->
 <template>
-	<n-modal
-		v-model:show="show"
-		preset="card"
-		:title="lease?.reference ? `${t('officeLeases.detail.title')} · ${lease.reference}` : t('officeLeases.detail.title')"
-		closable
-		class="max-w-2xl w-full !rounded-2xl shadow-xl my-6"
-		style="max-height: 86vh; display: flex; flex-direction: column;"
-		content-style="max-height: calc(86vh - 140px); overflow-y: auto;"
-		:segmented="{ content: 'soft', footer: 'soft' }"
-	>
+	<FormModal v-model:show="show" :title="lease?.reference ? `${t('officeLeases.detail.title')} · ${lease.reference}` : t('officeLeases.detail.title')" size="lg">
 		<div v-if="isLoading" class="py-16 flex items-center justify-center">
 			<n-spin size="large" />
 		</div>
@@ -19,21 +10,21 @@
 
 		<div v-else-if="lease" class="flex flex-col gap-5">
 			<!-- Header summary cards -->
-			<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-neutral-50 dark:bg-neutral-800/40 p-3.5 rounded-lg border border-black/5 dark:border-white/5 text-xs">
+			<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[var(--add-surface-sunken)] p-3.5 rounded-lg border border-black/5 text-xs">
 				<div class="flex flex-col gap-0.5">
-					<span class="text-neutral-500">{{ t('officeLeases.detail.space') }}</span>
+					<span class="text-[var(--add-text-secondary)]">{{ t('officeLeases.detail.space') }}</span>
 					<span class="font-semibold text-sm">{{ lease.space?.name || `#${lease.space?.id}` }}</span>
 				</div>
 				<div class="flex flex-col gap-0.5">
-					<span class="text-neutral-500">{{ t('officeLeases.detail.company') }}</span>
+					<span class="text-[var(--add-text-secondary)]">{{ t('officeLeases.detail.company') }}</span>
 					<span class="font-semibold text-sm">{{ lease.company?.legal_name || '—' }}</span>
 				</div>
 				<div class="flex flex-col gap-0.5">
-					<span class="text-neutral-500">{{ t('officeLeases.detail.monthlyAmount') }}</span>
+					<span class="text-[var(--add-text-secondary)]">{{ t('officeLeases.detail.monthlyAmount') }}</span>
 					<span class="font-semibold text-sm text-primary">{{ lease.monthly_amount }} {{ lease.currency }}</span>
 				</div>
 				<div class="flex flex-col gap-0.5">
-					<span class="text-neutral-500">{{ t('officeLeases.columns.status') }}</span>
+					<span class="text-[var(--add-text-secondary)]">{{ t('officeLeases.columns.status') }}</span>
 					<div>
 						<n-tag :type="statusTagType(lease.status)" size="small" round :bordered="true">
 							{{ t(`officeLeases.status.${lease.status}`) }}
@@ -43,23 +34,23 @@
 			</div>
 
 			<!-- Dates and Terms -->
-			<div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs bg-neutral-50/50 dark:bg-neutral-800/20 p-3 rounded-lg border border-black/5 dark:border-white/5">
+			<div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs bg-[var(--add-surface-sunken)] p-3 rounded-lg border border-black/5">
 				<div>
-					<span class="text-neutral-500">{{ t('officeLeases.detail.durationMonths') }}:</span>
+					<span class="text-[var(--add-text-secondary)]">{{ t('officeLeases.detail.durationMonths') }}:</span>
 					<div class="font-medium mt-0.5">{{ t('officeLeases.detail.durationValue', { months: lease.duration_months }) }}</div>
 				</div>
 				<div>
-					<span class="text-neutral-500">{{ t('officeLeases.detail.startsOn') }}:</span>
+					<span class="text-[var(--add-text-secondary)]">{{ t('officeLeases.detail.startsOn') }}:</span>
 					<div class="font-medium mt-0.5">{{ lease.starts_on }}</div>
 				</div>
 				<div>
-					<span class="text-neutral-500">{{ t('officeLeases.detail.endsOn') }}:</span>
+					<span class="text-[var(--add-text-secondary)]">{{ t('officeLeases.detail.endsOn') }}:</span>
 					<div class="font-medium mt-0.5">{{ lease.ends_on }}</div>
 				</div>
 			</div>
 
 			<!-- Auto-Renew Section -->
-			<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-lg border border-black/5 dark:border-white/5 bg-neutral-50/50 dark:bg-neutral-800/20">
+			<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-lg border border-black/5 bg-[var(--add-surface-sunken)]">
 				<div class="flex flex-col gap-0.5">
 					<div class="flex items-center gap-2">
 						<span class="font-bold text-sm">{{ t('officeLeases.detail.autoRenew') }}</span>
@@ -88,7 +79,7 @@
 			<div class="flex flex-col gap-3">
 				<h3 class="text-sm font-bold">{{ t('officeLeases.detail.periodsTitle') }}</h3>
 
-				<div v-if="!lease.periods || lease.periods.length === 0" class="text-xs text-neutral-400 py-3">
+				<div v-if="!lease.periods || lease.periods.length === 0" class="text-xs text-[var(--add-text-muted)] py-3">
 					{{ t('resourceCrud.table.empty') }}
 				</div>
 
@@ -96,10 +87,10 @@
 					<div
 						v-for="period in lease.periods"
 						:key="period.sequence"
-						class="flex flex-col gap-2 p-3 rounded-lg border border-black/5 dark:border-white/5 bg-neutral-50/40 dark:bg-neutral-800/10 text-xs"
+						class="flex flex-col gap-2 p-3 rounded-lg border border-black/5 bg-[var(--add-surface-sunken)] text-xs"
 					>
 						<div class="flex items-center justify-between">
-							<span class="font-bold text-neutral-700 dark:text-neutral-300">
+							<span class="font-bold text-[var(--add-text-primary)]">
 								{{ t('officeLeases.detail.periodSequence', { num: period.sequence }) }}
 							</span>
 							<n-tag :type="periodTagType(period.status)" size="small" round>
@@ -107,9 +98,9 @@
 							</n-tag>
 						</div>
 
-						<div class="flex flex-wrap items-center justify-between gap-2 text-neutral-500">
+						<div class="flex flex-wrap items-center justify-between gap-2 text-[var(--add-text-secondary)]">
 							<span>{{ t('officeLeases.detail.periodDates', { starts: period.starts_on, ends: period.ends_on }) }}</span>
-							<span class="font-semibold text-neutral-900 dark:text-neutral-100">
+							<span class="font-semibold text-[var(--add-text-primary)]">
 								{{ period.amount }} {{ lease.currency }}
 							</span>
 						</div>
@@ -117,7 +108,7 @@
 						<!-- Invoice summary (if available for provider) -->
 						<div
 							v-if="period.invoice"
-							class="mt-1 pt-2 border-t border-black/5 dark:border-white/5 flex flex-wrap items-center justify-between gap-2"
+							class="mt-1 pt-2 border-t border-black/5 flex flex-wrap items-center justify-between gap-2"
 						>
 							<div class="flex items-center gap-2">
 								<span class="font-medium text-primary">#{{ period.invoice.reference || period.invoice.id }}</span>
@@ -130,13 +121,13 @@
 							</div>
 
 							<div class="flex items-center gap-3">
-								<span class="text-neutral-500">{{ t('officeLeases.detail.invoicePaid') }}: {{ period.invoice.paid_amount }} {{ lease.currency }}</span>
-								<span class="font-semibold text-neutral-800 dark:text-neutral-200">
+								<span class="text-[var(--add-text-secondary)]">{{ t('officeLeases.detail.invoicePaid') }}: {{ period.invoice.paid_amount }} {{ lease.currency }}</span>
+								<span class="font-semibold text-[var(--add-text-primary)]">
 									{{ t('officeLeases.detail.invoiceRemaining') }}: {{ period.invoice.remaining }} {{ lease.currency }}
 								</span>
 							</div>
 						</div>
-						<div v-else class="text-neutral-400 italic text-[11px]">
+						<div v-else class="text-[var(--add-text-muted)] italic text-[11px]">
 							{{ t('officeLeases.detail.noInvoiceYet') }}
 						</div>
 					</div>
@@ -149,14 +140,15 @@
 				<n-button @click="show = false">{{ t('common.close', 'إغلاق') }}</n-button>
 			</div>
 		</template>
-	</n-modal>
+	</FormModal>
 </template>
 
 <script setup lang="ts">
-import type { OfficeLease, LeasePeriodStatus, OfficeLeaseStatus } from "@/add-os/modules/members/types/office-lease"
-import { NAlert, NButton, NModal, NSpin, NSwitch, NTag, useMessage } from "naive-ui"
+import type { LeasePeriodStatus, OfficeLease, OfficeLeaseStatus } from "@/add-os/modules/members/types/office-lease"
+import { NAlert, NButton, NSpin, NSwitch, NTag, useMessage } from "naive-ui"
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
+import FormModal from "@/add-os/components/page/FormModal.vue"
 import { ApiError } from "@/add-os/services/api"
 import { getProviderOfficeLease, setProviderOfficeLeaseAutoRenew } from "@/add-os/services/provider-portal"
 

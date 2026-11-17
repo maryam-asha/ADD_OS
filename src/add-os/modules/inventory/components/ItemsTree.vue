@@ -1,7 +1,7 @@
 <!-- src/add-os/modules/inventory/components/ItemsTree.vue -->
 <template>
 	<n-tree v-if="data.length" :data block-line default-expand-all :selectable="false" :render-label :node-props />
-	<div v-else class="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-500">
+	<div v-else class="flex flex-col items-center justify-center py-12 text-[var(--add-text-muted)]">
 		<Icon name="carbon:tree-view" :size="40" class="mb-2 opacity-50" />
 		<span>{{ t("inventory.items.empty") }}</span>
 	</div>
@@ -44,14 +44,14 @@ function renderLabel({ option }: { option: TreeOption }) {
 	const node = option as Option
 	if (!node.item) {
 		return h("span", { class: "inline-flex items-center gap-2 py-1 font-semibold" }, [
-			h(Icon, { name: "carbon:folder", size: 16, class: "text-amber-500" }),
+			h(Icon, { name: "carbon:folder", size: 16, class: "text-[var(--add-warning-text)]" }),
 			node.label,
-			h("span", { class: "rounded-full bg-slate-100 px-2 text-xs font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-400" }, formatNumber(node.count ?? 0))
+			h("span", { class: "rounded-full bg-[var(--add-surface-sunken)] px-2 text-xs font-medium text-[var(--add-text-secondary)]" }, formatNumber(node.count ?? 0))
 		])
 	}
 	const item = node.item
 	return h("span", { class: "inline-flex flex-wrap items-center gap-2 py-1" }, [
-		h(Icon, { name: item.kind === "asset" ? "carbon:box" : "carbon:layers", size: 15, class: item.kind === "asset" ? "text-blue-500" : "text-purple-500" }),
+		h(Icon, { name: item.kind === "asset" ? "carbon:box" : "carbon:layers", size: 15, class: item.kind === "asset" ? "text-[var(--add-info-text)]" : "text-[var(--add-info-text)]" }),
 		h("span", { class: "font-medium" }, node.label),
 		h("span", { class: "font-mono text-xs text-secondary", dir: "ltr" }, item.sku),
 		h(NTag, { size: "tiny", bordered: false, type: item.kind === "asset" ? "info" : "default" }, () => t(`inventory.kind.${item.kind}`)),
