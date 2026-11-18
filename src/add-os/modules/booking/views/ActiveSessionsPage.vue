@@ -91,6 +91,8 @@
 			</template>
 		</FormModal>
 
+		<RecordGuestModal v-model:show="guestModalVisible" :host-user-id="guestHostId" @recorded="refetch" />
+
 		<CollectPaymentModal
 			v-model:show="collectVisible"
 			:user-id="collectTarget?.userId ?? null"
@@ -118,6 +120,7 @@ import { useReceptionRealtime } from "@/add-os/modules/booking/composables/useRe
 import { buildSessionColumns } from "@/add-os/modules/booking/config/active-sessions.config"
 import CollectPaymentModal from "@/add-os/modules/payments/components/CollectPaymentModal.vue"
 import { PAYMENT_METHODS } from "@/add-os/modules/payments/types/wallet-top-up"
+import RecordGuestModal from "@/add-os/modules/reception/components/RecordGuestModal.vue"
 import {
 	cancelBooking,
 	checkOutSession,
@@ -344,11 +347,27 @@ async function cancelSession(row: ActiveSession) {
 	await action.run(() => cancelBooking(row.id), t("activeSessions.cancel.success"))
 }
 
-/** Checking out is `reception.check_in`; extending and cancelling a booking, `reception.book`. */
+/* ── Guests ────────────────────────────────────────────────────────────────── */
+
+/*
+ * A coworking member's guest, recorded from the member's own row. The host's
+ * session will not check out while that guest is inside: the API answers 409
+ * with its own sentence, which the check-out toast shows.
+ */
+const guestModalVisible = ref(false)
+const guestHostId = ref<number | null>(null)
+
+function openAddGuest(row: ActiveSession) {
+	guestHostId.value = row.user_id
+	guestModalVisible.value = true
+}
+
+/** Checking out and recording a guest are `reception.check_in`; extending and cancelling a booking, `reception.book`. */
 const columns = computed<DataTableColumns<ActiveSession>>(() =>
 	buildSessionColumns(t, {
 		onDetails: openDetails,
 		onCheckOut: canCheckInAtReception() ? openCheckOut : undefined,
+		onAddGuest: canCheckInAtReception() ? openAddGuest : undefined,
 		onExtend: canBookAtReception() ? openExtend : undefined,
 		onCancel: canBookAtReception() ? confirmCancel : undefined
 	})
@@ -370,6 +389,9 @@ defineExpose({
 	extendFieldErrors,
 	extendModalVisible,
 	extendOptions,
-	cancelSession
+	cancelSession,
+	openAddGuest,
+	guestModalVisible,
+	guestHostId
 })
 </script>

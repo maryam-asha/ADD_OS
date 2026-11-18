@@ -155,6 +155,19 @@
 				</div>
 			</n-tab-pane>
 
+			<!-- Members' coworking guests inside on a visit: free while their grace runs, then a walk-in on the sessions board. -->
+			<n-tab-pane name="guests">
+				<template #tab>
+					<span class="flex items-center gap-1.5">
+						<Icon name="carbon:user-follow" :size="16" />
+						{{ t("reception.tabs.guests") }}
+					</span>
+				</template>
+				<div class="mt-4">
+					<GuestVisitsPanel @changed="refreshSummary" />
+				</div>
+			</n-tab-pane>
+
 			<n-tab-pane name="end-requests">
 				<template #tab>
 					<span class="flex items-center gap-1.5">
@@ -210,7 +223,7 @@ import type { ReceptionSummary } from "@/add-os/modules/booking/types/reception"
 import { NAlert, NBadge, NButton, NCard, NSpin, NTabPane, NTabs, useMessage } from "naive-ui"
 import { computed, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
-import { useRouter } from "vue-router"
+import { useRoute, useRouter } from "vue-router"
 import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { canApproveBookings, canBookAtReception, canCheckInAtReception, canReviewKitchenOrders, canSellPlans, canTopUpWallets } from "@/add-os/config/permissions"
 import { useReceptionRealtime } from "@/add-os/modules/booking/composables/useReceptionRealtime"
@@ -220,10 +233,12 @@ import ArrivalsPage from "@/add-os/modules/booking/views/ArrivalsPage.vue"
 import CloseSessionPage from "@/add-os/modules/booking/views/CloseSessionPage.vue"
 import KitchenCashReturns from "@/add-os/modules/kitchen/components/KitchenCashReturns.vue"
 import ReceptionKitchenQueue from "@/add-os/modules/kitchen/components/ReceptionKitchenQueue.vue"
+import GuestVisitsPanel from "@/add-os/modules/reception/components/GuestVisitsPanel.vue"
 import PendingPaymentsPanel from "@/add-os/modules/reception/components/PendingPaymentsPanel.vue"
 import QuickBookingModal from "@/add-os/modules/reception/components/QuickBookingModal.vue"
 import QuickPlanModal from "@/add-os/modules/reception/components/QuickPlanModal.vue"
 import QuickTopUpModal from "@/add-os/modules/reception/components/QuickTopUpModal.vue"
+import { OPEN_QUERY } from "@/add-os/notifications/useOpenRecord"
 import { ApiError } from "@/add-os/services/api"
 import { listOrdersToConfirm } from "@/add-os/services/kitchen"
 import { checkInBooking, getReceptionSummary, listPendingApprovals } from "@/add-os/services/reception"
@@ -231,13 +246,25 @@ import { formatDate, formatNumber, formatTime } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
 type UpcomingItem = ReceptionSummary["upcoming"][number]
-type TabName = "overview" | "arrivals" | "approvals" | "sessions" | "end-requests" | "payments" | "kitchen"
+type TabName = "overview" | "arrivals" | "approvals" | "sessions" | "guests" | "end-requests" | "payments" | "kitchen"
 
 const { t } = useI18n()
+const route = useRoute()
 const router = useRouter()
 const message = useMessage()
 
 const activeTab = ref<TabName>("overview")
+
+/**
+ * `?open=<id>` on the desk is a guest visit — the one record a notice leads
+ * here for (`guest_visit`, notificationTarget). It opens the guests tab; the
+ * tab's own list picks out the row and drops the query (useOpenRecord). A
+ * second notice type pointed at the desk would need its own query to tell
+ * the two apart.
+ */
+watch(() => route.query[OPEN_QUERY], (value) => {
+	if (value) activeTab.value = "guests"
+}, { immediate: true })
 
 /* ── The desk's sales, each shown only to whoever may make it ─────────────── */
 

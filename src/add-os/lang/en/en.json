@@ -1773,7 +1773,61 @@
 			"confirmCancel": "Keep it",
 			"success": "Booking cancelled."
 		},
-		"details": "Details"
+		"details": "Details",
+		"guest": {
+			"add": "Add guest",
+			"of": "Guest of {host}",
+			"hint": "A guest's session billed to their host."
+		}
+	},
+	"guestVisits": {
+		"description": "Guests of members in a co-working session. A guest is free for a grace period; still inside when it ends, a session starts for them billed from their arrival — on their own account if their phone has one, otherwise on their host's.",
+		"loadError": "Couldn't load the guests inside.",
+		"empty": "No guests inside right now.",
+		"columns": {
+			"guest": "Guest",
+			"host": "Host",
+			"billedTo": "Billed to",
+			"arrivedAt": "Arrived",
+			"grace": "Free time"
+		},
+		"account": {
+			"member": "Has an account",
+			"none": "No account"
+		},
+		"billedTo": {
+			"host": "The host",
+			"guest": "The guest"
+		},
+		"status": {
+			"inGrace": "{minutes} min left",
+			"until": "until {time}",
+			"graceOver": "Free time over",
+			"graceOverHint": "Their session is being started, billed from their arrival.",
+			"declined": "Host declined",
+			"declinedHint": "The host refused to pay for this guest. Check them out, or have them register an account."
+		},
+		"record": {
+			"button": "Record a guest",
+			"title": "Record a guest",
+			"subtitle": "A guest of a member in a co-working session",
+			"host": "Host",
+			"hostPlaceholder": "The member they are visiting",
+			"hostRequired": "Choose the host.",
+			"hostsFailed": "Couldn't load the members in a co-working session.",
+			"noHosts": "No member is in a co-working session right now.",
+			"phone": "Guest's phone",
+			"name": "Guest's name",
+			"nameHint": "Needed only when this phone has no account.",
+			"submit": "Record guest",
+			"success": "{name} was recorded as a guest."
+		},
+		"checkOut": {
+			"button": "Check out",
+			"confirmFree": "Check {name} out? They are within their free time, so nothing is billed.",
+			"confirmBilled": "Check {name} out? Their free time is over, so a session is billed from their arrival.",
+			"success": "The guest was checked out."
+		}
 	},
 	"coworkingPool": {
 		"title": "Co-working seats",
@@ -2599,6 +2653,18 @@
 			"wallet_top_up_min_points": {
 				"label": "Minimum top-up (points)",
 				"hint": "The fewest points reception can credit in one top-up."
+			},
+			"guest_grace_minutes": {
+				"label": "Guest free time (minutes)",
+				"hint": "How long a member's co-working guest stays free. Still inside after it, a session starts billed from their arrival."
+			},
+			"guest_free_visits_per_day": {
+				"label": "Free guest visits per phone per day",
+				"hint": "How many free periods one phone gets a day. After that a guest's visit is billed from arrival at once."
+			},
+			"guest_max_active_per_host": {
+				"label": "Guests per host at once",
+				"hint": "The most guests one member may have inside at the same time."
 			}
 		}
 	},
@@ -3067,6 +3133,7 @@
 			"arrivals": "Arrivals",
 			"approvals": "Approvals",
 			"sessions": "Active Sessions",
+			"guests": "Guests",
 			"endRequests": "End Requests",
 			"payments": "Pending Payments",
 			"kitchen": "Kitchen orders"

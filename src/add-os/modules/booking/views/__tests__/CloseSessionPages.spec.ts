@@ -78,7 +78,7 @@ vi.mock("@/add-os/modules/payments/components/CollectPaymentModal.vue", () => ({
 
 vi.mock("vue-router", async () => {
 	const actual = await vi.importActual<typeof import("vue-router")>("vue-router")
-	return { ...actual, useRouter: () => ({ push: pushMock }), useRoute: () => ({ params: routeParams }) }
+	return { ...actual, useRouter: () => ({ push: pushMock }), useRoute: () => ({ params: routeParams, query: {} }) }
 })
 
 // The pages call useMessage()/useDialog() directly; the dialog confirms at once.

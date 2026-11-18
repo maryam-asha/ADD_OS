@@ -8,6 +8,7 @@ import type {
 	ConfirmSessionEndResponse,
 	CreateReceptionBookingPayload,
 	ExtendBookingPayload,
+	GuestVisit,
 	OutstandingItem,
 	OutstandingSummary,
 	PendingApprovalBooking,
@@ -15,6 +16,7 @@ import type {
 	ReceptionBookingQuote,
 	ReceptionSessionReport,
 	ReceptionSummary,
+	RegisterGuestVisitPayload,
 	RejectBookingPayload,
 	SessionType,
 	SettleAtReceptionPayload,
@@ -213,6 +215,41 @@ export async function listPendingPayments(query?: Record<string, unknown>): Prom
 export async function settleAtReception(payload: SettleAtReceptionPayload): Promise<SettleAtReceptionResult> {
 	const res = await post<{ data: SettleAtReceptionResult }>(`${BASE}/payments/settle`, payload)
 	return res.data
+}
+
+/*
+ * Coworking guests of a member in a session (ADDCore `GuestVisitService`,
+ * commit e3a6687c, 2026-11-18). Not yet in the pinned snapshot: the requests
+ * sit in the canonical collection's uncommitted edits, so this block cites
+ * the backend commit until the next re-pin.
+ *
+ * The guest is free for `guest.grace_minutes`; still inside at its end, the
+ * visit becomes a walk-in billed from the arrival — on the guest's account
+ * when the phone has one, else the host's. Checking out within the grace
+ * bills nothing; past it, the same bill the minute job would have made.
+ */
+
+/** The guests inside on a visit (in grace, or declined by the host), soonest grace end first. Not paginated. */
+export async function listGuestVisits(): Promise<GuestVisit[]> {
+	const raw = await get<{ data: GuestVisit[] }>(`${BASE}/guest-visits`)
+	return rowsOf<GuestVisit>(raw.data)
+}
+
+/**
+ * Records a guest on arrival. 422 `{message}` when the host has no open
+ * coworking session, the guest is the host, the host is at
+ * `guest.max_active_per_host`, there is no free seat, or the phone has no
+ * account and no `name` was given; 409 when the guest is already inside —
+ * on a visit, or on a session of their own.
+ */
+export async function registerGuestVisit(payload: RegisterGuestVisitPayload): Promise<GuestVisit> {
+	const res = await post<{ data: GuestVisit }>(`${BASE}/guest-visits`, payload)
+	return res.data
+}
+
+/** Checks the guest out; the message says whether a session was billed. 409 when already converted or left. */
+export async function checkOutGuestVisit(id: number): Promise<MessageResponse> {
+	return post<MessageResponse>(`${BASE}/guest-visits/${id}/check-out`)
 }
 
 /** The desk's day: counts, and what needs it next. */

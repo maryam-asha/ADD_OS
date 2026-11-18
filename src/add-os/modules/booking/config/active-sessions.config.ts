@@ -19,6 +19,17 @@ interface SessionHandlers {
 	onDetails: (row: ActiveSession) => void
 	onExtend?: (row: ActiveSession) => void
 	onCancel?: (row: ActiveSession) => void
+	/** Records a guest of this row's member — a coworking session of their own only. */
+	onAddGuest?: (row: ActiveSession) => void
+}
+
+/**
+ * A guest may be recorded on a member's own coworking session: never a room's
+ * or an office's (their guests are the booking's), and never a guest's
+ * session billed to its host — the host has their own row for that.
+ */
+export function canHostGuests(row: ActiveSession): boolean {
+	return row.space_type === "co_space" && !row.guest
 }
 
 /**
@@ -36,7 +47,20 @@ interface SessionHandlers {
  */
 export function buildSessionColumns(t: ComposerTranslation, handlers: SessionHandlers): DataTableColumns<ActiveSession> {
 	return [
-		{ title: t("activeSessions.columns.occupant"), key: "user_name", minWidth: 150, align: "center" },
+		{
+			title: t("activeSessions.columns.occupant"),
+			key: "user_name",
+			minWidth: 150,
+			align: "center",
+			// A guest's session billed to the host: the guest is in the seat,
+			// the host (`user_name`) pays.
+			render: row => row.guest
+				? h("div", { class: "flex flex-col items-center gap-1" }, [
+						h("span", row.guest.name),
+						h(NTag, { size: "small", round: true, type: "warning", title: t("activeSessions.guest.hint") }, { default: () => t("activeSessions.guest.of", { host: row.user_name }) })
+					])
+				: row.user_name
+		},
 		{
 			title: t("activeSessions.columns.space"),
 			key: "space_type",
@@ -116,9 +140,10 @@ export function buildSessionColumns(t: ComposerTranslation, handlers: SessionHan
 			minWidth: 360,
 			align: "center",
 			render: row => {
-				const { onCheckOut, onExtend, onCancel } = handlers
+				const { onCheckOut, onExtend, onCancel, onAddGuest } = handlers
 				const actions: RowAction[] = [{ key: "details", label: t("activeSessions.details"), icon: "carbon:view", onClick: () => handlers.onDetails(row) }]
 				if (onCheckOut) actions.push({ key: "checkOut", label: t("activeSessions.checkOut.button"), icon: "carbon:logout", primary: true, onClick: () => onCheckOut(row) })
+				if (onAddGuest && canHostGuests(row)) actions.push({ key: "addGuest", label: t("activeSessions.guest.add"), icon: "carbon:user-follow", onClick: () => onAddGuest(row) })
 				if (row.type === "booking" && onExtend) actions.push({ key: "extend", label: t("activeSessions.extend.button"), icon: "carbon:time", onClick: () => onExtend(row) })
 				if (row.type === "booking" && onCancel) actions.push({ key: "cancel", label: t("activeSessions.cancel.button"), icon: "carbon:close-outline", danger: true, onClick: () => onCancel(row) })
 				return h(RowActions, { actions, labelled: true })

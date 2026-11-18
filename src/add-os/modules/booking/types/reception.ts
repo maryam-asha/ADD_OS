@@ -87,6 +87,47 @@ export interface ActiveSession {
 	end_request?: SessionEndRequestSummary | null
 	started_via?: SessionStartSource
 	member?: { id: number, name: string, phone: string | null, avatar_url: string | null, company: string | null }
+	/**
+	 * A guest's walk-in billed to their host (a guest visit past its grace,
+	 * the guest with no account of their own): `user_id`/`member` are then
+	 * the host who pays, and this is the person in the seat. Null otherwise.
+	 */
+	guest?: { visit_id: number, name: string, phone: string } | null
+}
+
+/**
+ * Where a coworking guest visit stands (ADDCore `GuestVisitStatus`). The
+ * reception list carries only the two still inside on the visit itself:
+ * `in_grace` (free, counting down) and `declined` (the host refused to pay
+ * for a guest with no account — reception checks them out or has them
+ * register). `left` and `converted` are the visit's end.
+ */
+export type GuestVisitStatus = "in_grace" | "declined" | "left" | "converted"
+
+/** `GET/POST .../reception/guest-visits` — a member's guest in a coworking session. */
+export interface GuestVisit {
+	id: number
+	status: GuestVisitStatus
+	guest: { user_id: number | null, name: string, phone: string, has_account: boolean }
+	host: { id: number, name: string | null }
+	/** Whether the session the visit becomes is billed to the host (the guest has no account). */
+	bills_host: boolean
+	space_id: number
+	arrived_at: string
+	grace_ends_at: string
+	/** At the moment the list was read; 0 once the grace is over. */
+	grace_seconds_left: number
+	host_declined_at: string | null
+	left_at: string | null
+	converted_at: string | null
+	walkin_session_id: number | null
+}
+
+/** `POST .../reception/guest-visits` — `name` only when the phone has no account. */
+export interface RegisterGuestVisitPayload {
+	host_user_id: number
+	phone: string
+	name?: string
 }
 
 /** A member's "end session" press. `payment_method` is how they chose to pay: `wallet`, `cash`, a gateway, or null. */

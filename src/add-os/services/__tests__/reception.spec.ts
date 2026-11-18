@@ -3,11 +3,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import {
 	approveBooking,
 	cancelBooking,
+	checkOutGuestVisit,
 	checkOutSession,
 	extendBooking,
 	getExtensionOptions,
 	listActiveSessions,
+	listGuestVisits,
 	listPendingApprovals,
+	registerGuestVisit,
 	rejectBooking,
 	settleSessionPayment,
 	toOffsetIso
@@ -92,6 +95,39 @@ describe("reception service", () => {
 
 			expect(calledUrl()).toBe(`${BASE}/sessions/active`)
 			expect(sessions).toEqual([sessionRow])
+		})
+	})
+
+	describe("guest visits", () => {
+		const visit = { id: 4, status: "in_grace", guest: { user_id: null, name: "Omar", phone: "+963991234567", has_account: false }, host: { id: 12, name: "Sara" }, bills_host: true, grace_seconds_left: 900 }
+
+		it("listGuestVisits reads guest-visits as a flat array", async () => {
+			vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: [visit] }))
+
+			expect(await listGuestVisits()).toEqual([visit])
+			expect(calledUrl()).toBe(`${BASE}/guest-visits`)
+			expect(calledInit().method).toBe("GET")
+		})
+
+		it("registerGuestVisit POSTs host, phone and name and unwraps the visit", async () => {
+			vi.mocked(fetch).mockResolvedValue(jsonResponse({ data: visit }, 201))
+
+			const recorded = await registerGuestVisit({ host_user_id: 12, phone: "+963991234567", name: "Omar" })
+
+			expect(calledUrl()).toBe(`${BASE}/guest-visits`)
+			expect(calledInit().method).toBe("POST")
+			expect(calledInit().body).toBe(JSON.stringify({ host_user_id: 12, phone: "+963991234567", name: "Omar" }))
+			expect(recorded).toEqual(visit)
+		})
+
+		it("checkOutGuestVisit POSTs the visit's check-out with no body", async () => {
+			vi.mocked(fetch).mockResolvedValue(jsonResponse({ message: "The guest has been checked out at no charge." }))
+
+			await checkOutGuestVisit(4)
+
+			expect(calledUrl()).toBe(`${BASE}/guest-visits/4/check-out`)
+			expect(calledInit().method).toBe("POST")
+			expect(calledInit().body).toBeUndefined()
 		})
 	})
 

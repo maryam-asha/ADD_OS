@@ -23,7 +23,8 @@ describe("notificationTarget", () => {
 		["private_office_request", "1", "/address/private-office-requests"],
 		["provider_request", "8", "/providers/requests"],
 		["service_request", "6", "/address/operations-requests"],
-		["hr_approval_request", "4", "/my-hr/approvals"]
+		["hr_approval_request", "4", "/my-hr/approvals"],
+		["guest_visit", "11", "/bookings/reception-desk"]
 	])("a staff %s notice opens its list with that record open", (type, id, path) => {
 		expect(notificationTarget("staff", { target_type: type, target_id: id })).toEqual(opens(path, id))
 	})

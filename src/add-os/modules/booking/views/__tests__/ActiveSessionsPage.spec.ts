@@ -36,6 +36,7 @@ vi.mock("@/add-os/services/realtime", () => ({
 }))
 
 vi.mock("@/add-os/modules/payments/components/CollectPaymentModal.vue", () => ({ default: { name: "CollectPaymentModal", render: () => null } }))
+vi.mock("@/add-os/modules/reception/components/RecordGuestModal.vue", () => ({ default: { name: "RecordGuestModal", props: ["show", "hostUserId"], render: () => null } }))
 
 // The desk's permission gates, read from a set each test can narrow.
 const { granted } = vi.hoisted(() => ({ granted: new Set<string>() }))
@@ -127,6 +128,7 @@ const i18n = createI18n({
 				columns: { occupant: "Occupant", space: "Space", type: "Type", checkedInAt: "Checked in", status: "Status", actions: "Actions" },
 				type: { booking: "Booking", walkin: "Walk-in" },
 				seat: { covered: "Subscription seat", pool: "Pool seat", coveredHint: "", poolHint: "", desk: "Desk {code}", deskHint: "" },
+				guest: { add: "Add guest", of: "Guest of {host}", hint: "" },
 				checkOut: {
 					button: "Check out",
 					title: "Check out session",
@@ -216,6 +218,46 @@ describe("activeSessionsPage", () => {
 		await flushPromises()
 
 		expect(document.body.textContent ?? "").toContain("Desk D-04")
+		wrapper.unmount()
+	})
+
+	/**
+	 * A guest is recorded on a member's own coworking session only: never a
+	 * room's booking (its guests are the booking's), never a guest's session
+	 * billed to its host.
+	 */
+	it("offers to add a guest on a member's own coworking session only", async () => {
+		const guestSession = { ...walkinSession, id: 3, guest: { visit_id: 9, name: "Lina", phone: "+963991234567" } }
+		listActiveSessionsMock.mockResolvedValue([bookingSession, walkinSession, guestSession])
+		const wrapper = mountPage()
+		await flushPromises()
+
+		expect((document.body.textContent ?? "").match(/Add guest/g)).toHaveLength(1)
+
+		wrapper.vm.openAddGuest(walkinSession)
+		expect(wrapper.vm.guestModalVisible).toBe(true)
+		expect(wrapper.vm.guestHostId).toBe(walkinSession.user_id)
+		wrapper.unmount()
+	})
+
+	/** A guest's session billed to the host: the guest sits in the seat, the host pays. */
+	it("names the guest in a session billed to their host", async () => {
+		listActiveSessionsMock.mockResolvedValue([{ ...walkinSession, guest: { visit_id: 9, name: "Lina", phone: "+963991234567" } }])
+		const wrapper = mountPage()
+		await flushPromises()
+
+		const text = document.body.textContent ?? ""
+		expect(text).toContain("Lina")
+		expect(text).toContain("Guest of Omar Nasri")
+		wrapper.unmount()
+	})
+
+	it("hides adding a guest without reception.check_in", async () => {
+		grantOnly("reception.book")
+		const wrapper = mountPage()
+		await flushPromises()
+
+		expect(document.body.textContent ?? "").not.toContain("Add guest")
 		wrapper.unmount()
 	})
 
