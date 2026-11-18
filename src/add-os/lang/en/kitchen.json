@@ -54,16 +54,34 @@
 			"line": "{name} × {quantity}",
 			"unnamedItem": "Removed item",
 			"total": "{points} points",
-			"submitted": "Sent at {time}"
+			"submitted": "Sent at {time}",
+			"orderedQuantity": "ordered {quantity}",
+			"removed": "removed",
+			"adjusted": "Accepted with changes",
+			"orderedTotal": "was {points} points"
 		},
 		"actions": {
 			"accept": "Accept",
+			"adjust": "Accept with changes",
 			"reject": "Reject",
 			"ready": "Ready for pickup",
 			"deliver": "Delivered"
 		},
+		"adjust": {
+			"title": "Accept order #{id} with changes",
+			"hint": "Set how much of each item will be made. Zero takes the item off the order. The change applies at once and the member is told.",
+			"ordered": "ordered {quantity}",
+			"originalTotal": "Order total",
+			"newTotal": "Total after changes",
+			"refund": "{points} points go back to the member, to the wallet they paid from.",
+			"onBill": "The session or booking is charged the new total.",
+			"unchanged": "No quantity changed, so the order is accepted as it is.",
+			"noneLeft": "An order cannot be accepted with no item left. Reject it instead.",
+			"submit": "Accept with changes"
+		},
 		"success": {
 			"accept": "Order accepted.",
+			"acceptAdjusted": "Order accepted with the changed quantities.",
 			"reject": "Order rejected.",
 			"ready": "Order marked ready.",
 			"deliver": "Order marked delivered."

@@ -24,8 +24,11 @@ function orderOf(overrides: Partial<KitchenOrder> = {}): KitchenOrder {
 		cash_due_points: null,
 		cash_due_amounts: null,
 		cash_return: null,
-		lines: [{ sale_item_id: 1, name: "Latte", quantity: 2, unit_price_points: 625, line_points: 1250 }],
+		lines: [{ id: 11, sale_item_id: 1, name: "Latte", image_url: null, quantity: 2, ordered_quantity: 2, unit_price_points: 625, line_points: 1250 }],
+		items_count: 2,
 		total_points: 1250,
+		adjusted: false,
+		ordered_total_points: 1250,
 		rejection_reason: null,
 		cancelled_by: null,
 		timestamps: { submitted_at: "2026-11-11T09:00:00+03:00", accepted_at: null, ready_at: null, delivered_at: null },
@@ -48,11 +51,30 @@ describe("kitchenOrderCard", () => {
 
 	it("hides_actions_without_manage", () => {
 		const withManage = mountCard(orderOf(), true)
-		expect(withManage.findAll("[data-action]").map(node => node.attributes("data-action"))).toEqual(["accept", "reject"])
+		expect(withManage.findAll("[data-action]").map(node => node.attributes("data-action"))).toEqual(["accept", "adjust", "reject"])
 
 		const without = mountCard(orderOf(), false)
 		expect(without.find("[data-test=actions]").exists()).toBe(false)
 		expect(without.findAll("button")).toHaveLength(0)
+	})
+
+	it("an_order_accepted_with_changes_shows_what_was_ordered", () => {
+		const wrapper = mountCard(orderOf({
+			status: "preparing",
+			adjusted: true,
+			items_count: 1,
+			total_points: 625,
+			ordered_total_points: 1875,
+			lines: [
+				{ id: 11, sale_item_id: 1, name: "Latte", image_url: null, quantity: 1, ordered_quantity: 2, unit_price_points: 625, line_points: 625 },
+				{ id: 12, sale_item_id: 2, name: "Cookie", image_url: null, quantity: 0, ordered_quantity: 1, unit_price_points: 625, line_points: 0 }
+			]
+		}))
+
+		expect(wrapper.get("[data-test=adjusted]").text()).toBe("Accepted with changes")
+		expect(wrapper.get("[data-line='11'] [data-test=line-ordered]").text()).toBe("(ordered 2)")
+		expect(wrapper.find("[data-line='12'] [data-test=line-removed]").exists()).toBe(true)
+		expect(wrapper.get("[data-test=ordered-total]").text()).toBe("was 1,875 points")
 	})
 
 	it("an_unknown_member_and_arabic_plural_wait", () => {

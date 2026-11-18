@@ -59,9 +59,21 @@ async function act(id: number, action: "accept" | "reject" | "ready" | "deliver"
 	return (await post<{ data: KitchenOrder }>(`${BASE}/kitchen/orders/${id}/${action}`, body)).data
 }
 
-/** Draws the order's lines from the branch's kitchen store; 422 names an item short of stock. */
-export function acceptKitchenOrder(id: number): Promise<KitchenOrder> {
-	return act(id, "accept")
+/** One line the kitchen makes less of: its `lines[].id`, and how many are made (0 takes it off). */
+export interface AcceptLine {
+	id: number
+	quantity: number
+}
+
+/**
+ * Draws the order's lines from the branch's kitchen store; 422 names an item
+ * short of stock. With `lines`, the order is accepted with changes: each
+ * named line is made in that quantity (0 to what was ordered), the rest as
+ * ordered, and a paid order gets the difference back as points. 422 when a
+ * line is not the order's, above what was ordered, or every line is 0.
+ */
+export function acceptKitchenOrder(id: number, lines?: AcceptLine[]): Promise<KitchenOrder> {
+	return act(id, "accept", lines && lines.length > 0 ? { lines } : undefined)
 }
 
 /** A pending order only; `reason` is required, at most 300 characters. */

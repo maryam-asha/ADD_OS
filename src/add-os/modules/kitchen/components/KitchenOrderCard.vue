@@ -24,14 +24,18 @@
 
 			<n-tag v-if="paymentKey" size="small" :type="order.payment.choice === 'bill' ? 'default' : 'success'" class="self-start" data-test="payment">{{ t(paymentKey) }}</n-tag>
 
-			<ul class="flex flex-col gap-1" data-test="lines">
-				<li v-for="line in order.lines" :key="line.sale_item_id">
-					{{ t("kitchen.card.line", { name: line.name ?? t("kitchen.card.unnamedItem"), quantity: formatNumber(line.quantity) }) }}
-				</li>
-			</ul>
+			<n-tag v-if="order.adjusted" size="small" type="warning" :bordered="false" class="self-start" data-test="adjusted">
+				<template #icon><Icon name="carbon:edit" :size="14" /></template>
+				{{ t("kitchen.card.adjusted") }}
+			</n-tag>
+
+			<KitchenOrderLines :lines="order.lines" />
 
 			<div class="flex flex-wrap items-center justify-between gap-2">
-				<span class="font-bold" data-test="total">{{ t("kitchen.card.total", { points: formatNumber(order.total_points) }) }}</span>
+				<span class="flex flex-wrap items-baseline gap-2">
+					<span class="font-bold" data-test="total">{{ t("kitchen.card.total", { points: formatNumber(order.total_points) }) }}</span>
+					<span v-if="order.adjusted" class="text-xs text-[var(--add-text-muted)] line-through" data-test="ordered-total">{{ t("kitchen.card.orderedTotal", { points: formatNumber(order.ordered_total_points) }) }}</span>
+				</span>
 				<span v-if="order.timestamps.submitted_at" class="text-secondary text-sm" data-test="submitted">
 					{{ t("kitchen.card.submitted", { time: formatTime(order.timestamps.submitted_at) }) }}
 				</span>
@@ -51,11 +55,12 @@ import type { DeliveryType, KitchenOrder } from "@/add-os/modules/kitchen/types/
 import { NButton, NCard, NTag } from "naive-ui"
 import { computed } from "vue"
 import { useI18n } from "vue-i18n"
+import KitchenOrderLines from "@/add-os/modules/kitchen/components/KitchenOrderLines.vue"
 import { paymentLabelKey } from "@/add-os/modules/kitchen/utils/payment"
 import { countKey, formatNumber, formatTime } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
-type CardAction = "accept" | "reject" | "ready" | "deliver"
+type CardAction = "accept" | "adjust" | "reject" | "ready" | "deliver"
 
 const props = defineProps<{
 	order: KitchenOrder
@@ -69,12 +74,13 @@ const props = defineProps<{
 	busy?: boolean
 }>()
 
-const emit = defineEmits<{ accept: []; reject: []; ready: []; deliver: [] }>()
+const emit = defineEmits<{ accept: []; adjust: []; reject: []; ready: []; deliver: [] }>()
 
 const { t } = useI18n()
 
 function fire(action: CardAction) {
 	if (action === "accept") emit("accept")
+	else if (action === "adjust") emit("adjust")
 	else if (action === "reject") emit("reject")
 	else if (action === "ready") emit("ready")
 	else emit("deliver")
@@ -108,6 +114,7 @@ const actions = computed<{ key: CardAction; type: "primary" | "error" | "default
 		case "pending":
 			return [
 				{ key: "accept", type: "primary" },
+				{ key: "adjust", type: "default" },
 				{ key: "reject", type: "error" }
 			]
 		case "preparing":

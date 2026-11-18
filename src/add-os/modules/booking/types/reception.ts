@@ -125,7 +125,7 @@ export interface SessionReportLine {
 	/** `order`: an accepted kitchen order on this session, a charge of its own. */
 	kind: "time" | "resource_consumption" | "order"
 	label: string
-	/** Null on an `order` line, which has no quantity of its own. */
+	/** On an `order` line, how many items the order holds (every item's quantity), with no `unit`. */
 	quantity: number | null
 	unit: string | null
 	source: "plan" | "charge" | null
@@ -133,6 +133,22 @@ export interface SessionReportLine {
 	amount: string | null
 	/** `order` lines only: whether that order is paid yet. */
 	paid?: boolean
+	/** `order` lines only: the order's status (preparing, ready, delivered). */
+	status?: string
+	/** `order` lines only: what it holds. An item the kitchen took off has `quantity` 0. */
+	items?: SessionReportOrderItem[]
+}
+
+/** One item of an `order` line, at the prices of the moment it was sent. */
+export interface SessionReportOrderItem {
+	sale_item_id: number
+	/** Null when the item has since been removed. */
+	name: string | null
+	quantity: number
+	/** What the member ordered: more than `quantity` when the kitchen accepted the order with changes. */
+	ordered_quantity?: number
+	unit_price_points: number
+	line_points: number
 }
 
 /**

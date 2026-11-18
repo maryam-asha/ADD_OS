@@ -63,8 +63,11 @@ function orderOf(id: number, status: KitchenOrder["status"], submittedAt: string
 		cash_due_points: null,
 		cash_due_amounts: null,
 		cash_return: null,
-		lines: [{ sale_item_id: 1, name: "Tea", quantity: 1, unit_price_points: 100, line_points: 100 }],
+		lines: [{ id: 11, sale_item_id: 1, name: "Tea", image_url: null, quantity: 1, ordered_quantity: 1, unit_price_points: 100, line_points: 100 }],
+		items_count: 1,
 		total_points: 100,
+		adjusted: false,
+		ordered_total_points: 100,
 		rejection_reason: null,
 		cancelled_by: null,
 		timestamps: { submitted_at: submittedAt, accepted_at: null, ready_at: null, delivered_at: null },
@@ -182,6 +185,27 @@ describe("kitchenBoardPage", () => {
 		expect(messageMock.error).toHaveBeenCalledWith("Latte is not available in that quantity right now.")
 		expect(columnIds(wrapper, "pending")).toEqual([1])
 		expect(wrapper.find("[data-column=pending] [data-action=reject]").exists()).toBe(true)
+		wrapper.unmount()
+	})
+
+	it("accepts_with_changes_from_its_dialog_and_keeps_a_refusal_there", async () => {
+		listOrdersMock.mockResolvedValue(pageOf([orderOf(1, "pending", "2026-11-11T09:00:00+03:00")]))
+		acceptMock.mockRejectedValueOnce(new ApiError(422, JSON.stringify({ message: "You cannot accept more Tea than the member ordered." }))).mockResolvedValue({})
+		const wrapper = mountPage()
+		await flushPromises()
+
+		await wrapper.get("[data-action=adjust]").trigger("click")
+		await flushPromises()
+		document.querySelector<HTMLButtonElement>("[data-test=adjust-submit]")!.click()
+		await flushPromises()
+
+		expect(acceptMock).toHaveBeenCalledWith(1, [])
+		expect(document.querySelector("[data-test=adjust-error]")!.textContent).toContain("You cannot accept more Tea")
+		expect(messageMock.error).not.toHaveBeenCalled()
+
+		document.querySelector<HTMLButtonElement>("[data-test=adjust-submit]")!.click()
+		await flushPromises()
+		expect(messageMock.success).toHaveBeenCalledWith("Order accepted.")
 		wrapper.unmount()
 	})
 

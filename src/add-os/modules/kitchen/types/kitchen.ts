@@ -13,11 +13,18 @@ export const KITCHEN_ORDER_STATUSES: readonly KitchenOrderStatus[] = ["awaiting_
 export type DeliveryType = "desk" | "space" | "pickup" | "note"
 
 export interface KitchenOrderLine {
+	/** The line itself — what accepting with changes names. */
+	id: number
 	sale_item_id: number
 	/** The item's name in the request's language; null when the item has since been removed. */
 	name: string | null
+	image_url: string | null
+	/** What is made: less than `ordered_quantity`, or 0 (taken off), when the order was accepted with changes. */
 	quantity: number
+	/** What the member ordered. */
+	ordered_quantity: number
 	unit_price_points: number
+	/** `quantity` × `unit_price_points`. */
 	line_points: number
 }
 
@@ -48,7 +55,12 @@ export interface KitchenOrder {
 	/** Cash taken for an order that was not made: owed to the member, handed back, or credited as points. Null when none was taken. */
 	cash_return: "owed" | "returned_in_cash" | "credited_as_points" | null
 	lines: KitchenOrderLine[]
+	/** Every line's `quantity`: the items that are made. */
+	items_count: number
 	total_points: number
+	/** Accepted with less than was ordered; `ordered_total_points` is what the order came to as sent. */
+	adjusted: boolean
+	ordered_total_points: number
 	rejection_reason: string | null
 	cancelled_by: "member" | "system" | null
 	/**

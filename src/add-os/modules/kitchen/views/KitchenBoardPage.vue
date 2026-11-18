@@ -41,6 +41,7 @@
 					:fetched-at
 					:busy="busyId === order.id"
 					@accept="accept(order)"
+					@adjust="openAdjust(order)"
 					@reject="openReject(order)"
 					@ready="ready(order)"
 					@deliver="deliver(order)"
@@ -49,12 +50,14 @@
 			</section>
 		</div>
 
+		<AcceptWithChangesModal v-model:show="adjustVisible" :order="adjustTarget" :loading="busyId !== null" :server-error="adjustServerError" @submit="submitAdjust" />
 		<RejectOrderModal v-model:show="rejectVisible" :order-id="rejectTarget?.id ?? null" :loading="busyId !== null" :server-error="rejectServerError" @submit="submitReject" />
 	</div>
 </template>
 
 <script setup lang="ts">
 import type { KitchenOrder, KitchenOrderStatus, KitchenStoreRow } from "@/add-os/modules/kitchen/types/kitchen"
+import type { AcceptLine } from "@/add-os/services/kitchen"
 import { NAlert, NButton, NCard, NTag, useMessage } from "naive-ui"
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
@@ -62,6 +65,7 @@ import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { useNewArrivalChime } from "@/add-os/composables/useNewArrivalChime"
 import { canManageKitchenOrders, canUpdateKitchenStores, canViewKitchenStores } from "@/add-os/config/permissions"
 import { useBranchOptions } from "@/add-os/modules/dashboard/composables/useBranchOptions"
+import AcceptWithChangesModal from "@/add-os/modules/kitchen/components/AcceptWithChangesModal.vue"
 import ChimeMuteButton from "@/add-os/modules/kitchen/components/ChimeMuteButton.vue"
 import KitchenOrderCard from "@/add-os/modules/kitchen/components/KitchenOrderCard.vue"
 import RejectOrderModal from "@/add-os/modules/kitchen/components/RejectOrderModal.vue"
@@ -169,8 +173,13 @@ onBeforeUnmount(() => clearInterval(ticker))
 // ── Actions ─────────────────────────────────────────────────────────────────
 const busyId = ref<number | null>(null)
 
-/** Runs one action; true when it worked. Either way the board is read again. */
-async function run(order: KitchenOrder, action: () => Promise<unknown>, success: string, onReasonError?: (text: string) => void): Promise<boolean> {
+/**
+ * Runs one action; true when it worked. Either way the board is read again.
+ * `onReasonError` takes a 422 on `reason` (rejecting); `onUnprocessable`
+ * any 422 at all — its first field error, else its message (accepting with
+ * changes, whose dialog shows it).
+ */
+async function run(order: KitchenOrder, action: () => Promise<unknown>, success: string, onReasonError?: (text: string) => void, onUnprocessable?: (text: string) => void): Promise<boolean> {
 	busyId.value = order.id
 	try {
 		await action()
@@ -179,7 +188,9 @@ async function run(order: KitchenOrder, action: () => Promise<unknown>, success:
 	} catch (caught) {
 		if (!(caught instanceof ApiError)) throw caught
 		const reasonError = caught.status === 422 ? caught.data?.errors?.reason?.[0] : undefined
+		const unprocessable = caught.status === 422 ? (Object.values(caught.data?.errors ?? {})[0]?.[0] ?? caught.data?.message) : undefined
 		if (reasonError && onReasonError) onReasonError(reasonError)
+		else if (unprocessable && onUnprocessable) onUnprocessable(unprocessable)
 		else if (caught.status === 403) message.error(t("resourceCrud.mutations.permissionError"))
 		else message.error(caught.data?.message ?? t("resourceCrud.mutations.genericError"))
 		return false
@@ -194,6 +205,34 @@ async function run(order: KitchenOrder, action: () => Promise<unknown>, success:
 
 function accept(order: KitchenOrder) {
 	return run(order, () => acceptKitchenOrder(order.id), t("kitchen.success.accept"))
+}
+
+const adjustVisible = ref(false)
+const adjustTarget = ref<KitchenOrder | null>(null)
+const adjustServerError = ref<string | null>(null)
+
+function openAdjust(order: KitchenOrder) {
+	adjustTarget.value = order
+	adjustServerError.value = null
+	adjustVisible.value = true
+}
+
+/** No line changed: the order is accepted as it is. */
+async function submitAdjust(lines: AcceptLine[]) {
+	const order = adjustTarget.value
+	if (order === null) return
+	adjustServerError.value = null
+	const worked = await run(
+		order,
+		() => acceptKitchenOrder(order.id, lines),
+		t(lines.length > 0 ? "kitchen.success.acceptAdjusted" : "kitchen.success.accept"),
+		undefined,
+		text => {
+			adjustServerError.value = text
+		}
+	)
+	// Refused for another reason (already handled): the board has reloaded, nothing is left to accept.
+	if (worked || adjustServerError.value === null) adjustVisible.value = false
 }
 
 function ready(order: KitchenOrder) {

@@ -46,14 +46,15 @@
 					</div>
 
 					<div>
-						<h3 class="font-bold">{{ t("kitchen.history.lines") }}</h3>
-						<ul class="flex flex-col gap-1">
-							<li v-for="line in selected.lines" :key="line.sale_item_id" class="flex justify-between gap-2">
-								<span>{{ t("kitchen.card.line", { name: line.name ?? t("kitchen.card.unnamedItem"), quantity: formatNumber(line.quantity) }) }}</span>
-								<span>{{ t("kitchen.card.total", { points: formatNumber(line.line_points) }) }}</span>
-							</li>
-						</ul>
-						<p class="mt-2 font-bold">{{ t("kitchen.card.total", { points: formatNumber(selected.total_points) }) }}</p>
+						<div class="flex flex-wrap items-center gap-2">
+							<h3 class="font-bold">{{ t("kitchen.history.lines") }}</h3>
+							<n-tag v-if="selected.adjusted" size="small" type="warning" :bordered="false" data-test="adjusted">{{ t("kitchen.card.adjusted") }}</n-tag>
+						</div>
+						<KitchenOrderLines :lines="selected.lines" show-points />
+						<p class="mt-2 flex flex-wrap items-baseline gap-2">
+							<span class="font-bold">{{ t("kitchen.card.total", { points: formatNumber(selected.total_points) }) }}</span>
+							<span v-if="selected.adjusted" class="text-xs text-[var(--add-text-muted)] line-through" data-test="ordered-total">{{ t("kitchen.card.orderedTotal", { points: formatNumber(selected.ordered_total_points) }) }}</span>
+						</p>
 					</div>
 				</div>
 			</template>
@@ -72,6 +73,7 @@ import DetailDrawer from "@/add-os/components/page/DetailDrawer.vue"
 import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { canListMembers } from "@/add-os/config/permissions"
+import KitchenOrderLines from "@/add-os/modules/kitchen/components/KitchenOrderLines.vue"
 import { KITCHEN_ORDER_STATUSES } from "@/add-os/modules/kitchen/types/kitchen"
 import { paymentLabelKey } from "@/add-os/modules/kitchen/utils/payment"
 import { ApiError } from "@/add-os/services/api"

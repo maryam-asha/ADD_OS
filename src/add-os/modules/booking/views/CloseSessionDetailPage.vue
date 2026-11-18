@@ -72,13 +72,19 @@
 						</template>
 						<div class="flex flex-col gap-3 text-sm">
 							<div v-for="(line, index) in report.lines" :key="index" class="flex justify-between items-center text-[var(--add-text-primary)] p-2.5 rounded-lg hover:bg-[var(--add-surface-sunken)]" :data-line="line.kind">
-								<span class="flex flex-wrap items-center gap-2">
-									<Icon v-if="line.kind === 'order'" name="carbon:restaurant" :size="16" class="text-[var(--add-success-text)]" />
-									{{ line.label }}
-									<span v-if="line.quantity !== null" class="text-[var(--add-text-muted)]">({{ formatNumber(line.quantity) }} {{ line.unit }})</span>
-									<n-tag v-if="line.kind === 'order'" size="small" round :bordered="false" :type="line.paid ? 'success' : 'warning'" data-test="order-paid">
-										{{ t(line.paid ? "closeSession.detail.orders.paid" : "closeSession.detail.orders.unpaid") }}
-									</n-tag>
+								<span class="flex flex-col gap-1">
+									<span class="flex flex-wrap items-center gap-2">
+										<Icon v-if="line.kind === 'order'" name="carbon:restaurant" :size="16" class="text-[var(--add-success-text)]" />
+										{{ line.label }}
+										<!-- An order's count is spelled out by its items below. -->
+										<span v-if="line.quantity !== null && line.kind !== 'order'" class="text-[var(--add-text-muted)]">({{ formatNumber(line.quantity) }} {{ line.unit }})</span>
+										<n-tag v-if="line.kind === 'order'" size="small" round :bordered="false" :type="line.paid ? 'success' : 'warning'" data-test="order-paid">
+											{{ t(line.paid ? "closeSession.detail.orders.paid" : "closeSession.detail.orders.unpaid") }}
+										</n-tag>
+									</span>
+									<span v-if="line.kind === 'order' && orderItems(line).length > 0" class="flex flex-wrap gap-x-3 text-xs text-[var(--add-text-muted)] ps-6" data-test="order-items">
+										<span v-for="(item, itemIndex) in orderItems(line)" :key="itemIndex" dir="auto">{{ item }}</span>
+									</span>
 								</span>
 								<span v-if="line.points !== null" class="font-semibold text-[var(--add-text-primary)]">{{ t("closeSession.detail.points", { points: formatNumber(line.points) }) }}</span>
 							</div>
@@ -255,7 +261,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ReceptionSessionReport, SessionType } from "@/add-os/modules/booking/types/reception"
+import type { ReceptionSessionReport, SessionReportLine, SessionType } from "@/add-os/modules/booking/types/reception"
 import { NAlert, NAvatar, NButton, NCard, NSpin, NTag, useDialog, useMessage } from "naive-ui"
 import { computed, onBeforeUnmount, onMounted, ref } from "vue"
 import { useI18n } from "vue-i18n"
@@ -286,6 +292,13 @@ const isConfirming = ref(false)
 
 const closing = computed(() => report.value?.closing ?? null)
 /** Its accepted kitchen orders still unpaid — what the desk collects beside the session itself. */
+/** An order line's items as "name × quantity" — an item the kitchen took off is left out. */
+function orderItems(line: SessionReportLine): string[] {
+	return (line.items ?? [])
+		.filter(item => item.quantity > 0)
+		.map(item => t("closeSession.detail.orders.item", { name: item.name ?? t("closeSession.detail.orders.unnamedItem"), quantity: formatNumber(item.quantity) }))
+}
+
 const unpaidOrderPoints = computed(() => closing.value?.orders_points ?? report.value?.totals?.orders_unpaid_points ?? 0)
 const endRequest = computed(() => closing.value?.end_request?.status === "pending" ? closing.value.end_request : null)
 

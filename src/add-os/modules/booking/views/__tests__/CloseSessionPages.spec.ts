@@ -190,7 +190,7 @@ describe("end requests", () => {
 			...base,
 			lines: [
 				...base.lines,
-				{ kind: "order", id: 41, label: "Kitchen order #41", quantity: null, unit: null, source: null, points: 30, amount: "3.00", paid: false, recorded_at: "2026-08-17T09:00:00+03:00" },
+				{ kind: "order", id: 41, label: "Kitchen order #41", quantity: 3, unit: null, source: null, points: 30, amount: "3.00", paid: false, recorded_at: "2026-08-17T09:00:00+03:00", status: "delivered", items: [{ sale_item_id: 1, name: "Water", quantity: 3, ordered_quantity: 3, unit_price_points: 10, line_points: 30 }, { sale_item_id: 2, name: "Cookie", quantity: 0, ordered_quantity: 1, unit_price_points: 5, line_points: 0 }] },
 				{ kind: "order", id: 42, label: "Kitchen order #42", quantity: null, unit: null, source: null, points: 15, amount: "1.50", paid: true, recorded_at: "2026-08-17T09:30:00+03:00" }
 			],
 			closing: { ...base.closing, orders_points: 30 }
@@ -204,6 +204,10 @@ describe("end requests", () => {
 		expect(orders[0].text()).toContain("30 points")
 		expect(orders[0].get("[data-test=order-paid]").text()).toBe("Unpaid")
 		expect(orders[1].get("[data-test=order-paid]").text()).toBe("Paid")
+		// The items spell the count out; one taken off by the kitchen is left out, and no "(3 )" is shown.
+		expect(orders[0].get("[data-test=order-items]").text()).toBe("Water × 3")
+		expect(orders[0].text()).not.toContain("(3")
+		expect(orders[1].find("[data-test=order-items]").exists()).toBe(false)
 		expect(orders[0].text()).not.toContain("(")
 		expect(wrapper.get("[data-test=orders-unpaid]").text()).toContain("30 points")
 		expect(wrapper.get("[data-test=grand-total]").text()).toContain("230 points")
