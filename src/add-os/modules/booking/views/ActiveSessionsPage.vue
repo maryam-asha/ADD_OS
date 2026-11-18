@@ -107,7 +107,7 @@ import type { DataTableColumns, SelectOption } from "naive-ui"
 import type { FieldErrors } from "@/add-os/modules/booking/composables/useReceptionAction"
 import type { ActiveSession, BookingExtensionOptions, ExtensionOption, OutstandingPurpose } from "@/add-os/modules/booking/types/reception"
 import type { PaymentMethod } from "@/add-os/modules/payments/types/wallet-top-up"
-import { NAlert, NButton, NCard, NDataTable, NDatePicker, NForm, NFormItem, NRadio, NRadioGroup, NSelect, NSpin, useDialog } from "naive-ui"
+import { NAlert, NButton, NCard, NDataTable, NDatePicker, NForm, NFormItem, NRadio, NRadioGroup, NSelect, NSpin } from "naive-ui"
 import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import { useRouter } from "vue-router"
@@ -122,7 +122,6 @@ import CollectPaymentModal from "@/add-os/modules/payments/components/CollectPay
 import { PAYMENT_METHODS } from "@/add-os/modules/payments/types/wallet-top-up"
 import RecordGuestModal from "@/add-os/modules/reception/components/RecordGuestModal.vue"
 import {
-	cancelBooking,
 	checkOutSession,
 	extendBooking,
 	getExtensionOptions,
@@ -166,7 +165,6 @@ import Icon from "@/components/common/Icon.vue"
 defineProps<{ titleKey?: string, embedded?: boolean }>()
 
 const { t } = useI18n()
-const dialog = useDialog()
 const router = useRouter()
 
 const { data: rows, isLoading, error, refetch } = useResourceList<ActiveSession>(listActiveSessions)
@@ -331,22 +329,6 @@ async function submitExtend() {
 	if (succeeded) extendModalVisible.value = false
 }
 
-/* ── Cancel ────────────────────────────────────────────────────────────────── */
-
-function confirmCancel(row: ActiveSession) {
-	dialog.warning({
-		title: t("activeSessions.cancel.confirmTitle"),
-		content: t("activeSessions.cancel.confirmText"),
-		positiveText: t("activeSessions.cancel.confirmOk"),
-		negativeText: t("activeSessions.cancel.confirmCancel"),
-		onPositiveClick: () => cancelSession(row)
-	})
-}
-
-async function cancelSession(row: ActiveSession) {
-	await action.run(() => cancelBooking(row.id), t("activeSessions.cancel.success"))
-}
-
 /* ── Guests ────────────────────────────────────────────────────────────────── */
 
 /*
@@ -362,14 +344,13 @@ function openAddGuest(row: ActiveSession) {
 	guestModalVisible.value = true
 }
 
-/** Checking out and recording a guest are `reception.check_in`; extending and cancelling a booking, `reception.book`. */
+/** Checking out and recording a guest are `reception.check_in`; extending a booking, `reception.book`. No cancel: see active-sessions.config.ts. */
 const columns = computed<DataTableColumns<ActiveSession>>(() =>
 	buildSessionColumns(t, {
 		onDetails: openDetails,
 		onCheckOut: canCheckInAtReception() ? openCheckOut : undefined,
 		onAddGuest: canCheckInAtReception() ? openAddGuest : undefined,
-		onExtend: canBookAtReception() ? openExtend : undefined,
-		onCancel: canBookAtReception() ? confirmCancel : undefined
+		onExtend: canBookAtReception() ? openExtend : undefined
 	})
 )
 
@@ -389,7 +370,6 @@ defineExpose({
 	extendFieldErrors,
 	extendModalVisible,
 	extendOptions,
-	cancelSession,
 	openAddGuest,
 	guestModalVisible,
 	guestHostId

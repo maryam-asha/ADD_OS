@@ -5,10 +5,9 @@ import { createI18n } from "vue-i18n"
 import { ApiError } from "@/add-os/services/api"
 import ActiveSessionsPage from "../ActiveSessionsPage.vue"
 
-const { listActiveSessionsMock, checkOutSessionMock, cancelBookingMock, extendBookingMock, getExtensionOptionsMock } = vi.hoisted(() => ({
+const { listActiveSessionsMock, checkOutSessionMock, extendBookingMock, getExtensionOptionsMock } = vi.hoisted(() => ({
 	listActiveSessionsMock: vi.fn(),
 	checkOutSessionMock: vi.fn(),
-	cancelBookingMock: vi.fn(),
 	extendBookingMock: vi.fn(),
 	getExtensionOptionsMock: vi.fn()
 }))
@@ -16,7 +15,6 @@ const { listActiveSessionsMock, checkOutSessionMock, cancelBookingMock, extendBo
 vi.mock("@/add-os/services/reception", () => ({
 	listActiveSessions: listActiveSessionsMock,
 	checkOutSession: checkOutSessionMock,
-	cancelBooking: cancelBookingMock,
 	extendBooking: extendBookingMock,
 	getExtensionOptions: getExtensionOptionsMock
 }))
@@ -151,7 +149,6 @@ const i18n = createI18n({
 					loadError: "Couldn't load the extension options.",
 					success: "Booking extended."
 				},
-				cancel: { button: "Cancel booking", confirmTitle: "Cancel this booking?", confirmText: "Cancel booking", success: "Booking cancelled." }
 			},
 			resourceCrud: {
 				form: { submit: "Save", cancel: "Cancel" },
@@ -171,7 +168,6 @@ describe("activeSessionsPage", () => {
 		vi.clearAllMocks()
 		listActiveSessionsMock.mockResolvedValue([bookingSession, walkinSession])
 		checkOutSessionMock.mockResolvedValue({ message: "Checked out." })
-		cancelBookingMock.mockResolvedValue({ message: "Cancelled." })
 		extendBookingMock.mockResolvedValue({ message: "Extended." })
 		getExtensionOptionsMock.mockResolvedValue(extensionOptions())
 	})
@@ -332,22 +328,23 @@ describe("activeSessionsPage", () => {
 
 	/**
 	 * Booking-only actions are booking-only in the API, not just in the UI:
-	 * the collection has no walk-in cancel and no walk-in extend at all.
-	 * Rendering them for a walk-in row would be offering a 404.
+	 * the collection has no walk-in extend at all. Rendering it for a walk-in
+	 * row would be offering a 404. Cancel is offered on no row: every row is
+	 * checked in, and the API refuses to cancel a checked-in booking.
 	 */
 	describe("actions by row type", () => {
-		it("offers check-out, extend and cancel on a booking row", async () => {
+		it("offers check-out and extend on a booking row, and never cancel", async () => {
 			listActiveSessionsMock.mockResolvedValue([bookingSession])
 			const wrapper = mountPage()
 			await flushPromises()
 
 			expect(wrapper.find('[aria-label="Check out"]').exists()).toBe(true)
 			expect(wrapper.find('[aria-label="Extend"]').exists()).toBe(true)
-			expect(wrapper.find('[aria-label="Cancel booking"]').exists()).toBe(true)
+			expect(wrapper.find('[aria-label="activeSessions.cancel.button"]').exists()).toBe(false)
 			wrapper.unmount()
 		})
 
-		it("offers a booking's extend and cancel only with reception.book, and check-out only with reception.check_in", async () => {
+		it("offers a booking's extend only with reception.book, and check-out only with reception.check_in", async () => {
 			listActiveSessionsMock.mockResolvedValue([bookingSession])
 			grantOnly("reception.check_in")
 			const wrapper = mountPage()
@@ -355,7 +352,6 @@ describe("activeSessionsPage", () => {
 
 			expect(wrapper.find('[aria-label="Check out"]').exists()).toBe(true)
 			expect(wrapper.find('[aria-label="Extend"]').exists()).toBe(false)
-			expect(wrapper.find('[aria-label="Cancel booking"]').exists()).toBe(false)
 			wrapper.unmount()
 
 			grantOnly()
@@ -375,7 +371,6 @@ describe("activeSessionsPage", () => {
 
 			expect(wrapper.find('[aria-label="Check out"]').exists()).toBe(true)
 			expect(wrapper.find('[aria-label="Extend"]').exists()).toBe(false)
-			expect(wrapper.find('[aria-label="Cancel booking"]').exists()).toBe(false)
 			wrapper.unmount()
 		})
 	})
@@ -646,32 +641,6 @@ describe("activeSessionsPage", () => {
 			await flushPromises()
 
 			expect(wrapper.vm.extendModalVisible).toBe(true)
-			expect(listActiveSessionsMock).toHaveBeenCalledTimes(1)
-			wrapper.unmount()
-		})
-	})
-
-	describe("cancel", () => {
-		it("cancels a booking and refetches", async () => {
-			const wrapper = mountPage()
-			await flushPromises()
-
-			await wrapper.vm.cancelSession(bookingSession)
-			await flushPromises()
-
-			expect(cancelBookingMock).toHaveBeenCalledWith(1)
-			expect(listActiveSessionsMock).toHaveBeenCalledTimes(2)
-			wrapper.unmount()
-		})
-
-		it("does not refetch when the cancellation window has passed", async () => {
-			cancelBookingMock.mockRejectedValue(new ApiError(422, JSON.stringify({ message: "This booking is past its cancellation window." })))
-			const wrapper = mountPage()
-			await flushPromises()
-
-			await wrapper.vm.cancelSession(bookingSession)
-			await flushPromises()
-
 			expect(listActiveSessionsMock).toHaveBeenCalledTimes(1)
 			wrapper.unmount()
 		})

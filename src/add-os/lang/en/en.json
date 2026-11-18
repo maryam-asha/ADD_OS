@@ -1765,14 +1765,6 @@
 			"loadError": "Couldn't load the extension options.",
 			"success": "Booking extended."
 		},
-		"cancel": {
-			"button": "Cancel booking",
-			"confirmTitle": "Cancel this booking?",
-			"confirmText": "The member's booking ends now and the space is freed.",
-			"confirmOk": "Cancel booking",
-			"confirmCancel": "Keep it",
-			"success": "Booking cancelled."
-		},
 		"details": "Details",
 		"guest": {
 			"add": "Add guest",

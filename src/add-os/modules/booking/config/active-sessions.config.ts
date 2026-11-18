@@ -18,7 +18,6 @@ interface SessionHandlers {
 	/** Opens the session's own page: its live timer, its bill so far. */
 	onDetails: (row: ActiveSession) => void
 	onExtend?: (row: ActiveSession) => void
-	onCancel?: (row: ActiveSession) => void
 	/** Records a guest of this row's member — a coworking session of their own only. */
 	onAddGuest?: (row: ActiveSession) => void
 }
@@ -33,12 +32,20 @@ export function canHostGuests(row: ActiveSession): boolean {
 }
 
 /**
- * Extend and cancel are rendered for `booking` rows only, and that is a
- * capability boundary rather than a styling choice: the API snapshot pinned
- * 2026-08-25 has no walk-in `extend` and no walk-in `cancel` endpoint at all.
- * Showing them greyed out for a walk-in would imply a permission problem;
- * showing them enabled would offer a 404. They are absent because the action
- * does not exist for that row.
+ * Extend is rendered for `booking` rows only, and that is a capability
+ * boundary rather than a styling choice: the API snapshot pinned 2026-08-25
+ * has no walk-in `extend` endpoint at all. Showing it greyed out for a
+ * walk-in would imply a permission problem; showing it enabled would offer a
+ * 404. It is absent because the action does not exist for that row.
+ *
+ * Cancel is not a row action here at all (removed 2026-11-18). It used to be
+ * offered on every booking row, but every row on this board is checked in,
+ * and the API refuses to cancel a checked-in booking (ADDCore
+ * `BookingCancellationService::canCancel` → `already_checked_in`, 409). The
+ * button could only ever fail. A booking that has not started yet is cancelled
+ * from All Bookings, which shows the button only when the booking can be
+ * cancelled. What was given up: nothing that worked — a checked-in booking is
+ * ended by check-out.
  *
  * Settle-payment is deliberately not a row action anywhere here — the API
  * refuses to settle a session that has not been checked out, and every row on
@@ -140,13 +147,14 @@ export function buildSessionColumns(t: ComposerTranslation, handlers: SessionHan
 			minWidth: 360,
 			align: "center",
 			render: row => {
-				const { onCheckOut, onExtend, onCancel, onAddGuest } = handlers
+				const { onCheckOut, onExtend, onAddGuest } = handlers
 				const actions: RowAction[] = [{ key: "details", label: t("activeSessions.details"), icon: "carbon:view", onClick: () => handlers.onDetails(row) }]
 				if (onCheckOut) actions.push({ key: "checkOut", label: t("activeSessions.checkOut.button"), icon: "carbon:logout", primary: true, onClick: () => onCheckOut(row) })
 				if (onAddGuest && canHostGuests(row)) actions.push({ key: "addGuest", label: t("activeSessions.guest.add"), icon: "carbon:user-follow", onClick: () => onAddGuest(row) })
 				if (row.type === "booking" && onExtend) actions.push({ key: "extend", label: t("activeSessions.extend.button"), icon: "carbon:time", onClick: () => onExtend(row) })
-				if (row.type === "booking" && onCancel) actions.push({ key: "cancel", label: t("activeSessions.cancel.button"), icon: "carbon:close-outline", danger: true, onClick: () => onCancel(row) })
-				return h(RowActions, { actions, labelled: true })
+				// One line, never a lone button wrapped under the rest: the
+				// column's width fits every action a row can carry.
+				return h(RowActions, { actions, labelled: true, class: "flex-nowrap!" })
 			}
 		}
 	]
