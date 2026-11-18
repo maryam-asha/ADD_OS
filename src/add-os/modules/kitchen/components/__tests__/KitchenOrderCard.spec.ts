@@ -86,6 +86,21 @@ describe("kitchenOrderCard", () => {
 		expect(mountCard(orderOf({ waited_seconds: 180 }), true, "ar").get("[data-test=waited]").text()).toContain("دقائق")
 	})
 
+	it("shows_the_members_and_receptions_notes", () => {
+		const wrapper = mountCard(orderOf({ note: "No sugar, please", reception_note: "Second floor, by the window" }))
+
+		expect(wrapper.get("[data-test=member-note]").text()).toContain(en.kitchen.card.memberNote)
+		expect(wrapper.get("[data-test=member-note]").text()).toContain("No sugar, please")
+		expect(wrapper.get("[data-test=reception-note]").text()).toContain(en.kitchen.card.receptionNote)
+		expect(wrapper.get("[data-test=reception-note]").text()).toContain("Second floor, by the window")
+		expect(wrapper.get("[data-test=reception-note] p").attributes("dir")).toBe("auto")
+	})
+
+	it("shows_no_notes_block_without_notes", () => {
+		expect(mountCard(orderOf()).find("[data-test=order-notes]").exists()).toBe(false)
+		expect(mountCard(orderOf({ note: null, reception_note: "  " })).find("[data-test=order-notes]").exists()).toBe(false)
+	})
+
 	it("shows_full_note", () => {
 		const note = "الرجاء إحضار الطلب إلى الطاولة الكبيرة قرب النافذة في الطابق الثاني، بجانب غرفة الاجتماعات الزجاجية، وشكرًا جزيلًا لكم على تعبكم"
 		const wrapper = mountCard(orderOf({ delivery: { type: "note", label: note, note } }), true, "ar")

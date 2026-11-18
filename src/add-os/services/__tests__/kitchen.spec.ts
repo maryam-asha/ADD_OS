@@ -61,6 +61,18 @@ describe("kitchen service", () => {
 		expect(postMock).toHaveBeenNthCalledWith(2, "/api/v1/admin/reception/kitchen-orders/5/accept", { currency: "USD" })
 	})
 
+	it("confirm_sends_receptions_note_trimmed_and_leaves_a_blank_one_out", async () => {
+		postMock.mockResolvedValue({ data: { id: 5 } })
+
+		await confirmKitchenOrder(5, null, "  Table 3  ")
+		await confirmKitchenOrder(5, "USD", "Table 3")
+		await confirmKitchenOrder(5, null, "   ")
+
+		expect(postMock).toHaveBeenNthCalledWith(1, "/api/v1/admin/reception/kitchen-orders/5/accept", { note: "Table 3" })
+		expect(postMock).toHaveBeenNthCalledWith(2, "/api/v1/admin/reception/kitchen-orders/5/accept", { currency: "USD", note: "Table 3" })
+		expect(postMock).toHaveBeenNthCalledWith(3, "/api/v1/admin/reception/kitchen-orders/5/accept", undefined)
+	})
+
 	it("turn_down_sends_reason", async () => {
 		postMock.mockResolvedValue({ data: { id: 5 } })
 

@@ -41,6 +41,8 @@
 						</li>
 					</ul>
 
+					<KitchenOrderNotes :order />
+
 					<div class="flex flex-wrap items-center justify-between gap-2">
 						<span class="font-bold" data-test="total">{{ t("kitchen.card.total", { points: formatNumber(order.total_points) }) }}</span>
 						<n-tag v-if="owesCash(order)" type="warning" size="small" :bordered="false" data-test="cash-tag">
@@ -53,6 +55,21 @@
 							{{ t(`kitchen.reception.payment.${paymentKey(order)}`) }}
 						</n-tag>
 					</div>
+
+					<label class="flex flex-col gap-1" data-test="reception-note-field">
+						<span class="text-xs text-[var(--add-text-secondary)]">{{ t("kitchen.reception.noteLabel") }}</span>
+						<n-input
+							v-model:value="notes[order.id]"
+							type="textarea"
+							size="small"
+							:autosize="{ minRows: 1, maxRows: 4 }"
+							:maxlength="NOTE_MAX"
+							show-count
+							:placeholder="t('kitchen.reception.notePlaceholder')"
+							:disabled="busyId === order.id"
+							:input-props="{ dir: 'auto' }"
+						/>
+					</label>
 
 					<div class="flex flex-wrap gap-2">
 						<n-button size="small" type="primary" :disabled="busyId === order.id" :loading="busyId === order.id" data-action="confirm" @click="confirm(order)">
@@ -79,13 +96,14 @@
 <script setup lang="ts">
 import type { KitchenOrder } from "@/add-os/modules/kitchen/types/kitchen"
 import type { PaginationMeta } from "@/add-os/services/pagination"
-import { NAlert, NButton, NCard, NPagination, NTag, useMessage } from "naive-ui"
+import { NAlert, NButton, NCard, NInput, NPagination, NTag, useMessage } from "naive-ui"
 import { onMounted, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { useNewArrivalChime } from "@/add-os/composables/useNewArrivalChime"
 import { useReceptionRealtime } from "@/add-os/modules/booking/composables/useReceptionRealtime"
 import ChimeMuteButton from "@/add-os/modules/kitchen/components/ChimeMuteButton.vue"
 import ConfirmCashOrderModal from "@/add-os/modules/kitchen/components/ConfirmCashOrderModal.vue"
+import KitchenOrderNotes from "@/add-os/modules/kitchen/components/KitchenOrderNotes.vue"
 import RejectOrderModal from "@/add-os/modules/kitchen/components/RejectOrderModal.vue"
 import { ApiError } from "@/add-os/services/api"
 import { confirmKitchenOrder, listOrdersToConfirm, turnDownKitchenOrder } from "@/add-os/services/kitchen"
@@ -101,6 +119,10 @@ import Icon from "@/components/common/Icon.vue"
  * list again — a colleague may have handled the order first (409), and the
  * server's list is the truth. The one exception is a refused cash confirm (422,
  * the currency has no rate): the dialog stays open with the server's sentence.
+ *
+ * Each card takes an optional note for the kitchen (where the member is sitting, or
+ * any other detail), sent with the confirm — the cash one too — and never shown to
+ * the member. What is typed is kept per order across reloads until it is sent.
  */
 const emit = defineEmits<{ changed: [] }>()
 
@@ -166,6 +188,15 @@ function paymentKey(order: KitchenOrder): string | null {
 }
 
 // ── Actions ─────────────────────────────────────────────────────────────────
+/** The API's limit on reception's note (AcceptKitchenOrderRequest). */
+const NOTE_MAX = 500
+/** Reception's note for the kitchen, per order id, until the order is confirmed. */
+const notes = ref<Record<number, string>>({})
+
+function noteFor(order: KitchenOrder): string | null {
+	return notes.value[order.id]?.trim() || null
+}
+
 const busyId = ref<number | null>(null)
 const target = ref<KitchenOrder | null>(null)
 const cashVisible = ref(false)
@@ -212,16 +243,19 @@ function confirm(order: KitchenOrder): void {
 		cashVisible.value = true
 		return
 	}
-	void run(order, () => confirmKitchenOrder(order.id), t("kitchen.reception.confirmed"))
+	void run(order, () => confirmKitchenOrder(order.id, null, noteFor(order)), t("kitchen.reception.confirmed")).then(worked => {
+		if (worked) delete notes.value[order.id]
+	})
 }
 
 async function submitCash(currency: string): Promise<void> {
 	const order = target.value
 	if (!order) return
 	cashError.value = null
-	const worked = await run(order, () => confirmKitchenOrder(order.id, currency), t("kitchen.reception.confirmed"), error => {
+	const worked = await run(order, () => confirmKitchenOrder(order.id, currency, noteFor(order)), t("kitchen.reception.confirmed"), error => {
 		cashError.value = error.data?.message ?? t("resourceCrud.mutations.genericError")
 	})
+	if (worked) delete notes.value[order.id]
 	// A 409 means someone else handled it: the list is read again, so the dialog has nothing left to confirm.
 	if (worked || !orders.value.some(row => row.id === order.id)) cashVisible.value = false
 }

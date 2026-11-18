@@ -38,6 +38,14 @@ export interface KitchenOrder {
 		label: string | null
 		note: string | null
 	}
+	/** What the member added when sending the order; null (or absent, on an older read) when nothing. Not `delivery.note`, which is the place. */
+	note?: string | null
+	/**
+	 * Reception's note for the kitchen, written when it let the order through —
+	 * where the member is, or any other detail. The dashboard's only: the member
+	 * never sees it. Null until reception adds one.
+	 */
+	reception_note?: string | null
 	/** The session or booking the order is billed onto — the coworking names. Null when it was sent without a bill. */
 	bill: { type: "booking" | "walkin"; id: number } | null
 	/** Which queue it was sent to: straight to the kitchen, or first to reception to be confirmed. */

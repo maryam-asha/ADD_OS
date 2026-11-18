@@ -58,7 +58,9 @@
 			"orderedQuantity": "ordered {quantity}",
 			"removed": "removed",
 			"adjusted": "Accepted with changes",
-			"orderedTotal": "was {points} points"
+			"orderedTotal": "was {points} points",
+			"memberNote": "Member's note",
+			"receptionNote": "Reception's note"
 		},
 		"actions": {
 			"accept": "Accept",
@@ -171,6 +173,8 @@
 			"turnDown": "Turn down",
 			"confirmed": "Order confirmed and sent to the kitchen.",
 			"turnedDown": "Order turned down.",
+			"noteLabel": "Note for the kitchen (optional)",
+			"notePlaceholder": "Where the member is sitting, or any other detail. Only the kitchen sees it.",
 			"payment": {
 				"wallet": "Paid from wallet",
 				"companyWallet": "Paid from company wallet",

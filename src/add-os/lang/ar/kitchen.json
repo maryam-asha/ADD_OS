@@ -58,7 +58,9 @@
 			"orderedQuantity": "طُلب {quantity}",
 			"removed": "أُزيلت",
 			"adjusted": "قُبل بكميات معدّلة",
-			"orderedTotal": "كان {points} نقطة"
+			"orderedTotal": "كان {points} نقطة",
+			"memberNote": "ملاحظة العضو",
+			"receptionNote": "ملاحظة الاستقبال"
 		},
 		"actions": {
 			"accept": "قبول",
@@ -171,6 +173,8 @@
 			"turnDown": "رفض",
 			"confirmed": "تم تأكيد الطلب وإرساله إلى المطبخ.",
 			"turnedDown": "تم رفض الطلب.",
+			"noteLabel": "ملاحظة للمطبخ (اختيارية)",
+			"notePlaceholder": "مكان جلوس العضو، أو أي تفاصيل أخرى. تظهر للمطبخ فقط.",
 			"payment": {
 				"wallet": "مدفوع من المحفظة",
 				"companyWallet": "مدفوع من محفظة الشركة",

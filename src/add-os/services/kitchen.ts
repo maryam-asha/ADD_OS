@@ -137,9 +137,13 @@ export async function listOrdersToConfirm(q: ReceptionKitchenQuery = {}): Promis
  * due, in `currency` (omitted: the base currency); there is no amount — change is the
  * desk's, never points. Ignored for an order already paid. 422 `api.payment.currency_unavailable`
  * when that currency has no rate yet.
+ *
+ * `note` (optional, up to 500 characters) goes to the kitchen with the order — where the
+ * member is, or any other detail — as `reception_note`; the member never sees it.
  */
-export async function confirmKitchenOrder(id: number, currency?: string | null): Promise<KitchenOrder> {
-	return (await post<{ data: KitchenOrder }>(`${BASE}/reception/kitchen-orders/${id}/accept`, currency ? { currency } : undefined)).data
+export async function confirmKitchenOrder(id: number, currency?: string | null, note?: string | null): Promise<KitchenOrder> {
+	const body = { ...(currency ? { currency } : {}), ...(note?.trim() ? { note: note.trim() } : {}) }
+	return (await post<{ data: KitchenOrder }>(`${BASE}/reception/kitchen-orders/${id}/accept`, Object.keys(body).length > 0 ? body : undefined)).data
 }
 
 export async function turnDownKitchenOrder(id: number, reason: string): Promise<KitchenOrder> {

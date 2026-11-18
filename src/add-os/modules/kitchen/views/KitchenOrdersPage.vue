@@ -40,6 +40,8 @@
 						</template>
 					</dl>
 
+					<KitchenOrderNotes :order="selected" />
+
 					<div v-if="selected.rejection_reason" data-test="rejection-reason">
 						<h3 class="font-bold">{{ t("kitchen.history.rejectionReason") }}</h3>
 						<p dir="auto" class="whitespace-pre-wrap break-words">{{ selected.rejection_reason }}</p>
@@ -74,6 +76,7 @@ import PageHeader from "@/add-os/components/page/PageHeader.vue"
 import { useResourceList } from "@/add-os/composables/useResourceList"
 import { canListMembers } from "@/add-os/config/permissions"
 import KitchenOrderLines from "@/add-os/modules/kitchen/components/KitchenOrderLines.vue"
+import KitchenOrderNotes from "@/add-os/modules/kitchen/components/KitchenOrderNotes.vue"
 import { KITCHEN_ORDER_STATUSES } from "@/add-os/modules/kitchen/types/kitchen"
 import { paymentLabelKey } from "@/add-os/modules/kitchen/utils/payment"
 import { ApiError } from "@/add-os/services/api"

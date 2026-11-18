@@ -31,6 +31,8 @@
 
 			<KitchenOrderLines :lines="order.lines" />
 
+			<KitchenOrderNotes :order />
+
 			<div class="flex flex-wrap items-center justify-between gap-2">
 				<span class="flex flex-wrap items-baseline gap-2">
 					<span class="font-bold" data-test="total">{{ t("kitchen.card.total", { points: formatNumber(order.total_points) }) }}</span>
@@ -56,6 +58,7 @@ import { NButton, NCard, NTag } from "naive-ui"
 import { computed } from "vue"
 import { useI18n } from "vue-i18n"
 import KitchenOrderLines from "@/add-os/modules/kitchen/components/KitchenOrderLines.vue"
+import KitchenOrderNotes from "@/add-os/modules/kitchen/components/KitchenOrderNotes.vue"
 import { paymentLabelKey } from "@/add-os/modules/kitchen/utils/payment"
 import { countKey, formatNumber, formatTime } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"

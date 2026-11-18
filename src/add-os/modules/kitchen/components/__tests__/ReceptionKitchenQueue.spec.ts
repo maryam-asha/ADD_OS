@@ -144,6 +144,45 @@ describe("receptionKitchenQueue", () => {
 		wrapper.unmount()
 	})
 
+	it("sends_receptions_note_for_the_kitchen_with_the_confirm", async () => {
+		listMock.mockResolvedValue(page([orderOf({ note: "No sugar" }), cashOrder()]))
+		confirmMock.mockResolvedValue(orderOf({ status: "pending" }))
+		const wrapper = mountQueue()
+		await flushPromises()
+
+		// The member's note is shown to the desk.
+		expect(wrapper.get("[data-order='41'] [data-test='member-note']").text()).toContain("No sugar")
+		expect(wrapper.find("[data-order='42'] [data-test='member-note']").exists()).toBe(false)
+
+		await wrapper.get("[data-order='41'] [data-test='reception-note-field'] textarea").setValue("  Second floor, by the window  ")
+		await wrapper.find("[data-order='41'] [data-action='confirm']").trigger("click")
+		await flushPromises()
+		expect(confirmMock).toHaveBeenLastCalledWith(41, null, "Second floor, by the window")
+
+		// The cash dialog sends it too.
+		await wrapper.get("[data-order='42'] [data-test='reception-note-field'] textarea").setValue("Table 3")
+		await wrapper.find("[data-order='42'] [data-action='confirm']").trigger("click")
+		await flushPromises()
+		inBody("[data-test='confirm-cash-submit']")!.click()
+		await flushPromises()
+		expect(confirmMock).toHaveBeenLastCalledWith(42, "SYP", "Table 3")
+		wrapper.unmount()
+	})
+
+	it("a_blank_note_is_not_sent", async () => {
+		listMock.mockResolvedValue(page([orderOf()]))
+		confirmMock.mockResolvedValue(orderOf({ status: "pending" }))
+		const wrapper = mountQueue()
+		await flushPromises()
+
+		await wrapper.get("[data-order='41'] [data-test='reception-note-field'] textarea").setValue("   ")
+		await wrapper.find("[data-order='41'] [data-action='confirm']").trigger("click")
+		await flushPromises()
+
+		expect(confirmMock).toHaveBeenCalledWith(41, null, null)
+		wrapper.unmount()
+	})
+
 	it("opens_cash_dialog_for_cash_order", async () => {
 		listMock.mockResolvedValue(page([cashOrder()]))
 		confirmMock.mockResolvedValue(cashOrder({ status: "pending" }))
@@ -162,7 +201,7 @@ describe("receptionKitchenQueue", () => {
 		inBody("[data-test='confirm-cash-submit']")!.click()
 		await flushPromises()
 
-		expect(confirmMock).toHaveBeenCalledWith(42, "SYP")
+		expect(confirmMock).toHaveBeenCalledWith(42, "SYP", null)
 		expect(listMock).toHaveBeenCalledTimes(2)
 		wrapper.unmount()
 	})
@@ -249,7 +288,7 @@ describe("receptionKitchenQueue", () => {
 		expect(inBody("[data-test='currencies-failed']")).not.toBeNull()
 		inBody("[data-test='confirm-cash-submit']")!.click()
 		await flushPromises()
-		expect(confirmMock).toHaveBeenCalledWith(42, "SYP")
+		expect(confirmMock).toHaveBeenCalledWith(42, "SYP", null)
 		wrapper.unmount()
 	})
 
