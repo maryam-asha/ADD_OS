@@ -11,6 +11,7 @@ import { listEvents } from "@/add-os/services/events"
 import { listPlans } from "@/add-os/services/plans"
 import { listSpaces } from "@/add-os/services/spaces"
 import { listUsers } from "@/add-os/services/users"
+import { personSearchText } from "@/add-os/utils/personName"
 
 /**
  * The option lists a coupon is written against, from the endpoints that
@@ -45,7 +46,7 @@ export function usePricingPickers(): PricingPickers {
 		loaded ??= (async () => {
 			const locale = currentLocale.value
 			const [u, c, p, s, e] = await Promise.all([listUsers({ role: "member" }), listCompanies(), listPlans(), listSpaces(), listEvents()])
-			users.value = u.map(user => ({ label: `${user.name} · ${user.phone}`, value: user.id }))
+			users.value = u.map(user => ({ label: `${user.name} · ${user.phone}`, value: user.id, search: personSearchText(user) }))
 			companies.value = c.map(company => ({ label: company.legal_name, value: company.id }))
 			plans.value = p.map(plan => ({ label: pickLocalized(plan.name, locale), value: plan.id }))
 			spaces.value = s.map(space => ({ label: space.name ? pickLocalized(space.name, locale) : `#${space.id}`, value: space.id }))

@@ -102,6 +102,7 @@ import WalletTopUpDialog from "@/add-os/modules/members/components/WalletTopUpDi
 import { ApiError } from "@/add-os/services/api"
 import { listMembers, updateMemberStatus } from "@/add-os/services/members"
 import { STATUS_ICONS } from "@/add-os/theme/tokens"
+import { personNameMatches } from "@/add-os/utils/personName"
 import Icon from "@/components/common/Icon.vue"
 
 defineProps<{ titleKey?: string }>()
@@ -147,7 +148,7 @@ const filteredMembers = computed(() => {
 		if (statusFilter.value && m.status !== statusFilter.value) return false
 		if (!term) return true
 		return (
-			m.name.toLowerCase().includes(term) ||
+			personNameMatches(m, term) ||
 			m.phone.toLowerCase().includes(term) ||
 			(m.email && m.email.toLowerCase().includes(term))
 		)

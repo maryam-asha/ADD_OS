@@ -40,6 +40,7 @@
 						<n-select
 							v-model:value="form.user_id"
 							:options="userOptions"
+							:filter="filterPersonOption"
 							filterable
 							:placeholder="t('planPurchases.selectMember')"
 							:loading="isLoadingUsers"
@@ -258,6 +259,7 @@ import { listCurrencies } from "@/add-os/services/currencies"
 import { listPlans } from "@/add-os/services/plans"
 import { executePlanPurchase, previewPlanPurchase } from "@/add-os/services/reception"
 import { listUsers } from "@/add-os/services/users"
+import { filterPersonOption, personSearchText } from "@/add-os/utils/personName"
 import { getWalletBalance } from "@/add-os/services/wallet-top-ups"
 import { formatDate } from "@/add-os/utils/format/dates"
 
@@ -393,7 +395,7 @@ async function fetchUsers() {
     isLoadingUsers.value = true
     try {
         const users = await listUsers({ role: "member" })
-        userOptions.value = users.map(u => ({ label: u.name, value: u.id }))
+        userOptions.value = users.map(u => ({ label: u.name, value: u.id, search: personSearchText(u) }))
     } catch {
         // Handle error quietly
     } finally {

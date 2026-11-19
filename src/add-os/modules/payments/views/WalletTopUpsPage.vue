@@ -44,6 +44,7 @@
 									<n-select
 										v-model:value="form.user_id"
 										:options="userOptions"
+										:filter="filterPersonOption"
 										:loading="isLoadingUsers"
 										filterable
 										clearable
@@ -394,6 +395,7 @@ import { listCompanies } from "@/add-os/services/companies"
 import { listUsers } from "@/add-os/services/users"
 import { createWalletTopUp, getWalletBalance } from "@/add-os/services/wallet-top-ups"
 import { formatCurrency, formatDateTime, formatNumber, isCurrencyCode } from "@/add-os/utils/format"
+import { filterPersonOption, personSearchText } from "@/add-os/utils/personName"
 import Icon from "@/components/common/Icon.vue"
 import { useCurrencyStore } from "@/stores/currency"
 import { useLocalesStore } from "@/stores/i18n"
@@ -499,7 +501,8 @@ const loadError = computed(() => usersError.value !== null || companiesError.val
 const userOptions = computed<SelectOption[]>(() =>
 	users.value.map(user => ({
 		label: `${user.name} — ${user.phone}`,
-		value: user.id
+		value: user.id,
+		search: personSearchText(user)
 	}))
 )
 

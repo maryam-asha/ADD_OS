@@ -132,6 +132,7 @@ import { searchAccounts } from "@/add-os/services/hr/core"
 import { listRoleRecords } from "@/add-os/services/roles"
 import { assignRole, createUser, listUsers, updateUserProfile, updateUserStatus } from "@/add-os/services/users"
 import { STATUS_ICONS } from "@/add-os/theme/tokens"
+import { personNameMatches } from "@/add-os/utils/personName"
 import { isValidPhone, toInternationalPhone } from "@/add-os/utils/phone"
 import Icon from "@/components/common/Icon.vue"
 
@@ -200,7 +201,7 @@ const filteredUsers = computed(() => {
 		if (roleFilter.value && !user.roles.includes(roleFilter.value)) return false
 		if (!term) return true
 		return (
-			user.name.toLowerCase().includes(term) ||
+			personNameMatches(user, term) ||
 			user.phone.toLowerCase().includes(term) ||
 			user.email.toLowerCase().includes(term)
 		)

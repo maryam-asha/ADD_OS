@@ -91,6 +91,7 @@
 									clearable
 									filterable
 									:options="memberOptions"
+									:filter="filterPersonOption"
 									:loading="isLoadingMembers"
 									:placeholder="t('bookingCalendar.filters.allMembers')"
 									@focus="ensureMembers"
@@ -269,6 +270,7 @@
 							v-model:value="createForm.user_id"
 							filterable
 							:options="memberOptions"
+							:filter="filterPersonOption"
 							:loading="isLoadingMembers"
 							:placeholder="t('bookingCalendar.create.memberPlaceholder')"
 						/>
@@ -514,6 +516,7 @@ import { getCalendar, getSpaceSlots } from "@/add-os/services/booking-calendar"
 import { listMembers } from "@/add-os/services/members"
 import { createReceptionBooking, quoteReceptionBooking } from "@/add-os/services/reception"
 import { formatClockTime, formatDate, formatDateTime, formatNumber, formatTime } from "@/add-os/utils/format"
+import { filterPersonOption, personSearchText } from "@/add-os/utils/personName"
 import Icon from "@/components/common/Icon.vue"
 
 /**
@@ -1322,7 +1325,7 @@ function isDateDisabled(timestamp: number): boolean {
 }
 
 const memberOptions = computed<SelectOption[]>(() =>
-	members.value.map(member => ({ label: `${member.name} · ${member.phone}`, value: member.id }))
+	members.value.map(member => ({ label: `${member.name} · ${member.phone}`, value: member.id, search: personSearchText(member) }))
 )
 
 /**

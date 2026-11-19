@@ -1,6 +1,6 @@
 <!-- src/add-os/modules/inventory/components/StaffSelect.vue -->
 <template>
-	<n-select v-model:value="value" :options :loading :placeholder filterable clearable />
+	<n-select v-model:value="value" :options :loading :placeholder :filter="filterPersonOption" filterable clearable />
 </template>
 
 <script setup lang="ts">
@@ -10,6 +10,7 @@ import { NSelect } from "naive-ui"
 import { computed, onMounted, ref } from "vue"
 import { quietly } from "@/add-os/modules/hr/utils/errors"
 import { listUsers } from "@/add-os/services/users"
+import { filterPersonOption, personSearchText } from "@/add-os/utils/personName"
 
 /**
  * Choosing a dashboard account — anyone holding a role other than member
@@ -23,7 +24,7 @@ const loading = ref(true)
 
 const OUTSIDE = new Set(["member", "provider"])
 
-const options = computed<SelectOption[]>(() => users.value.filter(user => user.roles.some(role => !OUTSIDE.has(role))).map(user => ({ label: user.name, value: user.id })))
+const options = computed<SelectOption[]>(() => users.value.filter(user => user.roles.some(role => !OUTSIDE.has(role))).map(user => ({ label: user.name, value: user.id, search: personSearchText(user) })))
 
 onMounted(async () => {
 	await quietly(() => listUsers(), rows => (users.value = rows))

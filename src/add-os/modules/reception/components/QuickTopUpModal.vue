@@ -16,6 +16,7 @@
 			<n-select
 				v-model:value="memberId"
 				:options="memberOptions"
+				:filter="filterPersonOption"
 				:loading="isLoading"
 				filterable
 				clearable
@@ -37,6 +38,7 @@ import FormModal from "@/add-os/components/page/FormModal.vue"
 import WalletTopUpDialog from "@/add-os/modules/members/components/WalletTopUpDialog.vue"
 import { ApiError } from "@/add-os/services/api"
 import { listMembers } from "@/add-os/services/members"
+import { filterPersonOption, personSearchText } from "@/add-os/utils/personName"
 
 const props = defineProps<{
 	show: boolean
@@ -59,7 +61,7 @@ const memberId = ref<number | null>(null)
 const member = computed(() => members.value.find(candidate => candidate.id === memberId.value) ?? null)
 
 const memberOptions = computed<SelectOption[]>(() =>
-	members.value.map(candidate => ({ label: `${candidate.name} — ${candidate.phone}`, value: candidate.id }))
+	members.value.map(candidate => ({ label: `${candidate.name} — ${candidate.phone}`, value: candidate.id, search: personSearchText(candidate) }))
 )
 
 /** Closing the top-up dialog, after a top-up or without one, closes the whole flow. */

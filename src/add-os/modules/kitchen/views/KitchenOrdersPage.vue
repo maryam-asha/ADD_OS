@@ -10,6 +10,7 @@
 				v-if="mayPickMember"
 				v-model:value="memberId"
 				:options="memberOptions"
+				:filter="filterPersonOption"
 				filterable
 				clearable
 				:placeholder="t('kitchen.history.filters.member')"
@@ -83,6 +84,7 @@ import { ApiError } from "@/add-os/services/api"
 import { listKitchenOrders } from "@/add-os/services/kitchen"
 import { listMembers } from "@/add-os/services/members"
 import { formatDateTime, formatNumber } from "@/add-os/utils/format"
+import { filterPersonOption, personSearchText } from "@/add-os/utils/personName"
 
 /**
  * Every kitchen order, filtered and paged by the API. A row opens the whole
@@ -119,7 +121,7 @@ const memberOptions = ref<SelectOption[]>([])
 onMounted(async () => {
 	if (!mayPickMember) return
 	try {
-		memberOptions.value = (await listMembers()).map(member => ({ label: member.phone ? `${member.name} · ${member.phone}` : member.name, value: member.id }))
+		memberOptions.value = (await listMembers()).map(member => ({ label: member.phone ? `${member.name} · ${member.phone}` : member.name, value: member.id, search: personSearchText(member) }))
 	} catch (caught) {
 		if (!(caught instanceof ApiError)) throw caught
 	}

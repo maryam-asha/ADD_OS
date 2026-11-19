@@ -33,6 +33,7 @@
 								<n-select
 									v-model:value="form.owner_id"
 									:options="ownerOptions"
+									:filter="filterPersonOption"
 									:loading="ownersLoading"
 									:placeholder="ownerPlaceholder"
 									filterable
@@ -194,6 +195,7 @@ import { listMembers } from "@/add-os/services/members"
 import { activateMembership } from "@/add-os/services/memberships"
 import { listPlans } from "@/add-os/services/plans"
 import { listSeatsDesks } from "@/add-os/services/seats-desks"
+import { filterPersonOption, personSearchText } from "@/add-os/utils/personName"
 import { formatClockTime, formatDateTime, formatNumber } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
 
@@ -409,7 +411,8 @@ async function loadOwners() {
 
 		memberOptions.value = members.map(member => ({
 			value: member.id,
-			label: member.phone ? `${member.name} — ${member.phone}` : member.name
+			label: member.phone ? `${member.name} — ${member.phone}` : member.name,
+			search: personSearchText(member)
 		}))
 		companyOptions.value = companies.map(company => ({ value: company.id, label: company.legal_name }))
 		companyBranch.value = new Map(companies.map(company => [company.id, company.branch_id]))

@@ -229,7 +229,7 @@
 							</div>
 							<div class="flex flex-col gap-1">
 								<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t('coupons.form.users') }}</span>
-								<n-select v-model:value="form.user_ids" :options="pickers.users.value" multiple filterable clearable :status="grouped.fields.user_ids ? 'error' : undefined" />
+								<n-select v-model:value="form.user_ids" :options="pickers.users.value" :filter="filterPersonOption" multiple filterable clearable :status="grouped.fields.user_ids ? 'error' : undefined" />
 								<span class="text-[11px] text-[var(--add-text-secondary)]">{{ grouped.fields.user_ids ? grouped.fields.user_ids[0] : t('coupons.form.usersHint') }}</span>
 							</div>
 						</div>
@@ -264,6 +264,7 @@ import { generateCouponCode } from "@/add-os/modules/pricing/utils/coupon-code"
 import { couponToForm, emptyCouponForm, formToPayload, groupErrors, hasLimits, missingLimits } from "@/add-os/modules/pricing/utils/coupon-form"
 import { ApiError } from "@/add-os/services/api"
 import { createCoupon, getCoupon, updateCoupon } from "@/add-os/services/coupons"
+import { filterPersonOption } from "@/add-os/utils/personName"
 import Icon from "@/components/common/Icon.vue"
 
 /** `automatic`: a new one is an offer. Editing reads it from the coupon itself. */

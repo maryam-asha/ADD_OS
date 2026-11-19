@@ -36,6 +36,8 @@ export interface MemberProfileLinks {
 export interface Member {
 	id: number
 	name: string
+	name_ar?: string | null
+	name_en?: string | null
 	phone: string
 	email: string
 	preferred_language: string

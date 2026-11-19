@@ -13,6 +13,7 @@
 				<n-select
 					v-model:value="form.user_id"
 					:options="userOptions"
+					:filter="filterPersonOption"
 					:loading="isLoading"
 					filterable
 					clearable
@@ -106,6 +107,7 @@ import { createReceptionBooking, quoteReceptionBooking, toOffsetIso } from "@/ad
 import { listSpaces } from "@/add-os/services/spaces"
 import { listUsers } from "@/add-os/services/users"
 import { formatCurrency, formatNumber, isCurrencyCode } from "@/add-os/utils/format"
+import { filterPersonOption, personSearchText } from "@/add-os/utils/personName"
 import Icon from "@/components/common/Icon.vue"
 
 const props = defineProps<{
@@ -158,7 +160,7 @@ async function load(): Promise<void> {
 }
 
 const userOptions = computed<SelectOption[]>(() =>
-	users.value.map(user => ({ label: `${user.name} — ${user.phone}`, value: user.id }))
+	users.value.map(user => ({ label: `${user.name} — ${user.phone}`, value: user.id, search: personSearchText(user) }))
 )
 
 const spaceOptions = computed<SelectOption[]>(() =>
