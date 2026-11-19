@@ -67,8 +67,25 @@ export interface TTLockAccount {
 	gateways: TTLockAccountGateway[]
 }
 
-export type AccessEventType = "unlock" | "lock" | "lock_auto" | "failed_attempt"
-export type AccessEventChannel = "keypad_manual" | "qr_scan" | "reception_activation" | "app_remote" | "dashboard"
+export type AccessEventType = "unlock" | "lock" | "lock_auto" | "failed_attempt" | "alert" | "other"
+export type AccessEventChannel =
+	| "keypad_manual"
+	| "qr_scan"
+	| "reception_activation"
+	| "app_remote"
+	| "dashboard"
+	| "bluetooth"
+	// The rest come only from the lock's own records, pulled from TTLock.
+	| "fingerprint"
+	| "card"
+	| "mechanical_key"
+	| "inside"
+	| "face"
+	| "remote_control"
+	| "ttlock_app"
+	| "ttlock_remote"
+	| "lock_itself"
+	| "other"
 
 export interface AccessEvent {
 	id: number
@@ -78,6 +95,8 @@ export interface AccessEvent {
 	device: { id: number; external_ref: string | null; space: { id: number; name: string } | null } | null
 	actor: { id: number; name: string } | null
 	grant: { id: number; source_type: AccessSourceType | null; booking_id: number | null; office_lease_id: number | null } | null
+	/** The lock's own record of it at TTLock; `name` is TTLock's name for the fingerprint, card, code or eKey used. */
+	lock_record: { type: number | null; name: string | null } | null
 }
 
 export type AccessGrantStatus = "issued" | "activated" | "expired" | "revoked"

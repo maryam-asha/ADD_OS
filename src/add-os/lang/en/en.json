@@ -5276,8 +5276,9 @@
 		}
 	},
 	"accessLog": {
-		"subtitle": "Every door opened, locked or refused. Keypad entries are not reported by the lock.",
+		"subtitle": "Every door opened, locked or refused, from ADD or at the lock itself: fingerprint, card, code, key, from inside. Lock records arrive within minutes.",
 		"loadError": "The access log could not be loaded.",
+		"ttlockName": "(from the lock)",
 		"filters": {
 			"lock": "All locks",
 			"type": "Any event",
@@ -5287,14 +5288,39 @@
 			"unlock": "Opened",
 			"lock": "Locked",
 			"lock_auto": "Locked itself",
-			"failed_attempt": "Refused"
+			"failed_attempt": "Refused",
+			"alert": "Alert",
+			"other": "Other event"
 		},
 		"channel": {
 			"keypad_manual": "Keypad",
 			"qr_scan": "Sticker scan",
 			"reception_activation": "Desk activation",
 			"app_remote": "App door button",
-			"dashboard": "Dashboard"
+			"dashboard": "Dashboard",
+			"bluetooth": "App Bluetooth",
+			"fingerprint": "Fingerprint",
+			"card": "Card",
+			"mechanical_key": "Mechanical key",
+			"inside": "From inside",
+			"face": "Face",
+			"remote_control": "Remote control",
+			"ttlock_app": "TTLock app",
+			"ttlock_remote": "TTLock remote",
+			"lock_itself": "The lock itself",
+			"other": "Other"
+		},
+		"record": {
+			"29": "Forced",
+			"30": "Door closed",
+			"31": "Door opened",
+			"44": "Tamper alert",
+			"48": "Locked out after wrong tries",
+			"50": "Opened by high temperature",
+			"63": "Opened by passage mode",
+			"64": "Door left open",
+			"66": "Failed to lock",
+			"123": "Network problem"
 		},
 		"columns": {
 			"at": "When",

@@ -38,10 +38,11 @@ import { useResourceList } from "@/add-os/composables/useResourceList"
 import { can } from "@/add-os/config/permissions"
 import { listAccessEvents, listDevices } from "@/add-os/services/access"
 import { formatDateTime } from "@/add-os/utils/format"
+import Icon from "@/components/common/Icon.vue"
 
 defineProps<{ titleKey?: string }>()
 
-const { t } = useI18n()
+const { t, te } = useI18n()
 const route = useRoute()
 
 const initialDevice = Number(route.query.device_id)
@@ -71,16 +72,53 @@ onMounted(async () => {
 })
 const lockOptions = computed(() => devices.value.map(lock => ({ label: `${lock.external_ref ?? "—"} · #${lock.id}`, value: lock.id })))
 
-const TYPES: AccessEventType[] = ["unlock", "lock", "failed_attempt"]
-const CHANNELS: AccessEventChannel[] = ["qr_scan", "app_remote", "reception_activation", "dashboard"]
+const TYPES: AccessEventType[] = ["unlock", "lock", "lock_auto", "failed_attempt", "alert", "other"]
+const CHANNEL_ICON: Record<AccessEventChannel, string> = {
+	fingerprint: "carbon:fingerprint-recognition",
+	card: "carbon:identification",
+	keypad_manual: "carbon:keyboard",
+	mechanical_key: "carbon:password",
+	inside: "carbon:logout",
+	face: "carbon:face-activated",
+	remote_control: "carbon:wifi-controller",
+	qr_scan: "carbon:qr-code",
+	app_remote: "carbon:mobile",
+	bluetooth: "carbon:bluetooth",
+	reception_activation: "carbon:user-identification",
+	dashboard: "carbon:dashboard",
+	ttlock_app: "carbon:application-mobile",
+	ttlock_remote: "carbon:cloud-satellite",
+	lock_itself: "carbon:chip",
+	other: "carbon:unknown-filled"
+}
+const CHANNELS = Object.keys(CHANNEL_ICON) as AccessEventChannel[]
 const typeOptions = computed(() => TYPES.map(type => ({ label: t(`accessLog.type.${type}`), value: type })))
 const channelOptions = computed(() => CHANNELS.map(channel => ({ label: t(`accessLog.channel.${channel}`), value: channel })))
 
-const TYPE_TAG: Record<AccessEventType, "success" | "info" | "default" | "error"> = {
+const TYPE_TAG: Record<AccessEventType, "success" | "info" | "default" | "error" | "warning"> = {
 	unlock: "success",
 	lock: "info",
 	lock_auto: "default",
-	failed_attempt: "error"
+	failed_attempt: "error",
+	alert: "warning",
+	other: "default"
+}
+
+/** An alarm or other lock record says what it was, where the TTLock type is one we name. */
+function typeLabel(row: AccessEvent): string {
+	const record = row.lock_record?.type
+	if ((row.event_type === "alert" || row.event_type === "other") && record != null && te(`accessLog.record.${record}`)) {
+		return t(`accessLog.record.${record}`)
+	}
+	return t(`accessLog.type.${row.event_type}`)
+}
+
+function actor(row: AccessEvent) {
+	if (row.actor) return row.actor.name
+	if (row.lock_record?.name) {
+		return h("span", [row.lock_record.name, h("span", { class: "ms-1 text-xs opacity-60" }, t("accessLog.ttlockName"))])
+	}
+	return "—"
 }
 
 const columns = computed<DataTableColumns<AccessEvent>>(() => [
@@ -88,11 +126,19 @@ const columns = computed<DataTableColumns<AccessEvent>>(() => [
 	{
 		title: t("accessLog.columns.type"),
 		key: "event_type",
-		render: row => h(NTag, { type: TYPE_TAG[row.event_type] ?? "default", size: "small", round: true, bordered: false }, { default: () => t(`accessLog.type.${row.event_type}`) })
+		render: row => h(NTag, { type: TYPE_TAG[row.event_type] ?? "default", size: "small", round: true, bordered: false }, { default: () => typeLabel(row) })
 	},
-	{ title: t("accessLog.columns.channel"), key: "channel", render: row => t(`accessLog.channel.${row.channel}`) },
+	{
+		title: t("accessLog.columns.channel"),
+		key: "channel",
+		render: row =>
+			h("span", { class: "inline-flex items-center gap-1.5" }, [
+				h(Icon, { name: CHANNEL_ICON[row.channel] ?? CHANNEL_ICON.other, size: 16 }),
+				te(`accessLog.channel.${row.channel}`) ? t(`accessLog.channel.${row.channel}`) : row.channel
+			])
+	},
 	{ title: t("accessLog.columns.place"), key: "device", render: row => row.device?.space?.name ?? (row.device ? `#${row.device.id}` : "—") },
-	{ title: t("accessLog.columns.actor"), key: "actor", render: row => row.actor?.name ?? "—" },
+	{ title: t("accessLog.columns.actor"), key: "actor", render: actor },
 	{
 		title: t("accessLog.columns.code"),
 		key: "grant",
