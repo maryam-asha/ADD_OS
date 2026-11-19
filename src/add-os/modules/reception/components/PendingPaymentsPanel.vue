@@ -42,6 +42,7 @@ import { useResourceList } from "@/add-os/composables/useResourceList"
 import { canSettleAtReception } from "@/add-os/config/permissions"
 import { useReceptionRealtime } from "@/add-os/modules/booking/composables/useReceptionRealtime"
 import CollectPaymentModal from "@/add-os/modules/payments/components/CollectPaymentModal.vue"
+import OutstandingOrdersList from "@/add-os/modules/payments/components/OutstandingOrdersList.vue"
 import { listPendingPayments } from "@/add-os/services/reception"
 import { formatCurrency, formatDateTime, formatNumber, isCurrencyCode } from "@/add-os/utils/format"
 import Icon from "@/components/common/Icon.vue"
@@ -115,6 +116,14 @@ function isUpcoming(item: OutstandingItem): boolean {
 
 const columns = computed<DataTableColumns<OutstandingItem>>(() => {
 	const all: DataTableColumns<OutstandingItem> = [
+		{
+			// A session's or booking's café orders: each order's items, note and amount, collected with it.
+			type: "expand",
+			expandable: row => (row.kitchen_orders?.length ?? 0) > 0,
+			renderExpand: row => h("div", { class: "max-w-2xl py-1" }, [
+				h(OutstandingOrdersList, { orders: row.kitchen_orders ?? [], ownAmount: row.own_points ? row.own_amount : null })
+			])
+		},
 		{
 			title: t("reception.pendingPayments.columns.member"),
 			key: "member",

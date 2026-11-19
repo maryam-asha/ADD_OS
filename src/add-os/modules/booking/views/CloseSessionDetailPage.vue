@@ -392,7 +392,8 @@ async function confirm(cashCollected: boolean): Promise<void> {
 	isConfirming.value = true
 	try {
 		const result = await confirmSessionEnd(request.id, false)
-		const settled = result.data.payment_state === "paid" || result.data.price_points <= 0
+		// Its café orders are on the same outstanding line and collected with it.
+		const settled = (result.data.payment_state === "paid" || result.data.price_points <= 0) && unpaidOrderPoints.value <= 0
 		if (cashCollected && !settled) {
 			collectVisible.value = true
 			return

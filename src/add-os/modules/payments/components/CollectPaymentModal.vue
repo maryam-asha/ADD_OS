@@ -49,16 +49,10 @@
 					<bdi dir="ltr" class="text-lg font-extrabold add-numeric">{{ formatAmount(selected.amount) }}</bdi>
 					<span class="text-xs text-[var(--add-text-muted)]">{{ t("collectPayment.duePoints", { points: formatNumber(selected.amount_points) }) }}</span>
 					<!-- A session's or booking's café orders, paid with it in this one payment. -->
-					<ul v-if="selected.kitchen_orders?.length" class="mt-2 flex flex-col gap-1 border-t border-[var(--add-border)] pt-2 text-xs text-[var(--add-text-secondary)]">
-						<li v-if="selected.own_points && selected.own_amount" class="flex justify-between gap-3">
-							<span>{{ t("collectPayment.ownShare") }}</span>
-							<bdi dir="ltr" class="add-numeric">{{ formatAmount(selected.own_amount) }}</bdi>
-						</li>
-						<li v-for="order in selected.kitchen_orders" :key="order.id" class="flex justify-between gap-3">
-							<span>{{ order.title }}</span>
-							<bdi dir="ltr" class="add-numeric">{{ formatAmount(order.amount) }}</bdi>
-						</li>
-					</ul>
+					<div v-if="selected.kitchen_orders?.length" class="mt-2 flex flex-col gap-2 border-t border-[var(--add-border)] pt-2">
+						<span class="text-xs font-semibold text-[var(--add-text-secondary)]">{{ t("collectPayment.withOrders", { count: formatNumber(selected.kitchen_orders.length) }) }}</span>
+						<OutstandingOrdersList :orders="selected.kitchen_orders" :own-amount="selected.own_points ? selected.own_amount : null" />
+					</div>
 				</div>
 
 				<n-form label-placement="top">
@@ -103,6 +97,7 @@ import { NAlert, NButton, NForm, NFormItem, NInput, NRadio, NRadioGroup, NSelect
 import { computed, ref, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import FormModal from "@/add-os/components/page/FormModal.vue"
+import OutstandingOrdersList from "@/add-os/modules/payments/components/OutstandingOrdersList.vue"
 import { ApiError } from "@/add-os/services/api"
 import { getOutstanding, settleAtReception } from "@/add-os/services/reception"
 import { formatCurrency, formatDateTime, formatNumber, isCurrencyCode } from "@/add-os/utils/format"
@@ -194,7 +189,9 @@ function formatAmount(value: { value: string, currency: string }): string {
 function itemTitle(item: OutstandingItem): string {
 	const kind = t(`collectPayment.purpose.${item.purpose}`)
 	const name = item.title ? `${kind} — ${item.title}` : kind
-	return item.starts_at ? `${name} · ${formatDateTime(item.starts_at)}` : name
+	const dated = item.starts_at ? `${name} · ${formatDateTime(item.starts_at)}` : name
+	// Its café orders are paid with it: say so wherever the line is named.
+	return item.kitchen_orders?.length ? `${dated} · ${t("collectPayment.withOrders", { count: formatNumber(item.kitchen_orders.length) })}` : dated
 }
 
 /** Re-reads what is owed in the chosen currency, and starts the amount at exactly that. */

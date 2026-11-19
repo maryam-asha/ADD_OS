@@ -403,6 +403,13 @@ export interface OutstandingKitchenOrder {
 	id: number
 	title: string
 	ordered_at: string | null
+	/** A KitchenOrderStatus value (accepted: preparing, ready or delivered). */
+	status?: string
+	/** What the member added when sending it. */
+	note?: string | null
+	/** `quantity` is what was made; `ordered_quantity` what was ordered. */
+	lines?: { id: number, name: string | null, quantity: number, ordered_quantity: number, line_points: number }[]
+	items_count?: number
 	amount_points: number
 	amount: { value: string, currency: string }
 }
