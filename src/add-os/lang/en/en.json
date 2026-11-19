@@ -3408,8 +3408,11 @@
 			"booking": "Booking",
 			"coworking_session": "Co-working session",
 			"event_registration": "Event registration",
-			"plan_purchase": "Plan"
-		}
+			"plan_purchase": "Plan",
+			"kitchen_order": "Café order"
+		},
+		"withOrders": "Includes café orders ({count})",
+		"ownShare": "Session or booking"
 	},
 	"arrivals": {
 		"description": "Today's bookings not yet checked in, and kiosk scans waiting for the desk. A co-working session starts only when you confirm it here, and is billed from then. A booked room starts by itself when its door is opened by QR or its code is activated; anything else starts here.",

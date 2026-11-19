@@ -132,6 +132,9 @@ const columns = computed<DataTableColumns<OutstandingItem>>(() => {
 			minWidth: 190,
 			render: row => h("div", { class: "flex flex-col gap-1" }, [
 				h("span", { class: "font-medium" }, row.title ? `${t(`collectPayment.purpose.${row.purpose}`)} — ${row.title}` : t(`collectPayment.purpose.${row.purpose}`)),
+				row.kitchen_orders?.length
+					? h("span", { class: "text-xs text-[var(--add-text-secondary)]" }, t("collectPayment.withOrders", { count: formatNumber(row.kitchen_orders.length) }))
+					: null,
 				h(NTag, { size: "small", bordered: false, type: isUpcoming(row) ? "info" : "warning", class: "self-start" }, () =>
 					t(isUpcoming(row) ? "reception.pendingPayments.upcoming" : "reception.pendingPayments.used"))
 			])

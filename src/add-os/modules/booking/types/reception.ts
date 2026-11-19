@@ -372,7 +372,7 @@ export interface ArrivalRequest {
 }
 
 /** What `POST reception/payments/settle` settles, as `reception/outstanding` names it. */
-export type OutstandingPurpose = "booking" | "coworking_session" | "event_registration" | "plan_purchase"
+export type OutstandingPurpose = "booking" | "coworking_session" | "event_registration" | "plan_purchase" | "kitchen_order"
 
 /** One thing a member still owes (ADDCore `OutstandingItems`). */
 export interface OutstandingItem {
@@ -388,6 +388,23 @@ export interface OutstandingItem {
 	amount: { value: string, currency: string }
 	/** Whose it is — always sent; what the desk-wide list shows on each row. */
 	member?: { id: number, name: string | null, phone: string | null } | null
+	/**
+	 * `booking` / `coworking_session` only: the bill's unpaid café orders,
+	 * inside its line and settled with it in one payment. `amount` covers the
+	 * bill's own share (`own_points` / `own_amount`) and every order.
+	 */
+	own_points?: number
+	own_amount?: { value: string, currency: string }
+	kitchen_orders?: OutstandingKitchenOrder[]
+}
+
+/** One café order inside a session's or booking's outstanding line. */
+export interface OutstandingKitchenOrder {
+	id: number
+	title: string
+	ordered_at: string | null
+	amount_points: number
+	amount: { value: string, currency: string }
 }
 
 export interface OutstandingSummary {

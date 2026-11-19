@@ -48,6 +48,17 @@
 					<span class="text-sm text-[var(--add-text-secondary)]">{{ t("collectPayment.due", { title: itemTitle(selected) }) }}</span>
 					<bdi dir="ltr" class="text-lg font-extrabold add-numeric">{{ formatAmount(selected.amount) }}</bdi>
 					<span class="text-xs text-[var(--add-text-muted)]">{{ t("collectPayment.duePoints", { points: formatNumber(selected.amount_points) }) }}</span>
+					<!-- A session's or booking's café orders, paid with it in this one payment. -->
+					<ul v-if="selected.kitchen_orders?.length" class="mt-2 flex flex-col gap-1 border-t border-[var(--add-border)] pt-2 text-xs text-[var(--add-text-secondary)]">
+						<li v-if="selected.own_points && selected.own_amount" class="flex justify-between gap-3">
+							<span>{{ t("collectPayment.ownShare") }}</span>
+							<bdi dir="ltr" class="add-numeric">{{ formatAmount(selected.own_amount) }}</bdi>
+						</li>
+						<li v-for="order in selected.kitchen_orders" :key="order.id" class="flex justify-between gap-3">
+							<span>{{ order.title }}</span>
+							<bdi dir="ltr" class="add-numeric">{{ formatAmount(order.amount) }}</bdi>
+						</li>
+					</ul>
 				</div>
 
 				<n-form label-placement="top">
